@@ -12,8 +12,6 @@ import zipfile
 from os.path import basename
 from xml.etree.ElementInclude import include
 
-from _helpers import sets_path_to_root
-
 # Zip the files from given directory that matches the filter
 
 
@@ -41,11 +39,8 @@ def zipFilesInDir(dirName, zipFileName, filter, include_parent=True):
 
 if __name__ == "__main__":
     # Set path to this file
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    # Required to set path to pypsa-earth
-    sets_path_to_root("pypsa-earth")
 
-# Execute zip function
-# zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
-zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
-# zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)
+    # Execute zip function
+    # zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
+    zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
+    # zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)

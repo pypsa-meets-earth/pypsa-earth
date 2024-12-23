@@ -9,16 +9,102 @@ Release Notes
 Upcoming release
 ================
 
-Please add descriptive release notes like in `PyPSA-Eur <https://github.com/PyPSA/pypsa-eur/blob/master/doc/release_notes.rst>`__.
-E.g. if a new rule becomes available describe how to use it `snakemake -j1 run_tests` and in one sentence what it does.
+This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
 
+* Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`__
 
 
 **Minor Changes and bug-fixing**
 
+* Added electricity bus to Fischer-Tropsch in prepare_sector_network.py `PR #1226 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1226>`__
+
+* Update BW, NG and BJ tutorial databundles to include gadm-like sources from geoboundaries `PR #1257 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1257>`__
+
+
+PyPSA-Earth 0.5.0
+=================
+
+**New Features and Major Changes (14th December 2024)**
+
+* Added capabilities of cross-sectoral modeling by merging with PyPSA-Earth-Sec model `https://github.com/pypsa-meets-earth/pypsa-earth-sec`__
+
+* The workflow configuration now supports incremental changes to the default configuration in the `config.yaml` and configfiles passed to snakemake via `--configfile myconfig.yaml`. Therefore the user may now only include settings in their `config.yaml` which differ from the default configuration. One can think of the new `config.yaml` as of a list of arguments in a python function that already have a default. So in principle the `config.yaml` could now be empty, and the workflow would still run. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`__
+
+* Include option of endogenous export, which optimizes the export quantity based on price signals `PR #1201 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1201>`__
+
+* Remove elec-based H2 and battery technologies before addition in `prepare_sector_network.py` script and fix bus names for links that models H2 repuspose network `PR #1198 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1198>`__
+
+* Add electricity distribution grid with solar rooftop and home battery technologies `PR #1221 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1221>`__
+
+* Include a dedicated cutout for North America in bundle_config.yaml `PR #1121 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1121>`__
+
+* Include a dedicated cutout for Europe in bundle_config.yaml `PR #1125 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1125>`__
+
+* Include a dedicated cutout for Oceania in bundle_config.yaml `PR #1157 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1157>`__
+
+* Integrate RDIR into sector rules to store intermediate data in scenario folders `PR #1154 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1154>`__
+
+* The computation of `hydro_profile.nc` in `build_renewable_profiles.py` is not differentiated whether alternative clustering is applied or not; the indexing of the different power plants in `add_electricity.py` is performed according to the bus either in case alternative clustering is applied or not and a `hydro_inflow_factor` is computed prior to the computation of `inflow_t` to split the inflow according to the capacity of each different unit of each power plant (if more units are present). `PR #1119 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1119>`__
+
+* Use BASE_DIR in rules and `_helpers.py` script for facilitate module import in subworkflow `PR #1137 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1137>`__
+
+* Enable sector rules import in subworkflow `PR #1178 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1178>`__
+
+**Minor Changes and bug-fixing**
+
+* The default configuration for `electricity:estimate_renewable_capacities:year` was updated from 2020 to 2023. `PR #1106 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1106>`__
+
+* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`__
+
+* Enable configfile specification for mock_snakemake `PR #1135 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1135>`__
+
+* Removed duplications of devendencies in environment.yaml `PR #1128 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1128>`__
+
+* Fix pre-commit docformatter python issue. `PR #1153 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1153>`__
+
+* Drop duplicate entries in `AL_production.csv` data used in `build_industry_demand` rule `PR #1143 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1143>`__
+
+* Fix bugs in `prepare_sector_network.py` related to links with H2 buses and bug of re-addition of H2 and battery carriers in present `PR #1145 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1145>`__
+
+* Drop entries that contain non-string elements in country column of `CO2_emissions_csv` data in `prepare_transport_data_input.py` script `PR #1166 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1166>`__
+
+* Local tests are now run with `make test`. This uses a `Makefile` which runs snakemake calls with different configurations. `PR #1053 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1053>`__
+
+* Adds `Dependabot <https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide>`__ to keep GitHub actions up to date. `PR #1184 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1184>`__
+
+* Adds code security scans via `CodeQL <https://codeql.github.com/>`__ to CI. `PR #1185 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1185>`__
+
+* Adds CI to update keep pinned environment files up to date. `PR #1183 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1183>`__ and  `PR #1210 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1210>`__
+
+* Revise ports data for export in `add_export.py` related to sector model `PR #1175 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1175>`__
+
+* Restore string values of tech_colors in config file `PR #1205 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1205>`__
+
+* Drop vrestil dependency `PR #1220 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1220>`__
+
+* Include a configuration option to simplify / not simplify shapefiles based on a boolean value specified under `build_shape_options:simplify_gadm` option in the config file `PR 1138 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1138>`_
+
+* Fix the mismatch between buses and x, y locations while creating H2 Stores `PR #1134 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1134>`_
+
+* Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`__
+
+* Fix the environment placing a version limit to numpoly `PR #1237 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1237>`__
+
+PyPSA-Earth 0.4.1
+=================
+
+**New Features and Major Changes (19th September 2024)**
+
+* Add functionality to modify the cost assumptions using config files `PR #1097 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1097>`__
+
+**Minor Changes and bug-fixing**
+
 * Remove unused `countries_codes` argument from `load_GDP` function in `build_shapes.py` script, which was not being called as intended with positional arguments `PR #1069 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1069>`__
+* Fixed problematic float parsing (`_parse_float`) in `clean_osm_data.py` to make sure all OSM lines are correctly accounted for `PR #1089 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1089>`__
+* Fix minor bug for advanced csp implementation `PR #1076 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1076>`__
+* Fix minor bug in `build_powerplants.py` where the gas technology assignment incorrectly introduced NaN values for all powerplant technologies. `PR #1102 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1102>`__
 
 
 PyPSA-Earth 0.4.0
@@ -445,9 +531,7 @@ Release Process
 
 * Finalise release notes at ``doc/release_notes.rst``.
 
-* Update ``envs/environment.fixed.yaml`` via
-  ``conda env export -n pypsa-earth -f envs/environment.fixed.yaml --no-builds``
-  from an up-to-date `pypsa-earth` environment. Add license note at the top of the new yaml.
+* Make sure thah pinned versions of the environments ``*-pinned.yaml`` in ``envs`` folder are up-to-date.
 
 * Update version number in ``doc/conf.py`` and ``*config.*.yaml``.
 

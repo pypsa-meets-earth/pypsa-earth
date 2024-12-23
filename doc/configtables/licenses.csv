@@ -9,3 +9,8 @@
 "data/raw/WorldPop/*","CC","x",,,,https://www.worldpop.org/
 "data/raw/GDP/*","CC1.0",,,,,https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0
 "data/osm/*","ODbL",,,,,https://www.openstreetmap.org/copyright
+"data/demand/unsd/*","Custom","x",,,,"https://unstats.un.org/unsd/energystats/data/"
+"data/industrial_database.csv","CC","x",,,,https://globalenergymonitor.org/projects/global-steel-plant-tracker/download-data/
+"data/industrial_database.csv","CC4.0","x",,,,https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/
+"data/industrial_database.csv","CC4.0","x",,,,https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/
+"data/airports.csv","Public Domain",,,,,https://ourairports.com/data/

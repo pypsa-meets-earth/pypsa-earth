@@ -65,7 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging, create_logger
+from _helpers import BASE_DIR, configure_logging, create_logger
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -85,13 +85,13 @@ def download_emission_data():
     try:
         url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
         with requests.get(url) as rq:
-            with open("data/co2.zip", "wb") as file:
+            with open(os.path.join(BASE_DIR, "data/co2.zip"), "wb") as file:
                 file.write(rq.content)
-        rootpath = os.getcwd()
-        file_path = os.path.join(rootpath, "data/co2.zip")
+        file_path = os.path.join(BASE_DIR, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
             zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls", rootpath + "/data"
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                os.path.join(BASE_DIR, "data"),
             )
         os.remove(file_path)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
@@ -120,7 +120,7 @@ def emission_extractor(filename, emission_year, country_names):
     """
 
     # data reading process
-    datapath = os.path.join(os.getcwd(), "data", filename)
+    datapath = os.path.join(BASE_DIR, "data", filename)
     df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
     df = df.set_index("Country_code_A3")
@@ -319,14 +319,15 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="10",
-            ll="v0.3",
-            opts="Co2L-24H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
+            configfile="test/config.sector.yaml",
         )
+
     configure_logging(snakemake)
 
     opts = snakemake.wildcards.opts.split("-")
@@ -372,10 +373,10 @@ if __name__ == "__main__":
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
-                co2limit = float(m[0]) * snakemake.params.electricity["co2base"]
+                co2limit = float(m[0]) * float(snakemake.params.electricity["co2base"])
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.params.electricity["co2limit"]
+                co2limit = float(snakemake.params.electricity["co2limit"])
                 logger.info("Setting CO2 limit according to config value.")
             add_co2limit(n, co2limit, Nyears)
             break

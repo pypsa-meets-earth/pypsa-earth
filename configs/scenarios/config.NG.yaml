@@ -1,22 +1,15 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: CC0-1.0
+version: 0.5.0
 
-# Changes with respect to the base configuration file specified in run->base_config
-# default value is config.tutorial.yaml
 run:
   name: NG  # Name of the configuration (arbitrary string value)
   shared_cutouts: true  # set to true to share the default cutout(s) across runs
   base_config: config.tutorial.yaml  # base configuration file
-
-retrieve_databundle: # required to be "false" for nice CI test output
-  show_progress: false
 
 countries:
 - NG
 
 scenario:
   clusters: [5]
-
-enable:
-  retrieve_databundle: false

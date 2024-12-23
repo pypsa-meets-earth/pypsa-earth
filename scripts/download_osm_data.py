@@ -30,7 +30,7 @@ import os
 import shutil
 from pathlib import Path
 
-from _helpers import configure_logging, create_logger, read_osm_config
+from _helpers import BASE_DIR, configure_logging, create_logger, read_osm_config
 from earth_osm import eo
 
 logger = create_logger(__name__)
@@ -92,17 +92,17 @@ def convert_iso_to_geofk(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake, sets_path_to_root
+        from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("download_osm_data")
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = Path.joinpath(Path().cwd(), "resources", RDIR, "osm", "raw")
-    store_path_data = Path.joinpath(Path().cwd(), "data", "osm")
+    store_path_resources = Path.joinpath(
+        Path(BASE_DIR), "resources", RDIR, "osm", "raw"
+    )
+    store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
 
     eo.save_osm_data(
@@ -115,6 +115,7 @@ if __name__ == "__main__":
         out_dir=store_path_resources,
         out_format=["csv", "geojson"],
         out_aggregate=True,
+        progress_bar=snakemake.config["enable"]["progress_bar"],
     )
 
     out_path = Path.joinpath(store_path_resources, "out")
