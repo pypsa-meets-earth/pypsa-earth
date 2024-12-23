@@ -12,7 +12,8 @@ on:
 
 jobs:
   update-pinned-environment:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # the update is always needed for env changes in main and sometimes for other branches
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
     name: Update pinned envs
     runs-on: ${{ matrix.os }}-latest
     strategy:
