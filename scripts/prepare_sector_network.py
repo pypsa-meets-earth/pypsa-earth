@@ -170,6 +170,7 @@ def H2_liquid_fossil_conversions(n, costs):
         bus0=spatial.nodes + " H2",
         bus1=spatial.oil.nodes,
         bus2=spatial.co2.nodes,
+        bus3=spatial.nodes,
         carrier="Fischer-Tropsch",
         efficiency=costs.at["Fischer-Tropsch", "efficiency"],
         capital_cost=costs.at["Fischer-Tropsch", "fixed"]
@@ -178,6 +179,8 @@ def H2_liquid_fossil_conversions(n, costs):
         ],  # Use efficiency to convert from EUR/MW_FT/a to EUR/MW_H2/a
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
+        efficiency3=-costs.at["Fischer-Tropsch", "electricity-input"]
+        / costs.at["Fischer-Tropsch", "hydrogen-input"],
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
@@ -2916,12 +2919,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="19",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="72H",
-            discountrate="0.071",
+            sopts="144H",
+            discountrate=0.071,
             demand="AB",
         )
 
