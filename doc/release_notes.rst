@@ -15,6 +15,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`__
 
+* Added Dev Containers and docker as an option to get started with pypsa-earth `PR #1228 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1228>`__
 
 **Minor Changes and bug-fixing**
 
