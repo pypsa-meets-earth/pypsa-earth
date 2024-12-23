@@ -21,9 +21,11 @@ Steps:
 
     Ensure Docker is installed on your system.
 
-2. Install GitHub Desktop for your OS `here <https://desktop.github.com/download/>`_.
+2. You can use the link `here <https://code.visualstudio.com/download>`_ to install Visual Studio Code on your operating system. Ensure to select the most compatible file for your operating system.
 
-3. Clone the repository:
+3. Install GitHub Desktop for your OS `here <https://desktop.github.com/download/>`_.
+
+4. Clone the repository:
     * Open GitHub Desktop.
     * Click on "File" in the top left corner.
     * Click on "Clone Repository".
@@ -31,7 +33,7 @@ Steps:
 
     .. code:: bash
 
-        https://github.com/drifter089/pypsa-earth.git
+        https://github.com/pypsa-meets-earth/pypsa-earth.git
 
     * Click on "Clone".
     * Choose the location where you want to save the repository.
@@ -40,9 +42,9 @@ Steps:
 
     The repository will be cloned to your local machine.
 
-4. Rebuild and open in a container:
+5. Rebuild and open in a container:
     * Open the repository in VSCode.
-    * Click on the green icon in the bottom left corner of the VSCode window.
+    * Click on the icon in the far bottom left corner of the VSCode window.
     * Click on "Reopen in Container".
     * Wait for the container to build and open the repository in the container.
 
