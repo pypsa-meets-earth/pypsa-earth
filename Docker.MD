@@ -45,7 +45,7 @@ You will also need GitHub Desktop to clone the PyPSA-Earth repository. Install G
 ### Step 2: Rebuild and Open in Container
 
 1. Open the cloned repository in **VSCode**.
-2. Click on the green icon in the bottom left corner of the VSCode window.
+2. Click on the icon located at the bottom left corner of the VSCode window.
 3. Select **Reopen in Container**.
 4. Wait for the container to build and for the repository to open in the container.
 
