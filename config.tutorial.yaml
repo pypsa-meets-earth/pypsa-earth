@@ -32,7 +32,7 @@ base_network:
 electricity:
   co2limit: 1.487e+9
   co2base: 1.487e+9
-  automatic_emission: true
+  automatic_emission: false
 
 
 atlite:
