@@ -33,7 +33,9 @@ gitpython
 chaospy
 numba
 ruamel.yaml<=0.17.26
-earth-osm>=0.1.0, <0.2.0
+earth-osm>=2.3.post1
 reverse-geocode
 pyDOE2
 # graphviz
+
+fake_useragent
