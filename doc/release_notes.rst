@@ -16,6 +16,14 @@ This part of documentation collects descriptive release notes to capture the mai
 * Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`__
 
 
+* Computational improvements of build_osm_network `PR #845 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/845>`__
+
+* Boost computational performances of set_lines_ids with cKDTree by scipy `PR #806 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/806>`__
+
+* Boost computational performances of set_substation_ids using DBSCAN `PR #799 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/799>`__
+
+* Boost computational performances of fix_overpassing_line `PR #807 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/807>`__
+
 **Minor Changes and bug-fixing**
 
 * Added electricity bus to Fischer-Tropsch in prepare_sector_network.py `PR #1226 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1226>`__
@@ -122,8 +130,6 @@ PyPSA-Earth 0.4.0
 
 * Add an option to use csv format for custom demand imports. `PR #995 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/995>`__
 
-* Computational improvements of build_osm_network `PR #845 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/845>`__
-
 **Minor Changes and bug-fixing**
 
 * Minor bug-fixing to run the cluster wildcard min `PR #1019 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1019>`__
@@ -169,12 +175,6 @@ PyPSA-Earth 0.3.0
 * Add functionality to load shapefiles for hydrobasins directly from the data source directly `PR #919 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/919>`__
 
 * Use `new CC0 v1 dataset <https://doi.org/10.7910/DVN/XIV9BL>`__ for the natura input and automate download of WDPA protected planet data `PR #913 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/913>`__
-
-* Boost computational performances of set_lines_ids with cKDTree by scipy `PR #806 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/806>`__
-
-* Boost computational performances of set_substation_ids using DBSCAN `PR #799 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/799>`__
-
-* Boost computational performances of fix_overpassing_line `PR #807 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/807>`__
 
 **Minor Changes and bug-fixing**
 
