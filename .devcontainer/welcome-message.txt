@@ -6,11 +6,11 @@
 
 👋 Welcome to the PyPSA-Earth Development Environment!
 
-We’re excited to have you here! This setup allows you to contribute to PyPSA-Earth effortlessly using a development container in VS Code.
+We’re excited to have you here! This setup allows you to use and contribute to PyPSA-Earth using a development container in VS Code.
 
 📖 Getting Started for New Users
 
-	•	For a step-by-step guide on setting up your environment, debugging, and making your first contribution, refer to the PyPSA-Earth README. It covers everything you need to know as a newcomer.
+	•	For a step-by-step guide on setting up your environment, debugging, and making your first contribution, refer to the PyPSA-Earth README here: (https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/README.md). It covers everything you need to know as a newcomer.
 	•	The configuration files for the development container are located in the .github/.devcontainer folder.
 
 💡 Tips for New Users
@@ -20,4 +20,4 @@ We’re excited to have you here! This setup allows you to contribute to PyPSA-E
 
 🚀 Start Exploring and Happy Coding!
 
-Don’t hesitate to reach out if you need help—our community is here to support you.
+Don’t hesitate to reach out if you need help—our community is here to support you. You can access our discord server here: https://discord.gg/AnuJBk23FU
