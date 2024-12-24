@@ -373,14 +373,14 @@ def add_operational_reserve_margin_constraint(n, sns, config):
         0, np.inf, coords=[sns, n.generators.index], name="Generator-r"
     )
     reserve = n.model["Generator-r"]
-    lhs = reserve.sum("Generator")
+    summed_reserve = reserve.sum("Generator")
 
     # Share of extendable renewable capacities
     ext_i = n.generators.query("p_nom_extendable").index
     vres_i = n.generators_t.p_max_pu.columns
     if not ext_i.empty and not vres_i.empty:
         capacity_factor = n.generators_t.p_max_pu[vres_i.intersection(ext_i)]
-        renewable_capacity_variables = (
+        p_nom_vres = (
             n.model["Generator-p_nom"]
             .loc[vres_i.intersection(ext_i)]
             .rename({"Generator-ext": "Generator"})
@@ -472,7 +472,8 @@ def add_battery_constraints(n):
         # for some reasons, eff is one element longer as compared with vars_link
         vars_link.sel({"Link-ext": nodes + " discharger"}) * -eff[0],
     )
-    n.model.add_constraints(lhs == 0, name="link_charger_ratio")
+
+    n.model.add_constraints(lhs == 0, name="Link-charger_ratio")
 
 
 def add_RES_constraints(n, res_share, config):
