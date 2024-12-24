@@ -417,6 +417,7 @@ def update_capacity_constraint(n):
 
     lhs = dispatch + reserve
 
+    # TODO check if `p_max_pu[ext_i]` is safe for empty `ext_i` and drop if cause in case
     if not ext_i.empty:
         capacity_variable = n.model["Generator-p_nom"].rename(
             {"Generator-ext": "Generator"}
