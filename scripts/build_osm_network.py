@@ -554,21 +554,17 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     buffer_df = df_p.buffer(tol).to_frame()
 
     # Spatial join to find lines intersecting point buffers
-    joined = gpd.sjoin(df_l, buffer_df, how="inner", op="intersects")
+    joined = gpd.sjoin(df_l, buffer_df, how="inner", predicate="intersects")
 
     # group lines by their index
     group_lines = joined.groupby(level=0)
 
     # iterate over the groups, TODO: change to apply
     for i, group in group_lines:
-        line_id = df_l.loc[i, line_id_str]  # pick the line id that represents the group
         line_geom = df_l.loc[i, "geometry"]
 
-        # number of points that intersect with the line
-        num_points = len(group)
-
         # get the indices of the points that intersect with the line
-        points_indexes = group["index_right"].tolist()
+        points_indexes = group[buffer_df.index.name].tolist()
 
         # get the geometries of the points that intersect with the line
         all_points = df_p.loc[points_indexes, "geometry"]
