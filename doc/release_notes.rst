@@ -15,6 +15,18 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Include option in the config to allow for custom airport data `PR #1241 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1241>`__
 
+* Added Dev Containers and docker as an option to get started with pypsa-earth `PR #1228 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1228>`__
+
+* Add a list of PyPSA-Earth applications in academic and industrial projects `PR #1255 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1255>`__
+
+
+* Computational improvements of build_osm_network `PR #845 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/845>`__
+
+* Boost computational performances of set_lines_ids with cKDTree by scipy `PR #806 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/806>`__
+
+* Boost computational performances of set_substation_ids using DBSCAN `PR #799 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/799>`__
+
+* Boost computational performances of fix_overpassing_line `PR #807 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/807>`__
 
 **Minor Changes and bug-fixing**
 
