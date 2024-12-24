@@ -385,12 +385,9 @@ def add_operational_reserve_margin_constraint(n, sns, config):
             .loc[vres_i.intersection(ext_i)]
             .rename({"Generator-ext": "Generator"})
         )
-        lhs = merge(
-            lhs,
-            (renewable_capacity_variables * (-EPSILON_VRES * capacity_factor)).sum(
-                ["Generator"]
-            ),
-        )
+        lhs = summed_reserve + (
+            p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor)),
+        ).sum("Generator")
 
     # Total demand per t
     demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
@@ -418,10 +415,7 @@ def update_capacity_constraint(n):
 
     p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
 
-    lhs = merge(
-        dispatch * 1,
-        reserve * 1,
-    )
+    lhs = dispatch + reserve
 
     if not ext_i.empty:
         capacity_variable = n.model["Generator-p_nom"].rename(
@@ -462,15 +456,19 @@ def add_battery_constraints(n):
     Add constraint ensuring that charger = discharger, i.e.
     1 * charger_size - efficiency * discharger_size = 0
     """
-    nodes = n.buses.index[n.buses.carrier == "battery"]
-    if nodes.empty:
+    if not n.links.p_nom_extendable.any():
         return
-    vars_link = n.model["Link-p_nom"]
-    eff = n.links.loc[nodes + " discharger", "efficiency"]
-    lhs = merge(
-        vars_link.sel({"Link-ext": nodes + " charger"}) * 1,
-        # for some reasons, eff is one element longer as compared with vars_link
-        vars_link.sel({"Link-ext": nodes + " discharger"}) * -eff[0],
+
+    discharger_bool = n.links.index.str.contains("battery discharger")
+    charger_bool = n.links.index.str.contains("battery charger")
+
+    dischargers_ext = n.links[discharger_bool].query("p_nom_extendable").index
+    chargers_ext = n.links[charger_bool].query("p_nom_extendable").index
+
+    eff = n.links.efficiency[dischargers_ext].values
+    lhs = (
+        n.model["Link-p_nom"].loc[chargers_ext]
+        - n.model["Link-p_nom"].loc[dischargers_ext] * eff
     )
 
     n.model.add_constraints(lhs == 0, name="Link-charger_ratio")
