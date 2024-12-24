@@ -1875,8 +1875,9 @@ rule build_base_industry_totals:  #default data
         countries=config["countries"],
         other_industries=config["demand_data"]["other_industries"],
     input:
+        #os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
         #industrial_production_per_country="data/industrial_production_per_country.csv",
-        #unsd_path="data/demand/unsd/data/",
+        unsd_path="data/demand/unsd/data/",
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
         transactions_path="data/unsd_transactions.csv",
     output:
