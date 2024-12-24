@@ -549,7 +549,7 @@ Release Process
   Make sure to close issues and PRs or the release milestone with it (e.g. closes #X).
   Run ``pre-commit run --all`` locally and fix any issues.
 
-* Tag a release on Github via ``git tag v0.x.x``, ``git push``, ``git push --tags``. Include release notes in the tag message.
+* Update and checkout your local `main` and tag a release with ``git tag v0.x.x``, ``git push``, ``git push --tags``. Include release notes in the tag message using Github UI.
 
 * Upload code to `zenodo code repository <https://doi.org>`_ with `GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.en.html>`_.
 
