@@ -33,8 +33,8 @@ dependencies:
 # starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
 - numpoly<=1.3.4
 - pandas
-- geopandas>=0.11.0
-- fiona!=1.8.22
+- geopandas>=1
+- fiona>=1.10
 - xarray>=2023.11.0, <2023.12.0
 - netcdf4
 - networkx
