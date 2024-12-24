@@ -373,24 +373,21 @@ def add_operational_reserve_margin_constraint(n, sns, config):
         0, np.inf, coords=[sns, n.generators.index], name="Generator-r"
     )
     reserve = n.model["Generator-r"]
-    lhs = reserve.sum("Generator")
+    summed_reserve = reserve.sum("Generator")
 
     # Share of extendable renewable capacities
     ext_i = n.generators.query("p_nom_extendable").index
     vres_i = n.generators_t.p_max_pu.columns
     if not ext_i.empty and not vres_i.empty:
         capacity_factor = n.generators_t.p_max_pu[vres_i.intersection(ext_i)]
-        renewable_capacity_variables = (
+        p_nom_vres = (
             n.model["Generator-p_nom"]
             .loc[vres_i.intersection(ext_i)]
             .rename({"Generator-ext": "Generator"})
         )
-        lhs = merge(
-            lhs,
-            (renewable_capacity_variables * (-EPSILON_VRES * capacity_factor)).sum(
-                ["Generator"]
-            ),
-        )
+        lhs = summed_reserve + (
+            p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor)),
+        ).sum("Generator")
 
     # Total demand per t
     demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
@@ -418,11 +415,9 @@ def update_capacity_constraint(n):
 
     p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
 
-    lhs = merge(
-        dispatch * 1,
-        reserve * 1,
-    )
+    lhs = dispatch + reserve
 
+    # TODO check if `p_max_pu[ext_i]` is safe for empty `ext_i` and drop if cause in case
     if not ext_i.empty:
         capacity_variable = n.model["Generator-p_nom"].rename(
             {"Generator-ext": "Generator"}
@@ -462,17 +457,22 @@ def add_battery_constraints(n):
     Add constraint ensuring that charger = discharger, i.e.
     1 * charger_size - efficiency * discharger_size = 0
     """
-    nodes = n.buses.index[n.buses.carrier == "battery"]
-    if nodes.empty:
+    if not n.links.p_nom_extendable.any():
         return
-    vars_link = n.model["Link-p_nom"]
-    eff = n.links.loc[nodes + " discharger", "efficiency"]
-    lhs = merge(
-        vars_link.sel({"Link-ext": nodes + " charger"}) * 1,
-        # for some reasons, eff is one element longer as compared with vars_link
-        vars_link.sel({"Link-ext": nodes + " discharger"}) * -eff[0],
+
+    discharger_bool = n.links.index.str.contains("battery discharger")
+    charger_bool = n.links.index.str.contains("battery charger")
+
+    dischargers_ext = n.links[discharger_bool].query("p_nom_extendable").index
+    chargers_ext = n.links[charger_bool].query("p_nom_extendable").index
+
+    eff = n.links.efficiency[dischargers_ext].values
+    lhs = (
+        n.model["Link-p_nom"].loc[chargers_ext]
+        - n.model["Link-p_nom"].loc[dischargers_ext] * eff
     )
-    n.model.add_constraints(lhs == 0, name="link_charger_ratio")
+
+    n.model.add_constraints(lhs == 0, name="Link-charger_ratio")
 
 
 def add_RES_constraints(n, res_share, config):
