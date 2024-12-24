@@ -1013,6 +1013,7 @@ rule prepare_ports:
 rule prepare_airports:
     params:
         airport_sizing_factor=config["sector"]["airport_sizing_factor"],
+        airport_custom_data=config["custom_data"]["airports"],
     output:
         ports="resources/" + SECDIR + "airports.csv",
     script:
