@@ -1755,8 +1755,6 @@ rule plot_network:
 rule conservation_checks:
     input:
         network_folder="networks/" + RDIR,
-    # output:
-    #     stats="validation/" + RDIR + "stats.csv",
     threads: 1
     script:
         "validation/conservation_checks.py"
