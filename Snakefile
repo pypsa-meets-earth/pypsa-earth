@@ -1752,6 +1752,16 @@ rule plot_network:
         "scripts/plot_network.py"
 
 
+rule conservancy_checks:
+    input:
+        network_folder="networks/" + RDIR,
+    # output:
+    #     stats="validation/" + RDIR + "stats.csv",
+    threads: 1
+    script:
+        "validation/conservancy_checks.py"
+
+
 rule make_statistics:
     params:
         countries=config["countries"],
