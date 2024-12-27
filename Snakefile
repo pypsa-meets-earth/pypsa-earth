@@ -1752,14 +1752,14 @@ rule plot_network:
         "scripts/plot_network.py"
 
 
-rule conservancy_checks:
+rule conservation_checks:
     input:
         network_folder="networks/" + RDIR,
     # output:
     #     stats="validation/" + RDIR + "stats.csv",
     threads: 1
     script:
-        "validation/conservancy_checks.py"
+        "validation/conservation_checks.py"
 
 
 rule make_statistics:
