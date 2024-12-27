@@ -69,7 +69,7 @@ dependencies:
 - cfitsio=4.4.1
 - cftime=1.6.4
 - charset-normalizer=3.4.0
-- click=8.1.7
+- click=8.1.8
 - click-plugins=1.1.1
 - cligj=0.7.2
 - cloudpickle=3.1.0
@@ -101,6 +101,7 @@ dependencies:
 - distributed=2024.12.1
 - docutils=0.21.2
 - dpath=2.2.0
+- earth-osm=2.3.post1
 - entrypoints=0.4
 - entsoe-py=0.6.11
 - et_xmlfile=2.0.0
@@ -165,14 +166,14 @@ dependencies:
 - importlib-metadata=8.5.0
 - importlib_metadata=8.5.0
 - importlib_resources=6.4.5
-- inflate64=1.0.0
+- inflate64=1.0.1
 - iniconfig=2.0.0
 - ipopt=3.14.17
 - ipykernel=6.29.5
 - ipython=8.31.0
 - isoduration=20.11.0
 - jedi=0.19.2
-- jinja2=3.1.4
+- jinja2=3.1.5
 - joblib=1.4.2
 - json5=0.10.0
 - jsonpointer=3.0.0
@@ -255,7 +256,7 @@ dependencies:
 - librttopo=1.1.0
 - libsodium=1.0.20
 - libsolv=0.7.30
-- libspatialindex=2.0.0
+- libspatialindex=2.1.0
 - libspatialite=5.1.0
 - libsqlite=3.47.2
 - libssh2=1.11.1
@@ -348,6 +349,7 @@ dependencies:
 - proj=9.5.1
 - prometheus_client=0.21.1
 - prompt-toolkit=3.0.48
+- protobuf=5.28.2
 - psutil=6.1.0
 - pthread-stubs=0.4
 - pulp=2.7.0
@@ -356,7 +358,7 @@ dependencies:
 - py7zr=0.22.0
 - pyarrow=18.1.0
 - pyarrow-core=18.1.0
-- pybcj=1.0.2
+- pybcj=1.0.3
 - pycountry=24.6.1
 - pycparser=2.22
 - pycryptodomex=3.21.0
@@ -460,7 +462,7 @@ dependencies:
 - unidecode=1.3.8
 - uri-template=1.3.0
 - uriparser=0.9.8
-- urllib3=2.2.3
+- urllib3=2.3.0
 - validators=0.34.0
 - vc=14.3
 - vc14_runtime=14.42.34433
@@ -499,11 +501,9 @@ dependencies:
 - zstd=1.5.6
 - pip:
   - chaospy==4.3.17
-  - earth-osm==2.2
   - fake-useragent==2.0.3
   - googledrivedownloader==0.4
   - highspy==1.9.0
   - polars==1.17.1
-  - protobuf==5.29.2
   - tsam==2.3.6
 prefix: C:\Miniconda\envs\pypsa-earth
