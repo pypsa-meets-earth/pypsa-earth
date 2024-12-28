@@ -56,10 +56,6 @@ def collect_statistics(n, network_id):
         variables.extend(["tech_potential"] * len(tech_pot_vals))
         carriers.extend([carr] * len(tech_pot_vals))
 
-    # print(values)
-    # print(variables)
-    # print(carriers)
-
     res_df = pd.DataFrame(
         data={"values": values, "variables": variables, "carriers": carriers}
     )
@@ -84,4 +80,3 @@ if __name__ == "__main__":
         network_data_df = collect_statistics(n, fl.stem)
 
         network_data_df.to_csv(data_folder + "/" + fl.stem + "_invar_check.csv")
-        # network_data_df.to_csv(data_folder + "/conservation_checks/" + network_id + "_invar_check.csv")
