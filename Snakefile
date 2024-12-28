@@ -1757,7 +1757,7 @@ rule conservation_checks:
         network_folder="networks/" + RDIR,
     threads: 1
     script:
-        "validation/conservation_checks.py"
+        "scripts/conservation_checks.py"
 
 
 rule make_statistics:
