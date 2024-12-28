@@ -27,6 +27,7 @@ def collect_statistics(n, network_id):
     variables = []
     carriers = []
 
+    # TODO account for snapshots_weightings
     overall_load = [n.loads_t.p_set.copy().sum().sum().tolist()]
     values.extend(overall_load)
     variables.extend(["p_set"] * len(overall_load))
@@ -39,6 +40,7 @@ def collect_statistics(n, network_id):
 
     network_carriers = list(n.generators.carrier.unique())
     for carr in network_carriers:
+        # TODO account for snapshots_weightings
         p_max_pu_cols = n.generators_t.p_max_pu.columns
         carr_cols = p_max_pu_cols[p_max_pu_cols.str.contains(carr)]
         p_max_pu_vals = [n.generators_t.p_max_pu[carr_cols].sum().sum().copy().tolist()]
