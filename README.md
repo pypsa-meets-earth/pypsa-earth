@@ -62,37 +62,44 @@ The diagram below depicts one representative clustered node for the sector-coupl
 
 There are multiple ways to get involved and learn more about our work. That's how we organise ourselves:
 
-- [**Discord NEW! (Open)**](https://discord.gg/AnuJBk23FU)
-  - chat with the community, team up on features, exchange with developers, code in voice channels
-  - registration and usage is for free
-        <p align="left">
-            <a href="https://discord.gg/AnuJBk23FU">
-            <img src="https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg" width="150">
-            <a/>
-        </p>
-- **General initiative meeting (Open)**
-  - every forth Thursday each month Thursday 16-17:00 (UK time)
-    <a href="https://drive.google.com/file/d/1naH4WwW9drkOkOJ3PLO4fyWdkZQi5-_w/view?usp=share_link">
-    `download .ics`
-    </a>
-  - join for project news and high-level code updates
-  - meeting hosted on Discord
-  - [open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). See what we will discuss. Invited members have edit rights.
-- **Buddy talk (Open)**
-  - book a 30min meeting with Max to discuss anything you like
-  - booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min)
-- **Specific code meeting (Open)**
-  - meeting hosted on Discord
-  - join updates, demos, Q&A's, discussions and the coordination of each work package
-    1. Demand creation and prediction meeting, on demand
-    2. AI asset detection meeting, on demand
-    3. Sector coupling meeting, every Thursday 09:00 (UK time), <a href="https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link" >`download .ics`</a>
-    4. PyPSA-Earth meeting, every Thursday 16:00 (UK time), <a href="https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link" >`download .ics`</a>
-- **Outreach meeting (Open)**
-  - every second week, Tuesday 17:00 (UK time)
-  - planning, discussing events, workshops, communication, community activities
-- [**Google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
-  - access to minutes, presentations, lists, documents (access to minutes)
+### Discord Server
+
+Join [**PyPSA-meets-Earth**](https://discord.gg/AnuJBk23FU) Discord server to check the news, chat with the community, team up on features, exchange with developers in voice channels.
+
+### Developers Meetings
+
+There are a number of developers meeting which take place on regular basis. The meetings are open to everyone interested and you are welcome to join the discussions! All meetings are held on PyPSA-meets-Earth Discord channel.
+
+#### General initiative meeting
+
+Is held every forth Thursday each month Thursday 16-17:00 (UK time) and is a perfect place to meet the community and get a high-level update on PyPSA ecosystem relevant for PyPSA-Earth developments. The calendar invite is available [here](https://drive.google.com/file/d/1naH4WwW9drkOkOJ3PLO4fyWdkZQi5-_w/view?usp=share_link).
+
+Join for project news and high-level code updates! [Open agenda](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing).
+
+#### Weekly developers meetings
+
+We meet every week to align on the development priorities, discuss the progress in development modeling features, help eachother with usage questions and bug-fixing and exchange with the initiative-related news. The meetings are open to everyone interested in using and developing PyPSA-Earth, and you are very welcome to join us. It goes perfectly well also if you are not really sure and want first to hear what is going on!
+
+The agenda of the weeklies is open and avaulable [here](<https://docs.google.com/document/d/1WDkF3fl0wOCBgvNdQ4TghrZa4WsM8I8S/edit?usp=share_link&ouid=108647137928038440094&rtpof=true&sd=true>).
+
+   - **Morning meeting** every Thursday at 09:00 (UK time) which is Eastern-Hemisphere friendly. A calendar invite can be found [here](https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link).
+   - **Evening meeting** every Thursday 16:00 (UK time). A calendar invite can be found [here](https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link). Is replaced by the monthly meeting every forth Thursday which has a more high-level perspective but you can also join it if you have more particular questions.
+
+
+#### Buddy talk
+
+You can book a 30min meeting with [Max](https://www.linkedin.com/in/maximilian-parzen-b047a1126/) to discuss anything you like.
+  Booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min)
+
+#### Specific on-demand meetings
+
+Feel free to ping us if you are interested in updates, demos, Q&A's, discussions and the coordination of each work package
+    1. Demand creation and prediction meeting
+    2. AI asset detection meeting
+    3. Outreach meeting for planning, discussing events, workshops, communication, community activities
+
+#### Materials Storage
+We are using [**Google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing) to share to minutes, presentations, lists and documents. Feel gree to get a look!
 
 ## Installation
 
