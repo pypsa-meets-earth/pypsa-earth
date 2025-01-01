@@ -34,6 +34,7 @@ def collect_statistics(n, network_id):
     carriers.extend(["physical_load"] * len(overall_load))
 
     for var in ["p_set", "p_nom_max", "weight"]:
+        # NB There is no "weight" column in older PyPSA versions
         values.extend(extract_gen_sum(n, var)[0])
         variables.extend(extract_gen_sum(n, var)[1])
         carriers.extend(extract_gen_sum(n, var)[2])
