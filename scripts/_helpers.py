@@ -1506,10 +1506,12 @@ def lossy_bidirectional_links(n, carrier):
     rev_links = (
         n.links.loc[carrier_i].copy().rename({"bus0": "bus1", "bus1": "bus0"}, axis=1)
     )
-    rev_links["length_original"] = rev_links["length"] # tracker for the length of the original links length
+    rev_links["length_original"] = rev_links[
+        "length"
+    ]  # tracker for the length of the original links length
     rev_links["capital_cost"] = 0
     rev_links["length"] = 0
-    rev_links["reversed"] = True # tracker for easy identification of reversed links
+    rev_links["reversed"] = True  # tracker for easy identification of reversed links
     rev_links.index = rev_links.index.map(lambda x: x + "-reversed")
 
     # add the new reversed links to the network and fill the newly created trackers with default values for the other links
@@ -1552,8 +1554,7 @@ def set_length_based_efficiency(n, carrier, bus_suffix, config):
 
     # set the links' length based efficiency
     n.links.loc[carrier_i, "efficiency"] = (
-        efficiency_static
-        * efficiency_per_1000km ** (lengths / 1e3)
+        efficiency_static * efficiency_per_1000km ** (lengths / 1e3)
     )
 
     # set the links's electricity demand for compression
@@ -1569,6 +1570,4 @@ def set_length_based_efficiency(n, carrier, bus_suffix, config):
         )  # electricity
         """
         # set the required compression demand
-        n.links.loc[carrier_i, "efficiency2"] = (
-            -compression_per_1000km * lengths / 1e3
-        )
+        n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3

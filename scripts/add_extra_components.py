@@ -57,7 +57,13 @@ import os
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger, lossy_bidirectional_links, set_length_based_efficiency, override_component_attrs
+from _helpers import (
+    configure_logging,
+    create_logger,
+    lossy_bidirectional_links,
+    override_component_attrs,
+    set_length_based_efficiency,
+)
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,

@@ -868,9 +868,7 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
 
     # get the indices of all forward links (non-reversed), that have a reversed counterpart
     forward_i = n.links.loc[
-        n.links.carrier.isin(carriers) &
-        ~n.links.reversed &
-        n.links.p_nom_extendable
+        n.links.carrier.isin(carriers) & ~n.links.reversed & n.links.p_nom_extendable
     ].index
 
     # get the indices of all backward links (reversed)
@@ -1030,7 +1028,7 @@ if __name__ == "__main__":
     solving = snakemake.params.solving
 
     is_sector_coupled = "sopts" in snakemake.wildcards.keys()
-    
+
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
