@@ -13,9 +13,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add a function to calculate length-based efficiencies and apply it to the H2 pipelines. `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 **Minor Changes and bug-fixing**
 
+* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 PyPSA-Earth 0.6.0
 =================
