@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from _helpers import aggregate_fuels, get_conv_factors
+from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors
 
 _logger = logging.getLogger(__name__)
 
@@ -357,7 +357,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_energy_totals",
             simpl="",
-            clusters=19,
+            clusters=4,
             demand="AB",
             planning_horizons=2030,
         )
@@ -375,7 +375,7 @@ if __name__ == "__main__":
     if snakemake.params.update_data:
         # Delete and existing files to avoid duplication and double counting
 
-        files = glob.glob("data/demand/unsd/data/*.txt")
+        files = glob.glob(os.path.join(BASE_DIR, "data/demand/unsd/data/*.txt"))
         for f in files:
             os.remove(f)
 
@@ -385,12 +385,14 @@ if __name__ == "__main__":
 
             with urlopen(zipurl) as zipresp:
                 with ZipFile(BytesIO(zipresp.read())) as zfile:
-                    zfile.extractall("data/demand/unsd/data")
+                    zfile.extractall(os.path.join(BASE_DIR, "data/demand/unsd/data"))
 
-                    path = "data/demand/unsd/data"
+                    path = os.path.join(BASE_DIR, "data/demand/unsd/data")
 
     # Get the files from the path provided in the OP
-    all_files = list(Path("data/demand/unsd/data").glob("*.txt"))
+    all_files = list(
+        Path(os.path.join(BASE_DIR, "data/demand/unsd/data")).glob("*.txt")
+    )
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
@@ -433,7 +435,9 @@ if __name__ == "__main__":
     df_yr = df_yr[df_yr.country.isin(countries)]
 
     # Create an empty dataframe for energy_totals_base
-    energy_totals_cols = pd.read_csv("data/energy_totals_DF_2030.csv").columns
+    energy_totals_cols = pd.read_csv(
+        os.path.join(BASE_DIR, "data/energy_totals_DF_2030.csv")
+    ).columns
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
 
     # Lists that combine the different fuels in the dataset to the model's carriers
