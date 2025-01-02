@@ -868,8 +868,8 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
 
     # get the indices of all forward links (non-reversed), that have a reversed counterpart
     forward_i = n.links.loc[
-        (n.links.carrier in carriers) and
-        ~n.links.reversed and
+        n.links.carrier.isin(carriers) &
+        ~n.links.reversed &
         n.links.p_nom_extendable
     ].index
 

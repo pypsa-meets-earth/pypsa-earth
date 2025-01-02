@@ -819,7 +819,8 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides="data/override_component_attrs",
+            overrides=os.getcwd() + "/data/override_component_attrs" if os.name == "nt"
+                else "/data/override_component_attrs", # on Windows os.getcwd() is required because of the "copy-minimal" shadow directory
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
