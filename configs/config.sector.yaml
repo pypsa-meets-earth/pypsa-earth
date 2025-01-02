@@ -155,6 +155,17 @@ sector:
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
 
+  shipping_hydrogen_share: #1.0
+    BU_2030: 0.00
+    AP_2030: 0.00
+    NZ_2030: 0.10
+    DF_2030: 0.05
+    AB_2030: 0.05
+    BU_2050: 0.00
+    AP_2050: 0.25
+    NZ_2050: 0.36
+    DF_2050: 0.12
+
   gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
