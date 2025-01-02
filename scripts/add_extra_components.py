@@ -57,7 +57,7 @@ import os
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, lossy_bidirectional_links, set_length_based_efficiency, override_component_attrs
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -261,39 +261,14 @@ def attach_hydrogen_pipelines(n, costs, config):
         p_nom_extendable=True,
         length=h2_links.length.values,
         capital_cost=costs.at["H2 pipeline", "capital_cost"] * h2_links.length,
-        efficiency=costs.at["H2 pipeline", "efficiency"],
         carrier="H2 pipeline",
     )
 
-    # setup pipelines as bidirectional and lossy
+    # split the pipeline into two unidirectional links to properly apply transmission losses in both directions.
     lossy_bidirectional_links(n, "H2 pipeline")
 
-
-def lossy_bidirectional_links(n: pypsa.components.Network, carrier: str):
-
-    "Split bidirectional links into two unidirectional links to include transmission losses."
-
-    carrier_i = n.links.query("carrier == @carrier").index
-
-    if carrier_i.empty:
-        return
-
-    logger.info(f"Splitting bidirectional links with the carrier {carrier}")
-
-    n.links.loc[carrier_i, "p_min_pu"] = 0
-
-    rev_links = (
-        n.links.loc[carrier_i].copy().rename({"bus0": "bus1", "bus1": "bus0"}, axis=1)
-    )
-    rev_links["length_original"] = rev_links["length"]
-    rev_links["capital_cost"] = 0
-    rev_links["length"] = 0
-    rev_links["reversed"] = True
-    rev_links.index = rev_links.index.map(lambda x: x + "-reversed")
-
-    n.links = pd.concat([n.links, rev_links], sort=False)
-    n.links["reversed"] = n.links["reversed"].fillna(False).infer_objects(copy=False)
-    n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
+    # set the pipelines efficiency and the electricity required by the pipeline for compression
+    set_length_based_efficiency(n, "H2 pipeline", " H2", config)
 
 
 if __name__ == "__main__":
@@ -304,7 +279,8 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.network)
+    overrides = override_component_attrs(snakemake.input.overrides)
+    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     config = snakemake.config
 

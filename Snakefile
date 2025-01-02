@@ -745,6 +745,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 
 rule add_extra_components:
     input:
+        overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
     output:
@@ -818,6 +819,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
+            overrides="data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -884,6 +886,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
+            overrides="data/override_component_attrs",
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
