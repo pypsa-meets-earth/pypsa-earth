@@ -24,7 +24,6 @@ import yaml
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
 from shapely.geometry import Point
-from vresutils.costdata import annuity
 
 logger = logging.getLogger(__name__)
 
@@ -923,6 +922,21 @@ def get_last_commit_message(path):
 
 
 # PYPSA-EARTH-SEC
+def annuity(n, r):
+    """
+    Calculate the annuity factor for an asset with lifetime n years and.
+
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    """
+
+    if isinstance(r, pd.Series):
+        return pd.Series(1 / n, index=r.index).where(
+            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
+        )
+    elif r > 0:
+        return r / (1.0 - 1.0 / (1.0 + r) ** n)
+    else:
+        return 1 / n
 
 
 def prepare_costs(
@@ -1118,18 +1132,20 @@ def get_country(target, **keys):
     target: str
         Desired type of country code.
         Examples:
-            - 'alpha_3' for 3-digit
-            - 'alpha_2' for 2-digit
-            - 'name' for full country name
+        - 'alpha_3' for 3-digit
+        - 'alpha_2' for 2-digit
+        - 'name' for full country name
     keys: dict
         Specification of the country name and reference system.
         Examples:
-            - alpha_3="ZAF" for 3-digit
-            - alpha_2="ZA" for 2-digit
-            - name="South Africa" for full country name
+        - alpha_3="ZAF" for 3-digit
+        - alpha_2="ZA" for 2-digit
+        - name="South Africa" for full country name
+
     Returns
     -------
     country code as requested in keys or np.nan, when country code is not recognized
+
     Example of usage
     -------
     - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")

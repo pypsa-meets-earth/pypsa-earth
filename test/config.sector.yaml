@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: 0.4.1
+version: 0.6.0
 tutorial: true
 
 run:
-  name: test1
+  name: sector
   shared_cutouts: true
 
 scenario:
-  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
+  clusters: # number of nodes
   - 4
   ll:
   - "c1"

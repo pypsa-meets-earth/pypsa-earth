@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
-version: 0.4.1
+version: 0.6.0
 
 run:
   name: "custom"
