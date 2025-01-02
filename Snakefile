@@ -16,6 +16,7 @@ from _helpers import (
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    write_config,
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
@@ -41,6 +42,7 @@ configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
 
 
+write_config(config)
 # check_config_version(config=config)
 
 config.update({"git_commit": get_last_commit_message(".")})
