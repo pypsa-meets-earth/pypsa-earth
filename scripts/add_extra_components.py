@@ -57,7 +57,13 @@ import os
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
+from _helpers import (
+    configure_logging,
+    create_logger,
+    lossy_bidirectional_links,
+    override_component_attrs,
+    set_length_based_efficiency,
+)
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -261,9 +267,14 @@ def attach_hydrogen_pipelines(n, costs, config):
         p_nom_extendable=True,
         length=h2_links.length.values,
         capital_cost=costs.at["H2 pipeline", "capital_cost"] * h2_links.length,
-        efficiency=costs.at["H2 pipeline", "efficiency"],
         carrier="H2 pipeline",
     )
+
+    # split the pipeline into two unidirectional links to properly apply transmission losses in both directions.
+    lossy_bidirectional_links(n, "H2 pipeline")
+
+    # set the pipelines efficiency and the electricity required by the pipeline for compression
+    set_length_based_efficiency(n, "H2 pipeline", " H2", config)
 
 
 if __name__ == "__main__":
@@ -274,7 +285,8 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.network)
+    overrides = override_component_attrs(snakemake.input.overrides)
+    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     config = snakemake.config
 
