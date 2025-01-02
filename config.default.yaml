@@ -604,7 +604,7 @@ sector:
     electricity distribution grid:
       efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
     H2 pipeline:
-      efficiency_per_1000km: 1 
+      efficiency_per_1000km: 1
       compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
   dynamic_transport:
