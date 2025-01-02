@@ -27,7 +27,7 @@ HTTP = HTTPRemoteProvider()
 copy_default_files()
 
 
-configfile: "config.default.yaml"
+# configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
 configfile: "configs/config.main.yaml"
@@ -41,7 +41,7 @@ configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
 
 
-check_config_version(config=config)
+# check_config_version(config=config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 
