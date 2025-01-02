@@ -634,14 +634,6 @@ def clustering_for_n_clusters(
     return clustering
 
 
-def save_to_geojson(s, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)
-    df = s.reset_index()
-    schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-    df.to_file(fn, driver="GeoJSON", schema=schema, engine="fiona")
-
-
 def cluster_regions(busmaps, inputs, output):
     busmap = reduce(lambda x, y: x.map(y), busmaps[1:], busmaps[0])
 
