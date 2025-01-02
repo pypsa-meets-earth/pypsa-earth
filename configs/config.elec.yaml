@@ -17,6 +17,8 @@ clean_osm_data_options: # osm = OpenStreetMap
   use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
   path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
+# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
+
 build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMap
   group_close_buses: true # When "True", close buses are merged and guarantee the voltage matching among line endings
   group_tolerance_buses: 5000 # [m] (default 5000) Tolerance in meters of the close buses to merge
@@ -44,6 +46,32 @@ electricity:
     epsilon_vres: 0.02 # share of total renewable supply
     contingency: 0 # fixed capacity in MW
 
+  max_hours:
+    battery: 6
+    H2: 168
+
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    StorageUnit: [] # battery, H2
+    Store: [battery, H2]
+    Link: [] # H2 pipeline
+
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
+  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  estimate_renewable_capacities:
+    stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
+    year: 2023 # Reference year, available years for IRENA stats are 2000 to 2023
+    p_nom_min: 1 # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
+    p_nom_max: false # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
+    technology_mapping:
+      # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
+      Offshore: [offwind-ac, offwind-dc]
+      Onshore: [onwind]
+      PV: [solar]
 
 lines:
   ac_types:
