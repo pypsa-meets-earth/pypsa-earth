@@ -170,7 +170,7 @@ electricity:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
-    Link: [] # H2 pipeline
+    Link: [H2 pipeline] # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
   custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
@@ -683,6 +683,10 @@ sector:
     biomass: biomass
   keep_existing_capacities: true
 
+  transmission_efficiency:
+    H2 pipeline:
+      efficiency_per_1000km: 1 
+      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
 solving:
   options:
