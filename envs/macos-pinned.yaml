@@ -268,6 +268,7 @@ dependencies:
 - libscotch=7.0.5
 - libsodium=1.0.20
 - libsolv=0.7.30
+- libspatialindex=2.1.0
 - libspatialite=5.1.0
 - libsqlite=3.47.2
 - libssh2=1.11.1
@@ -484,7 +485,6 @@ dependencies:
 - xarray=2023.11.0
 - xerces-c=3.2.5
 - xlrd=2.0.1
-- xorg-libxau=1.0.12
 - xorg-libxdmcp=1.1.5
 - xyzservices=2024.9.0
 - yaml=0.2.5

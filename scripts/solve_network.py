@@ -386,7 +386,7 @@ def add_operational_reserve_margin_constraint(n, sns, config):
             .rename({"Generator-ext": "Generator"})
         )
         lhs = summed_reserve + (
-            p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor)),
+            p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor))
         ).sum("Generator")
 
     # Total demand per t

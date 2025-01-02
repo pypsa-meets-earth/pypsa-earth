@@ -307,6 +307,7 @@ dependencies:
 - libsndfile=1.2.2
 - libsodium=1.0.20
 - libsolv=0.7.30
+- libspatialindex=2.1.0
 - libspatialite=5.1.0
 - libspral=2024.05.08
 - libsqlite=3.47.2
