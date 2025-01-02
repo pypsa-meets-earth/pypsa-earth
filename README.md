@@ -67,16 +67,14 @@ There are multiple ways to get involved and learn more about our work:
     - **Weekly developers meetings**
         - *Morning meeting* every [Thursday at 09:00 (UK time)](https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link) which is Eastern-Hemisphere friendly.
         - *Evening meeting* every [Thursday 16:00 (UK time)](https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link). A calendar invite can be found [here]. Is replaced by the monthly meeting every forth Thursday which has a more high-level perspective but you can also join it if you have more particular questions.
-
-    - **Specific meetings**
-        - Buddy talk
-You can book a 30min meeting with [Max](https://www.linkedin.com/in/maximilian-parzen-b047a1126/) to discuss anything you like. Booking link: [calendly.com/pypsa-meets-earth](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min)
-        - On-demand meetings
-            - Demand creation and prediction meeting
-            - AI asset detection meeting
-            - Outreach meeting for planning, discussing events, workshops, communication, community activities
 - Look at public materials at [**google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing) to share to minutes, presentations, lists and documents. Feel gree to get a look!
-- Join us and propose you stream
+- Notify your interest to on-demand meetings:
+    - Buddy talk: you can [book](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min) a 30min meeting with [Max](https://www.linkedin.com/in/maximilian-parzen-b047a1126/) to discuss anything you like.
+    - On-demand meetings
+        - Demand creation and prediction meeting
+        - AI asset detection meeting
+        - Outreach meeting for planning, discussing events, workshops, communication, community activities
+- Join us and propose you stream.
 
 ## Installation
 
