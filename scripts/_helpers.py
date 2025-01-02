@@ -1522,7 +1522,7 @@ def set_length_based_efficiency(n, carrier, bus_suffix, config):
     """
     Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
     Additionally add the length based electricity demand required for compression (if applicable).
-    The bus_suffix referes to the suffix that differentiates the links bus0 from the corresponding electricty bus, i.e. " H2".
+    The bus_suffix refers to the suffix that differentiates the links bus0 from the corresponding electricity bus, i.e. " H2".
     Important:
     Call this function AFTER lossy_bidirectional_links when creating links that are both bidirectional and lossy,
     and have a length based electricity demand for compression. Otherwise the compression will not consistently take place at
@@ -1532,7 +1532,7 @@ def set_length_based_efficiency(n, carrier, bus_suffix, config):
     # get the links length based efficiency and required compression
     if carrier not in config["sector"]["transmission_efficiency"]:
         raise KeyError(
-            f"An error occured when setting the length based efficiency for the Links of type {carrier}."
+            f"An error occurred when setting the length based efficiency for the Links of type {carrier}."
             f"The Link type {carrier} was not found in the config under config['sector']['transmission_efficiency']."
         )
     efficiencies = config["sector"]["transmission_efficiency"][carrier]
