@@ -15,6 +15,7 @@ import pypsa
 import pytz
 import ruamel.yaml
 import xarray as xr
+from typing import Iterable
 from _helpers import (
     BASE_DIR,
     create_dummy_data,
@@ -916,7 +917,7 @@ def add_co2(n, costs):
     n.add(
         "Bus",
         "co2 atmosphere",
-        location="Earth",  # TODO Ignoed by pypsa check
+        location="Earth",  # TODO Ignored by pypsa check
         carrier="co2",
     )
 
@@ -2789,6 +2790,205 @@ def add_electricity_distribution_grid(n, costs):
 #         constant=co2_limit,
 #     )
 
+def add_industry_demand(n, demand):
+
+    logger.info("adding low and medium temperature industrial demand")
+
+    # Low temperature demand between 50C and 150C
+    n.add(
+        "Load",
+        spatial.nodes,
+        suffix=" low temperature heat 50-150C for industry",
+        bus=spatial.nodes,
+        carrier="low temperature heat 50-150C for industry",
+        p_set=demand.loc[spatial.nodes, "demand(50-150C)[MW]"]
+    )
+
+    # Medium temperature demand between 150C and 250C
+    n.add(
+        "Load",
+        spatial.nodes,
+        suffix=" medium temperature heat 150-250C for industry",
+        bus=spatial.nodes,
+        carrier="medium temperature heat 150-250C for industry",
+        p_set=demand.loc[spatial.nodes, "demand(150-250C)[MW]"]
+    )
+
+
+def add_egs_industry_supply(n, supply_curve):
+    # logger.info("Adding EGS supply for industry")
+    raise NotImplementedError("EGS supply for industry not implemented yet")
+
+
+def add_industrial_heating(n, costs, nodes):
+
+    assert isinstance(nodes, Iterable)
+
+    if not isinstance(nodes, pd.Index):
+        nodes = pd.Index(nodes)
+
+    low_temp_buses = nodes + ' 50-150C heat for industry'
+    medium_temp_buses = nodes + ' 50-150C heat for industry'
+
+    # Add carriers if not already present
+    carriers = [
+        "molten salt store",
+        "molten salt charger",
+        "molten salt discharger",
+        "solar heat for industrial processes",
+        "industrial heat pump high temperature",
+        "csp-tower",
+        "steam boiler gas cond",
+        "hot water boiler gas cond",
+        "hot water storage",
+    ]
+    for carrier in carriers:
+        if carrier not in n.carriers.index:
+            n.add("Carrier", name=carrier)
+
+    # 1. Low-temp molten salt store (Store)
+    n.add(
+        "Bus",
+        nodes + " molten salt store",
+        carrier="molten sand store"
+    )
+
+    n.add(
+        "Store",
+        name=nodes + " molten salt store",
+        bus=nodes + " molten salt store",
+        carrier="molten salt store",
+        e_nom_extendable=True,
+        capital_cost=costs.at["low-temp molten salt store", "fixed"],
+        lifetime=costs.at["low-temp molten salt store", "lifetime"],
+        efficiency=costs.at["low-temp molten salt store", "efficiency"]
+    )
+
+    # 2. Low-temp molten salt discharger (Link)
+    # Assumes the discharger converts stored heat in the same bus to usable heat at the same bus
+    n.madd(
+        "Link", 
+        nodes,
+        suffix=" molten salt discharger",
+        bus0=nodes + " molten sand store",
+        bus1=medium_temp_buses,
+        carrier="low-temp molten salt discharger",
+        p_nom_extendable=True,
+        capital_cost=costs.at["low-temp molten salt discharger", "fixed"],
+        lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
+        efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
+        p_min_pu=0.
+    )
+
+    # 3. Low-temp molten salt charger (Link)
+    logger.warning('Yet to techno-economic data for molten sand charger')
+    n.madd(
+        "Link", 
+        nodes,
+        suffix=" molten salt charger",
+        bus0=medium_temp_buses,
+        bus1=nodes,
+        carrier="low-temp molten salt charger",
+        p_nom_extendable=True,
+        capital_cost=costs.at["low-temp molten salt charger", "fixed"],
+        lifetime=costs.at["low-temp molten salt charger", "lifetime"],
+        efficiency=costs.at["low-temp molten salt charger", "efficiency"],
+        p_min_pu=0.
+    )
+
+    # 4. Solar heat for industrial processes (Generator)
+    # This is assumed to produce heat directly at the bus. is assumed to produce heat directly at the bus.
+    logger.warning("Yet to add capacity factor for solar heat for industrial processes")
+    '''
+    n.madd(
+        "Generator",
+        nodes,
+        suffix=" solar heat for industrial processes",
+        bus=low_temp_buses,
+        carrier="solar heat for industrial processes",
+        p_nom_extendable=True,
+        capital_cost=costs.at["solar heat for industrial processes", "fixed"],
+        lifetime=costs.at["solar heat for industrial processes", "lifetime"],
+        # or static 'p_max_pu' representing "efficiency" or capacity factor.
+        # If you wish to model resource availability (capacity factors), you need a time series
+        # or static 'p_max_pu' representing "efficiency" or capacity factor.
+    )
+    '''
+
+    # 5. Industrial heat pump high temperature (Link)
+    # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
+    n.madd(
+        "Link",
+        nodes,
+        suffix=" industrial heat pump high temperature",
+        bus0=nodes,
+        bus1=low_temp_buses,
+        carrier="industrial heat pump high temperature",
+        p_nom_extendable=True,
+        capital_cost=costs.at["industrial heat pump high temperature", "fixed"],
+        lifetime=costs.at["industrial heat pump high temperature", "lifetime"],
+        efficiency=costs.at["industrial heat pump high temperature", "efficiency"],
+        marginal_cost=costs.at["industrial heat pump high temperature", "VOM"]
+    )
+
+    # 6. CSP-tower (Generator)
+    logger.warning("Yet to add capacity factor for solar heat for industrial processes")
+    # Typically CSP is solar thermal. Here, we assume it just generates heat at bus.
+    n.madd(
+        "Generator",
+        nodes,
+        suffix=" csp-tower",
+        bus=nodes,
+        carrier="csp-tower",
+        p_nom_extendable=True,
+        capital_cost=costs.at["csp-tower", "fixed"],
+        lifetime=costs.at["csp-tower", "lifetime"]
+        # If you have FOM as a percentage, you might incorporate it as an annualized cost or handle separately.
+    )
+
+    # 7. Steam boiler gas cond (Generator)
+    # Typically converts gas input to heat output. Assuming both on same bus for demonstration.
+    n.madd(
+        "Generator",
+        nodes,
+        suffix=" steam boiler gas cond",
+        bus=medium_temp_buses,
+        carrier="steam boiler gas cond",
+        p_nom_extendable=True,
+        capital_cost=costs.at["steam boiler gas cond", "fixed"],
+        lifetime=costs.at["steam boiler gas cond", "lifetime"],
+        efficiency=costs.at["steam boiler gas cond", "efficiency"],
+        marginal_cost=costs.at["steam boiler gas cond", "VOM"] + costs.at["biogas", "fuel"]
+    )
+
+    # 8. Hot water boiler gas cond (Generator)
+    n.madd(
+        "Generator",
+        nodes,
+        suffix=" hot water boiler gas cond",
+        bus=low_temp_buses,
+        carrier="hot water boiler gas cond",
+        p_nom_extendable=True,
+        capital_cost=costs.at["hot water boiler gas cond", "fixed"],
+        lifetime=costs.at["hot water boiler gas cond", "lifetime"],
+        efficiency=costs.at["hot water boiler gas cond", "efficiency"],
+        marginal_cost=costs.at["hot water boiler gas cond", "VOM"] + costs.at["biogas", "fuel"]
+    )
+
+    # 9. Hot water tank (Store)
+    n.madd(
+        "Store",
+        nodes,
+        suffix=" hot water storage",
+        bus=low_temp_buses,
+        carrier="hot water storage",
+        e_nom_extendable=True,
+        capital_cost=costs.at["central water tank storage", "fixed"],
+        lifetime=costs.at["central water tank storage", "lifetime"]
+        # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
+    )
+
+
 
 def add_custom_water_cost(n):
     for country in countries:
@@ -3032,6 +3232,31 @@ if __name__ == "__main__":
     industrial_demand = pd.read_csv(
         snakemake.input.industrial_demand, index_col=0, header=0
     )  # * 1e6
+
+    ##########################################################################
+    ######### Functions adding EGS-US project demands and generators #########
+    ##########################################################################
+
+    industry_demands = pd.read_csv(
+        snakemake.input['industrial_heating_demands'], index_col=0
+    )
+
+    add_industry_demand(n, industry_demands)    
+
+    industry_egs_supply = pd.read_csv(
+        snakemake.input['industrial_heating_egs_supply_curve'], index_col=[0,1]
+    )
+
+    add_egs_industry_supply(n, industry_demands)
+
+
+    industry_heating_costs = (
+        prepare_costs(
+            pd.read_csv(snakemake.input['industrial_heating_costs'], index_col=[0,1])    
+        )
+    )
+
+    add_industrial_heating(n, industry_heating_costs)
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
