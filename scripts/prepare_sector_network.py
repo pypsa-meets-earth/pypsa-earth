@@ -3249,7 +3249,6 @@ if __name__ == "__main__":
 
     add_egs_industry_supply(n, industry_demands)
 
-
     industry_heating_costs = (
         prepare_costs(
             pd.read_csv(snakemake.input['industrial_heating_costs'], index_col=[0,1])    
