@@ -516,6 +516,25 @@ rule build_powerplants:
         "scripts/build_powerplants.py"
 
 
+rule build_egs_potentials:
+    params:
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
+    input:
+        egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
+        egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
+        egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
+        shapes="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+    output:
+        egs_potentials="resources/" + RDIR + "egs_potential.csv",
+    threads: 2
+    resources:
+        mem_mb=10000,
+    benchmark:
+        RDIR + "/benchmarks/build_egs_potentials/egs_potential"
+    script:
+        "scripts/build_egs_potentials.py"
+
+
 rule add_electricity:
     params:
         countries=config["countries"],
@@ -549,6 +568,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
+        egs_potentials="resources/" + RDIR + "egs_potential.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:
@@ -785,6 +805,50 @@ rule prepare_network:
         mem_mb=4000,
     script:
         "scripts/prepare_network.py"
+
+
+rule build_industrial_heating_costs:
+    params:
+        cost_year=config["costs"]["year"],
+    input:
+        costs=COSTS,
+    output:
+        industry_heating_costs="resources/" + RDIR + "industrial_heating_costs.csv",
+    threads: 1
+    log:
+        "logs/" + RDIR + "build_industrial_heating_costs.log",
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/build_industrial_heating_costs.py"
+
+
+rule build_industrial_heating_demands:
+    input:
+        demand_data="dummy/translated_to_us.geojson",
+        regions=(
+            "resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
+    output:
+        industrial_heating_egs_supply_curves=(
+            "resources/"
+            + RDIR
+            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
+        ),
+        industrial_heating_demands=(
+            "resources/"
+            + RDIR
+            + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+        ),
+    threads: 1
+    log:
+        "logs/" + RDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/build_industrial_heating_demand.py"
 
 
 def memory(w):
@@ -1124,6 +1188,17 @@ rule prepare_sector_network:
             + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv"
         ),
+        industrial_heating_egs_supply_curves=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
+        ),
+        industrial_heating_demands=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+        ),
+        industrial_heating_costs="resources/" + RDIR + "industrial_heating_costs.csv",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
