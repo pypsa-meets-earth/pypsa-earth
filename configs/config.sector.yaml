@@ -4,6 +4,27 @@
 
 version: 0.4.1
 
+policy_config:
+  hydrogen:
+    temporal_matching: "no_res_matching" # either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
+    spatial_matching: false
+    additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
+    allowed_excess: 1.0
+    is_reference: false # Whether or not this network is a reference case network, relevant only if additionality is _true_
+    remove_h2_load: false #Whether or not to remove the h2 load from the network, relevant only if is_reference is _true_
+    path_to_ref: "" # Path to the reference case network for additionality calculation, relevant only if additionality is _true_ and is_reference is _false_
+    re_country_load: false # Set to "True" to force the RE electricity to be equal to the electricity required for hydrogen export and the country electricity load. "False" excludes the country electricity load from the constraint.
+
+# originates from sector part
+demand_data:
+  update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
+  base_year: 2019
+  other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
+  aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
+
+fossil_reserves:
+  oil: 100 #TWh Maybe redundant
+
 sector:
   gas:
     spatial_gas: true # ALWAYS TRUE
@@ -150,6 +171,14 @@ sector:
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
   lignite:
     spatial_lignite: false
+  oil:
+    spatial_oil: true
+
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
+
+  co2_network: true
+  co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
+  co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
 
   hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
