@@ -1290,6 +1290,9 @@ def add_shipping(n, costs):
     ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
+    if ports.empty:
+        return
+
     gadm_level = options["gadm_level"]
 
     all_navigation = ["total international navigation", "total domestic navigation"]
