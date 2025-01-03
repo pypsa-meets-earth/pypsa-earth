@@ -461,6 +461,7 @@ dependencies:
 - tornado=6.4.2
 - tqdm=4.67.1
 - traitlets=5.14.3
+- tsam=2.3.6
 - types-python-dateutil=2.9.0.20241206
 - typing-extensions=4.12.2
 - typing_extensions=4.12.2
