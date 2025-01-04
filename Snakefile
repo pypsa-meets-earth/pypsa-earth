@@ -1358,6 +1358,7 @@ rule build_base_energy_totals:
         unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
     output:
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
+        unsd_export_path=directory("data/demand/unsd/data/"),
     script:
         "scripts/build_base_energy_totals.py"
 
@@ -1877,7 +1878,7 @@ rule build_base_industry_totals:  #default data
     input:
         #os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
         #industrial_production_per_country="data/industrial_production_per_country.csv",
-        unsd_path="data/demand/unsd/data/",
+        unsd_export_path="data/demand/unsd/data/",
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
         transactions_path="data/unsd_transactions.csv",
     output:
