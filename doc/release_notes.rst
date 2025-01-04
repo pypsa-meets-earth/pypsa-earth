@@ -16,6 +16,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
+
 
 PyPSA-Earth 0.6.0
 =================
@@ -41,8 +43,6 @@ PyPSA-Earth 0.6.0
 * Added electricity bus to Fischer-Tropsch in prepare_sector_network.py `PR #1226 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1226>`__
 
 * Update BW, NG and BJ tutorial databundles to include gadm-like sources from geoboundaries `PR #1257 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1257>`__
-
-* Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
 
 
 PyPSA-Earth 0.5.0
