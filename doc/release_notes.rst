@@ -42,6 +42,8 @@ PyPSA-Earth 0.6.0
 
 * Update BW, NG and BJ tutorial databundles to include gadm-like sources from geoboundaries `PR #1257 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1257>`__
 
+* Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
+
 
 PyPSA-Earth 0.5.0
 =================
