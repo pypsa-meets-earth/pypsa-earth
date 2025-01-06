@@ -1,9 +1,10 @@
 name: Test workflows
 
 on:
+  workflow_dispatch:
   push:
     branches:
-    - main
+    - add_cooling
   pull_request:
     branches:
     - main
