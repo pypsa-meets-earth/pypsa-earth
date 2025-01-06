@@ -699,9 +699,7 @@ if __name__ == "__main__":
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
         linemap = n.lines.index.to_series()
-        clustering = pypsa.clustering.spatial.Clustering(
-            n, busmap, linemap, linemap, pd.Series(dtype="O")
-        )
+        clustering = pypsa.clustering.spatial.Clustering(n, busmap, linemap)
     elif len(n.buses) < n_clusters:
         logger.error(
             f"Desired number of clusters ({n_clusters}) higher than the number of buses ({len(n.buses)})"
