@@ -88,7 +88,7 @@ dependencies:
   # until the next release after will be out after v0.3.0
   # the commit precedes numpy upgrades which could lead to troubles
   # as pip is not excellent in resolving version conflicts
-  - git+https://https://github.com/pypsa/atlite.git@a0ff6690c0b4680ef208ba4d54185617330cecb9
+  - git+https://github.com/pypsa/atlite.git@a0ff6690c0b4680ef208ba4d54185617330cecb9
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent
