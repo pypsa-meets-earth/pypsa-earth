@@ -17,9 +17,7 @@ dependencies:
 # currently the packages are being installed with pip
 # need to move back to conda once the issues will be resolved
 - powerplantmatching>=0.5.19
-# - earth-osm>=2.1
-# until the release will incorporate all the fixes needed
-# to work with CDS beta
+- earth-osm>=2.3.post1
 - atlite>=0.3
 
   # Dependencies of the workflow itself
@@ -36,7 +34,7 @@ dependencies:
 - numpoly<=1.3.4
 - pandas
 - geopandas>=0.11.0, <=0.14.3
-- fiona<1.10.0
+- fiona!=1.8.22, <1.10.0
 - xarray>=2023.11.0, <2023.12.0
 - netcdf4
 - networkx
@@ -86,7 +84,6 @@ dependencies:
 - gurobi
 
 - pip:
-  - earth-osm==2.2 # until conda release it out for earth-osm
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
