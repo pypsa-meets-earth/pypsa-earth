@@ -1132,18 +1132,20 @@ def get_country(target, **keys):
     target: str
         Desired type of country code.
         Examples:
-            - 'alpha_3' for 3-digit
-            - 'alpha_2' for 2-digit
-            - 'name' for full country name
+        - 'alpha_3' for 3-digit
+        - 'alpha_2' for 2-digit
+        - 'name' for full country name
     keys: dict
         Specification of the country name and reference system.
         Examples:
-            - alpha_3="ZAF" for 3-digit
-            - alpha_2="ZA" for 2-digit
-            - name="South Africa" for full country name
+        - alpha_3="ZAF" for 3-digit
+        - alpha_2="ZA" for 2-digit
+        - name="South Africa" for full country name
+
     Returns
     -------
     country code as requested in keys or np.nan, when country code is not recognized
+
     Example of usage
     -------
     - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")

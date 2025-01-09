@@ -992,7 +992,7 @@ rule prepare_ports:
     params:
         custom_export=config["custom_data"]["export_ports"],
     output:
-        ports="data/ports.csv",  # TODO move from data to resources
+        ports="resources/" + SECDIR + "ports.csv",
         export_ports="resources/" + SECDIR + "export_ports.csv",
     script:
         "scripts/prepare_ports.py"
@@ -1003,14 +1003,14 @@ rule prepare_airports:
         airport_sizing_factor=config["sector"]["airport_sizing_factor"],
         airport_custom_data=config["custom_data"]["airports"],
     output:
-        ports="data/airports.csv",  # TODO move from data to resources
+        ports="resources/" + SECDIR + "airports.csv",
     script:
         "scripts/prepare_airports.py"
 
 
 rule prepare_urban_percent:
     output:
-        urban_percent="data/urban_percent.csv",  # TODO move from data to resources
+        urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:
         "scripts/prepare_urban_percent.py"
 
@@ -1083,9 +1083,11 @@ rule prepare_sector_network:
         industrial_demand="resources/"
         + SECDIR
         + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
-        energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
-        airports="data/airports.csv",
-        ports="data/ports.csv",
+        energy_totals="resources/"
+        + SECDIR
+        + "energy_totals_{demand}_{planning_horizons}.csv",
+        airports="resources/" + SECDIR + "airports.csv",
+        ports="resources/" + SECDIR + "ports.csv",
         heat_demand="resources/"
         + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1189,7 +1191,9 @@ rule override_respot:
         },
         overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
+        energy_totals="resources/"
+        + SECDIR
+        + "energy_totals_{demand}_{planning_horizons}.csv",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
@@ -1200,7 +1204,9 @@ rule override_respot:
 rule prepare_transport_data:
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
+        energy_totals_name="resources/"
+        + SECDIR
+        + "energy_totals_{demand}_{planning_horizons}.csv",
         traffic_data_KFZ="data/emobility/KFZ__count",
         traffic_data_Pkw="data/emobility/Pkw__count",
         transport_name="resources/" + SECDIR + "transport_data.csv",
@@ -1284,7 +1290,9 @@ rule build_cop_profiles:
 rule prepare_heat_data:
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        energy_totals_name="data/energy_totals_{demand}_{planning_horizons}.csv",
+        energy_totals_name="resources/"
+        + SECDIR
+        + "energy_totals_{demand}_{planning_horizons}.csv",
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1337,7 +1345,8 @@ rule build_base_energy_totals:
     input:
         unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
     output:
-        energy_totals_base="data/energy_totals_base.csv",
+        energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
+        unsd_export_path=directory("data/demand/unsd/data/"),
     script:
         "scripts/build_base_energy_totals.py"
 
@@ -1348,13 +1357,15 @@ rule prepare_energy_totals:
         base_year=config["demand_data"]["base_year"],
         sector_options=config["sector"],
     input:
-        unsd_paths="data/energy_totals_base.csv",
+        unsd_paths="resources/" + SECDIR + "energy_totals_base.csv",
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
         growth_factors_cagr="data/demand/growth_factors_cagr.csv",
         district_heating="data/demand/district_heating.csv",
         fuel_shares="data/demand/fuel_shares.csv",
     output:
-        energy_totals="data/energy_totals_{demand}_{planning_horizons}.csv",
+        energy_totals="resources/"
+        + SECDIR
+        + "energy_totals_{demand}_{planning_horizons}.csv",
     script:
         "scripts/prepare_energy_totals.py"
 
@@ -1408,7 +1419,7 @@ rule build_population_layouts:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        urban_percent="data/urban_percent.csv",
+        urban_percent="resources/" + SECDIR + "urban_percent.csv",
         cutout="cutouts/"
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
@@ -1853,9 +1864,10 @@ rule build_base_industry_totals:  #default data
         countries=config["countries"],
         other_industries=config["demand_data"]["other_industries"],
     input:
+        #os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
         #industrial_production_per_country="data/industrial_production_per_country.csv",
-        #unsd_path="data/demand/unsd/data/",
-        energy_totals_base="data/energy_totals_base.csv",
+        unsd_export_path="data/demand/unsd/data/",
+        energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
         transactions_path="data/unsd_transactions.csv",
     output:
         base_industry_totals="resources/"

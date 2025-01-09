@@ -14,8 +14,8 @@ Welcome to the PyPSA-Earth documentation!
 .. image:: https://img.shields.io/github/v/release/pypsa-meets-earth/pypsa-earth?include_prereleases
     :alt: GitHub release (latest by date including pre-releases)
 
-.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml/badge.svg
-    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/ci.yml
+.. image:: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml
     :alt: CI
 
 .. image:: https://readthedocs.org/projects/pypsa-earth/badge/?version=latest
@@ -120,6 +120,7 @@ Documentation
 
 * :doc:`introduction`
 * :doc:`installation`
+* :doc:`docker_containers`
 * :doc:`short_tutorial`
 * :doc:`tutorial`
 * :doc:`data_workflow`
@@ -132,6 +133,7 @@ Documentation
 
    introduction
    installation
+   docker_containers
    short_tutorial
    tutorial
    data_workflow
@@ -178,12 +180,28 @@ Documentation
 
    monte_carlo
 
-**Help and References**
+**Support and Contributing**
 
 * :doc:`release_notes`
 * :doc:`how_to_contribute`
+* :doc:`how_to_docs`
 * :doc:`software_hints`
 * :doc:`learning_materials`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Support
+
+   release_notes
+   how_to_contribute
+   how_to_docs
+   software_hints
+   learning_materials
+
+**References**
+
+* :doc:`users_list`
 * :doc:`project_structure_and_credits`
 * :doc:`talks_and_papers`
 
@@ -192,9 +210,6 @@ Documentation
    :maxdepth: 2
    :caption: Project Info
 
-   release_notes
-   how_to_contribute
-   software_hints
-   learning_materials
+   users_list
    project_structure_and_credits
    talks_and_papers
