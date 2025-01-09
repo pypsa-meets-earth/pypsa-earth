@@ -285,6 +285,7 @@ rule base_network:
         "scripts/base_network.py"
 
 
+'''
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
@@ -330,10 +331,12 @@ def terminate_if_cutout_exists(config=config):
                 + cutout_fl
                 + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
             )
+'''
 
 
+'''
 if config["enable"].get("build_cutout", False):
-    terminate_if_cutout_exists(config)
+    # terminate_if_cutout_exists(config)
 
     rule build_cutout:
         params:
@@ -353,8 +356,10 @@ if config["enable"].get("build_cutout", False):
             mem_mb=ATLITE_NPROCESSES * 1000,
         script:
             "scripts/build_cutout.py"
+'''
 
 
+'''
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
@@ -374,6 +379,7 @@ if config["enable"].get("build_natura_raster", False):
             "benchmarks/" + RDIR + "build_natura_raster"
         script:
             "scripts/build_natura_raster.py"
+'''
 
 
 if not config["enable"].get("build_natura_raster", False):
@@ -468,10 +474,10 @@ rule build_renewable_profiles:
             if w.technology in ("onwind", "solar", "hydro", "csp")
             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
         ),
-        cutout=lambda w: "cutouts/"
-        + CDIR
-        + config["renewable"][w.technology]["cutout"]
-        + ".nc",
+        # cutout=lambda w: "cutouts/"
+        # + CDIR
+        # + config["renewable"][w.technology]["cutout"]
+        # + ".nc",
     output:
         profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc",
     log:
@@ -582,6 +588,7 @@ rule add_electricity:
         "scripts/add_electricity.py"
 
 
+'''
 rule simplify_network:
     params:
         renewable=config["renewable"],
@@ -620,6 +627,7 @@ rule simplify_network:
         mem_mb=4000,
     script:
         "scripts/simplify_network.py"
+'''
 
 
 if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
@@ -813,10 +821,10 @@ rule build_industrial_heating_costs:
     input:
         costs=COSTS,
     output:
-        industry_heating_costs="resources/" + RDIR + "industrial_heating_costs.csv",
+        industry_heating_costs="resources/" + SECDIR + "industrial_heating_costs.csv",
     threads: 1
     log:
-        "logs/" + RDIR + "build_industrial_heating_costs.log",
+        "logs/" + SECDIR + "build_industrial_heating_costs.log",
     resources:
         mem_mb=2000,
     script:
@@ -834,17 +842,17 @@ rule build_industrial_heating_demands:
     output:
         industrial_heating_egs_supply_curves=(
             "resources/"
-            + RDIR
+            + SECDIR
             + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
         ),
         industrial_heating_demands=(
             "resources/"
-            + RDIR
+            + SECDIR
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
     threads: 1
     log:
-        "logs/" + RDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
+        "logs/" + SECDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
     resources:
         mem_mb=2000,
     script:
@@ -1198,7 +1206,11 @@ rule prepare_sector_network:
             + SECDIR
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
-        industrial_heating_costs="resources/" + RDIR + "industrial_heating_costs.csv",
+        industrial_heating_costs=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_costs.csv",
+        )
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -1463,10 +1475,10 @@ rule build_solar_thermal_profiles:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         solar_thermal_total="resources/"
@@ -1496,10 +1508,10 @@ rule build_population_layouts:
     input:
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         urban_percent="data/urban_percent.csv",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         pop_layout_total="resources/"
@@ -1549,10 +1561,10 @@ rule build_clustered_population_layouts:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         clustered_pop_layout="resources/"
@@ -1589,10 +1601,10 @@ rule build_heat_demand:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         heat_demand_urban="resources/"
@@ -1632,10 +1644,10 @@ rule build_temperature_profiles:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         temp_soil_total="resources/"
