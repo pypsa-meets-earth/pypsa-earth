@@ -256,6 +256,22 @@ if __name__ == "__main__":
         crs=country_shapes.crs,
     ).dropna(axis="index", subset=["geometry"])
 
+    if snakemake.params.alternative_clustering:
+        # determine isolated buses
+        n.determine_network_topology()
+        non_isolated_buses = n.buses.duplicated(subset=["sub_network"], keep=False)
+        isolated_buses = n.buses[~non_isolated_buses].index
+        # drop isolated buses
+        onshore_regions = onshore_regions[~onshore_regions.name.isin(isolated_buses)]
+        # drop duplicates based on shape_id
+        onshore_regions = onshore_regions.drop_duplicates('shape_id')
+
+        if len(onshore_regions) < len(gadm_country):
+            logger.error(
+                f"The number of remaining of buses are less than the number of administrative clusters suggested!"
+            )
+            raise ValueError("Insufficient buses to match administrative clusters!")
+
     onshore_regions = pd.concat([onshore_regions], ignore_index=True).to_file(
         snakemake.output.regions_onshore
     )
