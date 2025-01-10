@@ -261,15 +261,16 @@ if __name__ == "__main__":
         n.determine_network_topology()
         non_isolated_buses = n.buses.duplicated(subset=["sub_network"], keep=False)
         isolated_buses = n.buses[~non_isolated_buses].index
-        non_isolated_regions = onshore_regions[~onshore_regions.name.isin(isolated_buses)]
+        non_isolated_regions = onshore_regions[
+            ~onshore_regions.name.isin(isolated_buses)
+        ]
         isolated_regions = onshore_regions[onshore_regions.name.isin(isolated_buses)]
-        
+
         # Combine regions while prioritizing non-isolated ones
-        onshore_regions = (
-            pd.concat([non_isolated_regions, isolated_regions])
-            .drop_duplicates("shape_id", keep="first")
-        )
-        
+        onshore_regions = pd.concat(
+            [non_isolated_regions, isolated_regions]
+        ).drop_duplicates("shape_id", keep="first")
+
         if len(onshore_regions) < len(gadm_country):
             logger.warning(
                 f"The number of remaining of buses are less than the number of administrative clusters suggested!"
