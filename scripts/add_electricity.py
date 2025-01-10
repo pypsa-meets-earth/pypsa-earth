@@ -91,8 +91,9 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
+from tqdm import tqdm
 from powerplantmatching.export import map_country_bus
+from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
 
 idx = pd.IndexSlice
 
