@@ -23,6 +23,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix overlapping bus regions when alternative clustering is selected `PR #1287 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1287>`__
 
+* Fix readthedocs by explicitly specifying the location of the Sphinx config `PR #1292 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1292>`__
+
 PyPSA-Earth 0.6.0
 =================
 
