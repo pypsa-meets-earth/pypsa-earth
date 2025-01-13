@@ -302,7 +302,6 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true

@@ -47,13 +47,13 @@ def select_ports(n):
         logger.error(
             "No export ports chosen, please add ports to the file data/export_ports.csv"
         )
-    gadm_level = snakemake.params.gadm_level
+    gadm_layer_id = snakemake.params.gadm_layer_id
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
+    ports["gadm_{}".format(gadm_layer_id)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(
             port[["x", "y"]],
             port["country"],
-            gadm_level,
+            gadm_layer_id,
             snakemake.input["shapes_path"],
             snakemake.params.alternative_clustering,
         ),
@@ -62,7 +62,7 @@ def select_ports(n):
 
     # TODO: revise if ports quantity and property by shape become relevant
     # drop duplicated entries
-    gcol = "gadm_{}".format(gadm_level)
+    gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports
