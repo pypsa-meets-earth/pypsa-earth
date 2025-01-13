@@ -337,13 +337,16 @@ if __name__ == "__main__":
     else:
         config["main_query"] = ""
 
-    ppl = (
-        pm.powerplants(from_url=False, update=True, config_update=config)
-        .powerplant.fill_missing_decommissioning_years()
-        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .powerplant.convert_country_to_alpha2()
-        .pipe(replace_natural_gas_technology)
-    )
+    if snakemake.config["electricity"]["custom_powerplants"] != "replace":
+        ppl = (
+            pm.powerplants(from_url=False, update=True, config_update=config)
+            .powerplant.fill_missing_decommissioning_years()
+            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .powerplant.convert_country_to_alpha2()
+            .pipe(replace_natural_gas_technology)
+        )
+    else:
+        ppl = pd.DataFrame()
 
     ppl = add_custom_powerplants(
         ppl, snakemake.input, snakemake.config
