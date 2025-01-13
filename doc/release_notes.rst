@@ -13,9 +13,17 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Drop duplication of retrieve_data and COST_DIR, add params and update technology-data version `PR #1249 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1249>`__
+
+* In alternative clustering, generate hydro inflows by shape and avoid hydro inflows duplication for plants installed in the same node `PR #1120 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1120>`
+
 * Add a function to calculate length-based efficiencies and apply it to the H2 pipelines. `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 **Minor Changes and bug-fixing**
+
+* Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
+
+* Fix overlapping bus regions when alternative clustering is selected `PR #1287 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1287>`__
 
 * Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
