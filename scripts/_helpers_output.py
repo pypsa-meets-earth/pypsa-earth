@@ -65,23 +65,23 @@ b {
   color: #0000ff;
   background-color: grey;
 }
-coral_bg {
+blue_bg {
   color: #36454F;
   background-color: #A7C8FF;
 }
-gold_bg {
+mint_bg {
   color: #36454F;
   background-color: #B7E5D5;
 }
-sage_bg {
+coral_bg {
   color: #36454F;
   background-color: #FF9E9E;
 }
-blue_bg {
+lavend_bg {
   color: #36454F;
   background-color: #D8ADEF;
 }
-blue_bg {
+gold_bg {
   color: #36454F;
   background-color: #F9C6A1;
 }
@@ -96,7 +96,7 @@ def write_dict_key(dict, fl_name="out.html", style=style):
 
     # define styles to be used in htmls generated below
     coral_bg = "coral_bg"
-    sage_bg = "sage_bg"
+    mint_bg = "mint_bg"
     blue_bg = "blue_bg"
 
     f = open(fl_name, "w")
@@ -110,8 +110,8 @@ def write_dict_key(dict, fl_name="out.html", style=style):
         type=coral_bg,
         str_="------------------------------------------ <br />",
     )
-    write_html(style=style, fl=f, type=sage_bg, str_=yaml.dump(dict))
-    write_html(style=style, fl=f, type=sage_bg, str_="<br />")
+    write_html(style=style, fl=f, type=mint_bg, str_=yaml.dump(dict))
+    write_html(style=style, fl=f, type=mint_bg, str_="<br />")
     write_html(
         style=style,
         fl=f,
