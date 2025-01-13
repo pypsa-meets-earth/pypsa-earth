@@ -21,7 +21,7 @@ countries: ["NG", "BJ"]
 electricity:
   extendable_carriers:
     Store: []
-    Link: []
+    Link: [H2 pipeline]
 
   co2limit: 7.75e7
 
