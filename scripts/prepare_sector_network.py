@@ -1022,23 +1022,23 @@ def add_aviation(n, cost):
     airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
-    gadm_level = options["gadm_level"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
 
-    airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
+    airports["gadm_{}".format(gadm_layer_id)] = airports[["x", "y", "country"]].apply(
         lambda airport: locate_bus(
             airport[["x", "y"]],
             airport["country"],
-            gadm_level,
+            gadm_layer_id,
             snakemake.input.shapes_path,
             snakemake.config["cluster_options"]["alternative_clustering"],
         ),
         axis=1,
     )
     # To change 3 country code to 2
-    # airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
+    # airports["gadm_{}".format(gadm_layer_id)] = airports["gadm_{}".format(gadm_layer_id)].apply(
     # lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
 
-    airports = airports.set_index("gadm_{}".format(gadm_level))
+    airports = airports.set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
@@ -1290,7 +1290,7 @@ def add_shipping(n, costs):
     ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
-    gadm_level = options["gadm_level"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
@@ -1307,18 +1307,18 @@ def add_shipping(n, costs):
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
+    ports["gadm_{}".format(gadm_layer_id)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(
             port[["x", "y"]],
             port["country"],
-            gadm_level,
+            gadm_layer_id,
             snakemake.input["shapes_path"],
             snakemake.config["cluster_options"]["alternative_clustering"],
         ),
         axis=1,
     )
 
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    ports = ports.set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
