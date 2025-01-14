@@ -1284,7 +1284,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 def locate_bus(
     coords,
     co,
-    gadm_level,
+    gadm_layer_id,
     path_to_gadm=None,
     gadm_clustering=False,
     col="name",
@@ -1316,8 +1316,8 @@ def locate_bus(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf = get_GADM_layer(co, gadm_level)
-            col = "GID_{}".format(gadm_level)
+            gdf = get_GADM_layer(co, gadm_layer_id)
+            col = "GID_{}".format(gadm_layer_id)
 
         # gdf.set_index("GADM_ID", inplace=True)
     gdf_co = gdf[

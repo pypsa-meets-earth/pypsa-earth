@@ -43,7 +43,6 @@ existing_capacities:
 
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
-  gadm_level: 2
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
