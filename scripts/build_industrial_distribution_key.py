@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 gpd_version = StrictVersion(gpd.__version__)
 
 
-def map_industry_to_buses(df, countries, gadm_level, shapes_path, gadm_clustering):
+def map_industry_to_buses(df, countries, gadm_layer_id, shapes_path, gadm_clustering):
     """
     Load hotmaps database of industrial sites and map onto bus regions. Build
     industrial demand... Change name and add other functions.
@@ -31,18 +31,18 @@ def map_industry_to_buses(df, countries, gadm_level, shapes_path, gadm_clusterin
     Change hotmaps to more descriptive name, etc.
     """
     df = df[df.country.isin(countries)]
-    df["gadm_{}".format(gadm_level)] = df[["x", "y", "country"]].apply(
+    df["gadm_{}".format(gadm_layer_id)] = df[["x", "y", "country"]].apply(
         lambda site: locate_bus(
             site[["x", "y"]].astype("float"),
             site["country"],
-            gadm_level,
+            gadm_layer_id,
             shapes_path,
             gadm_clustering,
         ),
         axis=1,
     )
 
-    return df.set_index("gadm_" + str(gadm_level))
+    return df.set_index("gadm_" + str(gadm_layer_id))
 
 
 def build_nodal_distribution_key(
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     regions = gpd.read_file(snakemake.input.regions_onshore)
     shapes_path = snakemake.input.shapes_path
 
-    gadm_level = snakemake.params.gadm_level
+    gadm_layer_id = snakemake.params.gadm_layer_id
     countries = snakemake.params.countries
     gadm_clustering = snakemake.params.alternative_clustering
 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     industrial_database = map_industry_to_buses(
         geo_locs[geo_locs.quality != "unavailable"],
         countries,
-        gadm_level,
+        gadm_layer_id,
         shapes_path,
         gadm_clustering,
     )
