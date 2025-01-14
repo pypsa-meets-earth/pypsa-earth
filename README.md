@@ -69,7 +69,6 @@ There are multiple ways to get involved and learn more about our work:
         - Western-Hemisphere friendly *Evening meeting* every [Thursday 16:00 (UK time)](https://drive.google.com/file/d/1gaLmyV4qGPXsogkeRcAPWjC0ESebUxU-/view?usp=share_link). Every forth Thursday is replaced by the General initiative meeting which has a more high-level perspective, but you can also join to discuss more particular questions.
 3. **Look at public materials** at [**google Drive**](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing) to share to minutes, presentations, lists and documents. Feel gree to get a look!
 4. **Notify your interest** to on-demand meetings:
-    - Buddy talk: you can [book](https://calendly.com/max-parzen/pypsa-meets-earth-exchange-30min) a 30min meeting with [Max](https://www.linkedin.com/in/maximilian-parzen-b047a1126/) to discuss anything you like.
     - On-demand meetings
         - Demand creation and prediction meeting
         - AI asset detection meeting
