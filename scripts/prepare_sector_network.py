@@ -184,6 +184,55 @@ def H2_liquid_fossil_conversions(n, costs):
     )
 
 
+def add_with_water_network(n, costs):
+    """
+    Add water network for hydrogen production via electrolysis.
+    """
+    logger.info("Adding water")
+
+    n.add(
+        "Carrier", "H2O"
+    )  # TODO: water is not a carrier, not a bus and also not any of the other pypsa components ?
+    n.madd(
+        "Bus",
+        spatial.nodes + " H2O",
+        location=spatial.nodes,
+        carrier="H2O",
+        x=n.buses.loc[list(spatial.nodes)].x.values,
+        y=n.buses.loc[list(spatial.nodes)].y.values,
+    )
+    if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
+        n.madd(
+            "Link",
+            nodes + " H2 Electrolysis",
+            bus0=nodes,
+            bus1=nodes + " grid H2",
+            bus2=nodes + " H2O",
+            p_nom_extendable=True,
+            carrier="H2 Electrolysis",
+            efficiency=costs.at["electrolysis", "efficiency"],
+            efficiency2=snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
+            / 33,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % TODO: integrate ratio_water_elec in technology data
+            capital_cost=costs.at["electrolysis", "fixed"],
+            lifetime=costs.at["electrolysis", "lifetime"],
+        )
+    else:
+        n.madd(
+            "Link",
+            nodes + " H2 Electrolysis",
+            bus0=nodes,
+            bus1=nodes + " H2",
+            bus2=nodes + " H2O",
+            p_nom_extendable=True,
+            carrier="H2 Electrolysis",
+            efficiency=costs.at["electrolysis", "efficiency"],
+            efficiency2=snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
+            / 33,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % TODO: integrate ratio_water_elec in technology data
+            capital_cost=costs.at["electrolysis", "fixed"],
+            lifetime=costs.at["electrolysis", "lifetime"],
+        )
+
+
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
     logger.info("Adding hydrogen")
@@ -208,20 +257,8 @@ def add_hydrogen(n, costs):
             x=n.buses.loc[list(nodes)].x.values,
             y=n.buses.loc[list(nodes)].y.values,
         )
-        if snakemake.config["sector"]["hydrogen"]["water_network"]: #TODO: Adjust bus2 and efficiency2 as needed
-            n.madd(
-                "Link",
-                nodes + " H2 Electrolysis",
-                bus0=nodes,
-                bus1=nodes + " grid H2",
-                bus2=nodes + " H2O",
-                p_nom_extendable=True,
-                carrier="H2 Electrolysis",
-                efficiency=costs.at["electrolysis", "efficiency"],
-                efficiency2=costs.at["desalination", "efficiency"],
-                capital_cost=costs.at["electrolysis", "fixed"],
-                lifetime=costs.at["electrolysis", "lifetime"],
-            )
+        if snakemake.config["sector"]["hydrogen"]["water_network"]:
+            add_with_water_network(n, costs)
         else:
             n.madd(
                 "Link",
@@ -234,7 +271,7 @@ def add_hydrogen(n, costs):
                 capital_cost=costs.at["electrolysis", "fixed"],
                 lifetime=costs.at["electrolysis", "lifetime"],
             )
-        
+
         n.madd(
             "Link",
             nodes + " grid H2",
@@ -247,20 +284,8 @@ def add_hydrogen(n, costs):
         )
 
     else:
-        if snakemake.config["sector"]["hydrogen"]["water_network"]: #TODO: Adjust bus2 and efficiency2 as needed
-            n.madd(
-                "Link",
-                nodes + " H2 Electrolysis",
-                bus0=nodes,
-                bus1=nodes + " H2",
-                bus2=nodes + " H2O",
-                p_nom_extendable=True,
-                carrier="H2 Electrolysis",
-                efficiency=costs.at["electrolysis", "efficiency"],
-                efficiency2=costs.at["desalination", "efficiency"],
-                capital_cost=costs.at["electrolysis", "fixed"],
-                lifetime=costs.at["electrolysis", "lifetime"],
-            )
+        if snakemake.config["sector"]["hydrogen"]["water_network"]:
+            add_with_water_network(n, costs)
         else:
             n.madd(
                 "Link",

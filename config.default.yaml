@@ -518,6 +518,7 @@ sector:
     hydrogen_colors: false
     water_network: true
     custom_water_network: false
+    ratio_water_hydrogen: 15 # liters of water per kg of hydrogen, see: https://www.sciencedirect.com/science/article/pii/S0959652621023428
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
