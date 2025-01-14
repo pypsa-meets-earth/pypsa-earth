@@ -74,7 +74,7 @@ There are multiple ways to get involved and learn more about our work:
         - Demand creation and prediction meeting
         - AI asset detection meeting
         - Outreach meeting for planning, discussing events, workshops, communication, community activities
-5. Join us and **propose you stream**.
+5. Join us and **propose your stream**.
 
 ## Installation
 
