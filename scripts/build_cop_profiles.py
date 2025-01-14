@@ -23,6 +23,40 @@ def coefficient_of_performance(delta_T, source="air"):
     else:
         raise NotImplementedError("'source' must be one of  ['air', 'soil']")
 
+def eir_air_conditioner(t_ewb, t_odw, install_type, unit_type):
+    """
+    Source: Tables 17 & 19 of Cutler et al (2023) NREL Report
+
+    EIR = 1/COP
+    t_ewb is the entering wet-bulb temperature
+    t_odw is the outdoor dry-bulb temperature
+    """
+    if unit_type == "single stage":
+        a = –0.30428
+        b =  0.11805
+        c = –0.00342
+        d = –0.00626
+        e =  0.00070
+        f = –0.00047
+    if unit_type == "two stage, low speed":
+        a = –0.42738
+        b =  0.14191
+        c = –0.00412
+        d = –0.01406
+        e =  0.00083
+        f = –0.00043
+    if unit_type == "two stage, high speed":
+        a =  0.04232
+        b =  0.07892
+        c = –0.00238
+        d = –0.00304
+        e =  0.00053
+        f = –0.00032
+
+    EIR = a + b * t_ewb + c * (t_ebw^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+
+    return EIR
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
