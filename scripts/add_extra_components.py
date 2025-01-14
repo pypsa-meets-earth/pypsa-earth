@@ -231,7 +231,7 @@ def attach_stores(n, costs, config):
         )
 
 
-def attach_hydrogen_pipelines(n, costs, config):
+def attach_hydrogen_pipelines(n, costs, config, transmission_efficiency):
     elec_opts = config["electricity"]
     ext_carriers = elec_opts["extendable_carriers"]
     as_stores = ext_carriers.get("Store", [])
@@ -274,7 +274,7 @@ def attach_hydrogen_pipelines(n, costs, config):
     lossy_bidirectional_links(n, "H2 pipeline")
 
     # set the pipelines efficiency and the electricity required by the pipeline for compression
-    set_length_based_efficiency(n, "H2 pipeline", " H2", config)
+    set_length_based_efficiency(n, "H2 pipeline", " H2", transmission_efficiency)
 
 
 if __name__ == "__main__":
@@ -288,6 +288,7 @@ if __name__ == "__main__":
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    transmission_efficiency = snakemake.params.transmission_efficiency
     config = snakemake.config
 
     costs = load_costs(
@@ -299,7 +300,7 @@ if __name__ == "__main__":
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
-    attach_hydrogen_pipelines(n, costs, config)
+    attach_hydrogen_pipelines(n, costs, config, transmission_efficiency)
 
     add_nice_carrier_names(n, config=snakemake.config)
 

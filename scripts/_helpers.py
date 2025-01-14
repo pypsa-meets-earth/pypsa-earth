@@ -1520,7 +1520,7 @@ def lossy_bidirectional_links(n, carrier):
     n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
 
 
-def set_length_based_efficiency(n, carrier, bus_suffix, config):
+def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency):
     """
     Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
     Additionally add the length based electricity demand required for compression (if applicable).
@@ -1532,12 +1532,12 @@ def set_length_based_efficiency(n, carrier, bus_suffix, config):
     """
 
     # get the links length based efficiency and required compression
-    if carrier not in config["sector"]["transmission_efficiency"]:
+    if carrier not in transmission_efficiency:
         raise KeyError(
             f"An error occurred when setting the length based efficiency for the Links of type {carrier}."
             f"The Link type {carrier} was not found in the config under config['sector']['transmission_efficiency']."
         )
-    efficiencies = config["sector"]["transmission_efficiency"][carrier]
+    efficiencies = transmission_efficiency[carrier]
     efficiency_static = efficiencies.get("efficiency_static", 1)
     efficiency_per_1000km = efficiencies.get("efficiency_per_1000km", 1)
     compression_per_1000km = efficiencies.get("compression_per_1000km", 0)

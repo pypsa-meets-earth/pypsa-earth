@@ -871,8 +871,20 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
         n.links.carrier.isin(carriers) & ~n.links.reversed & n.links.p_nom_extendable
     ].index
 
+    # function to get backward (reversed) indices corresponding to forward links
+    # this function is required to properly interact with the myopic naming scheme
+    def get_backward_i(forward_i):
+        return pd.Index(
+            [
+                re.sub(r"-(\d{4})$", r"-reversed-\1", s)
+                if re.search(r"-\d{4}$", s)
+                else s + "-reversed"
+                for s in forward_i
+            ]
+        )
+
     # get the indices of all backward links (reversed)
-    backward_i = forward_i + "-reversed"
+    backward_i = get_backward_i(forward_i)
 
     # get the p_nom optimization variables for the links using the get_var function
     links_p_nom = get_var(n, "Link", "p_nom")
