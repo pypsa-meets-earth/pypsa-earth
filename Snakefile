@@ -809,12 +809,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides=(
-                os.getcwd() + "/data/override_component_attrs"
-                if os.name == "nt"
-                else "data/override_component_attrs"
-            ),
-            # on Windows os.getcwd() is required because of the "copy-minimal" shadow directory
+            overrides="data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -881,12 +876,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides=(
-                os.getcwd() + "/data/override_component_attrs"
-                if os.name == "nt"
-                else "data/override_component_attrs"
-            ),
-            # on Windows os.getcwd() is required because of the "copy-minimal" shadow directory
+            overrides="data/override_component_attrs",
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
@@ -1630,12 +1620,7 @@ if config["foresight"] == "overnight":
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides=(
-                os.getcwd() + "/data/override_component_attrs"
-                if os.name == "nt"
-                else "data/override_component_attrs"
-            ),
-            # on Windows os.getcwd() is required because of the "copy-minimal" shadow directory
+            overrides="data/override_component_attrs",
             # network=RESDIR
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
@@ -2101,12 +2086,7 @@ if config["foresight"] == "myopic":
                 "co2_sequestration_potential", 200
             ),
         input:
-            overrides=(
-                os.getcwd() + "/data/override_component_attrs"
-                if os.name == "nt"
-                else "data/override_component_attrs"
-            ),
-            # on Windows os.getcwd() is required because of the "copy-minimal" shadow directory
+            overrides="data/override_component_attrs",
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs=CDIR + "costs_{planning_horizons}.csv",
