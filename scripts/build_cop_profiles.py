@@ -156,7 +156,7 @@ def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     return EIR
 
 
-def capft_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
+def capft_absorption_chiller_air_cool(t_chws, t_odb, unit_type):
     """
     Source: Table 74 of PNNL (2016) ANSI-ASHRAE-IES Standard Performance Rating Method
 
@@ -252,7 +252,7 @@ if __name__ == "__main__":
         )
 
         capft_abch_cooling = capft_absorption_chiller_air_cool(
-            t_ewb=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage absorption"
+            t_chws=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage absorption"
         )
 
         cop_hp_cooling.to_netcdf(snakemake.output[f"cop_hp_cooling_{source}_{area}"])
