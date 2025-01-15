@@ -1275,6 +1275,15 @@ rule build_cop_profiles:
         cop_air_urban="resources/"
         + SECDIR
         + "cops/cop_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ca_cooling_rural="resources/"
+        + SECDIR
+        + "cops/cop_ca_cooling_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_ac_cooling_urban="resources/"
+        + SECDIR
+        + "cops/capft_ac_cooling_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -1305,6 +1314,15 @@ rule prepare_heat_data:
         cop_air_total="resources/"
         + SECDIR
         + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ca_cooling_rural="resources/"
+        + SECDIR
+        + "cops/cop_ca_cooling_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_ac_cooling_urban="resources/"
+        + SECDIR
+        + "cops/capft_ac_cooling_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         solar_thermal_total="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
