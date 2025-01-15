@@ -244,10 +244,10 @@ if __name__ == "__main__":
         # TODO check if K->C transformations is needed
         outdoor_T = xr.open_dataarray(snakemake.input[f"temp_air_{area}"])
 
-        cop_hp_cooling = cop_heat_pump_cooling(
+        cop_hp_cooling = 1 / eir_heat_pump_cooling(
             t_ewb=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage"
         )
-        cop_ac_cooling = cop_air_conditioner(
+        cop_ac_cooling = 1 / eir_air_conditioner(
             t_ewb=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage"
         )
 
