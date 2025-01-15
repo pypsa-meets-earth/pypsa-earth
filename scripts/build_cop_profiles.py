@@ -221,7 +221,9 @@ if __name__ == "__main__":
             clusters=4,
         )
 
+    # heating performance
     for area in ["total", "urban", "rural"]:
+        # assuming that the heat source for heat pumps is outdoor air or soil
         for source in ["air", "soil"]:
             source_T = xr.open_dataarray(snakemake.input[f"temp_{source}_{area}"])
 
