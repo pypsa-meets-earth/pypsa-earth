@@ -31,7 +31,7 @@ def eir_air_conditioner(t_ewb, t_odb, unit_type):
 
     EIR = 1/COP
     t_ewb is the entering wet-bulb temperature
-    t_odw is the outdoor dry-bulb temperature
+    t_odb is the outdoor dry-bulb temperature
     """
     if unit_type == "single stage":
         a = –0.30428
@@ -55,17 +55,17 @@ def eir_air_conditioner(t_ewb, t_odb, unit_type):
         e =  0.00053
         f = –0.00032
 
-    EIR = a + b * t_ewb + c * (t_ebw^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+    EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
 
     return EIR
 
-def eir_heat_pump_cooling(t_ewb, t_odw, unit_type):
+def eir_heat_pump_cooling(t_ewb, t_odb, unit_type):
     """
     Source: Tables 17 & 19 of Cutler et al (2023) NREL Report
 
     EIR = 1/COP
     t_ewb is the entering wet-bulb temperature
-    t_odw is the outdoor dry-bulb temperature
+    t_odb is the outdoor dry-bulb temperature
     """
     if unit_type == "single stage":
         a = –0.350448
@@ -89,17 +89,17 @@ def eir_heat_pump_cooling(t_ewb, t_odw, unit_type):
         e = 0.000430 
         f = –0.001097
 
-    EIR = a + b * t_ewb + c * (t_ebw^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+    EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
 
     return EIR
 
-def eir_heat_pump_heating(t_ewb, t_odw, unit_type):
+def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     """
     Source: Tables 17 & 19 of Cutler et al (2023) NREL Report
 
     EIR = 1/COP
     t_ewb is the entering wet-bulb temperature
-    t_odw is the outdoor dry-bulb temperature
+    t_odb is the outdoor dry-bulb temperature
     """
     if unit_type == "single stage":
         a = 0.704658 
@@ -123,7 +123,7 @@ def eir_heat_pump_heating(t_ewb, t_odw, unit_type):
         e = 0.001083
         f = –0.001487
 
-    EIR = a + b * t_ewb + c * (t_ebw^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+    EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
 
     return EIR    
 
