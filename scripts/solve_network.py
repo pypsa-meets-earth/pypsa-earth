@@ -920,6 +920,62 @@ def add_existing(n):
             n.generators.loc[tech_index, tech] = existing_res
 
 
+def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> None:
+    """
+    Ensures that the two links simulating a bidirectional_link are extended the same amount.
+    """
+
+    if not n.links.p_nom_extendable.any() or "reversed" not in n.links.columns:
+        return
+
+    # ensure that the 'reversed' column is boolean and identify all link carriers that have 'reversed' links
+    n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
+    carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
+
+    # get the indices of all forward links (non-reversed), that have a reversed counterpart
+    forward_i = n.links.loc[
+        n.links.carrier.isin(carriers) & ~n.links.reversed & n.links.p_nom_extendable
+    ].index
+
+    # function to get backward (reversed) indices corresponding to forward links
+    # this function is required to properly interact with the myopic naming scheme
+    def get_backward_i(forward_i):
+        return pd.Index(
+            [
+                (
+                    re.sub(r"-(\d{4})$", r"-reversed-\1", s)
+                    if re.search(r"-\d{4}$", s)
+                    else s + "-reversed"
+                )
+                for s in forward_i
+            ]
+        )
+
+    # get the indices of all backward links (reversed)
+    backward_i = get_backward_i(forward_i)
+
+    # get the p_nom optimization variables for the links using the get_var function
+    links_p_nom = get_var(n, "Link", "p_nom")
+
+    # only consider forward and backward links that are present in the optimization variables
+    subset_forward = forward_i.intersection(links_p_nom.index)
+    subset_backward = backward_i.intersection(links_p_nom.index)
+
+    # ensure we have a matching number of forward and backward links
+    if len(subset_forward) != len(subset_backward):
+        raise ValueError("Mismatch between forward and backward links.")
+
+    # define the lefthand side of the constrain p_nom (forward) - p_nom (backward) = 0
+    # this ensures that the forward links always have the same maximum nominal power as their backward counterpart
+    lhs = linexpr(
+        (1, get_var(n, "Link", "p_nom")[backward_i].to_numpy()),
+        (-1, get_var(n, "Link", "p_nom")[forward_i].to_numpy()),
+    )
+
+    # add the constraint to the PySPA model
+    define_constraints(n, lhs, "=", 0, "Link-bidirectional_sync")
+
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -948,6 +1004,7 @@ def extra_functionality(n, snapshots):
             add_EQ_constraints(n, o)
 
     add_battery_constraints(n)
+    add_lossy_bidirectional_link_constraints(n)
 
     if snakemake.config["sector"]["chp"]:
         logger.info("setting CHP constraints")
@@ -1059,11 +1116,8 @@ if __name__ == "__main__":
 
     is_sector_coupled = "sopts" in snakemake.wildcards.keys()
 
-    if is_sector_coupled:
-        overrides = override_component_attrs(snakemake.input.overrides)
-        n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    else:
-        n = pypsa.Network(snakemake.input.network)
+    overrides = override_component_attrs(snakemake.input.overrides)
+    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
 
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (

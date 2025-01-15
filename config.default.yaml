@@ -603,6 +603,9 @@ sector:
   transmission_efficiency:
     electricity distribution grid:
       efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+    H2 pipeline:
+      efficiency_per_1000km: 1
+      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
   dynamic_transport:
     enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
@@ -693,7 +696,6 @@ sector:
     lignite: lignite
     biomass: biomass
   keep_existing_capacities: true
-
 
 solving:
   options:

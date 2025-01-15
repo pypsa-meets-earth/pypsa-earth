@@ -17,6 +17,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * In alternative clustering, generate hydro inflows by shape and avoid hydro inflows duplication for plants installed in the same node `PR #1120 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1120>`
 
+* Add a function to calculate length-based efficiencies and apply it to the H2 pipelines. `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
+
 * Support of Linopy for Power and Sector-Coupled Modelling and latest PyPSA version `PR #1172 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1172>`__
 
 * Update workflow to geopandas >= 1.0 `PR #1276 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1276>`__
@@ -28,6 +30,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix overlapping bus regions when alternative clustering is selected `PR #1287 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1287>`__
 
 * Fix readthedocs by explicitly specifying the location of the Sphinx config `PR #1292 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1292>`__
+
+* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
+
+* Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__
 
 PyPSA-Earth 0.6.0
 =================
