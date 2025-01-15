@@ -125,7 +125,43 @@ def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
 
     EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
 
-    return EIR    
+    return EIR
+
+def cap_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
+    """
+    Source: Table 74 of PNNL (2016) ANSI-ASHRAE-IES Standard Performance Rating Method
+
+    EIR = 1/COP
+    t_chws is the chilled water supply temperature
+    t_odb is the outdoor air dry-bulb temperature (or condenser water supply temperature)
+    """
+    if unit_type == "single stage absorption":
+        a = 0.723412 
+        b = 0.079006 
+        c = -0.000897
+        d = -0.025285
+        e = -0.000048
+        f = 0.000276 
+    if unit_type == "double stage absorption":
+        a = -0.816039
+        b = -0.038707
+        c = 0.000450 
+        d = 0.071491 
+        e = -0.000636
+        f = 0.000312 
+    if unit_type == "engine driven chiller":
+        a = 0.573597
+        b = 0.0186802
+        c = 0.000000
+        d = -0.00465325
+        e = 0.000000
+        f = 0.000000
+
+    CAP_ft = (
+        a + b * t_chws + c * (t_chws^2) + d * t_odb + e * (t_odb^2) + f * t_chws * t_odb
+    )
+
+    return EIR      
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
