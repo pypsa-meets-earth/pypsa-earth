@@ -1,5 +1,4 @@
-# Source: https://raw.githubusercontent.com/renewables-ninja/demand-ninja/refs/heads/main/demand_ninja/diurnal_profiles.csv
-,cooling space, cooling water
+,cooling space,cooling water
 0,0.891535713,1.0
 1,0.798235095,1.0
 2,0.722202491,1.0
