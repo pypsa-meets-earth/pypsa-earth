@@ -23,7 +23,9 @@ def coefficient_of_performance(delta_T, source="air"):
     else:
         raise NotImplementedError("'source' must be one of  ['air', 'soil']")
 
-def eir_air_conditioner(t_ewb, t_odw, unit_type):
+# TODO Translate wet-bulb temperature into the relative humidity        
+
+def eir_air_conditioner(t_ewb, t_odb, unit_type):
     """
     Source: Tables 17 & 19 of Cutler et al (2023) NREL Report
 
