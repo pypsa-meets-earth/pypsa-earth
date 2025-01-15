@@ -45,8 +45,7 @@ def prepare_heat_data(n):
         xr.open_dataarray(snakemake.input.cop_soil_total)
         .to_pandas()
         .reindex(index=n.snapshots)
-    )
-
+    )   
     solar_thermal = (
         xr.open_dataarray(snakemake.input.solar_thermal_total)
         .to_pandas()
@@ -68,42 +67,76 @@ def prepare_heat_data(n):
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
+    # heating/cooling demand profiles
     # copy forward the daily average heat demand into each hour, so it can be multiplied by the intraday profile
     daily_space_heat_demand = (
         xr.open_dataarray(snakemake.input.heat_demand_total)
         .to_pandas()
         .reindex(index=n.snapshots, method="ffill")
     )
+    daily_space_cooling_demand = (
+        xr.open_dataarray(snakemake.input.heat_cooling_total)
+        .to_pandas()
+        .reindex(index=n.snapshots, method="ffill")
+    )
 
-    intraday_profiles = pd.read_csv(
+    intraday_profiles_heating = pd.read_csv(
         snakemake.input.heat_profile, index_col=0
     )  # TODO GHALAT
+    intraday_profiles_cooling = pd.read_csv(
+        snakemake.input.cooling_profile, index_col=0
+    )  # TODO GHALAT
 
-    sectors = ["residential", "services"]
+    # sectors = ["residential", "services"]
+    loads = ["heating", "cooling"]
     uses = ["water", "space"]
 
     heat_demand = {}
+    cooling_demand = {}
     electric_heat_supply = {}
-    for sector, use in product(sectors, uses):
-        weekday = list(intraday_profiles[f"{sector} {use} weekday"])
-        weekend = list(intraday_profiles[f"{sector} {use} weekend"])
-        weekly_profile = weekday * 5 + weekend * 2
-        intraday_year_profile = generate_periodic_profiles(
+    # for sector, use in product(sectors, uses):
+    #     weekday = list(intraday_profiles[f"{sector} {use} weekday"])
+    #     weekend = list(intraday_profiles[f"{sector} {use} weekend"])
+    #     weekly_profile = weekday * 5 + weekend * 2
+    for use in uses:
+        day_heating = list(intraday_profiles_heating[f"heating {use}"])
+        weekly_profile_heating = day * 7
+        intraday_year_profile_heating = generate_periodic_profiles(
             daily_space_heat_demand.index.tz_localize("UTC"),
             nodes=daily_space_heat_demand.columns,
-            weekly_profile=weekly_profile,
+            weekly_profile=weekly_profile_heating,
+        )
+
+        day_cooling = list(intraday_profiles[f"cooling {use}"])
+        weekly_profile_cooling = day * 7
+        intraday_year_profile_cooling = generate_periodic_profiles(
+            daily_space_heat_demand.index.tz_localize("UTC"),
+            nodes=daily_space_cooling_demand.columns,
+            weekly_profile=weekly_profile_cooling,
         )
 
         if use == "space":
-            heat_demand_shape = daily_space_heat_demand * intraday_year_profile
+            heating_demand_shape = (
+                daily_space_heat_demand * intraday_year_profile_heating
+            )
+            cooling_demand_shape = (
+                daily_space_cooling_demand * intraday_year_profile_cooling
+            )
         else:
-            heat_demand_shape = intraday_year_profile
+            heating_demand_shape = intraday_year_profile_heating
+            cooling_demand_shape = intraday_year_profile_cooling
 
-        heat_demand[f"{sector} {use}"] = (
-            heat_demand_shape / heat_demand_shape.sum()
+        heat_demand[f"{use}"] = (
+            heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
-            nodal_energy_totals[f"total {sector} {use}"]
+            nodal_energy_totals[f"total {use}"]
         ) * 1e6  # TODO v0.0.2
+        cooling_demand[f"{use}"] = (
+            cooling_demand_shape / cooling_demand_shape.sum()
+        ).multiply(
+            nodal_energy_totals[f"total {use}"]
+        ) * 1e6  # TODO v0.0.2
+
         electric_heat_supply[f"{sector} {use}"] = (
             heat_demand_shape / heat_demand_shape.sum()
         ).multiply(
@@ -111,6 +144,7 @@ def prepare_heat_data(n):
         ) * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
+    cooling_demand = pd.concat(cooling_demand, axis=1)
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
 
     # subtract from electricity load since heat demand already in heat_demand #TODO v0.1
@@ -123,6 +157,7 @@ def prepare_heat_data(n):
     return (
         nodal_energy_totals,
         heat_demand,
+        cooling_demand,
         ashp_cop,
         gshp_cop,
         solar_thermal,
@@ -162,6 +197,7 @@ if __name__ == "__main__":
     (
         nodal_energy_totals,
         heat_demand,
+        cooling_demand,
         ashp_cop,
         gshp_cop,
         solar_thermal,
@@ -171,6 +207,8 @@ if __name__ == "__main__":
     # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
     heat_demand.to_csv(snakemake.output.heat_demand)
+    cooling_demand.to_csv(snakemake.output.cooling_demand)
+
     ashp_cop.to_csv(snakemake.output.ashp_cop)
     gshp_cop.to_csv(snakemake.output.gshp_cop)
     solar_thermal.to_csv(snakemake.output.solar_thermal)
