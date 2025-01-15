@@ -153,7 +153,7 @@ def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     return EIR
 
 
-def cap_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
+def capft_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
     """
     Source: Table 74 of PNNL (2016) ANSI-ASHRAE-IES Standard Performance Rating Method
 
@@ -192,7 +192,7 @@ def cap_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
         + f * t_chws * t_odb
     )
 
-    return EIR
+    return CAP_ft
 
 
 if __name__ == "__main__":
