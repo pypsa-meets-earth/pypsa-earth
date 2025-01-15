@@ -94,7 +94,7 @@ def prepare_heat_data(n):
         .reindex(index=n.snapshots, method="ffill")
     )
     daily_space_cooling_demand = (
-        xr.open_dataarray(snakemake.input.heat_cooling_total)
+        xr.open_dataarray(snakemake.input.cooling_demand_total)
         .to_pandas()
         .reindex(index=n.snapshots, method="ffill")
     )
@@ -119,15 +119,15 @@ def prepare_heat_data(n):
     #     weekly_profile = weekday * 5 + weekend * 2
     for use in uses:
         day_heating = list(intraday_profiles_heating[f"heating {use}"])
-        weekly_profile_heating = day * 7
+        weekly_profile_heating = day_heating * 7
         intraday_year_profile_heating = generate_periodic_profiles(
             daily_space_heat_demand.index.tz_localize("UTC"),
             nodes=daily_space_heat_demand.columns,
             weekly_profile=weekly_profile_heating,
         )
 
-        day_cooling = list(intraday_profiles[f"cooling {use}"])
-        weekly_profile_cooling = day * 7
+        day_cooling = list(intraday_profiles_cooling[f"cooling {use}"])
+        weekly_profile_cooling = day_cooling * 7
         intraday_year_profile_cooling = generate_periodic_profiles(
             daily_space_heat_demand.index.tz_localize("UTC"),
             nodes=daily_space_cooling_demand.columns,
@@ -238,8 +238,8 @@ if __name__ == "__main__":
     gshp_cop.to_csv(snakemake.output.gshp_cop)
     solar_thermal.to_csv(snakemake.output.solar_thermal)
 
-    hp_cooling_total_cop.to_csv(snakemake.output.hp_cooling_total_cop)
-    ac_cooling_total_cop.to_csv(snakemake.output.ac_cooling_total_cop)
-    apft_abch_cooling_total_cop.to_csv(snakemake.output.apft_abch_cooling_total_cop)
+    hp_cooling_total_cop.to_csv(snakemake.output.cop_hp_cooling_total)
+    ac_cooling_total_cop.to_csv(snakemake.output.cop_ac_cooling_total)
+    apft_abch_cooling_total_cop.to_csv(snakemake.output.capft_abch_cooling_total)
 
     district_heat_share.to_csv(snakemake.output.district_heat_share)
