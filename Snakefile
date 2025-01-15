@@ -1278,10 +1278,10 @@ rule build_cop_profiles:
         cop_hp_cooling_total="resources/"
         + SECDIR
         + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        cop_ca_cooling_rural="resources/"
+        cop_ca_cooling_total="resources/"
         + SECDIR
         + "cops/cop_ca_cooling_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        capft_ac_cooling_urban="resources/"
+        capft_ac_cooling_total="resources/"
         + SECDIR
         + "cops/capft_ac_cooling_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
@@ -1314,25 +1314,27 @@ rule prepare_heat_data:
         cop_air_total="resources/"
         + SECDIR
         + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        cop_hp_cooling_total="resources/"
-        + SECDIR
-        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        cop_ca_cooling_rural="resources/"
-        + SECDIR
-        + "cops/cop_ca_cooling_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        capft_ac_cooling_urban="resources/"
-        + SECDIR
-        + "cops/capft_ac_cooling_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         solar_thermal_total="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_ac_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "cops/capft_abch_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        heat_profile="data/heat_load_profile_BDEW.csv",
+        cooling_demand_total="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         # heat_profile="data/heat_load_profile_BDEW.csv",
         heat_profile="data/heating_load_profile_staffel.csv",
-        cooling_profile="data/cooling_load_profile_staffel.csv",        
+        cooling_profile="data/cooling_load_profile_staffel.csv",
     output:
         nodal_energy_totals="resources/"
         + SECDIR
