@@ -195,6 +195,18 @@ def capft_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
     return CAP_ft
 
 
+def cop_air_conditioner(t_ewb, t_odb, unit_type):
+    1 / eir_air_conditioner(t_ewb, t_odb, unit_type)
+
+
+def cop_heat_pump_heating(t_ewb, t_odb, unit_type):
+    return 1 / eir_heat_pump_heating(t_ewb, t_odb, unit_type)
+
+
+def cop_heat_pump_cooling(t_ewb, t_odb, unit_type):
+    1 / eir_heat_pump_cooling(t_ewb, t_odb, unit_type)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
