@@ -1342,12 +1342,24 @@ rule prepare_heat_data:
         heat_demand="resources/"
         + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cooling_demand="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ashp_cop="resources/"
         + SECDIR
         + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         gshp_cop="resources/"
         + SECDIR
         + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_hp_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_ac_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/capft_abch_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         solar_thermal="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
