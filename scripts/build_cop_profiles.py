@@ -157,9 +157,10 @@ def capft_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
     """
     Source: Table 74 of PNNL (2016) ANSI-ASHRAE-IES Standard Performance Rating Method
 
-    EIR = 1/COP
-    t_chws is the chilled water supply temperature
-    t_odb is the outdoor air dry-bulb temperature (or condenser water supply temperature)
+    Share of the available cooling capacity from the rated value
+
+    t_chws [F] is the chilled water supply temperature
+    t_odb [F] is the outdoor air dry-bulb temperature (or condenser water supply temperature)
     """
     if unit_type == "single stage absorption":
         a = 0.723412
@@ -183,6 +184,9 @@ def capft_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
         e = 0.000000
         f = 0.000000
 
+    # !!!!!!!!!!!!!!!!!!!!!
+    # TODO Transform F -> C
+    # !!!!!!!!!!!!!!!!!!!!!
     CAP_ft = (
         a
         + b * t_chws
