@@ -36,6 +36,7 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
 
 
 def prepare_heat_data(n):
+    # heating
     ashp_cop = (
         xr.open_dataarray(snakemake.input.cop_air_total)
         .to_pandas()
@@ -45,7 +46,7 @@ def prepare_heat_data(n):
         xr.open_dataarray(snakemake.input.cop_soil_total)
         .to_pandas()
         .reindex(index=n.snapshots)
-    )   
+    )
     solar_thermal = (
         xr.open_dataarray(snakemake.input.solar_thermal_total)
         .to_pandas()
@@ -69,7 +70,9 @@ def prepare_heat_data(n):
         xr.open_dataarray(snakemake.input.capft_abch_cooling_total)
         .to_pandas()
         .reindex(index=n.snapshots)
-    )     
+    )
+
+    # energy balance
     energy_totals = pd.read_csv(
         snakemake.input.energy_totals_name,
         index_col=0,
@@ -79,7 +82,7 @@ def prepare_heat_data(n):
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
-    # # district heat share not weighted by population
+    # district heat share not weighted by population
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
@@ -222,7 +225,7 @@ if __name__ == "__main__":
         solar_thermal,
         hp_cooling_total_cop,
         ac_cooling_total_cop,
-        apft_abch_cooling_total_cop,        
+        apft_abch_cooling_total_cop,
         district_heat_share,
     ) = prepare_heat_data(n)
 
