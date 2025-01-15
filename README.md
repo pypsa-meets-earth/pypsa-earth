@@ -62,7 +62,7 @@ The diagram below depicts one representative clustered node for the sector-coupl
 
 There are multiple ways to get involved and learn more about our work:
 1. **Join our forum** and communication platform on [**PyPSA-meets-Earth**](https://discord.gg/AnuJBk23FU) Discord Server
-2. **Chat on Discord with us** in the following meetings:
+2. **Chat on Discord with us** in the following open meetings:
     - <ins>General initiative meeting</ins> for project news and [high-level code updates](https://docs.google.com/document/d/1r6wm2RBe0DWFngmItpFfSFHA-CnUmVcVTkIKmthdW3g/edit?usp=sharing). Held every [fourth Thursday 16-17:00 (UK time)](https://drive.google.com/file/d/1naH4WwW9drkOkOJ3PLO4fyWdkZQi5-_w/view?usp=share_link) and is a perfect place to meet the community and get a high-level update on PyPSA ecosystem relevant for PyPSA-Earth developments.
     - <ins>Weekly developers meetings</ins>
         - Eastern-Hemisphere friendly *Morning meeting* every [Thursday at 09:00 (UK time)](https://drive.google.com/file/d/1PDdmjsKhzyGRo0_YrP4wPQkn2XTNh6jA/view?usp=share_link).
