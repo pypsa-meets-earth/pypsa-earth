@@ -8,6 +8,7 @@
 import pathlib
 import shutil
 
+import pandas as pd
 import pypsa
 import pytest
 import yaml
@@ -50,3 +51,42 @@ def get_config_dict():
     with open(path_config, "r") as file:
         config_dict = yaml.safe_load(file)
     return config_dict
+
+
+@pytest.fixture(scope="function")
+def battery_network():
+    n = pypsa.Network()
+    n.set_snapshots(pd.date_range("2022-01-01", periods=24, freq="H"))
+    n.add("Bus", "bus1")
+    n.add(
+        "Link",
+        "battery discharger",
+        bus0="bus1",
+        bus1="bus1",
+        p_nom_extendable=True,
+        efficiency=0.9,
+    )
+    n.add("Link", "battery charger", bus0="bus1", bus1="bus1", p_nom_extendable=True)
+
+    # Add links
+    n.add(
+        "Link",
+        "urban central CHP electric",
+        bus0="bus0",
+        bus1="bus1",
+        p_nom_extendable=True,
+        efficiency=0.9,
+        p_nom_ratio=1.0,
+    )
+    n.add(
+        "Link",
+        "urban central CHP heat",
+        bus0="bus1",
+        bus1="bus0",
+        p_nom_extendable=True,
+        efficiency=0.9,
+    )
+
+    n.optimize.create_model()
+
+    return n
