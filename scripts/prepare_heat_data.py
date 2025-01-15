@@ -54,6 +54,22 @@ def prepare_heat_data(n):
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     solar_thermal = options["solar_cf_correction"] * solar_thermal / 1e3
 
+    # cooling
+    hp_cooling_total_cop = (
+        xr.open_dataarray(snakemake.input.cop_hp_cooling_total)
+        .to_pandas()
+        .reindex(index=n.snapshots)
+    )
+    ac_cooling_total_cop = (
+        xr.open_dataarray(snakemake.input.cop_ac_cooling_total)
+        .to_pandas()
+        .reindex(index=n.snapshots)
+    )
+    apft_abch_cooling_total_cop = (
+        xr.open_dataarray(snakemake.input.capft_abch_cooling_total)
+        .to_pandas()
+        .reindex(index=n.snapshots)
+    )     
     energy_totals = pd.read_csv(
         snakemake.input.energy_totals_name,
         index_col=0,
@@ -161,6 +177,9 @@ def prepare_heat_data(n):
         ashp_cop,
         gshp_cop,
         solar_thermal,
+        hp_cooling_total_cop,
+        ac_cooling_total_cop,
+        apft_abch_cooling_total_cop,
         district_heat_share,
     )
 
@@ -201,6 +220,9 @@ if __name__ == "__main__":
         ashp_cop,
         gshp_cop,
         solar_thermal,
+        hp_cooling_total_cop,
+        ac_cooling_total_cop,
+        apft_abch_cooling_total_cop,        
         district_heat_share,
     ) = prepare_heat_data(n)
 
@@ -212,4 +234,9 @@ if __name__ == "__main__":
     ashp_cop.to_csv(snakemake.output.ashp_cop)
     gshp_cop.to_csv(snakemake.output.gshp_cop)
     solar_thermal.to_csv(snakemake.output.solar_thermal)
+
+    hp_cooling_total_cop.to_csv(snakemake.output.hp_cooling_total_cop)
+    ac_cooling_total_cop.to_csv(snakemake.output.ac_cooling_total_cop)
+    apft_abch_cooling_total_cop.to_csv(snakemake.output.apft_abch_cooling_total_cop)
+
     district_heat_share.to_csv(snakemake.output.district_heat_share)
