@@ -117,6 +117,8 @@ def prepare_heat_data(n):
     #     weekday = list(intraday_profiles[f"{sector} {use} weekday"])
     #     weekend = list(intraday_profiles[f"{sector} {use} weekend"])
     #     weekly_profile = weekday * 5 + weekend * 2
+
+    # TODO probably no need to cool water
     for use in uses:
         day_heating = list(intraday_profiles_heating[f"heating {use}"])
         weekly_profile_heating = day_heating * 7
@@ -148,18 +150,22 @@ def prepare_heat_data(n):
         heat_demand[f"{use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
-            nodal_energy_totals[f"total {use}"]
+            nodal_energy_totals[f"total residential {use}"]
+            + nodal_energy_totals[f"total services {use}"]
         ) * 1e6  # TODO v0.0.2
         cooling_demand[f"{use}"] = (
             cooling_demand_shape / cooling_demand_shape.sum()
         ).multiply(
-            nodal_energy_totals[f"total {use}"]
+            # TODO it appears there is no cooling in UN statistics
+            # nodal_energy_totals[f"total {use}"]
+            1000
         ) * 1e6  # TODO v0.0.2
 
-        electric_heat_supply[f"{sector} {use}"] = (
-            heat_demand_shape / heat_demand_shape.sum()
+        electric_heat_supply[f"total {use}"] = (
+            heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
-            nodal_energy_totals[f"electricity {sector} {use}"]
+            nodal_energy_totals[f"electricity residential {use}"]
+            + nodal_energy_totals[f"electricity services {use}"]
         ) * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
