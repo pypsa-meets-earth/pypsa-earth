@@ -1278,12 +1278,12 @@ rule build_cop_profiles:
         cop_hp_cooling_total="resources/"
         + SECDIR
         + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        cop_ca_cooling_total="resources/"
+        cop_ac_cooling_total="resources/"
         + SECDIR
-        + "cops/cop_ca_cooling_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        capft_ac_cooling_total="resources/"
+        + "cops/cop_ac_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_abch_cooling_total="resources/"
         + SECDIR
-        + "cops/capft_ac_cooling_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        + "cops/capft_abch_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
