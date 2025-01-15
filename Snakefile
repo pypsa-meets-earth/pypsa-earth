@@ -1330,6 +1330,9 @@ rule prepare_heat_data:
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_profile="data/heat_load_profile_BDEW.csv",
+        # heat_profile="data/heat_load_profile_BDEW.csv",
+        heat_profile="data/heating_load_profile_staffel.csv",
+        cooling_profile="data/cooling_load_profile_staffel.csv",        
     output:
         nodal_energy_totals="resources/"
         + SECDIR
