@@ -63,9 +63,9 @@ def eir_air_conditioner(t_ewb, t_odb, unit_type):
     EIR = (
         a
         + b * t_ewb
-        + c * (t_ewb ^ 2)
+        + c * (t_ewb * t_ewb)
         + d * t_odb
-        + e * (t_odb ^ 2)
+        + e * (t_odb * t_odb)
         + f * t_ewb * t_odb
     )
 
@@ -105,9 +105,9 @@ def eir_heat_pump_cooling(t_ewb, t_odb, unit_type):
     EIR = (
         a
         + b * t_ewb
-        + c * (t_ewb ^ 2)
+        + c * (t_ewb * t_ewb)
         + d * t_odb
-        + e * (t_odb ^ 2)
+        + e * (t_odb * t_odb)
         + f * t_ewb * t_odb
     )
 
@@ -147,9 +147,9 @@ def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     EIR = (
         a
         + b * t_ewb
-        + c * (t_ewb ^ 2)
+        + c * (t_ewb * t_ewb)
         + d * t_odb
-        + e * (t_odb ^ 2)
+        + e * (t_odb * t_odb)
         + f * t_ewb * t_odb
     )
 
@@ -195,7 +195,7 @@ def capft_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
         + b * t_chws
         + c * (t_chws ^ 2)
         + d * t_odb
-        + e * (t_odb ^ 2)
+        + e * (t_odb * t_odb)
         + f * t_chws * t_odb
     )
 
