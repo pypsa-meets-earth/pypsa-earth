@@ -23,7 +23,9 @@ def coefficient_of_performance(delta_T, source="air"):
     else:
         raise NotImplementedError("'source' must be one of  ['air', 'soil']")
 
-# TODO Translate wet-bulb temperature into the relative humidity        
+
+# TODO Translate wet-bulb temperature into the relative humidity
+
 
 def eir_air_conditioner(t_ewb, t_odb, unit_type):
     """
@@ -34,30 +36,38 @@ def eir_air_conditioner(t_ewb, t_odb, unit_type):
     t_odb is the outdoor dry-bulb temperature
     """
     if unit_type == "single stage":
-        a = –0.30428
-        b =  0.11805
-        c = –0.00342
-        d = –0.00626
-        e =  0.00070
-        f = –0.00047
+        a = -0.30428
+        b = 0.11805
+        c = -0.00342
+        d = -0.00626
+        e = 0.00070
+        f = -0.00047
     if unit_type == "two stage, low speed":
-        a = –0.42738
-        b =  0.14191
-        c = –0.00412
-        d = –0.01406
-        e =  0.00083
-        f = –0.00043
+        a = -0.42738
+        b = 0.14191
+        c = -0.00412
+        d = -0.01406
+        e = 0.00083
+        f = -0.00043
     if unit_type == "two stage, high speed":
-        a =  0.04232
-        b =  0.07892
-        c = –0.00238
-        d = –0.00304
-        e =  0.00053
-        f = –0.00032
+        a = 0.04232
+        b = 0.07892
+        c = -0.00238
+        d = -0.00304
+        e = 0.00053
+        f = -0.00032
 
-    EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+    EIR = (
+        a
+        + b * t_ewb
+        + c * (t_ewb ^ 2)
+        + d * t_odb
+        + e * (t_odb ^ 2)
+        + f * t_ewb * t_odb
+    )
 
     return EIR
+
 
 def eir_heat_pump_cooling(t_ewb, t_odb, unit_type):
     """
@@ -68,30 +78,38 @@ def eir_heat_pump_cooling(t_ewb, t_odb, unit_type):
     t_odb is the outdoor dry-bulb temperature
     """
     if unit_type == "single stage":
-        a = –0.350448
-        b =  0.116810 
-        c = –0.003400
-        d = –0.001226
-        e =  0.000601 
-        f = –0.000467
+        a = -0.350448
+        b = 0.116810
+        c = -0.003400
+        d = -0.001226
+        e = 0.000601
+        f = -0.000467
     if unit_type == "two stage, low speed":
-        a = –0.582916
-        b = 0.158101 
-        c = –0.004398
-        d = –0.020335
-        e = 0.001080 
-        f = –0.000640
+        a = -0.582916
+        b = 0.158101
+        c = -0.004398
+        d = -0.020335
+        e = 0.001080
+        f = -0.000640
     if unit_type == "two stage, high speed":
-        a = –0.488196
-        b = 0.099162 
-        c = –0.002370
-        d = 0.019503 
-        e = 0.000430 
-        f = –0.001097
+        a = -0.488196
+        b = 0.099162
+        c = -0.002370
+        d = 0.019503
+        e = 0.000430
+        f = -0.001097
 
-    EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+    EIR = (
+        a
+        + b * t_ewb
+        + c * (t_ewb ^ 2)
+        + d * t_odb
+        + e * (t_odb ^ 2)
+        + f * t_ewb * t_odb
+    )
 
     return EIR
+
 
 def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     """
@@ -102,30 +120,38 @@ def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     t_odb is the outdoor dry-bulb temperature
     """
     if unit_type == "single stage":
-        a = 0.704658 
-        b = 0.008767 
-        c = 0.000625 
-        d = –0.009037
-        e = 0.000738 
-        f = –0.001025
+        a = 0.704658
+        b = 0.008767
+        c = 0.000625
+        d = -0.009037
+        e = 0.000738
+        f = -0.001025
     if unit_type == "two stage, low speed":
-        a = 0.551837 
-        b = 0.020380 
-        c = 0.000546 
-        d = –0.009638
-        e = 0.000785 
-        f = –0.001250
+        a = 0.551837
+        b = 0.020380
+        c = 0.000546
+        d = -0.009638
+        e = 0.000785
+        f = -0.001250
     if unit_type == "two stage, high speed":
         a = 0.815840
-        b = –0.006150
+        b = -0.006150
         c = 0.001021
-        d = –0.001301
+        d = -0.001301
         e = 0.001083
-        f = –0.001487
+        f = -0.001487
 
-    EIR = a + b * t_ewb + c * (t_ewb^2) + d * t_odb + e * (t_odb^2) + f * t_ewb * t_odb
+    EIR = (
+        a
+        + b * t_ewb
+        + c * (t_ewb ^ 2)
+        + d * t_odb
+        + e * (t_odb ^ 2)
+        + f * t_ewb * t_odb
+    )
 
     return EIR
+
 
 def cap_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
     """
@@ -136,19 +162,19 @@ def cap_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
     t_odb is the outdoor air dry-bulb temperature (or condenser water supply temperature)
     """
     if unit_type == "single stage absorption":
-        a = 0.723412 
-        b = 0.079006 
+        a = 0.723412
+        b = 0.079006
         c = -0.000897
         d = -0.025285
         e = -0.000048
-        f = 0.000276 
+        f = 0.000276
     if unit_type == "double stage absorption":
         a = -0.816039
         b = -0.038707
-        c = 0.000450 
-        d = 0.071491 
+        c = 0.000450
+        d = 0.071491
         e = -0.000636
-        f = 0.000312 
+        f = 0.000312
     if unit_type == "engine driven chiller":
         a = 0.573597
         b = 0.0186802
@@ -158,10 +184,16 @@ def cap_absorption_chiller_air_cool(t_ewb, t_odb, unit_type):
         f = 0.000000
 
     CAP_ft = (
-        a + b * t_chws + c * (t_chws^2) + d * t_odb + e * (t_odb^2) + f * t_chws * t_odb
+        a
+        + b * t_chws
+        + c * (t_chws ^ 2)
+        + d * t_odb
+        + e * (t_odb ^ 2)
+        + f * t_chws * t_odb
     )
 
-    return EIR      
+    return EIR
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
