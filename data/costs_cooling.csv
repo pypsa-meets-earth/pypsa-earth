@@ -1,0 +1,17 @@
+technology,parameter,value,unit,source,further description
+air conditioner,FOM,1,%/year,
+air conditioner,VOM,1.25,EUR/MWh_th,
+air conditioner,efficiency,3,
+air conditioner,investment,500.0,EUR/kW_th,
+air conditioner,lifetime,20.0,years,
+heat pump cooling,FOM,1,%/year,
+heat pump cooling,discount rate,0.04
+heat pump cooling,efficiency,4,
+heat pump cooling,investment,1000.0,EUR/kW_th,
+heat pump cooling,lifetime,20.0,years,
+absorption chiller,FOM,1,%/year,
+absorption chiller,discount rate,0.04
+absorption chiller,efficiency,3.9,
+absorption chiller,efficiency-heat,90,years,
+absorption chiller,investment,2000.0,EUR/kW_th,
+absorption chiller,lifetime,20.0,years,
