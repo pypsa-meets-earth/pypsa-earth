@@ -237,16 +237,12 @@ def add_water_network(n, costs):
             lifetime=costs.at["electrolysis", "lifetime"],
         )
 
-    # Add water generators at each bus
-    # TODO: spatial.nodes or nodes?
-    # TODO: update efficiency2 of electrolysis from kWh to MWh.
-    # Output unit of generator is in liters.
-
     # DEVELOPMENT STAGE 1
 
     n.madd(
         "Generator",
-        spatial.nodes + " H20",
+        spatial.nodes
+        + " H20",  # Output unit of generator is in liters, this is defined by the electrolysis.
         bus=spatial.nodes + " H2O",
         carrier="H2O",
         p_nom_extendable=True,
