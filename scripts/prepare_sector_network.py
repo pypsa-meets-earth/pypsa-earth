@@ -2312,7 +2312,7 @@ def add_cooling(n, costs):
     efficiency = (
         cop["air conditioner"][c_nodes[name]]
         if options["time_dep_hp_cop"]
-        else costs.at["air conditioner", "efficiency"]
+        else cooling_costs.at["air conditioner", "efficiency"]
     )
 
     n.madd(
@@ -2323,17 +2323,17 @@ def add_cooling(n, costs):
         bus1=c_nodes[name] + f" {name} cooling",
         carrier=f"{name} air conditioner",
         efficiency=efficiency,
-        capital_cost=costs.at["air conditioner", "efficiency"]
-        * costs.at["air conditioner", "fixed"],
+        capital_cost=cooling_costs.at["air conditioner", "efficiency"]
+        * cooling_costs.at["air conditioner", "fixed"],
         p_nom_extendable=True,
-        lifetime=costs.at["air conditioner", "lifetime"],
+        lifetime=cooling_costs.at["air conditioner", "lifetime"],
     )
 
     # Add heat pumps working in a cooling mode
     efficiency = (
         cop["heat pump cooling"][c_nodes[name]]
         if options["time_dep_hp_cop"]
-        else costs.at["heat pump cooling", "efficiency"]
+        else cooling_costs.at["heat pump cooling", "efficiency"]
     )
 
     n.madd(
@@ -2344,17 +2344,17 @@ def add_cooling(n, costs):
         bus1=c_nodes[name] + f" {name} cooling",
         carrier=f"{name} heat pump cooling",
         efficiency=efficiency,
-        capital_cost=costs.at["heat pump cooling", "efficiency"]
-        * costs.at["heat pump cooling", "fixed"],
+        capital_cost=cooling_costs.at["heat pump cooling", "efficiency"]
+        * cooling_costs.at["heat pump cooling", "fixed"],
         p_nom_extendable=True,
-        lifetime=costs.at["heat pump cooling", "lifetime"],
+        lifetime=cooling_costs.at["heat pump cooling", "lifetime"],
     )
 
     # Add absorption chillers
     efficiency = (
         cop["absorption chiller"][c_nodes[name]]
         if options["time_dep_hp_cop"]
-        else costs.at["absorption chiller", "efficiency"]
+        else cooling_costs.at["absorption chiller", "efficiency"]
     )
 
     n.madd(
@@ -2365,12 +2365,12 @@ def add_cooling(n, costs):
         bus=c_nodes[name],
         bus2=c_nodes[name] + f" {name} cooling",
         carrier=f"{name} absorption chiller",
-        efficiency=costs.at["absorption chiller", "efficiency-heat"],
+        efficiency=cooling_costs.at["absorption chiller", "efficiency-heat"],
         efficiency2=efficiency,
-        capital_cost=costs.at["absorption chiller", "efficiency"]
-        * costs.at["absorption chiller", "fixed"],
+        capital_cost=cooling_costs.at["absorption chiller", "efficiency"]
+        * cooling_costs.at["absorption chiller", "fixed"],
         p_nom_extendable=True,
-        lifetime=costs.at["absorption chiller", "lifetime"],
+        lifetime=cooling_costs.at["absorption chiller", "lifetime"],
     )
 
 
@@ -3079,6 +3079,13 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     costs = prepare_costs(
         snakemake.input.costs,
+        snakemake.params.costs["USD2013_to_EUR2013"],
+        snakemake.params.costs["fill_values"],
+        Nyears,
+    )
+    # TODO Replace a temporary solution with a more stable one
+    cooling_costs = prepare_costs(
+        snakemake.input.cooling_costs,
         snakemake.params.costs["USD2013_to_EUR2013"],
         snakemake.params.costs["fill_values"],
         Nyears,
