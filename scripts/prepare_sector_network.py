@@ -1970,6 +1970,17 @@ def create_nodes_for_heat_sector():
     return h_nodes, dist_fraction_node, urban_fraction
 
 
+# a simplistic formulation which can be elaborated
+def create_nodes_for_cooling_sector():
+
+    # assume that all the cooling technologies are applicable both for urban and rural areas
+    # district heating is not accounted for
+    c_nodes = {}
+    c_nodes["cooling"] = pop_layout.index
+
+    return c_nodes
+
+
 def add_heat(n, costs):
     # TODO options?
     # TODO pop_layout?
