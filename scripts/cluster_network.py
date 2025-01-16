@@ -378,7 +378,7 @@ def distribute_clusters(
     )
 
 
-def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
+def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
     gdf = gpd.read_file(inputs.gadm_shapes)
 
     def locate_bus(coords, co):
@@ -394,12 +394,12 @@ def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
             ]["GADM_ID"].item()
 
     buses = n.buses
-    buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
+    buses["gadm_{}".format(gadm_layer_id)] = buses[["x", "y", "country"]].apply(
         lambda bus: locate_bus(bus[["x", "y"]], bus["country"]), axis=1
     )
 
     buses["gadm_subnetwork"] = (
-        buses["gadm_{}".format(gadm_level)] + "_" + buses["carrier"].astype(str)
+        buses["gadm_{}".format(gadm_layer_id)] + "_" + buses["carrier"].astype(str)
     )
     busmap = buses["gadm_subnetwork"]
 

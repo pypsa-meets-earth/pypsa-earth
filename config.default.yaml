@@ -602,6 +602,9 @@ sector:
   transmission_efficiency:
     electricity distribution grid:
       efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+    H2 pipeline:
+      efficiency_per_1000km: 1
+      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
   dynamic_transport:
     enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
@@ -657,7 +660,6 @@ sector:
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
-  hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
 
@@ -672,7 +674,6 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
@@ -694,7 +695,6 @@ sector:
     lignite: lignite
     biomass: biomass
   keep_existing_capacities: true
-
 
 solving:
   options:
