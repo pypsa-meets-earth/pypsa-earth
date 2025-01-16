@@ -2798,13 +2798,13 @@ def add_industry_demand(n, demand):
     # Low temperature demand between 50C and 150C
     carrier = "low temperature heat 50-150C for industry"
 
-    n.add(
+    n.madd(
         "Bus",
         avail + " " + carrier,
         carrier=carrier
     )
 
-    n.add(
+    n.madd(
         "Load",
         avail + " " + carrier,
         bus=avail + " " + carrier,
@@ -2815,13 +2815,13 @@ def add_industry_demand(n, demand):
     # Medium temperature demand between 150C and 250C
     carrier = "medium temperature heat 150-250C for industry"
 
-    n.add(
+    n.madd(
         "Bus",
         avail + " " + carrier,
         carrier=carrier
     )
 
-    n.add(
+    n.madd(
         "Load",
         avail + " " + carrier,
         bus=avail + " " + carrier,
@@ -2831,22 +2831,39 @@ def add_industry_demand(n, demand):
 
 
 def add_egs_industry_supply(n, supply_curve):
-    print(supply_curve.dropna())
-    print(supply_curve.isna().all().all())
 
-    print(n.links.carrier.unique())
+    # annuitize capex
+    supply_curve['capex[$/MW]'] = (
+        supply_curve['capex[$/MW]'] * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
+    )
 
-    cols = ['p_nom', 'p_nom_max', 'carrier', 'efficiency', 'capital_cost']
+    for (region, cost_index), row in supply_curve.loc[
+        supply_curve['avail_capacity[MW]'] != 0.
+        ].iterrows():
 
-    print('orc')
-    print(n.links.loc[n.links.carrier == 'orc'].head()[cols])
+        full_name = {
+            'low temperature industry': 'low temperature heat 50-150C for industry',
+            'medium temperature industry': 'medium temperature heat 150-250C for industry',
+        }
 
-    print('EGS well')
-    print(n.links.loc[n.links.carrier == 'EGS well'].head()[cols])
-    raise NotImplementedError("EGS supply for industry not implemented yet")
+        for carrier in [
+            'low temperature industry',
+            'medium temperature industry',
+        ]:
 
+            n.add(
+                "Link",
+                region + ' EGS ' + carrier + ' ' + str(cost_index),
+                bus0=region + ' EGS surface',
+                bus1=region + ' ' + full_name[carrier],
+                carrier=carrier,
+                capital_cost=row['capex[$/MW]'],
+                marginal_cost=row['opex[$/MWh]'],
+                p_nom_max=row['avail_capacity[MW]'],
+                efficiency=0.9,
+                p_nom_extendable=True,
+            )
 
-    
 
 def add_industry_heating(n, costs, nodes):
 
@@ -3183,10 +3200,9 @@ def attach_enhanced_geothermal(n):
             capex * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
         )
 
-        n.madd(
+        n.add(
             "Bus",
-            nodes,
-            suffix=" EGS surface",
+            bus + " EGS surface",
             carrier="geothermal heat",
         )
 
@@ -3195,26 +3211,26 @@ def attach_enhanced_geothermal(n):
             nodes,
             suffix=" EGS well",
             bus0="EGS",
-            bus1=nodes + " EGS surface",
+            bus1=bus+ " EGS surface",
             p_nom_max=p_nom_max / eta,
             capital_cost=capex * eta,
             p_nom_extendable=True,
             carrier="EGS well",
         )
 
-        n.madd(
-            "StorageUnit",
-            nodes,
-            suffix=" EGS reservoir",
-            bus=nodes + " EGS surface",
-            max_hours=100,  # should be agreed on, constraint to be implemented
-        )
+        # n.madd(
+        #     "StorageUnit",
+        #     nodes,
+        #     suffix=" EGS reservoir",
+        #     bus=bus + " EGS surface",
+        #     max_hours=100,  # should be agreed on, constraint to be implemented
+        # )
 
         n.madd(
             "Link",
             nodes,
             suffix=" EGS surface",
-            bus0=nodes + " EGS surface",
+            bus0=bus + " EGS surface",
             bus1=bus,
             carrier="orc",
             efficiency=eta,
