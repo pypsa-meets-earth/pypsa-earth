@@ -193,9 +193,7 @@ def add_water_network(n, costs):
     """
     logger.info("Adding water")
 
-    n.add(
-        "Carrier", "H2O"
-    )  # TODO: water is not a carrier, not a bus and also not any of the other pypsa components ?
+    n.add("Carrier", "H2O")
     n.madd(
         "Bus",
         spatial.nodes + " H2O",
