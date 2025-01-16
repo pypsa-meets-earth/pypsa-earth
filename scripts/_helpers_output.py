@@ -84,6 +84,46 @@ lavend_bg {
 gold_bg {
   color: #36454F;
   background-color: #F9C6A1;
+
+blue_hd {
+  font-weight: bold;
+  color: #36454F;
+  background-color: #A7C8FF;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;
+}
+mint_hd {
+  font-weight: bold;
+  color: #36454F;
+  background-color: #B7E5D5;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;
+}
+coral_hd {
+  font-weight: bold;
+  color: #36454F;
+  background-color: #FF9E9E;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;
+}
+lavend_hd {
+  font-weight: bold;
+  color: #36454F;
+  background-color: #D8ADEF;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;
+}
+gold_hd {
+  font-weight: bold;
+  color: #36454F;
+  background-color: #F9C6A1;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;
 }
 </style>"""
 
@@ -92,31 +132,59 @@ def write_html(style, fl, type, str_):
     fl.write("<%(type)s>%(str)s</%(type)s>" % {"type": type, "str": str_})
 
 
-def write_dict_key(dict, fl_name="out.html", style=style):
+def write_dict_key(
+  header, dict, 
+  style_text, style_header, style_def=style,
+  fl_name="out.html"
+  ):
 
     # define styles to be used in htmls generated below
     coral_bg = "coral_bg"
     mint_bg = "mint_bg"
     blue_bg = "blue_bg"
 
-    f = open(fl_name, "w")
+    content_str = yaml.dump(dict)
+
+    clean_str = content_str.replace("\t", "     ").replace("\n", "<br />").replace("\r", "<br />")
+    # clean_str = content_str.replace("\n", ", ")#.replace("\r", "<br />")
+
+    # f = open(fl_name, "w")
+    f = open(fl_name, "a")
 
     f.write("<html>")
     f.write(style)
 
     write_html(
-        style=style,
-        fl=f,
-        type=coral_bg,
-        str_="------------------------------------------ <br />",
+      style=style_def,
+      fl=f,
+      type=style_text,
+      str_="------------------------------------------ <br />",
     )
-    write_html(style=style, fl=f, type=mint_bg, str_=yaml.dump(dict))
-    write_html(style=style, fl=f, type=mint_bg, str_="<br />")
     write_html(
-        style=style,
-        fl=f,
-        type=blue_bg,
-        str_="------------------------------------------ <br />",
+      style=style_def,
+      fl=f,
+      type=style_header,
+      str_=header + "<br />"
+    )    
+    write_html(
+      style=style_def,
+      fl=f,
+      type=style_text,
+      str_="------------------------------------------ <br />",
     )
+    write_html(
+      style=style_def,
+      fl=f,
+      type=style_text,
+      str_=clean_str
+    )
+
+    write_html(style=style_def, fl=f, type=mint_bg, str_="<br />")
+    # write_html(
+    #     style=style_def,
+    #     fl=f,
+    #     type=style_text,
+    #     str_="------------------------------------------ <br /><br />",
+    # )
 
     f.write("</html>")
