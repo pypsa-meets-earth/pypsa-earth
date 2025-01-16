@@ -2298,9 +2298,6 @@ def add_cooling(n, costs):
 
     # Add "generators" for cooling
     costs_name = f"{name_type} {heat_pump_type}-sourced heat pump"
-    # "air conditioner":
-    # "heat pump cooling":
-    # "absorption chiller":
 
     cop = {
         "air conditioner": ac_cooling_cop,
