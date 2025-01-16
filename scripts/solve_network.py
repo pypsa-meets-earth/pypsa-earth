@@ -933,9 +933,9 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
 
     # get the indices of all forward links (non-reversed), that have a reversed counterpart
-    forward_i = n.links.loc[
-        n.links.carrier.isin(carriers) & ~n.links.reversed & n.links.p_nom_extendable
-    ].index
+    forward_i = n.links.query(
+        "carrier in @carriers and ~reversed and p_nom_extendable"
+    ).index
 
     # function to get backward (reversed) indices corresponding to forward links
     # this function is required to properly interact with the myopic naming scheme
@@ -955,11 +955,11 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     backward_i = get_backward_i(forward_i)
 
     # get the p_nom optimization variables for the links using the get_var function
-    links_p_nom = get_var(n, "Link", "p_nom")
+    links_p_nom = n.model["Link-p_nom"]
 
     # only consider forward and backward links that are present in the optimization variables
-    subset_forward = forward_i.intersection(links_p_nom.index)
-    subset_backward = backward_i.intersection(links_p_nom.index)
+    subset_forward = forward_i.intersection(links_p_nom.indexes["Link-ext"])
+    subset_backward = backward_i.intersection(links_p_nom.indexes["Link-ext"])
 
     # ensure we have a matching number of forward and backward links
     if len(subset_forward) != len(subset_backward):
@@ -967,13 +967,10 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
 
     # define the lefthand side of the constrain p_nom (forward) - p_nom (backward) = 0
     # this ensures that the forward links always have the same maximum nominal power as their backward counterpart
-    lhs = linexpr(
-        (1, get_var(n, "Link", "p_nom")[backward_i].to_numpy()),
-        (-1, get_var(n, "Link", "p_nom")[forward_i].to_numpy()),
-    )
+    lhs = links_p_nom.loc[backward_i] - links_p_nom.loc[forward_i]
 
     # add the constraint to the PySPA model
-    define_constraints(n, lhs, "=", 0, "Link-bidirectional_sync")
+    n.model.add_constraints(lhs == 0, name="Link-bidirectional_sync")
 
 
 def extra_functionality(n, snapshots):
@@ -1102,11 +1099,17 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "solve_network",
+            "solve_sector_network",
             simpl="",
             clusters="4",
             ll="c1",
             opts="Co2L-4H",
+            planning_horizons="2030",
+            discountrate="0.071",
+            demand="AB",
+            sopts="144H",
+            h2export="120",
+            configfile="config.tutorial.yaml",
         )
 
     configure_logging(snakemake)
