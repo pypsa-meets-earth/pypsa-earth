@@ -12,6 +12,6 @@ heat pump cooling,lifetime,20.0,years,
 absorption chiller,FOM,1,%/year,
 absorption chiller,discount rate,0.04
 absorption chiller,efficiency,3.9,
-absorption chiller,efficiency-heat,90,years,
+absorption chiller,efficiency-heat,0.9,years,
 absorption chiller,investment,2000.0,EUR/kW_th,
 absorption chiller,lifetime,20.0,years,
