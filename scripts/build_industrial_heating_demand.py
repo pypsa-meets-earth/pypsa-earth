@@ -611,6 +611,7 @@ if __name__ == '__main__':
     logger.warning('Assumes that EGS drilling cost are added somewhere else to the model.')
     (
         pd.concat(regional_supplies)
+        .dropna()
         .to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
     )
     final_demands.to_csv(snakemake.output['industrial_heating_demands'])
