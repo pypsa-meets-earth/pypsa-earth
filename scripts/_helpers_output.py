@@ -133,10 +133,8 @@ def write_html(style, fl, type, str_):
 
 
 def write_dict_key(
-  header, dict, 
-  style_text, style_header, style_def=style,
-  fl_name="out.html"
-  ):
+    header, dict, style_text, style_header, style_def=style, fl_name="out.html"
+):
 
     # define styles to be used in htmls generated below
     coral_bg = "coral_bg"
