@@ -457,7 +457,7 @@ if __name__ == '__main__':
     
     final_demands = pd.DataFrame(
         index=regions.index,
-        columns=['demand(50-150C)[MWh]', 'demand(150-250C)[MWh]']
+        columns=['demand(50-150C)[MW]', 'demand(150-250C)[MW]']
         )
 
     for region, geometry in regions['geometry'].items():
