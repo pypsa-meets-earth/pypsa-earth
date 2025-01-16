@@ -2792,26 +2792,40 @@ def add_electricity_distribution_grid(n, costs):
 
 def add_industry_demand(n, demand):
 
-    logger.info("adding low and medium temperature industrial demand")
+    avail = spatial.nodes.intersection(demand.index)
 
     # Low temperature demand between 50C and 150C
+    carrier = "low temperature heat 50-150C for industry"
+
+    n.add(
+        "Bus",
+        avail + " " + carrier,
+        carrier=carrier
+    )
+
     n.add(
         "Load",
-        spatial.nodes,
-        suffix=" low temperature heat 50-150C for industry",
-        bus=spatial.nodes,
-        carrier="low temperature heat 50-150C for industry",
-        p_set=demand.loc[spatial.nodes, "demand(50-150C)[MW]"]
+        avail + " " + carrier,
+        bus=avail + " " + carrier,
+        carrier=carrier,
+        p_set=demand.loc[avail, "demand(50-150C)[MW]"]
     )
 
     # Medium temperature demand between 150C and 250C
+    carrier = "medium temperature heat 150-250C for industry"
+
+    n.add(
+        "Bus",
+        avail + " " + carrier,
+        carrier=carrier
+    )
+
     n.add(
         "Load",
-        spatial.nodes,
-        suffix=" medium temperature heat 150-250C for industry",
-        bus=spatial.nodes,
-        carrier="medium temperature heat 150-250C for industry",
-        p_set=demand.loc[spatial.nodes, "demand(150-250C)[MW]"]
+        avail + " " + carrier,
+        bus=avail + " " + carrier,
+        carrier=carrier,
+        p_set=demand.loc[avail, "demand(150-250C)[MW]"]
     )
 
 
@@ -2820,7 +2834,7 @@ def add_egs_industry_supply(n, supply_curve):
     raise NotImplementedError("EGS supply for industry not implemented yet")
 
 
-def add_industrial_heating(n, costs, nodes):
+def add_industry_heating(n, costs, nodes):
 
     assert isinstance(nodes, Iterable)
 
@@ -3241,6 +3255,7 @@ if __name__ == "__main__":
         snakemake.input['industrial_heating_demands'], index_col=0
     )
 
+    logger.info("Adding industrial heating demands")
     add_industry_demand(n, industry_demands)    
 
     industry_egs_supply = pd.read_csv(
@@ -3255,7 +3270,7 @@ if __name__ == "__main__":
         )
     )
 
-    add_industrial_heating(n, industry_heating_costs)
+    add_industry_heating(n, industry_heating_costs)
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
