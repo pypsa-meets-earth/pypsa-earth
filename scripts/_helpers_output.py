@@ -68,22 +68,38 @@ b {
 blue_bg {
   color: #36454F;
   background-color: #A7C8FF;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;    
 }
 mint_bg {
   color: #36454F;
   background-color: #B7E5D5;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;    
 }
 coral_bg {
   color: #36454F;
   background-color: #FF9E9E;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;  
 }
 lavend_bg {
   color: #36454F;
   background-color: #D8ADEF;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;    
 }
 gold_bg {
   color: #36454F;
   background-color: #F9C6A1;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;    
+}
 
 blue_hd {
   font-weight: bold;
