@@ -2061,8 +2061,9 @@ def add_heat(n, costs):
             p_set=heat_load,
         )
 
-        ## Add heat pumps
+        # Add "generators" for heating
 
+        ## Add heat pumps
         heat_pump_type = "air" if "urban" in name else "ground"
 
         costs_name = f"{name_type} {heat_pump_type}-sourced heat pump"
@@ -3120,7 +3121,7 @@ if __name__ == "__main__":
     # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    ).fillna(0)  
+    ).fillna(0)
     # Ground-sourced heatpump coefficient of performance
     gshp_cop = pd.read_csv(
         snakemake.input.gshp_cop, index_col=0, parse_dates=True
@@ -3147,13 +3148,19 @@ if __name__ == "__main__":
     ).fillna(0)
 
     # Heatpump coefficient of performance when in cooling mode
-    hp_cooling_cop = pd.read_csv(snakemake.input.cop_hp_cooling_total, index_col=0, parse_dates=True)
+    hp_cooling_cop = pd.read_csv(
+        snakemake.input.cop_hp_cooling_total, index_col=0, parse_dates=True
+    )
 
     # Air conditioners coefficient of performance
-    ac_cooling_cop = pd.read_csv(snakemake.input.cop_ac_cooling_total, index_col=0, parse_dates=True)
+    ac_cooling_cop = pd.read_csv(
+        snakemake.input.cop_ac_cooling_total, index_col=0, parse_dates=True
+    )
 
     # Capacity coefficient of absorption chillers
-    abch_cooling_cop = pd.read_csv(snakemake.input.capft_abch_cooling_total, index_col=0, parse_dates=True)
+    abch_cooling_cop = pd.read_csv(
+        snakemake.input.capft_abch_cooling_total, index_col=0, parse_dates=True
+    )
 
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat
