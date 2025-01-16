@@ -173,29 +173,19 @@ def write_dict_key(
     f.write(style)
 
     write_html(
-      style=style_def,
-      fl=f,
-      type=style_text,
-      str_="------------------------------------------ <br />",
+        style=style_def,
+        fl=f,
+        type=style_text,
+        str_="------------------------------------------ <br />",
     )
+    write_html(style=style_def, fl=f, type=style_header, str_=header + "<br />")
     write_html(
-      style=style_def,
-      fl=f,
-      type=style_header,
-      str_=header + "<br />"
-    )    
-    write_html(
-      style=style_def,
-      fl=f,
-      type=style_text,
-      str_="------------------------------------------ <br />",
+        style=style_def,
+        fl=f,
+        type=style_text,
+        str_="------------------------------------------ <br />",
     )
-    write_html(
-      style=style_def,
-      fl=f,
-      type=style_text,
-      str_=clean_str
-    )
+    write_html(style=style_def, fl=f, type=style_text, str_=clean_str)
 
     write_html(style=style_def, fl=f, type=mint_bg, str_="<br />")
     # write_html(
