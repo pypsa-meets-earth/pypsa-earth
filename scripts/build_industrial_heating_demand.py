@@ -532,7 +532,7 @@ if __name__ == '__main__':
         piping_cost = 1_300_000 # $/km
 
         def dummy_egs_query(cluster):
-            return 1_000_000 # $/MWth
+            return 0 # $/MWth
 
         for cluster in new_clusters:
 
@@ -608,7 +608,7 @@ if __name__ == '__main__':
 
         regional_supplies.append(regional_supply)
 
-
+    logger.warning('Assumes that EGS drilling cost are added somewhere else to the model.')
     (
         pd.concat(regional_supplies)
         .to_csv(snakemake.output['industrial_heating_egs_supply_curves'])

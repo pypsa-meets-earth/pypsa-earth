@@ -15,6 +15,7 @@ import pypsa
 import pytz
 import ruamel.yaml
 import xarray as xr
+from tqdm import tqdm
 from typing import Iterable
 from _helpers import (
     BASE_DIR,
@@ -2830,9 +2831,22 @@ def add_industry_demand(n, demand):
 
 
 def add_egs_industry_supply(n, supply_curve):
-    # logger.info("Adding EGS supply for industry")
+    print(supply_curve.dropna())
+    print(supply_curve.isna().all().all())
+
+    print(n.links.carrier.unique())
+
+    cols = ['p_nom', 'p_nom_max', 'carrier', 'efficiency', 'capital_cost']
+
+    print('orc')
+    print(n.links.loc[n.links.carrier == 'orc'].head()[cols])
+
+    print('EGS well')
+    print(n.links.loc[n.links.carrier == 'EGS well'].head()[cols])
     raise NotImplementedError("EGS supply for industry not implemented yet")
 
+
+    
 
 def add_industry_heating(n, costs, nodes):
 
@@ -3127,6 +3141,89 @@ def remove_carrier_related_components(n, carriers_to_drop):
     n.mremove("Link", links_to_remove)
 
 
+def attach_enhanced_geothermal(n):
+
+    logger.warning('Adding EGS for electricity generation in prepare_sector_network.py')
+
+    egs_potential = pd.read_csv(snakemake.input["egs_potentials"], index_col=[0, 1])
+
+    idx = pd.IndexSlice
+
+    n.add(
+        "Bus",
+        "EGS",
+        carrier="geothermal heat",
+        unit="MWh_th",
+    )
+
+    n.add(
+        "Generator",
+        "EGS",
+        bus="EGS",
+        carrier="geothermal heat",
+        p_nom_extendable=True,
+    )
+
+    eta = 0.15  # preliminary
+
+    for bus in tqdm(
+        egs_potential.index.get_level_values(0).unique(),
+        desc="Adding enhanced geothermal",
+        ):
+
+        ss = egs_potential.loc[idx[bus, :]]
+        nodes = f"{bus} " + pd.Index(range(len(ss)), dtype=str)
+
+        p_nom_max = ss["available_capacity[MW]"].values
+        capex = ss.index.values * 1000 # from $/kW to $/MW
+        opex = ss["opex[$/kWh]"].values
+
+        # annuitize capex
+        capex = (
+            capex * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
+        )
+
+        n.madd(
+            "Bus",
+            nodes,
+            suffix=" EGS surface",
+            carrier="geothermal heat",
+        )
+
+        n.madd(
+            "Link",
+            nodes,
+            suffix=" EGS well",
+            bus0="EGS",
+            bus1=nodes + " EGS surface",
+            p_nom_max=p_nom_max / eta,
+            capital_cost=capex * eta,
+            p_nom_extendable=True,
+            carrier="EGS well",
+        )
+
+        n.madd(
+            "StorageUnit",
+            nodes,
+            suffix=" EGS reservoir",
+            bus=nodes + " EGS surface",
+            max_hours=100,  # should be agreed on, constraint to be implemented
+        )
+
+        n.madd(
+            "Link",
+            nodes,
+            suffix=" EGS surface",
+            bus0=nodes + " EGS surface",
+            bus1=bus,
+            carrier="orc",
+            efficiency=eta,
+            marginal_cost=opex,
+            p_nom_extendable=True,
+        )
+
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         # from helper import mock_snakemake #TODO remove func from here to helper script
@@ -3251,18 +3348,21 @@ if __name__ == "__main__":
     ######### Functions adding EGS-US project demands and generators #########
     ##########################################################################
 
+    attach_enhanced_geothermal(n)
+
     industry_demands = pd.read_csv(
         snakemake.input['industrial_heating_demands'], index_col=0
     )
 
-    logger.info("Adding industrial heating demands")
+    logger.info("Adding industrial heating demands.")
     add_industry_demand(n, industry_demands)    
 
     industry_egs_supply = pd.read_csv(
-        snakemake.input['industrial_heating_egs_supply_curve'], index_col=[0,1]
+        snakemake.input['industrial_heating_egs_supply_curves'], index_col=[0,1]
     )
-
-    add_egs_industry_supply(n, industry_demands)
+    
+    logger.info("Adding EGS supply for industry.")
+    add_egs_industry_supply(n, industry_egs_supply)
 
     industry_heating_costs = (
         prepare_costs(

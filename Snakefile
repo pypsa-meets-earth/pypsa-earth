@@ -530,14 +530,20 @@ rule build_egs_potentials:
         egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
         egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
         egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
-        shapes="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        # shapes="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        shapes=(
+            "resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
     output:
-        egs_potentials="resources/" + RDIR + "egs_potential.csv",
+        # egs_potentials="resources/" + RDIR + "egs_potential.csv",
+        egs_potentials="resources/" + SECDIR + "egs_potential_s{simpl}_{clusters}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/build_egs_potentials/egs_potential"
+        RDIR + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}"
     script:
         "scripts/build_egs_potentials.py"
 
@@ -1213,6 +1219,11 @@ rule prepare_sector_network:
             "resources/"
             + SECDIR
             + "industrial_heating_costs.csv",
+        ),
+        egs_potentials=(
+            "resources/"
+            + SECDIR
+            + "egs_potential_s{simpl}_{clusters}.csv"
         )
     output:
         RESDIR
