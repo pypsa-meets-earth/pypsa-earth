@@ -222,7 +222,7 @@ rule build_osm_network:
     script:
         "scripts/build_osm_network.py"
 
-
+'''
 rule build_shapes:
     params:
         build_shape_options=config["build_shape_options"],
@@ -249,6 +249,7 @@ rule build_shapes:
         mem_mb=3096,
     script:
         "scripts/build_shapes.py"
+'''
 
 
 rule base_network:
@@ -821,7 +822,7 @@ rule build_industrial_heating_costs:
     input:
         costs=COSTS,
     output:
-        industry_heating_costs="resources/" + SECDIR + "industrial_heating_costs.csv",
+        industrial_heating_costs="resources/" + SECDIR + "industrial_heating_costs.csv",
     threads: 1
     log:
         "logs/" + SECDIR + "build_industrial_heating_costs.log",
@@ -1164,9 +1165,9 @@ rule prepare_sector_network:
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_demand="resources/"
-        + SECDIR
-        + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        # industrial_demand="resources/"
+        # + SECDIR
+        # + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         energy_totals="resources/"
         + SECDIR
         + "energy_totals_{demand}_{planning_horizons}.csv",

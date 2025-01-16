@@ -3229,9 +3229,9 @@ if __name__ == "__main__":
     # TODO follow the same structure as land transport and heat
 
     # Load industry demand data
-    industrial_demand = pd.read_csv(
-        snakemake.input.industrial_demand, index_col=0, header=0
-    )  # * 1e6
+    # industrial_demand = pd.read_csv(
+    # snakemake.input.industrial_demand, index_col=0, header=0
+    # )  # * 1e6
 
     ##########################################################################
     ######### Functions adding EGS-US project demands and generators #########
