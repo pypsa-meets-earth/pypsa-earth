@@ -2268,6 +2268,111 @@ def add_heat(n, costs):
             )
 
 
+def add_cooling(n, costs):
+    logger.info("adding cooling")
+
+    c_nodes = create_nodes_for_cooling_sector
+
+    # to keep the implementation generalizable name is used as a parameter
+    # in future can distinguish service/residential, central/decentral, urban/rural
+    name = "overall"
+
+    n.add("Carrier", name + " cooling")
+
+    n.madd(
+        "Bus",
+        c_nodes[name] + " {} cooling".format(name),
+        location=c_nodes[name],
+        carrier=name + " cooling",
+    )
+
+    n.madd(
+        "Load",
+        c_nodes[name],
+        suffix=f" {name} cooling",
+        bus=c_nodes[name] + f" {name} cooling",
+        carrier=name + " cooling",
+        p_set=cooling_demand,
+    )
+
+    # Add "generators" for cooling
+    costs_name = f"{name_type} {heat_pump_type}-sourced heat pump"
+    # "air conditioner":
+    # "heat pump cooling":
+    # "absorption chiller":
+
+    cop = {
+        "air conditioner": ac_cooling_cop,
+        "heat pump cooling": hp_cooling_cop,
+        "absorption chiller": abch_cooling_cop,
+    }
+
+    # Add air conditioners
+    efficiency = (
+        cop["air conditioner"][c_nodes[name]]
+        if options["time_dep_hp_cop"]
+        else costs.at["air conditioner", "efficiency"]
+    )
+
+    n.madd(
+        "Link",
+        c_nodes[name],
+        suffix=f" {name} air conditioner",
+        bus0=c_nodes[name],
+        bus1=c_nodes[name] + f" {name} cooling",
+        carrier=f"{name} air conditioner",
+        efficiency=efficiency,
+        capital_cost=costs.at["air conditioner", "efficiency"]
+        * costs.at["air conditioner", "fixed"],
+        p_nom_extendable=True,
+        lifetime=costs.at["air conditioner", "lifetime"],
+    )
+
+    # Add heat pumps working in a cooling mode
+    efficiency = (
+        cop["heat pump cooling"][c_nodes[name]]
+        if options["time_dep_hp_cop"]
+        else costs.at["heat pump cooling", "efficiency"]
+    )
+
+    n.madd(
+        "Link",
+        c_nodes[name],
+        suffix=f" {name} heat pump cooling",
+        bus0=c_nodes[name],
+        bus1=c_nodes[name] + f" {name} cooling",
+        carrier=f"{name} heat pump cooling",
+        efficiency=efficiency,
+        capital_cost=costs.at["heat pump cooling", "efficiency"]
+        * costs.at["heat pump cooling", "fixed"],
+        p_nom_extendable=True,
+        lifetime=costs.at["heat pump cooling", "lifetime"],
+    )
+
+    # Add absorption chillers
+    efficiency = (
+        cop["absorption chiller"][c_nodes[name]]
+        if options["time_dep_hp_cop"]
+        else costs.at["absorption chiller", "efficiency"]
+    )
+
+    n.madd(
+        "Link",
+        c_nodes[name],
+        suffix=f" {name} absorption chiller",
+        bus0=waste_heat_source,
+        bus=c_nodes[name],
+        bus2=c_nodes[name] + f" {name} cooling",
+        carrier=f"{name} absorption chiller",
+        efficiency=costs.at["absorption chiller", "efficiency-heat"],
+        efficiency2=efficiency,
+        capital_cost=costs.at["absorption chiller", "efficiency"]
+        * costs.at["absorption chiller", "fixed"],
+        p_nom_extendable=True,
+        lifetime=costs.at["absorption chiller", "lifetime"],
+    )
+
+
 def average_every_nhours(n, offset):
     # logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
@@ -3015,7 +3120,7 @@ if __name__ == "__main__":
     # Load data required for the heat sector
     heat_demand = pd.read_csv(
         snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    ).fillna(0)
+    ).fillna(0)  
     # Ground-sourced heatpump coefficient of performance
     gshp_cop = pd.read_csv(
         snakemake.input.gshp_cop, index_col=0, parse_dates=True
@@ -3036,6 +3141,20 @@ if __name__ == "__main__":
     # Share of district heating at each node
     district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
 
+    # Load data required for the cooling sector
+    cooling_demand = pd.read_csv(
+        snakemake.input.cooling_demand, index_col=0, header=[0, 1], parse_dates=True
+    ).fillna(0)
+
+    # Heatpump coefficient of performance when in cooling mode
+    hp_cooling_cop = pd.read_csv(snakemake.input.cop_hp_cooling_total, index_col=0, parse_dates=True)
+
+    # Air conditioners coefficient of performance
+    ac_cooling_cop = pd.read_csv(snakemake.input.cop_ac_cooling_total, index_col=0, parse_dates=True)
+
+    # Capacity coefficient of absorption chillers
+    abch_cooling_cop = pd.read_csv(snakemake.input.capft_abch_cooling_total, index_col=0, parse_dates=True)
+
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat
 
@@ -3047,6 +3166,8 @@ if __name__ == "__main__":
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
+
+    # TODO Add existing capacities of air conditioning
 
     # read existing installed capacities of generators
     if options.get("keep_existing_capacities", False):
