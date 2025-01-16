@@ -1335,6 +1335,9 @@ rule prepare_heat_data:
         # heat_profile="data/heat_load_profile_BDEW.csv",
         heat_profile="data/heating_load_profile_staffel.csv",
         cooling_profile="data/cooling_load_profile_staffel.csv",
+        # TODO revise the values which are currently very rough estimations
+        # &replace a temporary file with a more stable solution in future
+        cooling_costs="data/costs_cooling.csv",
     output:
         nodal_energy_totals="resources/"
         + SECDIR
