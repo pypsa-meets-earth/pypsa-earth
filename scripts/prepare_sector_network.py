@@ -235,6 +235,24 @@ def add_water_network(n, costs):
             lifetime=costs.at["electrolysis", "lifetime"],
         )
 
+    # Add water generators at each bus
+    # TODO: spatial.nodes or nodes?
+    # TODO: update efficiency2 of electrolysis from kWh to MWh.
+    # Output unit of generator is in liters.
+
+    n.madd(
+        "Generator",
+        spatial.nodes,
+        bus=spatial.nodes + " H2O",
+        carrier="H2O",
+        p_nom_extendable=True,
+        # capital_cost
+        # marginal_cost
+        # life
+        efficiency=1,
+        lifetime=costs.at["seawater desalination", "lifetime"],
+    )
+
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
