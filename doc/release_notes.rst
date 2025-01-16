@@ -29,7 +29,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
-* Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__
+* Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__ and  `PR #1301 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1301>`__
 
 PyPSA-Earth 0.6.0
 =================
