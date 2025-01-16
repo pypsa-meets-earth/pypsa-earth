@@ -24,7 +24,6 @@ import yaml
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
 from shapely.geometry import Point
-from vresutils.costdata import annuity
 
 logger = logging.getLogger(__name__)
 
@@ -923,6 +922,21 @@ def get_last_commit_message(path):
 
 
 # PYPSA-EARTH-SEC
+def annuity(n, r):
+    """
+    Calculate the annuity factor for an asset with lifetime n years and.
+
+    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+    """
+
+    if isinstance(r, pd.Series):
+        return pd.Series(1 / n, index=r.index).where(
+            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
+        )
+    elif r > 0:
+        return r / (1.0 - 1.0 / (1.0 + r) ** n)
+    else:
+        return 1 / n
 
 
 def prepare_costs(
@@ -1118,18 +1132,20 @@ def get_country(target, **keys):
     target: str
         Desired type of country code.
         Examples:
-            - 'alpha_3' for 3-digit
-            - 'alpha_2' for 2-digit
-            - 'name' for full country name
+        - 'alpha_3' for 3-digit
+        - 'alpha_2' for 2-digit
+        - 'name' for full country name
     keys: dict
         Specification of the country name and reference system.
         Examples:
-            - alpha_3="ZAF" for 3-digit
-            - alpha_2="ZA" for 2-digit
-            - name="South Africa" for full country name
+        - alpha_3="ZAF" for 3-digit
+        - alpha_2="ZA" for 2-digit
+        - name="South Africa" for full country name
+
     Returns
     -------
     country code as requested in keys or np.nan, when country code is not recognized
+
     Example of usage
     -------
     - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")
@@ -1257,7 +1273,7 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
 def locate_bus(
     coords,
     co,
-    gadm_level,
+    gadm_layer_id,
     path_to_gadm=None,
     gadm_clustering=False,
     col="name",
@@ -1289,8 +1305,8 @@ def locate_bus(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf = get_GADM_layer(co, gadm_level)
-            col = "GID_{}".format(gadm_level)
+            gdf = get_GADM_layer(co, gadm_layer_id)
+            col = "GID_{}".format(gadm_layer_id)
 
         # gdf.set_index("GADM_ID", inplace=True)
     gdf_co = gdf[
@@ -1467,3 +1483,91 @@ def safe_divide(numerator, denominator, default_value=np.nan):
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
         return np.nan
+
+
+def lossy_bidirectional_links(n, carrier):
+    """
+    Split bidirectional links of type carrier into two unidirectional links to include transmission losses.
+    """
+
+    # identify all links of type carrier
+    carrier_i = n.links.query("carrier == @carrier").index
+
+    if carrier_i.empty:
+        return
+
+    logger.info(f"Splitting bidirectional links with the carrier {carrier}")
+
+    # set original links to be unidirectional
+    n.links.loc[carrier_i, "p_min_pu"] = 0
+
+    # add a new links that mirror the original links, but represent the reversed flow direction
+    # the new links have a cost and length of 0 to not distort the overall cost and network length
+    rev_links = (
+        n.links.loc[carrier_i].copy().rename({"bus0": "bus1", "bus1": "bus0"}, axis=1)
+    )
+    rev_links["length_original"] = rev_links[
+        "length"
+    ]  # tracker for the length of the original links length
+    rev_links["capital_cost"] = 0
+    rev_links["length"] = 0
+    rev_links["reversed"] = True  # tracker for easy identification of reversed links
+    rev_links.index = rev_links.index.map(lambda x: x + "-reversed")
+
+    # add the new reversed links to the network and fill the newly created trackers with default values for the other links
+    n.links = pd.concat([n.links, rev_links], sort=False)
+    n.links["reversed"] = n.links["reversed"].fillna(False).infer_objects(copy=False)
+    n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
+
+
+def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency):
+    """
+    Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
+    Additionally add the length based electricity demand required for compression (if applicable).
+    The bus_suffix refers to the suffix that differentiates the links bus0 from the corresponding electricity bus, i.e. " H2".
+    Important:
+    Call this function AFTER lossy_bidirectional_links when creating links that are both bidirectional and lossy,
+    and have a length based electricity demand for compression. Otherwise the compression will not consistently take place at
+    the inflow bus and instead vary between the inflow and the outflow bus.
+    """
+
+    # get the links length based efficiency and required compression
+    if carrier not in transmission_efficiency:
+        raise KeyError(
+            f"An error occurred when setting the length based efficiency for the Links of type {carrier}."
+            f"The Link type {carrier} was not found in the config under config['sector']['transmission_efficiency']."
+        )
+    efficiencies = transmission_efficiency[carrier]
+    efficiency_static = efficiencies.get("efficiency_static", 1)
+    efficiency_per_1000km = efficiencies.get("efficiency_per_1000km", 1)
+    compression_per_1000km = efficiencies.get("compression_per_1000km", 0)
+
+    # indetify all links of type carrier
+    carrier_i = n.links.loc[n.links.carrier == carrier].index
+
+    # identify the lengths of all links of type carrier
+    # use "length_original" for lossy bidirectional links and "length" for any other link
+    if ("reversed" in n.links.columns) and any(n.links.loc[carrier_i, "reversed"]):
+        lengths = n.links.loc[carrier_i, "length_original"]
+    else:
+        lengths = n.links.loc[carrier_i, "length"]
+
+    # set the links' length based efficiency
+    n.links.loc[carrier_i, "efficiency"] = (
+        efficiency_static * efficiency_per_1000km ** (lengths / 1e3)
+    )
+
+    # set the links's electricity demand for compression
+    if compression_per_1000km > 0:
+        # connect the links to their corresponding electricity buses
+        n.links.loc[carrier_i, "bus2"] = n.links.loc[
+            carrier_i, "bus0"
+        ].str.removesuffix(bus_suffix)
+        # TODO: use these lines to set bus 2 instead, once n.buses.location is functional and remove bus_suffix.
+        """
+        n.links.loc[carrier_i, "bus2"] = n.links.loc[carrier_i, "bus0"].map(
+            n.buses.location
+        )  # electricity
+        """
+        # set the required compression demand
+        n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3

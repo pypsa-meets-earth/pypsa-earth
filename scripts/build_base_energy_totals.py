@@ -357,7 +357,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_energy_totals",
             simpl="",
-            clusters=19,
+            clusters=4,
             demand="AB",
             planning_horizons=2030,
         )

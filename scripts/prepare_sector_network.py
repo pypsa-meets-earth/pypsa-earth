@@ -170,6 +170,7 @@ def H2_liquid_fossil_conversions(n, costs):
         bus0=spatial.nodes + " H2",
         bus1=spatial.oil.nodes,
         bus2=spatial.co2.nodes,
+        bus3=spatial.nodes,
         carrier="Fischer-Tropsch",
         efficiency=costs.at["Fischer-Tropsch", "efficiency"],
         capital_cost=costs.at["Fischer-Tropsch", "fixed"]
@@ -178,6 +179,8 @@ def H2_liquid_fossil_conversions(n, costs):
         ],  # Use efficiency to convert from EUR/MW_FT/a to EUR/MW_H2/a
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
+        efficiency3=-costs.at["Fischer-Tropsch", "electricity-input"]
+        / costs.at["Fischer-Tropsch", "hydrogen-input"],
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
@@ -1075,23 +1078,23 @@ def add_aviation(n, cost):
     airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
-    gadm_level = options["gadm_level"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
 
-    airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
+    airports["gadm_{}".format(gadm_layer_id)] = airports[["x", "y", "country"]].apply(
         lambda airport: locate_bus(
             airport[["x", "y"]],
             airport["country"],
-            gadm_level,
+            gadm_layer_id,
             snakemake.input.shapes_path,
             snakemake.config["cluster_options"]["alternative_clustering"],
         ),
         axis=1,
     )
     # To change 3 country code to 2
-    # airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
+    # airports["gadm_{}".format(gadm_layer_id)] = airports["gadm_{}".format(gadm_layer_id)].apply(
     # lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
 
-    airports = airports.set_index("gadm_{}".format(gadm_level))
+    airports = airports.set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
@@ -1343,7 +1346,7 @@ def add_shipping(n, costs):
     ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
-    gadm_level = options["gadm_level"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
@@ -1360,18 +1363,18 @@ def add_shipping(n, costs):
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
+    ports["gadm_{}".format(gadm_layer_id)] = ports[["x", "y", "country"]].apply(
         lambda port: locate_bus(
             port[["x", "y"]],
             port["country"],
-            gadm_level,
+            gadm_layer_id,
             snakemake.input["shapes_path"],
             snakemake.config["cluster_options"]["alternative_clustering"],
         ),
         axis=1,
     )
 
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    ports = ports.set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
@@ -2685,6 +2688,141 @@ def add_residential(n, costs):
     )
 
 
+def add_electricity_distribution_grid(n, costs):
+    logger.info("Adding electricity distribution network")
+    nodes = pop_layout.index
+
+    n.madd(
+        "Bus",
+        nodes + " low voltage",
+        location=nodes,
+        carrier="low voltage",
+        unit="MWh_el",
+    )
+
+    n.madd(
+        "Link",
+        nodes + " electricity distribution grid",
+        bus0=nodes,
+        bus1=nodes + " low voltage",
+        p_nom_extendable=True,
+        p_min_pu=-1,
+        carrier="electricity distribution grid",
+        efficiency=1,
+        lifetime=costs.at["electricity distribution grid", "lifetime"],
+        capital_cost=costs.at["electricity distribution grid", "fixed"],
+    )
+
+    # deduct distribution losses from electricity demand as these are included in total load
+    # https://nbviewer.org/github/Open-Power-System-Data/datapackage_timeseries/blob/2020-10-06/main.ipynb
+    if (
+        efficiency := options["transmission_efficiency"]
+        .get("electricity distribution grid", {})
+        .get("efficiency_static")
+    ):
+        logger.info(
+            f"Deducting distribution losses from electricity demand: {np.around(100*(1-efficiency), decimals=2)}%"
+        )
+        n.loads_t.p_set.loc[:, n.loads.carrier == "AC"] *= efficiency
+
+    # move AC loads to low voltage buses
+    ac_loads = n.loads.index[n.loads.carrier == "AC"]
+    n.loads.loc[ac_loads, "bus"] += " low voltage"
+
+    # move industry, rail transport, agriculture and services electricity to low voltage
+    loads = n.loads.index[n.loads.carrier.str.contains("electricity")]
+    n.loads.loc[loads, "bus"] += " low voltage"
+
+    bevs = n.links.index[n.links.carrier == "BEV charger"]
+    n.links.loc[bevs, "bus0"] += " low voltage"
+
+    v2gs = n.links.index[n.links.carrier == "V2G"]
+    n.links.loc[v2gs, "bus1"] += " low voltage"
+
+    hps = n.links.index[n.links.carrier.str.contains("heat pump")]
+    n.links.loc[hps, "bus0"] += " low voltage"
+
+    rh = n.links.index[n.links.carrier.str.contains("resistive heater")]
+    n.links.loc[rh, "bus0"] += " low voltage"
+
+    mchp = n.links.index[n.links.carrier.str.contains("micro gas")]
+    n.links.loc[mchp, "bus1"] += " low voltage"
+
+    if options.get("solar_rooftop", False):
+        logger.info("Adding solar rooftop technology")
+        # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
+        solar = n.generators.index[n.generators.carrier == "solar"]
+        n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "fixed"]
+        pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
+
+        # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
+        # i.e. 2 kW/person (population data is in thousands of people) so we get MW
+        potential = 0.1 * 20 * pop_solar
+
+        n.madd(
+            "Generator",
+            solar,
+            suffix=" rooftop",
+            bus=n.generators.loc[solar, "bus"] + " low voltage",
+            carrier="solar rooftop",
+            p_nom_extendable=True,
+            p_nom_max=potential.loc[solar],
+            marginal_cost=n.generators.loc[solar, "marginal_cost"],
+            capital_cost=costs.at["solar-rooftop", "fixed"],
+            efficiency=n.generators.loc[solar, "efficiency"],
+            p_max_pu=n.generators_t.p_max_pu[solar],
+            lifetime=costs.at["solar-rooftop", "lifetime"],
+        )
+
+    if options.get("home_battery", False):
+        logger.info("Adding home battery technology")
+        n.add("Carrier", "home battery")
+
+        n.madd(
+            "Bus",
+            nodes + " home battery",
+            location=nodes,
+            carrier="home battery",
+            unit="MWh_el",
+        )
+
+        n.madd(
+            "Store",
+            nodes + " home battery",
+            bus=nodes + " home battery",
+            location=nodes,
+            e_cyclic=True,
+            e_nom_extendable=True,
+            carrier="home battery",
+            capital_cost=costs.at["home battery storage", "fixed"],
+            lifetime=costs.at["battery storage", "lifetime"],
+        )
+
+        n.madd(
+            "Link",
+            nodes + " home battery charger",
+            bus0=nodes + " low voltage",
+            bus1=nodes + " home battery",
+            carrier="home battery charger",
+            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            capital_cost=costs.at["home battery inverter", "fixed"],
+            p_nom_extendable=True,
+            lifetime=costs.at["battery inverter", "lifetime"],
+        )
+
+        n.madd(
+            "Link",
+            nodes + " home battery discharger",
+            bus0=nodes + " home battery",
+            bus1=nodes + " low voltage",
+            carrier="home battery discharger",
+            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            marginal_cost=options["marginal_cost_storage"],
+            p_nom_extendable=True,
+            lifetime=costs.at["battery inverter", "lifetime"],
+        )
+
+
 # def add_co2limit(n, Nyears=1.0, limit=0.0):
 #     print("Adding CO2 budget limit as per unit of 1990 levels of", limit)
 
@@ -2837,12 +2975,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="19",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="72H",
-            discountrate="0.071",
+            sopts="144H",
+            discountrate=0.071,
             demand="AB",
         )
 
@@ -3005,6 +3143,9 @@ if __name__ == "__main__":
     add_agriculture(n, costs)
     add_residential(n, costs)
     add_services(n, costs)
+
+    if options.get("electricity_distribution_grid", False):
+        add_electricity_distribution_grid(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
 
