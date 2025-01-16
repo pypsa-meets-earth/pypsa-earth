@@ -609,7 +609,8 @@ if __name__ == '__main__':
         regional_supplies.append(regional_supply)
 
 
-    final_costs = pd.concat(regional_supplies)
-
-    final_costs.to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
+    (
+        pd.concat(regional_supplies)
+        .to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
+    )
     final_demands.to_csv(snakemake.output['industrial_heating_demands'])
