@@ -214,7 +214,8 @@ def add_water_network(n, costs):
             efficiency=costs.at["electrolysis", "efficiency"],
             efficiency2=costs.at["electrolysis", "efficiency"]
             * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-            / 33,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % TODO: integrate ratio_water_elec in technology data
+            / 33
+            * 1000,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh TODO: integrate ratio_water_elec in technology data
             capital_cost=costs.at["electrolysis", "fixed"],
             lifetime=costs.at["electrolysis", "lifetime"],
         )
@@ -230,7 +231,8 @@ def add_water_network(n, costs):
             efficiency=costs.at["electrolysis", "efficiency"],
             efficiency2=costs.at["electrolysis", "efficiency"]
             * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-            / 33,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % TODO: integrate ratio_water_elec in technology data
+            / 33
+            * 1000,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh TODO: integrate ratio_water_elec in technology data
             capital_cost=costs.at["electrolysis", "fixed"],
             lifetime=costs.at["electrolysis", "lifetime"],
         )
