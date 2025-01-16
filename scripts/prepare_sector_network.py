@@ -242,7 +242,7 @@ def add_water_network(n, costs):
 
     n.madd(
         "Generator",
-        spatial.nodes,
+        spatial.nodes + " H20",
         bus=spatial.nodes + " H2O",
         carrier="H2O",
         p_nom_extendable=True,
