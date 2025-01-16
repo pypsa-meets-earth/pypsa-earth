@@ -159,7 +159,11 @@ def write_dict_key(
 
     content_str = yaml.dump(dict)
 
-    clean_str = content_str.replace("\t", "     ").replace("\n", "<br />").replace("\r", "<br />")
+    clean_str = (
+        content_str.replace("\t", "     ")
+        .replace("\n", "<br />")
+        .replace("\r", "<br />")
+    )
     # clean_str = content_str.replace("\n", ", ")#.replace("\r", "<br />")
 
     # f = open(fl_name, "w")
