@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 import random
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
@@ -450,19 +451,18 @@ if __name__ == '__main__':
     max_network_average_capacity = 30. # MWh
 
     n_cost_steps = 2
-    final_costs = pd.DataFrame(
-        index=pd.MultiIndex.from_product([regions.index, range(n_cost_steps)], names=['region', 'cost_step']),
-        columns=['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
-        )
+    supply_curve_columns = ['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
     
     final_demands = pd.DataFrame(
         index=regions.index,
         columns=['demand(50-150C)[MW]', 'demand(150-250C)[MW]']
         )
 
-    for region, geometry in regions['geometry'].items():
+    regional_supplies = list()
 
-        regional_supply = pd.DataFrame(columns=final_costs.columns)
+    for region, geometry in tqdm(regions['geometry'].items()):
+
+        regional_supply = pd.DataFrame(columns=supply_curve_columns)
 
         ss = gdf.loc[gdf['geometry'].within(geometry)]
 
@@ -547,7 +547,7 @@ if __name__ == '__main__':
             cluster_supply.loc['avail_capacity[MW]'] = cluster_size            
             cluster_supply.loc['opex[$/MWh]'] = 0.0
 
-            if cluster_supply.empty or regional_supply.empty:
+            if cluster_supply.empty:
                 continue
 
             regional_supply = pd.concat(
@@ -597,9 +597,19 @@ if __name__ == '__main__':
             .groupby('level', observed=False)
             [['avail_capacity[MW]', 'opex[$/MWh]']]
             .agg({'avail_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean'})
+            .reset_index()
+            .rename(columns={'level': 'capex[$/MW]'})
         )
 
-    final_costs = pd.concat((final_costs, regional_supply))
+        regional_supply.index = pd.MultiIndex.from_product(
+            [[region], range(len(regional_supply))],
+            names=['region', 'cost_step']
+            )
+
+        regional_supplies.append(regional_supply)
+
+
+    final_costs = pd.concat(regional_supplies)
 
     final_costs.to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
     final_demands.to_csv(snakemake.output['industrial_heating_demands'])
