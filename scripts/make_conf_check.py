@@ -47,6 +47,30 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
+    key_to_show = "enable"
     write_dict_key(
-        dict=snakemake.config["electricity"], fl_name=snakemake.output.pretty_config
+        header=key_to_show,
+        dict=snakemake.config[key_to_show], 
+        style_text="coral_bg",
+        style_header="coral_hd",
+        fl_name=snakemake.output.pretty_config
     )
+
+    key_to_show = "scenario"
+    write_dict_key(
+        header=key_to_show,
+        dict=snakemake.config[key_to_show], 
+        style_text="mint_bg",
+        style_header="mint_hd",
+        fl_name=snakemake.output.pretty_config
+    )
+
+    key_to_show = "electricity"
+    write_dict_key(
+        header=key_to_show,
+        dict=snakemake.config[key_to_show], 
+        style_text="blue_bg",
+        style_header="blue_hd",
+        fl_name=snakemake.output.pretty_config
+    )    
+
