@@ -2851,11 +2851,15 @@ def add_egs_industry_supply(n, supply_curve):
             'medium temperature industry',
         ]:
 
+            bus1 = region + ' ' + full_name[carrier]
+            if bus1 not in n.buses.index:
+                continue
+
             n.add(
                 "Link",
                 region + ' EGS ' + carrier + ' ' + str(cost_index),
                 bus0=region + ' EGS surface',
-                bus1=region + ' ' + full_name[carrier],
+                bus1=bus1,
                 carrier=carrier,
                 capital_cost=row['capex[$/MW]'],
                 marginal_cost=row['opex[$/MWh]'],
@@ -3386,7 +3390,11 @@ if __name__ == "__main__":
         )
     )
 
+    logger.info("Adding industrial heating technologies.")
     add_industry_heating(n, industry_heating_costs)
+
+    import sys
+    sys.exit()
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
