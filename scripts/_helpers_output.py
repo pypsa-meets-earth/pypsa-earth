@@ -51,7 +51,7 @@ electrycity_model_keys = ["electricity"]
 # visual settings -------------------------------------------------------------
 style = """<style type='text/css'>
 html {
-  font-family: Courier;
+  font-family: Georgia;
 }
 r {
   color: #ff0000;
