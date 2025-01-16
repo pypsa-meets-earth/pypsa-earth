@@ -240,6 +240,8 @@ def add_water_network(n, costs):
     # TODO: update efficiency2 of electrolysis from kWh to MWh.
     # Output unit of generator is in liters.
 
+    # DEVELOPMENT STAGE 1
+
     n.madd(
         "Generator",
         spatial.nodes + " H20",
@@ -252,6 +254,21 @@ def add_water_network(n, costs):
         efficiency=1,
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
+
+    # DEVELOPMENT STAGE 2
+
+    # n.madd(
+    #     "Link",
+    #     spatial.nodes + " desalination",
+    #     bus0=spatial.nodes,
+    #     bus1=spatial.nodes + " H20",
+    #     carrier="desalination",
+    #     p_nom_extendable=True,
+    #     efficiency=costs.at["seawater desalination", "electricity-input"],
+    #     capital_cost=costs.at["seawater desalination", "fixed"],
+    #     marginal_cost=costs.at["seawater desalination", "FOM"],
+    #     lifetime=costs.at["seawater desalination", "lifetime"],
+    # )
 
 
 def add_hydrogen(n, costs):
