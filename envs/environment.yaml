@@ -52,6 +52,7 @@ dependencies:
 - numba
 - py7zr
 - tsam>=1.1.0
+- currencyconverter
 
   # Keep in conda environment when calling ipython
 - ipython
