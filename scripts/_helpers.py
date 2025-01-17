@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import calendar
 import io
 import logging
 import os
@@ -13,20 +14,19 @@ import subprocess
 import sys
 import time
 import zipfile
+from datetime import datetime, timedelta
 from pathlib import Path
 
-import calendar
 import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
 import yaml
+from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
 from shapely.geometry import Point
-from currency_converter import CurrencyConverter
-from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -953,8 +953,13 @@ def annuity(n, r):
         return 1 / n
 
 
-def get_yearly_currency_exchange_average(initial_currency: str, output_currency: str, year: int):
-    converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True, fallback_on_missing_rate_method="linear_interpolation")
+def get_yearly_currency_exchange_average(
+    initial_currency: str, output_currency: str, year: int
+):
+    converter = CurrencyConverter(
+        fallback_on_missing_rate=True,
+        fallback_on_wrong_date=True,
+    )
     if calendar.isleap(year):
         days_per_year = 366
     else:
@@ -963,9 +968,12 @@ def get_yearly_currency_exchange_average(initial_currency: str, output_currency:
     initial_date = datetime(year, 1, 1)
     for day_index in range(days_per_year):
         date_to_use = initial_date + timedelta(days=day_index)
-        currency_exchange_rate += converter.convert(1, initial_currency, output_currency, date_to_use)
+        currency_exchange_rate += converter.convert(
+            1, initial_currency, output_currency, date_to_use
+        )
     currency_exchange_rate /= days_per_year
     return currency_exchange_rate
+
 
 def prepare_costs(
     cost_file: str, USD_to_EUR: float, fill_values: dict, Nyears: float | int = 1
