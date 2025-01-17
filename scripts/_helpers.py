@@ -976,14 +976,25 @@ def get_yearly_currency_exchange_average(
 
 
 def prepare_costs(
-    cost_file: str, USD_to_EUR: float, fill_values: dict, Nyears: float | int = 1
+    cost_file: str, fill_values: dict, Nyears: float | int = 1
 ):
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
+    temp_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
+    currency_list = temp_converter.currencies
+
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-    costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
+    costs["value"] = costs.apply(
+        lambda x: x["value"] * get_yearly_currency_exchange_average(x["unit"][0:3], "EUR", int(x["currency_year"])) if
+        x["unit"][0:3] in currency_list else x["value"], axis=1)
+
+    # TODO
+    # How to set final currency (snakemake config?) # TODO
+    # Test it # TODO
+    # Modify prepare_costs calls # TODO
+    # find elsewhere where costs.loc[costs.unit.str.contains( ... is used # TODO
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
     costs = (
