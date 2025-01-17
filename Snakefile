@@ -1218,7 +1218,7 @@ rule prepare_sector_network:
         industrial_heating_costs=(
             "resources/"
             + SECDIR
-            + "industrial_heating_costs.csv",
+            + "industrial_heating_costs.csv"
         ),
         egs_potentials=(
             "resources/"
