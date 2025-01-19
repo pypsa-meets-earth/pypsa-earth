@@ -470,20 +470,19 @@ def attach_hydro(n, costs, ppl):
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    if snakemake.params.alternative_clustering:
-        # bus to region mapping for hydro powerplants
-        bus_to_region_id = (
-            ppl.drop_duplicates(subset="bus").set_index("bus")["region_id"].to_dict()
-        )
-
     ppl = (
         ppl.query('carrier == "hydro"')
         .reset_index(drop=True)
         .rename(index=lambda s: str(s) + " hydro")
     )
 
-    with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-        if snakemake.params.alternative_clustering:
+    if snakemake.params.alternative_clustering:
+        # bus to region mapping for hydro powerplants
+        bus_to_region_id = (
+            ppl.drop_duplicates(subset="bus").set_index("bus")["region_id"].to_dict()
+        )
+
+        with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             for bus in inflow.indexes["plant"]:
                 if bus in bus_to_region_id:
                     region_to_update = bus_to_region_id[bus]
