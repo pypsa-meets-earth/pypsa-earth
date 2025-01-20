@@ -492,6 +492,10 @@ def base_network(
     lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
     lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
 
+    # avoiding the conflicts in processing the network model
+    lines_ac = lines_ac.drop(["tag_frequency"], axis=1)
+    lines_dc = lines_dc.drop(["tag_frequency"], axis=1)
+
     lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
 
     lines_dc = _set_electrical_parameters_dc_lines(

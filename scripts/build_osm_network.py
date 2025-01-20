@@ -36,6 +36,7 @@ LINES_COLUMNS = [
     "bus0",
     "bus1",
     "length",
+    "tag_frequency",
     "dc",
     "country",
     "geometry",
