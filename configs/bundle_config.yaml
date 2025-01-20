@@ -58,7 +58,7 @@ databundles:
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-    - data/gadm/gadm41_BWA/gadm41_BWA.gpkg  # needed in build_shapes
+    #- data/gadm/gadm41_BWA/gadm41_BWA.gpkg  # needed in build_shapes (disabled due to different naming convetion)
     - data/gadm/gadm36_BWA/gadm36_BWA.gpkg  # needed in sector-coupled model
 
   # tutorial bundle specific for Morocco only

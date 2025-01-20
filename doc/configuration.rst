@@ -171,6 +171,24 @@ Specifies the options to build the shapes in which the region of interest (``cou
    :widths: 25,10,22,27
    :file: configtables/build_shape_options.csv
 
+.. _subregion_cf:
+
+``subregion``
+=============================
+
+If enabled, this option allows a region of interest (``countries``) to be redefined into subregions, 
+which can be activated at various stages of the workflow. Currently, it is only used in the ``simplify_network`` rule.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: subregion:
+   :end-at: path_custom_shapes:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/subregion.csv
+
 .. _clean_osm_data_options_cf:
 
 ``clean_osm_data_options``

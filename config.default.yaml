@@ -116,6 +116,10 @@ build_shape_options:
   gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
+subregion:
+  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
+  path_custom_shapes: false # (optional )provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
   threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
