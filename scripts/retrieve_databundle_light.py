@@ -95,6 +95,7 @@ from _helpers import (
     create_logger,
     progress_retrieve,
 )
+from build_demand_profiles import log_load_paths_gegis
 from google_drive_downloader import GoogleDriveDownloader as gdd
 from tqdm import tqdm
 
@@ -820,6 +821,9 @@ if __name__ == "__main__":
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
 
+    # log the load paths for GEGIS outputs
+    log_load_paths_gegis("data", snakemake.config)
+    raise ValueError("asdaf")
     rootpath = "."
     tutorial = snakemake.params.tutorial
     countries = snakemake.params.countries
