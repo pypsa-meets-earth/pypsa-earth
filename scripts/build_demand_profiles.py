@@ -154,7 +154,9 @@ def log_load_paths_gegis(ssp_parentfolder, config):
     Log the load paths for GEGIS outputs.
     """
 
-    load_paths, load_dir, file_names = prepare_load_paths_gegis(ssp_parentfolder, config)
+    load_paths, load_dir, file_names = prepare_load_paths_gegis(
+        ssp_parentfolder, config
+    )
 
     logger.info(
         f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
