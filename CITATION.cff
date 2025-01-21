@@ -1,8 +1,6 @@
-<!--
-SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
-SPDX-License-Identifier: AGPL-3.0-or-later
--->
 title: PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa
 abstract: This repository contains the source code of the paper PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa by Maximilian Parzen, Hazem Abdel-Khalek, Ekaterina Fedotova, Matin Mahmood, Martha Maria Frysztacki, Johannes Hampp, Lukas Franken, Leon Schumm, Fabian Neumann, Davide Poli, Aristides Kiprakis and Davide Fioriti, from Applied Energy
 doi: 10.1016/j.apenergy.2023.121096
