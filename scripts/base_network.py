@@ -489,9 +489,8 @@ def base_network(
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
-    lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
-    lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
-
+    lines_ac = lines[~lines.dc].copy()
+    lines_dc = lines[lines.dc].copy()
     lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
 
     lines_dc = _set_electrical_parameters_dc_lines(

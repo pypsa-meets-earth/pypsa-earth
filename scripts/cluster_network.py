@@ -736,8 +736,6 @@ if __name__ == "__main__":
                 "v_nom": "first",
                 "lat": "mean",
                 "lon": "mean",
-                "tag_substation": "first",
-                "tag_area": "first",
                 "country": "first",
             },
         )
