@@ -26,6 +26,7 @@ dependencies:
 - openpyxl
 - seaborn
 - snakemake-minimal<8.25
+- snakemake-storage-plugin-http
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
