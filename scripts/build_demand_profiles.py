@@ -96,7 +96,7 @@ def get_gegis_regions(countries):
     return regions
 
 
-def prepare_load_paths_gegis(ssp_parentfolder, config):
+def get_load_paths_gegis(ssp_parentfolder, config):
     """
     Create load paths for GEGIS outputs.
 
@@ -136,33 +136,13 @@ def prepare_load_paths_gegis(ssp_parentfolder, config):
         load_paths.append(load_path)
         file_names.append(file_name)
 
-    return load_paths, load_dir, file_names
-
-
-def get_load_paths_gegis(ssp_parentfolder, config):
-    """
-    Return load paths for GEGIS outputs.
-    """
-
-    load_paths, _, _ = prepare_load_paths_gegis(ssp_parentfolder, config)
-
-    return load_paths
-
-
-def log_load_paths_gegis(ssp_parentfolder, config):
-    """
-    Log the load paths for GEGIS outputs.
-    """
-
-    load_paths, load_dir, file_names = prepare_load_paths_gegis(
-        ssp_parentfolder, config
-    )
-
     logger.info(
         f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
         + f"Expected files: "
         + "; ".join(file_names)
     )
+
+    return load_paths
 
 
 def shapes_to_shapes(orig, dest):
