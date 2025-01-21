@@ -45,7 +45,7 @@ dependencies:
 - shapely!=2.0.4
 - pre-commit
 - pyomo
-- matplotlib<=3.5.2
+- matplotlib
 - reverse-geocode
 - country_converter
 - pyogrio
