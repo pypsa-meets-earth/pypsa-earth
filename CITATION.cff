@@ -8,26 +8,33 @@ message: If you use this software in your work, please cite it using the followi
 authors:
   - given-names: Maximilian
     family-names: Parzen
+    orcid: https://orcid.org/0000-0002-4390-0063
   - given-names: Hazem
     family-names: Abdel-Khalek
   - given-names: Ekaterina
     family-names: Fedotova
+    orcid: https://orcid.org/0000-0002-5590-9591
   - given-names: Matin
     family-names: Mahmood
   - given-names: Martha Maria
     family-names: Frysztacki
+    orcid: https://orcid.org/0000-0002-0788-1328
   - given-names: Johannes
     family-names: Hampp
+    orcid: https://orcid.org/0000-0002-1776-116X
   - given-names: Lukas
     family-names: Franken
   - given-names: Leon
     family-names: Schumm
   - given-names: Fabian
     family-names: Neumann
+    orcid: https://orcid.org/0000-0002-6604-5450
   - given-names: Davide
     family-names: Poli
+    orcid: https://orcid.org/0000-0002-5045-9034
   - given-names: Aristides
     family-names: Kiprakis
   - given-names: Davide
     family-names: Fioriti
+    orcid: https://orcid.org/0000-0001-5491-7912
 cff-version: 1.2.0
