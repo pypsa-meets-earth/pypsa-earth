@@ -1,0 +1,33 @@
+title: PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa
+abstract: This repository contains the source code of the paper PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa by Maximilian Parzen, Hazem Abdel-Khalek, Ekaterina Fedotova, Matin Mahmood, Martha Maria Frysztacki, Johannes Hampp, Lukas Franken, Leon Schumm, Fabian Neumann, Davide Poli, Aristides Kiprakis and Davide Fioriti, from Applied Energy
+doi: 10.1016/j.apenergy.2023.121096
+repository-code: https://github.com/pypsa-meets-earth/pypsa-earth
+version: 1.0.0
+date-released: 2023-04-18
+message: If you use this software in your work, please cite it using the following metadata.
+authors:
+  - given-names: Maximilian
+    family-names: Parzen
+  - given-names: Hazem
+    family-names: Abdel-Khalek
+  - given-names: Ekaterina
+    family-names: Fedotova
+  - given-names: Matin
+    family-names: Mahmood
+  - given-names: Martha Maria
+    family-names: Frysztacki
+  - given-names: Johannes
+    family-names: Hampp
+  - given-names: Lukas
+    family-names: Franken
+  - given-names: Leon
+    family-names: Schumm
+  - given-names: Fabian
+    family-names: Neumann
+  - given-names: Davide
+    family-names: Poli
+  - given-names: Aristides
+    family-names: Kiprakis
+  - given-names: Davide
+    family-names: Fioriti
+cff-version: 1.2.0
