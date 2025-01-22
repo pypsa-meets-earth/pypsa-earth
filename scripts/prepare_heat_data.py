@@ -106,59 +106,41 @@ def prepare_heat_data(n):
         snakemake.input.cooling_profile, index_col=0
     )  # TODO GHALAT
 
-    # sectors = ["residential", "services"]
     loads = ["heating", "cooling"]
+    sectors = ["residential", "services"]
     uses = ["water", "space"]
 
     heat_demand = {}
     cooling_demand = {}
     electric_heat_supply = {}
-    # for sector, use in product(sectors, uses):
-    #     weekday = list(intraday_profiles[f"{sector} {use} weekday"])
-    #     weekend = list(intraday_profiles[f"{sector} {use} weekend"])
-    #     weekly_profile = weekday * 5 + weekend * 2
 
-    # TODO probably no need to cool water
-    for use in uses:
-        day_heating = list(intraday_profiles_heating[f"heating {use}"])
-        weekly_profile_heating = day_heating * 7
+    for sector, use in product(sectors, uses):
+        weekday = list(intraday_profiles_heating[f"{sector} {use} weekday"])
+        weekend = list(intraday_profiles_heating[f"{sector} {use} weekend"])
+        weekly_profile_heating = weekday * 5 + weekend * 2
+
         intraday_year_profile_heating = generate_periodic_profiles(
             daily_space_heat_demand.index.tz_localize("UTC"),
             nodes=daily_space_heat_demand.columns,
             weekly_profile=weekly_profile_heating,
         )
 
-        day_cooling = list(intraday_profiles_cooling[f"cooling {use}"])
-        weekly_profile_cooling = day_cooling * 7
-        intraday_year_profile_cooling = generate_periodic_profiles(
-            daily_space_heat_demand.index.tz_localize("UTC"),
-            nodes=daily_space_cooling_demand.columns,
-            weekly_profile=weekly_profile_cooling,
-        )
-
         if use == "space":
             heating_demand_shape = (
                 daily_space_heat_demand * intraday_year_profile_heating
             )
-            cooling_demand_shape = (
-                daily_space_cooling_demand * intraday_year_profile_cooling
-            )
         else:
             heating_demand_shape = intraday_year_profile_heating
-            cooling_demand_shape = intraday_year_profile_cooling
 
-        heat_demand[f"{use}"] = (
+        heat_demand[f"{sector} {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
-            nodal_energy_totals[f"total residential {use}"]
-            + nodal_energy_totals[f"total services {use}"]
+            nodal_energy_totals[f"total {sector} {use}"]
         ) * 1e6  # TODO v0.0.2
-        cooling_demand[f"{use}"] = (
-            cooling_demand_shape / cooling_demand_shape.sum()
+        electric_heat_supply[f"{sector} {use}"] = (
+            heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
-            # TODO it appears there is no cooling in UN statistics
-            # nodal_energy_totals[f"total {use}"]
-            1000
+            nodal_energy_totals[f"electricity {sector} {use}"]
         ) * 1e6  # TODO v0.0.2
 
         electric_heat_supply[f"total {use}"] = (
@@ -169,7 +151,7 @@ def prepare_heat_data(n):
         ) * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
-    cooling_demand = pd.concat(cooling_demand, axis=1)
+
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
 
     # subtract from electricity load since heat demand already in heat_demand #TODO v0.1
@@ -178,6 +160,34 @@ def prepare_heat_data(n):
     #     n.loads_t.p_set[electric_nodes]
     #     - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
     # )
+
+    # TODO probably no need to cool water
+    # TODO it's possible to account for weekday/weekend differences
+    for use in uses:
+        day_cooling = list(intraday_profiles_cooling[f"cooling {use}"])
+        weekly_profile_cooling = day_cooling * 7
+        intraday_year_profile_cooling = generate_periodic_profiles(
+            daily_space_heat_demand.index.tz_localize("UTC"),
+            nodes=daily_space_cooling_demand.columns,
+            weekly_profile=weekly_profile_cooling,
+        )
+
+        if use == "space":
+            cooling_demand_shape = (
+                daily_space_cooling_demand * intraday_year_profile_cooling
+            )
+        else:
+            cooling_demand_shape = intraday_year_profile_cooling
+
+        cooling_demand[f"{use}"] = (
+            cooling_demand_shape / cooling_demand_shape.sum()
+        ).multiply(
+            # TODO it appears there is no cooling in UN statistics
+            # nodal_energy_totals[f"total {use}"]
+            1000
+        ) * 1e6  # TODO v0.0.2
+
+    cooling_demand = pd.concat(cooling_demand, axis=1)
 
     return (
         nodal_energy_totals,
