@@ -35,6 +35,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__ and  `PR #1301 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1301>`__
 
+* Add CITATION.cff to guide users on how cite PyPSA-Earth. Insert the DOI badge in the README linking to the very first PyPSA-Earth paper. `PR #1316 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1316>`__
+
 PyPSA-Earth 0.6.0
 =================
 
