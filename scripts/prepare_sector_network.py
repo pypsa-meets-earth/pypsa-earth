@@ -1977,7 +1977,10 @@ def create_nodes_for_cooling_sector():
     # assume that all the cooling technologies are applicable both for urban and rural areas
     # district heating is not accounted for
     c_nodes = {}
-    c_nodes["cooling"] = pop_layout.index
+
+    #for sector in sectors:
+    #    c_nodes[sector + " rural"] = pop_layout.index
+    c_nodes["cooling" + " overall"] = pop_layout.index
 
     return c_nodes
 
@@ -2277,99 +2280,89 @@ def add_cooling(n, costs):
 
     # to keep the implementation generalizable name is used as a parameter
     # in future can distinguish service/residential, central/decentral, urban/rural
-    name = "overall"
+    cooling_systems = ["cooling overall"]
 
-    n.add("Carrier", name + " cooling")
+    for name in cooling_systems:
+        n.add("Carrier", name + " cooling")
 
-    n.madd(
-        "Bus",
-        c_nodes[name] + " {} cooling".format(name),
-        location=c_nodes[name],
-        carrier=name + " cooling",
-    )
+        n.madd(
+            "Bus",
+            c_nodes[name] + " {} cooling".format(name),
+            location=c_nodes[name],
+            carrier=name + " cooling",
+        )
 
-    n.madd(
-        "Load",
-        c_nodes[name],
-        suffix=f" {name} cooling",
-        bus=c_nodes[name] + f" {name} cooling",
-        carrier=name + " cooling",
-        p_set=cooling_demand,
-    )
+        cooling_load = (
+            cooling_demand[["space"]]
+            .groupby(level=1, axis=1)
+            .sum()[c_nodes[name]]
+            #.multiply(factor)
+        )
 
-    # Add "generators" for cooling
-    costs_name = f"{name_type} {heat_pump_type}-sourced heat pump"
+        n.madd(
+            "Load",
+            c_nodes[name],
+            suffix=f" {name} cooling",
+            bus=c_nodes[name] + f" {name} cooling",
+            carrier=name + " cooling",
+            p_set=cooling_load,
+        )
 
-    cop = {
-        "air conditioner": ac_cooling_cop,
-        "heat pump cooling": hp_cooling_cop,
-        "absorption chiller": abch_cooling_cop,
-    }
+        cop = {
+            "air conditioner": ac_cooling_cop,
+            "heat pump cooling": hp_cooling_cop,
+            "absorption chiller": abch_cooling_cop,
+        }
 
-    # Add air conditioners
-    efficiency = (
-        cop["air conditioner"][c_nodes[name]]
-        if options["time_dep_hp_cop"]
-        else cooling_costs.at["air conditioner", "efficiency"]
-    )
+        # Add air conditioners
+        efficiency = (
+            cop["air conditioner"][c_nodes[name]]
+            if options["time_dep_hp_cop"]
+            else cooling_costs.at["air conditioner", "efficiency"]
+        )
 
-    n.madd(
-        "Link",
-        c_nodes[name],
-        suffix=f" {name} air conditioner",
-        bus0=c_nodes[name],
-        bus1=c_nodes[name] + f" {name} cooling",
-        carrier=f"{name} air conditioner",
-        efficiency=efficiency,
-        capital_cost=cooling_costs.at["air conditioner", "efficiency"]
-        * cooling_costs.at["air conditioner", "fixed"],
-        p_nom_extendable=True,
-        lifetime=cooling_costs.at["air conditioner", "lifetime"],
-    )
+        n.madd(
+            "Link",
+            c_nodes[name],
+            suffix=f" {name} air conditioner",
+            bus0=c_nodes[name],
+            bus1=c_nodes[name] + f" {name} cooling",
+            carrier=f"{name} air conditioner",
+            efficiency=efficiency,
+            capital_cost=cooling_costs.at["air conditioner", "efficiency"]
+            * cooling_costs.at["air conditioner", "fixed"],
+            p_nom_extendable=True,
+            lifetime=cooling_costs.at["air conditioner", "lifetime"],
+        )
 
-    # Add heat pumps working in a cooling mode
-    efficiency = (
-        cop["heat pump cooling"][c_nodes[name]]
-        if options["time_dep_hp_cop"]
-        else cooling_costs.at["heat pump cooling", "efficiency"]
-    )
+        # Add heat pumps working in a cooling mode
+        efficiency = (
+            cop["heat pump cooling"][c_nodes[name]]
+            if options["time_dep_hp_cop"]
+            else cooling_costs.at["heat pump cooling", "efficiency"]
+        )
 
-    n.madd(
-        "Link",
-        c_nodes[name],
-        suffix=f" {name} heat pump cooling",
-        bus0=c_nodes[name],
-        bus1=c_nodes[name] + f" {name} cooling",
-        carrier=f"{name} heat pump cooling",
-        efficiency=efficiency,
-        capital_cost=cooling_costs.at["heat pump cooling", "efficiency"]
-        * cooling_costs.at["heat pump cooling", "fixed"],
-        p_nom_extendable=True,
-        lifetime=cooling_costs.at["heat pump cooling", "lifetime"],
-    )
+        n.madd(
+            "Link",
+            c_nodes[name],
+            suffix=f" {name} heat pump cooling",
+            bus0=c_nodes[name],
+            bus1=c_nodes[name] + f" {name} cooling",
+            carrier=f"{name} heat pump cooling",
+            efficiency=efficiency,
+            capital_cost=cooling_costs.at["heat pump cooling", "efficiency"]
+            * cooling_costs.at["heat pump cooling", "fixed"],
+            p_nom_extendable=True,
+            lifetime=cooling_costs.at["heat pump cooling", "lifetime"],
+        )
 
-    # Add absorption chillers
-    efficiency = (
-        cop["absorption chiller"][c_nodes[name]]
-        if options["time_dep_hp_cop"]
-        else cooling_costs.at["absorption chiller", "efficiency"]
-    )
+        # Add absorption chillers
+        efficiency = (
+            cop["absorption chiller"][c_nodes[name]]
+            if options["time_dep_hp_cop"]
+            else cooling_costs.at["absorption chiller", "efficiency"]
+        )
 
-    n.madd(
-        "Link",
-        c_nodes[name],
-        suffix=f" {name} absorption chiller",
-        bus0=waste_heat_source,
-        bus=c_nodes[name],
-        bus2=c_nodes[name] + f" {name} cooling",
-        carrier=f"{name} absorption chiller",
-        efficiency=cooling_costs.at["absorption chiller", "efficiency-heat"],
-        efficiency2=efficiency,
-        capital_cost=cooling_costs.at["absorption chiller", "efficiency"]
-        * cooling_costs.at["absorption chiller", "fixed"],
-        p_nom_extendable=True,
-        lifetime=cooling_costs.at["absorption chiller", "lifetime"],
-    )
 
 
 def average_every_nhours(n, offset):
