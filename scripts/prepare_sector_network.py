@@ -1978,7 +1978,7 @@ def create_nodes_for_cooling_sector():
     # district heating is not accounted for
     c_nodes = {}
 
-    #for sector in sectors:
+    # for sector in sectors:
     #    c_nodes[sector + " rural"] = pop_layout.index
     c_nodes["cooling" + " overall"] = pop_layout.index
 
@@ -2296,7 +2296,7 @@ def add_cooling(n, costs):
             cooling_demand[["space"]]
             .groupby(level=1, axis=1)
             .sum()[c_nodes[name]]
-            #.multiply(factor)
+            # .multiply(factor)
         )
 
         n.madd(
