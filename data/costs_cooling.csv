@@ -1,6 +1,5 @@
 technology,parameter,value,unit,source,further description
 air conditioner,FOM,1.0,%/year,""
-air conditioner,discount rate,0.07,%/year,""
 air conditioner,VOM,1.25,EUR/MWh_th,""
 air conditioner,efficiency,3,%,""
 air conditioner,investment,500.0,EUR/kW_th,""
