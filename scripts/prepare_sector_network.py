@@ -2273,7 +2273,7 @@ def add_heat(n, costs):
 def add_cooling(n, costs):
     logger.info("adding cooling")
 
-    c_nodes = create_nodes_for_cooling_sector
+    c_nodes = create_nodes_for_cooling_sector()
 
     # to keep the implementation generalizable name is used as a parameter
     # in future can distinguish service/residential, central/decentral, urban/rural
