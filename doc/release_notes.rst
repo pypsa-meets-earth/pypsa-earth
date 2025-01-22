@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Align structure of the components with consistency checks in the updated PyPSA version `PR #1315 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1315>`__
+
 * Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
 
 * Fix overlapping bus regions when alternative clustering is selected `PR #1287 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1287>`__
@@ -34,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 * Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__ and  `PR #1301 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1301>`__
+
+* Add CITATION.cff to guide users on how cite PyPSA-Earth. Insert the DOI badge in the README linking to the very first PyPSA-Earth paper. `PR #1316 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1316>`__
 
 PyPSA-Earth 0.6.0
 =================
