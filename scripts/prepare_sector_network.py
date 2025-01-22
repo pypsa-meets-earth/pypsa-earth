@@ -1951,8 +1951,9 @@ def create_nodes_for_heat_sector():
     dist_fraction_node = (
         district_heat_share["district heat share"]
         * pop_layout["urban_ct_fraction"]
-        / pop_layout["fraction"]
-    )
+        / (pop_layout["fraction"])
+        # NB pop_layout["fraction"] can be zero
+    ).replace(np.inf, 0)
     h_nodes["urban central"] = dist_fraction_node.index
     # if district heating share larger than urban fraction -> set urban
     # fraction to district heating share
