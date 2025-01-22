@@ -163,11 +163,11 @@ def prepare_heat_data(n):
 
     # TODO probably no need to cool water
     # TODO it's possible to account for weekday/weekend differences
-    for use in uses:
+    for use in ["space"]:
         day_cooling = list(intraday_profiles_cooling[f"cooling {use}"])
         weekly_profile_cooling = day_cooling * 7
         intraday_year_profile_cooling = generate_periodic_profiles(
-            daily_space_heat_demand.index.tz_localize("UTC"),
+            daily_space_cooling_demand.index.tz_localize("UTC"),
             nodes=daily_space_cooling_demand.columns,
             weekly_profile=weekly_profile_cooling,
         )
@@ -179,13 +179,14 @@ def prepare_heat_data(n):
         else:
             cooling_demand_shape = intraday_year_profile_cooling
 
-        cooling_demand[f"{use}"] = (
-            cooling_demand_shape / cooling_demand_shape.sum()
-        ).multiply(
-            # TODO it appears there is no cooling in UN statistics
-            # nodal_energy_totals[f"total {use}"]
-            1000
-        ) * 1e6  # TODO v0.0.2
+        # TODO Implement calibration
+        # it appears there is no cooling in UN statistics
+        # nodal_energy_totals[f"total {use}"]
+        cooling_demand[f"{use}"] = cooling_demand_shape
+        # cooling_demand[f"{use}"] = (
+        #    cooling_demand_shape / cooling_demand_shape.sum()
+        # ).multiply(
+        # ) * 1e6  # TODO v0.0.2
 
     cooling_demand = pd.concat(cooling_demand, axis=1)
 
