@@ -3219,7 +3219,10 @@ if __name__ == "__main__":
     H2_liquid_fossil_conversions(n, costs)
 
     h2_hc_conversions(n, costs)
+
     add_heat(n, costs)
+    add_cooling(n, costs)
+
     add_biomass(n, costs)
 
     add_industry(n, costs)
