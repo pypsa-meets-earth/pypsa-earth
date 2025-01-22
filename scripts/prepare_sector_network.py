@@ -2363,6 +2363,22 @@ def add_cooling(n, costs):
             else cooling_costs.at["absorption chiller", "efficiency"]
         )
 
+        # TODO Add EGS as a source
+        # n.madd(
+        #    "Link",
+        #    c_nodes[name],
+        #    suffix=f" {name} absorption chiller",
+        #    bus0=waste_heat_source,
+        #    bus=c_nodes[name],
+        #    bus2=c_nodes[name] + f" {name} cooling",
+        #    carrier=f"{name} absorption chiller",
+        #    efficiency=cooling_costs.at["absorption chiller", "efficiency-heat"],
+        #    efficiency2=efficiency,
+        #    capital_cost=cooling_costs.at["absorption chiller", "efficiency"]
+        #    * cooling_costs.at["absorption chiller", "fixed"],
+        #    p_nom_extendable=True,
+        #    lifetime=cooling_costs.at["absorption chiller", "lifetime"],
+        # )
 
 
 def average_every_nhours(n, offset):
