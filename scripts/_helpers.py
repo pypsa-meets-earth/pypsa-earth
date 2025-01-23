@@ -980,10 +980,23 @@ def get_yearly_currency_exchange_average(
 def convert_currency_and_unit(cost_dataframe, output_currency: str):
     currency_list = currency_converter.currencies
     cost_dataframe["value"] = cost_dataframe.apply(
-        lambda x: x["value"] * get_yearly_currency_exchange_average(x["unit"][0:3], output_currency, int(x["currency_year"])) if
-        x["unit"][0:3] in currency_list else x["value"], axis=1)
+        lambda x: (
+            x["value"]
+            * get_yearly_currency_exchange_average(
+                x["unit"][0:3], output_currency, int(x["currency_year"])
+            )
+            if x["unit"][0:3] in currency_list
+            else x["value"]
+        ),
+        axis=1,
+    )
     cost_dataframe["unit"] = cost_dataframe.apply(
-        lambda x: x["unit"].replace(x["unit"][0:3], output_currency) if x["unit"][0:3] in currency_list else x["unit"], axis=1
+        lambda x: (
+            x["unit"].replace(x["unit"][0:3], output_currency)
+            if x["unit"][0:3] in currency_list
+            else x["unit"]
+        ),
+        axis=1,
     )
     return cost_dataframe
 
@@ -1001,7 +1014,10 @@ def prepare_costs(
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
     modified_costs = (
-        modified_costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+        modified_costs.loc[:, "value"]
+        .unstack(level=1)
+        .groupby("technology")
+        .sum(min_count=1)
     )
     modified_costs = modified_costs.fillna(fill_values)
 
@@ -1009,7 +1025,8 @@ def prepare_costs(
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
     modified_costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears for i, v in modified_costs.iterrows()
+        annuity_factor(v) * v["investment"] * Nyears
+        for i, v in modified_costs.iterrows()
     ]
 
     return modified_costs

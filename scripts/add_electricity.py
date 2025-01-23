@@ -89,7 +89,13 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, convert_currency_and_unit, read_csv_nafix, update_p_nom_max
+from _helpers import (
+    configure_logging,
+    convert_currency_and_unit,
+    create_logger,
+    read_csv_nafix,
+    update_p_nom_max,
+)
 from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
