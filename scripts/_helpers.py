@@ -30,6 +30,11 @@ from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
+currency_converter = CurrencyConverter(
+    fallback_on_missing_rate=True,
+    fallback_on_wrong_date=True,
+)
+
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
 
@@ -956,10 +961,7 @@ def annuity(n, r):
 def get_yearly_currency_exchange_average(
     initial_currency: str, output_currency: str, year: int
 ):
-    converter = CurrencyConverter(
-        fallback_on_missing_rate=True,
-        fallback_on_wrong_date=True,
-    )
+
     if calendar.isleap(year):
         days_per_year = 366
     else:
@@ -968,48 +970,49 @@ def get_yearly_currency_exchange_average(
     initial_date = datetime(year, 1, 1)
     for day_index in range(days_per_year):
         date_to_use = initial_date + timedelta(days=day_index)
-        currency_exchange_rate += converter.convert(
+        currency_exchange_rate += currency_converter.convert(
             1, initial_currency, output_currency, date_to_use
         )
     currency_exchange_rate /= days_per_year
     return currency_exchange_rate
 
 
+def convert_currency_and_unit(cost_dataframe, output_currency: str):
+    currency_list = currency_converter.currencies
+    cost_dataframe["value"] = cost_dataframe.apply(
+        lambda x: x["value"] * get_yearly_currency_exchange_average(x["unit"][0:3], output_currency, int(x["currency_year"])) if
+        x["unit"][0:3] in currency_list else x["value"], axis=1)
+    cost_dataframe["unit"] = cost_dataframe.apply(
+        lambda x: x["unit"].replace(x["unit"][0:3], output_currency) if x["unit"][0:3] in currency_list else x["unit"], axis=1
+    )
+    return cost_dataframe
+
+
 def prepare_costs(
-    cost_file: str, fill_values: dict, Nyears: float | int = 1
+    cost_file: str, output_currency: str, fill_values: dict, Nyears: float | int = 1
 ):
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
-    temp_converter = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=True)
-    currency_list = temp_converter.currencies
-
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-    costs["value"] = costs.apply(
-        lambda x: x["value"] * get_yearly_currency_exchange_average(x["unit"][0:3], "EUR", int(x["currency_year"])) if
-        x["unit"][0:3] in currency_list else x["value"], axis=1)
 
-    # TODO
-    # How to set final currency (snakemake config?) # TODO
-    # Test it # TODO
-    # Modify prepare_costs calls # TODO
-    # find elsewhere where costs.loc[costs.unit.str.contains( ... is used # TODO
+    modified_costs = convert_currency_and_unit(costs, output_currency)
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = (
-        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    modified_costs = (
+        modified_costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
     )
-    costs = costs.fillna(fill_values)
+    modified_costs = modified_costs.fillna(fill_values)
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
-    costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
+    modified_costs["fixed"] = [
+        annuity_factor(v) * v["investment"] * Nyears for i, v in modified_costs.iterrows()
     ]
 
-    return costs
+    return modified_costs
 
 
 def create_network_topology(

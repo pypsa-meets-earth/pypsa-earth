@@ -84,14 +84,12 @@ It further adds extendable ``generators`` with **zero** capacity for
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
-import os
-
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
+from _helpers import configure_logging, create_logger, convert_currency_and_unit, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
@@ -141,8 +139,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
-    costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
-
+    costs = convert_currency_and_unit(costs, config["output_currency"])
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
