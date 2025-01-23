@@ -16,6 +16,7 @@ from _helpers import (
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    BASE_DIR,
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
@@ -554,6 +555,7 @@ rule add_electricity:
 
 rule simplify_network:
     params:
+        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
         renewable=config["renewable"],
         crs=config["crs"],
         cluster_options=config["cluster_options"],
@@ -599,6 +601,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
 
     rule cluster_network:
         params:
+            aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
             build_shape_options=config["build_shape_options"],
             electricity=config["electricity"],
             costs=config["costs"],
@@ -684,6 +687,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 
     rule cluster_network:
         params:
+            aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
             build_shape_options=config["build_shape_options"],
             electricity=config["electricity"],
             costs=config["costs"],
@@ -814,7 +818,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides="data/override_component_attrs",
+            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -881,7 +885,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides="data/override_component_attrs",
+            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
@@ -1625,7 +1629,7 @@ if config["foresight"] == "overnight":
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides="data/override_component_attrs",
+            overrides=BASE_DIR + "/data/override_component_attrs",
             # network=RESDIR
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
@@ -2091,7 +2095,7 @@ if config["foresight"] == "myopic":
                 "co2_sequestration_potential", 200
             ),
         input:
-            overrides="data/override_component_attrs",
+            overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs=CDIR + "costs_{planning_horizons}.csv",

@@ -24,6 +24,8 @@ by
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-earth/pypsa-earth/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-earth/pypsa-earth/main)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
+[![DOI](https://img.shields.io/badge/DOI-10.1016%2Fj.apenergy.2023.121096-blue)](https://doi.org/10.1016/j.apenergy.2023.121096)
+
 
 **PyPSA-Earth: A Global Sector-Coupled Open-Source Multi-Energy System Model**
 
@@ -121,10 +123,10 @@ There are multiple ways to get involved and learn more about our work:
 
 ## Running the model in previous versions
 
-The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.4.1, which is the last version before the repo `pypsa-earth-sec` was merged, the following command can be used:
+The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.6.0, which is the last version before the repo `pypsa-earth-sec` was merged, the following command can be used:
 
 ```bash
-git checkout v0.4.1
+git checkout v0.6.0
 ```
 After checking out the tag, the model can be run as usual. Please make sure to install the required packages for the respective version.
 

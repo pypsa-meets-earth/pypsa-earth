@@ -21,7 +21,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add a function to calculate length-based efficiencies and apply it to the H2 pipelines. `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
+* Support of Linopy for Power and Sector-Coupled Modelling and latest PyPSA version `PR #1172 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1172>`__
+
+* Update workflow to geopandas >= 1.0 `PR #1276 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1276>`__
+
 **Minor Changes and bug-fixing**
+
+* Align structure of the components with consistency checks in the updated PyPSA version `PR #1315 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1315>`__
 
 * Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
 
@@ -31,7 +37,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
-* Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__
+* Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__ and  `PR #1301 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1301>`__
+
+* Add CITATION.cff to guide users on how cite PyPSA-Earth. Insert the DOI badge in the README linking to the very first PyPSA-Earth paper. `PR #1316 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1316>`__
 
 PyPSA-Earth 0.6.0
 =================
@@ -157,6 +165,7 @@ PyPSA-Earth 0.4.0
 * Add an option to merge isolated networks into respective backbone networks by countries. `PR #903 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/903>`__
 
 * Add an option to use csv format for custom demand imports. `PR #995 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/995>`__
+
 
 **Minor Changes and bug-fixing**
 
