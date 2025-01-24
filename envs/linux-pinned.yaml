@@ -97,7 +97,6 @@ dependencies:
 - cycler=0.12.1
 - cyrus-sasl=2.1.27
 - cytoolz=1.0.1
-- CurrencyConverter=0.17.30
 - dask=2024.12.1
 - dask-core=2024.12.1
 - dask-expr=1.1.21
@@ -576,6 +575,7 @@ dependencies:
 - zstd=1.5.6
 - pip:
   - chaospy==4.3.17
+  - currencyconverter==0.17.30
   - fake-useragent==2.0.3
   - googledrivedownloader==0.4
 prefix: /usr/share/miniconda/envs/pypsa-earth
