@@ -87,6 +87,7 @@ dependencies:
 - cpython=3.10.16
 - cycler=0.12.1
 - cytoolz=1.0.1
+- CurrencyConverter=0.17.30
 - dask=2024.12.1
 - dask-core=2024.12.1
 - dask-expr=1.1.21
