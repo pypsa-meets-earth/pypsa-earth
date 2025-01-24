@@ -60,7 +60,7 @@ load_data_paths = get_load_paths_gegis("data", config)
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + f"costs_{config['costs']['year']}.csv"
 else:
-    COSTS = "data/costs.csv"
+    COSTS = "data/costs.csv" # TODO remove this option because it is always better to fetch the cost data from technology-data
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -390,6 +390,9 @@ if not config["enable"].get("build_natura_raster", False):
 
 
 if config["enable"].get("retrieve_cost_data", True):
+
+    # first set country # TODO
+    # eliminate from config["costs"] the config year. Use instead config["scenario"]["planning_horizon"] # TODO
 
     rule retrieve_cost_data:
         params:
