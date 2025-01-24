@@ -25,7 +25,8 @@ dependencies:
 - xlrd
 - openpyxl
 - seaborn
-- snakemake-minimal<8
+- snakemake-minimal<8.25
+- snakemake-storage-plugin-http
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
@@ -45,7 +46,7 @@ dependencies:
 - shapely!=2.0.4
 - pre-commit
 - pyomo
-- matplotlib<=3.5.2
+- matplotlib
 - reverse-geocode
 - country_converter
 - pyogrio

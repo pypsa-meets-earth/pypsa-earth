@@ -539,7 +539,7 @@ def load_bus_region(onshore_path, pipelines):
     if snakemake.params.alternative_clustering:
         countries_list = snakemake.params.countries_list
         layer_id = snakemake.params.layer_id
-        update = snakemake.params.update
+        update = snakemake.params.update_file
         out_logging = snakemake.params.out_logging
         year = snakemake.params.year
         nprocesses = snakemake.params.nprocesses

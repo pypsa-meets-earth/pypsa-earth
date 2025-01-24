@@ -9,8 +9,6 @@ sys.path.append("./scripts")
 from os.path import normpath, exists, isdir
 from shutil import copyfile, move
 
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
 from _helpers import (
     create_country_list,
     get_last_commit_message,
@@ -22,8 +20,6 @@ from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
-
-HTTP = HTTPRemoteProvider()
 
 copy_default_files()
 
@@ -65,16 +61,16 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
 wildcard_constraints:
-    simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+(m|flex)?|all|min",
-    ll="(v|c)([0-9\.]+|opt|all)|all",
-    opts="[-+a-zA-Z0-9\.]*",
-    unc="[-+a-zA-Z0-9\.]*",
-    sopts="[-+a-zA-Z0-9\.\s]*",
-    discountrate="[-+a-zA-Z0-9\.\s]*",
-    demand="[-+a-zA-Z0-9\.\s]*",
-    h2export="[0-9]+m?|all",
-    planning_horizons="20[2-9][0-9]|2100",
+    simpl=r"[a-zA-Z0-9]*|all",
+    clusters=r"[0-9]+(m|flex)?|all|min",
+    ll=r"(v|c)([0-9\.]+|opt|all)|all",
+    opts=r"[-+a-zA-Z0-9\.]*",
+    unc=r"[-+a-zA-Z0-9\.]*",
+    sopts=r"[-+a-zA-Z0-9\.\s]*",
+    discountrate=r"[-+a-zA-Z0-9\.\s]*",
+    demand=r"[-+a-zA-Z0-9\.\s]*",
+    h2export=r"[0-9]+m?|all",
+    planning_horizons=r"20[2-9][0-9]|2100",
 
 
 if config["custom_rules"] is not []:
@@ -395,8 +391,8 @@ if config["enable"].get("retrieve_cost_data", True):
         params:
             version=config["costs"]["version"],
         input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
+            storage(
+                f"https://raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
                 + "costs_{year}.csv",
                 keep_local=True,
             ),
@@ -1039,7 +1035,7 @@ if not config["custom_data"]["gas_network"]:
             alternative_clustering=config["cluster_options"]["alternative_clustering"],
             countries_list=config["countries"],
             layer_id=config["build_shape_options"]["gadm_layer_id"],
-            update=config["build_shape_options"]["update_file"],
+            update_file=config["build_shape_options"]["update_file"],
             out_logging=config["build_shape_options"]["out_logging"],
             year=config["build_shape_options"]["year"],
             nprocesses=config["build_shape_options"]["nprocesses"],
