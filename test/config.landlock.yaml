@@ -9,7 +9,7 @@ countries: ["BW"]
 
 subregion:
   define_by_gadm:
-    Central: 
+    Central:
       BW: [1]
 
 electricity:

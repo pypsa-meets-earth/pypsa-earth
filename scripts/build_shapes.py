@@ -1302,11 +1302,12 @@ def gadm(
 
     return df_gadm
 
+
 def crop_country(gadm_shapes, subregion_config):
     """
-    The crop_country function reconstructs country geometries by combining 
-    individual GADM shapes, incorporating subregions specified in a configuration. 
-    It returns a new GeoDataFrame where the country column includes both full countries 
+    The crop_country function reconstructs country geometries by combining
+    individual GADM shapes, incorporating subregions specified in a configuration.
+    It returns a new GeoDataFrame where the country column includes both full countries
     and their respective subregions, merging the geometries accordingly.
     """
 
@@ -1359,6 +1360,7 @@ def crop_country(gadm_shapes, subregion_config):
         crs=offshore_shapes.crs,
         geometry=country_shapes_new.geometry,
     )
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1427,6 +1429,6 @@ if __name__ == "__main__":
     if subregion_config:
         subregion_shapes = crop_country(gadm_shapes, subregion_config)
     else:
-        subregion_shapes = []
-        
+        subregion_shapes = pd.DataFrame()
+
     save_to_geojson(subregion_shapes, out.subregion_shapes)

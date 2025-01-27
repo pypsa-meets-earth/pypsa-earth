@@ -971,27 +971,30 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     return clustering.network, busmap
 
-def nearest_shape(n, path_shapes, distance_crs):
 
+def nearest_shape(n, path_shapes, distance_crs):
     """
-    The function nearest_shape reallocates buses to the closest "country" shape based on their geographical coordinates, 
+    The function nearest_shape reallocates buses to the closest "country" shape based on their geographical coordinates,
     using the provided shapefile and distance CRS.
 
     """
 
     from shapely.geometry import Point
-    
+
     shapes = gpd.read_file(path_shapes, crs=distance_crs).set_index("name")["geometry"]
 
     for i in n.buses.index:
-        point = Point(n.buses.loc[i,"x"], n.buses.loc[i,"y"])
+        point = Point(n.buses.loc[i, "x"], n.buses.loc[i, "y"])
         distance = shapes.distance(point).sort_values()
         if distance.iloc[0] < 1:
-            n.buses.loc[i,"country"] = distance.index[0]
+            n.buses.loc[i, "country"] = distance.index[0]
         else:
-            logger.info(f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} ")
+            logger.info(
+                f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} "
+            )
 
     return n
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1157,7 +1160,7 @@ if __name__ == "__main__":
         subregion_shapes = subregion_config["path_custom_shapes"]
     else:
         subregion_shapes = False
-        
+
     if subregion_shapes:
         logger.info("Activate subregion classificaition")
         distance_crs = snakemake.params.crs["distance_crs"]

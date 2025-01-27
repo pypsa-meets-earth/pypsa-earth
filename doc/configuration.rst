@@ -176,7 +176,7 @@ Specifies the options to build the shapes in which the region of interest (``cou
 ``subregion``
 =============================
 
-If enabled, this option allows a region of interest (``countries``) to be redefined into subregions, 
+If enabled, this option allows a region of interest (``countries``) to be redefined into subregions,
 which can be activated at various stages of the workflow. Currently, it is only used in the ``simplify_network`` rule.
 
 .. literalinclude:: ../config.default.yaml
