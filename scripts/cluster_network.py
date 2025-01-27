@@ -137,6 +137,7 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
+import logging
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
@@ -346,8 +347,12 @@ def distribute_clusters(
         clusters * clusters - 2 * clusters * L * n_clusters
     )  # + (L * n_clusters) ** 2 (constant)
     if solver_name == "gurobi":
-        logger.getLogger("gurobipy").propagate = False
-
+        logging.getLogger("gurobipy").propagate = False
+    elif solver_name not in ["scip", "cplex", "xpress", "copt", "mosek"]:
+        logger.error(
+            f"The configured solver `{solver_name}` does not support quadratic objectives. Falling back to `scip`."
+        )
+        solver_name = "scip"
     m.solve(solver_name=solver_name)
     return m.solution["n"].to_series().astype(int)
 
