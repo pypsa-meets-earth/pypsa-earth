@@ -121,6 +121,7 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
+import logging
 import os
 from functools import reduce
 
@@ -137,7 +138,6 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
-import logging
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
