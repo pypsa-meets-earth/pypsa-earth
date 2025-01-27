@@ -125,9 +125,9 @@ import os
 from functools import reduce
 
 import geopandas as gpd
+import linopy
 import numpy as np
 import pandas as pd
-import linopy
 import pypsa
 from _helpers import (
     REGION_COLS,
@@ -338,15 +338,16 @@ def distribute_clusters(
 
     m = linopy.Model()
     clusters = m.add_variables(
-        lower=1, upper=N, coords=[L.index], name="n", integer=True)
-    
+        lower=1, upper=N, coords=[L.index], name="n", integer=True
+    )
+
     m.add_constraints(clusters.sum() == n_clusters, name="tot")
     m.objective = (
         clusters * clusters - 2 * clusters * L * n_clusters
     )  # + (L * n_clusters) ** 2 (constant)
     if solver_name == "gurobi":
         logger.getLogger("gurobipy").propagate = False
-    
+
     m.solve(solver_name=solver_name)
     return m.solution["n"].to_series().astype(int)
 
