@@ -39,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add CITATION.cff to guide users on how cite PyPSA-Earth. Insert the DOI badge in the README linking to the very first PyPSA-Earth paper. `PR #1316 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1316>`__
 
+* Remove pyomo from cluster_network and introduce scip. `PR #1320 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1323>`__
+
 PyPSA-Earth 0.6.0
 =================
 
