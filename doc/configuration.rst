@@ -189,6 +189,15 @@ which can be activated at various stages of the workflow. Currently, it is only 
    :widths: 25,10,22,27
    :file: configtables/subregion.csv
 
+There are several formats for GADM IDs depending on the version, so before using this feature, please review the ``resources/shapes/gadm_shape.geojson`` file which can be created using the command:
+
+.. code:: bash
+
+    snakemake -j 1 build_shapes
+
+.. note::
+   The rule ``build_shapes`` currently use `Version 4.1  <https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/>`_ for their GADM data.
+
 .. _clean_osm_data_options_cf:
 
 ``clean_osm_data_options``

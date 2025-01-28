@@ -9,8 +9,7 @@ countries: ["BW"]
 
 subregion:
   define_by_gadm:
-    Central:
-      BW: [1]
+    Central: [BW.1]
 
 electricity:
   renewable_carriers: [solar, csp, onwind, hydro]
