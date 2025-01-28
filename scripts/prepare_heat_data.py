@@ -104,6 +104,44 @@ def prepare_heat_data(n):
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
+    energy_col_names = nodal_energy_totals.columns
+
+    # TODO reimplement using DRY approach
+    # a proper structure of the inputs is essential
+    residential_cols = energy_col_names[energy_col_names.str.contains("residential")]
+    services_cols = energy_col_names[energy_col_names.str.contains("services")]
+
+    energy_residential = nodal_energy_totals.loc[:, residential_cols].sum().sum()
+    energy_services = nodal_energy_totals.loc[:, services_cols].sum().sum()
+    energy_total = nodal_energy_totals.sum().sum()
+
+    nodal_energy_totals[f"heat residential space"] = (
+        SHARE_HEAT_RESID_DEMAND * energy_residential
+    )
+    nodal_energy_totals[f"heat residential water"] = (
+        SHARE_WATER_RESID_DEMAND * energy_residential
+    )
+    nodal_energy_totals[f"heat services space"] = (
+        SHARE_HEAT_SERVICES_DEMAND * energy_services
+    )
+    nodal_energy_totals[f"heat services water"] = (
+        SHARE_WATER_SERVICES_DEMAND * energy_services
+    )
+
+    nodal_energy_totals[f"cool residential space"] = (
+        SHARE_COOL_RESID_DEMAND * energy_residential
+    )
+    nodal_energy_totals[f"cool services space"] = (
+        SHARE_COOL_SERVICES_DEMAND * energy_services
+    )
+
+    nodal_energy_totals[f"electricity residential space"] = (
+        SHARE_ELECTRICITY_RESID_SPACE * energy_residential
+    )
+    nodal_energy_totals[f"electricity services space"] = (
+        SHARE_ELECTRICITY_SERVICES_SPACE * energy_services
+    )
+
     # heating/cooling demand profiles
     # copy forward the daily average heat demand into each hour, so it can be multiplied by the intraday profile
     daily_space_heat_demand = (
