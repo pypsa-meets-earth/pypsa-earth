@@ -211,11 +211,11 @@ def prepare_heat_data(n):
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
 
     # subtract from electricity load since heat demand already in heat_demand #TODO v0.1
-    # electric_nodes = n.loads.index[n.loads.carrier == "electricity"]
-    # n.loads_t.p_set[electric_nodes] = (
-    #     n.loads_t.p_set[electric_nodes]
-    #     - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
-    # )
+    electric_nodes = n.loads.index[n.loads.carrier == "electricity"]
+    n.loads_t.p_set[electric_nodes] = (
+        n.loads_t.p_set[electric_nodes]
+        - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
+    )
 
     # TODO probably no need to cool water
     # TODO it's possible to account for weekday/weekend differences
