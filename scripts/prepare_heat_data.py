@@ -238,11 +238,15 @@ def prepare_heat_data(n):
         # TODO Implement calibration
         # it appears there is no cooling in UN statistics
         # nodal_energy_totals[f"total {use}"]
-        cooling_demand[f"{use}"] = cooling_demand_shape
-        # cooling_demand[f"{use}"] = (
-        #    cooling_demand_shape / cooling_demand_shape.sum()
-        # ).multiply(
-        # ) * 1e6  # TODO v0.0.2
+        # cooling_demand[f"{use}"] = cooling_demand_shape
+        cooling_demand[f"{use}"] = (
+            cooling_demand_shape / cooling_demand_shape.sum()
+        ).multiply(
+            (
+                nodal_energy_totals[f"cool residential space"]
+                + nodal_energy_totals[f"cool services space"]
+            )
+        )
 
     cooling_demand = pd.concat(cooling_demand, axis=1)
 
