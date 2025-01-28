@@ -339,13 +339,13 @@ def distribute_clusters(
 
     m = linopy.Model()
     clusters = m.add_variables(
-        lower=1, upper=N, coords=[L.index], name="n", integer=True
+        lower=1, upper=N, coords=[distribution_factor.index], name="n", integer=True
     )
 
     m.add_constraints(clusters.sum() == n_clusters, name="tot")
     m.objective = (
-        clusters * clusters - 2 * clusters * L * n_clusters
-    )  # + (L * n_clusters) ** 2 (constant)
+        clusters * clusters - 2 * clusters * distribution_factor * n_clusters
+    ).sum()
     if solver_name == "gurobi":
         logging.getLogger("gurobipy").propagate = False
     elif solver_name not in ["scip", "cplex", "xpress", "copt", "mosek"]:
