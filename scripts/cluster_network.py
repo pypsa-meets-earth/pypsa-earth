@@ -343,6 +343,7 @@ def distribute_clusters(
     )
 
     m.add_constraints(clusters.sum() == n_clusters, name="tot")
+    # leave out constant in objective (L * n_clusters) ** 2 as it doesn't affect the clustering results
     m.objective = (
         clusters * clusters - 2 * clusters * distribution_factor * n_clusters
     ).sum()
