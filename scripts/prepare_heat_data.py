@@ -12,6 +12,24 @@ import pytz
 import xarray as xr
 from _helpers import mock_snakemake
 
+# TODO Add to the data properly
+# Data on space heating and cooling may be missed from UN database
+# Data sourse: EIA Surveys
+#     - 2018 (commertial buildings)
+#     - 2020 (residential building)
+# Heating includes both space heating and hot water
+SHARE_HEAT_RESID_DEMAND = 0.12
+SHARE_WATER_RESID_DEMAND = 0.12
+
+SHARE_HEAT_SERVICES_DEMAND = 0.32
+SHARE_WATER_SERVICES_DEMAND = 0.05
+
+SHARE_COOL_RESID_DEMAND = 0.19
+SHARE_COOL_SERVICES_DEMAND = 0.11
+
+SHARE_ELECTRICITY_RESID_SPACE = 0.10
+SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
+
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     """
