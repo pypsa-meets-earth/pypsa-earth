@@ -30,6 +30,8 @@ SHARE_COOL_SERVICES_DEMAND = 0.11
 SHARE_ELECTRICITY_RESID_SPACE = 0.10
 SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
 
+SHARE_DISTRICT_HEAT = 0.1
+
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     """
@@ -100,6 +102,8 @@ def prepare_heat_data(n):
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
+    # TODO keeping the solution consistent
+    nodal_energy_totals["district heat share"] = SHARE_DISTRICT_HEAT
     # district heat share not weighted by population
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
