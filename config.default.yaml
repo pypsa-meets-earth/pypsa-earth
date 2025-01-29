@@ -119,7 +119,7 @@ build_shape_options:
 
 subregion:
   define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
-  path_custom_shapes: false # (optional )provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
 
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes

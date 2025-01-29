@@ -1155,14 +1155,15 @@ if __name__ == "__main__":
 
     subregion_config = snakemake.params.subregion
     if subregion_config["define_by_gadm"]:
+        logger.info("Activate subregion classificaition based on GADM")
         subregion_shapes = snakemake.input.subregion_shapes
     elif subregion_config["path_custom_shapes"]:
+        logger.info("Activate subregion classificaition based on custom shapes")
         subregion_shapes = subregion_config["path_custom_shapes"]
     else:
         subregion_shapes = False
 
     if subregion_shapes:
-        logger.info("Activate subregion classificaition")
         distance_crs = snakemake.params.crs["distance_crs"]
         n = nearest_shape(n, subregion_shapes, distance_crs)
 
