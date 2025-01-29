@@ -43,7 +43,7 @@ configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
 
 
-write_config(config)
+write_config(config, "actual_config.yaml")
 # check_config_version(config=config)
 
 config.update({"git_commit": get_last_commit_message(".")})
