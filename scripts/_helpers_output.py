@@ -6,7 +6,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
+import pandas as pd
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -196,3 +196,11 @@ def write_dict_key(
     # )
 
     f.write("</html>")
+
+def get_vals(test_dict, key_list):
+  df = pd.json_normalize(test_dict, sep=" ")
+  d_flat = df.to_dict(orient='records')[0]
+
+  res = [(key, value) for key, value in d_flat.items() if key_list in key.lower()]
+
+  return(res)
