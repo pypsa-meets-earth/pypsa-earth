@@ -43,11 +43,18 @@ CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 CONFIGS_STORE_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
-def write_config(config):
-    # TODO Add licensing information
-    with open("config_test.yaml", "w") as outfile:
-        yaml.dump(config, outfile, default_flow_style=False)
+def write_config(config, fl_name):
+    license_str_list = [
+    "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors",
+    "#",
+    "# SPDX-License-Identifier: CC0-1.0\n\r"
+    ]
+    license_str = "\n\r".join(license_str_list)
 
+    # TODO keep a copy if the file exists?
+    with open(fl_name, "w") as outfile:
+        outfile.write(license_str)
+        yaml.dump(config, outfile, default_flow_style=False)
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
