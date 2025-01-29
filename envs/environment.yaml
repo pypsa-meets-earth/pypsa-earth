@@ -44,7 +44,7 @@ dependencies:
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
-- pyomo
+- scip!=9.2.0  # dependency of pyscipopt, temporary fix
 - matplotlib<=3.5.2
 - reverse-geocode
 - country_converter

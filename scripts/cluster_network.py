@@ -121,13 +121,14 @@ Exemplary unsolved network clustered to 37 nodes:
     :align: center
 """
 
+import logging
 import os
 from functools import reduce
 
 import geopandas as gpd
+import linopy
 import numpy as np
 import pandas as pd
-import pyomo.environ as po
 import pypsa
 from _helpers import (
     REGION_COLS,
@@ -336,47 +337,25 @@ def distribute_clusters(
         distribution_factor.sum(), 1.0, rtol=1e-3
     ), f"Country weights L must sum up to 1.0 when distributing clusters. Is {distribution_factor.sum()}."
 
-    m = po.ConcreteModel()
-
-    def n_bounds(model, *n_id):
-        """
-        Create a function that makes a bound pair for pyomo.
-
-        Use n_bounds(model, n_id) if N is Single-Index
-        Use n_bounds(model, *n_id) if N is Multi-Index
-        Example: https://pyomo.readthedocs.io/en/stable/pyomo_modeling_components/Variables.html
-
-        Returns
-        -------
-        bounds = A function (or Python object) that gives a (lower,upper) bound pair i.e.(1,10) for the variable
-        """
-        return (1, N[n_id])
-
-    m.n = po.Var(list(distribution_factor.index), bounds=n_bounds, domain=po.Integers)
-    m.tot = po.Constraint(expr=(po.summation(m.n) == n_clusters))
-    m.objective = po.Objective(
-        expr=sum(
-            (m.n[i] - distribution_factor.loc[i] * n_clusters) ** 2
-            for i in distribution_factor.index
-        ),
-        sense=po.minimize,
+    m = linopy.Model()
+    clusters = m.add_variables(
+        lower=1, upper=N, coords=[distribution_factor.index], name="n", integer=True
     )
 
-    opt = po.SolverFactory(solver_name)
-    if not opt.has_capability("quadratic_objective"):
-        logger.warning(
-            f"The configured solver `{solver_name}` does not support quadratic objectives. Falling back to `ipopt`."
+    m.add_constraints(clusters.sum() == n_clusters, name="tot")
+    # leave out constant in objective (L * n_clusters) ** 2 as it doesn't affect the clustering results
+    m.objective = (
+        clusters * clusters - 2 * clusters * distribution_factor * n_clusters
+    ).sum()
+    if solver_name == "gurobi":
+        logging.getLogger("gurobipy").propagate = False
+    elif solver_name not in ["scip", "cplex", "xpress", "copt", "mosek"]:
+        logger.error(
+            f"The configured solver `{solver_name}` does not support quadratic objectives. Falling back to `scip`."
         )
-        opt = po.SolverFactory("ipopt")
-
-    results = opt.solve(m)
-    assert (
-        results["Solver"][0]["Status"] == "ok"
-    ), f"Solver returned non-optimally: {results}"
-
-    return (
-        pd.Series(m.n.get_values(), index=distribution_factor.index).round().astype(int)
-    )
+        solver_name = "scip"
+    m.solve(solver_name=solver_name)
+    return m.solution["n"].to_series().astype(int)
 
 
 def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
