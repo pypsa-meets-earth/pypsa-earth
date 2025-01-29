@@ -204,3 +204,65 @@ def get_vals(test_dict, key_list):
   res = [(key, value) for key, value in d_flat.items() if key_list in key.lower()]
 
   return(res)
+
+def parse_config(config, fl_name=None, style_def=style):
+  res = dict(get_vals(config, "year"))
+
+  str_list = [None] * len(res)
+  k = 0
+  for i, j in res.items():
+    str_list[k] = str(i) + ": " + str(j)
+    k += 1
+
+  html_content_string = "<br />".join(str_list) + "<br />"
+
+  print("The config looks like follows:")
+  print(html_content_string)
+  print("-------------------------------")  
+
+
+  # define styles to be used in htmls generated below
+  coral_bg = "coral_bg"
+  mint_bg = "mint_bg"
+  blue_bg = "blue_bg"  
+
+  f = open("config_check.html", "a")
+
+  f.write("<html>")
+  f.write(style)
+  write_html(
+      style=mint_bg,
+      fl=f,
+      type=mint_bg,
+      str_="------------------------------------------ <br />",
+  )  
+  write_html(
+      style=mint_bg,
+      fl=f,
+      type=mint_bg,
+      str_="------------------------------------------ <br />",
+  )
+  write_html(
+      style=mint_bg,
+      fl=f,
+      type=mint_bg,
+      str_="The current configuration contains the following year definitions:<br />",
+  )  
+  write_html(
+      style=mint_bg,
+      fl=f,
+      type=mint_bg,
+      str_=html_content_string,
+  )
+  write_html(
+      style=mint_bg,
+      fl=f,
+      type=mint_bg,
+      str_="------------------------------------------ <br />",
+  )
+
+
+
+
+
+
