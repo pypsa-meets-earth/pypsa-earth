@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+
 import pandas as pd
 import yaml
 
@@ -144,6 +145,19 @@ gold_hd {
 </style>"""
 
 
+def make_license_text(html=False):
+    license_str_list = [
+        "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors",
+        "#",
+        "# SPDX-License-Identifier: CC0-1.0\n\r",
+    ]
+    if html:
+        license_str = "<br />".join(license_str_list)
+    else:
+        license_str = "\n\r".join(license_str_list)
+    return license_str
+
+
 def write_html(style, fl, type, str_):
     fl.write("<%(type)s>%(str)s</%(type)s>" % {"type": type, "str": str_})
 
@@ -197,72 +211,68 @@ def write_dict_key(
 
     f.write("</html>")
 
+
 def get_vals(test_dict, key_list):
-  df = pd.json_normalize(test_dict, sep=" ")
-  d_flat = df.to_dict(orient='records')[0]
+    df = pd.json_normalize(test_dict, sep=" ")
+    d_flat = df.to_dict(orient="records")[0]
 
-  res = [(key, value) for key, value in d_flat.items() if key_list in key.lower()]
+    res = [(key, value) for key, value in d_flat.items() if key_list in key.lower()]
 
-  return(res)
+    return res
+
 
 def parse_config(config, fl_name=None, style_def=style):
-  res = dict(get_vals(config, "year"))
+    res = dict(get_vals(config, "year"))
 
-  str_list = [None] * len(res)
-  k = 0
-  for i, j in res.items():
-    str_list[k] = str(i) + ": " + str(j)
-    k += 1
+    str_list = [None] * len(res)
+    k = 0
+    for i, j in res.items():
+        str_list[k] = str(i) + ": " + str(j)
+        k += 1
 
-  html_content_string = "<br />".join(str_list) + "<br />"
+    html_content_string = "<br />".join(str_list) + "<br />"
 
-  print("The config looks like follows:")
-  print(html_content_string)
-  print("-------------------------------")  
+    print("The config looks like follows:")
+    print(html_content_string)
+    print("-------------------------------")
 
+    # define styles to be used in htmls generated below
+    coral_bg = "coral_bg"
+    mint_bg = "mint_bg"
+    blue_bg = "blue_bg"
 
-  # define styles to be used in htmls generated below
-  coral_bg = "coral_bg"
-  mint_bg = "mint_bg"
-  blue_bg = "blue_bg"  
+    f = open("config_check.html", "a")
 
-  f = open("config_check.html", "a")
-
-  f.write("<html>")
-  f.write(style)
-  write_html(
-      style=mint_bg,
-      fl=f,
-      type=mint_bg,
-      str_="------------------------------------------ <br />",
-  )  
-  write_html(
-      style=mint_bg,
-      fl=f,
-      type=mint_bg,
-      str_="------------------------------------------ <br />",
-  )
-  write_html(
-      style=mint_bg,
-      fl=f,
-      type=mint_bg,
-      str_="The current configuration contains the following year definitions:<br />",
-  )  
-  write_html(
-      style=mint_bg,
-      fl=f,
-      type=mint_bg,
-      str_=html_content_string,
-  )
-  write_html(
-      style=mint_bg,
-      fl=f,
-      type=mint_bg,
-      str_="------------------------------------------ <br />",
-  )
-
-
-
-
-
-
+    f.write("<html>")
+    f.write(style)
+    write_html(
+        style=mint_bg,
+        fl=f,
+        type=mint_bg,
+        str_="------------------------------------------ <br />",
+    )
+    f.write(make_license_text(html=True))
+    write_html(
+        style=mint_bg,
+        fl=f,
+        type=mint_bg,
+        str_="------------------------------------------ <br />",
+    )
+    write_html(
+        style=mint_bg,
+        fl=f,
+        type=mint_bg,
+        str_="The current configuration contains the following year definitions:<br />",
+    )
+    write_html(
+        style=mint_bg,
+        fl=f,
+        type=mint_bg,
+        str_=html_content_string,
+    )
+    write_html(
+        style=mint_bg,
+        fl=f,
+        type=mint_bg,
+        str_="------------------------------------------ <br />",
+    )
