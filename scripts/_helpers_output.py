@@ -232,10 +232,6 @@ def parse_config(config, fl_name=None, style_def=style):
 
     html_content_string = "<br />".join(str_list) + "<br />"
 
-    print("The config looks like follows:")
-    print(html_content_string)
-    print("-------------------------------")
-
     # define styles to be used in htmls generated below
     coral_bg = "coral_bg"
     mint_bg = "mint_bg"
