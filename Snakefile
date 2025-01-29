@@ -19,6 +19,9 @@ from _helpers import (
     write_config,
     BASE_DIR,
 )
+from _helpers_output import (
+    parse_config,
+)
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
@@ -45,6 +48,7 @@ configfile: "config.yaml"
 
 write_config(config, "actual_config.yaml")
 # check_config_version(config=config)
+parse_config(config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 
