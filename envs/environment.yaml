@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-name: pypsa-earth
+name: pypsa-earth-31_1_25
 channels:
 - conda-forge
 - bioconda
@@ -88,4 +88,4 @@ dependencies:
 - gurobi
 
 - pip:
-  - google-drive-downloader
+  - googledrivedownloader
