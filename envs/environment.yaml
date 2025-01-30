@@ -88,4 +88,4 @@ dependencies:
 - gurobi
 
 - pip:
-  - googledrivedownloader
+  - googledrivedownloader>=1.1
