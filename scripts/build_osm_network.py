@@ -581,7 +581,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         line_geom = df_l.loc[i, "geometry"]
 
         # get the indices of the points that intersect with the line
-        points_indexes = group[buffer_df.index.name].tolist()  # <----- Error Here
+        points_indexes = group[buffer_df.index.name].tolist()
 
         # get the geometries of the points that intersect with the line
         all_points = df_p.loc[points_indexes, "geometry"]
