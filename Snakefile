@@ -228,6 +228,7 @@ rule build_shapes:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
         countries=config["countries"],
+        subregion=config["subregion"],
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
@@ -240,6 +241,7 @@ rule build_shapes:
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     log:
         "logs/" + RDIR + "build_shapes.log",
     benchmark:
@@ -555,7 +557,7 @@ rule simplify_network:
     params:
         aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
         renewable=config["renewable"],
-        geo_crs=config["crs"]["geo_crs"],
+        crs=config["crs"],
         cluster_options=config["cluster_options"],
         countries=config["countries"],
         build_shape_options=config["build_shape_options"],
@@ -564,11 +566,14 @@ rule simplify_network:
         config_lines=config["lines"],
         config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
+        subregion=config["subregion"],
     input:
         network="networks/" + RDIR + "elec.nc",
         tech_costs=COSTS,
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         regions_onshore="resources/"
