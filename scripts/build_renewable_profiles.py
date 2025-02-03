@@ -670,7 +670,7 @@ if __name__ == "__main__":
             # add zero values for out of hydrobasins elements
             if len(bus_notin_hydrobasins) > 0:
                 regions_notin = regions.loc[
-                    bus_notin_hydrobasins, ["x", "y", "country"]
+                    bus_notin_hydrobasins, ["x", "y", "country", "shape_id"]
                 ]
                 logger.warning(
                     f"Buses {bus_notin_hydrobasins} are not contained into hydrobasins."
@@ -684,7 +684,11 @@ if __name__ == "__main__":
                     ),
                     dims=("plant", "time"),
                     coords=dict(
-                        plant=bus_notin_hydrobasins,
+                        plant=(
+                            bus_notin_hydrobasins
+                            if not snakemake.params.alternative_clustering
+                            else regions_notin["shape_id"].values
+                        ),
                         time=inflow.coords["time"],
                     ),
                 )

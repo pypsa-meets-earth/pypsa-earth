@@ -41,6 +41,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove pyomo from cluster_network and introduce scip. `PR #1320 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1323>`__
 
+* Fix mixup of plant locations for hydro inflow and inflow overestimation `PR #1322 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1322>`__
+
 PyPSA-Earth 0.6.0
 =================
 
