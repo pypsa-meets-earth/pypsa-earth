@@ -1,21 +1,14 @@
 name: Dev Container Build and Push Image
 
-# This workflow runs when any of the following occur:
-# - A push is made to a branch called `main` or `seed`
-# - A tag starting with "v" is created
-# - A pull request is created or updated
 on:
-  push:
-    branches:
-    - main
-    - seed
-    tags:
-    - v*
-  pull_request:
-  # This creates an environment variable called `IMAGE_NAME ` with the value `ghtoken_product_demo`.
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+    - envs/linux-pinned.yaml
+
 env:
-  IMAGE_NAME: ghtoken_product_demo
+  IMAGE_NAME: pypsa-earth
 #
 jobs:
   # This pushes the image to GitHub Packages.
