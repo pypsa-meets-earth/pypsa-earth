@@ -126,7 +126,7 @@ The model can be run in previous versions by checking out the respective tag. Fo
 ```bash
 git checkout v0.6.0
 ```
-After checking out the tag, the model can be run as usual. Please make sure use the environment built for the respective version.
+After checking out the tag, the model can be run as usual. Please make sure to use the environment built for the respective version.
 
 
 
