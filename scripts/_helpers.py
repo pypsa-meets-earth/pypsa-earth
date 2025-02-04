@@ -1216,60 +1216,6 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
-    """
-    Function to retrieve a specific layer id of a geopackage for a selection of
-    countries.
-
-    Parameters
-    ----------
-    country_list : str
-        List of the countries
-    layer_id : int
-        Layer to consider in the format GID_{layer_id}.
-        When the requested layer_id is greater than the last available layer, then the last layer is selected.
-        When a negative value is requested, then, the last layer is requested
-    """
-    # initialization of the list of geodataframes
-    geodf_list = []
-
-    for country_code in country_list:
-        # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
-
-        # get layers of a geopackage
-        list_layers = fiona.listlayers(file_gpkg)
-
-        # get layer name
-        if layer_id < 0 | layer_id >= len(list_layers):
-            # when layer id is negative or larger than the number of layers, select the last layer
-            layer_id = len(list_layers) - 1
-        code_layer = np.mod(layer_id, len(list_layers))
-        layer_name = (
-            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
-        )
-
-        # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
-
-        # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-        ]
-
-        # create a subindex column that is useful
-        # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
-
-        # concatenate geodataframes
-        geodf_list = pd.concat([geodf_list, geodf_temp])
-
-    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
-
-    return geodf_GADM
-
-
 def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
     """
     Parameters
