@@ -45,6 +45,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix mixup of plant locations for hydro inflow and inflow overestimation `PR #1322 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1322>`__
 
+* Fix namibia geofk, line country tag mismatch and minor fixes `PR #1330 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1330>`__
+
 PyPSA-Earth 0.6.0
 =================
 
