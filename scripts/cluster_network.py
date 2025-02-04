@@ -134,7 +134,7 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
-    get_aggregation_strategies,
+    locate_bus,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -359,23 +359,13 @@ def distribute_clusters(
 
 
 def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
-    gdf = gpd.read_file(inputs.gadm_shapes)
 
-    def locate_bus(coords, co):
-        gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
-        point = Point(coords["x"], coords["y"])
-
-        try:
-            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
-
-        except ValueError:
-            return gdf_co[
-                gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-            ]["GADM_ID"].item()
-
-    buses = n.buses
-    buses["gadm_{}".format(gadm_layer_id)] = buses[["x", "y", "country"]].apply(
-        lambda bus: locate_bus(bus[["x", "y"]], bus["country"]), axis=1
+    buses = locate_bus(
+        n.buses,
+        country_list,
+        gadm_layer_id,
+        inputs.gadm_shapes,
+        gadm_clustering=True,
     )
 
     buses["gadm_subnetwork"] = (
