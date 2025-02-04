@@ -325,6 +325,7 @@ if __name__ == "__main__":
             clusters="4",
             ll="c1",
             opts="Co2L-4H",
+            configfile="test/config.sector.yaml",
         )
 
     configure_logging(snakemake)
@@ -372,10 +373,10 @@ if __name__ == "__main__":
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
-                co2limit = float(m[0]) * snakemake.params.electricity["co2base"]
+                co2limit = float(m[0]) * float(snakemake.params.electricity["co2base"])
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.params.electricity["co2limit"]
+                co2limit = float(snakemake.params.electricity["co2limit"])
                 logger.info("Setting CO2 limit according to config value.")
             add_co2limit(n, co2limit, Nyears)
             break

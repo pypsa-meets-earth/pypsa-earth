@@ -21,21 +21,6 @@ logger = logging.getLogger(__name__)
 gpd_version = StrictVersion(gpd.__version__)
 
 
-def map_industry_to_buses(df, countries, gadm_level, shapes_path, gadm_clustering):
-    """
-    Load hotmaps database of industrial sites and map onto bus regions. Build
-    industrial demand... Change name and add other functions.
-
-    Function similar to aviation/shipping. Use functions to disaggregate.
-    Only cement not steel - proof of concept.
-    Change hotmaps to more descriptive name, etc.
-    """
-    df = locate_bus(df, countries, gadm_level, shapes_path, gadm_clustering).set_index(
-        "gadm_" + str(gadm_level)
-    )
-    return df
-
-
 def build_nodal_distribution_key(
     industrial_database, regions, industry, countries
 ):  # returns percentage of co2 emissions
@@ -121,7 +106,7 @@ if __name__ == "__main__":
     regions = gpd.read_file(snakemake.input.regions_onshore)
     shapes_path = snakemake.input.shapes_path
 
-    gadm_level = snakemake.params.gadm_level
+    gadm_layer_id = snakemake.params.gadm_layer_id
     countries = snakemake.params.countries
     gadm_clustering = snakemake.params.alternative_clustering
 
@@ -165,13 +150,14 @@ if __name__ == "__main__":
 
     industry = geo_locs.industry.unique()
 
-    industrial_database = map_industry_to_buses(
+    # Map industries to gadm shapes
+    industrial_database = locate_bus(
         geo_locs[geo_locs.quality != "unavailable"],
         countries,
-        gadm_level,
+        gadm_layer_id,
         shapes_path,
         gadm_clustering,
-    )
+    ).set_index("gadm_" + str(gadm_layer_id))
 
     keys = build_nodal_distribution_key(
         industrial_database, regions, industry, countries

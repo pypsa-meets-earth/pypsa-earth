@@ -39,19 +39,19 @@ def select_ports(n):
         keep_default_na=False,
     ).squeeze()
 
-    gadm_level = snakemake.params.gadm_level
+    gadm_layer_id = snakemake.params.gadm_layer_id
 
     ports = locate_bus(
         ports,
         countries,
-        gadm_level,
+        gadm_layer_id,
         snakemake.input.shapes_path,
         snakemake.params.alternative_clustering,
     )
 
     # TODO: revise if ports quantity and property by shape become relevant
     # drop duplicated entries
-    gcol = "gadm_{}".format(gadm_level)
+    gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports
