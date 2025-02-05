@@ -186,6 +186,35 @@ def prepare_heat_data(n):
         snakemake.input.cooling_profile, index_col=0
     )  # TODO GHALAT
 
+    calibr_heat_df = pd.read_csv(
+        os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0
+    )
+    calibr_heat_df["country"] = "US"
+    calibr_cool_df = pd.read_csv(
+        os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0
+    )
+    calibr_cool_df["country"] = "US"
+
+    calibr_heat_buses_df = locate_bus(
+        df=calibr_heat_df,
+        countries=["US"],
+        gadm_level=1,
+        path_to_gadm=shapes_path,
+        gadm_clustering=True,
+        dropnull=True,
+        col_out=None,
+    )
+
+    calibr_cool_buses_df = locate_bus(
+        df=calibr_cool_df,
+        countries=["US"],
+        gadm_level=1,
+        path_to_gadm=shapes_path,
+        gadm_clustering=True,
+        dropnull=True,
+        col_out=None,
+    )   
+
     loads = ["heating", "cooling"]
     sectors = ["residential", "services"]
     uses = ["water", "space"]
@@ -212,11 +241,21 @@ def prepare_heat_data(n):
         else:
             heating_demand_shape = intraday_year_profile_heating
 
+        if CALIBRATE_LOAD:
+            # TODO Account for the differences in a column name alternative/Voronoi clustering
+            heating_demand_shape = scale_demand(
+                data_df=heating_demand_shape,
+                calibr_df=calibr_heat_buses_df,
+                load_mode="heating",
+                geom_id="gadm_1",
+            )
+
         heat_demand[f"{sector} {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
             nodal_energy_totals[f"total {sector} {use}"]
         ) * 1e6  # TODO v0.0.2
+
         electric_heat_supply[f"{sector} {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
@@ -259,10 +298,15 @@ def prepare_heat_data(n):
         else:
             cooling_demand_shape = intraday_year_profile_cooling
 
-        # TODO Implement calibration
-        # it appears there is no cooling in UN statistics
-        # nodal_energy_totals[f"total {use}"]
-        # cooling_demand[f"{use}"] = cooling_demand_shape
+        if CALIBRATE_LOAD:
+            # TODO Account for the differences in a column name alternative/Voronoi clustering
+            cooling_demand_shape = scale_demand(
+                data_df=cooling_demand_shape,
+                calibr_df=calibr_cool_buses_df,
+                load_mode="cooling",
+                geom_id="gadm_1",
+            )
+
         cooling_demand[f"{use}"] = (
             cooling_demand_shape / cooling_demand_shape.sum()
         ).multiply(
