@@ -47,7 +47,18 @@ if __name__ == "__main__":
 
     pop = pd.DataFrame(pop, index=clustered_regions.index)
 
-    pop["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
+    if alternative_clustering:
+        regions_tmp = gpd.read_file(snakemake.input.regions_onshore)
+        regions_tmp["GADM_ID"] = regions_tmp["name"]
+        # TODO pop is longer than rigions_onshore
+        pop["ct"] = regions_tmp.set_index("GADM_ID").country
+    else:
+        pop["ct"] = (
+            gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
+        )
+
+    pop["ct"] = "US"
+
     country_population = pop.total.groupby(pop.ct).sum()
     pop["fraction"] = (pop.total / pop.ct.map(country_population)).fillna(0.0)
 
