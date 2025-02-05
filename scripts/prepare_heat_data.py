@@ -10,7 +10,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from _helpers import mock_snakemake
+from _helpers import locate_bus, mock_snakemake
 
 # TODO Add to the data properly
 # Data on space heating and cooling may be missed from UN database
