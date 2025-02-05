@@ -5,6 +5,7 @@
 version: 0.4.1
 
 policy_config:
+  # TODO The documentation is needed
   hydrogen:
     temporal_matching: "no_res_matching" # either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
     spatial_matching: false
@@ -22,8 +23,12 @@ demand_data:
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
+# TODO Check if it can be excluded
 fossil_reserves:
   oil: 100 #TWh Maybe redundant
+
+industry:
+  reference_year: 2015  
 
 sector:
   gas:
@@ -70,7 +75,6 @@ sector:
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
   solar_cf_correction: 0.788457 # = >>>1/1.2683
-
 
   # parameters of the mobility sector
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
@@ -156,6 +160,7 @@ sector:
   # parameters of H2 production, transport and storage
   hydrogen:
     network: true
+    # TODO The scenario assumptions must be documented 
     H2_retrofit_capacity_per_CH4: 0.6
     network_limit: 2000 #GWkm
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
@@ -180,7 +185,6 @@ sector:
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
 
-  hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
 
