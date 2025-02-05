@@ -1270,64 +1270,93 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
     return geodf_GADM
 
 
-def locate_bus(
-    coords,
-    co,
-    gadm_level,
-    path_to_gadm=None,
-    gadm_clustering=False,
-    col="name",
-):
+def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
     """
-    Function to locate the right node for a coordinate set input coords of
-    point.
-
     Parameters
     ----------
-    coords: pandas dataseries
-        dataseries with 2 rows x & y representing the longitude and latitude
-    co: string (code for country where coords are MA Morocco)
-        code of the countries where the coordinates are
+    country_list : str
+        List of the countries
+    layer_id : int
+        Layer to consider in the format GID_{layer_id}.
+        When the requested layer_id is greater than the last available layer, then the last layer is selected.
+        When a negative value is requested, then, the last layer is requested
     """
+    from build_shapes import get_GADM_layer
+
     col = "name"
     if not gadm_clustering:
-        gdf = gpd.read_file(path_to_gadm)
+        gdf_shapes = gpd.read_file(path_to_gadm)
     else:
         if path_to_gadm:
-            gdf = gpd.read_file(path_to_gadm)
-            if "GADM_ID" in gdf.columns:
+            gdf_shapes = gpd.read_file(path_to_gadm)
+            if "GADM_ID" in gdf_shapes.columns:
                 col = "GADM_ID"
 
-                if gdf[col][0][
+                if gdf_shapes[col][0][
                     :3
                 ].isalpha():  # TODO clean later by changing all codes to 2 letters
-                    gdf[col] = gdf[col].apply(
+                    gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf = get_GADM_layer(co, gadm_level)
-            col = "GID_{}".format(gadm_level)
+            gdf_shapes = get_GADM_layer(co, gadm_layer_id)
+            col = "GID_{}".format(gadm_layer_id)
+    gdf_shapes = gdf_shapes[gdf_shapes[col].str.contains(co)]
+    return gdf_shapes, col
 
-        # gdf.set_index("GADM_ID", inplace=True)
-    gdf_co = gdf[
-        gdf[col].str.contains(co)
-    ]  # geodataframe of entire continent - output of prev function {} are placeholders
-    # in strings - conditional formatting
-    # insert any variable into that place using .format - extract string and filter for those containing co (MA)
-    point = Point(coords["x"], coords["y"])  # point object
 
-    if gdf_co.empty:
-        return None
+def locate_bus(
+    df,
+    countries,
+    gadm_level,
+    path_to_gadm=None,
+    gadm_clustering=False,
+    dropnull=True,
+    col_out=None,
+):
+    """
+    Function to locate the points of the dataframe df into the GADM shapefile.
 
-    try:
-        return gdf_co[gdf_co.contains(point)][
-            col
-        ].item()  # filter gdf_co which contains point and returns the bus
+    Parameters
+    ----------
+    df: pd.Dataframe
+        Dataframe with mandatory x, y and country columns
+    countries: list
+        List of target countries
+    gadm_level: int
+        GADM level to be used
+    path_to_gadm: str (default None)
+        Path to the GADM shapefile
+    gadm_clustering: bool (default False)
+        True if gadm clustering is adopted
+    dropnull: bool (default True)
+        True if the rows with null values should be dropped
+    col_out: str (default gadm_{gadm_level})
+        Name of the output column
+    """
+    if col_out is None:
+        col_out = "gadm_{}".format(gadm_level)
+    df = df[df.country.isin(countries)]
+    df[col_out] = None
+    for co in countries:
+        gdf_shape, col = _get_shape_col_gdf(
+            path_to_gadm, co, gadm_level, gadm_clustering
+        )
+        sub_df = df.loc[df.country == co, ["x", "y", "country"]]
+        gdf = gpd.GeoDataFrame(
+            sub_df,
+            geometry=gpd.points_from_xy(sub_df.x, sub_df.y),
+            crs="EPSG:4326",
+        )
 
-    except ValueError:
-        return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
-            col
-        ].item()  # looks for closest one shape=node
+        gdf_merged = gpd.sjoin_nearest(gdf, gdf_shape, how="inner", rsuffix="right")
+
+        df.loc[gdf_merged.index, col_out] = gdf_merged[col]
+
+    if dropnull:
+        df = df[df[col_out].notnull()]
+
+    return df
 
 
 def get_conv_factors(sector):
