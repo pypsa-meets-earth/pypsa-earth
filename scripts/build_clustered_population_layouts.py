@@ -41,6 +41,7 @@ if __name__ == "__main__":
 
     pop = {}
     for item in ["total", "urban", "rural"]:
+        # TODO Rural population is zero
         pop_layout = xr.open_dataarray(snakemake.input[f"pop_layout_{item}"])
         pop[item] = I.dot(pop_layout.stack(spatial=("y", "x")))
 
