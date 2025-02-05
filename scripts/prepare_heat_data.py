@@ -60,6 +60,21 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     return week_df
 
 
+def scale_demand(data_df, calibr_df, load_mode, geom_id):
+
+    data_col = "scaling_" + load_mode
+
+    scale_coeff = calibr_df[[data_col, geom_id]].set_index(geom_id)
+    # some states can be missed from the scaling factors calculations
+    states_missed = data_df.columns.difference(scale_coeff.index)
+    default_scaling = pd.DataFrame(
+        data=[1.0] * len(states_missed), index=states_missed, columns=[data_col]
+    )
+    scale_coeff_clean = pd.concat([scale_coeff[data_col], default_scaling])
+    data_df.mul(scale_coeff_clean.to_dict()[data_col], axis=1)
+    return data_df
+
+
 def prepare_heat_data(n):
     # heating
     ashp_cop = (
