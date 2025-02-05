@@ -32,11 +32,11 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [Co2L-3H]
+  opts: [Co2L-3h]
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   sopts:
-  - "144H"
+  - "144h"
   demand:
   - "AB"
 
@@ -57,6 +57,10 @@ cluster_options:
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+
+subregion:
+  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
+  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
 
 clean_osm_data_options: # osm = OpenStreetMap
   threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]

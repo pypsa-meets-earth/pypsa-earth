@@ -586,3 +586,4 @@ iso_to_geofk_dict:
   TC: "central-america"  # Turks and Caicos Islands
   FK: "south-america"  # Falkland
   GF: "south-america"  # French-Guyana
+  "NA": "namibia"  # Namibia
