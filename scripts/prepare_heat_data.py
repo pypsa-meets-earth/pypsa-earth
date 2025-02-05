@@ -186,13 +186,9 @@ def prepare_heat_data(n):
         snakemake.input.cooling_profile, index_col=0
     )  # TODO GHALAT
 
-    calibr_heat_df = pd.read_csv(
-        os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0
-    )
+    calibr_heat_df = pd.read_csv(os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0)
     calibr_heat_df["country"] = "US"
-    calibr_cool_df = pd.read_csv(
-        os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0
-    )
+    calibr_cool_df = pd.read_csv(os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0)
     calibr_cool_df["country"] = "US"
 
     calibr_heat_buses_df = locate_bus(
@@ -213,7 +209,7 @@ def prepare_heat_data(n):
         gadm_clustering=True,
         dropnull=True,
         col_out=None,
-    )   
+    )
 
     loads = ["heating", "cooling"]
     sectors = ["residential", "services"]
