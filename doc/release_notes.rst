@@ -43,6 +43,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix mixup of plant locations for hydro inflow and inflow overestimation `PR #1322 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1322>`__
 
+* Minor revision docker workflow to have it working on upstream `PR #1343 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1343>`__
+
 PyPSA-Earth 0.6.0
 =================
 
