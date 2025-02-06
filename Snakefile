@@ -527,23 +527,24 @@ rule build_egs_potentials:
     params:
         enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
-        egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
-        egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
-        egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
-        # shapes="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        egs_capex="data/p{power_share}_h{heat_share}/Total_CAPEX_USDmm.tif",
+        egs_opex="data/p{power_share}_h{heat_share}/Average_OPEX_cUSDkW-h.tif",
+        egs_gen="data/p{power_share}_h{heat_share}/Average_Electric_Energy_Output_MWhyear.tif",
         shapes=(
             "resources/"
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
         ),
     output:
-        # egs_potentials="resources/" + RDIR + "egs_potential.csv",
-        egs_potentials="resources/" + SECDIR + "egs_potential_s{simpl}_{clusters}.csv",
+        egs_potentials=
+            "resources/"
+            + SECDIR
+            + "egs_potential_s{simpl}_{clusters}_p{power_share}_h{heat_share}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}"
+        RDIR + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}_p{power_share}_h{heat_share}"
     script:
         "scripts/build_egs_potentials.py"
 
@@ -1143,13 +1144,31 @@ if not config["custom_data"]["gas_network"]:
             "scripts/prepare_gas_network.py"
 
 
+def get_heat_steps(n):
+    assert n >= 1, "n must be greater than 1"
+    assert n <= 10, "n must be less than 10"
+    import numpy as np
+
+    return np.linspace(0, 100, n).astype(int)
+
+
+def get_power_steps(n):
+    assert n >= 1, "n must be greater than 1"
+    assert n <= 10, "n must be less than 10"
+    import numpy as np
+
+    return 100 - np.linspace(0, 100, n).astype(int)
+
+
 rule prepare_sector_network:
     params:
         costs=config["costs"],
         electricity=config["electricity"],
+        enhanced_geothermal=config["enhanced_geothermal"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
+
         costs=COSTDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
@@ -1220,11 +1239,21 @@ rule prepare_sector_network:
             + SECDIR
             + "industrial_heating_costs.csv"
         ),
-        egs_potentials=(
+        egs_potentials=lambda wildcards: [
             "resources/"
             + SECDIR
-            + "egs_potential_s{simpl}_{clusters}.csv"
-        )
+            + f"egs_potential_s{wildcards.simpl}_{wildcards.clusters}_p{ps}_h{hs}.csv"
+            for ps, hs in zip(
+                [100, 50], [0, 50]
+                # get_power_steps(
+                #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
+                # ),
+                # get_heat_steps(
+                #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
+                # )
+
+            )
+            ],
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",

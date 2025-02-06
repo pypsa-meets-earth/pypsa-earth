@@ -2858,7 +2858,7 @@ def add_egs_industry_supply(n, supply_curve):
             n.add(
                 "Link",
                 region + ' EGS ' + carrier + ' ' + str(cost_index),
-                bus0=region + ' EGS surface',
+                bus0=region + ' general industry heat',
                 bus1=bus1,
                 carrier=carrier,
                 capital_cost=row['capex[$/MW]'],
@@ -3170,30 +3170,33 @@ def remove_carrier_related_components(n, carriers_to_drop):
     n.mremove("Link", links_to_remove)
 
 
-def attach_enhanced_geothermal(n):
+def attach_enhanced_geothermal(n, potential):
 
     logger.warning('Adding EGS for electricity generation in prepare_sector_network.py')
 
-    egs_potential = pd.read_csv(snakemake.input["egs_potentials"], index_col=[0, 1])
+    egs_potential = pd.read_csv(potential, index_col=[0, 1])
+
+    heat_share = int(re.search(r'_h(\d+)', potential).group(1)) / 100
+    power_share = int(re.search(r'_p(\d+)', potential).group(1)) / 100
 
     idx = pd.IndexSlice
 
-    n.add(
-        "Bus",
-        "EGS",
-        carrier="geothermal heat",
-        unit="MWh_th",
-    )
+    if "EGS" not in n.buses.index:
 
-    n.add(
-        "Generator",
-        "EGS",
-        bus="EGS",
-        carrier="geothermal heat",
-        p_nom_extendable=True,
-    )
+        n.add(
+            "Bus",
+            "EGS",
+            carrier="geothermal heat",
+            unit="MWh_th",
+        )
 
-    eta = 0.15  # preliminary
+        n.add(
+            "Generator",
+            "EGS",
+            bus="EGS",
+            carrier="geothermal heat",
+            p_nom_extendable=True,
+        )
 
     for bus in tqdm(
         egs_potential.index.get_level_values(0).unique(),
@@ -3201,54 +3204,70 @@ def attach_enhanced_geothermal(n):
         ):
 
         ss = egs_potential.loc[idx[bus, :]]
-        nodes = f"{bus} " + pd.Index(range(len(ss)), dtype=str)
 
-        p_nom_max = ss["available_capacity[MW]"].values
-        capex = ss.index.values * 1000 # from $/kW to $/MW
-        opex = ss["opex[$/kWh]"].values
+        # For each region (bus) create a bus for general industry heat if not already present
+        industry_bus = f"{bus} general industry heat"
+        if industry_bus not in n.buses.index:
+            n.add("Bus", industry_bus, carrier="general industry heat")
 
-        # annuitize capex
-        capex = (
-            capex * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
-        )
+        # Loop over each supply‐curve point (i.e. each potential) for this region
+        for i, (cost_index, row) in enumerate(ss.iterrows()):
+            capacity = row["available_capacity[MW]"]
+            # Convert the cost index from $/kW to $/MW and annuitize the capex
+            capex_value = float(cost_index) * 1000  
+            ann_capex = capex_value * 0.07 / (1 - (1 + 0.07) ** (-25))
 
-        n.add(
-            "Bus",
-            bus + " EGS surface",
-            carrier="geothermal heat",
-        )
+            # Build an identifier that encodes the region name, heat share, power share, and supply‐curve index
+            identifier = f"{bus}_H{heat_share:.2f}_P{power_share:.2f}_curve{i}"
 
-        n.madd(
-            "Link",
-            nodes,
-            suffix=" EGS well",
-            bus0="EGS",
-            bus1=bus+ " EGS surface",
-            p_nom_max=p_nom_max / eta,
-            capital_cost=capex * eta,
-            p_nom_extendable=True,
-            carrier="EGS well",
-        )
+            # Create the first link: connects the AC bus with the regional bus.
+            # It also uses the bus2 keyword to link to the corresponding low-temperature bus.
+            n.add(
+                "Link",
+                name=f"EGS ORC {identifier}",
+                bus0="EGS",
+                bus1=bus,
+                bus2=f"{bus} low temperature heat 50-150C for industry",
+                carrier="enhanced geothermal ORC",
+                p_nom_max=capacity,
+                capital_cost=ann_capex,
 
-        # n.madd(
-        #     "StorageUnit",
-        #     nodes,
-        #     suffix=" EGS reservoir",
-        #     bus=bus + " EGS surface",
-        #     max_hours=100,  # should be agreed on, constraint to be implemented
-        # )
+                p_nom_extendable=True,
+            )
 
-        n.madd(
-            "Link",
-            nodes,
-            suffix=" EGS surface",
-            bus0=bus + " EGS surface",
-            bus1=bus,
-            carrier="orc",
-            efficiency=eta,
-            marginal_cost=opex,
-            p_nom_extendable=True,
-        )
+            # Create the second link: connects the EGS Generator (on bus "EGS") with the general industry heat bus.
+            # Both links share the identifier so that they can be paired.
+            n.add(
+                "Link",
+                name=f"EGS industry heat {identifier}",
+                bus0="EGS",
+                bus1=industry_bus,
+                carrier="enhanced geothermal industry heat",
+                p_nom_max=capacity,
+                p_nom_extendable=True,
+            )
+
+        # Connect general industry heat to medium temperature industry heat demand ("heat distribution")
+        if industry_bus in n.buses.index and "medium temperature heat 150-250C for industry" in n.buses.index:
+            n.add(
+                "Link",
+                name="EGS industry heat distribution",
+                bus0=industry_bus,
+                bus1="medium temperature heat 150-250C for industry",
+                carrier="heat distribution",
+                p_nom_extendable=True,
+            )
+        
+        # Connect general industry heat to low temperature industry heat demand ("heat exchanger")
+        if industry_bus in n.buses.index and "low temperature heat 50-150C for industry" in n.buses.index:
+            n.add(
+                "Link",
+                name="EGS industry heat exchanger",
+                bus0=industry_bus,
+                bus1="low temperature heat 50-150C for industry",
+                carrier="heat exchanger",
+                p_nom_extendable=True,
+            )
 
 
 
@@ -3376,14 +3395,15 @@ if __name__ == "__main__":
     ######### Functions adding EGS-US project demands and generators #########
     ##########################################################################
 
-    attach_enhanced_geothermal(n)
-
     industry_demands = pd.read_csv(
         snakemake.input['industrial_heating_demands'], index_col=0
     )
 
     logger.info("Adding industrial heating demands.")
     add_industry_demand(n, industry_demands)    
+
+    for potential in snakemake.input["egs_potentials"]:
+        attach_enhanced_geothermal(n, potential)
 
     industry_egs_supply = pd.read_csv(
         snakemake.input['industrial_heating_egs_supply_curves'], index_col=[0,1]
@@ -3430,6 +3450,7 @@ if __name__ == "__main__":
     # remove conventional generators built in elec-only model
     remove_elec_base_techs(n)
 
+    '''
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     # remove H2 and battery technologies added in elec-only model
@@ -3488,11 +3509,14 @@ if __name__ == "__main__":
     #     constant=co2_limit,
     # )
 
-    if options["dac"]:
-        add_dac(n, costs)
 
     if snakemake.config["custom_data"]["water_costs"]:
         add_custom_water_cost(n)
+
+    if options["dac"]:
+        add_dac(n, costs)
+
+    '''
 
     n.export_to_netcdf(snakemake.output[0])
 
