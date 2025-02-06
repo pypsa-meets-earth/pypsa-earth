@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add an option to redefine countries into subregions which can be activated at various stages of the workflow. The subregions can be defined either by the GADM_ID or a custom map. Currently, it is only used in the ``simplify_network`` rule `PR #1300 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1300>`__
+
 * Drop duplication of retrieve_data and COST_DIR, add params and update technology-data version `PR #1249 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1249>`__
 
 * In alternative clustering, generate hydro inflows by shape and avoid hydro inflows duplication for plants installed in the same node `PR #1120 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1120>`
@@ -42,6 +44,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Remove pyomo from cluster_network and introduce scip. `PR #1320 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1323>`__
 
 * Fix mixup of plant locations for hydro inflow and inflow overestimation `PR #1322 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1322>`__
+
+* Fix namibia geofk, line country tag mismatch and minor fixes `PR #1330 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1330>`__
 
 * Minor revision docker workflow to have it working on upstream `PR #1343 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1343>`__
 
