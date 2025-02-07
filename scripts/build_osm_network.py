@@ -37,7 +37,6 @@ LINES_COLUMNS = [
     "bus1",
     "length",
     "dc",
-    "country",
     "geometry",
     "bounds",
 ]

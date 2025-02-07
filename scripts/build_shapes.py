@@ -155,7 +155,7 @@ def filter_gadm(
             f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
         )
         # take the first row only to re-define geometry keeping other columns
-        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
+        geodf = geodf.iloc[[0]].set_geometry([geodf.union_all()])
 
     # debug output to file
     if output_nonstd_to_csv and not geodf_non_std.empty:
@@ -366,7 +366,7 @@ def eez(
         {
             "name": eez_countries,
             "geometry": [
-                df_eez.geometry.loc[df_eez.name == cc].geometry.unary_union
+                df_eez.geometry.loc[df_eez.name == cc].geometry.union_all()
                 for cc in eez_countries
             ],
         }
@@ -1303,6 +1303,66 @@ def gadm(
     return df_gadm
 
 
+def crop_country(gadm_shapes, subregion_config):
+    """
+    The crop_country function reconstructs country geometries by combining
+    individual GADM shapes, incorporating subregions specified in a configuration.
+    It returns a new GeoDataFrame where the country column includes both full countries
+    and their respective subregions, merging the geometries accordingly.
+    """
+
+    country_shapes_new = gpd.GeoDataFrame(columns=["name", "geometry"]).set_index(
+        "name"
+    )
+    remain_gadm_shapes = gadm_shapes.copy(deep=True)
+
+    for sub_region in subregion_config:
+
+        region_GADM = subregion_config[sub_region]
+        sub_gadm = remain_gadm_shapes.loc[remain_gadm_shapes.index.isin(region_GADM)]
+        sub_geometry = sub_gadm.union_all()
+
+        if not sub_geometry:
+            logger.warning(f"No subregion shape generated for {sub_region}")
+            continue
+
+        logger.info(
+            f"Created the {sub_region} subregion based on {list(sub_gadm.index)}"
+        )
+
+        sub_country_shapes = gpd.GeoDataFrame(
+            {
+                "name": sub_region,
+                "geometry": [sub_geometry],
+            }
+        ).set_index("name")
+
+        country_shapes_new = pd.concat([country_shapes_new, sub_country_shapes])
+
+        remain_gadm_shapes = remain_gadm_shapes.loc[
+            ~remain_gadm_shapes.index.isin(region_GADM)
+        ]
+
+    for country in remain_gadm_shapes.country.unique():
+        country_geometry_new = remain_gadm_shapes.query(
+            "country == @country"
+        ).union_all()
+        country_shapes_country = gpd.GeoDataFrame(
+            {
+                "name": country,
+                "geometry": [country_geometry_new],
+            }
+        ).set_index("name")
+
+        country_shapes_new = pd.concat([country_shapes_new, country_shapes_country])
+
+    return gpd.GeoDataFrame(
+        country_shapes_new,
+        crs=offshore_shapes.crs,
+        geometry=country_shapes_new.geometry,
+    )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -1363,4 +1423,13 @@ if __name__ == "__main__":
         nprocesses=nprocesses,
         simplify_gadm=simplify_gadm,
     )
+
     save_to_geojson(gadm_shapes, out.gadm_shapes)
+
+    subregion_config = snakemake.params.subregion["define_by_gadm"]
+    if subregion_config:
+        subregion_shapes = crop_country(gadm_shapes, subregion_config)
+    else:
+        subregion_shapes = pd.DataFrame()
+
+    save_to_geojson(subregion_shapes, out.subregion_shapes)
