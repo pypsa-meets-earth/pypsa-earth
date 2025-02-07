@@ -34,6 +34,9 @@ SHARE_DISTRICT_HEAT = 0.1
 
 CALIBRATE_LOAD = True
 
+# TODO Add to Snakemake
+CALIBR_DIR = "./data"
+
 CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
 CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
 
@@ -195,7 +198,7 @@ def prepare_heat_data(n):
         df=calibr_heat_df,
         countries=["US"],
         gadm_level=1,
-        path_to_gadm=shapes_path,
+        path_to_gadm=snakemake.input.shapes_path,
         gadm_clustering=True,
         dropnull=True,
         col_out=None,
@@ -205,7 +208,7 @@ def prepare_heat_data(n):
         df=calibr_cool_df,
         countries=["US"],
         gadm_level=1,
-        path_to_gadm=shapes_path,
+        path_to_gadm=snakemake.input.shapes_path,
         gadm_clustering=True,
         dropnull=True,
         col_out=None,
