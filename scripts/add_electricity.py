@@ -17,7 +17,7 @@ Relevant Settings
         year:
         version:
         rooftop_share:
-        USD2013_to_EUR2013:
+        output_currency:
         dicountrate:
         emission_prices:
 
@@ -142,7 +142,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
-    # correct units to MW and EUR
+    # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
     costs = convert_currency_and_unit(costs, config["output_currency"])
