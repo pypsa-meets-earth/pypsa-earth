@@ -78,22 +78,22 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id):
     return data_df
 
 
-def prepare_heat_data(n):
+def prepare_heat_data(n, snapshots):
     # heating
     ashp_cop = (
         xr.open_dataarray(snakemake.input.cop_air_total)
         .to_pandas()
-        .reindex(index=n.snapshots)
+        .reindex(index=snapshots)
     )
     gshp_cop = (
         xr.open_dataarray(snakemake.input.cop_soil_total)
         .to_pandas()
-        .reindex(index=n.snapshots)
+        .reindex(index=snapshots)
     )
     solar_thermal = (
         xr.open_dataarray(snakemake.input.solar_thermal_total)
         .to_pandas()
-        .reindex(index=n.snapshots)
+        .reindex(index=snapshots)
     )
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     solar_thermal = options["solar_cf_correction"] * solar_thermal / 1e3
@@ -102,17 +102,17 @@ def prepare_heat_data(n):
     hp_cooling_total_cop = (
         xr.open_dataarray(snakemake.input.cop_hp_cooling_total)
         .to_pandas()
-        .reindex(index=n.snapshots)
+        .reindex(index=snapshots)
     )
     ac_cooling_total_cop = (
         xr.open_dataarray(snakemake.input.cop_ac_cooling_total)
         .to_pandas()
-        .reindex(index=n.snapshots)
+        .reindex(index=snapshots)
     )
     apft_abch_cooling_total_cop = (
         xr.open_dataarray(snakemake.input.capft_abch_cooling_total)
         .to_pandas()
-        .reindex(index=n.snapshots)
+        .reindex(index=snapshots)
     )
 
     # energy balance
@@ -169,17 +169,20 @@ def prepare_heat_data(n):
         SHARE_ELECTRICITY_SERVICES_SPACE * energy_services
     )
 
+    # TODO Add a local fix to make test with pre-compiled networks
+    # snapshots = n.snapshots
+
     # heating/cooling demand profiles
     # copy forward the daily average heat demand into each hour, so it can be multiplied by the intraday profile
     daily_space_heat_demand = (
         xr.open_dataarray(snakemake.input.heat_demand_total)
         .to_pandas()
-        .reindex(index=n.snapshots, method="ffill")
+        .reindex(index=snapshots, method="ffill")
     )
     daily_space_cooling_demand = (
         xr.open_dataarray(snakemake.input.cooling_demand_total)
         .to_pandas()
-        .reindex(index=n.snapshots, method="ffill")
+        .reindex(index=snapshots, method="ffill")
     )
 
     intraday_profiles_heating = pd.read_csv(
@@ -358,6 +361,7 @@ if __name__ == "__main__":
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760
+    config_snapshots = pd.date_range(**snakemake.config["snapshots"], freq="h")
 
     # Prepare transport data
     (
@@ -371,7 +375,7 @@ if __name__ == "__main__":
         ac_cooling_total_cop,
         apft_abch_cooling_total_cop,
         district_heat_share,
-    ) = prepare_heat_data(n)
+    ) = prepare_heat_data(n, config_snapshots)
 
     # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
