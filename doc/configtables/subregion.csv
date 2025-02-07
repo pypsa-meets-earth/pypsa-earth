@@ -1,0 +1,4 @@
+,Unit,Values,Description
+define_by_gadm,,,
+-- {subregion_name},-,Str: list  ,Specifies the names of subregions and its GADM IDs as a list
+path_custom_shapes,-,path,(optional) Specifies the subregion based on a custom shapes
