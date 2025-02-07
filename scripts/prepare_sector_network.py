@@ -3003,8 +3003,8 @@ def add_industry_heating(n, costs):
         carrier="csp-tower",
         p_nom_extendable=True,
         capital_cost=costs.at["csp-tower", "fixed"],
-        lifetime=costs.at["csp-tower", "lifetime"]
-        # If you have FOM as a percentage, you might incorporate it as an annualized cost or handle separately.
+        lifetime=costs.at["csp-tower", "lifetime"],
+        p_max_pu=solar_thermal[nodes_medium]  # Added solar thermal profiles similarly to other solar thermal generators
     )
 
     # 7. Steam boiler gas cond (Generator)
