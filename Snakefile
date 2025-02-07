@@ -1350,6 +1350,9 @@ rule prepare_heat_data:
         # heat_profile="data/heat_load_profile_BDEW.csv",
         heat_profile="data/heating_load_profile_staffel.csv",
         cooling_profile="data/cooling_load_profile_staffel.csv",
+        shapes_path="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
         nodal_energy_totals="resources/"
         + SECDIR
