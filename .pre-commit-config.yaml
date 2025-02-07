@@ -73,6 +73,7 @@ repos:
   rev: v2.14.0
   hooks:
   - id: pretty-format-yaml
+    exclude: pinned\.yaml$
     args: [--autofix, --indent, '2', --preserve-quotes]
 
 # Use yamllint to check for valid YAML files and list syntax errors
