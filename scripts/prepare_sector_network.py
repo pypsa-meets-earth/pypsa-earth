@@ -3231,7 +3231,6 @@ def attach_enhanced_geothermal(n, potential):
                 carrier="enhanced geothermal ORC",
                 p_nom_max=capacity,
                 capital_cost=ann_capex,
-
                 p_nom_extendable=True,
             )
 
@@ -3425,6 +3424,23 @@ if __name__ == "__main__":
         )
     )
     '''
+
+    conversion_rates = {2019: 1.12, 2020: 1.10, 2021: 1.15, 2022: 1.05}
+
+    def convert_row(row):
+        # Check if the unit indicates that the value is in EUR
+        if "EUR" in row["unit"]:
+            # Use the provided currency year or default to 2019 if not available
+            year = int(row["currency_year"]) if pd.notna(row["currency_year"]) else 2019
+            # Get the conversion rate for this year; if not found, default to the 2019 rate
+            rate = conversion_rates.get(year, conversion_rates[2019])
+            # Convert the value from EUR to USD using the conversion rate
+            row["value"] = row["value"] * rate
+            # Update the unit to reflect dollars instead of euros
+            row["unit"] = row["unit"].replace("EUR", "$")
+        return row
+
+    industry_heating_costs = industry_heating_costs.apply(convert_row, axis=1)
 
     logger.info("Adding industrial heating technologies.")
     add_industry_heating(n, industry_heating_costs)
