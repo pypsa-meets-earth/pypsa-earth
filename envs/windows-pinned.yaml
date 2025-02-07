@@ -477,4 +477,5 @@ dependencies:
 - pip:
   - googledrivedownloader==1.1.0
   - polars==1.21.0
+  - pyscipopt=5.2.1
 prefix: C:\Miniconda\envs\pypsa-earth

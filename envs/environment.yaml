@@ -29,7 +29,7 @@ dependencies:
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
-- pyscipopt # added to compy with the quadratic objective requirement of the clustering script
+# - pyscipopt # added to compy with the quadratic objective requirement of the clustering script
 - lxml
 - numpy<=2
 - pandas
@@ -86,4 +86,5 @@ dependencies:
 - gurobi
 
 - pip:
+  - pyscipopt # See https://github.com/scipopt/PySCIPOpt/issues/944
   - googledrivedownloader>=1.1

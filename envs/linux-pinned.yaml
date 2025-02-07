@@ -410,7 +410,6 @@ dependencies:
 - pyppmd=1.1.0
 - pyproj=3.7.0
 - pypsa=0.33.0
-- pyscipopt=5.2.1
 - pyshp=2.3.1
 - pyside6=6.8.2
 - pysocks=1.7.1
@@ -552,4 +551,5 @@ dependencies:
 - zstd=1.5.6
 - pip:
   - googledrivedownloader==1.1.0
+  - pyscipopt=5.2.1
 prefix: /usr/share/miniconda/envs/pypsa-earth
