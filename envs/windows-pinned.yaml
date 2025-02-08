@@ -473,4 +473,3 @@ dependencies:
       - polars==1.21.0
       - pyscipopt==5.3.0
 prefix: C:\Miniconda\envs\pypsa-earth
-
