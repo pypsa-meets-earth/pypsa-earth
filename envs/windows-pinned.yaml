@@ -6,6 +6,7 @@ name: pypsa-earth
 channels:
   - conda-forge
   - bioconda
+  - gurobi
 dependencies:
   - _libavif_api=1.1.1
   - _openmp_mutex=4.5

@@ -6,6 +6,7 @@ name: pypsa-earth
 channels:
   - conda-forge
   - bioconda
+  - gurobi
 dependencies:
   - adwaita-icon-theme=47.0
   - affine=2.4.0
