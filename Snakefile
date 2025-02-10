@@ -1886,7 +1886,7 @@ rule prepare_db:
 rule build_industrial_distribution_key:  #default data
     params:
         countries=config["countries"],
-        gadm_level_id=config["sector"]["gadm_level_id"],
+        gadm_level_id=config["sector"]["gadm_level"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         industry_database=config["custom_data"]["industry_database"],
     input:
