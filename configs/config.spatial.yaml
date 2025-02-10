@@ -4,6 +4,11 @@
 
 version: 0.4.1
 
+
+subregion:
+  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
+  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+
 # definition of the Coordinate Reference Systems
 crs:
   geo_crs: EPSG:4326 # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
