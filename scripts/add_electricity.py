@@ -369,7 +369,10 @@ def attach_wind_and_solar(
                 )
                 logger.info(
                     "Added connection cost of {:0.0f}-{:0.0f} {}/MW/a to {}".format(
-                        connection_cost.min(), connection_cost.max(), snakemake.params.costs["output_currency"], tech
+                        connection_cost.min(),
+                        connection_cost.max(),
+                        snakemake.params.costs["output_currency"],
+                        tech,
                     )
                 )
             else:
