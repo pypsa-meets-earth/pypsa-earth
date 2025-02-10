@@ -28,7 +28,7 @@ fossil_reserves:
   oil: 100 #TWh Maybe redundant
 
 industry:
-  reference_year: 2015  
+  reference_year: 2015
 
 sector:
   gas:
@@ -160,7 +160,7 @@ sector:
   # parameters of H2 production, transport and storage
   hydrogen:
     network: true
-    # TODO The scenario assumptions must be documented 
+    # TODO The scenario assumptions must be documented
     H2_retrofit_capacity_per_CH4: 0.6
     network_limit: 2000 #GWkm
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
