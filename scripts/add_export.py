@@ -51,7 +51,7 @@ def select_ports(n):
 
     # TODO: revise if ports quantity and property by shape become relevant
     # drop duplicated entries
-    gcol = "gadm_{}".format(gadm_level)
+    gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports
