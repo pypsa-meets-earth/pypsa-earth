@@ -499,7 +499,6 @@ dependencies:
 - zstd=1.5.6
 - pip:
   - chaospy==4.3.17
-  - currencyconverter==0.17.30
   - fake-useragent==2.0.3
   - googledrivedownloader==0.4
   - polars==1.21.0
