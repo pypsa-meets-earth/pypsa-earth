@@ -24,8 +24,9 @@ def prepare_demand_data(fn):
     df = gpd.read_file(fn)
 
     id_cols = [
-        'names_primary', 'geometry',
-        'industrial_type', 'industrial_sub_type'
+        # 'names_primary', 'geometry',
+        # 'industrial_type', 'industrial_sub_type'
+        'FACILITY_ID', 'FACILITY_NAME', 'geometry',
     ]
 
     heating_cols = [
@@ -466,7 +467,10 @@ if __name__ == '__main__':
 
         ss = gdf.loc[gdf['geometry'].within(geometry)]
 
-        final_demands.loc[region, 'demand(50-150C)[MW]'] = ss.loc[ss['temperature'] <= 150, 'avg_demand'].sum()
+        final_demands.loc[region, 'demand(50-150C)[MW]'] = ss.loc[
+            ss['temperature'] <= 150, 'avg_demand'
+            ].sum()
+
         final_demands.loc[region, 'demand(150-250C)[MW]'] = ss.loc[
             (ss['temperature'] > 150) & (ss['temperature'] <= 250), 'avg_demand'
             ].sum()

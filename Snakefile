@@ -841,7 +841,7 @@ rule build_industrial_heating_costs:
 
 rule build_industrial_heating_demands:
     input:
-        demand_data="dummy/translated_to_us.geojson",
+        demand_data="data/nrel_epa_flight_heating_demand_disagg.geojson",
         regions=(
             "resources/"
             + RDIR
@@ -1251,7 +1251,6 @@ rule prepare_sector_network:
                 # get_heat_steps(
                 #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
                 # )
-
             )
             ],
     output:
