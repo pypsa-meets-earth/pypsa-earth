@@ -1,4 +1,4 @@
-          ,parameter,value,unit,source,further description
+technology,parameter,value,unit,source,further description
 air conditioner,FOM,1,%/year,,
 air conditioner,VOM,1.25,EUR/MWh_th,,
 air conditioner,efficiency,3.37,per unit,https://www.energystar.gov/sites/default/files/2024-08/ENERGY%20STAR%20Version%206.1%20Central%20Air%20Conditioner%20and%20Heat%20Pump%20Final%20Specification%20Rev.%20January%20%202022.pdf,Based on the allowable SEER for EnergyStar compliance.
