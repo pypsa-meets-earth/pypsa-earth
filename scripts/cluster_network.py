@@ -135,7 +135,7 @@ from _helpers import (
     create_logger,
     get_aggregation_strategies,
     locate_bus,
-    update_config_dictionary,
+    # update_config_dictionary,
     update_p_nom_max,
 )
 from add_electricity import load_costs

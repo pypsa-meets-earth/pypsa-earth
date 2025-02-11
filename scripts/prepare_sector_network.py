@@ -180,7 +180,7 @@ def H2_liquid_fossil_conversions(n, costs):
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
         efficiency3=-costs.at["Fischer-Tropsch", "electricity-input"]
-        / costs.at["Fischer-Tropsch", "hydrogen-input"],
+        / 1,#costs.at["Fischer-Tropsch", "hydrogen-input"],
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
@@ -1304,10 +1304,10 @@ def add_shipping(n, costs):
     ports = locate_bus(
         ports,
         countries,
-        gadm_layer_id,
+        gadm_level,
         snakemake.input.shapes_path,
         snakemake.config["cluster_options"]["alternative_clustering"],
-    ).set_index("gadm_{}".format(gadm_layer_id))
+    ).set_index("gadm_{}".format(gadm_level))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
@@ -2339,10 +2339,10 @@ def add_cooling(n, costs):
             bus1=c_nodes[name] + f" {name} cooling",
             carrier=f"{name} heat pump cooling",
             efficiency=efficiency,
-            capital_cost=cooling_costs.at["heat pump cooling", "efficiency"]
-            * cooling_costs.at["heat pump cooling", "fixed"],
+            capital_cost=cooling_costs.at["centralized geothermal heat pumps", "efficiency"]
+            * cooling_costs.at["centralized geothermal heat pumps", "fixed"],
             p_nom_extendable=True,
-            lifetime=cooling_costs.at["heat pump cooling", "lifetime"],
+            lifetime=cooling_costs.at["centralized geothermal heat pumps", "lifetime"],
         )
 
         # Add absorption chillers
@@ -2610,7 +2610,7 @@ def add_residential(n, costs):
     heat_ind = (
         n.loads_t.p_set.filter(like="residential")
         .filter(like="heat")
-        .dropna(axis=1)
+        # .dropna(axis=1)
         .columns
     )
     heat_shape_raw = normalize_by_country(n.loads_t.p_set[heat_ind])
@@ -3032,9 +3032,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-24H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,

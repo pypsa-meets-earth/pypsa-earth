@@ -224,7 +224,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_cop_profiles",
             simpl="",
-            clusters=4,
+            clusters=10,
+            planning_horizons=2030
         )
 
     # heating performance
@@ -258,8 +259,8 @@ if __name__ == "__main__":
             t_chws=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage absorption"
         )
 
-        cop_hp_cooling.to_netcdf(snakemake.output[f"cop_hp_cooling_{source}_{area}"])
-        cop_ac_cooling.to_netcdf(snakemake.output[f"cop_ac_cooling_{source}_{area}"])
-        capft_ac_cooling.to_netcdf(
-            snakemake.output[f"capft_abch_cooling_{source}_{area}"]
+        cop_hp_cooling.to_netcdf(snakemake.output[f"cop_hp_cooling_{area}"])
+        cop_ac_cooling.to_netcdf(snakemake.output[f"cop_ac_cooling_{area}"])
+        capft_abch_cooling.to_netcdf(
+            snakemake.output[f"capft_abch_cooling_{area}"]
         )
