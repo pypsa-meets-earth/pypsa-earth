@@ -985,13 +985,17 @@ def nearest_shape(n, path_shapes, distance_crs):
 
     for i in n.buses.index:
         point = Point(n.buses.loc[i, "x"], n.buses.loc[i, "y"])
-        distance = shapes.distance(point).sort_values()
-        if distance.iloc[0] < 1:
-            n.buses.loc[i, "country"] = distance.index[0]
+        contains = shapes.contains(point)
+        if contains.any():
+            n.buses.loc[i, "country"] = contains.idxmax()
         else:
-            logger.info(
-                f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} "
-            )
+            distance = shapes.distance(point).sort_values()
+            if distance.iloc[0] < 1:
+                n.buses.loc[i, "country"] = distance.index[0]
+            else:
+                logger.info(
+                    f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} "
+                )
 
     return n
 

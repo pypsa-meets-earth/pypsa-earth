@@ -27,6 +27,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix missing focus_weights on cluster_network params without augmented_line_connections, minimize warnings on subregions `PR #1348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1348>`__
+
 * Align structure of the components with consistency checks in the updated PyPSA version `PR #1315 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1315>`__
 
 * Prevent computation of powerplantmatching if replace option is selected for custom_powerplants `PR #1281 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1281>`__
