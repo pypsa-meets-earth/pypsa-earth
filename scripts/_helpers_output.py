@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
+"""
+Set of helper functions to deal with human-redable outputs.
+"""
 
 import logging
 
@@ -226,6 +229,18 @@ def get_vals(test_dict, key_list):
 
 
 def parse_config(config, fl_name=None, style_def=style):
+    """
+    Outputs a config summary to highlight points which require attention
+    from a modeler
+
+    Currently, the following checks are implemented:
+    1. List all the year-related parameters used in a simulation
+    """
+
+    # TODO Add a check for the cutouts used
+
+    # 1. Outline all the years used in a simulation
+    # The config contains
     res = dict(get_vals(config, "year"))
 
     str_list = [None] * len(res)
