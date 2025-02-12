@@ -256,7 +256,7 @@ def parse_config(config, fl_name=None, style_def=style):
     mint_bg = "mint_bg"
     blue_bg = "blue_bg"
 
-    f = open("config_check.html", "a")
+    f = open("config_check.html", "w")
 
     f.write("<html>")
     f.write(style)
