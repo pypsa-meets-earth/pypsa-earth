@@ -21,14 +21,6 @@ from shapely.geometry import Point
 from _helpers import configure_logging
 
 
-def get_demands(df, x, y):
-    raise NotImplementedError('implement me')
-
-
-def get_demand_geometries(demand):
-    raise NotImplementedError('implement me')
-
-
 def get_raster_file(tif_file):
 
     with rasterio.open(tif_file) as src:

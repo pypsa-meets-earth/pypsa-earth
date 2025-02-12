@@ -91,8 +91,9 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
+from tqdm import tqdm
 from powerplantmatching.export import map_country_bus
+from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
 
 idx = pd.IndexSlice
 
@@ -488,7 +489,10 @@ def attach_hydro(n, costs, ppl):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
-    bus_id = ppl["bus"]
+    if snakemake.params.alternative_clustering:
+        bus_id = ppl["region_id"]
+    else:
+        bus_id = ppl["bus"]
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:

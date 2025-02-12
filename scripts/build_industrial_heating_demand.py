@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 import random
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
@@ -23,8 +24,9 @@ def prepare_demand_data(fn):
     df = gpd.read_file(fn)
 
     id_cols = [
-        'names_primary', 'geometry',
-        'industrial_type', 'industrial_sub_type'
+        # 'names_primary', 'geometry',
+        # 'industrial_type', 'industrial_sub_type'
+        'FACILITY_ID', 'FACILITY_NAME', 'geometry',
     ]
 
     heating_cols = [
@@ -152,7 +154,6 @@ def greedy_clustering(
     cluster_mst_info : list of tuples
         parallel structure to clusters, each element is (mst_length, mst_diameter, sum_values)
     """
-
 
     n_points = len(points)
     assigned = [False]*n_points
@@ -444,35 +445,32 @@ if __name__ == '__main__':
 
     gdf = prepare_demand_data(snakemake.input['demand_data'])
 
-    print(gdf)
-    print(type(gdf))
-
     regions = gpd.read_file(snakemake.input['regions']).set_index('name')
-
-    print(regions.head())
 
     max_network_diameter = 20. # km
     min_network_average_capacity = 10. # MWh
     max_network_average_capacity = 30. # MWh
 
     n_cost_steps = 2
-    final_costs = pd.DataFrame(
-        index=pd.MultiIndex.from_product([regions.index, range(n_cost_steps)], names=['region', 'cost_step']),
-        columns=['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
-        )
+    supply_curve_columns = ['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
     
     final_demands = pd.DataFrame(
         index=regions.index,
-        columns=['demand(50-150C)[MWh]', 'demand(150-250C)[MWh]']
+        columns=['demand(50-150C)[MW]', 'demand(150-250C)[MW]']
         )
 
-    for region, geometry in regions['geometry'].items():
+    regional_supplies = list()
 
-        regional_supply = pd.DataFrame(columns=final_costs.columns)
+    for region, geometry in tqdm(regions['geometry'].items()):
+
+        regional_supply = pd.DataFrame(columns=supply_curve_columns)
 
         ss = gdf.loc[gdf['geometry'].within(geometry)]
 
-        final_demands.loc[region, 'demand(50-150C)[MW]'] = ss.loc[ss['temperature'] <= 150, 'avg_demand'].sum()
+        final_demands.loc[region, 'demand(50-150C)[MW]'] = ss.loc[
+            ss['temperature'] <= 150, 'avg_demand'
+            ].sum()
+
         final_demands.loc[region, 'demand(150-250C)[MW]'] = ss.loc[
             (ss['temperature'] > 150) & (ss['temperature'] <= 250), 'avg_demand'
             ].sum()
@@ -481,14 +479,8 @@ if __name__ == '__main__':
             logger.warning(f"No data for {region}")
             continue
 
-        print('found data for', region)
-        print(ss.shape)
-        print(ss.head())
-
         utm_coords = coords_to_relative_utm(ss[['y', 'x']].values)
-        avg_demand = ss[['avg_demand']].values
-
-        print(utm_coords)
+        avg_demand = ss['avg_demand'].values
 
         clusters, cluster_info = greedy_clustering(
             utm_coords,
@@ -498,7 +490,7 @@ if __name__ == '__main__':
             max_sum_value=max_network_average_capacity
             )
 
-        frac_in_clusters, w_mst_cost = evaluate_solution(cluster_info, utm_coords)
+        frac_in_clusters, w_mst_cost = evaluate_solution(cluster_info, avg_demand)
 
         logger.info(f"Region: {region}, Fraction of values in clusters: {frac_in_clusters:.2f}, Weighted MST cost: {w_mst_cost:.2f}")
         logger.info(f"Total EGS applicable demand: {sum(ss['total_demand'] * frac_in_clusters) / 1e3:.2f} GWh")
@@ -509,37 +501,42 @@ if __name__ == '__main__':
             for idx in cluster:
                 assignments[idx] = i
 
-        new_clustering = reassign_points(
-            utm_coords[assignments != -1],
-            utm_coords[assignments != -1],
-            assignments[assignments != -1],
-            max_iterations=10,
-            size_threshold=10
-            )
+        if len(utm_coords[assignments != -1]):
 
-        new_clusters = []
+            new_clustering = reassign_points(
+                utm_coords[assignments != -1],
+                utm_coords[assignments != -1],
+                assignments[assignments != -1],
+                max_iterations=10,
+                size_threshold=10
+                )
+        
+            new_clusters = []
 
-        for label in sorted(pd.Series(new_clustering).value_counts().index):
-            new_clusters.append(np.where(new_clustering == label)[0].tolist())
+            for label in sorted(pd.Series(new_clustering).value_counts().index):
+                new_clusters.append(np.where(new_clustering == label)[0].tolist())
 
-        # map indices back to original
-        old_indexes = pd.Series(np.where(assignments != -1)[0])
-        fixed_clustering = []
+            # map indices back to original
+            old_indexes = pd.Series(np.where(assignments != -1)[0])
+            fixed_clustering = []
 
-        for c in new_clusters:
-            
-            fixed_c = []
-            for entry in c:
-                fixed_c.append(old_indexes.loc[entry])
+            for c in new_clusters:
+                
+                fixed_c = []
+                for entry in c:
+                    fixed_c.append(old_indexes.loc[entry])
 
-            fixed_clustering.append(fixed_c)
+                fixed_clustering.append(fixed_c)
 
-        new_clusters = fixed_clustering
+            new_clusters = fixed_clustering
+        
+        else:
+            new_clusters = clusters
 
         piping_cost = 1_300_000 # $/km
 
         def dummy_egs_query(cluster):
-            return 1_000_000 # $/MWth
+            return 0 # $/MWth
 
         for cluster in new_clusters:
 
@@ -547,35 +544,47 @@ if __name__ == '__main__':
             cluster_sp, _ = compute_mst_cost_and_diameter(utm_coords[cluster])
             cluster_size = sum(avg_demand[cluster]) 
 
-            cluster_supply['capex[$/MW]'] = (
+            cluster_supply.loc['capex[$/MW]'] = (
                 dummy_egs_query(cluster) * cluster_size +
                 piping_cost * cluster_sp) / cluster_size
 
-            cluster_supply['avail_capacity[MW]'] = cluster_size            
-            cluster_supply['opex[$/MWh]'] = 0.0
+            cluster_supply.loc['avail_capacity[MW]'] = cluster_size            
+            cluster_supply.loc['opex[$/MWh]'] = 0.0
 
-            regional_supply = regional_supply.append(cluster_supply, ignore_index=True)
+            if cluster_supply.empty:
+                continue
 
-        bins = pd.Series(
-                np.linspace(
-                    ss['capex[$/kW]'].min(),
-                    ss['capex[$/kW]'].max(),
-                    n_cost_steps+1
-                    )
+            regional_supply = pd.concat(
+                (regional_supply, cluster_supply.to_frame().T),
+                ignore_index=True
                 )
 
-        labels = (
-            bins
-            .rolling(2)
-            .mean()
-            .dropna()
-            .tolist()
-        )
+        regional_supply.loc[:,'capex[$/MW]'] = regional_supply.loc[:,'capex[$/MW]'].round(3)
+        regional_supply = regional_supply.groupby('capex[$/MW]').agg(
+            {'avail_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean'}
+            ).reset_index()
 
         if regional_supply.empty:
             continue
 
         if len(regional_supply) > 1:
+
+            bins = pd.Series(
+                    np.linspace(
+                        regional_supply['capex[$/MW]'].min(),
+                        regional_supply['capex[$/MW]'].max(),
+                        n_cost_steps+1
+                        )
+                    )
+
+            labels = (
+                bins
+                .rolling(2)
+                .mean()
+                .dropna()
+                .tolist()
+            )
+
             regional_supply['level'] = pd.cut(
                 regional_supply['capex[$/MW]'],
                 bins=bins,
@@ -590,11 +599,23 @@ if __name__ == '__main__':
         regional_supply = (
             regional_supply
             .groupby('level', observed=False)
-            [['available_capacity[MW]', 'opex[$/MWh]']]
-            .agg({'available_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean'})
+            [['avail_capacity[MW]', 'opex[$/MWh]']]
+            .agg({'avail_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean'})
+            .reset_index()
+            .rename(columns={'level': 'capex[$/MW]'})
         )
 
-    final_costs = pd.concat((final_costs, regional_supply))
+        regional_supply.index = pd.MultiIndex.from_product(
+            [[region], range(len(regional_supply))],
+            names=['region', 'cost_step']
+            )
 
-    final_costs.to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
+        regional_supplies.append(regional_supply)
+
+    logger.warning('Assumes that EGS drilling cost are added somewhere else to the model.')
+    (
+        pd.concat(regional_supplies)
+        .dropna()
+        .to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
+    )
     final_demands.to_csv(snakemake.output['industrial_heating_demands'])

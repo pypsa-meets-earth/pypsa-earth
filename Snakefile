@@ -53,12 +53,11 @@ CDIR = RDIR if not run.get("shared_cutouts") else ""
 SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
-COSTDIR = config["costs_dir"]
 
 load_data_paths = get_load_paths_gegis("data", config)
 
 if config["enable"].get("retrieve_cost_data", True):
-    COSTS = "resources/" + RDIR + "costs.csv"
+    COSTS = "resources/" + RDIR + f"costs_{config['costs']['year']}.csv"
 else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
@@ -222,7 +221,7 @@ rule build_osm_network:
     script:
         "scripts/build_osm_network.py"
 
-
+'''
 rule build_shapes:
     params:
         build_shape_options=config["build_shape_options"],
@@ -249,6 +248,7 @@ rule build_shapes:
         mem_mb=3096,
     script:
         "scripts/build_shapes.py"
+'''
 
 
 rule base_network:
@@ -285,6 +285,7 @@ rule base_network:
         "scripts/base_network.py"
 
 
+'''
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
@@ -330,10 +331,12 @@ def terminate_if_cutout_exists(config=config):
                 + cutout_fl
                 + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
             )
+'''
 
 
+'''
 if config["enable"].get("build_cutout", False):
-    terminate_if_cutout_exists(config)
+    # terminate_if_cutout_exists(config)
 
     rule build_cutout:
         params:
@@ -353,8 +356,10 @@ if config["enable"].get("build_cutout", False):
             mem_mb=ATLITE_NPROCESSES * 1000,
         script:
             "scripts/build_cutout.py"
+'''
 
 
+'''
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
@@ -374,6 +379,7 @@ if config["enable"].get("build_natura_raster", False):
             "benchmarks/" + RDIR + "build_natura_raster"
         script:
             "scripts/build_natura_raster.py"
+'''
 
 
 if not config["enable"].get("build_natura_raster", False):
@@ -392,29 +398,18 @@ if not config["enable"].get("build_natura_raster", False):
 if config["enable"].get("retrieve_cost_data", True):
 
     rule retrieve_cost_data:
+        params:
+            version=config["costs"]["version"],
         input:
             HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs_{config['costs']['year']}.csv",
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
+                + "costs_{year}.csv",
                 keep_local=True,
             ),
         output:
-            COSTS,
+            "resources/" + RDIR + "costs_{year}.csv",
         log:
-            "logs/" + RDIR + "retrieve_cost_data.log",
-        resources:
-            mem_mb=5000,
-        run:
-            move(input[0], output[0])
-
-    rule retrieve_cost_data_flexible:
-        input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs"
-                + "_{planning_horizons}.csv",
-                keep_local=True,
-            ),
-        output:
-            costs=COSTDIR + "costs_{planning_horizons}.csv",
+            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:
             mem_mb=5000,
         run:
@@ -468,10 +463,10 @@ rule build_renewable_profiles:
             if w.technology in ("onwind", "solar", "hydro", "csp")
             else "resources/" + RDIR + "bus_regions/regions_offshore.geojson"
         ),
-        cutout=lambda w: "cutouts/"
-        + CDIR
-        + config["renewable"][w.technology]["cutout"]
-        + ".nc",
+        # cutout=lambda w: "cutouts/"
+        # + CDIR
+        # + config["renewable"][w.technology]["cutout"]
+        # + ".nc",
     output:
         profile="resources/" + RDIR + "renewable_profiles/profile_{technology}.nc",
     log:
@@ -520,17 +515,24 @@ rule build_egs_potentials:
     params:
         enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
-        egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
-        egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
-        egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
-        shapes="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        egs_capex="data/p{power_share}_h{heat_share}/Total_CAPEX_USDmm.tif",
+        egs_opex="data/p{power_share}_h{heat_share}/Average_OPEX_cUSDkW-h.tif",
+        egs_gen="data/p{power_share}_h{heat_share}/Average_Electric_Energy_Output_MWhyear.tif",
+        shapes=(
+            "resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
     output:
-        egs_potentials="resources/" + RDIR + "egs_potential.csv",
+        egs_potentials=
+            "resources/"
+            + SECDIR
+            + "egs_potential_s{simpl}_{clusters}_p{power_share}_h{heat_share}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/build_egs_potentials/egs_potential"
+        RDIR + "/benchmarks/build_egs_potentials/egs_potential_s{simpl}_{clusters}_p{power_share}_h{heat_share}"
     script:
         "scripts/build_egs_potentials.py"
 
@@ -582,6 +584,7 @@ rule add_electricity:
         "scripts/add_electricity.py"
 
 
+'''
 rule simplify_network:
     params:
         renewable=config["renewable"],
@@ -620,6 +623,7 @@ rule simplify_network:
         mem_mb=4000,
     script:
         "scripts/simplify_network.py"
+'''
 
 
 if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
@@ -813,10 +817,10 @@ rule build_industrial_heating_costs:
     input:
         costs=COSTS,
     output:
-        industry_heating_costs="resources/" + RDIR + "industrial_heating_costs.csv",
+        industrial_heating_costs="resources/" + SECDIR + "industrial_heating_costs.csv",
     threads: 1
     log:
-        "logs/" + RDIR + "build_industrial_heating_costs.log",
+        "logs/" + SECDIR + "build_industrial_heating_costs.log",
     resources:
         mem_mb=2000,
     script:
@@ -825,7 +829,7 @@ rule build_industrial_heating_costs:
 
 rule build_industrial_heating_demands:
     input:
-        demand_data="dummy/translated_to_us.geojson",
+        demand_data="data/nrel_epa_flight_heating_demand_disagg.geojson",
         regions=(
             "resources/"
             + RDIR
@@ -834,17 +838,17 @@ rule build_industrial_heating_demands:
     output:
         industrial_heating_egs_supply_curves=(
             "resources/"
-            + RDIR
+            + SECDIR
             + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
         ),
         industrial_heating_demands=(
             "resources/"
-            + RDIR
+            + SECDIR
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
     threads: 1
     log:
-        "logs/" + RDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
+        "logs/" + SECDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
     resources:
         mem_mb=2000,
     script:
@@ -1128,14 +1132,31 @@ if not config["custom_data"]["gas_network"]:
             "scripts/prepare_gas_network.py"
 
 
+def get_heat_steps(n):
+    assert n >= 1, "n must be greater than 1"
+    assert n <= 10, "n must be less than 10"
+    import numpy as np
+
+    return np.linspace(0, 100, n).astype(int)
+
+
+def get_power_steps(n):
+    assert n >= 1, "n must be greater than 1"
+    assert n <= 10, "n must be less than 10"
+    import numpy as np
+
+    return 100 - np.linspace(0, 100, n).astype(int)
+
+
 rule prepare_sector_network:
     params:
         costs=config["costs"],
         electricity=config["electricity"],
+        enhanced_geothermal=config["enhanced_geothermal"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
-        costs=COSTDIR + "costs_{planning_horizons}.csv",
+        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
         + SECDIR
@@ -1156,9 +1177,9 @@ rule prepare_sector_network:
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_demand="resources/"
-        + SECDIR
-        + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        # industrial_demand="resources/"
+        # + SECDIR
+        # + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         energy_totals="resources/"
         + SECDIR
         + "energy_totals_{demand}_{planning_horizons}.csv",
@@ -1200,7 +1221,25 @@ rule prepare_sector_network:
             + SECDIR
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
-        industrial_heating_costs="resources/" + RDIR + "industrial_heating_costs.csv",
+        industrial_heating_costs=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_costs.csv"
+        ),
+        egs_potentials=lambda wildcards: [
+            "resources/"
+            + SECDIR
+            + f"egs_potential_s{wildcards.simpl}_{wildcards.clusters}_p{ps}_h{hs}.csv"
+            for ps, hs in zip(
+                [100, 50], [0, 50]
+                # get_power_steps(
+                #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
+                # ),
+                # get_heat_steps(
+                #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
+                # )
+            )
+            ],
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -1240,7 +1279,7 @@ rule add_export:
     input:
         overrides="data/override_component_attrs",
         export_ports="resources/" + SECDIR + "export_ports.csv",
-        costs=COSTDIR + "costs_{planning_horizons}.csv",
+        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -1433,6 +1472,7 @@ rule build_base_energy_totals:
         unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
     output:
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
+        unsd_export_path=directory("data/demand/unsd/data/"),
     script:
         "scripts/build_base_energy_totals.py"
 
@@ -1473,10 +1513,10 @@ rule build_solar_thermal_profiles:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         solar_thermal_total="resources/"
@@ -1505,11 +1545,11 @@ rule build_population_layouts:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        urban_percent="resources/" + SECDIR + "urban_percent.csv",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        urban_percent="data/urban_percent.csv",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         pop_layout_total="resources/"
@@ -1559,10 +1599,10 @@ rule build_clustered_population_layouts:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         clustered_pop_layout="resources/"
@@ -1599,10 +1639,10 @@ rule build_heat_demand:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         heat_demand_urban="resources/"
@@ -1642,10 +1682,10 @@ rule build_temperature_profiles:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        cutout="cutouts/"
-        + CDIR
-        + [c["cutout"] for _, c in config["renewable"].items()][0]
-        + ".nc",
+        # cutout="cutouts/"
+        # + CDIR
+        # + [c["cutout"] for _, c in config["renewable"].items()][0]
+        # + ".nc",
         # default to first cutout found
     output:
         temp_soil_total="resources/"
@@ -1706,7 +1746,7 @@ if config["foresight"] == "overnight":
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            costs=COSTDIR + "costs_{planning_horizons}.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
         output:
             RESDIR
@@ -1751,7 +1791,7 @@ rule make_sector_summary:
             **config["costs"],
             **config["export"],
         ),
-        costs=COSTDIR + "costs_{planning_horizons}.csv",
+        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         plots=expand(
             RESDIR
             + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
@@ -1952,7 +1992,7 @@ rule build_base_industry_totals:  #default data
     input:
         #os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
         #industrial_production_per_country="data/industrial_production_per_country.csv",
-        unsd_path="data/demand/unsd/data/",
+        unsd_export_path="data/demand/unsd/data/",
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
         transactions_path="data/unsd_transactions.csv",
     output:
@@ -1989,7 +2029,7 @@ rule build_industry_demand:  #default data
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         industrial_database="data/industrial_database.csv",
-        costs=COSTDIR + "costs_{planning_horizons}.csv",
+        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
         industrial_energy_demand_per_node="resources/"
