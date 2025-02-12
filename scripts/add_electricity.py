@@ -823,62 +823,32 @@ def attach_enhanced_geothermal(n):
         p_nom_extendable=True,
     )
 
-    eta = 0.15  # preliminary
-
     for bus in tqdm(
         egs_potential.index.get_level_values(0).unique(),
         desc="Adding enhanced geothermal",
         ):
 
         ss = egs_potential.loc[idx[bus, :]]
-        nodes = f"{bus} " + pd.Index(range(len(ss)), dtype=str)
 
-        p_nom_max = ss["available_capacity[MW]"].values
-        capex = ss.index.values * 1000 # from $/kW to $/MW
-        opex = ss["opex[$/kWh]"].values
+        # Loop over supply‐curve point (i.e. each potential) for this region
+        for i, (cost_index, row) in enumerate(ss.iterrows()):
+            capacity = row["available_capacity[MW]"]
+            # Convert the cost index from $/kW to $/MW and annuitize the capex
+            capex_value = float(cost_index) * 1000  
+            ann_capex = capex_value * 0.07 / (1 - (1 + 0.07) ** (-25))
 
-        # annuitize capex
-        capex = (
-            capex * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
-        )
+            identifier = f"{bus}_curve{i}"
 
-        n.madd(
-            "Bus",
-            nodes,
-            suffix=" EGS surface",
-            carrier="geothermal heat",
-        )
-
-        n.madd(
-            "Link",
-            nodes,
-            suffix=" EGS well",
-            bus0="EGS",
-            bus1=nodes + " EGS surface",
-            p_nom_max=p_nom_max / eta,
-            capital_cost=capex * eta,
-            p_nom_extendable=True,
-        )
-
-        n.madd(
-            "StorageUnit",
-            nodes,
-            suffix=" EGS reservoir",
-            bus=nodes + " EGS surface",
-            max_hours=100,  # should be agreed on, constraint to be implemented
-        )
-
-        n.madd(
-            "Link",
-            nodes,
-            suffix=" EGS surface",
-            bus0=nodes + " EGS surface",
-            bus1=bus,
-            carrier="orc",
-            efficiency=eta,
-            marginal_cost=opex,
-            p_nom_extendable=True,
-        )
+            n.add(
+                "Link",
+                name=f"EGS electricity {identifier}",
+                bus0="EGS",
+                bus1=bus,
+                carrier="enhanced geothermal ORC",
+                p_nom_max=capacity,
+                capital_cost=ann_capex,
+                p_nom_extendable=True,
+            )
 
 
 def add_nice_carrier_names(n, config):
