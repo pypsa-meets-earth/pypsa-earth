@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import sys
+import pathlib
 
 sys.path.append("./scripts")
 
@@ -395,21 +396,16 @@ if config["enable"].get("retrieve_cost_data", True):
 
     rule retrieve_cost_data:
         params:
+            countries=config["countries"],
             costs=config["costs"],
-        input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
-                + "costs_{year}.csv",
-                keep_local=True,
-            ),
-        output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            output_directory=pathlib.Path("resources", RDIR, "costs")
         log:
             "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+        threads: 1
         resources:
             mem_mb=5000,
-        run:
-            move(input[0], output[0])
+        script:
+            "scripts/retrieve_cost_data.py"
 
 
 rule build_demand_profiles:

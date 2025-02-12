@@ -362,6 +362,8 @@ renewable:
 # Costs Configuration
 costs:
   year: [2030]
+  technology_data_countries: ["US"] #TODO: write an automated way to fetch countries from technology_data
+  technology_data_url: "https://raw.githubusercontent.com/PyPSA/technology-data/"
   version: v0.10.0
   discountrate: [0.071] #, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501

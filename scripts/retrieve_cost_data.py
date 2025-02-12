@@ -4,63 +4,43 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import datetime as dt
-import os
-import re
-from zipfile import ZipFile
-
-import geopandas as gpd
-import pandas as pd
-import yaml
+import requests
+import pathlib
 from _helpers import (
-    BASE_DIR,
     configure_logging,
-    create_country_list,
     create_logger,
-    progress_retrieve,
 )
-from google_drive_downloader import GoogleDriveDownloader as gdd
-from tqdm import tqdm
 
 logger = create_logger(__name__)
 
 
-def load_databundle_config(config):
-    "Load databundle configurations from path file or dictionary"
-
-    if type(config) is str:
-        with open(config) as file:
-            config = yaml.load(file, Loader=yaml.FullLoader)["databundles"]
-    elif type(config) is not dict:
-        logger.error("Impossible to load the databundle configuration")
-
-    # parse the "countries" list specified in the file before processing
-    for bundle_name in config:
-        config[bundle_name]["countries"] = create_country_list(
-            config[bundle_name]["countries"], iso_coding=False
-        )
-
-    return config
-
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
-
         from _helpers import mock_snakemake
+        snakemake = mock_snakemake("retrieve_cost_data")
 
-        snakemake = mock_snakemake("retrieve_cost_data.py")
-
-    # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
+    model_country_list = list(snakemake.params.countries)
+    future_years_list = list(snakemake.params.costs["year"])
+    url_technology_data = snakemake.params.costs["technology_data_url"]
+    version_technology_data = snakemake.params.costs["version"]
+    country_list_technology_data = list(snakemake.params.costs["technology_data_countries"])
+    base_url_to_use = "/".join((url_technology_data, version_technology_data, "outputs"))
+    base_output_path = snakemake.params.output_directory
 
-    rootpath = "."
-    tutorial = snakemake.params.tutorial
-    countries = snakemake.params.countries
-    logger.info(f"Retrieving data for {len(countries)} countries.")
-
-    config_enable = snakemake.config["enable"]
-    config_bundles = load_databundle_config(snakemake.config["databundles"])
-    disable_progress = not config_enable["progress_bar"]
+    for country_val in model_country_list:
+        for year_val in future_years_list:
+            cost_file_name = f"costs_{year_val}.csv"
+            if country_val in country_list_technology_data:
+                output_path = pathlib.Path(base_output_path, str(country_val), cost_file_name)
+                url_to_use = "/".join((base_url_to_use, str(country_val), cost_file_name))
+            else:
+                url_to_use = "/".join((base_url_to_use, cost_file_name))
+                output_path = pathlib.Path(base_output_path, cost_file_name)
+            response = requests.get(url_to_use)
+            with open(output_path, mode="wb") as output_cost_file:
+                output_cost_file.write(response.content)
+            output_cost_file.close()
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
