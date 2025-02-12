@@ -146,11 +146,15 @@ gold_hd {
 
 
 def make_license_text(html=False):
+    # Avoid confusing REUSE as in https://reuse.software/faq/#exclude-lines
+    # REUSE-IgnoreStart
     license_str_list = [
         "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors",
+        "# SPDX-License-Identifier: AGPL-3.0-or-later",
         "#",
-        "# SPDX-License-Identifier: CC0-1.0\n\r",
+        "\n\r",
     ]
+    # REUSE-IgnoreEnd
     if html:
         license_str = "<br />".join(license_str_list)
     else:

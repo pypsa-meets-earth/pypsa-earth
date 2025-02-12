@@ -44,11 +44,15 @@ CONFIGS_STORE_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
 def write_config(config, fl_name):
+    # Avoid confusing REUSE as in https://reuse.software/faq/#exclude-lines
+    # REUSE-IgnoreStart
     license_str_list = [
         "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors",
+        "# SPDX-License-Identifier: AGPL-3.0-or-later",
         "#",
-        "# SPDX-License-Identifier: CC0-1.0\n\r",
+        "\n\r",
     ]
+    # REUSE-IgnoreEnd
     license_str = "\n\r".join(license_str_list)
 
     # TODO keep a copy if the file exists?
