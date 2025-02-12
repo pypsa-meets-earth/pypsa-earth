@@ -570,7 +570,11 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
-        egs_potentials="resources/" + RDIR + "egs_potential.csv",
+        egs_potentials=(
+            "resources/"
+            + SECDIR
+            + f"egs_potential_s{wildcards.simpl}_{wildcards.clusters}_p100_h0.csv"
+        ),
     output:
         "networks/" + RDIR + "elec.nc",
     log:

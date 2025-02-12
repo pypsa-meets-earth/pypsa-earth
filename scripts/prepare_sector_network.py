@@ -3179,6 +3179,9 @@ def attach_enhanced_geothermal(n, potential):
     heat_share = int(re.search(r'_h(\d+)', potential).group(1)) / 100
     power_share = int(re.search(r'_p(\d+)', potential).group(1)) / 100
 
+    # remove EGS from electricity only implementation
+    n.remove("Link", n.links.index[n.links.index.str.contains('EGS electricity')])
+
     idx = pd.IndexSlice
 
     if "EGS" not in n.buses.index:
