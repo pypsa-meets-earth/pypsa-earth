@@ -27,7 +27,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Fix missing focus_weights on cluster network without augmented_line_connections, minimize warnings on subregions
+* Fix missing focus_weights on cluster_network params without augmented_line_connections, minimize warnings on subregions `PR #1348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1348>`__
 
 * Align structure of the components with consistency checks in the updated PyPSA version `PR #1315 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1315>`__
 
