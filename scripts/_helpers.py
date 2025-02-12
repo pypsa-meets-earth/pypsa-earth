@@ -55,10 +55,18 @@ def write_config(config, fl_name):
     # REUSE-IgnoreEnd
     license_str = "\n\r".join(license_str_list)
 
+    if config_exclude:
+        keys_exclude = set(config.keys()) - set(config_exclude.keys())
+        config_clean = dict()
+        for key in keys_exclude:
+            config_clean[key] = config.get(key)
+    else:
+        config_clean = config
+
     # TODO keep a copy if the file exists?
     with open(fl_name, "w") as outfile:
         outfile.write(license_str)
-        yaml.dump(config, outfile, default_flow_style=False)
+        yaml.dump(config_clean, outfile, default_flow_style=False)
 
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
