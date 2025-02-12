@@ -15,7 +15,7 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["US", "NG"]
+countries: ["NG", "BJ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 enable:
@@ -364,10 +364,9 @@ costs:
   year: [2020, 2030, 2045]
   technology_data_countries: ["US"] #TODO: write an automated way to fetch countries from technology_data
   technology_data_url: "https://raw.githubusercontent.com/PyPSA/technology-data/"
-  version: v0.10.0
+  version: v0.11.0
   discountrate: [0.071] #, 0.086, 0.111]
-  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
-  USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  output_currency: "EUR"
   rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
   fill_values:
     FOM: 0
