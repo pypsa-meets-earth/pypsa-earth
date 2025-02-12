@@ -15,7 +15,7 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["NG", "BJ"]
+countries: ["US", "NG"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 enable:
@@ -361,7 +361,7 @@ renewable:
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration
 costs:
-  year: [2030]
+  year: [2020, 2030, 2045]
   technology_data_countries: ["US"] #TODO: write an automated way to fetch countries from technology_data
   technology_data_url: "https://raw.githubusercontent.com/PyPSA/technology-data/"
   version: v0.10.0

@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import sys
+import os
 import pathlib
 
 sys.path.append("./scripts")
 
-from os.path import normpath, exists, isdir
-from shutil import copyfile, move
+from shutil import copyfile
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -398,9 +398,10 @@ if config["enable"].get("retrieve_cost_data", True):
         params:
             countries=config["countries"],
             costs=config["costs"],
-            output_directory=pathlib.Path("resources", RDIR, "costs")
+        output:
+            output_path=directory(pathlib.Path("resources", RDIR, "costs")),
         log:
-            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+            "logs/" + RDIR + "retrieve_cost_data.log",
         threads: 1
         resources:
             mem_mb=5000,
@@ -819,7 +820,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
-            solver=normpath(
+            solver=os.path.normpath(
                 "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
@@ -890,7 +891,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             + RDIR
             + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         log:
-            solver=normpath(
+            solver=os.path.normpath(
                 "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
