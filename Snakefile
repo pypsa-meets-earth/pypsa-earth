@@ -35,6 +35,11 @@ copy_default_files()
 # configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
+
+
+config_technical = config.copy()
+
+
 configfile: "configs/config.main.yaml"
 configfile: "configs/config.spatial.yaml"
 configfile: "configs/config.weather.yaml"
@@ -46,10 +51,16 @@ configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
 
 
-write_config(config, "actual_config.yaml")
+# Provide summary of the actually used configs --------------------------------
+write_config(config, "run_config.yaml", config_exclude=config_technical)
+
+# in case config Snakemake variable must be checked
+write_config(config, "full_run_config.yaml", config_exclude=None)
+
 # check_config_version(config=config)
 parse_config(config)
 
+# Prepare variable for the workflow -------------------------------------------
 config.update({"git_commit": get_last_commit_message(".")})
 
 # convert country list according to the desired region
