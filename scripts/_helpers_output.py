@@ -153,9 +153,7 @@ def make_license_text(html=False):
     # REUSE-IgnoreStart
     license_str_list = [
         "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors",
-        "# SPDX-License-Identifier: AGPL-3.0-or-later",
-        "#",
-        "\n\r",
+        "# SPDX-License-Identifier: AGPL-3.0-or-later ",
     ]
     # REUSE-IgnoreEnd
     if html:

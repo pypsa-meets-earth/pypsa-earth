@@ -108,6 +108,7 @@ if config["custom_rules"] is not []:
         include: rule
 
 
+# Define rules to run the workflow --------------------------------------------
 rule clean:
     run:
         try:
