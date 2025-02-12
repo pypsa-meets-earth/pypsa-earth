@@ -697,6 +697,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             countries=config["countries"],
             gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
             cluster_options=config["cluster_options"],
+            focus_weights=config.get("focus_weights", None),
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
