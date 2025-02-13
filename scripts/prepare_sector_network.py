@@ -2832,9 +2832,12 @@ def add_industry_demand(n, demand):
 
 def add_egs_industry_supply(n, supply_curve):
 
+    dr = snakemake.params.costs["fill_values"]["discount rate"]
+    lifetime = snakemake.params.enhanced_geothermal["lifetime"]
+
     # annuitize capex
     supply_curve['capex[$/MW]'] = (
-        supply_curve['capex[$/MW]'] * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
+        supply_curve['capex[$/MW]'] * dr / (1 - (1 + dr) ** (-lifetime))
     )
 
     for (region, cost_index), row in supply_curve.loc[
@@ -2864,7 +2867,7 @@ def add_egs_industry_supply(n, supply_curve):
                 capital_cost=row['capex[$/MW]'],
                 marginal_cost=row['opex[$/MWh]'],
                 p_nom_max=row['avail_capacity[MW]'],
-                efficiency=0.9,
+                efficiency=snakemake.params['enhanced_geothermal']['heat_distribution_network_efficiency'],
                 p_nom_extendable=True,
             )
 
