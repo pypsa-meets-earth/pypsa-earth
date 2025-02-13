@@ -447,9 +447,10 @@ if __name__ == '__main__':
 
     regions = gpd.read_file(snakemake.input['regions']).set_index('name')
 
-    max_network_diameter = 20. # km
-    min_network_average_capacity = 10. # MWh
-    max_network_average_capacity = 30. # MWh
+    egs_params = snakemake.params['enhanced_geothermal']
+    max_network_diameter = egs_params['max_network_diameter']
+    min_network_average_capacity = egs_params['min_network_average_capacity']
+    max_network_average_capacity = egs_params['max_network_average_capacity']
 
     n_cost_steps = 2
     supply_curve_columns = ['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
