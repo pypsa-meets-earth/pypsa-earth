@@ -452,7 +452,8 @@ if __name__ == '__main__':
     min_network_average_capacity = egs_params['min_network_average_capacity']
     max_network_average_capacity = egs_params['max_network_average_capacity']
 
-    n_cost_steps = 2
+    n_cost_steps = egs_params['industrial_heating_n_cost_steps']
+
     supply_curve_columns = ['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
     
     final_demands = pd.DataFrame(
@@ -509,7 +510,7 @@ if __name__ == '__main__':
                 utm_coords[assignments != -1],
                 assignments[assignments != -1],
                 max_iterations=10,
-                size_threshold=10
+                size_threshold=egs_params['min_network_average_capacity']
                 )
         
             new_clusters = []
@@ -534,7 +535,7 @@ if __name__ == '__main__':
         else:
             new_clusters = clusters
 
-        piping_cost = 1_300_000 # $/km
+        piping_cost = egs_params['piping_cost']
 
         def dummy_egs_query(cluster):
             return 0 # $/MWth
