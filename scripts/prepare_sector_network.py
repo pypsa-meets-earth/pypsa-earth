@@ -2877,9 +2877,13 @@ def add_industry_heating(n, costs):
     idx = pd.IndexSlice
 
     investment_costs = costs.loc[idx[:,'investment'],:]
+
+    dr = snakemake.params.costs["fill_values"]["discount rate"]
+    lifetime = snakemake.params.costs["fill_values"]["lifetime"]
+
     investment_costs.loc[:,'value'] = (
         investment_costs['value']
-        * 0.07 / (1 - (1 + 0.07) ** - 25)  # 7% interest rate, 25 years lifetime
+        * dr / (1 - (1 + dr) ** (-lifetime))
     )
 
     # investment_costs.index = investment_costs.index.set_levels(['fixed'], level='parameter')
