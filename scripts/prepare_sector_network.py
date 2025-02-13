@@ -3174,7 +3174,8 @@ def attach_enhanced_geothermal(n, potential):
 
     logger.warning('Adding EGS for electricity generation in prepare_sector_network.py')
 
-    egs_potential = pd.read_csv(potential, index_col=[0, 1])
+    egs_potential = pd.read_csv(potential, index_col=[0,1])
+    assert egs_potential.index.names == ['network_region', 'capital_cost[$/kW]']
 
     heat_share = int(re.search(r'_h(\d+)', potential).group(1)) / 100
     power_share = int(re.search(r'_p(\d+)', potential).group(1)) / 100
@@ -3214,11 +3215,10 @@ def attach_enhanced_geothermal(n, potential):
             n.add("Bus", industry_bus, carrier="general industry heat")
 
         # Loop over each supply‐curve point (i.e. each potential) for this region
-        for i, (cost_index, row) in enumerate(ss.iterrows()):
+        for i, (capital_cost, row) in enumerate(ss.iterrows()):
             capacity = row["available_capacity[MW]"]
             # Convert the cost index from $/kW to $/MW and annuitize the capex
-            capex_value = float(cost_index) * 1000  
-            ann_capex = capex_value * 0.07 / (1 - (1 + 0.07) ** (-25))
+            capital_cost = float(capital_cost) * 1000 # $/kW -> $/MW
 
             # Build an identifier that encodes the region name, heat share, power share, and supply‐curve index
             identifier = f"{bus}_H{heat_share:.2f}_P{power_share:.2f}_curve{i}"
@@ -3233,7 +3233,7 @@ def attach_enhanced_geothermal(n, potential):
                 bus2=f"{bus} low temperature heat 50-150C for industry",
                 carrier="enhanced geothermal ORC",
                 p_nom_max=capacity,
-                capital_cost=ann_capex,
+                capital_cost=capital_cost,
                 p_nom_extendable=True,
             )
 
