@@ -513,6 +513,7 @@ rule build_powerplants:
 
 rule build_egs_potentials:
     params:
+        costs=config["costs"],
         enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
         egs_capex="data/p{power_share}_h{heat_share}/Total_CAPEX_USDmm.tif",
@@ -546,6 +547,7 @@ rule add_electricity:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
         **{
             f"profile_{tech}": "resources/"

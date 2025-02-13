@@ -805,6 +805,7 @@ def estimate_renewable_capacities_irena(
 def attach_enhanced_geothermal(n):
 
     egs_potential = pd.read_csv(snakemake.input["egs_potentials"], index_col=[0, 1])
+    assert egs_potential.index.names == ['network_region', 'capital_cost[$/kW]']
 
     idx = pd.IndexSlice
 
@@ -831,11 +832,10 @@ def attach_enhanced_geothermal(n):
         ss = egs_potential.loc[idx[bus, :]]
 
         # Loop over supply‐curve point (i.e. each potential) for this region
-        for i, (cost_index, row) in enumerate(ss.iterrows()):
+        for i, (capital_cost, row) in enumerate(ss.iterrows()):
             capacity = row["available_capacity[MW]"]
             # Convert the cost index from $/kW to $/MW and annuitize the capex
-            capex_value = float(cost_index) * 1000  
-            ann_capex = capex_value * 0.07 / (1 - (1 + 0.07) ** (-25))
+            capital_cost = float(capital_cost) * 1000 # $/kW -> $/MW
 
             identifier = f"{bus}_curve{i}"
 
@@ -846,7 +846,7 @@ def attach_enhanced_geothermal(n):
                 bus1=bus,
                 carrier="enhanced geothermal ORC",
                 p_nom_max=capacity,
-                capital_cost=ann_capex,
+                capital_cost=capital_cost,
                 p_nom_extendable=True,
             )
 

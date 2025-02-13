@@ -178,4 +178,13 @@ if __name__ == "__main__":
 
         regional_potentials.append(ss) 
 
-    pd.concat(regional_potentials).dropna().to_csv(snakemake.output.egs_potentials)
+    regional_potentials = pd.concat(regional_potentials).dropna()
+    dr = snakemake.params['costs']['fill_values']['discount rate']
+
+    def to_capital_cost(index, lt=25):
+        return (index[0], index[1] * dr / (1 - (1 + dr) ** (-lt)))
+
+    regional_potentials.index = regional_potentials.index.map(to_capital_cost)
+    regional_potentials.index.names = ['network_region', 'capital_cost[$/kW]']
+
+    regional_potentials.to_csv(snakemake.output.egs_potentials)
