@@ -170,6 +170,7 @@ def H2_liquid_fossil_conversions(n, costs):
         bus0=spatial.nodes + " H2",
         bus1=spatial.oil.nodes,
         bus2=spatial.co2.nodes,
+        bus3=spatial.nodes,
         carrier="Fischer-Tropsch",
         efficiency=costs.at["Fischer-Tropsch", "efficiency"],
         capital_cost=costs.at["Fischer-Tropsch", "fixed"]
@@ -178,6 +179,8 @@ def H2_liquid_fossil_conversions(n, costs):
         ],  # Use efficiency to convert from EUR/MW_FT/a to EUR/MW_H2/a
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
+        efficiency3=-costs.at["Fischer-Tropsch", "electricity-input"]
+        / costs.at["Fischer-Tropsch", "hydrogen-input"],
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
@@ -1019,23 +1022,16 @@ def add_aviation(n, cost):
     airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
-    gadm_level = options["gadm_level"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
 
-    airports["gadm_{}".format(gadm_level)] = airports[["x", "y", "country"]].apply(
-        lambda airport: locate_bus(
-            airport[["x", "y"]],
-            airport["country"],
-            gadm_level,
-            snakemake.input.shapes_path,
-            snakemake.config["cluster_options"]["alternative_clustering"],
-        ),
-        axis=1,
-    )
-    # To change 3 country code to 2
-    # airports["gadm_{}".format(gadm_level)] = airports["gadm_{}".format(gadm_level)].apply(
-    # lambda cocode: three_2_two_digits_country(cocode[:3]) + " " + cocode[4:-2])
-
-    airports = airports.set_index("gadm_{}".format(gadm_level))
+    # Map airports location to gadm location
+    airports = locate_bus(
+        airports,
+        countries,
+        gadm_layer_id,
+        snakemake.input.shapes_path,
+        snakemake.config["cluster_options"]["alternative_clustering"],
+    ).set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
@@ -1287,7 +1283,7 @@ def add_shipping(n, costs):
     ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
-    gadm_level = options["gadm_level"]
+    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
@@ -1304,18 +1300,13 @@ def add_shipping(n, costs):
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(
-            port[["x", "y"]],
-            port["country"],
-            gadm_level,
-            snakemake.input["shapes_path"],
-            snakemake.config["cluster_options"]["alternative_clustering"],
-        ),
-        axis=1,
-    )
-
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    ports = locate_bus(
+        ports,
+        countries,
+        gadm_layer_id,
+        snakemake.input.shapes_path,
+        snakemake.config["cluster_options"]["alternative_clustering"],
+    ).set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
@@ -2916,12 +2907,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="19",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="72H",
-            discountrate="0.071",
+            sopts="144H",
+            discountrate=0.071,
             demand="AB",
         )
 

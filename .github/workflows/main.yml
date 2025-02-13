@@ -1,13 +1,17 @@
 on:
   schedule:
-  - cron: "0 5 * * 0"
+  - cron: "0 5 1 * *"
+  workflow_dispatch:
 
 jobs:
   contrib-readme-job:
     runs-on: ubuntu-latest
     name: A job to automate contrib in readme
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.repository_owner == 'pypsa-meets-earth' && github.ref == 'refs/heads/main')}}
     steps:
     - name: Contribute List
       uses: akhilmhdh/contributors-readme-action@v2.3.10
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        use_username: true
