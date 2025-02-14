@@ -236,14 +236,13 @@ def parse_config(config, fl_name=None, style_def=style):
     """
 
     # TODO Add a check for the cutouts used
-
+    year_items = dict(get_vals(config, "year"))
     # 1. Outline all the years used in a simulation
     # The config contains
-    res = dict(get_vals(config, "year"))
 
-    str_list = [None] * len(res)
+    str_list = [None] * len(year_items)
     k = 0
-    for i, j in res.items():
+    for i, j in year_items.items():
         str_list[k] = str(i) + ": " + str(j)
         k += 1
 
