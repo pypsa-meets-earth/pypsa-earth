@@ -9,6 +9,7 @@ Set of helper functions to deal with human-redable outputs.
 """
 
 import logging
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -224,6 +225,43 @@ def get_vals(test_dict, key_list):
     res = [(key, value) for key, value in d_flat.items() if key_list in key.lower()]
 
     return res
+
+
+def check_cutout(config, fl="config.yaml"):
+    snakem_config_cutouts = [
+        d_value.get("cutout") for tc, d_value in config.get("renewable").items()
+    ] + list(config.get("atlite").get("cutouts"))
+
+    local_config = yaml.safe_load(Path(fl).read_text())
+
+    local_config_cutouts = [
+        d_value.get("cutout") for tc, d_value in local_config.get("renewable").items()
+    ] + list(local_config.get("atlite").get("cutouts"))
+    # local config can miss some or all keys
+    local_config_cutouts = [x for x in local_config_cutouts if x is not None]
+
+    # A user must have an opportunity to over-write all the cutouts
+    # with a single value defined in `config.yaml`
+    if len(local_config_cutouts) == 1:
+
+        cutout_name = local_config_cutouts[0]
+
+        setup_cutout_dict = {
+            "atlite": {"cutouts": cutout_name},
+            # TODO Read values from the config
+            "renewable": {
+                "onwind": {"cutout": cutout_name},
+                "offwind-ac": {"cutout": cutout_name},
+                "offwind-dc": {"cutout": cutout_name},
+                "solar": {"cutout": cutout_name},
+                "hydro": {"cutout": cutout_name},
+                "csp": {"cutout": cutout_name},
+            },
+        }
+
+        config.update(setup_cutout_dict)
+
+    return config
 
 
 def parse_config(config, fl_name=None, style_def=style):
