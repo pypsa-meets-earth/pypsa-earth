@@ -20,7 +20,7 @@ from _helpers import (
     BASE_DIR,
 )
 from _helpers_output import (
-    check_cutout,
+    update_cutout,
     parse_config,
 )
 from build_demand_profiles import get_load_paths_gegis
