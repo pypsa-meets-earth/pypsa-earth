@@ -316,7 +316,7 @@ def prepare_heat_data(n, snapshots):
                 nodal_energy_totals[f"cool residential space"]
                 + nodal_energy_totals[f"cool services space"]
             )
-        )
+        ) * 1e6
 
     cooling_demand = pd.concat(cooling_demand, axis=1)
 
