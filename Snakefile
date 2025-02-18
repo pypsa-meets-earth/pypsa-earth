@@ -399,7 +399,7 @@ if config["enable"].get("retrieve_cost_data", True):
             countries=config["countries"],
             costs=config["costs"],
         output:
-            output_path=directory(pathlib.Path("resources", RDIR, "costs")),
+            output_path=directory(pathlib.Path("resources", RDIR)),
         log:
             "logs/" + RDIR + "retrieve_cost_data.log",
         threads: 1
