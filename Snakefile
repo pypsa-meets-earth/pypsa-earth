@@ -52,7 +52,7 @@ configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
 
 
-config = check_cutout(config, "config.yaml")
+config = update_cutout(config, "config.yaml")
 
 
 # Provide summary of the actually used configs --------------------------------

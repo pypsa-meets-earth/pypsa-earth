@@ -227,7 +227,7 @@ def get_vals(test_dict, key_list):
     return res
 
 
-def check_cutout(config, fl="config.yaml"):
+def update_cutout(config, fl="config.yaml"):
     snakem_config_cutouts = [
         d_value.get("cutout") for tc, d_value in config.get("renewable").items()
     ] + list(config.get("atlite").get("cutouts"))
