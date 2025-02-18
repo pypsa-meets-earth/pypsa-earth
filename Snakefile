@@ -20,6 +20,7 @@ from _helpers import (
     BASE_DIR,
 )
 from _helpers_output import (
+    check_cutout,
     parse_config,
 )
 from build_demand_profiles import get_load_paths_gegis
@@ -49,6 +50,9 @@ configfile: "configs/config.costs.yaml"
 configfile: "configs/config.solve.yaml"
 configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
+
+
+config = check_cutout(config, "config.yaml")
 
 
 # Provide summary of the actually used configs --------------------------------
