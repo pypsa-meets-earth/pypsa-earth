@@ -5,7 +5,7 @@
 .. _how_to_contribute:
 
 ##########################################
-Сontribute
+How to Сontribute
 ##########################################
 
 Contributions are welcome, and they are greatly appreciated!
