@@ -43,7 +43,7 @@ if __name__ == "__main__":
         M = I.T.dot(np.diag(I.dot(stacked_pop)))
 
         cooling_demand = cutout.cooling_demand(
-            matrix=M.T, index=clustered_regions.index
+            matrix=M.T, index=clustered_regions.index, threshold=19
         )
         cooling_demand.to_netcdf(snakemake.output[f"cooling_demand_{area}"])
 
