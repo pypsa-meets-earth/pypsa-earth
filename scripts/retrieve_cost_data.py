@@ -35,12 +35,8 @@ if __name__ == "__main__":
 
     if len(model_country_list) == 1 and "US" in model_country_list:
         # take technology-data/outputs/US/costs_yyyy.csv
-        output_path = pathlib.Path(
-            base_output_path, cost_file_name
-        )
-        url_to_use = "/".join(
-            (base_url_to_use, "US", cost_file_name)
-        )
+        output_path = pathlib.Path(base_output_path, cost_file_name)
+        url_to_use = "/".join((base_url_to_use, "US", cost_file_name))
     else:
         # take technology-data/outputs/costs_yyyy.csv
         url_to_use = "/".join((base_url_to_use, cost_file_name))

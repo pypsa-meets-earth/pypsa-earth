@@ -148,6 +148,25 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs = convert_currency_and_unit(costs, config["output_currency"])
     costs = costs.value.unstack().fillna(config["fill_values"])
 
+    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
+    wished_cost_scenario = config["costs"]["cost_scenario"]
+    wished_financial_case = config["costs"]["financial_case"]
+    if "scenario" in costs.columns and "financial_case" in costs.columns:
+        # both financial_case and scenario are NOT NULL
+        query_string_part_one = (
+            "financial_case.str.casefold() == @f & scenario.str.casefold() == @s"
+        )
+
+        # both financial case and scenario are NULL
+        query_string_part_two = "financial_case.isnull() | scenario.isnull()"
+
+        query_string = " | ".join([query_string_part_one, query_string_part_two])
+
+        costs = costs.query(
+            query_string,
+            local_dict={"f": wished_financial_case, "s": wished_cost_scenario},
+        )
+
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
         overwrites = config.get(attr)
         if overwrites is not None:
