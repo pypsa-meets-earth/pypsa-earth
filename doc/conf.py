@@ -84,6 +84,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.graphviz",
+    "sphinx_copybutton",
     # "sphinx.ext.pngmath",
     # "sphinxcontrib.tikz",
     # "rinoh.frontend.sphinx",
@@ -177,7 +178,8 @@ texinfo_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "pypsa_earth", "pypsa_earth Documentation", [author], 1)]
+man_pages = [(master_doc, "pypsa_earth",
+              "pypsa_earth Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
