@@ -12,26 +12,26 @@ Tutorial: Electricity
 .. note::
     If you have not yet installed PyPSA-Earth, please refer to the :ref:`installation` section.
 
-To properly model any region of the Earth, it is first crucial to get familiar with a tutorial 
+To properly model any region of the Earth, it is first crucial to get familiar with a tutorial
 where a simpler model is considered. This section explains how to run and analyze the tutorial model.
 
 Build the tutorial electricity-only model
 ---------------------------------------------
 
-The user can explore the majority of the model's functions on a local machine by running the tutorial, 
-which uses fewer computational resources than the entire model does. A tutorial data kit was developed 
+The user can explore the majority of the model's functions on a local machine by running the tutorial,
+which uses fewer computational resources than the entire model does. A tutorial data kit was developed
 to facilitate exploring the model.
-You can build it using the tutorial configuration file ``config.tutorial.yaml`` (placed in the project 
-folder ``pypsa-earth``). It includes parts deviating from the default config file ``config.default.yaml``, 
-which are necessary to run the tutorial model. By default, PyPSA-Earth reads configuration parameters 
-of simulation from ``config.yaml`` file located in ``pypsa-earth`` folder. Thus, to run the tutorial 
+You can build it using the tutorial configuration file ``config.tutorial.yaml`` (placed in the project
+folder ``pypsa-earth``). It includes parts deviating from the default config file ``config.default.yaml``,
+which are necessary to run the tutorial model. By default, PyPSA-Earth reads configuration parameters
+of simulation from ``config.yaml`` file located in ``pypsa-earth`` folder. Thus, to run the tutorial
 model, ``config.tutorial.yaml`` needs to be stored as ``config.yaml``:
 
 
 How to configure runs for the tutorial model
 ---------------------------------------------
 
-The model can be adapted to include any selected country. But this tutorial is limited to ``Nigeria ("NG")``, 
+The model can be adapted to include any selected country. But this tutorial is limited to ``Nigeria ("NG")``,
 ``Benin ("BJ")``, ``Botswana ("BW")`` and ``Morocco ("MA")``.
 
 .. code:: yaml
@@ -46,8 +46,8 @@ When the first run is completed and all the necessary data are extracted, it may
     enable:
         retrieve_databundle: true
 
-The scenario is defined by the number of clusters and the optimization options. The tutorial model 
-is set to have 6 clusters and the optimization option "Co2L-4H" which translates absolute carbon-dioxide 
+The scenario is defined by the number of clusters and the optimization options. The tutorial model
+is set to have 6 clusters and the optimization option "Co2L-4H" which translates absolute carbon-dioxide
 emission limit with the model resampled to 4H resolution.
 
 .. code:: yaml
@@ -70,7 +70,7 @@ The temporal scope is set to a single week. This is to make sure that the model 
 Run the model
 ---------------------
 
-After configuration set-up, the model is ready to be built and run. 
+After configuration set-up, the model is ready to be built and run.
 Open a terminal, go into the PyPSA-Earth directory, and activate the pypsa-earth environment with
 
 .. code:: bash
@@ -84,7 +84,7 @@ You then need to copy the tutorial config file to ``config.yaml``
     .../pypsa-earth (pypsa-earth) $ cp config.tutorial.yaml config.yaml
 
 .. note::
-    If you previously have a ``config.yaml file``, You may want to reserve a copy of 
+    If you previously have a ``config.yaml file``, You may want to reserve a copy of
     your current configuration file (``config.yaml``) as it will be overwritten by a tutorial configuration.
 
 Before running the workflow you may check how it will look by using ``--dryrun`` or ``-n`` Snakemake option:
