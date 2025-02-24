@@ -26,7 +26,6 @@ by
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
 [![DOI](https://img.shields.io/badge/DOI-10.1016%2Fj.apenergy.2023.121096-blue)](https://doi.org/10.1016/j.apenergy.2023.121096)
 
-
 **PyPSA-Earth: A Global Sector-Coupled Open-Source Multi-Energy System Model**
 
 PyPSA-Earth is the first open-source global cross-sectoral energy system model with high spatial and temporal resolution. Originally it was derived from the European [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/) model using new data and functions which provide capabilities for modelling the world energy system or any subset of it, enabling large-scale collaboration and transparent analysis for a sustainable energy future. It is suitable for operational studies, as well as expansion studies on combined generation, storage and transmission accounting for cross-sectoral interactions. The model provides two main features: (1) customizable data extraction and preparation scripts with global coverage for power and cross-sectoral modelling and (2) a [PyPSA](https://pypsa.readthedocs.io/en/latest/) energy modelling framework integration. In particular, the data includes energy demand, generation and medium to high-voltage networks from open sources, yet additional data can be further integrated. A broad range of clustering and grid meshing strategies help adapt the model to computational and practical needs.
@@ -37,7 +36,6 @@ PyPSA-Earth is capable to provide the modelling evidence needed to translate imp
 
 For more details, the model is described in the Applied Energy article "PyPSA-Earth: A new global open energy system optimization model demonstrated in Africa," 2023. The preprint describing the sector-coupled functionalities is also available [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4743242). Additional information can be found in the [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
 
-
 **PyPSA meets Earth is a free and open source software initiative aiming to develop a powerful energy system model for Earth.** We work on open data, open source modelling, open source solver support and open communities. Stay tuned and join our mission - We look for users, co-developers and leaders! Check out our [website for results and our projects](https://pypsa-meets-earth.github.io/projects.html). Happy coding!
 
 <p align="center">
@@ -47,7 +45,6 @@ For more details, the model is described in the Applied Energy article "PyPSA-Ea
 </p>
 
 <p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a>https://zenodo.org/records/10080766</a></p>
-
 
 The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
 
@@ -84,6 +81,7 @@ There are multiple ways to get involved and learn more about our work:
    ```bash
       .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
    ```
+
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
@@ -99,14 +97,21 @@ There are multiple ways to get involved and learn more about our work:
     .../pypsa-earth % mamba env create -f envs/environment.yaml
 ```
 
-3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
-4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632) or follow the conda approach as now packages via pip and conda are available:
+
+```bash
+    (base) conda activate pypsa-earth
+    (pypsa-earth) conda install -c conda-forge highspy
+```
+
+5. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
    ```bash
       .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
       .../pypsa-earth % jupyter lab
    ```
-5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+
+6. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
    To verify the successful installation the following code can be tested from bash:
 
    ```bash
@@ -120,7 +125,6 @@ There are multiple ways to get involved and learn more about our work:
       Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
       Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
    ```
-
 ## Running the model in previous versions
 
 The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.6.0, which is the last version before the recent PyPSA update, the following command can be used:
@@ -129,8 +133,6 @@ The model can be run in previous versions by checking out the respective tag. Fo
 git checkout v0.6.0
 ```
 After checking out the tag, the model can be run as usual. Please make sure to use the environment built for the respective version.
-
-
 
 ## Test run on tutorial
 
@@ -146,10 +148,6 @@ After checking out the tag, the model can be run as usual. Please make sure to u
   ```
 
   Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
-
-
-
-
 
 ## Training
 
