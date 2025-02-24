@@ -191,7 +191,7 @@ This triggers a workflow of multiple preceding jobs that depend on each rule's i
         16 -> 22
         9 -> 22
         10 -> 22
-    }            
+    }
 
 In the terminal, this will show up as a list of jobs to be run:
 
@@ -241,10 +241,11 @@ both ``tutorial`` and ``retrieve_databundle`` flags are on. The tutorial model w
 Note that data load will need about 1.6GB and model building will take a while (about 20-50 minutes).
 
 .. note::
+
     It is good practice to perform a dry-run using the option -n, before you commit to a run:
 
     .. code:: bash
-        
+
         .../pypsa-earth (pypsa-earth) $ snakemake solve_all_networks -n
 
 
