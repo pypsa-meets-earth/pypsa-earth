@@ -101,7 +101,7 @@ There are multiple ways to get involved and learn more about our work:
 
 ```bash
     (base) conda activate pypsa-earth
-    (pypsa-earth) conda install -c conda-forge linopy
+    (pypsa-earth) conda install -c conda-forge highspy
 ```
 
 5. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
