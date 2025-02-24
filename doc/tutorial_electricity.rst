@@ -25,7 +25,7 @@ Thus, to run the tutorial model, ``config.tutorial.yaml`` needs to be stored as 
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % cp config.tutorial.yaml config.yaml
+    .../pypsa-earth (pypsa-earth) $ cp config.tutorial.yaml config.yaml
 
 .. note::
     You may want to do a reserve copy of your current configuration file (``config.yaml``) as it will be overwritten by a tutorial configuration.
@@ -47,17 +47,23 @@ Run the model
 ---------------------
 
 After configuration set-up, the model is ready to be built and run.
-Before running the workflow you may check how it will look by using `--dryrun` or `-n` Snakemake option:
+Before running the workflow you may check how it will look by using ``--dryrun`` or ``-n`` Snakemake option:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks --dryrun
+    .../pypsa-earth (pypsa-earth) $ snakemake -j 1 solve_all_networks --dryrun
+
+You can also run the tutorial model using the tutorial config directly by using the following command:
+
+.. code:: bash
+
+    .../pypsa-earth (pypsa-earth) $ snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml
 
 To run the whole model workflow you just need the following command:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake -j 1 solve_all_networks
+    .../pypsa-earth (pypsa-earth) $  snakemake -j 1 solve_all_networks
 
 .. TODO Explain settings of the tutorial case
 
@@ -95,7 +101,7 @@ You may use the ``clean`` rule for making so:
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake -j 1 clean
+    .../pypsa-earth (pypsa-earth) $ snakemake -j 1 clean
 
 Generally, it's a good idea to repeat the cleaning procedure every time when the underlying data are changed to avoid conflicts between run settings corresponding to different scenarios.
 
