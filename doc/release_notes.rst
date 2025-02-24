@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update workflow to geopandas >= 1.0 `PR #1276 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1276>`__
 
+* Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
+
 **Minor Changes and bug-fixing**
 
 * Fix missing focus_weights on cluster_network params without augmented_line_connections, minimize warnings on subregions `PR #1348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1348>`__
