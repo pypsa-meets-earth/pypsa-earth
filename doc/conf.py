@@ -178,8 +178,7 @@ texinfo_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "pypsa_earth",
-              "pypsa_earth Documentation", [author], 1)]
+man_pages = [(master_doc, "pypsa_earth", "pypsa_earth Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -187,6 +186,6 @@ man_pages = [(master_doc, "pypsa_earth",
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
-copybutton_prompt_text = r"\.{3}/[^$]*\$ "  # Matches the pattern .../something $ 
+copybutton_prompt_text = r"\.{3}/[^$]*\$ "  # Matches the pattern .../something $
 copybutton_prompt_is_regexp = True
 copybutton_only_copy_prompt_lines = True
