@@ -809,31 +809,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     )
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
-
-if __name__ == "__main__":
-    if "snakemake" not in globals():
-
-        from _helpers import mock_snakemake
-
-        snakemake = mock_snakemake("retrieve_databundle_light")
-
-    # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
-    configure_logging(snakemake)
-
-    rootpath = "."
-    tutorial = snakemake.params.tutorial
-    countries = snakemake.params.countries
-    logger.info(f"Retrieving data for {len(countries)} countries.")
-
-    # load enable configuration
-    config_enable = snakemake.config["enable"]
-    # load databundle configuration
-    config_bundles = load_databundle_config(snakemake.config["databundles"])
-    disable_progress = not config_enable["progress_bar"]
-
-    bundles_to_download = get_best_bundles(
-        countries, config_bundles, tutorial, config_enable
-    )
+def retrieve_databundle(bundles_to_download, config_bundles, hydrobasins_level, rootpath=".", disable_progress=False):
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
@@ -879,7 +855,6 @@ if __name__ == "__main__":
     ]
     if len(hydrobasin_bundles) > 0:
         logger.info("Merging regional hydrobasins files into a global shapefile")
-        hydrobasins_level = snakemake.params["hydrobasins_level"]
         merge_hydrobasins_shape(
             config_bundles[hydrobasin_bundles[0]], hydrobasins_level
         )
@@ -895,3 +870,36 @@ if __name__ == "__main__":
             "The following bundles could not be downloaded:\n\t"
             + "\n\t".join(list(missing_bundles))
         )
+
+if __name__ == "__main__":
+    if "snakemake" not in globals():
+
+        from _helpers import mock_snakemake
+
+        snakemake = mock_snakemake("retrieve_databundle_light")
+
+    # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
+    configure_logging(snakemake)
+
+    rootpath = "."
+    tutorial = snakemake.params.tutorial
+    countries = snakemake.params.countries
+    logger.info(f"Retrieving data for {len(countries)} countries.")
+
+    # load enable configuration
+    config_enable = snakemake.config["enable"]
+    # load databundle configuration
+    config_bundles = load_databundle_config(snakemake.config["databundles"])
+    disable_progress = not config_enable["progress_bar"]
+    hydrobasins_level = snakemake.params["hydrobasins_level"]
+
+    bundles_to_download = get_best_bundles(
+        countries, config_bundles, tutorial, config_enable
+    )
+    
+    retrieve_databundle(bundles_to_download,
+                        config_bundles,
+                        hydrobasins_level, 
+                        rootpath=rootpath, 
+                        disable_progress=disable_progress
+                        )
