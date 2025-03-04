@@ -1984,9 +1984,9 @@ if config["foresight"] == "myopic":
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
             busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
-            busmap=pypsaearth(
-                "resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
-            ),
+            busmap="resources/"
+            + RDIR
+            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
             clustered_pop_layout="resources/"
             + SECDIR
             + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
