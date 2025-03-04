@@ -809,7 +809,14 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     )
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
-def retrieve_databundle(bundles_to_download, config_bundles, hydrobasins_level, rootpath=".", disable_progress=False):
+
+def retrieve_databundle(
+    bundles_to_download,
+    config_bundles,
+    hydrobasins_level,
+    rootpath=".",
+    disable_progress=False,
+):
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
@@ -871,6 +878,7 @@ def retrieve_databundle(bundles_to_download, config_bundles, hydrobasins_level, 
             + "\n\t".join(list(missing_bundles))
         )
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
 
@@ -896,10 +904,11 @@ if __name__ == "__main__":
     bundles_to_download = get_best_bundles(
         countries, config_bundles, tutorial, config_enable
     )
-    
-    retrieve_databundle(bundles_to_download,
-                        config_bundles,
-                        hydrobasins_level, 
-                        rootpath=rootpath, 
-                        disable_progress=disable_progress
-                        )
+
+    retrieve_databundle(
+        bundles_to_download,
+        config_bundles,
+        hydrobasins_level,
+        rootpath=rootpath,
+        disable_progress=disable_progress,
+    )
