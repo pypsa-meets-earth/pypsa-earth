@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 import textwrap
 
-from _helpers import create_logger
+import yaml
 from retrieve_databundle_light import *
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.table import Table
-
-logger = create_logger(__name__)
-
-import yaml
 
 configfile = ["config.default.yaml", "configs/bundle_config.yaml", "config.yaml"]
 
@@ -152,7 +151,7 @@ if __name__ == "__main__":
     console_markdown(
         """
 
-    # PyPSA-Earth Databundle Retrival Command-Line Interface (CLI)
+    # PyPSA-Earth Databundle Retrieval Command-Line Interface (CLI)
 
     Find the missing file for your snakemake run and solve them your own way. Please make sure to:
 
