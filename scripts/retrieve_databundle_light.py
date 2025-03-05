@@ -915,3 +915,7 @@ if __name__ == "__main__":
         rootpath=rootpath,
         disable_progress=disable_progress,
     )
+
+    # if some files are still missing, reroute to command-line-interface
+    if any(not os.path.isfile(file) for file in snakemake.output):
+        os.system("python scripts/_cli.py")
