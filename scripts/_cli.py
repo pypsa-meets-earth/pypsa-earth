@@ -4,21 +4,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import textwrap
 
-import yaml
+from _helpers import mock_snakemake
 from retrieve_databundle_light import *
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.table import Table
-
-configfile = ["config.default.yaml", "configs/bundle_config.yaml", "config.yaml"]
-
-config = {}
-for c in configfile:
-    if os.path.isfile(c):
-        with open(c) as file:
-            config_append = yaml.safe_load(file)
-
-        config.update(config_append)
 
 
 def console_markdown(markdown, lvl=1):
@@ -56,15 +46,15 @@ def console_table(dataframe, table_kw={}):
     return console.print(table)
 
 
-def databundle_check(bundles_to_download):
+def databundle_check(bundles_to_download, config):
 
     df_file = pd.DataFrame()
 
     for bundlename in bundles_to_download:
         df = (
-            pd.DataFrame.from_dict(config["databundles"][bundlename]["output"])
+            pd.DataFrame.from_dict(config_databundles[bundlename]["output"])
             .rename(columns={0: "filepath"})
-            # .assign(category=config["databundles"][bundlename]["category"])
+            # .assign(category=config_databundles[bundlename]["category"])
             .assign(databundle=bundlename)
             .set_index("filepath")
         )
@@ -90,7 +80,7 @@ def databundle_check(bundles_to_download):
         extractable_bundle = [
             bundlename
             for bundlename in missing_bundles
-            if set(config["databundles"][bundlename]["urls"].keys()).intersection(
+            if set(config_databundles[bundlename]["urls"].keys()).intersection(
                 ["zenodo", "gdrive", "direct"]
             )
         ]
@@ -104,7 +94,7 @@ def databundle_check(bundles_to_download):
 
             for bundlename in extractable_bundle:
                 df = (
-                    pd.DataFrame(config["databundles"][bundlename]["urls"].items())
+                    pd.DataFrame(config_databundles[bundlename]["urls"].items())
                     .rename(columns={0: "host", 1: "urls"})
                     .assign(databundle=bundlename)
                 )
@@ -135,11 +125,11 @@ def databundle_check(bundles_to_download):
         f"""
     Options:
 
-    - **check**: update the Databundle Checklist to see if the file is included
-    - **all**: retrieve all missing databundles, namely **{", ".join(missing_bundles)}**
-    - **rerun**: retrieve all databundles again, namely **{", ".join(bundles_to_download)}**
-    - **bundle_...**: retrieve the selected databundles, can be more than one
-    - Press **ENTER** to end this loop
+    - **check**: update the checklist table to see if the file is now included
+    - **all**: get all missing databundles: **{", ".join(missing_bundles)}**
+    - **rerun**: get all databundles again: **{", ".join(bundles_to_download)}**
+    - **bundle_...**: get selected databundles, can be more than one
+    - Press **ENTER** to exit
     """
     )
 
@@ -147,6 +137,8 @@ def databundle_check(bundles_to_download):
 
 
 if __name__ == "__main__":
+
+    snakemake = mock_snakemake("retrieve_databundle_light")
 
     console_markdown(
         """
@@ -161,20 +153,21 @@ if __name__ == "__main__":
     )
 
     rootpath = "."
-    tutorial = config["tutorial"]
-    countries = config["countries"]
-    config_enable = config["enable"]
+    tutorial = snakemake.config["tutorial"]
+    countries = snakemake.config["countries"]
+    config_enable = snakemake.config["enable"]
     disable_progress = not config_enable["progress_bar"]
-    hydrobasins_level = config["renewable"]["hydro"]["hydrobasins_level"]
+    hydrobasins_level = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
+    config_databundles = snakemake.config["databundles"]
 
-    config_bundles = load_databundle_config(config["databundles"])
+    config_bundles = load_databundle_config(snakemake.config["databundles"])
 
     bundles_to_download = get_best_bundles(
         countries, config_bundles, tutorial, config_enable
     )
 
     while True:
-        missing_bundles = databundle_check(bundles_to_download)
+        missing_bundles = databundle_check(bundles_to_download, config_databundles)
         answer = input("Input: ")
 
         if not answer:

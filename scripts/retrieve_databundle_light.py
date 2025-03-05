@@ -233,7 +233,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
 
         return True
     else:
-        logger.error(f"Host {host} not implemented")
+        logger.error(f"Host gdrive not implemented")
         return False
 
 
@@ -497,7 +497,7 @@ def download_and_unzip_hydrobasins(
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
-    level_code = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
+    level_code = config["level_code"]
     level_code = "{:02d}".format(int(level_code))
 
     all_downloaded = True
@@ -828,6 +828,12 @@ def retrieve_databundle(
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
+    hydrobasin_bundles = [
+        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
+    ]
+    if len(hydrobasin_bundles) > 0:
+        config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
+
     # initialize downloaded and missing bundles
     downloaded_bundles = []
 
@@ -857,9 +863,6 @@ def retrieve_databundle(
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
-    hydrobasin_bundles = [
-        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
-    ]
     if len(hydrobasin_bundles) > 0:
         logger.info("Merging regional hydrobasins files into a global shapefile")
         merge_hydrobasins_shape(
