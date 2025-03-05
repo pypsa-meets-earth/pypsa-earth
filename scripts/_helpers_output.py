@@ -228,16 +228,43 @@ def get_vals(test_dict, key_list):
 
 
 def update_cutout(config, fl="config.yaml"):
+    """
+    Process configuration inputs for a cutout file to be used in a model.
+    Updates the Snakemake config variable according to the parameters
+    set by a user in the actual configuration file for a simulation accounting
+    for the need to provide multiple cutout entries to the Snakemake config
+    variable.
+
+    In case the custom configuration file contains only one cutout entry, this
+    entry will be used to update the Snakemake config variable for all the
+    cutout entries.
+
+    If the custom configuration file contains multiple entries for a cutout
+    they will be merged with all the other cutout entries with a normally-used
+    Snakemake approach.
+
+    Parameters
+    ----------
+    config : dictionary
+        A dictionary which corresponds to the Snakemake config variable
+        to be used in a simulation
+    fl : string
+        A name of the yaml file which contains custom user-defined configuration
+        perameters to be prioritised over default parameters
+    """
     snakem_config_cutouts = [
         d_value.get("cutout") for tc, d_value in config.get("renewable").items()
     ] + list(config.get("atlite").get("cutouts"))
 
+    # A user-defined configuration file is loaded directly to avoid merges
+    # made by Snakemake
     local_config = yaml.safe_load(Path(fl).read_text())
-
     local_config_cutouts = [
-        d_value.get("cutout") for tc, d_value in local_config.get("renewable").items()
+        # "renewable" can be missing from the the local config
+        d_value.get("cutout")
+        for tc, d_value in local_config.get("renewable", {}).items()
     ] + list(local_config.get("atlite").get("cutouts"))
-    # local config can miss some or all keys
+    # A local config file can miss some or all keys
     local_config_cutouts = [x for x in local_config_cutouts if x is not None]
 
     # A user must have an opportunity to over-write all the cutouts
