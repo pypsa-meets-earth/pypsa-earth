@@ -48,7 +48,7 @@ For more details, the model is described in the Applied Energy article "PyPSA-Ea
 
 The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
 
-![alt text](doc/SCPE_v0.2.png)
+![alt text](https://ars.els-cdn.com/content/image/1-s2.0-S0306261925000467-gr5_lrg.jpg)
 
 ## Livetracker. Most popular global models:
 
@@ -97,21 +97,16 @@ There are multiple ways to get involved and learn more about our work:
     .../pypsa-earth % mamba env create -f envs/environment.yaml
 ```
 
-3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632) or follow the conda approach as now packages via pip and conda are available:
+3. For running the optimization one has to install a solver. Check the [installation](https://pypsa-earth.readthedocs.io/en/latest/installation.html) guideline for more details.
 
-```bash
-    (base) conda activate pypsa-earth
-    (pypsa-earth) conda install -c conda-forge linopy
-```
-
-5. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
    ```bash
       .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
       .../pypsa-earth % jupyter lab
    ```
 
-6. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
    To verify the successful installation the following code can be tested from bash:
 
    ```bash

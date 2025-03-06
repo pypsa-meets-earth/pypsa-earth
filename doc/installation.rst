@@ -107,6 +107,7 @@ The environment can be installed and activated like this:
 
     .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
 
+
 Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you
 open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.
 
@@ -153,7 +154,12 @@ To further improve performances, commercial solvers like
     However, solving capabilities of ``glpk`` are limited.
     To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
-A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
+A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_ or follow the conda approach as pip and conda packages are available as well:
+
+.. code:: bash
+
+    (base) conda activate pypsa-earth
+    (pypsa-earth) conda install -c conda-forge linopy
 
 
 Install Jupyter Lab
