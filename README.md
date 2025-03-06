@@ -99,7 +99,16 @@ There are multiple ways to get involved and learn more about our work:
 
 3. For running the optimization one has to install a solver. Check the [installation](https://pypsa-earth.readthedocs.io/en/latest/installation.html) guideline for more details.
 
+<<<<<<< HEAD
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+=======
+```bash
+    (base) conda activate pypsa-earth
+    (pypsa-earth) conda install -c conda-forge highspy
+```
+
+5. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+>>>>>>> 65fcdc2356f5f826b234a2f3fc66810a2372a1c7
 
    ```bash
       .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
