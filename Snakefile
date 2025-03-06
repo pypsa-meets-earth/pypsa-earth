@@ -2126,7 +2126,7 @@ if config["foresight"] == "myopic":
         script:
             "./scripts/solve_network.py"
 
-    rule solve_all_networks_myopic:
+    rule solve_sector_networks_myopic:
         input:
             networks=expand(
                 RESDIR
