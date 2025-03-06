@@ -16,7 +16,12 @@ from _helpers import (
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    write_config,
     BASE_DIR,
+)
+from _helpers_output import (
+    update_cutout,
+    parse_config,
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
@@ -28,14 +33,38 @@ HTTP = HTTPRemoteProvider()
 copy_default_files()
 
 
-configfile: "config.default.yaml"
+# configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
+
+
+config_technical = config.copy()
+
+
+configfile: "configs/config.main.yaml"
+configfile: "configs/config.spatial.yaml"
+configfile: "configs/config.weather.yaml"
+configfile: "configs/config.elec.yaml"
+configfile: "configs/config.sector.yaml"
+configfile: "configs/config.costs.yaml"
+configfile: "configs/config.solve.yaml"
+configfile: "configs/config.plot.yaml"
 configfile: "config.yaml"
 
 
-check_config_version(config=config)
+config = update_cutout(config, "config.yaml")
 
+
+# Provide summary of the actually used configs --------------------------------
+write_config(config, "run_config.yaml", config_exclude=config_technical)
+
+# in case config Snakemake variable must be checked
+write_config(config, "full_run_config.yaml", config_exclude=None)
+
+# check_config_version(config=config)
+parse_config(config)
+
+# Prepare variable for the workflow -------------------------------------------
 config.update({"git_commit": get_last_commit_message(".")})
 
 # convert country list according to the desired region
@@ -83,6 +112,7 @@ if config["custom_rules"] is not []:
         include: rule
 
 
+# Define rules to run the workflow --------------------------------------------
 rule clean:
     run:
         try:
@@ -1659,6 +1689,16 @@ if config["foresight"] == "overnight":
             )
         script:
             "scripts/solve_network.py"
+
+
+rule make_conf_check:
+    output:
+        pretty_config="results/" + RDIR + "config_scenarios.html",
+    threads: 1
+    resources:
+        mem_mb=10000,
+    script:
+        "scripts/make_conf_check.py"
 
 
 rule make_sector_summary:
