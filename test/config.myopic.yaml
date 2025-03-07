@@ -22,7 +22,7 @@ scenario:
   simpl:
   - ""
   clusters: # number of nodes
-  - 6
+  - 4
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   ll:
@@ -30,7 +30,7 @@ scenario:
   opts:
   - "Co2L-24H"
   sopts:
-  - "144H"
+  - "144h"
   demand:
   - "DF"
 
@@ -68,4 +68,4 @@ snapshots:
 
 solving:
   solver:
-    name: gurobi
+    name: glpk
