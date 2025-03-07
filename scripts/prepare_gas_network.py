@@ -334,7 +334,6 @@ def load_bus_region(onshore_path, pipelines, config):
                 nprocesses=nprocesses,
                 simplify_gadm=False,
             )
-        
 
         bus_regions_onshore = bus_regions_onshore.reset_index()
         bus_regions_onshore = bus_regions_onshore.rename(columns={"GADM_ID": "gadm_id"})

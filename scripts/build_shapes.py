@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import json
 import multiprocessing as mp
 import os
 import shutil
@@ -36,7 +37,6 @@ from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
-import json
 
 logger = create_logger(__name__)
 
@@ -1363,6 +1363,7 @@ def crop_country(gadm_shapes, subregion_config):
         geometry=country_shapes_new.geometry,
     )
 
+
 def get_geoboundaries_layer(countries, layer_id, geo_crs):
 
     # initialization of the geoDataFrame
@@ -1371,48 +1372,63 @@ def get_geoboundaries_layer(countries, layer_id, geo_crs):
     for country in countries:
         print(f"retrieving {country}")
         country_code = two_2_three_digits_country(country)
-        url_template = f"https://www.geoboundaries.org/api/current/gbOpen/{country_code}/ALL/"
-        
+        url_template = (
+            f"https://www.geoboundaries.org/api/current/gbOpen/{country_code}/ALL/"
+        )
+
         # Download the GeoJSON file
         response = requests.get(url_template)
-        max_level = min(len(json.loads(response.text)),layer_id)
+        max_level = min(len(json.loads(response.text)), layer_id)
         gdf_base = gpd.GeoDataFrame()
-        
+
         for i in reversed(range(max_level)):
             path_geojson = json.loads(response.content)[i]["gjDownloadURL"]
-            gdf = gpd.read_file(path_geojson)#.to_crs("EPSG:3857") #distance
-            gdf = gdf.rename(columns={"shapeName":f"shapeName_{i}"})
-        
+            gdf = gpd.read_file(path_geojson)  # .to_crs("EPSG:3857") #distance
+            gdf = gdf.rename(columns={"shapeName": f"shapeName_{i}"})
+
             if gdf_base.empty:
                 gdf_base = gdf
                 gdf_base[f"index_{i}"] = gdf_base.index
                 gdf_base["center"] = gdf_base.centroid
                 continue
-        
-            gdf_base[f"index_{i}"] = [gdf.contains(center).idxmax() for center in gdf_base.center]
-            gdf_base[f"shapeName_{i}"] = [gdf.loc[index,f"shapeName_{i}"] for index in gdf_base[f"index_{i}"]]
-        
+
+            # TODO: Set a clause for shapes where the center is not in a shape (islands)
+            # Can use distance for example gdf.distance(center).sort_values().index[0]
+            # idxmax was used because its faster
+            gdf_base[f"index_{i}"] = [
+                gdf.contains(center).idxmax() for center in gdf_base.center
+            ]
+            gdf_base[f"shapeName_{i}"] = [
+                gdf.loc[index, f"shapeName_{i}"] for index in gdf_base[f"index_{i}"]
+            ]
+
             if i == 1:
-                gdf_base["shapeISO"] = [gdf.loc[index,"shapeISO"] for index in gdf_base[f"index_{i}"]]
-        
+                gdf_base["shapeISO"] = [
+                    gdf.loc[index, "shapeISO"] for index in gdf_base[f"index_{i}"]
+                ]
+
         psuedo_GADM_ID = []
         for i in gdf_base.index:
             base_string = country + "." + str(gdf_base.loc[i, "index_0"])
             for j in range(1, max_level):
                 base_string += "." + str(gdf_base.loc[i, f"index_{j}"])
             psuedo_GADM_ID.append(base_string + "_1")
-        
+
         gdf_base["GADM_ID"] = psuedo_GADM_ID
         gdf_base["country"] = country
-        gdf_base = gdf_base[[f"shapeName_{i}" for i in range(max_level)]+["GADM_ID","country","geometry"]]
+        gdf_base = gdf_base[
+            [f"shapeName_{i}" for i in range(max_level)]
+            + ["GADM_ID", "country", "geometry"]
+        ]
 
         # append geodataframes
         geodf_list.append(gdf_base)
 
     geodf_geoboundaries = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
     geodf_geoboundaries.set_crs(geo_crs)
-    
+
     return geodf_geoboundaries
+
 
 def geoboundaries(
     worldpop_method,
@@ -1462,8 +1478,9 @@ def geoboundaries(
         lambda r: make_valid(r) if not r.is_valid else r
     )
     df_geob = df_geob[df_geob.geometry.is_valid & ~df_geob.geometry.is_empty]
-    
+
     return df_geob
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

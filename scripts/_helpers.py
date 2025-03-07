@@ -1227,7 +1227,9 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering, admin_shapes=None):
+def _get_shape_col_gdf(
+    path_to_gadm, co, gadm_layer_id, gadm_clustering, admin_shapes=None
+):
     """
     Parameters
     ----------
@@ -1238,7 +1240,7 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering, admin_s
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
     """
-    from build_shapes import get_geoboundaries_layer, get_GADM_layer
+    from build_shapes import get_GADM_layer, get_geoboundaries_layer
 
     col = "name"
     if not gadm_clustering:

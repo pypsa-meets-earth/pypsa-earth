@@ -1043,24 +1043,26 @@ if not config["custom_data"]["gas_network"]:
 
     # Include all parameters if alternative_clustering is True
     if config["cluster_options"]["alternative_clustering"]:
-        alternative_gas_clustering.update({
-            "admin_shape": config["build_shape_options"]["admin_shape"],
-            "countries_list": config["countries"],
-            "layer_id": config["build_shape_options"]["gadm_layer_id"],
-            "update": config["build_shape_options"]["update_file"],
-            "out_logging": config["build_shape_options"]["out_logging"],
-            "year": config["build_shape_options"]["year"],
-            "nprocesses": config["build_shape_options"]["nprocesses"],
-            "contended_flag": config["build_shape_options"]["contended_flag"],
-            "geo_crs": config["crs"]["geo_crs"]
-        })
+        alternative_gas_clustering.update(
+            {
+                "admin_shape": config["build_shape_options"]["admin_shape"],
+                "countries_list": config["countries"],
+                "layer_id": config["build_shape_options"]["gadm_layer_id"],
+                "update": config["build_shape_options"]["update_file"],
+                "out_logging": config["build_shape_options"]["out_logging"],
+                "year": config["build_shape_options"]["year"],
+                "nprocesses": config["build_shape_options"]["nprocesses"],
+                "contended_flag": config["build_shape_options"]["contended_flag"],
+                "geo_crs": config["crs"]["geo_crs"],
+            }
+        )
 
     rule prepare_gas_network:
         params:
+            **alternative_gas_clustering,
             gas_config=config["sector"]["gas"],
             alternative_clustering=config["cluster_options"]["alternative_clustering"],
             custom_gas_network=config["custom_data"]["gas_network"],
-            **alternative_gas_clustering,
         input:
             regions_onshore="resources/"
             + RDIR

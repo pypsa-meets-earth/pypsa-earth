@@ -18,8 +18,8 @@ from _helpers import (
     three_2_two_digits_country,
 )
 from matplotlib.lines import Line2D
-from shapely.geometry import LineString
 from shapely import wkt
+from shapely.geometry import LineString
 
 
 def plot_gas_network(pipelines, country_borders, bus_regions_onshore, gas_network_data):
@@ -96,6 +96,7 @@ def plot_gas_network(pipelines, country_borders, bus_regions_onshore, gas_networ
     ax.set_axis_off()
     fig.savefig(snakemake.output.existing_gas_pipelines, dpi=300, bbox_inches="tight")
 
+
 def plot_clustered_gas_network(pipelines, bus_regions_onshore):
     # Create a new GeoDataFrame with centroids
     centroids = bus_regions_onshore.copy()
@@ -156,6 +157,7 @@ def plot_clustered_gas_network(pipelines, bus_regions_onshore):
     ax.set_axis_off()
     fig.savefig(snakemake.output.clustered_gas_pipelines, dpi=300, bbox_inches="tight")
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -173,8 +175,8 @@ if __name__ == "__main__":
     country_borders = gpd.read_file(snakemake.input.country_borders)
 
     pipelines = pd.read_csv(snakemake.input.preclustered_gas_network)
-    pipelines['geometry'] = pipelines['geometry'].apply(wkt.loads)
-    pipelines = gpd.GeoDataFrame(pipelines, geometry = "geometry", crs="epsg:3857")
+    pipelines["geometry"] = pipelines["geometry"].apply(wkt.loads)
+    pipelines = gpd.GeoDataFrame(pipelines, geometry="geometry", crs="epsg:3857")
 
     clustered_pipelines = pd.read_csv(snakemake.input.clustered_gas_network)
 
