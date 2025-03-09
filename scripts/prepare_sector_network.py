@@ -658,7 +658,7 @@ def define_spatial(nodes, options):
         spatial.gas.locations = nodes
         spatial.gas.biogas = nodes + " biogas"
         spatial.gas.industry = nodes + " gas for industry"
-        if snakemake.config["sector"]["cc"]:
+        if options["cc"]:
             spatial.gas.industry_cc = nodes + " gas for industry CC"
         spatial.gas.biogas_to_gas = nodes + " biogas to gas"
     else:
@@ -666,7 +666,7 @@ def define_spatial(nodes, options):
         spatial.gas.locations = ["Earth"]
         spatial.gas.biogas = ["Earth biogas"]
         spatial.gas.industry = ["gas for industry"]
-        if snakemake.config["sector"]["cc"]:
+        if options["cc"]:
             spatial.gas.industry_cc = ["gas for industry CC"]
         spatial.gas.biogas_to_gas = ["Earth biogas to gas"]
 
