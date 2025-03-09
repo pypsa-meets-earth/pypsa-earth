@@ -649,7 +649,7 @@ def two_2_three_digits_country(two_code_country):
     if two_code_country == "SN-GM":
         return f"{two_2_three_digits_country('SN')}-{two_2_three_digits_country('GM')}"
 
-    three_code_country = coco.convert(two_code_country, to="ISO3")
+    three_code_country = coco.convert(two_code_country, to="ISO3", not_found=None)
     return three_code_country
 
 
@@ -670,7 +670,7 @@ def three_2_two_digits_country(three_code_country):
     if three_code_country == "SEN-GMB":
         return f"{three_2_two_digits_country('SN')}-{three_2_two_digits_country('GM')}"
 
-    two_code_country = coco.convert(three_code_country, to="ISO2")
+    two_code_country = coco.convert(three_code_country, to="ISO2", not_found=None)
     return two_code_country
 
 
@@ -697,7 +697,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     if two_code_country == "SN-GM":
         return f"{two_digits_2_name_country('SN')}-{two_digits_2_name_country('GM')}"
 
-    full_name = coco.convert(two_code_country, to="name_short")
+    full_name = coco.convert(two_code_country, to="name_short", not_found=None)
 
     if nocomma:
         # separate list by delim
@@ -740,7 +740,7 @@ def country_name_2_two_digits(country_name):
     ):
         return "SN-GM"
 
-    full_name = coco.convert(country_name, to="ISO2")
+    full_name = coco.convert(country_name, to="ISO2", not_found=None)
     return full_name
 
 
@@ -1227,7 +1227,9 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
+def _get_shape_col_gdf(
+    path_to_gadm, co, gadm_layer_id, gadm_clustering, admin_shapes=None
+):
     """
     Parameters
     ----------
@@ -1238,7 +1240,7 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
     """
-    from build_shapes import get_GADM_layer
+    from build_shapes import get_GADM_layer, get_geoboundaries_layer
 
     col = "name"
     if not gadm_clustering:
@@ -1256,8 +1258,12 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf_shapes = get_GADM_layer(co, gadm_layer_id)
-            col = "GID_{}".format(gadm_layer_id)
+            if admin_shapes == "geoboundaries":
+                gdf_shapes = get_geoboundaries_layer(co, gadm_layer_id)
+                col = "country"
+            else:
+                gdf_shapes = get_GADM_layer(co, gadm_layer_id)
+                col = "GID_{}".format(gadm_layer_id)
     gdf_shapes = gdf_shapes[gdf_shapes[col].str.contains(co)]
     return gdf_shapes, col
 
@@ -1269,6 +1275,7 @@ def locate_bus(
     path_to_gadm=None,
     gadm_clustering=False,
     dropnull=True,
+    admin_shapes=None,
     col_out=None,
 ):
     """
@@ -1297,7 +1304,7 @@ def locate_bus(
     df[col_out] = None
     for co in countries:
         gdf_shape, col = _get_shape_col_gdf(
-            path_to_gadm, co, gadm_level, gadm_clustering
+            path_to_gadm, co, gadm_level, gadm_clustering, admin_shapes=admin_shapes
         )
         sub_df = df.loc[df.country == co, ["x", "y", "country"]]
         gdf = gpd.GeoDataFrame(
