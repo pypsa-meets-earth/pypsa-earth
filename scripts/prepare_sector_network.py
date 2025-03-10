@@ -2299,7 +2299,7 @@ def add_dac(n, costs):
 
 
 def add_services(n, costs):
-    temporal_resolution = n.snapshot_weightings.generators.iloc[0]
+    temporal_resolution = n.snapshot_weightings.generators
     buses = spatial.nodes.intersection(n.loads_t.p_set.columns)
 
     profile_residential = normalize_by_country(
@@ -2468,8 +2468,7 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     """
     return (
         1e6
-        / nhours
-        * scaling.mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
+        * scaling.div(nhours,level=0).mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
     )
 
 
@@ -2480,7 +2479,7 @@ def add_residential(n, costs):
     # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
     # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
 
-    temporal_resolution = n.snapshot_weightings.generators.iloc[0]
+    temporal_resolution = n.snapshot_weightings.generators
 
     heat_ind = (
         n.loads_t.p_set.filter(like="residential")
