@@ -250,7 +250,7 @@ def update_cutout(config, fl="config.yaml"):
         to be used in a simulation
     fl : string
         A name of the yaml file which contains custom user-defined configuration
-        perameters to be prioritised over default parameters
+        parameters to be prioritised over default parameters
     """
     snakem_config_cutouts = [
         d_value.get("cutout") for tc, d_value in config.get("renewable").items()
@@ -298,10 +298,12 @@ def parse_config(config, fl_name=None, style_def=style):
 
     Currently, the following checks are implemented:
     1. List all the year-related parameters used in a simulation
+    2. Checks which cutouts are used in a simulation
     """
 
     # TODO Add a check for the cutouts used
     year_items = dict(get_vals(config, "year"))
+    
     # 1. Outline all the years used in a simulation
     # The config contains
 
@@ -312,6 +314,18 @@ def parse_config(config, fl_name=None, style_def=style):
         k += 1
 
     html_content_string = "<br />".join(str_list) + "<br />"
+
+    # 2. Extract names of the cutouts used
+    # cutouts_used = [
+    #     d_value.get("cutout") for tc, d_value in config.get("renewable").items()
+    # ] + list(config.get("atlite").get("cutouts"))
+
+    cutouts_renewable = [
+        d_value.get("cutout") for tc, d_value in config.get("renewable").items()
+    ]
+    cutouts_atlite = list(config.get("atlite").get("cutouts"))
+
+    cutouts_used = cutouts_renewable + cutouts_atlite
 
     # define styles to be used in htmls generated below
     coral_bg = "coral_bg"
