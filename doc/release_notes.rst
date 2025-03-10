@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update workflow to geopandas >= 1.0 `PR #1276 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1276>`__
 
+* Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
+
 **Minor Changes and bug-fixing**
 
 * Fix bug in myopic run. `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
