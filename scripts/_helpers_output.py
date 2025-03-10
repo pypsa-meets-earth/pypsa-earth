@@ -303,17 +303,16 @@ def parse_config(config, fl_name=None, style_def=style):
 
     # TODO Add a check for the cutouts used
     year_items = dict(get_vals(config, "year"))
-    
+
     # 1. Outline all the years used in a simulation
     # The config contains
-
-    str_list = [None] * len(year_items)
+    year_config_params = [None] * len(year_items)
     k = 0
     for i, j in year_items.items():
-        str_list[k] = str(i) + ": " + str(j)
+        year_config_params[k] = str(i) + ": " + str(j)
         k += 1
 
-    html_content_string = "<br />".join(str_list) + "<br />"
+    years_html_string = "<br />".join(year_config_params) + "<br />"
 
     # 2. Extract names of the cutouts used
     # cutouts_used = [
@@ -359,7 +358,7 @@ def parse_config(config, fl_name=None, style_def=style):
         style=mint_bg,
         fl=f,
         type=mint_bg,
-        str_=html_content_string,
+        str_=years_html_string,
     )
     write_html(
         style=mint_bg,
