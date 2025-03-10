@@ -2795,8 +2795,7 @@ def add_industry_demand(n, demand):
 
     avail = spatial.nodes.intersection(demand.index)
 
-    # Low temperature demand between 50C and 150C
-    carrier = "low temperature heat 50-150C for industry"
+    carrier = "low temperature heat 50-100C for industry"
 
     n.madd(
         "Bus",
@@ -2809,11 +2808,21 @@ def add_industry_demand(n, demand):
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(50-150C)[MW]"]
+        p_set=demand.loc[avail, "demand(50-100C)[MW]"]
     )
 
-    # Medium temperature demand between 150C and 250C
-    carrier = "medium temperature heat 150-250C for industry"
+    # Add a store for low temperature heat that can absorb an infinite amount of heat but cannot discharge it
+    n.madd(
+        "StorageUnit",
+        avail + " " + carrier + " store",
+        bus=avail + " " + carrier,
+        p_nom_extendable=True,
+        p_max_pu=0.0,
+        capital_cost=0.0,
+    )
+
+    # Medium temperature demand between 150C and 250C for industry
+    carrier = "medium temperature heat 100-200C for industry"
 
     n.madd(
         "Bus",
@@ -2826,7 +2835,44 @@ def add_industry_demand(n, demand):
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(150-250C)[MW]"]
+        p_set=demand.loc[avail, "demand(100-200C)[MW]"]
+    )
+
+    # Add a store for medium temperature heat that can absorb an infinite amount of heat but cannot discharge it
+    n.madd(
+        "StorageUnit",
+        avail + " " + carrier + " store",
+        bus=avail + " " + carrier,
+        p_nom_extendable=True,
+        p_max_pu=0.0,
+        capital_cost=0.0,
+    )
+
+    # High temperature demand between 200C and 250C for industry
+    carrier = "high temperature heat 200-250C for industry"
+
+    n.madd(
+        "Bus",
+        avail + " " + carrier,
+        carrier=carrier
+    )
+
+    n.madd(
+        "Load",
+        avail + " " + carrier,
+        bus=avail + " " + carrier,
+        carrier=carrier,
+        p_set=demand.loc[avail, "demand(200-250C)[MW]"]
+    )
+
+    # Add a store for high temperature heat that can absorb an infinite amount of heat but cannot discharge it
+    n.madd(
+        "StorageUnit",
+        avail + " " + carrier + " store",
+        bus=avail + " " + carrier,
+        p_nom_extendable=True,
+        p_max_pu=0.0,
+        capital_cost=0.0,
     )
 
 
@@ -3003,6 +3049,11 @@ def add_industry_heating(n, costs):
     # 6. CSP-tower (Generator)
     logger.warning("Yet to add capacity factor for CSP for industrial processes")
     # Typically CSP is solar thermal. Here, we assume it just generates heat at bus.
+    p_max_pu = n.generators_t.p_max_pu.loc[:, nodes_medium + ' csp']
+    p_max_pu.rename(columns={
+        name + ' csp': name + ' csp-tower' for name in nodes_medium
+    }, inplace=True)
+
     n.madd(
         "Generator",
         nodes_medium + " csp-tower",
@@ -3011,7 +3062,7 @@ def add_industry_heating(n, costs):
         p_nom_extendable=True,
         capital_cost=costs.at["csp-tower", "fixed"],
         lifetime=costs.at["csp-tower", "lifetime"],
-        p_max_pu=solar_thermal[nodes_medium]  # Added solar thermal profiles similarly to other solar thermal generators
+        p_max_pu=p_max_pu  # Added solar thermal profiles similarly to other solar thermal generators
     )
 
     # 7. Steam boiler gas cond (Generator)
@@ -3188,7 +3239,9 @@ def attach_enhanced_geothermal(n, potential):
     power_share = int(re.search(r'_p(\d+)', potential).group(1)) / 100
 
     # remove EGS from electricity only implementation
-    n.remove("Link", n.links.index[n.links.index.str.contains('EGS electricity')])
+    to_be_removed = n.links.index[n.links.index.str.contains('EGS electricity')]
+    if not to_be_removed.empty:
+        n.remove("Link", to_be_removed)
 
     idx = pd.IndexSlice
 

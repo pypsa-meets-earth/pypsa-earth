@@ -48,7 +48,8 @@ def prepare_demand_data(fn):
         'Heating (BBtu), ', '', regex=False
     )
 
-    df_melted['Heating Demand (MWh)'] = df_melted['Heating Demand (BBtu)'] * 293.07107
+    # df_melted['Heating Demand (MWh)'] = df_melted['Heating Demand (BBtu)'] * 293.07107
+    df_melted['Heating Demand (MWh)'] = df_melted['Heating Demand (BBtu)'] * 2.9307e-7
 
     df_melted = df_melted.drop(columns=['Heating Demand (BBtu)'])
 
@@ -441,9 +442,84 @@ def reassign_points(points, values, assignments, max_iterations=10, size_thresho
     return assignments
 
 
+def find_heat_exchanger_capacity(data, distance_threshold=1.0):
+    """
+    Check pairwise for connections between entries where the centroid of a lower temperature band
+    is within a specified distance of a higher temperature band.
+    
+    The mapping is defined as:
+      - For '150-250C', the lower band is '80-150C' (for the high-temp heat exchanger)
+      - For '80-150C', the lower band is '50-80C'   (for the low-temp heat exchanger)
+    
+    When the Euclidean distance between centroids (in km) is <= distance_threshold,
+    the candidate lower entry's capacity (size_mw) is added to the corresponding capacity.
+    
+    Parameters:
+      data (list of dict): List of entries where each dict must include:
+                           'band', 'centroid' (numpy array), 'region', 'size_mw'
+      distance_threshold (float): Maximum allowable distance (in km) for the connection.
+      
+    Returns:
+      dict: A dictionary with the following keys:
+            - 'high_temp_heat_exchanger_max_capacity': Sum of size_mw from lower entries in the 
+              '80-150C' band that are connected to a '150-250C' entry.
+            - 'low_temp_heat_exchanger_max_capacity': Sum of size_mw from lower entries in the 
+              '50-80C' band that are connected to an '80-150C' entry.
+    """
+    # Define mapping from a given band to the lower temperature band.
+    mapping = {
+        '150-250C': '80-150C',
+        '80-150C': '50-80C'
+    }
+    
+    # Initialize accumulators for each heat exchanger category.
+    high_temp_capacity = 0.0  # from connections: 150-250C -> 80-150C
+    low_temp_capacity = 0.0   # from connections: 80-150C -> 50-80C
+    
+    for i, upper in enumerate(data):
+        for j, lower in enumerate(data[i+1:], start=i+1):  # Start from i+1 to avoid duplicates
+            higher_band = upper.get('band')
+            
+            if higher_band not in mapping:
+                continue
+
+            higher_centroid = upper.get('centroid')
+            lower_centroid = lower.get('centroid')
+
+            if mapping[higher_band] == lower.get('band'):
+
+                distance = np.linalg.norm(higher_centroid - lower_centroid)
+                if distance <= distance_threshold:
+                    if higher_band == '150-250C':
+                        high_temp_capacity += lower.get('size_mw', 0)
+                    elif higher_band == '80-150C':
+                        low_temp_capacity += lower.get('size_mw', 0)
+
+            # Also check the reverse direction
+            higher_band = lower.get('band')
+            if higher_band in mapping and mapping[higher_band] == upper.get('band'):
+                distance = np.linalg.norm(higher_centroid - lower_centroid)
+                if distance <= distance_threshold:
+                    if higher_band == '150-250C':
+                        high_temp_capacity += upper.get('size_mw', 0)
+                    elif higher_band == '80-150C':
+                        low_temp_capacity += upper.get('size_mw', 0)
+
+    return {
+        'high_temp_heat_exchanger_max_capacity': high_temp_capacity,
+        'low_temp_heat_exchanger_max_capacity': low_temp_capacity
+    }
+
+
+
 if __name__ == '__main__':
 
     gdf = prepare_demand_data(snakemake.input['demand_data'])
+    logger.warning(
+        'Inconcistency between temperature ranges in the data and this scripts.'
+        'This script has 50-80, 80-150, 150-250.'
+        'The data has 0-49, 50-99, 100-149, 150-199, 200-249, 250-299, 300-349, 350-399, 400-449, >450.'
+    )
 
     regions = gpd.read_file(snakemake.input['regions']).set_index('name')
 
@@ -454,165 +530,221 @@ if __name__ == '__main__':
 
     n_cost_steps = egs_params['industrial_heating_n_cost_steps']
 
-    supply_curve_columns = ['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]']
+    supply_curve_columns = ['capex[$/MW]', 'avail_capacity[MW]', 'opex[$/MWh]', 'temperature']
     
     final_demands = pd.DataFrame(
         index=regions.index,
-        columns=['demand(50-150C)[MW]', 'demand(150-250C)[MW]']
+        columns=['demand(50-80C)[MW]', 'demand(80-150C)[MW]', 'demand(150-250C)[MW]']
         )
 
     regional_supplies = list()
+    heat_exchanger_max_capacities = list()
 
     for region, geometry in tqdm(regions['geometry'].items()):
 
         regional_supply = pd.DataFrame(columns=supply_curve_columns)
-
         ss = gdf.loc[gdf['geometry'].within(geometry)]
 
-        final_demands.loc[region, 'demand(50-150C)[MW]'] = ss.loc[
-            ss['temperature'] <= 150, 'avg_demand'
-            ].sum()
+        temp_bands = [
+            ('50-80C', lambda x: (x >= 50) & (x <= 80)),
+            ('80-150C', lambda x: (x > 80) & (x <= 150)),
+            ('150-250C', lambda x: (x > 150) & (x <= 250))
+        ]
 
-        final_demands.loc[region, 'demand(150-250C)[MW]'] = ss.loc[
-            (ss['temperature'] > 150) & (ss['temperature'] <= 250), 'avg_demand'
-            ].sum()
+        band_centroids = [] # track centroids for heat exchanger capacity
 
-        if ss.empty:
-            logger.warning(f"No data for {region}")
-            continue
+        for band, filter in temp_bands:
 
-        utm_coords = coords_to_relative_utm(ss[['y', 'x']].values)
-        avg_demand = ss['avg_demand'].values
+            band_data = ss.loc[filter(ss['temperature'])]
+            final_demands.loc[region, f'demand({band})[MW]'] = band_data['avg_demand'].sum()
 
-        clusters, cluster_info = greedy_clustering(
-            utm_coords,
-            avg_demand,
-            max_network_diameter,
-            min_sum_value=min_network_average_capacity,
-            max_sum_value=max_network_average_capacity
-            )
-
-        frac_in_clusters, w_mst_cost = evaluate_solution(cluster_info, avg_demand)
-
-        logger.info(f"Region: {region}, Fraction of values in clusters: {frac_in_clusters:.2f}, Weighted MST cost: {w_mst_cost:.2f}")
-        logger.info(f"Total EGS applicable demand: {sum(ss['total_demand'] * frac_in_clusters) / 1e3:.2f} GWh")
-
-        assignments = np.ones(len(utm_coords), dtype=int) * -1
-
-        for i, cluster in enumerate(clusters):
-            for idx in cluster:
-                assignments[idx] = i
-
-        if len(utm_coords[assignments != -1]):
-
-            new_clustering = reassign_points(
-                utm_coords[assignments != -1],
-                utm_coords[assignments != -1],
-                assignments[assignments != -1],
-                max_iterations=10,
-                size_threshold=egs_params['min_network_average_capacity']
-                )
-        
-            new_clusters = []
-
-            for label in sorted(pd.Series(new_clustering).value_counts().index):
-                new_clusters.append(np.where(new_clustering == label)[0].tolist())
-
-            # map indices back to original
-            old_indexes = pd.Series(np.where(assignments != -1)[0])
-            fixed_clustering = []
-
-            for c in new_clusters:
-                
-                fixed_c = []
-                for entry in c:
-                    fixed_c.append(old_indexes.loc[entry])
-
-                fixed_clustering.append(fixed_c)
-
-            new_clusters = fixed_clustering
-        
-        else:
-            new_clusters = clusters
-
-        piping_cost = egs_params['piping_cost']
-
-        def dummy_egs_query(cluster):
-            return 0 # $/MWth
-
-        for cluster in new_clusters:
-
-            cluster_supply = pd.Series()
-            cluster_sp, _ = compute_mst_cost_and_diameter(utm_coords[cluster])
-            cluster_size = sum(avg_demand[cluster]) 
-
-            cluster_supply.loc['capex[$/MW]'] = (
-                dummy_egs_query(cluster) * cluster_size +
-                piping_cost * cluster_sp) / cluster_size
-
-            cluster_supply.loc['avail_capacity[MW]'] = cluster_size            
-            cluster_supply.loc['opex[$/MWh]'] = 0.0
-
-            if cluster_supply.empty:
+            if band_data.empty:
+                logger.warning(f"No data for {region}")
                 continue
 
-            regional_supply = pd.concat(
-                (regional_supply, cluster_supply.to_frame().T),
-                ignore_index=True
+            utm_coords = coords_to_relative_utm(band_data[['y', 'x']].values)
+            avg_demand = band_data['avg_demand'].values
+
+            clusters, cluster_info = greedy_clustering(
+                utm_coords,
+                avg_demand,
+                max_network_diameter,
+                min_sum_value=min_network_average_capacity,
+                max_sum_value=max_network_average_capacity
                 )
 
-        regional_supply.loc[:,'capex[$/MW]'] = regional_supply.loc[:,'capex[$/MW]'].round(3)
-        regional_supply = regional_supply.groupby('capex[$/MW]').agg(
-            {'avail_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean'}
-            ).reset_index()
+            frac_in_clusters, w_mst_cost = evaluate_solution(cluster_info, avg_demand)
 
-        if regional_supply.empty:
-            continue
+            logger.info(f"Region: {region}, band: {band}, Fraction of values in clusters: {frac_in_clusters:.2f}, Weighted MST cost: {w_mst_cost:.2f}")
+            logger.info(f"Total EGS applicable demand: {sum(band_data['total_demand'] * frac_in_clusters) / 1e3:.2f} GWh")
 
-        if len(regional_supply) > 1:
+            assignments = np.ones(len(utm_coords), dtype=int) * -1
 
-            bins = pd.Series(
-                    np.linspace(
-                        regional_supply['capex[$/MW]'].min(),
-                        regional_supply['capex[$/MW]'].max(),
-                        n_cost_steps+1
-                        )
+            for i, cluster in enumerate(clusters):
+                for idx in cluster:
+                    assignments[idx] = i
+
+            if len(utm_coords[assignments != -1]):
+
+                new_clustering = reassign_points(
+                    utm_coords[assignments != -1],
+                    utm_coords[assignments != -1],
+                    assignments[assignments != -1],
+                    max_iterations=10,
+                    size_threshold=egs_params['min_network_average_capacity']
+                    )
+            
+                new_clusters = []
+
+                for label in sorted(pd.Series(new_clustering).value_counts().index):
+                    new_clusters.append(np.where(new_clustering == label)[0].tolist())
+
+                # map indices back to original
+                old_indexes = pd.Series(np.where(assignments != -1)[0])
+                fixed_clustering = []
+
+                for c in new_clusters:
+                    
+                    fixed_c = []
+                    for entry in c:
+                        fixed_c.append(old_indexes.loc[entry])
+
+                    fixed_clustering.append(fixed_c)
+
+                new_clusters = fixed_clustering
+            
+            else:
+                new_clusters = clusters
+
+            piping_cost = egs_params['piping_cost']
+
+            def dummy_egs_query(cluster):
+                return 0 # $/MWth
+
+            total_cluster_size = 0
+            for cluster in new_clusters:
+
+                cluster_supply = pd.Series()
+                cluster_sp, _ = compute_mst_cost_and_diameter(utm_coords[cluster])
+                cluster_size = sum(avg_demand[cluster]) 
+                total_cluster_size += cluster_size
+
+                cluster_supply.loc['capex[$/MW]'] = (
+                    dummy_egs_query(cluster) * cluster_size +
+                    piping_cost * cluster_sp) / cluster_size
+
+                cluster_supply.loc['avail_capacity[MW]'] = cluster_size            
+                cluster_supply.loc['opex[$/MWh]'] = 0.0
+                cluster_supply.loc['temperature'] = band
+
+                if cluster_supply.empty:
+                    continue
+
+                cluster_points = utm_coords[cluster]
+                centroid = compute_centroid(cluster_points)
+                
+                appendage = {
+                    'region': region,
+                    'centroid': centroid,
+                    'size_mw': cluster_size,
+                    'band': band
+                    }
+                band_centroids.append(appendage)
+            
+                regional_supply = pd.concat(
+                    (regional_supply, cluster_supply.to_frame().T),
+                    ignore_index=True
                     )
 
-            labels = (
-                bins
-                .rolling(2)
-                .mean()
-                .dropna()
-                .tolist()
-            )
-
-            regional_supply['level'] = pd.cut(
-                regional_supply['capex[$/MW]'],
-                bins=bins,
-                labels=labels,
-                duplicates='drop'
-                )
-        else:
-            regional_supply['level'] = regional_supply['capex[$/MW]'].iloc[0]
-
-        regional_supply = regional_supply.dropna()
-
-        regional_supply = (
-            regional_supply
-            .groupby('level', observed=False)
-            [['avail_capacity[MW]', 'opex[$/MWh]']]
-            .agg({'avail_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean'})
-            .reset_index()
-            .rename(columns={'level': 'capex[$/MW]'})
+        heat_exchanger_capacity = pd.Series(
+            find_heat_exchanger_capacity(band_centroids, distance_threshold=2), name=region
         )
 
-        regional_supply.index = pd.MultiIndex.from_product(
-            [[region], range(len(regional_supply))],
-            names=['region', 'cost_step']
+        regional_supply.loc[:,'capex[$/MW]'] = regional_supply.loc[:,'capex[$/MW]'].round(3)
+
+        # Process each temperature band separately
+        temperature_bands = regional_supply['temperature'].unique()
+        processed_supplies = []
+
+        for temp_band in temperature_bands:
+
+            temp_supply = regional_supply[regional_supply['temperature'] == temp_band].copy()
+            
+            temp_supply = temp_supply.dropna()
+
+            temp_supply = temp_supply.groupby('capex[$/MW]').agg(
+                {'avail_capacity[MW]': 'sum', 'opex[$/MWh]': 'mean', 'temperature': 'first'}
+                ).reset_index()
+
+            if temp_supply.empty:
+                continue
+
+            if len(temp_supply) <= n_cost_steps: # nothing needs to be done
+                temp_supply['level'] = temp_supply['capex[$/MW]'].values
+                pass
+
+            else:
+                logger.warning('Check this method once real data is used!!')
+                bins = pd.Series(
+                        np.linspace(
+                            temp_supply['capex[$/MW]'].min(),
+                            temp_supply['capex[$/MW]'].max(),
+                            n_cost_steps+1
+                            )
+                        )
+
+                labels = (
+                    bins
+                    .rolling(2)
+                    .mean()
+                    .dropna()
+                    .tolist()
+                )
+
+                temp_supply['level'] = pd.cut(
+                    temp_supply['capex[$/MW]'],
+                    bins=bins,
+                    labels=labels,
+                    duplicates='drop'
+                    )
+
+            temp_supply = temp_supply.dropna()
+
+            temp_supply = (
+                temp_supply
+                .groupby('level', observed=False)
+                [['avail_capacity[MW]', 'opex[$/MWh]', 'temperature']]
+                .agg({
+                    'avail_capacity[MW]': 'sum',
+                    'opex[$/MWh]': 'mean',
+                    'temperature': 'first'
+                    })
+                .reset_index()
+                .rename(columns={'level': 'capex[$/MW]'})
             )
 
-        regional_supplies.append(regional_supply)
+            temp_supply = temp_supply.dropna()
+            temp_supply.index = pd.MultiIndex.from_arrays(
+                [
+                    [region] * len(temp_supply),
+                    temp_supply['temperature'].values,
+                    range(len(temp_supply))
+                ],
+                names=['region', 'temperature', 'cost_step']
+            )
+
+            temp_supply.drop(columns=['temperature'], inplace=True)
+            processed_supplies.append(temp_supply)
+        
+        if processed_supplies:
+            regional_supply = pd.concat(processed_supplies)
+            regional_supplies.append(regional_supply)
+
+        heat_exchanger_max_capacities.append(
+            pd.Series(  
+                heat_exchanger_capacity, name=region
+                )
+        )
 
     logger.warning('Assumes that EGS drilling cost are added somewhere else to the model.')
     (
@@ -620,4 +752,6 @@ if __name__ == '__main__':
         .dropna()
         .to_csv(snakemake.output['industrial_heating_egs_supply_curves'])
     )
+
     final_demands.to_csv(snakemake.output['industrial_heating_demands'])
+    pd.concat(heat_exchanger_max_capacities, axis=1).to_csv(snakemake.output['heat_exchanger_capacity'])
