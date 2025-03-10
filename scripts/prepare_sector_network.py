@@ -2466,9 +2466,9 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     Function to create p_set from energy_totals, using the per-unit scaling
     dataframe.
     """
-    return 1e6 * scaling.div(nhours, level=0).mul(
-        energy_totals[col], level=0
-    ).droplevel(level=0, axis=1)
+    return 1e6 * scaling.div(nhours, axis=0).mul(energy_totals[col], level=0).droplevel(
+        level=0, axis=1
+    )
 
 
 def add_residential(n, costs):
@@ -2499,7 +2499,7 @@ def add_residential(n, costs):
         - energy_totals["residential heat oil"]
         - energy_totals["residential heat gas"],
         level=0,
-    ).droplevel(level=0, axis=1).div(temporal_resolution)
+    ).droplevel(level=0, axis=1).div(temporal_resolution, axis=0)
 
     heat_oil_demand = p_set_from_scaling(
         "residential heat oil", heat_shape, energy_totals, temporal_resolution
@@ -2608,7 +2608,7 @@ def add_residential(n, costs):
         )
         n.loads_t.p_set.loc[:, heat_buses] = np.where(
             ~np.isnan(safe_division),
-            safe_division * rem_heat_demand * 1e6 / temporal_resolution,
+            (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
             0.0,
         )
 
