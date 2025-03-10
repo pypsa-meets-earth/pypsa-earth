@@ -2466,10 +2466,9 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     Function to create p_set from energy_totals, using the per-unit scaling
     dataframe.
     """
-    return (
-        1e6
-        * scaling.div(nhours,level=0).mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
-    )
+    return 1e6 * scaling.div(nhours, level=0).mul(
+        energy_totals[col], level=0
+    ).droplevel(level=0, axis=1)
 
 
 def add_residential(n, costs):
