@@ -572,7 +572,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
-        egs_potentials=(
+        egs_potentials=lambda wildcards: (
             "resources/"
             + SECDIR
             + f"egs_potential_s{wildcards.simpl}_{wildcards.clusters}_p100_h0.csv"
@@ -834,6 +834,8 @@ rule build_industrial_heating_costs:
 
 
 rule build_industrial_heating_demands:
+    params:
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
         demand_data="data/nrel_epa_flight_heating_demand_disagg.geojson",
         regions=(
@@ -851,6 +853,11 @@ rule build_industrial_heating_demands:
             "resources/"
             + SECDIR
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+        ),
+        heat_exchanger_capacity=(
+            "resources/"
+            + SECDIR
+            + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
         ),
     threads: 1
     log:
@@ -1158,7 +1165,7 @@ rule prepare_sector_network:
     params:
         costs=config["costs"],
         electricity=config["electricity"],
-        enhanced_geothermal=config["enhanced_geothermal"],
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
