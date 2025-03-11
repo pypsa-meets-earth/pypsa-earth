@@ -361,6 +361,10 @@ if __name__ == "__main__":
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760
+    # TODO The approach simplifies runs in a debug mode
+    # minimising interactions between different states of the model
+    # Thouhg, it's not fully consistent with the approach used across
+    # the codebase
     config_snapshots = pd.date_range(**snakemake.config["snapshots"], freq="h")
 
     # Prepare transport data
