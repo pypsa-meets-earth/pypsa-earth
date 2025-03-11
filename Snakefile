@@ -331,12 +331,8 @@ def terminate_if_cutout_exists(config=config):
             )
 
 
-"""
-
-
-"""
 if config["enable"].get("build_cutout", False):
-    # terminate_if_cutout_exists(config)
+    terminate_if_cutout_exists(config)
 
     rule build_cutout:
         params:
@@ -357,11 +353,6 @@ if config["enable"].get("build_cutout", False):
         script:
             "scripts/build_cutout.py"
 
-
-"""
-
-
-"""
 
 if config["enable"].get("build_natura_raster", False):
 
@@ -528,7 +519,7 @@ rule build_egs_potentials:
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "/benchmarks/build_egs_potentials/egs_potential"
+        RDIR + "benchmarks/build_egs_potentials/egs_potential"
     script:
         "scripts/build_egs_potentials.py"
 
