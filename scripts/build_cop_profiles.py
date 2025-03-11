@@ -33,9 +33,9 @@ def coefficient_of_performance(delta_T, source="air"):
 def eir_air_conditioner(t_ewb, t_odb, unit_type):
     """
     Source: Tables 17 & 19 of NREL Report Cutler et al (2013)
-    Improved Modeling of Residential Air Conditioners and Heat
-    Pumps for Energy Calculations
-    https://www.nrel.gov/docs/fy13osti/56354.pdf
+    "Improved Modeling of Residential Air Conditioners and Heat Pumps for
+     Energy Calculations" available via
+     https://www.nrel.gov/docs/fy13osti/56354.pdf
 
     EIR = 1/COP
     t_ewb is the entering wet-bulb temperature
@@ -123,6 +123,9 @@ def eir_heat_pump_cooling(t_ewb, t_odb, unit_type):
 def eir_heat_pump_heating(t_ewb, t_odb, unit_type):
     """
     Source: Tables 17 & 19 of Cutler et al (2023) NREL Report
+    "Improved Modeling of Residential Air Conditioners and Heat Pumps for
+     Energy Calculations" available via
+     https://www.nrel.gov/docs/fy13osti/56354.pdf
 
     EIR = 1/COP
     t_ewb is the entering wet-bulb temperature
