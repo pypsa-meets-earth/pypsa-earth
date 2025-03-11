@@ -5,7 +5,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such as
+Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such
+as.
 
 - adding an annual **limit** of carbon-dioxide emissions,
 - adding an exogenous **price** per tonne emissions of carbon-dioxide (or other kinds),
@@ -54,21 +55,92 @@ Description
     The rule :mod:`prepare_all_networks` runs
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
-
 """
-import logging
 import os
 import re
+from zipfile import ZipFile
 
+import country_converter as cc
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+import requests
+from _helpers import BASE_DIR, configure_logging, create_logger
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
+
+
+def download_emission_data():
+    """
+    Download emission file from EDGAR.
+
+    Returns
+    -------
+    global emission file for all countries in the world.
+    """
+
+    try:
+        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
+        with requests.get(url) as rq:
+            with open(os.path.join(BASE_DIR, "data/co2.zip"), "wb") as file:
+                file.write(rq.content)
+        file_path = os.path.join(BASE_DIR, "data/co2.zip")
+        with ZipFile(file_path, "r") as zipObj:
+            zipObj.extract(
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                os.path.join(BASE_DIR, "data"),
+            )
+        os.remove(file_path)
+        return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
+    except:
+        logger.error(f"Failed download resource from '{url}'.")
+        return False
+
+
+def emission_extractor(filename, emission_year, country_names):
+    """
+    Extracts CO2 emission values for given country codes from the global
+    emission file.
+
+    Parameters
+    ----------
+    filename : str
+        Global emission filename
+    emission_year : int
+        Year of CO2 emissions
+    country_names : numpy.ndarray
+        Two letter country codes of analysed countries.
+
+    Returns
+    -------
+    CO2 emission values of studied countries.
+    """
+
+    # data reading process
+    datapath = os.path.join(BASE_DIR, "data", filename)
+    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
+    df.columns = df.iloc[0]
+    df = df.set_index("Country_code_A3")
+    df = df.loc[
+        df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
+    ]
+    df = df.loc[:, "Y_1970":"Y_2018"].astype(float).ffill(axis=1)
+    df = df.loc[:, "Y_1970":"Y_2018"].astype(float).bfill(axis=1)
+    cc_iso3 = cc.convert(names=country_names, to="ISO3")
+    if len(country_names) == 1:
+        cc_iso3 = [cc_iso3]
+    emission_by_country = df.loc[
+        df.index.intersection(cc_iso3), "Y_" + str(emission_year)
+    ]
+    missing_ccs = np.setdiff1d(cc_iso3, df.index.intersection(cc_iso3))
+    if missing_ccs.size:
+        logger.warning(
+            f"The emission value for the following countries has not been found: {missing_ccs}"
+        )
+    return emission_by_country
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
@@ -153,10 +225,16 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
 
 
 def average_every_nhours(n, offset):
+
+    # Please note that a casefold is applied to the offset during the resampling.
+    # This is because the usage of offset where the time interval is in capital
+    # letters is deprecated in future versions of pandas.
+    # For example 24H is deprecated. Instead, 24h is allowed.
+
     logger.info(f"Resampling the network to {offset}")
     m = n.copy(with_time=False)
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
@@ -164,7 +242,7 @@ def average_every_nhours(n, offset):
         pnl = getattr(m, c.list_name + "_t")
         for k, df in c.pnl.items():
             if not df.empty:
-                pnl[k] = df.resample(offset).mean()
+                pnl[k] = df.resample(offset.casefold()).mean()
 
     return m
 
@@ -233,22 +311,23 @@ def enforce_autarky(n, only_crossborder=False):
 
 
 def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-    n.lines.s_nom_max.clip(upper=s_nom_max_set, inplace=True)
-    n.links.p_nom_max.clip(upper=p_nom_max_set, inplace=True)
+    n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
+    n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="10",
-            ll="v0.3",
-            opts="Co2L-24H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
+            configfile="test/config.sector.yaml",
         )
+
     configure_logging(snakemake)
 
     opts = snakemake.wildcards.opts.split("-")
@@ -257,11 +336,11 @@ if __name__ == "__main__":
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         Nyears,
     )
-    s_max_pu = snakemake.config["lines"]["s_max_pu"]
+    s_max_pu = snakemake.params.lines["s_max_pu"]
 
     set_line_s_max_pu(n, s_max_pu)
 
@@ -281,14 +360,25 @@ if __name__ == "__main__":
     for o in opts:
         if "Co2L" in o:
             m = re.findall("[0-9]*\.?[0-9]+$", o)
-            if len(m) > 0:
-                co2limit = float(m[0]) * snakemake.config["electricity"]["co2base"]
-                add_co2limit(n, co2limit, Nyears)
+            if snakemake.params.electricity["automatic_emission"]:
+                country_names = n.buses.country.unique()
+                emission_year = snakemake.params.electricity[
+                    "automatic_emission_base_year"
+                ]
+                filename = download_emission_data()
+                co2limit = emission_extractor(
+                    filename, emission_year, country_names
+                ).sum()
+                if len(m) > 0:
+                    co2limit = co2limit * float(m[0])
+                logger.info("Setting CO2 limit according to emission base year.")
+            elif len(m) > 0:
+                co2limit = float(m[0]) * float(snakemake.params.electricity["co2base"])
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.config["electricity"]["co2limit"]
-                add_co2limit(n, co2limit, Nyears)
+                co2limit = float(snakemake.params.electricity["co2limit"])
                 logger.info("Setting CO2 limit according to config value.")
+            add_co2limit(n, co2limit, Nyears)
             break
 
     for o in opts:
@@ -299,7 +389,7 @@ if __name__ == "__main__":
                 add_gaslimit(n, limit, Nyears)
                 logger.info("Setting gas usage limit according to wildcard value.")
             else:
-                add_gaslimit(n, snakemake.config["electricity"].get("gaslimit"), Nyears)
+                add_gaslimit(n, snakemake.params.electricity.get("gaslimit"), Nyears)
                 logger.info("Setting gas usage limit according to config value.")
 
         for o in opts:
@@ -331,7 +421,7 @@ if __name__ == "__main__":
                     add_emission_prices(n, dict(co2=float(m[0])))
                 else:
                     logger.info("Setting emission prices according to config value.")
-                    add_emission_prices(n, snakemake.config["costs"]["emission_prices"])
+                    add_emission_prices(n, snakemake.params.costs["emission_prices"])
                 break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
@@ -339,8 +429,8 @@ if __name__ == "__main__":
 
     set_line_nom_max(
         n,
-        s_nom_max_set=snakemake.config["lines"].get("s_nom_max,", np.inf),
-        p_nom_max_set=snakemake.config["links"].get("p_nom_max,", np.inf),
+        s_nom_max_set=snakemake.params.lines.get("s_nom_max,", np.inf),
+        p_nom_max_set=snakemake.params.links.get("p_nom_max,", np.inf),
     )
 
     if "ATK" in opts:

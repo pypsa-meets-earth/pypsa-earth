@@ -39,7 +39,8 @@ Outputs
 Description
 -----------
 
-The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendmends. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
+The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendments. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
+
 1. Adding all powerplants from custom:
 
     .. code:: yaml
@@ -68,21 +69,27 @@ The configuration options ``electricity: powerplants_filter`` and ``electricity:
         powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
         custom_powerplants: YearCommissioned <= 2015
 
-Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations: 
+Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
+
 Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
 
 Tagging considerations for columns in the file:
+
 - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
 - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
-- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.)
+- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
+
 1. The benchmark PPM keys values were taken as follows:
         'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
             'Wind', 'Geothermal', 'Solar', 'Waste', 'Other']
+
         'Technology': ['Reservoir', 'Pumped Storage', 'Run-Of-River', 'Steam Turbine', 'CCGT', 'OCGT'
             'Pv', 'CCGT, Thermal', 'Offshore', 'Storage Technologies']
+
         'Set': ['Store', 'PP', 'CHP']
+
 2. OSM-extracted features were mapped into PPM ones using a (quite arbitrary) set of rules:
         'coal': 'Hard Coal'
         'wind_turbine': 'Onshore',
@@ -92,7 +99,7 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
 4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
 """
-import logging
+
 import os
 
 import geopandas as gpd
@@ -103,16 +110,16 @@ import pypsa
 import yaml
 from _helpers import (
     configure_logging,
+    create_logger,
+    locate_bus,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
 )
-from build_shapes import get_GADM_layer
 from scipy.spatial import cKDTree as KDTree
-from shapely import wkt
 from shapely.geometry import Point
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
@@ -142,7 +149,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     "wave": "Other",
                     "geothermal": "Geothermal",
                     "solar": "Solar",
-                    # "Hard Coal" follows defauls of PPM
+                    # "Hard Coal" follows defaults of PPM
                     "coal": "Hard Coal",
                     "gas": "Natural Gas",
                     "biomass": "Bioenergy",
@@ -200,7 +207,7 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     )
 
     # All Hydro objects can be interpreted by PPM as Storages, too
-    # However, everithing extracted from OSM seems to belong
+    # However, everything extracted from OSM seems to belong
     # to power plants with "tags.power" == "generator" only
     osm_ppm_df = pd.DataFrame(
         data={
@@ -253,32 +260,52 @@ def add_custom_powerplants(ppl, inputs, config):
         return add_ppls
 
 
-def replace_natural_gas_technology(df):
-    mapping = {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}
-    tech = df.Technology.replace(mapping).fillna("OCGT")
-    return df.Technology.where(df.Fueltype != "Natural Gas", tech)
-
-
-def replace_natural_gas_fueltype(df):
-    return df.Fueltype.where(df.Fueltype != "Natural Gas", df.Technology)
+def replace_natural_gas_technology(df: pd.DataFrame):
+    """
+    Maps and replaces gas technologies in the powerplants.csv onto model
+    compliant carriers.
+    """
+    mapping = {
+        "Steam Turbine": "CCGT",
+        "Combustion Engine": "OCGT",
+        "NG": "CCGT",
+        "Ng": "CCGT",
+        "NG/FO": "OCGT",
+        "Ng/Fo": "OCGT",
+        "NG/D": "OCGT",
+        "LNG": "OCGT",
+        "CCGT/D": "CCGT",
+        "CCGT/FO": "CCGT",
+        "LCCGT": "CCGT",
+        "CCGT/Fo": "CCGT",
+    }
+    fueltype = df["Fueltype"] == "Natural Gas"
+    df.loc[fueltype, "Technology"] = (
+        df.loc[fueltype, "Technology"].replace(mapping).fillna("CCGT")
+    )
+    unique_tech_with_ng = df.loc[fueltype, "Technology"].unique()
+    unknown_techs = np.setdiff1d(unique_tech_with_ng, ["CCGT", "OCGT"])
+    if len(unknown_techs) > 0:
+        df.loc[fueltype, "Technology"] = df.loc[fueltype, "Technology"].replace(
+            {t: "CCGT" for t in unknown_techs}
+        )
+    df["Fueltype"] = np.where(fueltype, df["Technology"], df["Fueltype"])
+    return df
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_powerplants")
 
     configure_logging(snakemake)
 
-    with open(snakemake.input.pm_config, "r") as f:
+    with open(snakemake.input.pm_config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     filepath_osm_ppl = snakemake.input.osm_powerplants
     filepath_osm2pm_ppl = snakemake.output.powerplants_osm2pm
-
-    csv_pm = convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
 
     n = pypsa.Network(snakemake.input.base_network)
     countries_codes = n.buses.country.unique()
@@ -286,29 +313,41 @@ if __name__ == "__main__":
 
     config["target_countries"] = countries_names
 
-    if "EXTERNAL_DATABASE" in config:
+    if (
+        "EXTERNAL_DATABASE"
+        in config["matching_sources"] + config["fully_included_sources"]
+    ):
+        if "EXTERNAL_DATABASE" not in config:
+            logger.error(
+                "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
+                "Please check file configs/powerplantmatching_config.yaml"
+            )
+        logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
+    else:
+        # create an empty file
+        with open(filepath_osm2pm_ppl, "w"):
+            pass
 
     # specify the main query for filtering powerplants
-    ppl_query = snakemake.config["electricity"]["powerplants_filter"]
+    ppl_query = snakemake.params.powerplants_filter
     if isinstance(ppl_query, str):
         config["main_query"] = ppl_query
     else:
         config["main_query"] = ""
 
-    ppl = (
-        pm.powerplants(from_url=False, update=True, config_update=config)
-        .powerplant.fill_missing_decommissioning_years()
-        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .replace({"Technology": {"Steam Turbine": "OCGT", "Combustion Engine": "OCGT"}})
-        .powerplant.convert_country_to_alpha2()
-        .assign(
-            Technology=replace_natural_gas_technology,
-            Fueltype=replace_natural_gas_fueltype,
+    if snakemake.config["electricity"]["custom_powerplants"] != "replace":
+        ppl = (
+            pm.powerplants(from_url=False, update=True, config_update=config)
+            .powerplant.fill_missing_decommissioning_years()
+            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .powerplant.convert_country_to_alpha2()
+            .pipe(replace_natural_gas_technology)
         )
-    )
+    else:
+        ppl = pd.DataFrame()
 
     ppl = add_custom_powerplants(
         ppl, snakemake.input, snakemake.config
@@ -325,39 +364,24 @@ if __name__ == "__main__":
         ppl.loc[ppl_i, "bus"] = substation_i.append(pd.Index([np.nan]))[tree_i]
 
     if cntries_without_ppl:
-        logging.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
+        logger.warning(f"No powerplants known in: {', '.join(cntries_without_ppl)}")
 
     bus_null_b = ppl["bus"].isnull()
     if bus_null_b.any():
-        logging.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
+        logger.warning(f"Couldn't find close bus for {bus_null_b.sum()} powerplants")
 
-    if snakemake.config["cluster_options"]["alternative_clustering"]:
-        gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
-        country_list = snakemake.config["countries"]
-        geo_crs = snakemake.config["crs"]["geo_crs"]
+    if snakemake.params.alternative_clustering:
+        gadm_layer_id = snakemake.params.gadm_layer_id
+        country_list = snakemake.params.countries
+        geo_crs = snakemake.params.geo_crs
 
-        gdf = gpd.read_file(snakemake.input.gadm_shapes)
-
-        def locate_bus(coords, co):
-            gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
-
-            point = Point(coords["lon"], coords["lat"])
-
-            try:
-                return gdf_co[gdf_co.contains(point)][
-                    "GADM_ID"
-                ].item()  # filter gdf_co which contains point and returns the bus
-
-            except ValueError:
-                return gdf_co[
-                    gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-                ][
-                    "GADM_ID"
-                ].item()  # looks for closest one shape=node
-                # fixing https://github.com/pypsa-meets-earth/pypsa-earth/pull/670
-
-        ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
-            lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
-        )
+        ppl = locate_bus(
+            ppl.rename(columns={"lon": "x", "lat": "y", "Country": "country"}),
+            country_list,
+            gadm_layer_id,
+            snakemake.input.gadm_shapes,
+            snakemake.params.alternative_clustering,
+            col_out="region_id",
+        ).rename(columns={"x": "lon", "y": "lat", "country": "Country"})
 
     ppl.to_csv(snakemake.output.powerplants)

@@ -10,8 +10,8 @@ Configuration
 
 PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
 The options here described are collected in a ``config.yaml`` file located in the root directory.
-Users should copy the provided default configuration (``config.default.yaml``) and amend 
-their own modifications and assumptions in the user-specific configuration file (``config.yaml``); 
+Users should copy the provided default configuration (``config.default.yaml``) and amend
+their own modifications and assumptions in the user-specific configuration file (``config.yaml``);
 confer installation instructions at :ref:`installation`.
 
 .. note::
@@ -42,7 +42,7 @@ It is common conduct to analyse energy system optimisation models for **multiple
 e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
 investment changes as more ambitious greenhouse-gas emission reduction targets are applied.
 
-The ``run`` section is used for running and storing scenarios with different configurations which are not covered by :ref:`wildcards`. It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set ``shared_cutouts`` to `true`.    
+The ``run`` section is used for running and storing scenarios with different configurations which are not covered by :ref:`wildcards`. It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set ``shared_cutouts`` to `true`.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
@@ -123,7 +123,7 @@ Defines the coordinate reference systems (crs).
 ``augmented_line_connection``
 =============================
 
-If enabled, it increases the connectivity of the network. It makes the network graph `k-edge-connected <https://en.wikipedia.org/wiki/K-edge-connected_graph>`_, i.e., 
+If enabled, it increases the connectivity of the network. It makes the network graph `k-edge-connected <https://en.wikipedia.org/wiki/K-edge-connected_graph>`_, i.e.,
 if fewer than k edges are removed, the network graph stays connected. It uses the `k-edge-augmentation <https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation>`_
 algorithm from the `NetworkX <https://networkx.org/documentation/stable/index.html>`_ Python package.
 
@@ -170,6 +170,44 @@ Specifies the options to build the shapes in which the region of interest (``cou
    :header-rows: 1
    :widths: 25,10,22,27
    :file: configtables/build_shape_options.csv
+
+.. _subregion_cf:
+
+``subregion``
+=============================
+
+If enabled, this option allows a region of interest (``countries``) to be redefined into subregions,
+which can be activated at various stages of the workflow. Currently, it is only used in the ``simplify_network`` rule.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: subregion:
+   :end-at: path_custom_shapes:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/subregion.csv
+
+The names of subregions are arbitrary. Its sizes are determined by how many GADM IDs that are included in the list.
+A single country can be divided into multiple subregions, and a single subregion can include GADM IDs from multiple countries.
+If the same GADM ID appears in different subregions, the first subregion listed will take precedence over that region.
+The remaining GADM IDs that are not listed will be merged back to form the remaining parts of their respective countries.
+For example, consider the Central District of Botswana, which has a GADM ID of ``BW.3``. To separate this district from the rest of the country, you can select:
+
+.. literalinclude:: ../test/config.landlock.yaml
+   :language: yaml
+   :start-at: subregion:
+   :end-at: Central:
+
+There are several formats for GADM IDs depending on the version, so before using this feature, please review the ``resources/shapes/gadm_shape.geojson`` file which can be created using the command:
+
+.. code:: bash
+
+    snakemake -j 1 build_shapes
+
+.. note::
+   The rule ``build_shapes`` currently use `Version 4.1  <https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/>`_ for their GADM data. This may change in the future.
 
 .. _clean_osm_data_options_cf:
 
@@ -227,7 +265,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 ``load_options``
 =============================
 
-Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socio-economic pathway (GDP and population growth), to enhance modelling capabilities.
+Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socioeconomic pathway (GDP and population growth), to enhance modelling capabilities.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
@@ -402,6 +440,19 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
    :widths: 25,7,22,30
    :file: configtables/hydro.csv
 
+``csp``
+---------------
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at:   csp:
+   :end-at: csp_model:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/csp.csv
+
 .. _costs_cf:
 
 ``costs``
@@ -412,7 +463,7 @@ Specifies the cost assumptions of the technologies considered. Cost information 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-after: Costs Configuration
-   :end-at: co2:
+   :end-at: CCGT: 0.58
 
 .. csv-table::
    :header-rows: 1

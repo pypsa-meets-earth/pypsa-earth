@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+version = 1
+SPDX-PackageName = "pypsa-earth"
+SPDX-PackageSupplier = "The PyPSA-Earth and PyPSA-Eur Authors <pypsameetsearth@gmail.com>"
+SPDX-PackageDownloadLocation = "https://github.com/pypsa-meets-earth/pypsa-earth"
+
+[[annotations]]
+path = "doc/data.csv"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = "doc/configtables/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = "data/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+
+[[annotations]]
+path = ".github/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC0-1.0"

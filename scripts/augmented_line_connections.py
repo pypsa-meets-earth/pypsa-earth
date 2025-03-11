@@ -27,24 +27,20 @@ Outputs
 
 Description
 -----------
-
-
 """
-import logging
 import os
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 from add_electricity import load_costs
-from base_network import _set_links_underwater_fraction
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 # Functions
@@ -58,23 +54,23 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
-            "augmented_line_connections", network="elec", simpl="", clusters="54"
+            "augmented_line_connections", network="elec", simpl="", clusters="4"
         )
+
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.sum().values[0] / 8760.0
     costs = load_costs(
         snakemake.input.tech_costs,
-        snakemake.config["costs"],
-        snakemake.config["electricity"],
+        snakemake.params.costs,
+        snakemake.params.electricity,
         Nyears,
     )
     # TODO: Implement below comment in future. Requires transformer consideration.
-    # component_type = {"False": "Line", "True":  "Link"}.get(snakemake.config["electricity"]["hvdc_as_lines"])
-    options = snakemake.config["augmented_line_connection"]
+    # component_type = {"False": "Line", "True":  "Link"}.get(snakemake.params.hvdc_as_lines)
+    options = snakemake.params.augmented_line_connection
     min_expansion_option = options.get("min_expansion")
     k_edge_option = options.get("connectivity_upgrade", 3)
     line_type_option = options.get("new_line_type", ["HVDC"])
@@ -88,6 +84,7 @@ if __name__ == "__main__":
 
     # TODO: Currently only AC lines are read in and meshed. One need to combine
     # AC & DC lines and then move on.
+    # rather there is a need to filter-out DC lines
     network_lines = n.lines
     sel = network_lines.s_nom > 100  # TODO: Check, should be all selected or filtered?
     attrs = ["bus0", "bus1", "length"]
@@ -140,7 +137,7 @@ if __name__ == "__main__":
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=snakemake.config["lines"].get("dc_type"),
+            type=snakemake.params.lines.get("dc_types"),
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
@@ -159,7 +156,7 @@ if __name__ == "__main__":
             suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
-            type=snakemake.config["lines"]["types"].get(380),
+            type=snakemake.params.lines["ac_types"].get(380),
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,
@@ -170,7 +167,10 @@ if __name__ == "__main__":
             lifetime=costs.at["HVAC overhead", "lifetime"],
         )
 
-        _set_links_underwater_fraction(snakemake.input.regions_offshore, n)
+        # TODO There is a need to add calculations of `underwater_fraction`
+        # considering only lines added during augmentation
+        # _set_dc_underwater_fraction(n.links, snakemake.input.regions_offshore)
+        # _set_dc_underwater_fraction(n.lines, snakemake.input.regions_offshore)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

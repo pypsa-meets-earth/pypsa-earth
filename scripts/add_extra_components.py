@@ -52,13 +52,18 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 
 - ``Stores`` of carrier 'H2' and/or 'battery' in combination with ``Links``. If this option is chosen, the script adds extra buses with corresponding carrier where energy ``Stores`` are attached and which are connected to the corresponding power buses via two links, one each for charging and discharging. This leads to three investment variables for the energy capacity, charging and discharging capacity of the storage unit.
 """
-import logging
 import os
 
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
+from _helpers import (
+    configure_logging,
+    create_logger,
+    lossy_bidirectional_links,
+    override_component_attrs,
+    set_length_based_efficiency,
+)
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
@@ -67,7 +72,7 @@ from add_electricity import (
 
 idx = pd.IndexSlice
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def attach_storageunits(n, costs, config):
@@ -276,6 +281,7 @@ def attach_stores(n, costs, config):
             zero_or_value = float(
                 costs.loc[discharger_or_bicharger_filter, "capital_cost"]
             )
+
         n.madd(
             "Link",
             carrier_buses_i + " discharger",
@@ -290,8 +296,48 @@ def attach_stores(n, costs, config):
             ),
         )
 
+    if ("csp" in config["electricity"]["renewable_carriers"]) and (
+        config["renewable"]["csp"]["csp_model"] == "advanced"
+    ):
+        # add separate buses for csp
+        main_buses = n.generators.query("carrier == 'csp'").bus
+        csp_buses_i = n.madd(
+            "Bus",
+            main_buses + " csp",
+            carrier="csp",
+            x=n.buses.loc[main_buses, "x"].values,
+            y=n.buses.loc[main_buses, "y"].values,
+            country=n.buses.loc[main_buses, "country"].values,
+        )
+        n.generators.loc[main_buses.index, "bus"] = csp_buses_i
 
-def attach_hydrogen_pipelines(n, costs, config):
+        # add stores for csp
+        n.madd(
+            "Store",
+            csp_buses_i,
+            bus=csp_buses_i,
+            carrier="csp",
+            e_cyclic=True,
+            e_nom_extendable=True,
+            capital_cost=costs.at["csp-tower TES", "capital_cost"],
+            marginal_cost=costs.at["csp-tower TES", "marginal_cost"],
+        )
+
+        # add links for csp
+        n.madd(
+            "Link",
+            csp_buses_i,
+            bus0=csp_buses_i,
+            bus1=main_buses,
+            carrier="csp",
+            efficiency=costs.at["csp-tower", "efficiency"],
+            capital_cost=costs.at["csp-tower", "capital_cost"],
+            p_nom_extendable=True,
+            marginal_cost=costs.at["csp-tower", "marginal_cost"],
+        )
+
+
+def attach_hydrogen_pipelines(n, costs, config, transmission_efficiency):
     ext_carriers = config["electricity"]["extendable_carriers"]
     as_stores = ext_carriers.get("Store", [])
 
@@ -326,21 +372,28 @@ def attach_hydrogen_pipelines(n, costs, config):
         p_nom_extendable=True,
         length=h2_links.length.values,
         capital_cost=costs.at["H2 pipeline", "capital_cost"] * h2_links.length,
-        efficiency=costs.at["H2 pipeline", "efficiency"],
         carrier="H2 pipeline",
     )
+
+    # split the pipeline into two unidirectional links to properly apply transmission losses in both directions.
+    lossy_bidirectional_links(n, "H2 pipeline")
+
+    # set the pipelines efficiency and the electricity required by the pipeline for compression
+    set_length_based_efficiency(n, "H2 pipeline", " H2", transmission_efficiency)
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("add_extra_components", simpl="", clusters=10)
+
     configure_logging(snakemake)
 
-    n = pypsa.Network(snakemake.input.network)
+    overrides = override_component_attrs(snakemake.input.overrides)
+    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    transmission_efficiency = snakemake.params.transmission_efficiency
     config = snakemake.config
 
     costs = load_costs(
@@ -352,7 +405,7 @@ if __name__ == "__main__":
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
-    attach_hydrogen_pipelines(n, costs, config)
+    attach_hydrogen_pipelines(n, costs, config, transmission_efficiency)
 
     add_nice_carrier_names(n, config=config)
 

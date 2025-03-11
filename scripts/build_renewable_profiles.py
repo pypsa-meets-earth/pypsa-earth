@@ -6,13 +6,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
-"""Calculates for each network node the
-(i) installable capacity (based on land-use), (ii) the available generation time
-series (based on weather data), and (iii) the average distance from the node for
-onshore wind, AC-connected offshore wind, DC-connected offshore wind and solar
-PV generators. For hydro generators, it calculates the expected inflows.
-In addition for offshore wind it calculates the fraction of the grid connection
-which is under water.
+"""
+Calculates for each network node the (i) installable capacity (based on land-
+use), (ii) the available generation time series (based on weather data), and
+(iii) the average distance from the node for onshore wind, AC-connected
+offshore wind, DC-connected offshore wind and solar PV generators. For hydro
+generators, it calculates the expected inflows. In addition for offshore wind
+it calculates the fraction of the grid connection which is under water.
 
 Relevant settings
 -----------------
@@ -189,10 +189,8 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 - ``conservative`` ascertains the nodal limit by increasing capacities
   proportional to the layout until the limit of an individual grid cell is
   reached.
-
 """
 import functools
-import logging
 import os
 import time
 from math import isnan
@@ -204,17 +202,39 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import configure_logging, read_csv_nafix, sets_path_to_root
+from _helpers import BASE_DIR, configure_logging, create_logger
 from add_electricity import load_powerplants
+from dask.distributed import Client
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
+
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
+
+
+def check_cutout_match(cutout, geodf):
+    cutout_box = box(*cutout.bounds)
+    region_box = box(*regions.total_bounds)
+
+    assert not region_box.intersection(cutout_box).is_empty, (
+        "The requested region is completely out of the cutout area.\n\r"
+        "Check please the provided cutout.\n\r"
+        "More details on cutout generation are available in docs:\n\r"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
+    )
+
+    if not region_box.covered_by(cutout_box):
+        logger.warning(
+            "Weather data does not fully cover the requester region.\n\r"
+            "It's recommended to check the provided cutout.\n\r"
+            "More details on cutout generation are available in docs:\n\r"
+            "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
+        )
 
 
 def get_eia_annual_hydro_generation(fn, countries):
@@ -263,8 +283,10 @@ def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
 def check_cutout_completness(cf):
     """
     Check if a cutout contains missed values.
-    That may be the case due to some issues with accessibility of ERA5 data
-    See for details https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
+
+    That may be the case due to some issues with accessibility of ERA5
+    data See for details
+    https://confluence.ecmwf.int/display/CUSF/Missing+data+in+ERA5T
     Returns share of cutout cells with missed data
     """
     n_missed_cells = pd.isnull(cf).sum()
@@ -280,6 +302,7 @@ def check_cutout_completness(cf):
 def estimate_bus_loss(data_column, tech):
     """
     Calculated share of buses with data loss due to flaws in the cutout data.
+
     Returns share of the buses with missed data
     """
     n_weights_initial = len(data_column)
@@ -299,7 +322,7 @@ def estimate_bus_loss(data_column, tech):
 
 def filter_cutout_region(cutout, regions):
     """
-    Filter the cutout to focus on the region of interest
+    Filter the cutout to focus on the region of interest.
     """
     # filter cutout regions to focus on the region of interest
     minx, miny, maxx, maxy = regions.total_bounds
@@ -311,7 +334,8 @@ def filter_cutout_region(cutout, regions):
 
 def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     """
-    Function used to rescale the inflows of the hydro capacities to match country statistics
+    Function used to rescale the inflows of the hydro capacities to match
+    country statistics.
 
     Parameters
     ----------
@@ -332,7 +356,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         logger.info("No bus has installed hydro plants, ignoring normalization.")
         return runoff
 
-    if snakemake.config["cluster_options"]["alternative_clustering"]:
+    if snakemake.params.alternative_clustering:
         plants = plants.set_index("shape_id")
 
     years_statistics = normalize_using_yearly.index
@@ -373,7 +397,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
             yearlyavg_runoff_by_plant.loc[normalization_buses].groupby("country").sum()
         )
 
-        # common country indeces
+        # common country indices
         common_countries = normalize_using_yearly.columns.intersection(
             grouped_runoffs.index
         )
@@ -464,24 +488,22 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("build_renewable_profiles", technology="solar")
-        sets_path_to_root("pypsa-earth")
     configure_logging(snakemake)
 
     pgb.streams.wrap_stderr()
-    countries = snakemake.config["countries"]
+    countries = snakemake.params.countries
     paths = snakemake.input
-    nprocesses = snakemake.config["atlite"].get("nprocesses")
-    noprogress = not snakemake.config["atlite"].get("show_progress", False)
-    config = snakemake.config["renewable"][snakemake.wildcards.technology]
+    nprocesses = int(snakemake.threads)
+    noprogress = not snakemake.config["enable"]["progress_bar"]
+    config = snakemake.params.renewable[snakemake.wildcards.technology]
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
 
     # crs
-    geo_crs = snakemake.config["crs"]["geo_crs"]
-    area_crs = snakemake.config["crs"]["area_crs"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    area_crs = snakemake.params.crs["area_crs"]
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -498,12 +520,20 @@ if __name__ == "__main__":
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
 
+    if nprocesses > 1:
+        client = Client(n_workers=nprocesses, threads_per_worker=1)
+    else:
+        client = None
+
     cutout = atlite.Cutout(paths["cutout"])
+
+    check_cutout_match(cutout=cutout, geodf=regions)
+
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
         cutout = filter_cutout_region(cutout, regions)
 
-    if snakemake.config["cluster_options"]["alternative_clustering"]:
+    if snakemake.params.alternative_clustering:
         regions = gpd.GeoDataFrame(
             regions.reset_index()
             .groupby("shape_id")
@@ -524,12 +554,14 @@ if __name__ == "__main__":
     buses = regions.index
 
     func = getattr(cutout, resource.pop("method"))
-    resource["dask_kwargs"] = {"num_workers": nprocesses}
+    resource["dask_kwargs"] = {"scheduler": client}
 
     # filter plants for hydro
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
-        hydrobasins = gpd.read_file(resource["hydrobasins"])
+        hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
+        resource["hydrobasins"] = hydrobasins_path
+        hydrobasins = gpd.read_file(hydrobasins_path)
         ppls = load_powerplants(snakemake.input.powerplants)
 
         hydro_ppls = ppls[ppls.carrier == "hydro"]
@@ -545,13 +577,13 @@ if __name__ == "__main__":
         # select busbar whose location (p) belongs to at least one hydrobasin geometry
         # if extendable option is true, all buses are included
         # otherwise only where hydro powerplants are available are considered
-        if snakemake.config["cluster_options"]["alternative_clustering"]:
+        if snakemake.params.alternative_clustering:
             filter_bus_to_consider = regions.index.map(
                 lambda bus_id: config.get("extendable", False)
                 | (bus_id in hydro_ppls.region_id.values)
             )
         ### TODO: quickfix. above case and the below case should by unified
-        if snakemake.config["cluster_options"]["alternative_clustering"] == False:
+        if snakemake.params.alternative_clustering == False:
             filter_bus_to_consider = regions.index.map(
                 lambda bus_id: config.get("extendable", False)
                 | (bus_id in hydro_ppls.bus.values)
@@ -573,10 +605,17 @@ if __name__ == "__main__":
             columns={"x": "lon", "y": "lat", "country": "countries"}
         ).loc[bus_in_hydrobasins, ["lon", "lat", "countries", "shape_id"]]
 
-        resource["plants"]["installed_hydro"] = [
-            True if (bus_id in hydro_ppls.bus.values) else False
-            for bus_id in resource["plants"].index
-        ]
+        # TODO: these cases shall be fixed by restructuring the alternative clustering procedure
+        if snakemake.params.alternative_clustering == False:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.bus.values) else False
+                for bus_id in resource["plants"].index
+            ]
+        else:
+            resource["plants"]["installed_hydro"] = [
+                True if (bus_id in hydro_ppls.region_id.values) else False
+                for bus_id in resource["plants"].shape_id.values
+            ]
 
         # get normalization before executing runoff
         normalization = None
@@ -592,7 +631,7 @@ if __name__ == "__main__":
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
-            if snakemake.config["cluster_options"]["alternative_clustering"]:
+            if snakemake.params.alternative_clustering:
                 inflow["plant"] = regions.shape_id.loc[inflow["plant"]].values
 
             if "clip_min_inflow" in config:
@@ -610,6 +649,7 @@ if __name__ == "__main__":
                         )
                         * config.get("multiplier", 1.0)
                     )
+
                 elif method == "eia":
                     path_eia_stats = snakemake.input.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
@@ -630,7 +670,7 @@ if __name__ == "__main__":
             # add zero values for out of hydrobasins elements
             if len(bus_notin_hydrobasins) > 0:
                 regions_notin = regions.loc[
-                    bus_notin_hydrobasins, ["x", "y", "country"]
+                    bus_notin_hydrobasins, ["x", "y", "country", "shape_id"]
                 ]
                 logger.warning(
                     f"Buses {bus_notin_hydrobasins} are not contained into hydrobasins."
@@ -644,7 +684,11 @@ if __name__ == "__main__":
                     ),
                     dims=("plant", "time"),
                     coords=dict(
-                        plant=bus_notin_hydrobasins,
+                        plant=(
+                            bus_notin_hydrobasins
+                            if not snakemake.params.alternative_clustering
+                            else regions_notin["shape_id"].values
+                        ),
                         time=inflow.coords["time"],
                     ),
                 )
@@ -795,3 +839,6 @@ if __name__ == "__main__":
             ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
 
         ds.to_netcdf(snakemake.output.profile)
+
+    if client is not None:
+        client.shutdown()

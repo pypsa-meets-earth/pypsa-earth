@@ -6,6 +6,7 @@
 # -*- coding: utf-8 -*-
 """
 Plots energy and cost summaries for solved networks.
+
 Relevant Settings
 -----------------
 Inputs
@@ -15,14 +16,13 @@ Outputs
 Description
 -----------
 """
-import logging
 import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import configure_logging
+from _helpers import configure_logging, create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def rename_techs(label):
@@ -219,15 +219,14 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake(
             "plot_summary",
             summary="energy",
             network="elec",
             simpl="",
-            clusters=10,
-            ll="copt",
-            opts="Co2L-24H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             attr="",
             ext="pdf",
             country="all",

@@ -5,11 +5,12 @@
 
 # -*- coding: utf-8 -*-
 """
-Create statistics for a given scenario run
+Create statistics for a given scenario run.
 
 This script contains functions to create statistics of the workflow for the current execution
 
 Relevant statistics that are created are:
+
 - For clean_osm_data and download_osm_data,
   the number of elements, length of the lines and length of dc lines are stored
 - For build_shapes, the surface, total GDP, total population and number of shapes are collected
@@ -23,8 +24,6 @@ Outputs
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
 import os
-import shutil
-from datetime import datetime
 from pathlib import Path
 
 import geopandas as gpd
@@ -32,10 +31,11 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import mock_snakemake, sets_path_to_root, to_csv_nafix
+from _helpers import create_logger, mock_snakemake, to_csv_nafix
 from build_test_configs import create_test_config
-from ruamel.yaml import YAML
 from shapely.validation import make_valid
+
+logger = create_logger(__name__)
 
 
 def _multi_index_scen(rulename, keys):
@@ -43,9 +43,9 @@ def _multi_index_scen(rulename, keys):
 
 
 def _mock_snakemake(rule, **kwargs):
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     snakemake = mock_snakemake(rule, **kwargs)
-    sets_path_to_root("pypsa-earth")
+
     return snakemake
 
 
@@ -53,9 +53,9 @@ def generate_scenario_by_country(
     path_base, country_list, out_dir="configs/scenarios", pre="config."
 ):
     """
-    Utility function to create copies of a standard yaml file available in path_base
-    for every country in country_list.
-    Copies are saved into the output directory out_dir
+    Utility function to create copies of a standard yaml file available in
+    path_base for every country in country_list. Copies are saved into the
+    output directory out_dir.
 
     Note:
     - the clusters are automatically modified for selected countries with limited data
@@ -173,8 +173,10 @@ def collect_network_osm_stats(path, rulename, header, metric_crs="EPSG:3857"):
 def collect_osm_stats(rulename, **kwargs):
     """
     Collect statistics on OSM data.
-    When lines and cables are considered, then network-related statistics are collected
-    (collect_network_osm_stats), otherwise basic statistics are (collect_basic_osm_stats)
+
+    When lines and cables are considered, then network-related
+    statistics are collected (collect_network_osm_stats), otherwise
+    basic statistics are (collect_basic_osm_stats)
     """
     metric_crs = kwargs.pop("metric_crs", "EPSG:3857")
     only_basic = kwargs.pop("only_basic", False)
@@ -230,7 +232,8 @@ def collect_clean_osm_stats(rulename="clean_osm_data", metric_crs="EPSG:3857"):
 
 def collect_bus_regions_stats(bus_region_rule="build_bus_regions"):
     """
-    Collect statistics on bus regions
+    Collect statistics on bus regions.
+
     - number of onshore regions
     - number of offshore regions
     """
@@ -258,7 +261,7 @@ def collect_bus_regions_stats(bus_region_rule="build_bus_regions"):
     return df
 
 
-def collect_network_stats(network_rule, config):
+def collect_network_stats(network_rule, scenario_config):
     """
     Collect statistics on pypsa networks:
     - installed capacity by carrier
@@ -266,7 +269,7 @@ def collect_network_stats(network_rule, config):
     - lines total capacity
     """
     wildcards = {
-        k: str(config["scenario"][k][0]) for k in ["simpl", "clusters", "ll", "opts"]
+        k: str(scenario_config[k][0]) for k in ["simpl", "clusters", "ll", "opts"]
     }
 
     snakemake = _mock_snakemake(network_rule, **wildcards)
@@ -310,7 +313,7 @@ def collect_network_stats(network_rule, config):
         )
 
         # add demand to statistics
-        tot_demand = n.loads_t.p_set.sum().sum()
+        tot_demand = float(n.loads_t.p_set.sum(axis=1).mean()) * 8760
         df_demand = pd.DataFrame({"demand": [tot_demand]})
         df_demand.columns = _multi_index_scen(network_rule, df_demand.columns)
         network_stats = pd.concat([network_stats, df_demand], axis=1)
@@ -373,7 +376,7 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
 
 def collect_only_computational(rulename):
     """
-    Rule to create only computational statistics of rule rulename
+    Rule to create only computational statistics of rule rulename.
     """
     snakemake = _mock_snakemake(rulename)
     df = pd.DataFrame()
@@ -381,15 +384,13 @@ def collect_only_computational(rulename):
     return df
 
 
-def collect_snakemake_stats(name, dict_dfs, config):
+def collect_snakemake_stats(
+    name, dict_dfs, renewable_config, renewable_carriers_config
+):
     """
-    Collect statistics on what rules have been successful
+    Collect statistics on what rules have been successful.
     """
-    ren_techs = [
-        tech
-        for tech in config["renewable"]
-        if tech in config["electricity"]["renewable_carriers"]
-    ]
+    ren_techs = [tech for tech in renewable_config if tech in renewable_carriers_config]
 
     list_rules = [
         "download_osm_data",
@@ -419,7 +420,9 @@ def collect_snakemake_stats(name, dict_dfs, config):
 
 
 def aggregate_computational_stats(name, dict_dfs):
-    """Function to aggregate the total computational statistics of the rules"""
+    """
+    Function to aggregate the total computational statistics of the rules.
+    """
     cols_comp = ["total_time", "mean_load", "max_memory"]
 
     def get_selected_cols(df, level=1, lvl_cols=cols_comp):
@@ -481,7 +484,7 @@ def collect_renewable_stats(rulename, technology):
             ),
         )
 
-        add_computational_stats(df_RES_stats, snakemake, rulename)
+        add_computational_stats(df_RES_stats, snakemake, f"{rulename}_{technology}")
 
         return df_RES_stats
     else:
@@ -490,7 +493,8 @@ def collect_renewable_stats(rulename, technology):
 
 def add_computational_stats(df, snakemake, column_name=None):
     """
-    Add the major computational information of a given rule into the existing dataframe
+    Add the major computational information of a given rule into the existing
+    dataframe.
     """
     comp_data = [np.nan] * 3  # total_time, mean_load and max_memory
 
@@ -515,7 +519,13 @@ def add_computational_stats(df, snakemake, column_name=None):
     return df
 
 
-def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
+def calculate_stats(
+    scenario_config,
+    renewable_config,
+    renewable_carriers_config,
+    metric_crs="EPSG:3857",
+    area_crs="ESRI:54009",
+):
     "Function to collect all statistics"
     df_osm_raw = collect_raw_osm_stats(metric_crs=metric_crs)
     df_osm_clean = collect_clean_osm_stats(metric_crs=metric_crs)
@@ -528,7 +538,7 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     }
 
     network_dict = {
-        network_rule: collect_network_stats(network_rule, config)
+        network_rule: collect_network_stats(network_rule, scenario_config)
         for network_rule in [
             "base_network",
             "add_electricity",
@@ -542,8 +552,8 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
     ren_rule = "build_renewable_profiles"
     renewables_dict = {
         f"{ren_rule}_{tech}": collect_renewable_stats(ren_rule, tech)
-        for tech in config["renewable"]
-        if tech in config["electricity"]["renewable_carriers"]
+        for tech in renewable_config
+        if tech in renewable_carriers_config
     }
 
     # network-related rules
@@ -561,7 +571,7 @@ def calculate_stats(config, metric_crs="EPSG:3857", area_crs="ESRI:54009"):
         "total_comp_stats", dict_dfs
     )
     dict_dfs["snakemake_status"] = collect_snakemake_stats(
-        "snakemake_status", dict_dfs, config
+        "snakemake_status", dict_dfs, renewable_config, renewable_carriers_config
     )
 
     return dict_dfs
@@ -571,22 +581,30 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         snakemake = mock_snakemake("make_statistics")
 
-    sets_path_to_root("pypsa-earth")
-
     fp_stats = snakemake.output["stats"]
-    config = snakemake.config
-    scenario_name = config["run"]["name"]
+    scenario = snakemake.params.scenario
+    scenario_name = snakemake.config["run"]["name"]
 
-    geo_crs = config["crs"]["geo_crs"]
-    metric_crs = config["crs"]["distance_crs"]
-    area_crs = config["crs"]["area_crs"]
+    geo_crs = snakemake.params.crs["geo_crs"]
+    metric_crs = snakemake.params.crs["distance_crs"]
+    area_crs = snakemake.params.crs["area_crs"]
 
-    name_index = scenario_name if not scenario_name else "-".join(config["countries"])
+    renewable = snakemake.params.renewable
+    renewable_carriers = snakemake.params.renewable_carriers
+
+    name_index = (
+        scenario_name if not scenario_name else "-".join(snakemake.params.countries)
+    )
 
     # create statistics
-    stats = calculate_stats(config, metric_crs=metric_crs, area_crs=area_crs)
+    stats = calculate_stats(
+        scenario,
+        renewable,
+        renewable_carriers,
+        metric_crs=metric_crs,
+        area_crs=area_crs,
+    )
     stats = pd.concat(stats.values(), axis=1).set_index(pd.Index([name_index]))
     to_csv_nafix(stats, fp_stats)
