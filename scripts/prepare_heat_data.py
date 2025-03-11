@@ -193,9 +193,7 @@ def prepare_heat_data(n, snapshots):
     )  # TODO GHALAT
 
     calibr_heat_df = pd.read_csv(os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0)
-    calibr_heat_df["country"] = "US"
     calibr_cool_df = pd.read_csv(os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0)
-    calibr_cool_df["country"] = "US"
 
     calibr_heat_buses_df = locate_bus(
         df=calibr_heat_df,
