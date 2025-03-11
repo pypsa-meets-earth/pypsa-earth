@@ -64,6 +64,21 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
 
 
 def scale_demand(data_df, calibr_df, load_mode, geom_id):
+    """
+    Apply a linear transformation to the demand dataframe to match
+    the demand values with the measured or modeled ones.
+
+    Parameters
+    ----------
+    data_df : DataFrame
+        Original demand
+    calibr_df : DataFrame
+        Calibration coefficients
+    load_mode : string
+        "heating" or "cooling" as is defined in the calibration data
+    geom_id : string
+        ID of the bus shapes
+    """
 
     data_col = "scaling_" + load_mode
 
