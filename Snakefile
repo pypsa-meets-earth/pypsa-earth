@@ -32,6 +32,7 @@ configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
 configfile: "config.yaml"
 
+
 check_config_version(config=config)
 
 config.update({"git_commit": get_last_commit_message(".")})
@@ -249,7 +250,6 @@ rule build_shapes:
         "scripts/build_shapes.py"
 
 
-
 rule base_network:
     params:
         voltages=config["electricity"]["voltages"],
@@ -329,10 +329,12 @@ def terminate_if_cutout_exists(config=config):
                 + cutout_fl
                 + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
             )
-'''
 
 
-'''
+"""
+
+
+"""
 if config["enable"].get("build_cutout", False):
     # terminate_if_cutout_exists(config)
 
@@ -354,10 +356,13 @@ if config["enable"].get("build_cutout", False):
             mem_mb=ATLITE_NPROCESSES * 1000,
         script:
             "scripts/build_cutout.py"
-'''
 
 
-'''
+"""
+
+
+"""
+
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
@@ -377,7 +382,6 @@ if config["enable"].get("build_natura_raster", False):
             "benchmarks/" + RDIR + "build_natura_raster"
         script:
             "scripts/build_natura_raster.py"
-
 
 
 if not config["enable"].get("build_natura_raster", False):
@@ -517,17 +521,9 @@ rule build_egs_potentials:
         egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
         egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
         egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
-        shapes=(
-            "resources/"
-            + RDIR
-            + "bus_regions/regions_onshore.geojson"
-        ),
+        shapes=("resources/" + RDIR + "bus_regions/regions_onshore.geojson"),
     output:
-        egs_potentials=(
-            "resources/"
-            + SECDIR
-            + "egs_potential_p100_h0.csv"
-        ),
+        egs_potentials=("resources/" + SECDIR + "egs_potential_p100_h0.csv"),
     threads: 2
     resources:
         mem_mb=10000,
@@ -571,9 +567,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
-        egs_potentials="resources/"
-            + SECDIR
-            + "egs_potential_p100_h0.csv",
+        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:
@@ -585,7 +579,6 @@ rule add_electricity:
         mem_mb=3000,
     script:
         "scripts/add_electricity.py"
-
 
 
 rule simplify_network:
@@ -626,7 +619,6 @@ rule simplify_network:
         mem_mb=4000,
     script:
         "scripts/simplify_network.py"
-
 
 
 if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
@@ -852,9 +844,7 @@ rule build_industrial_heating_demands:
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
         heat_exchanger_capacity=(
-            "resources/"
-            + SECDIR
-            + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
+            "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
         ),
     threads: 1
     log:
@@ -1247,13 +1237,9 @@ rule prepare_sector_network:
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
         industrial_heating_costs=(
-            "resources/"
-            + SECDIR
-            + "industrial_heating_costs.csv"
+            "resources/" + SECDIR + "industrial_heating_costs.csv"
         ),
-        egs_potentials="resources/"
-            + SECDIR
-            + "egs_potential_p100_h0.csv",
+        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
         # lambda wildcards: [
         #     "resources/"
         #     + SECDIR
