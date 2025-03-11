@@ -78,6 +78,9 @@ def eir_air_conditioner(t_ewb, t_odb, unit_type):
 def eir_heat_pump_cooling(t_ewb, t_odb, unit_type):
     """
     Source: Equation (7) and Tables 17 & 19 of Cutler et al (2023) NREL Report
+    "Improved Modeling of Residential Air Conditioners and Heat Pumps for
+     Energy Calculations" available via
+     https://www.nrel.gov/docs/fy13osti/56354.pdf
 
     EIR = 1/COP
     t_ewb is the entering wet-bulb temperature
@@ -222,10 +225,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_cop_profiles",
-            simpl="",
-            clusters=10,
-            planning_horizons=2030
+            "build_cop_profiles", simpl="", clusters=10, planning_horizons=2030
         )
 
     # heating performance
@@ -261,6 +261,4 @@ if __name__ == "__main__":
 
         cop_hp_cooling.to_netcdf(snakemake.output[f"cop_hp_cooling_{area}"])
         cop_ac_cooling.to_netcdf(snakemake.output[f"cop_ac_cooling_{area}"])
-        capft_abch_cooling.to_netcdf(
-            snakemake.output[f"capft_abch_cooling_{area}"]
-        )
+        capft_abch_cooling.to_netcdf(snakemake.output[f"capft_abch_cooling_{area}"])
