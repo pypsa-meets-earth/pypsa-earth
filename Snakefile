@@ -1312,6 +1312,8 @@ rule build_cop_profiles:
 
 
 rule prepare_heat_data:
+    params:
+        countries=config["countries"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="resources/"

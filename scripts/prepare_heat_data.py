@@ -78,7 +78,7 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id):
     return data_df
 
 
-def prepare_heat_data(n, snapshots):
+def prepare_heat_data(n, snapshots, countries):
     # heating
     ashp_cop = (
         xr.open_dataarray(snakemake.input.cop_air_total)
@@ -197,7 +197,7 @@ def prepare_heat_data(n, snapshots):
 
     calibr_heat_buses_df = locate_bus(
         df=calibr_heat_df,
-        countries=["US"],
+        countries=countries,
         gadm_level=1,
         path_to_gadm=snakemake.input.shapes_path,
         gadm_clustering=True,
@@ -207,7 +207,7 @@ def prepare_heat_data(n, snapshots):
 
     calibr_cool_buses_df = locate_bus(
         df=calibr_cool_df,
-        countries=["US"],
+        countries=countries,
         gadm_level=1,
         path_to_gadm=snakemake.input.shapes_path,
         gadm_clustering=True,
@@ -356,6 +356,7 @@ if __name__ == "__main__":
 
     # Add options
     options = snakemake.config["sector"]
+    country_list = snakemake.params.countries
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760
@@ -377,7 +378,7 @@ if __name__ == "__main__":
         ac_cooling_total_cop,
         apft_abch_cooling_total_cop,
         district_heat_share,
-    ) = prepare_heat_data(n, config_snapshots)
+    ) = prepare_heat_data(n, config_snapshots, country_list)
 
     # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
