@@ -184,9 +184,7 @@ def write_dict_key(
         .replace("\n", "<br />")
         .replace("\r", "<br />")
     )
-    # clean_str = content_str.replace("\n", ", ")#.replace("\r", "<br />")
 
-    # f = open(fl_name, "w")
     f = open(fl_name, "a")
 
     f.write("<html>")
@@ -208,12 +206,6 @@ def write_dict_key(
     write_html(style=style_def, fl=f, type=style_text, str_=clean_str)
 
     write_html(style=style_def, fl=f, type=mint_bg, str_="<br />")
-    # write_html(
-    #     style=style_def,
-    #     fl=f,
-    #     type=style_text,
-    #     str_="------------------------------------------ <br /><br />",
-    # )
 
     f.write("</html>")
 
@@ -260,8 +252,8 @@ def update_cutout(config, fl="config.yaml"):
     # made by Snakemake
     local_config = yaml.safe_load(Path(fl).read_text())
     local_config_cutouts = [
-        # "renewable" can be missing from the the local config
         d_value.get("cutout")
+        # "renewable" and "atlite"" can be missing from the the local config
         for tc, d_value in local_config.get("renewable", {}).items()
     ] + list(local_config.get("atlite", {}).get("cutouts", {}))
     # A local config file can miss some or all keys
@@ -275,7 +267,7 @@ def update_cutout(config, fl="config.yaml"):
 
         setup_cutout_dict = {
             "atlite": {"cutouts": cutout_name},
-            # TODO Read values from the config
+            # TODO Read keys from the config
             "renewable": {
                 "onwind": {"cutout": cutout_name},
                 "offwind-ac": {"cutout": cutout_name},
@@ -301,7 +293,6 @@ def parse_config(config, fl_name=None, style_def=style):
     2. Checks which cutouts are used in a simulation
     """
 
-    # TODO Add a check for the cutouts used
     year_items = dict(get_vals(config, "year"))
 
     # 1. Outline all the years used in a simulation
