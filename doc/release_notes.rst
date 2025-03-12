@@ -27,6 +27,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix bug in myopic run. `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
+
 * Fix missing focus_weights on cluster_network params without augmented_line_connections, minimize warnings on subregions `PR #1348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1348>`__
 
 * Align structure of the components with consistency checks in the updated PyPSA version `PR #1315 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1315>`__
@@ -48,6 +50,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix mixup of plant locations for hydro inflow and inflow overestimation `PR #1322 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1322>`__
 
 * Fix namibia geofk, line country tag mismatch and minor fixes `PR #1330 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1330>`__
+
+* Minor revision docker workflow to have it working on upstream `PR #1343 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1343>`__
+
+* Fix the scaling factor for time-varying loads of the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1372>`__
 
 PyPSA-Earth 0.6.0
 =================
