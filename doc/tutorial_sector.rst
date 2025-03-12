@@ -74,7 +74,7 @@ Make sure to be in the PyPSA-Earth root directory and run the following command:
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) $ conda activate pypsa-earth
-    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j8 --configfile config.tutorial.yaml -n
+    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j8 --configfile config.tutorial.yaml
 
 This covers the retrieval of additional raw data from online resources and preprocessing data about
 the transport, industry, and heating sectors as well as additional rules about geological storage
