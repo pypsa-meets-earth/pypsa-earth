@@ -33,7 +33,12 @@ HTTP = HTTPRemoteProvider()
 copy_default_files()
 
 
-# configfile: "config.default.yaml"
+# Implementation of Snakemake config update is a recursive dictionaty update
+# More details: https://github.com/snakemake/snakemake/blob/main/snakemake/utils.py#L565-L591
+# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+# An important implication: if one of the config dictionary keys is string
+# the different values will be not overwritten but concatenated
+# from all the configs which can be unintended. An example: `atlite:cutouts`
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
 
