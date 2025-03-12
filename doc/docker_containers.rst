@@ -4,7 +4,7 @@
 
 .. _docker_containers:
 
-Alternate Installation with Docker
+Installation with Docker
 ===============================================
 
 This is an alternative way to create a development environment for PyPSA-Earth. This method is useful for users who are not familiar with programming or Python, or who do not want to install Python on their local machine. It uses Docker containers to create a development environment for PyPSA-Earth.

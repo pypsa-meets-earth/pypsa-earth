@@ -16,6 +16,7 @@ from _helpers import (
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    BASE_DIR,
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import datafiles_retrivedatabundle
@@ -227,6 +228,7 @@ rule build_shapes:
         build_shape_options=config["build_shape_options"],
         crs=config["crs"],
         countries=config["countries"],
+        subregion=config["subregion"],
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
@@ -239,6 +241,7 @@ rule build_shapes:
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     log:
         "logs/" + RDIR + "build_shapes.log",
     benchmark:
@@ -552,8 +555,9 @@ rule add_electricity:
 
 rule simplify_network:
     params:
+        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
         renewable=config["renewable"],
-        geo_crs=config["crs"]["geo_crs"],
+        crs=config["crs"],
         cluster_options=config["cluster_options"],
         countries=config["countries"],
         build_shape_options=config["build_shape_options"],
@@ -562,11 +566,14 @@ rule simplify_network:
         config_lines=config["lines"],
         config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
+        subregion=config["subregion"],
     input:
         network="networks/" + RDIR + "elec.nc",
         tech_costs=COSTS,
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         regions_onshore="resources/"
@@ -594,6 +601,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
 
     rule cluster_network:
         params:
+            aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
             build_shape_options=config["build_shape_options"],
             electricity=config["electricity"],
             costs=config["costs"],
@@ -679,6 +687,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 
     rule cluster_network:
         params:
+            aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
             build_shape_options=config["build_shape_options"],
             electricity=config["electricity"],
             costs=config["costs"],
@@ -688,6 +697,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             countries=config["countries"],
             gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
             cluster_options=config["cluster_options"],
+            focus_weights=config.get("focus_weights", None),
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -732,7 +742,10 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
 
 
 rule add_extra_components:
+    params:
+        transmission_efficiency=config["sector"]["transmission_efficiency"],
     input:
+        overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
     output:
@@ -806,6 +819,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
+            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -872,6 +886,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
+            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
@@ -901,7 +916,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         resources:
             mem_mb=memory,
         shadow:
-            "shallow"
+            "copy-minimal" if os.name == "nt" else "shallow"
         script:
             "scripts/solve_network.py"
 
@@ -1679,7 +1694,7 @@ if config["foresight"] == "overnight":
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides="data/override_component_attrs",
+            overrides=BASE_DIR + "/data/override_component_attrs",
             # network=RESDIR
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
@@ -1690,7 +1705,7 @@ if config["foresight"] == "overnight":
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
         shadow:
-            "shallow"
+            "copy-minimal" if os.name == "nt" else "shallow"
         log:
             solver=RESDIR
             + "logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
@@ -1888,7 +1903,7 @@ rule prepare_db:
 rule build_industrial_distribution_key:  #default data
     params:
         countries=config["countries"],
-        gadm_level_id=config["sector"]["gadm_level"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         industry_database=config["custom_data"]["industry_database"],
     input:
@@ -2033,14 +2048,13 @@ if config["foresight"] == "myopic":
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
             busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
-            busmap=pypsaearth(
-                "resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
-            ),
+            busmap="resources/"
+            + RDIR
+            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
             clustered_pop_layout="resources/"
             + SECDIR
             + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-            costs=CDIR
-            + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             cop_soil_total="resources/"
             + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -2144,11 +2158,12 @@ if config["foresight"] == "myopic":
             co2_sequestration_potential=config["scenario"].get(
                 "co2_sequestration_potential", 200
             ),
+            augmented_line_connection=config["augmented_line_connection"],
         input:
-            overrides="data/override_component_attrs",
+            overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            costs=CDIR + "costs_{planning_horizons}.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
         output:
             network=RESDIR
@@ -2156,7 +2171,7 @@ if config["foresight"] == "myopic":
             # config=RESDIR
             # + "configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.yaml",
         shadow:
-            "shallow"
+            "copy-minimal" if os.name == "nt" else "shallow"
         log:
             solver=RESDIR
             + "logs/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
@@ -2175,7 +2190,7 @@ if config["foresight"] == "myopic":
         script:
             "./scripts/solve_network.py"
 
-    rule solve_all_networks_myopic:
+    rule solve_sector_networks_myopic:
         input:
             networks=expand(
                 RESDIR

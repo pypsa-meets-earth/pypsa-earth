@@ -84,6 +84,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.graphviz",
+    "sphinx_copybutton",
     # "sphinx.ext.pngmath",
     # "sphinxcontrib.tikz",
     # "rinoh.frontend.sphinx",
@@ -184,3 +185,7 @@ man_pages = [(master_doc, "pypsa_earth", "pypsa_earth Documentation", [author], 
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+
+copybutton_prompt_text = r"\.{3}/[^$]*\$ "  # Matches the pattern .../something $
+copybutton_prompt_is_regexp = True
+copybutton_only_copy_prompt_lines = True

@@ -20,8 +20,8 @@ countries: ["NG", "BJ"]
 
 electricity:
   extendable_carriers:
-    Store: []
-    Link: []
+    Store: [H2]
+    Link: [H2 pipeline]
 
   co2limit: 7.75e7
 
@@ -43,7 +43,6 @@ existing_capacities:
 
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
-  gadm_level: 2
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"

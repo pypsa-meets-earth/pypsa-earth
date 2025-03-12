@@ -96,13 +96,12 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
-    get_aggregation_strategies,
+    update_config_dictionary,
     update_p_nom_max,
 )
 from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
-    aggregategenerators,
     aggregateoneport,
     busmap_by_stubs,
     get_clustering_from_busmap,
@@ -276,11 +275,15 @@ def _aggregate_and_move_components(
 
     _adjust_capital_costs_using_connection_costs(n, connection_costs_to_bus, output)
 
-    _, generator_strategies = get_aggregation_strategies(aggregation_strategies)
+    generator_strategies = aggregation_strategies["generators"]
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
-    generators, generators_pnl = aggregategenerators(
-        n, busmap, carriers=carriers, custom_strategies=generator_strategies
+    generators, generators_pnl = aggregateoneport(
+        n,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=generator_strategies,
     )
 
     replace_components(n, "Generator", generators, generators_pnl)
@@ -588,19 +591,22 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
     if not dist.empty:
         busmap.loc[buses_i] = dist.idxmin(1)
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
+    line_strategies = aggregation_strategies.get("lines", dict())
+    bus_strategies = aggregation_strategies.get("buses", dict())
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
+        line_strategies=line_strategies,
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
     return clustering.network, busmap
@@ -799,7 +805,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     generators_mean_origin = n.generators.p_nom.mean()
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
-    network_crs = snakemake.params.geo_crs
+    network_crs = snakemake.params.crs["geo_crs"]
 
     n.determine_network_topology()
 
@@ -848,19 +854,22 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     if (busmap.index == busmap).all():
         return n, n.buses.index.to_series()
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
+    line_strategies = aggregation_strategies.get("lines", dict())
+    bus_strategies = aggregation_strategies.get("buses", dict())
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
+        line_strategies=line_strategies,
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
 
@@ -934,19 +943,22 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     if (busmap.index == busmap).all():
         return n, n.buses.index.to_series()
 
-    bus_strategies, generator_strategies = get_aggregation_strategies(
-        aggregation_strategies
-    )
+    line_strategies = aggregation_strategies.get("lines", dict())
+    bus_strategies = aggregation_strategies.get("buses", dict())
+    generator_strategies = aggregation_strategies.get("generators", dict())
+    one_port_strategies = aggregation_strategies.get("one_ports", dict())
 
     clustering = get_clustering_from_busmap(
         n,
         busmap,
-        bus_strategies=bus_strategies,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
         aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
+        line_strategies=line_strategies,
+        bus_strategies=bus_strategies,
         generator_strategies=generator_strategies,
+        one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
 
@@ -958,6 +970,34 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     )
 
     return clustering.network, busmap
+
+
+def nearest_shape(n, path_shapes, distance_crs):
+    """
+    The function nearest_shape reallocates buses to the closest "country" shape based on their geographical coordinates,
+    using the provided shapefile and distance CRS.
+
+    """
+
+    from shapely.geometry import Point
+
+    shapes = gpd.read_file(path_shapes, crs=distance_crs).set_index("name")["geometry"]
+
+    for i in n.buses.index:
+        point = Point(n.buses.loc[i, "x"], n.buses.loc[i, "y"])
+        contains = shapes.contains(point)
+        if contains.any():
+            n.buses.loc[i, "country"] = contains.idxmax()
+        else:
+            distance = shapes.distance(point).sort_values()
+            if distance.iloc[0] < 1:
+                n.buses.loc[i, "country"] = distance.index[0]
+            else:
+                logger.info(
+                    f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} "
+                )
+
+    return n
 
 
 if __name__ == "__main__":
@@ -976,14 +1016,25 @@ if __name__ == "__main__":
         "exclude_carriers", []
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
-    aggregation_strategies = snakemake.params.cluster_options.get(
-        "aggregation_strategies", {}
+    aggregation_strategies = snakemake.params.aggregation_strategies
+
+    # Aggregation strategies must be set for all columns
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="lines",
+        dict_to_use={"v_nom": "first", "geometry": "first", "bounds": "first"},
     )
-    # translate str entries of aggregation_strategies to pd.Series functions:
-    aggregation_strategies = {
-        p: {k: getattr(pd.Series, v) for k, v in aggregation_strategies[p].items()}
-        for p in aggregation_strategies.keys()
-    }
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="buses",
+        dict_to_use={
+            "v_nom": "first",
+            "lat": "mean",
+            "lon": "mean",
+            "country": "first",
+        },
+    )
+
     n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
@@ -1070,7 +1121,7 @@ if __name__ == "__main__":
         distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
         focus_weights = snakemake.params.focus_weights
         gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
-        geo_crs = snakemake.params.geo_crs
+        geo_crs = snakemake.params.crs["geo_crs"]
         renewable_config = snakemake.params.renewable
         solver_name = snakemake.config["solving"]["solver"]["name"]
 
@@ -1088,7 +1139,7 @@ if __name__ == "__main__":
             solver_name,
             cluster_config.get("algorithm", "hac"),
             cluster_config.get("feature", None),
-            aggregation_strategies,
+            aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(cluster_map)
 
@@ -1105,6 +1156,20 @@ if __name__ == "__main__":
     n.buses = n.buses.drop(buses_c, axis=1)
 
     update_p_nom_max(n)
+
+    subregion_config = snakemake.params.subregion
+    if subregion_config["define_by_gadm"]:
+        logger.info("Activate subregion classificaition based on GADM")
+        subregion_shapes = snakemake.input.subregion_shapes
+    elif subregion_config["path_custom_shapes"]:
+        logger.info("Activate subregion classificaition based on custom shapes")
+        subregion_shapes = subregion_config["path_custom_shapes"]
+    else:
+        subregion_shapes = False
+
+    if subregion_shapes:
+        distance_crs = snakemake.params.crs["distance_crs"]
+        n = nearest_shape(n, subregion_shapes, distance_crs)
 
     p_threshold_drop_isolated = max(
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
@@ -1129,6 +1194,11 @@ if __name__ == "__main__":
             aggregation_strategies=aggregation_strategies,
         )
         busmaps.append(fetched_nodes_map)
+
+    if subregion_shapes:
+        logger.info("Deactivate subregion classificaition")
+        country_shapes = snakemake.input.country_shapes
+        n = nearest_shape(n, country_shapes, distance_crs)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

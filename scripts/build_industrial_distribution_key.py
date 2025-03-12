@@ -98,16 +98,16 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
-            clusters="10",
-            planning_horizons=2030,
+            clusters="4",
+            planning_horizons=2050,
             demand="AB",
-            simpl=""
+            simpl="",
         )
 
     regions = gpd.read_file(snakemake.input.regions_onshore)
     shapes_path = snakemake.input.shapes_path
 
-    gadm_level = snakemake.params.gadm_level_id
+    gadm_layer_id = snakemake.params.gadm_layer_id
     countries = snakemake.params.countries
     gadm_clustering = snakemake.params.alternative_clustering
 
@@ -155,10 +155,10 @@ if __name__ == "__main__":
     industrial_database = locate_bus(
         geo_locs[geo_locs.quality != "unavailable"],
         countries,
-        gadm_level,
+        gadm_layer_id,
         shapes_path,
         gadm_clustering,
-    ).set_index("gadm_" + str(gadm_level))
+    ).set_index("gadm_" + str(gadm_layer_id))
 
     keys = build_nodal_distribution_key(
         industrial_database, regions, industry, countries
