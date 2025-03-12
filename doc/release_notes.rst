@@ -53,6 +53,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Minor revision docker workflow to have it working on upstream `PR #1343 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1343>`__
 
+* Fix the scaling factor for time-varying loads of the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1372>`__
+
 PyPSA-Earth 0.6.0
 =================
 
