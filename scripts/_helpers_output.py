@@ -261,7 +261,7 @@ def update_cutout(config, fl="config.yaml"):
 
     # A user must have an opportunity to over-write all the cutouts
     # with a single value defined in `config.yaml`
-    if len(local_config_cutouts) == 1:
+    if len(set(local_config_cutouts)) == 1:
 
         cutout_name = local_config_cutouts[0]
 
