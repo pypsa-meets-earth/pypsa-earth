@@ -263,7 +263,7 @@ def update_cutout(config, fl="config.yaml"):
         # "renewable" can be missing from the the local config
         d_value.get("cutout")
         for tc, d_value in local_config.get("renewable", {}).items()
-    ] + list(local_config.get("atlite").get("cutouts"))
+    ] + list(local_config.get("atlite", {}).get("cutouts", {}))
     # A local config file can miss some or all keys
     local_config_cutouts = [x for x in local_config_cutouts if x is not None]
 
