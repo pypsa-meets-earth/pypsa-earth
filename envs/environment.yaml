@@ -19,7 +19,7 @@ dependencies:
 # need to move back to conda once the issues will be resolved
 - powerplantmatching>=0.5.19
 - earth-osm>=2.3.post1
-#- atlite>=0.3
+- atlite>=0.3
 
   # Dependencies of the workflow itself
 - xlrd
