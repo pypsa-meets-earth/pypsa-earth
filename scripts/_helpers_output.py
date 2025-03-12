@@ -303,19 +303,32 @@ def parse_config(config, fl_name=None, style_def=style):
         year_config_params[k] = str(i) + ": " + str(j)
         k += 1
 
-    years_html_string = "<br />".join(year_config_params) + "<br />"
+    years_html_string = "<br /> - ".join(year_config_params) + "<br />"
 
     # 2. Extract names of the cutouts used
     # cutouts_used = [
     #     d_value.get("cutout") for tc, d_value in config.get("renewable").items()
     # ] + list(config.get("atlite").get("cutouts"))
 
+    # Different cutout names can be defined in `atlite` section
+    # to make possible using different weather datasets
+    # Merging of the configs can lead to adding more cutouts
+    # without an intention to do so and having a check may be a good idea
+    cutouts_atlite = [config.get("atlite").get("cutouts")]
+
     cutouts_renewable = [
         d_value.get("cutout") for tc, d_value in config.get("renewable").items()
     ]
-    cutouts_atlite = list(config.get("atlite").get("cutouts"))
 
-    cutouts_used = cutouts_renewable + cutouts_atlite
+    cutout_atlite_string = (
+        "<br />" + "- to build new cutouts: " + " ".join(set(cutouts_atlite)) + "<br />"
+    )
+    cutout_renew_string = (
+        "<br />"
+        + "- to evaluate the renewable potential: "
+        + " ".join(set(cutouts_renewable))
+        + "<br />"
+    )
 
     # define styles to be used in htmls generated below
     coral_bg = "coral_bg"
@@ -355,5 +368,35 @@ def parse_config(config, fl_name=None, style_def=style):
         style=mint_bg,
         fl=f,
         type=mint_bg,
+        str_="------------------------------------------ <br />",
+    )
+    write_html(
+        style=coral_bg,
+        fl=f,
+        type=coral_bg,
+        str_="------------------------------------------ <br />",
+    )
+    write_html(
+        style=coral_bg,
+        fl=f,
+        type=coral_bg,
+        str_="The current configuration is based on using the following cutouts:<br />",
+    )
+    write_html(
+        style=coral_bg,
+        fl=f,
+        type=coral_bg,
+        str_=cutout_atlite_string,
+    )
+    write_html(
+        style=coral_bg,
+        fl=f,
+        type=coral_bg,
+        str_=cutout_renew_string,
+    )
+    write_html(
+        style=coral_bg,
+        fl=f,
+        type=coral_bg,
         str_="------------------------------------------ <br />",
     )
