@@ -631,7 +631,7 @@ In the terminal, this will show up as a list of jobs to be run:
 
 
 Scaling-Up
----------------------------------------------
+=============================================
 If you now feel confident and want to tackle runs with larger temporal, technological and
 spatial scopes, you can adjust the configuration file to your needs. You can also check
 the :ref:`model_customization` for more information on how to customize the model.
