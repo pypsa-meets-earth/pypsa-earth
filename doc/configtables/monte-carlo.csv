@@ -1,6 +1,7 @@
 ,Unit,Values,Description
 **options**,,,
 add_to_snakemake,,"true or false","Set to true to enable Monte-Carlo"
+method,,"""global_sensitivity"" or ""single_best_in_worst""","""global_sensitivity"" create scenarios in latin hypercube space, or ""single_best_in_worst"" create scenarios where all values are pessimistic and only one is optimistic,,,
 samples,,"int","Defines the number of total sample networks that will be optimized. If the chosen sampling strategy is scipy,  then a square of a prime number needs to be chosen. E.g. 49 which is (7^2)"
 sampling_strategy,,"Any subset of {pydoe2, chaospy, scipy}","Current supported packages to create an experimental design"
 seed,,"int","Allows experimentation to be reproduced easily"

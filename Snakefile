@@ -19,6 +19,7 @@ from _helpers import (
     BASE_DIR,
 )
 from build_demand_profiles import get_load_paths_gegis
+from monte_carlo import wildcard_creator
 from retrieve_databundle_light import datafiles_retrivedatabundle
 from pathlib import Path
 
@@ -43,9 +44,8 @@ config["countries"] = create_country_list(config["countries"])
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
-config["scenario"]["unc"] = [
-    f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
-]
+if config["monte_carlo"].get("add_to_snakefile", False) == True:
+    config["scenario"]["unc"] = wildcard_creator(config)
 
 
 run = config.get("run", {})
@@ -821,6 +821,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            costs=COSTS,
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
@@ -890,6 +891,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            costs=COSTS,
         output:
             "results/"
             + RDIR
@@ -2167,8 +2169,11 @@ rule run_scenario:
         )
         # merge the default config file with the difference
         create_test_config(base_config_path, input.diff_config, "config.yaml")
+        rulename = "solve_all_networks"
+        if config["monte_carlo"].get("add_to_snakemake"):
+            rulename = "solve_all_networks_monte"
         run(
-            "snakemake -j all solve_all_networks --rerun-incomplete",
+            f"snakemake -j all {rulename} --rerun-incomplete",
             shell=True,
             check=not config["run"]["allow_scenario_failure"],
         )
