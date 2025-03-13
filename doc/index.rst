@@ -102,6 +102,7 @@ Documentation
 * :doc:`installation`
 * :doc:`docker_containers`
 * :doc:`tutorial_electricity`
+* :doc:`tutorial_sector`
 * :doc:`tutorial`
 * :doc:`data_workflow`
 * :doc:`notebooks`
@@ -115,6 +116,7 @@ Documentation
    installation
    docker_containers
    tutorial_electricity
+   tutorial_sector
    tutorial
    data_workflow
    notebooks
