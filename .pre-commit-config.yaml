@@ -81,6 +81,7 @@ repos:
   rev: v1.35.1
   hooks:
   - id: yamllint
+    exclude: pinned\.yaml$
     args: [--format, parsable, -c=.yamllint]
 
 # Format Snakemake rule / workflow files
