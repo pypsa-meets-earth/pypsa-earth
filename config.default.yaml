@@ -106,7 +106,7 @@ cluster_options:
       efficiency: mean
 
 build_shape_options:
-  admin_shape: "geoboundaries" # "geoboundaries" or "GADM" Datasource for geographic administrations. If not selected then "GADM" is chosen
+  admin_shape: "geoboundaries" # "geoboundaries" or "gadm" Datasource for geographic administrations. If not selected then "gadm" is chosen
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
   simplify_gadm: true # When true, shape polygons are simplified else no
   update_file: false # When true, all the input files are downloaded again and replace the existing files
