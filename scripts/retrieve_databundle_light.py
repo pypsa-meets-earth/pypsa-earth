@@ -693,7 +693,14 @@ def get_best_bundles_by_category(
     return returned_bundles
 
 
-def get_best_bundles(countries, config_bundles, tutorial, config_enable):
+def get_best_bundles(
+    countries,
+    config_bundles,
+    tutorial,
+    config_enable,
+    include_categories=[],
+    exclude_categories=[],
+):
     """
     get_best_bundles(countries, category, config_bundles, tutorial)
 
@@ -720,7 +727,8 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
         Whether data for tutorial shall be downloaded
     config_enable : dict
         Dictionary of the enabled/disabled scripts
-
+    exclude_category : List
+        (Optional) Lists of config bundle categories to exclude
     Outputs
     -------
     returned_bundles : list
@@ -731,6 +739,15 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
     categories = list(
         set([config_bundles[conf]["category"] for conf in config_bundles])
     )
+    if include_categories:
+        categories = [
+            category for category in categories if category in exclude_categories
+        ]
+
+    if exclude_categories:
+        categories = [
+            category for category in categories if category not in exclude_categories
+        ]
 
     # identify matched countries for every bundle
     for bname in config_bundles:
@@ -761,12 +778,7 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
     return bundles_to_download
 
 
-def datafiles_retrivedatabundle(config):
-    """
-    Function to get the output files from the bundles, given the target
-    countries, tutorial settings, etc.
-    """
-
+def get_best_bundles_in_snakemake(config, include_categories=[], exclude_categories=[]):
     tutorial = config["tutorial"]
     countries = config["countries"]
     config_enable = config["enable"]
@@ -774,8 +786,22 @@ def datafiles_retrivedatabundle(config):
     config_bundles = load_databundle_config(config["databundles"])
 
     bundles_to_download = get_best_bundles(
-        countries, config_bundles, tutorial, config_enable
+        countries,
+        config_bundles,
+        tutorial,
+        config_enable,
+        include_categories=include_categories,
+        exclude_categories=exclude_categories,
     )
+
+    return bundles_to_download
+
+
+def datafiles_retrivedatabundle(config, bundles_to_download):
+    """
+    Function to get the output files from the bundles, given the target
+    countries, tutorial settings, etc.
+    """
 
     listoutputs = list(
         set(
@@ -893,9 +919,9 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     rootpath = "."
-    tutorial = snakemake.params.tutorial
-    countries = snakemake.params.countries
-    logger.info(f"Retrieving data for {len(countries)} countries.")
+    # tutorial = snakemake.params.tutorial
+    # countries = snakemake.params.countries
+    # logger.info(f"Retrieving data for {len(countries)} countries.")
 
     # load enable configuration
     config_enable = snakemake.config["enable"]
@@ -904,9 +930,7 @@ if __name__ == "__main__":
     disable_progress = not config_enable["progress_bar"]
     hydrobasins_level = snakemake.params["hydrobasins_level"]
 
-    bundles_to_download = get_best_bundles(
-        countries, config_bundles, tutorial, config_enable
-    )
+    bundles_to_download = snakemake.params["bundles_to_download"]
 
     retrieve_databundle(
         bundles_to_download,
