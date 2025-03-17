@@ -314,7 +314,7 @@ def parse_config(config, fl_name=None, style_def=style):
     # to make possible using different weather datasets
     # Merging of the configs can lead to adding more cutouts
     # without an intention to do so and having a check may be a good idea
-    cutouts_atlite = [config.get("atlite").get("cutouts")]
+    cutouts_atlite = [k for k in config.get("atlite").get("cutouts").keys()]
 
     cutouts_renewable = [
         d_value.get("cutout") for tc, d_value in config.get("renewable").items()
