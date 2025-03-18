@@ -54,6 +54,7 @@ configfile: "configs/config.sector.yaml"
 configfile: "configs/config.costs.yaml"
 configfile: "configs/config.solve.yaml"
 configfile: "configs/config.plot.yaml"
+configfile: "config.default.yaml"
 configfile: "config.yaml"
 
 
