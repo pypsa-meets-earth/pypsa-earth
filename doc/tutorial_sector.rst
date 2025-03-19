@@ -9,16 +9,17 @@ Tutorial: Sector-Coupled
 ##########################################
 
 .. note::
+
     If you have not yet installed PyPSA-Earth, please refer to the :ref:`installation` section.
 
 In this tutorial, we will show you how to run the sector-coupled model. The sector-coupled model
 is a model that considers the energy system as a whole, including the electricity, heat, transport,
-and industry sectors. The model is based on the PyPSA-Eur model, which is a model of the European
+and industry sectors. The model has been insipred and partially based on the PyPSA-Eur model, which is a model of the European
 energy system. The sector-coupled model is a global model that can be used to model any region
 of the Earth. This section explains how to run and analyze the tutorial model.
 
 
-The sector-coupling code can be run as an overnight / greenfield scenario or myopic scenario.
+The sector-coupling code can be run as an overnight/greenfield scenario or myopic scenario.
 The overnight scenario is a long-term scenario that runs for a year, while the myopic scenario
 is a short-term scenario that runs for a day.
 
@@ -39,6 +40,11 @@ This foresight parameter is set to overnight by default.
 Documentation for all options will be added successively to :ref:`config`.
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options.
+
+.. note::
+
+    It is important to set the following flags ``retrieve_databundle`` and ``retrieve_databundle_sector``
+    to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once..
 
 .. code:: yaml
 
@@ -68,17 +74,19 @@ Make sure to be in the PyPSA-Earth root directory and run the following command:
 
     .. code:: bash
 
-        .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j8 --configfile config.tutorial.yaml -n
+        .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile config.tutorial.yaml -n
 
 
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) $ conda activate pypsa-earth
-    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j8 --configfile config.tutorial.yaml
+    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile config.tutorial.yaml
 
 This covers the retrieval of additional raw data from online resources and preprocessing data about
 the transport, industry, and heating sectors as well as additional rules about geological storage
-and sequestration potentials, gas infrastructure, and biomass potentials.
+and sequestration potentials, gas infrastructure, and biomass potentials. The workflow extracts
+all the data needed to run a model for any country of the world.
+
 This triggers a workflow of multiple preceding jobs that depend on each rule's inputs and outputs:
 
 .. graphviz::
@@ -331,9 +339,18 @@ in the ``test/config.test_myopic.yaml`` file.
 
     foresight: myopic
 
+.. note::
+
+    It is important to set the following flags ``retrieve_databundle`` and ``retrieve_databundle_sector``
+    to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once..
+
 Scenarios can be defined like for electricity-only studies, but with additional
 wildcard options. For the myopic foresight mode, the ``{planning_horizons}`` wildcard
 defines the sequence of investment horizons.
+
+.. note::
+
+    The myopic optimisation is only possible on the sector-coupled model
 
 .. code:: yaml
 
@@ -368,12 +385,12 @@ pypsa-earth environment. You need to have installed PyPSA-Earth using the instru
 
     .. code:: bash
 
-        .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j8 --configfile test/config.myopic.yaml -n
+        .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile test/config.myopic.yaml -n
 
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) $ conda activate pypsa-earth
-    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j8 --configfile test/config.myopic.yaml
+    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile test/config.myopic.yaml
 
 which will result in additional jobs snakemake wants to run, which translates to the following
 workflow diagram which nicely outlines how the sequential pathway optimisation with myopic

@@ -291,4 +291,4 @@ It is also possible to make manual clean-up removing folders "resources", "netwo
   To use the model in and outside Africa, you should also read
   `How to create a model for you region of interest with PyPSA-Earth? <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/505>`_
 
-:ref:`tutorial` section elaborates on building and running a full PyPSA-Earth model.
+:ref:`model_customization` section elaborates on building and running a full PyPSA-Earth model.
