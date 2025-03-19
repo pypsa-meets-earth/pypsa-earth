@@ -70,6 +70,13 @@ b {
   color: #0000ff;
   background-color: grey;
 }
+white_bg {
+  color: #36454F;
+  background-color: #FFFFFF;
+  width: 100%;
+  background-size: contain;
+  display:inline-block;
+}
 blue_bg {
   color: #36454F;
   background-color: #A7C8FF;
@@ -173,6 +180,7 @@ def write_dict_key(
 ):
 
     # define styles to be used in htmls generated below
+    white_bg = "white_bg"
     coral_bg = "coral_bg"
     mint_bg = "mint_bg"
     blue_bg = "blue_bg"
@@ -331,6 +339,7 @@ def parse_config(config, fl_name=None, style_def=style):
     )
 
     # define styles to be used in htmls generated below
+    white_bg = "white_bg"    
     coral_bg = "coral_bg"
     mint_bg = "mint_bg"
     blue_bg = "blue_bg"
@@ -339,14 +348,20 @@ def parse_config(config, fl_name=None, style_def=style):
 
     f.write("<html>")
     f.write(style)
+
     write_html(
-        style=mint_bg,
+        style="white_bg",
         fl=f,
-        type=mint_bg,
+        type="white_bg",
         str_="------------------------------------------ <br />",
     )
     f.write(make_license_text(html=True))
     write_html(
+        style="white_bg",
+        fl=f,
+        type="white_bg",
+        str_="------------------------------------------ <br />",
+    )
         style=mint_bg,
         fl=f,
         type=mint_bg,
