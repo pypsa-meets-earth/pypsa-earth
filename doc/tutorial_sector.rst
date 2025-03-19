@@ -50,22 +50,22 @@ Scenarios can be defined like for electricity-only studies, but with additional 
 .. code:: yaml
 
     enable:
-        retrieve_databundle: true
-        retrieve_databundle_sector: true
+      retrieve_databundle: true
+      retrieve_databundle_sector: true
 
 .. code:: yaml
 
     scenario:
-    simpl: [""]
-    ll: ["copt"]
-    clusters: [10]
-    opts: [Co2L-3h]
-    planning_horizons: # investment years for myopic and perfect; or costs year for overnight
-    - 2030
-    sopts:
-    - "144h"
-    demand:
-    - "AB"
+      simpl: [""]
+      ll: ["copt"]
+      clusters: [10]
+      opts: [Co2L-3h]
+      planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+      - 2030
+      sopts:
+      - "144h"
+      demand:
+      - "AB"
 
 For allowed wildcard values, refer to :ref:`wildcards`.
 
@@ -354,8 +354,8 @@ in the ``test/config.test_myopic.yaml`` file.
 .. code:: yaml
 
     enable:
-        retrieve_databundle: true
-        retrieve_databundle_sector: true
+      retrieve_databundle: true
+      retrieve_databundle_sector: true
 
 Scenarios can be defined like for electricity-only studies, but with additional
 wildcard options. For the myopic foresight mode, the ``{planning_horizons}`` wildcard
