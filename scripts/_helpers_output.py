@@ -290,6 +290,53 @@ def update_cutout(config, fl="config.yaml"):
 
     return config
 
+def check_config_keys(config, fl="config.yaml"):
+    """
+    Check if all the keys of `config.yaml` present in the default configs
+
+    Parameters
+    ----------
+    config : dictionary
+        A dictionary which corresponds to the Snakemake config variable
+        to be used in a simulation
+    fl : string
+        A name of the yaml file which contains custom user-defined configuration
+        parameters to be prioritised over default parameters
+    """
+    config.keys()
+
+    # A user-defined configuration file is loaded directly to avoid merges
+    # made by Snakemake
+    local_config = yaml.safe_load(Path(fl).read_text())
+
+    config_default_flatten = pd.json_normalize(config, sep=": ")
+    config_local_flatten = pd.json_normalize(local_config, sep=": ")
+
+    print("config_default_flatten.keys()")
+    print(config_default_flatten.keys())
+
+    congig_diff = (
+        config_default_flatten.keys().difference(config_local_flatten.keys())
+    )
+
+    # elements of index not in other
+    # config_local_flatten - config_default_flatten
+    config_diff2 = (
+        config_local_flatten.keys().difference(config_default_flatten.keys())
+    )
+
+    print("congig_diff")
+    print(congig_diff)
+
+    print("config_diff2")
+    print(config_diff2)
+
+    if not config_diff2.empty:
+        config_discrepancy_string = "<br />    - ".join(config_diff2) + "<br />"
+    else:
+        config_discrepancy_string = None
+
+    return config_discrepancy_string
 
 def parse_config(config, fl_name=None, style_def=style):
     """
@@ -299,6 +346,7 @@ def parse_config(config, fl_name=None, style_def=style):
     Currently, the following checks are implemented:
     1. List all the year-related parameters used in a simulation
     2. Checks which cutouts are used in a simulation
+    3. Check if any keys from `config.yaml` are missed from /config/*.yaml
     """
 
     year_items = dict(get_vals(config, "year"))
@@ -336,6 +384,12 @@ def parse_config(config, fl_name=None, style_def=style):
         + "- to evaluate the renewable potential: "
         + " ".join(set(cutouts_renewable))
         + "<br />"
+    )
+
+    # 3. Check if there is any discrepancy between the default config
+    # and a local one
+    structure_check_string = check_config_keys(
+        config=config, fl="config.default.local.yaml"
     )
 
     # define styles to be used in htmls generated below
