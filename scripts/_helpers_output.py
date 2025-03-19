@@ -313,23 +313,12 @@ def check_config_keys(config, fl="config.yaml"):
     config_default_flatten = pd.json_normalize(config, sep=": ")
     config_local_flatten = pd.json_normalize(local_config, sep=": ")
 
-    print("config_default_flatten.keys()")
-    print(config_default_flatten.keys())
-
-    congig_diff = config_default_flatten.keys().difference(config_local_flatten.keys())
-
     # elements of index not in other
     # config_local_flatten - config_default_flatten
-    config_diff2 = config_local_flatten.keys().difference(config_default_flatten.keys())
+    config_diff = config_local_flatten.keys().difference(config_default_flatten.keys())
 
-    print("congig_diff")
-    print(congig_diff)
-
-    print("config_diff2")
-    print(config_diff2)
-
-    if not config_diff2.empty:
-        config_discrepancy_string = "<br />    - ".join(config_diff2) + "<br />"
+    if not config_diff.empty:
+        config_discrepancy_string = "<br />    - ".join(config_diff) + "<br />"
     else:
         config_discrepancy_string = None
 
@@ -386,9 +375,7 @@ def parse_config(config, fl_name=None, style_def=style):
 
     # 3. Check if there is any discrepancy between the default config
     # and a local one
-    structure_check_string = check_config_keys(
-        config=config, fl="config.default.local.yaml"
-    )
+    structure_check_string = check_config_keys(config=config, fl="config.yaml")
 
     # define styles to be used in htmls generated below
     white_bg = "white_bg"
