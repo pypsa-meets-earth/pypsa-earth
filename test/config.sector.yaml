@@ -6,7 +6,7 @@ version: 0.6.0
 tutorial: true
 
 enable:
-  retrieve_databundle: false
+  retrieve_databundle: true
   retrieve_databundle_sector: true
 
 run:
