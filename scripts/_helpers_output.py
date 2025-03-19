@@ -468,32 +468,32 @@ def parse_config(config, fl_name=None, style_def=style):
         str_="------------------------------------------ <br />",
     )
     write_html(
-        style=coral_bg,
+        style=blue_bg,
         fl=f,
-        type=coral_bg,
+        type=blue_bg,
         str_="------------------------------------------ <br />",
     )
     write_html(
-        style=coral_bg,
+        style=blue_bg,
         fl=f,
-        type=coral_bg,
+        type=blue_bg,
         str_="The current configuration is based on using the following cutouts:<br />",
     )
     write_html(
-        style=coral_bg,
+        style=blue_bg,
         fl=f,
-        type=coral_bg,
+        type=blue_bg,
         str_=cutout_atlite_string,
     )
     write_html(
-        style=coral_bg,
+        style=blue_bg,
         fl=f,
-        type=coral_bg,
+        type=blue_bg,
         str_=cutout_renew_string,
     )
     write_html(
-        style=coral_bg,
+        style=blue_bg,
         fl=f,
-        type=coral_bg,
+        type=blue_bg,
         str_="------------------------------------------ <br />",
     )
