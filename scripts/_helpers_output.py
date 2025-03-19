@@ -416,6 +416,34 @@ def parse_config(config, fl_name=None, style_def=style):
         type="white_bg",
         str_="------------------------------------------ <br />",
     )
+
+    if structure_check_string is not None:
+        write_html(
+            style=coral_bg,
+            fl=f,
+            type=coral_bg,
+            str_="------------------------------------------ <br />",
+        )
+        write_html(
+            style=coral_bg,
+            fl=f,
+            type=coral_bg,
+            str_="The following configuration parameters do not present in config.yaml:<br />",
+        )        
+        write_html(
+            style=coral_bg,
+            fl=f,
+            type=coral_bg,
+            str_=structure_check_string,
+        )
+        write_html(
+            style=coral_bg,
+            fl=f,
+            type=coral_bg,
+            str_="------------------------------------------ <br />",
+        )        
+
+    write_html(
         style=mint_bg,
         fl=f,
         type=mint_bg,
