@@ -38,8 +38,10 @@ The model can be adapted to include any selected country. But this tutorial is l
 
     countries: ["NG", "BJ"]
 
-It's recommended to set ``retrieve_databundle: true`` when building the model for the first time to download all needed common data files.
-When the first run is completed and all the necessary data are extracted, it may be a good idea to set ``retrieve_databundle: false`` to avoid data loss.
+.. note::
+
+    It's recommended to set ``retrieve_databundle: true`` when building the model for the first time to download all needed common data files.
+    When the first run is completed and all the necessary data are extracted, it may be a good idea to set ``retrieve_databundle: false`` to avoid data loss.
 
 .. code:: yaml
 
