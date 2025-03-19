@@ -290,6 +290,7 @@ def update_cutout(config, fl="config.yaml"):
 
     return config
 
+
 def check_config_keys(config, fl="config.yaml"):
     """
     Check if all the keys of `config.yaml` present in the default configs
@@ -315,15 +316,11 @@ def check_config_keys(config, fl="config.yaml"):
     print("config_default_flatten.keys()")
     print(config_default_flatten.keys())
 
-    congig_diff = (
-        config_default_flatten.keys().difference(config_local_flatten.keys())
-    )
+    congig_diff = config_default_flatten.keys().difference(config_local_flatten.keys())
 
     # elements of index not in other
     # config_local_flatten - config_default_flatten
-    config_diff2 = (
-        config_local_flatten.keys().difference(config_default_flatten.keys())
-    )
+    config_diff2 = config_local_flatten.keys().difference(config_default_flatten.keys())
 
     print("congig_diff")
     print(congig_diff)
@@ -337,6 +334,7 @@ def check_config_keys(config, fl="config.yaml"):
         config_discrepancy_string = None
 
     return config_discrepancy_string
+
 
 def parse_config(config, fl_name=None, style_def=style):
     """
@@ -393,7 +391,7 @@ def parse_config(config, fl_name=None, style_def=style):
     )
 
     # define styles to be used in htmls generated below
-    white_bg = "white_bg"    
+    white_bg = "white_bg"
     coral_bg = "coral_bg"
     mint_bg = "mint_bg"
     blue_bg = "blue_bg"
@@ -429,7 +427,7 @@ def parse_config(config, fl_name=None, style_def=style):
             fl=f,
             type=coral_bg,
             str_="The following configuration parameters do not present in config.yaml:<br />",
-        )        
+        )
         write_html(
             style=coral_bg,
             fl=f,
@@ -441,7 +439,7 @@ def parse_config(config, fl_name=None, style_def=style):
             fl=f,
             type=coral_bg,
             str_="------------------------------------------ <br />",
-        )        
+        )
 
     write_html(
         style=mint_bg,
