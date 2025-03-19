@@ -31,7 +31,8 @@ Configuration
 ---------------------------------------------
 
 The configuration for sector-coupled is present in the  ``config.default.yaml`` file.
-This foresight parameter is set to overnight by default.
+This foresight parameter is set to overnight by default. For the purpose of this tutorial, ``test/config.sector.yaml``
+will be used to run the sector-coupled model.
 
 .. code:: yaml
 
@@ -44,7 +45,13 @@ Scenarios can be defined like for electricity-only studies, but with additional 
 .. note::
 
     It is important to set the following flags ``retrieve_databundle`` and ``retrieve_databundle_sector``
-    to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once..
+    to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
+
+.. code:: yaml
+
+    enable:
+        retrieve_databundle: true
+        retrieve_databundle_sector: true
 
 .. code:: yaml
 
@@ -74,13 +81,13 @@ Make sure to be in the PyPSA-Earth root directory and run the following command:
 
     .. code:: bash
 
-        .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile config.tutorial.yaml -n
+        .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile test/config.sector.yaml -n
 
 
 .. code:: bash
 
     .../pypsa-earth (pypsa-earth) $ conda activate pypsa-earth
-    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile config.tutorial.yaml
+    .../pypsa-earth (pypsa-earth) $ snakemake solve_sector_networks -j2 --configfile test/config.sector.yaml
 
 This covers the retrieval of additional raw data from online resources and preprocessing data about
 the transport, industry, and heating sectors as well as additional rules about geological storage
@@ -342,7 +349,13 @@ in the ``test/config.test_myopic.yaml`` file.
 .. note::
 
     It is important to set the following flags ``retrieve_databundle`` and ``retrieve_databundle_sector``
-    to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once..
+    to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
+
+.. code:: yaml
+
+    enable:
+        retrieve_databundle: true
+        retrieve_databundle_sector: true
 
 Scenarios can be defined like for electricity-only studies, but with additional
 wildcard options. For the myopic foresight mode, the ``{planning_horizons}`` wildcard
@@ -355,20 +368,13 @@ defines the sequence of investment horizons.
 .. code:: yaml
 
     scenario:
-    simpl:
-    - ""
-    clusters:
-    - 4
-    planning_horizons: # investment years for myopic and perfect; or costs year for overnight
-    - 2030
-    ll:
-    - "c1"
-    opts:
-    - "Co2L"
-    sopts:
-    - "24H"
-    demand:
-    - "DF"
+      simpl: [""]
+      clusters: [4]
+      planning_horizons: [2030] # investment years for myopcondaic and perfect; or costs year for overnight
+      ll: ["c1"]
+      opts: ["Co2L-24H"]
+      sopts: ["144h"]
+      demand: ["DF"]
 
 For allowed wildcard values, refer to :ref:`wildcards`.
 Documentation for all options will be added successively to :ref:`config`.
