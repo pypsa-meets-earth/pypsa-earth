@@ -16,7 +16,7 @@ or `google drive <https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQ
 and extracts it in the ``data``, ``resources`` and ``cutouts`` sub-directory.
 Bundle data are then deleted once downloaded and unzipped.
 
-The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_
+The :ref:`tutorial_electricity` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_
 than required for the full model (around 500 MB)
 
 The required bundles are downloaded automatically according to the list names, in agreement to
