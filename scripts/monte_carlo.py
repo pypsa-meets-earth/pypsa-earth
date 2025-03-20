@@ -84,6 +84,21 @@ logger = create_logger(__name__)
 sns.set(style="whitegrid")
 
 
+def wildcard_creator(config, method=None):
+    """
+    Creates wildcard for monte-carlo simulations.
+    """
+    method = config["monte_carlo"]["options"].get("method")
+    if method == "global_sensitivity":
+        return [f"g{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
+
+    elif method == "single_best_in_worst":
+        return [
+            f"a{i}"
+            for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
+        ]
+
+
 def monte_carlo_sampling_pydoe2(
     N_FEATURES: int,
     SAMPLES: int,
@@ -196,6 +211,48 @@ def monte_carlo_sampling_scipy(
     )
 
     return lh
+
+
+def single_best_in_worst_list(worst_list, best_list):
+    """
+    Return list with single best value per list of worst values
+
+    The goal is to create a list of scenarios where each scenario
+    has one best value and the rest are worst cases. This is useful for
+    assessing the impact of a single technology on the system.
+    E.g. if a technology is not optimised in any best case, it is
+    likely not relevant to include in the optimization or
+    global sensitivity analysis.
+
+    What is good and what is bad is determined by the user.
+    See example below for clarification of use cases.
+
+    Input:
+    ------
+    worst_list: 1D array, represents the worst value per technology
+    best_list: 1D array, represents the best value per technology
+
+    Output:
+    -------
+    new_list: 2D array
+
+    Example:
+    --------
+    Let's create a scenario set with 3 technologies (creates 3 scenarios)
+    # Scenario set when low values are good e.g. costs
+    >>> single_best_in_worst_list([4, 4, 4], [1, 1, 1])
+    [[1, 4, 4], [4, 1, 4], [4, 4, 1]]
+    # Scenario set when high values are good e.g. efficiency
+    >>> single_best_in_worst_list([1, 1, 1], [4, 4, 4])
+    [[4, 1, 1], [1, 4, 1], [1, 1, 4]]
+    """
+    new_list = []
+    for i in range(len(worst_list)):
+        l = worst_list.copy()
+        l[i] = best_list[i]
+        new_list.append(l)
+
+    return new_list
 
 
 def rescale_distribution(
@@ -377,35 +434,51 @@ if __name__ == "__main__":
     UNCERTAINTIES_VALUES = monte_carlo_config["uncertainties"].values()
     SEED = MONTE_CARLO_OPTIONS.get("seed")
 
-    # PARAMETERS VALIDATION
-    # validates the parameters supplied from config file
-    validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
-
-    # SCENARIO CREATION / SAMPLING STRATEGY
+    ### SCENARIO CREATION
     ###
-    if SAMPLING_STRATEGY == "pydoe2":
-        lh = monte_carlo_sampling_pydoe2(
-            N_FEATURES,
-            SAMPLES,
-            UNCERTAINTIES_VALUES,
-            random_state=SEED,
-            criterion=None,
-            iteration=None,
-            correlation_matrix=None,
-        )
-    if SAMPLING_STRATEGY == "scipy":
-        lh = monte_carlo_sampling_scipy(
-            N_FEATURES,
-            SAMPLES,
-            UNCERTAINTIES_VALUES,
-            seed=SEED,
-            strength=2,
-            optimization=None,
-        )
-    if SAMPLING_STRATEGY == "chaospy":
-        lh = monte_carlo_sampling_chaospy(
-            N_FEATURES, SAMPLES, UNCERTAINTIES_VALUES, seed=SEED, rule="latin_hypercube"
-        )
+    if MONTE_CARLO_OPTIONS.get("method") == "global_sensitivity":
+
+        # PARAMETERS VALIDATION
+        # validates the parameters supplied from config file
+        validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
+
+        # SCENARIO CREATION / SAMPLING STRATEGY
+        ###
+        if SAMPLING_STRATEGY == "pydoe2":
+            lh = monte_carlo_sampling_pydoe2(
+                N_FEATURES,
+                SAMPLES,
+                UNCERTAINTIES_VALUES,
+                random_state=SEED,
+                criterion=None,
+                iteration=None,
+                correlation_matrix=None,
+            )
+        if SAMPLING_STRATEGY == "scipy":
+            lh = monte_carlo_sampling_scipy(
+                N_FEATURES,
+                SAMPLES,
+                UNCERTAINTIES_VALUES,
+                seed=SEED,
+                strength=2,
+                optimization=None,
+            )
+        if SAMPLING_STRATEGY == "chaospy":
+            lh = monte_carlo_sampling_chaospy(
+                N_FEATURES,
+                SAMPLES,
+                UNCERTAINTIES_VALUES,
+                seed=SEED,
+                rule="latin_hypercube",
+            )
+
+    elif MONTE_CARLO_OPTIONS.get("method") == "single_best_in_worst":
+        carrier_no = len(n.stores.carrier.unique())
+        L_BOUNDS = [item[0] for item in UNCERTAINTIES_VALUES]
+        U_BOUNDS = [item[1] for item in UNCERTAINTIES_VALUES]
+        worst_list = U_BOUNDS * carrier_no
+        best_list = L_BOUNDS * carrier_no
+        scenarios = single_best_in_worst_list(worst_list, best_list)
 
     # create plot for the rescaled distributions (for development usage, commented by default)
     # for idx in range(N_FEATURES):
@@ -415,24 +488,44 @@ if __name__ == "__main__":
 
     # MONTE-CARLO MODIFICATIONS
     ###
-    n = pypsa.Network(snakemake.input[0])
     unc_wildcards = snakemake.wildcards[-1]
     i = int(unc_wildcards[1:])
     j = 0
-    for k in MONTE_CARLO_PYPSA_FEATURES:
-        # this loop sets in one scenario each "i" feature assumption
-        # k is the config input key "loads_t.p_set"
-        # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
-        # i, j interaction number to pick values of experimental setup
-        # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh_scaled[0,0]
-        exec(f"n.{k} = n.{k} * {lh[i,j]}")
-        logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
-        j = j + 1
 
-    # EXPORT AND METADATA
-    #
-    latin_hypercube_dict = (
-        pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
+    if MONTE_CARLO_OPTIONS.get("method") == "global_sensitivity":
+        for k, v in MONTE_CARLO_PYPSA_FEATURES.items():
+            # this loop sets in one scenario each "i" feature assumption
+            # k is the config input key "loads_t.p_set"
+            # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
+            # i, j interaction number to pick values of experimental setup
+            # Example: n.loads_t.p_set = network.loads_t.p_set = .loads_t.p_set * lh_scaled[0,0]
+            exec(f"n.{k} = n.{k} * {lh[i,j]}")
+            logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
+            j = j + 1
+
+    if MONTE_CARLO_OPTIONS.get("method") == "single_best_in_worst":
+        for k, _ in MONTE_CARLO_PYPSA_FEATURES.items():
+            type = k.split(".")[0]  # "stores", "generators", ...
+            feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
+
+        # TODO: Generalize for other features. Currently this scales the whole storage-chain
+        if type == "stores":
+            # scales the whole storage-chain
+            carrier_list = n.stores.carrier.unique()
+            for c in carrier_list:
+                n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j]
+                n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[
+                    i
+                ][j]
+                logger.info(
+                    f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario"
+                )
+                j += 1
+
+    ### EXPORT AND METADATA
+    ###
+    scenario_dict = (
+        pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
     ).to_dict()
-    n.meta.update(latin_hypercube_dict)
+    n.meta.update(scenario_dict)
     n.export_to_netcdf(snakemake.output[0])
