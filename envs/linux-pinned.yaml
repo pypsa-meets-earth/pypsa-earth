@@ -10,7 +10,7 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1
   - _openmp_mutex=4.5
-  - adwaita-icon-theme=47.0
+  - adwaita-icon-theme=48.0
   - affine=2.4.0
   - alsa-lib=1.2.13
   - ampl-asl=1.0.0
@@ -27,20 +27,20 @@ dependencies:
   - atk-1.0=2.38.0
   - atlite=0.4.0
   - attr=2.5.1
-  - attrs=25.1.0
-  - aws-c-auth=0.8.1
-  - aws-c-cal=0.8.1
-  - aws-c-common=0.10.6
-  - aws-c-compression=0.3.0
-  - aws-c-event-stream=0.5.0
-  - aws-c-http=0.9.2
-  - aws-c-io=0.15.3
-  - aws-c-mqtt=0.11.0
-  - aws-c-s3=0.7.9
-  - aws-c-sdkutils=0.2.2
-  - aws-checksums=0.2.2
-  - aws-crt-cpp=0.29.9
-  - aws-sdk-cpp=1.11.489
+  - attrs=25.3.0
+  - aws-c-auth=0.8.6
+  - aws-c-cal=0.8.7
+  - aws-c-common=0.12.0
+  - aws-c-compression=0.3.1
+  - aws-c-event-stream=0.5.4
+  - aws-c-http=0.9.4
+  - aws-c-io=0.17.0
+  - aws-c-mqtt=0.12.2
+  - aws-c-s3=0.7.13
+  - aws-c-sdkutils=0.2.3
+  - aws-checksums=0.2.3
+  - aws-crt-cpp=0.31.0
+  - aws-sdk-cpp=1.11.510
   - azure-core-cpp=1.14.0
   - azure-identity-cpp=1.10.0
   - azure-storage-blobs-cpp=12.13.0
@@ -64,7 +64,7 @@ dependencies:
   - ca-certificates=2025.1.31
   - cached-property=1.5.2
   - cached_property=1.5.2
-  - cairo=1.18.2
+  - cairo=1.18.4
   - capnproto=1.0.2
   - cartopy=0.23.0
   - cdsapi=0.7.5
@@ -99,11 +99,11 @@ dependencies:
   - cytoolz=1.0.1
   - dask=2025.2.0
   - dask-core=2025.2.0
-  - datapi=0.2.0
+  - datapi=0.3.0
   - datashader=0.17.0
   - datrie=0.8.2
   - dbus=1.13.6
-  - debugpy=1.8.12
+  - debugpy=1.8.13
   - decorator=5.2.1
   - defusedxml=0.7.1
   - deprecation=2.1.0
@@ -119,7 +119,7 @@ dependencies:
   - exceptiongroup=1.2.2
   - executing=2.1.0
   - expat=2.6.4
-  - filelock=3.17.0
+  - filelock=3.18.0
   - fiona=1.10.1
   - fmt=11.0.2
   - folium=0.19.5
@@ -132,10 +132,10 @@ dependencies:
   - fonts-conda-forge=1
   - fonttools=4.56.0
   - fqdn=1.5.1
-  - freetype=2.12.1
+  - freetype=2.13.3
   - freexl=2.0.0
   - fribidi=1.0.10
-  - fsspec=2025.2.0
+  - fsspec=2025.3.0
   - future=1.0.0
   - gdal=3.9.3
   - gdk-pixbuf=2.42.12
@@ -143,7 +143,7 @@ dependencies:
   - geopandas=1.0.1
   - geopandas-base=1.0.1
   - geopy=2.4.1
-  - geos=3.13.0
+  - geos=3.13.1
   - geotiff=1.7.4
   - geoviews=1.14.0
   - geoviews-core=1.14.0
@@ -167,12 +167,12 @@ dependencies:
   - gurobi=12.0.1
   - h11=0.14.0
   - h2=4.2.0
-  - harfbuzz=10.3.0
+  - harfbuzz=10.4.0
   - hdf4=4.2.15
   - hdf5=1.14.3
   - hicolor-icon-theme=0.17
   - highspy=1.9.0
-  - holoviews=1.20.1
+  - holoviews=1.20.2
   - hpack=4.1.0
   - httpcore=1.0.7
   - httpx=0.28.1
@@ -180,7 +180,7 @@ dependencies:
   - hvplot=0.11.2
   - hyperframe=6.1.0
   - icu=75.1
-  - identify=2.6.8
+  - identify=2.6.9
   - idna=3.10
   - importlib-metadata=8.6.1
   - importlib_metadata=8.6.1
@@ -189,10 +189,10 @@ dependencies:
   - iniconfig=2.0.0
   - ipopt=3.14.17
   - ipykernel=6.29.5
-  - ipython=8.32.0
+  - ipython=8.34.0
   - isoduration=20.11.0
   - jedi=0.19.2
-  - jinja2=3.1.5
+  - jinja2=3.1.6
   - joblib=1.4.2
   - json-c=0.18
   - json5=0.10.0
@@ -206,7 +206,7 @@ dependencies:
   - jupyter_events=0.12.0
   - jupyter_server=2.15.0
   - jupyter_server_terminals=0.5.3
-  - jupyterlab=4.3.5
+  - jupyterlab=4.3.6
   - jupyterlab_pygments=0.3.0
   - jupyterlab_server=2.27.3
   - kealib=1.6.1
@@ -217,7 +217,7 @@ dependencies:
   - lcms2=2.17
   - ld_impl_linux-64=2.43
   - lerc=4.0.0
-  - libabseil=20240722.0
+  - libabseil=20250127.0
   - libaec=1.1.3
   - libarchive=3.7.7
   - libarrow=19.0.1
@@ -230,7 +230,7 @@ dependencies:
   - libbrotlicommon=1.1.0
   - libbrotlidec=1.1.0
   - libbrotlienc=1.1.0
-  - libcap=2.71
+  - libcap=2.75
   - libcblas=3.9.0
   - libclang-cpp19.1=19.1.7
   - libclang13=19.1.7
@@ -274,10 +274,10 @@ dependencies:
   - libglvnd=1.7.0
   - libglx=1.7.0
   - libgomp=14.2.0
-  - libgoogle-cloud=2.35.0
-  - libgoogle-cloud-storage=2.35.0
+  - libgoogle-cloud=2.36.0
+  - libgoogle-cloud-storage=2.36.0
   - libgpg-error=1.51
-  - libgrpc=1.67.1
+  - libgrpc=1.71.0
   - libhwloc=2.11.2
   - libiconv=1.18
   - libjpeg-turbo=3.0.0
@@ -288,7 +288,7 @@ dependencies:
   - libllvm19=19.1.7
   - liblzma=5.6.4
   - liblzma-devel=5.6.4
-  - libmamba=2.0.5
+  - libmamba=2.0.7
   - libnetcdf=4.9.2
   - libnghttp2=1.64.0
   - libnsl=2.0.1
@@ -302,7 +302,7 @@ dependencies:
   - libpciaccess=0.18
   - libpng=1.6.47
   - libpq=17.4
-  - libprotobuf=5.28.3
+  - libprotobuf=5.29.3
   - libre2-11=2024.07.02
   - librsvg=2.58.4
   - librttopo=1.1.0
@@ -316,7 +316,7 @@ dependencies:
   - libssh2=1.11.1
   - libstdcxx=14.2.0
   - libstdcxx-ng=14.2.0
-  - libsystemd0=257.3
+  - libsystemd0=257.4
   - libthrift=0.21.0
   - libtiff=4.7.0
   - libutf8proc=2.10.0
@@ -325,7 +325,7 @@ dependencies:
   - libwebp-base=1.5.0
   - libxcb=1.17.0
   - libxcrypt=4.4.36
-  - libxkbcommon=1.8.0
+  - libxkbcommon=1.8.1
   - libxml2=2.13.6
   - libxslt=1.1.39
   - libzip=1.11.2
@@ -338,7 +338,7 @@ dependencies:
   - lz4=4.3.3
   - lz4-c=1.10.0
   - lzo=2.10
-  - mamba=2.0.5
+  - mamba=2.0.7
   - mapclassify=2.8.1
   - markdown=3.6
   - markdown-it-py=3.0.0
@@ -385,13 +385,13 @@ dependencies:
   - openldap=2.6.9
   - openpyxl=3.1.5
   - openssl=3.4.1
-  - orc=2.0.3
+  - orc=2.1.1
   - overrides=7.7.0
   - packaging=24.2
   - pandas=2.2.2
   - pandocfilters=1.5.0
   - panel=1.6.1
-  - pango=1.56.1
+  - pango=1.56.2
   - param=2.2.0
   - parso=0.8.4
   - partd=1.4.2
@@ -407,7 +407,7 @@ dependencies:
   - platformdirs=4.3.6
   - pluggy=1.5.0
   - ply=3.11
-  - polars=1.23.0
+  - polars=1.24.0
   - poppler=24.12.0
   - poppler-data=0.4.12
   - postgresql=17.4
@@ -418,7 +418,7 @@ dependencies:
   - prometheus-cpp=1.3.0
   - prometheus_client=0.21.1
   - prompt-toolkit=3.0.50
-  - protobuf=5.28.3
+  - protobuf=5.29.3
   - psutil=7.0.0
   - pthread-stubs=0.4
   - ptyprocess=0.7.0
@@ -448,7 +448,7 @@ dependencies:
   - pyshp=2.3.1
   - pysocks=1.7.1
   - pytables=3.10.1
-  - pytest=8.3.4
+  - pytest=8.3.5
   - python=3.10.16
   - python-dateutil=2.9.0.post0
   - python-fastjsonschema=2.21.1
@@ -459,7 +459,7 @@ dependencies:
   - pytz=2025.1
   - pyviz_comms=3.0.4
   - pyyaml=6.0.2
-  - pyzmq=26.2.1
+  - pyzmq=26.3.0
   - pyzstd=0.16.2
   - qt-main=5.15.15
   - rasterio=1.3.11
@@ -477,7 +477,7 @@ dependencies:
   - rpds-py=0.23.1
   - ruamel.yaml=0.17.26
   - ruamel.yaml.clib=0.2.8
-  - s2n=1.5.11
+  - s2n=1.5.14
   - scikit-learn=1.6.1
   - scip=9.2.1
   - scipy=1.15.2
@@ -486,7 +486,7 @@ dependencies:
   - send2trash=1.8.3
   - setuptools=75.8.2
   - shapely=2.0.7
-  - simdjson=3.11.6
+  - simdjson=3.12.2
   - sip=6.7.12
   - six=1.17.0
   - smart_open=7.1.0
@@ -507,9 +507,9 @@ dependencies:
   - tblib=3.0.0
   - terminado=0.18.1
   - texttable=1.7.0
-  - threadpoolctl=3.5.0
+  - threadpoolctl=3.6.0
   - throttler=1.2.2
-  - tiledb=2.27.1
+  - tiledb=2.27.2
   - tinycss2=1.4.0
   - tk=8.6.13
   - toml=0.10.2
@@ -534,7 +534,7 @@ dependencies:
   - uriparser=0.9.8
   - urllib3=2.3.0
   - validators=0.34.0
-  - virtualenv=20.29.2
+  - virtualenv=20.29.3
   - wayland=1.23.1
   - wcwidth=0.2.13
   - webcolors=24.11.1
@@ -552,8 +552,8 @@ dependencies:
   - xkeyboard-config=2.43
   - xlrd=2.0.1
   - xorg-libice=1.1.2
-  - xorg-libsm=1.2.5
-  - xorg-libx11=1.8.11
+  - xorg-libsm=1.2.6
+  - xorg-libx11=1.8.12
   - xorg-libxau=1.0.12
   - xorg-libxcomposite=0.4.6
   - xorg-libxcursor=1.2.3
@@ -573,17 +573,17 @@ dependencies:
   - xz-tools=5.6.4
   - yaml=0.2.5
   - yaml-cpp=0.8.0
-  - yte=1.5.7
+  - yte=1.7.0
   - zeromq=4.3.5
   - zict=3.0.0
   - zipfile-deflate64=0.2.0
   - zipp=3.21.0
   - zlib=1.3.1
   - zlib-ng=2.2.4
-  - zstandard=0.19.0
+  - zstandard=0.23.0
   - zstd=1.5.7
   - pip:
-      - chaospy==4.3.17
-      - fake-useragent==2.0.3
+      - chaospy==4.3.18
+      - fake-useragent==2.1.0
       - googledrivedownloader==0.4
 prefix: /usr/share/miniconda/envs/pypsa-earth
