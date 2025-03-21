@@ -71,6 +71,8 @@ Economical
 
 * **gadm** folder contains data of the shapes of administrative zones by country (e.g. regions, districts, provinces, ...), depending on the level of resolution desired by the configuration file. The data in this folder are automatically populated by the `build_shapes` rule that download such data from the gadm website.
 
+* **geoboundaries** is a CC-BY alternative to GADM, retrieved from `geoBoundaries <https://www.geoboundaries.org/>`_ by the `build_shapes`` rule.
+
 * **GDP** raster dataset of the Gross Domestic Product (GDP) by arcs of the world, as available from `DRYAD <https://datadryad.org/stash/dataset/doi:10.5061/dryad.dk1j0>`_.
 
 * **WorldPop** raster dataset of the population by arc as automatically by build_shapes rule from WorldPop
