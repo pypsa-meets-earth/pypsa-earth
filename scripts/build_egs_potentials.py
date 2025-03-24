@@ -107,6 +107,8 @@ if __name__ == "__main__":
 
     gdf = gdf[["capex[$/kW]", "opex[$/kWh]", "available_capacity[MW]", "geometry"]]
 
+    gdf = gdf.replace([np.inf, -np.inf], np.nan)
+
     nodal_egs_potentials = pd.DataFrame(
         np.nan,
         index=regions.index,
@@ -137,7 +139,8 @@ if __name__ == "__main__":
 
         bins = pd.Series(
             np.linspace(
-                ss["capex[$/kW]"].min(),
+                #ss["capex[$/kW]"].min(),
+                0,
                 ss["capex[$/kW]"].max(),
                 config["max_levels"] + 1,
             )
