@@ -11,6 +11,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 
 from copy import deepcopy
+from _helpers import mock_snakemake
 from scipy.spatial import distance
 from scipy.spatial import distance_matrix
 from scipy.sparse.csgraph import shortest_path
@@ -513,6 +514,12 @@ def find_heat_exchanger_capacity(data, distance_threshold=1.0):
 
 
 if __name__ == '__main__':
+
+    snakemake = mock_snakemake(
+            "build_industrial_heating_demands",
+            simpl="",
+            clusters=10,
+        )
 
     gdf = prepare_demand_data(snakemake.input['demand_data'])
     logger.warning(
