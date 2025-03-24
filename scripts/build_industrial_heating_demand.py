@@ -90,8 +90,8 @@ def prepare_demand_data(fn):
 
     df_melted = df_melted.loc[df_melted["temperature"] <= 250]
 
-    df_melted['x'] = df_melted['geometry'].x
-    df_melted['y'] = df_melted['geometry'].y
+    df_melted["x"] = df_melted["geometry"].x
+    df_melted["y"] = df_melted["geometry"].y
 
     return df_melted
 
