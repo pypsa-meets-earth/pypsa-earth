@@ -1736,11 +1736,10 @@ rule build_temperature_profiles:
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        # cutout="cutouts/"
-        # + CDIR
-        # + [c["cutout"] for _, c in config["renewable"].items()][0]
-        # + ".nc",
-        # default to first cutout found
+        cutout="cutouts/"
+        + CDIR
+        + [c["cutout"] for _, c in config["renewable"].items()][0]
+        + ".nc",
     output:
         temp_soil_total="resources/"
         + SECDIR
