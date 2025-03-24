@@ -656,6 +656,7 @@ if __name__ == "__main__":
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
 
     n = pypsa.Network(inputs.network)
+    n.links["underwater_fraction"] = 0
 
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
