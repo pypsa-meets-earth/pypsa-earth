@@ -91,9 +91,9 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from tqdm import tqdm
-from powerplantmatching.export import map_country_bus
 from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
+from powerplantmatching.export import map_country_bus
+from tqdm import tqdm
 
 idx = pd.IndexSlice
 
@@ -805,7 +805,7 @@ def estimate_renewable_capacities_irena(
 def attach_enhanced_geothermal(n):
 
     egs_potential = pd.read_csv(snakemake.input["egs_potentials"], index_col=[0, 1])
-    assert egs_potential.index.names == ['network_region', 'capital_cost[$/kW]']
+    assert egs_potential.index.names == ["network_region", "capital_cost[$/kW]"]
 
     idx = pd.IndexSlice
 
@@ -827,7 +827,7 @@ def attach_enhanced_geothermal(n):
     for bus in tqdm(
         egs_potential.index.get_level_values(0).unique(),
         desc="Adding enhanced geothermal",
-        ):
+    ):
 
         ss = egs_potential.loc[idx[bus, :]]
 
@@ -835,7 +835,7 @@ def attach_enhanced_geothermal(n):
         for i, (capital_cost, row) in enumerate(ss.iterrows()):
             capacity = row["available_capacity[MW]"]
             # Convert the cost index from $/kW to $/MW and annuitize the capex
-            capital_cost = float(capital_cost) * 1000 # $/kW -> $/MW
+            capital_cost = float(capital_cost) * 1000  # $/kW -> $/MW
 
             identifier = f"{bus}_curve{i}"
 
