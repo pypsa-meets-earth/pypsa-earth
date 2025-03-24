@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import numpy as np
 from pyproj import Proj, Transformer
@@ -23,18 +24,20 @@ def coords_to_relative_utm(coords):
     centroid_lat = np.mean(lats)
 
     utm_zone = int(np.floor((centroid_lon + 180) / 6) % 60) + 1
-    hemisphere = 'north' if centroid_lat >= 0 else 'south'
+    hemisphere = "north" if centroid_lat >= 0 else "south"
 
-    utm_proj = Proj(proj='utm', zone=utm_zone, hemisphere=hemisphere)
+    utm_proj = Proj(proj="utm", zone=utm_zone, hemisphere=hemisphere)
 
     transformer = Transformer.from_proj(
-        proj_from='epsg:4326',  # WGS84 Latitude and Longitude
+        proj_from="epsg:4326",  # WGS84 Latitude and Longitude
         proj_to=utm_proj,
-        always_xy=True
+        always_xy=True,
     )
 
     eastings, northings = transformer.transform(lons, lats)
-    centroid_easting, centroid_northing = transformer.transform(centroid_lon, centroid_lat)
+    centroid_easting, centroid_northing = transformer.transform(
+        centroid_lon, centroid_lat
+    )
 
     relative_eastings = eastings - centroid_easting
     relative_northings = northings - centroid_northing

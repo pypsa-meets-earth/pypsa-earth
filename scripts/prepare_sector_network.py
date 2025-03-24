@@ -8,6 +8,7 @@ import logging
 import os
 import re
 from types import SimpleNamespace
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -15,8 +16,6 @@ import pypsa
 import pytz
 import ruamel.yaml
 import xarray as xr
-from tqdm import tqdm
-from typing import Iterable
 from _helpers import (
     BASE_DIR,
     create_dummy_data,
@@ -31,6 +30,7 @@ from _helpers import (
     two_2_three_digits_country,
 )
 from prepare_transport_data import prepare_transport_data
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,7 @@ def H2_liquid_fossil_conversions(n, costs):
         efficiency2=-costs.at["oil", "CO2 intensity"]
         * costs.at["Fischer-Tropsch", "efficiency"],
         efficiency3=-costs.at["Fischer-Tropsch", "electricity-input"]
-        / 1,#costs.at["Fischer-Tropsch", "hydrogen-input"],
+        / 1,  # costs.at["Fischer-Tropsch", "hydrogen-input"],
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
@@ -2341,7 +2341,9 @@ def add_cooling(n, costs):
             bus1=c_nodes[name] + f" {name} cooling",
             carrier=f"{name} heat pump cooling",
             efficiency=efficiency,
-            capital_cost=cooling_costs.at["centralized geothermal heat pumps", "efficiency"]
+            capital_cost=cooling_costs.at[
+                "centralized geothermal heat pumps", "efficiency"
+            ]
             * cooling_costs.at["centralized geothermal heat pumps", "fixed"],
             p_nom_extendable=True,
             lifetime=cooling_costs.at["centralized geothermal heat pumps", "lifetime"],
@@ -2610,8 +2612,7 @@ def add_residential(n, costs):
     nhours = n.snapshot_weightings.generators.sum()
 
     heat_ind = (
-        n.loads_t.p_set.filter(like="residential")
-        .filter(like="heat")
+        n.loads_t.p_set.filter(like="residential").filter(like="heat")
         # .dropna(axis=1)
         .columns
     )
@@ -2904,24 +2905,21 @@ def add_electricity_distribution_grid(n, costs):
 #         constant=co2_limit,
 #     )
 
+
 def add_industry_demand(n, demand):
 
     avail = spatial.nodes.intersection(demand.index)
 
     carrier = "low temperature heat 50-100C for industry"
 
-    n.madd(
-        "Bus",
-        avail + " " + carrier,
-        carrier=carrier
-    )
+    n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
     n.madd(
         "Load",
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(50-100C)[MW]"]
+        p_set=demand.loc[avail, "demand(50-100C)[MW]"],
     )
 
     # Add a store for low temperature heat that can absorb an infinite amount of heat but cannot discharge it
@@ -2937,18 +2935,14 @@ def add_industry_demand(n, demand):
     # Medium temperature demand between 150C and 250C for industry
     carrier = "medium temperature heat 100-200C for industry"
 
-    n.madd(
-        "Bus",
-        avail + " " + carrier,
-        carrier=carrier
-    )
+    n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
     n.madd(
         "Load",
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(100-200C)[MW]"]
+        p_set=demand.loc[avail, "demand(100-200C)[MW]"],
     )
 
     # Add a store for medium temperature heat that can absorb an infinite amount of heat but cannot discharge it
@@ -2964,18 +2958,14 @@ def add_industry_demand(n, demand):
     # High temperature demand between 200C and 250C for industry
     carrier = "high temperature heat 200-250C for industry"
 
-    n.madd(
-        "Bus",
-        avail + " " + carrier,
-        carrier=carrier
-    )
+    n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
     n.madd(
         "Load",
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(200-250C)[MW]"]
+        p_set=demand.loc[avail, "demand(200-250C)[MW]"],
     )
 
     # Add a store for high temperature heat that can absorb an infinite amount of heat but cannot discharge it
@@ -2995,38 +2985,40 @@ def add_egs_industry_supply(n, supply_curve):
     lifetime = snakemake.params.enhanced_geothermal["lifetime"]
 
     # annuitize capex
-    supply_curve['capex[$/MW]'] = (
-        supply_curve['capex[$/MW]'] * dr / (1 - (1 + dr) ** (-lifetime))
+    supply_curve["capex[$/MW]"] = (
+        supply_curve["capex[$/MW]"] * dr / (1 - (1 + dr) ** (-lifetime))
     )
 
     for (region, cost_index), row in supply_curve.loc[
-        supply_curve['avail_capacity[MW]'] != 0.
-        ].iterrows():
+        supply_curve["avail_capacity[MW]"] != 0.0
+    ].iterrows():
 
         full_name = {
-            'low temperature industry': 'low temperature heat 50-150C for industry',
-            'medium temperature industry': 'medium temperature heat 150-250C for industry',
+            "low temperature industry": "low temperature heat 50-150C for industry",
+            "medium temperature industry": "medium temperature heat 150-250C for industry",
         }
 
         for carrier in [
-            'low temperature industry',
-            'medium temperature industry',
+            "low temperature industry",
+            "medium temperature industry",
         ]:
 
-            bus1 = region + ' ' + full_name[carrier]
+            bus1 = region + " " + full_name[carrier]
             if bus1 not in n.buses.index:
                 continue
 
             n.add(
                 "Link",
-                region + ' EGS ' + carrier + ' ' + str(cost_index),
-                bus0=region + ' general industry heat',
+                region + " EGS " + carrier + " " + str(cost_index),
+                bus0=region + " general industry heat",
                 bus1=bus1,
                 carrier=carrier,
-                capital_cost=row['capex[$/MW]'],
-                marginal_cost=row['opex[$/MWh]'],
-                p_nom_max=row['avail_capacity[MW]'],
-                efficiency=snakemake.params['enhanced_geothermal']['heat_distribution_network_efficiency'],
+                capital_cost=row["capex[$/MW]"],
+                marginal_cost=row["opex[$/MWh]"],
+                p_nom_max=row["avail_capacity[MW]"],
+                efficiency=snakemake.params["enhanced_geothermal"][
+                    "heat_distribution_network_efficiency"
+                ],
                 p_nom_extendable=True,
             )
 
@@ -3035,28 +3027,31 @@ def add_industry_heating(n, costs):
 
     idx = pd.IndexSlice
 
-    investment_costs = costs.loc[idx[:,'investment'],:]
+    investment_costs = costs.loc[idx[:, "investment"], :]
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
     lifetime = snakemake.params.costs["fill_values"]["lifetime"]
 
-    investment_costs.loc[:,'value'] = (
-        investment_costs['value']
-        * dr / (1 - (1 + dr) ** (-lifetime))
+    investment_costs.loc[:, "value"] = (
+        investment_costs["value"] * dr / (1 - (1 + dr) ** (-lifetime))
     )
 
     # investment_costs.index = investment_costs.index.set_levels(['fixed'], level='parameter')
     investment_costs.index = pd.MultiIndex.from_tuples(
-        [(x[0], 'fixed') for x in investment_costs.index]
+        [(x[0], "fixed") for x in investment_costs.index]
     )
     costs = pd.concat([costs, investment_costs])
-    costs = costs['value'].unstack()
+    costs = costs["value"].unstack()
 
-    low_temp_buses = n.buses.loc[n.buses.carrier == 'low temperature heat 50-150C for industry'].index
-    medium_temp_buses = n.buses.loc[n.buses.carrier == 'medium temperature heat 150-250C for industry'].index
+    low_temp_buses = n.buses.loc[
+        n.buses.carrier == "low temperature heat 50-150C for industry"
+    ].index
+    medium_temp_buses = n.buses.loc[
+        n.buses.carrier == "medium temperature heat 150-250C for industry"
+    ].index
 
-    nodes_low = low_temp_buses.str.split(' ').str[0]
-    nodes_medium = medium_temp_buses.str.split(' ').str[0]
+    nodes_low = low_temp_buses.str.split(" ").str[0]
+    nodes_medium = medium_temp_buses.str.split(" ").str[0]
 
     # Add carriers if not already present
     carriers = [
@@ -3075,11 +3070,7 @@ def add_industry_heating(n, costs):
             n.add("Carrier", name=carrier)
 
     # 1. Low-temp molten salt store (Store)
-    n.madd(
-        "Bus",
-        nodes_medium + " molten salt store",
-        carrier="molten sand store"
-    )
+    n.madd("Bus", nodes_medium + " molten salt store", carrier="molten sand store")
 
     n.madd(
         "Store",
@@ -3089,13 +3080,13 @@ def add_industry_heating(n, costs):
         e_nom_extendable=True,
         capital_cost=costs.at["low-temp molten salt store", "fixed"],
         lifetime=costs.at["low-temp molten salt store", "lifetime"],
-        efficiency=costs.at["low-temp molten salt store", "efficiency"]
+        efficiency=costs.at["low-temp molten salt store", "efficiency"],
     )
 
     # 2. Low-temp molten salt discharger (Link)
     # Assumes the discharger converts stored heat in the same bus to usable heat at the same bus
     n.madd(
-        "Link", 
+        "Link",
         nodes_medium + " molten salt discharger",
         bus0=nodes_medium + " molten salt store",
         bus1=medium_temp_buses,
@@ -3104,13 +3095,13 @@ def add_industry_heating(n, costs):
         capital_cost=costs.at["low-temp molten salt discharger", "fixed"],
         lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
         efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
-        p_min_pu=0.
+        p_min_pu=0.0,
     )
 
     # 3. Low-temp molten salt charger (Link)
-    logger.warning('Yet to get techno-economic data for molten sand charger')
+    logger.warning("Yet to get techno-economic data for molten sand charger")
     n.madd(
-        "Link", 
+        "Link",
         nodes_medium + " molten salt charger",
         bus0=medium_temp_buses,
         bus1=nodes_medium + " molten salt store",
@@ -3122,13 +3113,13 @@ def add_industry_heating(n, costs):
         capital_cost=costs.at["low-temp molten salt discharger", "fixed"],
         lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
         efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
-        p_min_pu=0.
+        p_min_pu=0.0,
     )
 
     # 4. Solar heat for industrial processes (Generator)
     # This is assumed to produce heat directly at the bus. is assumed to produce heat directly at the bus.
     logger.warning("Yet to add capacity factor for solar heat for industrial processes")
-    '''
+    """
     n.madd(
         "Generator",
         nodes,
@@ -3142,7 +3133,7 @@ def add_industry_heating(n, costs):
         # If you wish to model resource availability (capacity factors), you need a time series
         # or static 'p_max_pu' representing "efficiency" or capacity factor.
     )
-    '''
+    """
 
     # 5. Industrial heat pump high temperature (Link)
     # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
@@ -3156,16 +3147,17 @@ def add_industry_heating(n, costs):
         capital_cost=costs.at["industrial heat pump high temperature", "fixed"],
         lifetime=costs.at["industrial heat pump high temperature", "lifetime"],
         efficiency=costs.at["industrial heat pump high temperature", "efficiency"],
-        marginal_cost=costs.at["industrial heat pump high temperature", "VOM"]
+        marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
     )
 
     # 6. CSP-tower (Generator)
     logger.warning("Yet to add capacity factor for CSP for industrial processes")
     # Typically CSP is solar thermal. Here, we assume it just generates heat at bus.
-    p_max_pu = n.generators_t.p_max_pu.loc[:, nodes_medium + ' csp']
-    p_max_pu.rename(columns={
-        name + ' csp': name + ' csp-tower' for name in nodes_medium
-    }, inplace=True)
+    p_max_pu = n.generators_t.p_max_pu.loc[:, nodes_medium + " csp"]
+    p_max_pu.rename(
+        columns={name + " csp": name + " csp-tower" for name in nodes_medium},
+        inplace=True,
+    )
 
     n.madd(
         "Generator",
@@ -3175,7 +3167,7 @@ def add_industry_heating(n, costs):
         p_nom_extendable=True,
         capital_cost=costs.at["csp-tower", "fixed"],
         lifetime=costs.at["csp-tower", "lifetime"],
-        p_max_pu=p_max_pu  # Added solar thermal profiles similarly to other solar thermal generators
+        p_max_pu=p_max_pu,  # Added solar thermal profiles similarly to other solar thermal generators
     )
 
     # 7. Steam boiler gas cond (Generator)
@@ -3189,7 +3181,8 @@ def add_industry_heating(n, costs):
         capital_cost=costs.at["steam boiler gas cond", "fixed"],
         lifetime=costs.at["steam boiler gas cond", "lifetime"],
         efficiency=costs.at["steam boiler gas cond", "efficiency"],
-        marginal_cost=costs.at["steam boiler gas cond", "VOM"] + costs.at["biogas", "fuel cost"]
+        marginal_cost=costs.at["steam boiler gas cond", "VOM"]
+        + costs.at["biogas", "fuel cost"],
     )
 
     # 8. Hot water boiler gas cond (Generator)
@@ -3202,7 +3195,8 @@ def add_industry_heating(n, costs):
         capital_cost=costs.at["hot water boiler gas cond", "fixed"],
         lifetime=costs.at["hot water boiler gas cond", "lifetime"],
         efficiency=costs.at["hot water boiler gas cond", "efficiency"],
-        marginal_cost=costs.at["hot water boiler gas cond", "VOM"] + costs.at["biogas", "fuel cost"]
+        marginal_cost=costs.at["hot water boiler gas cond", "VOM"]
+        + costs.at["biogas", "fuel cost"],
     )
 
     # 9. Hot water tank (Store)
@@ -3213,7 +3207,7 @@ def add_industry_heating(n, costs):
         carrier="hot water storage",
         e_nom_extendable=True,
         capital_cost=costs.at["central water tank storage", "fixed"],
-        lifetime=costs.at["central water tank storage", "lifetime"]
+        lifetime=costs.at["central water tank storage", "lifetime"],
         # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
     )
 
@@ -3343,16 +3337,16 @@ def remove_carrier_related_components(n, carriers_to_drop):
 
 def attach_enhanced_geothermal(n, potential):
 
-    logger.warning('Adding EGS for electricity generation in prepare_sector_network.py')
+    logger.warning("Adding EGS for electricity generation in prepare_sector_network.py")
 
-    egs_potential = pd.read_csv(potential, index_col=[0,1])
-    assert egs_potential.index.names == ['network_region', 'capital_cost[$/kW]']
+    egs_potential = pd.read_csv(potential, index_col=[0, 1])
+    assert egs_potential.index.names == ["network_region", "capital_cost[$/kW]"]
 
-    heat_share = int(re.search(r'_h(\d+)', potential).group(1)) / 100
-    power_share = int(re.search(r'_p(\d+)', potential).group(1)) / 100
+    heat_share = int(re.search(r"_h(\d+)", potential).group(1)) / 100
+    power_share = int(re.search(r"_p(\d+)", potential).group(1)) / 100
 
     # remove EGS from electricity only implementation
-    to_be_removed = n.links.index[n.links.index.str.contains('EGS electricity')]
+    to_be_removed = n.links.index[n.links.index.str.contains("EGS electricity")]
     if not to_be_removed.empty:
         n.remove("Link", to_be_removed)
 
@@ -3378,7 +3372,7 @@ def attach_enhanced_geothermal(n, potential):
     for bus in tqdm(
         egs_potential.index.get_level_values(0).unique(),
         desc="Adding enhanced geothermal",
-        ):
+    ):
 
         ss = egs_potential.loc[idx[bus, :]]
 
@@ -3391,7 +3385,7 @@ def attach_enhanced_geothermal(n, potential):
         for i, (capital_cost, row) in enumerate(ss.iterrows()):
             capacity = row["available_capacity[MW]"]
             # Convert the cost index from $/kW to $/MW and annuitize the capex
-            capital_cost = float(capital_cost) * 1000 # $/kW -> $/MW
+            capital_cost = float(capital_cost) * 1000  # $/kW -> $/MW
 
             # Build an identifier that encodes the region name, heat share, power share, and supply‐curve index
             identifier = f"{bus}_H{heat_share:.2f}_P{power_share:.2f}_curve{i}"
@@ -3423,7 +3417,10 @@ def attach_enhanced_geothermal(n, potential):
             )
 
         # Connect general industry heat to medium temperature industry heat demand ("heat distribution")
-        if industry_bus in n.buses.index and "medium temperature heat 150-250C for industry" in n.buses.index:
+        if (
+            industry_bus in n.buses.index
+            and "medium temperature heat 150-250C for industry" in n.buses.index
+        ):
             n.add(
                 "Link",
                 name="EGS industry heat distribution",
@@ -3432,9 +3429,12 @@ def attach_enhanced_geothermal(n, potential):
                 carrier="heat distribution",
                 p_nom_extendable=True,
             )
-        
+
         # Connect general industry heat to low temperature industry heat demand ("heat exchanger")
-        if industry_bus in n.buses.index and "low temperature heat 50-150C for industry" in n.buses.index:
+        if (
+            industry_bus in n.buses.index
+            and "low temperature heat 50-150C for industry" in n.buses.index
+        ):
             n.add(
                 "Link",
                 name="EGS industry heat exchanger",
@@ -3443,7 +3443,6 @@ def attach_enhanced_geothermal(n, potential):
                 carrier="heat exchanger",
                 p_nom_extendable=True,
             )
-
 
 
 if __name__ == "__main__":
@@ -3598,26 +3597,28 @@ if __name__ == "__main__":
     ##########################################################################
 
     industry_demands = pd.read_csv(
-        snakemake.input['industrial_heating_demands'], index_col=0
+        snakemake.input["industrial_heating_demands"], index_col=0
     )
 
     logger.info("Adding industrial heating demands.")
-    add_industry_demand(n, industry_demands)    
+    add_industry_demand(n, industry_demands)
 
     for potential in snakemake.input["egs_potentials"]:
         attach_enhanced_geothermal(n, potential)
 
     industry_egs_supply = pd.read_csv(
-        snakemake.input['industrial_heating_egs_supply_curves'], index_col=[0,1]
+        snakemake.input["industrial_heating_egs_supply_curves"], index_col=[0, 1]
     )
-    
+
     logger.info("Adding EGS supply for industry.")
     add_egs_industry_supply(n, industry_egs_supply)
 
-    industry_heating_costs = pd.read_csv(snakemake.input['industrial_heating_costs'], index_col=[0,1])
+    industry_heating_costs = pd.read_csv(
+        snakemake.input["industrial_heating_costs"], index_col=[0, 1]
+    )
     print(industry_heating_costs)
 
-    '''
+    """
     industry_heating_costs = (
         prepare_costs(
             industry_heating_costs,
@@ -3626,7 +3627,7 @@ if __name__ == "__main__":
             Nyears,
         )
     )
-    '''
+    """
 
     conversion_rates = {2019: 1.12, 2020: 1.10, 2021: 1.15, 2022: 1.05}
 
@@ -3671,7 +3672,7 @@ if __name__ == "__main__":
     # remove conventional generators built in elec-only model
     remove_elec_base_techs(n)
 
-    '''
+    """
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     # remove H2 and battery technologies added in elec-only model
@@ -3740,7 +3741,7 @@ if __name__ == "__main__":
     if options["dac"]:
         add_dac(n, costs)
 
-    '''
+    """
 
     n.export_to_netcdf(snakemake.output[0])
 

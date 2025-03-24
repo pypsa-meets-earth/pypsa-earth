@@ -129,13 +129,12 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as po
 import pypsa
-from _helpers import (
+from _helpers import (  # update_config_dictionary,
     REGION_COLS,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
     locate_bus,
-    # update_config_dictionary,
     update_p_nom_max,
 )
 from add_electricity import load_costs

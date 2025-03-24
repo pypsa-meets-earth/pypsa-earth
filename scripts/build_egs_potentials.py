@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
         bins = pd.Series(
             np.linspace(
-                #ss["capex[$/kW]"].min(),
+                # ss["capex[$/kW]"].min(),
                 0,
                 ss["capex[$/kW]"].max(),
                 config["max_levels"] + 1,
