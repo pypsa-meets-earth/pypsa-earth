@@ -129,11 +129,12 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as po
 import pypsa
-from _helpers import (
+from _helpers import (  # update_config_dictionary,
     REGION_COLS,
     configure_logging,
     create_logger,
     get_aggregation_strategies,
+    locate_bus,
     update_p_nom_max,
 )
 from add_electricity import load_costs
@@ -378,28 +379,18 @@ def distribute_clusters(
     )
 
 
-def busmap_for_gadm_clusters(inputs, n, gadm_level, geo_crs, country_list):
-    gdf = gpd.read_file(inputs.gadm_shapes)
+def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
 
-    def locate_bus(coords, co):
-        gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
-        point = Point(coords["x"], coords["y"])
-
-        try:
-            return gdf_co[gdf_co.contains(point)]["GADM_ID"].item()
-
-        except ValueError:
-            return gdf_co[
-                gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-            ]["GADM_ID"].item()
-
-    buses = n.buses
-    buses["gadm_{}".format(gadm_level)] = buses[["x", "y", "country"]].apply(
-        lambda bus: locate_bus(bus[["x", "y"]], bus["country"]), axis=1
+    buses = locate_bus(
+        n.buses,
+        country_list,
+        gadm_layer_id,
+        inputs.gadm_shapes,
+        gadm_clustering=True,
     )
 
     buses["gadm_subnetwork"] = (
-        buses["gadm_{}".format(gadm_level)] + "_" + buses["carrier"].astype(str)
+        buses["gadm_{}".format(gadm_layer_id)] + "_" + buses["carrier"].astype(str)
     )
     busmap = buses["gadm_subnetwork"]
 
@@ -664,6 +655,7 @@ if __name__ == "__main__":
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
 
     n = pypsa.Network(inputs.network)
+    n.links["underwater_fraction"] = 0
 
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
