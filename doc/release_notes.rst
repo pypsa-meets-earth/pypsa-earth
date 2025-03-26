@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix readthedocs by explicitly specifying the location of the Sphinx config `PR #1292 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1292>`__
 
+* Fix bugs in demand scaling in the sector-coupled model `PR #24 <https://github.com/open-energy-transition/pypsa-earth/pull/24>`__
+
 PyPSA-Earth 0.6.0
 =================
 
