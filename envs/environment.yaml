@@ -18,7 +18,7 @@ dependencies:
 # need to move back to conda once the issues will be resolved
 - powerplantmatching>=0.5.19
 - earth-osm>=2.3.post1
-- atlite>=0.3
+#- atlite>=0.3
 
   # Dependencies of the workflow itself
 - xlrd
@@ -85,6 +85,10 @@ dependencies:
 
 - pip:
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
+  # until the next release after will be out after v0.3.0
+  # the commit precedes numpy upgrades which could lead to troubles
+  # as pip is not excellent in resolving version conflicts
+  - git+https://github.com/pypsa/atlite.git@a0ff6690c0b4680ef208ba4d54185617330cecb9
   - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent

@@ -504,6 +504,26 @@ rule build_powerplants:
         "scripts/build_powerplants.py"
 
 
+rule build_egs_potentials:
+    params:
+        costs=config["costs"],
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
+    input:
+        egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
+        egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
+        egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
+        shapes=("resources/" + RDIR + "bus_regions/regions_onshore.geojson"),
+    output:
+        egs_potentials=("resources/" + SECDIR + "egs_potential_p100_h0.csv"),
+    threads: 2
+    resources:
+        mem_mb=10000,
+    benchmark:
+        RDIR + "benchmarks/build_egs_potentials/egs_potential"
+    script:
+        "scripts/build_egs_potentials.py"
+
+
 rule add_electricity:
     params:
         countries=config["countries"],
@@ -513,6 +533,7 @@ rule add_electricity:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
         **{
             f"profile_{tech}": "resources/"
@@ -537,6 +558,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
+        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:
@@ -773,6 +795,55 @@ rule prepare_network:
         mem_mb=4000,
     script:
         "scripts/prepare_network.py"
+
+
+rule build_industrial_heating_costs:
+    params:
+        cost_year=config["costs"]["year"],
+    input:
+        costs=COSTS,
+    output:
+        industrial_heating_costs="resources/" + SECDIR + "industrial_heating_costs.csv",
+    threads: 1
+    log:
+        "logs/" + SECDIR + "build_industrial_heating_costs.log",
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/build_industrial_heating_costs.py"
+
+
+rule build_industrial_heating_demands:
+    params:
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
+    input:
+        demand_data="data/nrel_epa_flight_heating_demand_disagg.geojson",
+        regions=(
+            "resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
+    output:
+        industrial_heating_egs_supply_curves=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
+        ),
+        industrial_heating_demands=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+        ),
+        heat_exchanger_capacity=(
+            "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
+        ),
+    threads: 1
+    log:
+        "logs/" + SECDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/build_industrial_heating_demand.py"
 
 
 def memory(w):
@@ -1052,14 +1123,34 @@ if not config["custom_data"]["gas_network"]:
             "scripts/prepare_gas_network.py"
 
 
+def get_heat_steps(n):
+    assert n >= 1, "n must be greater than 1"
+    assert n <= 10, "n must be less than 10"
+    import numpy as np
+
+    return np.linspace(0, 100, n).astype(int)
+
+
+def get_power_steps(n):
+    assert n >= 1, "n must be greater than 1"
+    assert n <= 10, "n must be less than 10"
+    import numpy as np
+
+    return 100 - np.linspace(0, 100, n).astype(int)
+
+
 rule prepare_sector_network:
     params:
         costs=config["costs"],
         electricity=config["electricity"],
+        enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        # TODO revise the values which are currently very rough estimations
+        # &replace a temporary file with a more stable solution in future
+        cooling_costs="data/costs_cooling.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
         + SECDIR
@@ -1080,9 +1171,9 @@ rule prepare_sector_network:
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_demand="resources/"
-        + SECDIR
-        + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        # industrial_demand="resources/"
+        # + SECDIR
+        # + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
         energy_totals="resources/"
         + SECDIR
         + "energy_totals_{demand}_{planning_horizons}.csv",
@@ -1091,6 +1182,9 @@ rule prepare_sector_network:
         heat_demand="resources/"
         + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cooling_demand="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ashp_cop="resources/"
         + SECDIR
         + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1100,6 +1194,15 @@ rule prepare_sector_network:
         solar_thermal="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_hp_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_ac_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/capft_abch_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         district_heat_share="resources/"
         + SECDIR
         + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1114,6 +1217,34 @@ rule prepare_sector_network:
             + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv"
         ),
+        industrial_heating_egs_supply_curves=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
+        ),
+        industrial_heating_demands=(
+            "resources/"
+            + SECDIR
+            + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+        ),
+        industrial_heating_costs=(
+            "resources/" + SECDIR + "industrial_heating_costs.csv"
+        ),
+        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
+        # lambda wildcards: [
+        #     "resources/"
+        #     + SECDIR
+        #     + f"egs_potential_s{wildcards.simpl}_{wildcards.clusters}_p{ps}_h{hs}.csv"
+        #     for ps, hs in zip(
+        #         [100, 50], [0, 50]
+        #         # get_power_steps(
+        #         #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
+        #         # ),
+        #         # get_heat_steps(
+        #         #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
+        #         # )
+        #     )
+        #     ],
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -1141,7 +1272,7 @@ rule build_ship_profile:
 
 rule add_export:
     params:
-        gadm_level=config["sector"]["gadm_level"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         store=config["export"]["store"],
         store_capital_costs=config["export"]["store_capital_costs"],
@@ -1275,6 +1406,15 @@ rule build_cop_profiles:
         cop_air_urban="resources/"
         + SECDIR
         + "cops/cop_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_ac_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "cops/capft_abch_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -1288,6 +1428,8 @@ rule build_cop_profiles:
 
 
 rule prepare_heat_data:
+    params:
+        countries=config["countries"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="resources/"
@@ -1308,10 +1450,27 @@ rule prepare_heat_data:
         solar_thermal_total="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_ac_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "cops/capft_abch_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        heat_profile="data/heat_load_profile_BDEW.csv",
+        cooling_demand_total="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        # heat_profile="data/heat_load_profile_BDEW.csv",
+        heat_profile="data/heating_load_profile_staffel.csv",
+        cooling_profile="data/cooling_load_profile_staffel.csv",
+        shapes_path="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
         nodal_energy_totals="resources/"
         + SECDIR
@@ -1319,12 +1478,24 @@ rule prepare_heat_data:
         heat_demand="resources/"
         + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cooling_demand="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ashp_cop="resources/"
         + SECDIR
         + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         gshp_cop="resources/"
         + SECDIR
         + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_hp_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_ac_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/capft_abch_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         solar_thermal="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1419,7 +1590,7 @@ rule build_population_layouts:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        urban_percent="resources/" + SECDIR + "urban_percent.csv",
+        urban_percent="data/urban_percent.csv",
         cutout="cutouts/"
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
@@ -1528,6 +1699,15 @@ rule build_heat_demand:
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_urban="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_rural="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_total="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -1560,7 +1740,6 @@ rule build_temperature_profiles:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         temp_soil_total="resources/"
         + SECDIR
@@ -1824,7 +2003,7 @@ rule prepare_db:
 rule build_industrial_distribution_key:  #default data
     params:
         countries=config["countries"],
-        gadm_level=config["sector"]["gadm_level"],
+        gadm_level_id=config["sector"]["gadm_level"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         industry_database=config["custom_data"]["industry_database"],
     input:

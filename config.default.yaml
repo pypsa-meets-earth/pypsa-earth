@@ -352,6 +352,10 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
     csp_model: advanced # simple or advanced
+  enhanced_geothermal:
+    cutout: cutout-2013-era5
+    enable: true
+    max_levels: 4 # number of steps used to discretize EGS supply curve
 
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration
