@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 import requests
 import yaml
-from fake_useragent import UserAgent
+from fake-useragent import UserAgent
 from pypsa.components import component_attrs, components
 from shapely.geometry import Point
 
