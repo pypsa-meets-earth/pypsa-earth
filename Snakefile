@@ -1083,32 +1083,6 @@ if not config["custom_data"]["gas_network"]:
         script:
             "scripts/prepare_gas_network.py"
 
-    rule plot_gas_network:
-        params:
-            gas_network_data=config["sector"]["gas"]["network_data"],
-        input:
-            preclustered_gas_network="resources/"
-            + SECDIR
-            + "gas_networks/pre_gas_network_elec_s{simpl}_{clusters}.csv",
-            clustered_gas_network="resources/"
-            + SECDIR
-            + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
-            bus_regions_onshore="resources/"
-            + RDIR
-            + "gas_networks/gas_regions_onshore_elec_s{simpl}_{clusters}.geojson",
-            country_borders="resources/"
-            + RDIR
-            + "gas_networks/country_borders_elec_s{simpl}_{clusters}.geojson",
-        output:
-            existing_gas_pipelines="resources/"
-            + RDIR
-            + "gas_networks/existing_gas_pipelines_s{simpl}_{clusters}.png",
-            clustered_gas_pipelines="resources/"
-            + RDIR
-            + "gas_networks/clustered_gas_pipelines_s{simpl}_{clusters}.png",
-        script:
-            "scripts/plot_gas_network.py"
-
 
 rule prepare_sector_network:
     params:

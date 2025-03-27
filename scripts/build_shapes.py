@@ -1378,7 +1378,7 @@ def get_geoboundaries_layer(countries, layer_id, geo_crs):
 
         # Download the GeoJSON file
         response = requests.get(url_template)
-        max_level = min(len(json.loads(response.text)), layer_id) + 1
+        max_level = min(len(json.loads(response.text)), layer_id + 1)
         gdf_base = gpd.GeoDataFrame()
 
         for i in reversed(range(max_level)):
