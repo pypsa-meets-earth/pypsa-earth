@@ -500,4 +500,3 @@ dependencies:
       - googledrivedownloader==0.4
       - polars==1.26.0
 prefix: C:\Miniconda\envs\pypsa-earth
-
