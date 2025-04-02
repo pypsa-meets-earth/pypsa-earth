@@ -1039,30 +1039,47 @@ rule prepare_transport_data_input:
 
 if not config["custom_data"]["gas_network"]:
 
+    alternative_gas_clustering = {}
+
+    # Include all parameters if alternative_clustering is True
+    if config["cluster_options"]["alternative_clustering"]:
+        alternative_gas_clustering.update(
+            {
+                "admin_shape": config["build_shape_options"]["admin_shape"],
+                "countries_list": config["countries"],
+                "layer_id": config["build_shape_options"]["gadm_layer_id"],
+                "update": config["build_shape_options"]["update_file"],
+                "out_logging": config["build_shape_options"]["out_logging"],
+                "year": config["build_shape_options"]["year"],
+                "nprocesses": config["build_shape_options"]["nprocesses"],
+                "contended_flag": config["build_shape_options"]["contended_flag"],
+                "geo_crs": config["crs"]["geo_crs"],
+            }
+        )
+
     rule prepare_gas_network:
         params:
+            **alternative_gas_clustering,
             gas_config=config["sector"]["gas"],
             alternative_clustering=config["cluster_options"]["alternative_clustering"],
-            countries_list=config["countries"],
-            layer_id=config["build_shape_options"]["gadm_layer_id"],
-            update=config["build_shape_options"]["update_file"],
-            out_logging=config["build_shape_options"]["out_logging"],
-            year=config["build_shape_options"]["year"],
-            nprocesses=config["build_shape_options"]["nprocesses"],
-            contended_flag=config["build_shape_options"]["contended_flag"],
-            geo_crs=config["crs"]["geo_crs"],
             custom_gas_network=config["custom_data"]["gas_network"],
         input:
             regions_onshore="resources/"
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         output:
+            preclustered_gas_network="resources/"
+            + SECDIR
+            + "gas_networks/pre_gas_network_elec_s{simpl}_{clusters}.csv",
             clustered_gas_network="resources/"
             + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
-            # TODO: Should be a own snakemake rule
-            # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
-            # gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
+            bus_regions_onshore="resources/"
+            + RDIR
+            + "gas_networks/gas_regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            country_borders="resources/"
+            + RDIR
+            + "gas_networks/country_borders_elec_s{simpl}_{clusters}.geojson",
         script:
             "scripts/prepare_gas_network.py"
 

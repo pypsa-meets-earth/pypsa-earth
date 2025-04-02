@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import json
 import multiprocessing as mp
 import os
 import shutil
@@ -1363,6 +1364,124 @@ def crop_country(gadm_shapes, subregion_config):
     )
 
 
+def get_geoboundaries_layer(countries, layer_id, geo_crs):
+
+    # initialization of the geoDataFrame
+    geodf_list = []
+
+    for country in countries:
+        print(f"retrieving {country}")
+        country_code = two_2_three_digits_country(country)
+        url_template = (
+            f"https://www.geoboundaries.org/api/current/gbOpen/{country_code}/ALL/"
+        )
+
+        # Download the GeoJSON file
+        response = requests.get(url_template)
+        max_level = min(len(json.loads(response.text)), layer_id + 1)
+        gdf_base = gpd.GeoDataFrame()
+
+        for i in reversed(range(max_level)):
+            path_geojson = json.loads(response.content)[i]["gjDownloadURL"]
+            gdf = gpd.read_file(path_geojson)  # .to_crs("EPSG:3857") #distance
+            gdf = gdf.rename(columns={"shapeName": f"shapeName_{i}"})
+
+            if gdf_base.empty:
+                gdf_base = gdf
+                gdf_base[f"index_{i}"] = gdf_base.index
+                gdf_base["center"] = gdf_base.centroid
+                continue
+
+            # TODO: Set a clause for shapes where the center is not in a shape (islands)
+            # Can use distance for example gdf.distance(center).sort_values().index[0]
+            # idxmax was used because its faster
+            gdf_base[f"index_{i}"] = [
+                gdf.contains(center).idxmax() for center in gdf_base.center
+            ]
+            gdf_base[f"shapeName_{i}"] = [
+                gdf.loc[index, f"shapeName_{i}"] for index in gdf_base[f"index_{i}"]
+            ]
+
+            if i == 1:
+                gdf_base["shapeISO"] = [
+                    gdf.loc[index, "shapeISO"] for index in gdf_base[f"index_{i}"]
+                ]
+
+        psuedo_GADM_ID = []
+        for i in gdf_base.index:
+            base_string = country + "." + str(gdf_base.loc[i, "index_0"])
+            for j in range(1, max_level):
+                base_string += "." + str(gdf_base.loc[i, f"index_{j}"])
+            psuedo_GADM_ID.append(base_string + "_1")
+
+        gdf_base["GADM_ID"] = psuedo_GADM_ID
+        gdf_base["country"] = country
+        gdf_base = gdf_base[
+            [f"shapeName_{i}" for i in range(max_level)]
+            + ["GADM_ID", "country", "geometry"]
+        ]
+
+        # append geodataframes
+        geodf_list.append(gdf_base)
+
+    geodf_geoboundaries = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
+    geodf_geoboundaries.set_crs(geo_crs)
+
+    return geodf_geoboundaries
+
+
+def geoboundaries(
+    worldpop_method,
+    gdp_method,
+    countries,
+    geo_crs,
+    mem_mb,
+    layer_id=2,
+    update=False,
+    out_logging=False,
+    year=2020,
+    nprocesses=None,
+    simplify_gadm=True,
+):
+
+    df_geob = get_geoboundaries_layer(countries, layer_id, geo_crs)
+
+    if worldpop_method != False:
+        mem_read_limit_per_process = mem_mb / nprocesses
+        # add the population data to the dataset
+        add_population_data(
+            df_geob,
+            countries,
+            worldpop_method,
+            year,
+            update,
+            out_logging,
+            mem_read_limit_per_process,
+            nprocesses=nprocesses,
+        )
+
+    if gdp_method != False:
+        # add the gdp data to the dataset
+        add_gdp_data(
+            df_geob,
+            year,
+            update,
+            out_logging,
+            name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
+        )
+
+    df_geob.set_index("GADM_ID", inplace=True)
+
+    if simplify_gadm:
+        df_geob["geometry"] = df_geob["geometry"].map(_simplify_polys)
+    df_geob.geometry = df_geob.geometry.apply(
+        lambda r: make_valid(r) if not r.is_valid else r
+    )
+    df_geob = df_geob[df_geob.geometry.is_valid & ~df_geob.geometry.is_empty]
+
+    return df_geob
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -1409,20 +1528,35 @@ if __name__ == "__main__":
     )
     africa_shape.reset_index().to_file(snakemake.output.africa_shape)
 
-    gadm_shapes = gadm(
-        worldpop_method,
-        gdp_method,
-        countries_list,
-        geo_crs,
-        contended_flag,
-        mem_mb,
-        layer_id,
-        update,
-        out_logging,
-        year,
-        nprocesses=nprocesses,
-        simplify_gadm=simplify_gadm,
-    )
+    if snakemake.params.build_shape_options["admin_shape"] == "geoboundaries":
+        gadm_shapes = geoboundaries(
+            worldpop_method,
+            gdp_method,
+            countries_list,
+            geo_crs,
+            mem_mb,
+            layer_id,
+            update,
+            out_logging,
+            year,
+            nprocesses=nprocesses,
+            simplify_gadm=simplify_gadm,
+        )
+    else:
+        gadm_shapes = gadm(
+            worldpop_method,
+            gdp_method,
+            countries_list,
+            geo_crs,
+            contended_flag,
+            mem_mb,
+            layer_id,
+            update,
+            out_logging,
+            year,
+            nprocesses=nprocesses,
+            simplify_gadm=simplify_gadm,
+        )
 
     save_to_geojson(gadm_shapes, out.gadm_shapes)
 

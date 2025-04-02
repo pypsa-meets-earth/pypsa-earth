@@ -358,7 +358,9 @@ def distribute_clusters(
     return m.solution["n"].to_series().astype(int)
 
 
-def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
+def busmap_for_gadm_clusters(
+    inputs, n, gadm_layer_id, geo_crs, country_list, admin_shapes=None
+):
 
     buses = locate_bus(
         n.buses,
@@ -366,6 +368,7 @@ def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
         gadm_layer_id,
         inputs.gadm_shapes,
         gadm_clustering=True,
+        admin_shapes=admin_shapes,
     )
 
     buses["gadm_subnetwork"] = (
@@ -552,8 +555,15 @@ def clustering_for_n_clusters(
 
     if not isinstance(custom_busmap, pd.Series):
         if alternative_clustering:
+            admin_shapes = build_shape_options.get("build_shape_options", False)
+
             busmap = busmap_for_gadm_clusters(
-                inputs, n, gadm_layer_id, geo_crs, country_list
+                inputs,
+                n,
+                gadm_layer_id,
+                geo_crs,
+                country_list,
+                admin_shapes=admin_shapes,
             )
         else:
             busmap = busmap_for_n_clusters(
