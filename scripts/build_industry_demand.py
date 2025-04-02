@@ -226,7 +226,8 @@ if __name__ == "__main__":
         # Reindex and fill missing values with 0.0
         AL_prod_tom = AL_prod_tom.reindex(countries_geo, fill_value=0.0)
 
-        AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
+        # Estimate emissions for aluminum production and converting from ktons to tons
+        AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"] * 1000
 
         Steel_emissions = (
             geo_locs[geo_locs.industry == "iron and steel"]
