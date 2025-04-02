@@ -35,7 +35,7 @@ def country_to_nodal(industrial_production, keys):
     for country, sector in product(countries, sectors):
         buses = keys.index[keys.country == country]
 
-        if sector not in dist_keys.columns or dist_keys[sector].sum() == 0:
+        if sector not in keys.columns or keys[sector].sum() == 0:
             mapping = "gdp"
         else:
             mapping = sector
