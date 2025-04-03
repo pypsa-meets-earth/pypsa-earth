@@ -66,34 +66,43 @@ if __name__ == "__main__":
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.params.base_year
     )
-    growth_factors = calculate_end_values(growth_factors_cagr)
-    efficiency_gains = calculate_end_values(efficiency_gains_cagr)
 
     for country in countries:
-        if country not in efficiency_gains.index:
-            efficiency_gains.loc[country] = efficiency_gains.loc["DEFAULT"]
+        if country not in efficiency_gains_cagr.index:
+            efficiency_gains_cagr.loc[country] = efficiency_gains_cagr.loc["DEFAULT"]
             _logger.warning(
                 "No efficiency gains cagr data for "
                 + country
                 + " using default data instead."
             )
-        if country not in growth_factors.index:
-            growth_factors.loc[country] = growth_factors.loc["DEFAULT"]
+        else:
+            efficiency_gains_cagr.loc[country] = efficiency_gains_cagr.loc[country].fillna(efficiency_gains_cagr.loc["DEFAULT"])
+        if country not in growth_factors_cagr.index:
+            growth_factors_cagr.loc[country] = growth_factors_cagr.loc["DEFAULT"]
             _logger.warning(
                 "No growth factors cagr data for "
                 + country
                 + " using default data instead."
             )
+        else:
+            growth_factors_cagr.loc[country] = growth_factors_cagr.loc[country].fillna(growth_factors_cagr.loc["DEFAULT"])
         if country not in fuel_shares.index:
             fuel_shares.loc[country] = fuel_shares.loc["DEFAULT"]
             _logger.warning(
                 "No fuel share data for " + country + " using default data instead."
             )
+        else:
+            fuel_shares.loc[country] = fuel_shares.loc[country].fillna(fuel_shares.loc["DEFAULT"])
         if country not in district_heating.index:
             district_heating.loc[country] = district_heating.loc["DEFAULT"]
             _logger.warning(
                 "No heating data for " + country + " using default data instead."
             )
+        else:
+            district_heating.loc[country] = district_heating.loc[country].fillna(district_heating.loc["DEFAULT"])
+
+    growth_factors = calculate_end_values(growth_factors_cagr)
+    efficiency_gains = calculate_end_values(efficiency_gains_cagr)
 
     efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
     fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
