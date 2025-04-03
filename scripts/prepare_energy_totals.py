@@ -76,7 +76,9 @@ if __name__ == "__main__":
                 + " using default data instead."
             )
         else:
-            efficiency_gains_cagr.loc[country] = efficiency_gains_cagr.loc[country].fillna(efficiency_gains_cagr.loc["DEFAULT"])
+            efficiency_gains_cagr.loc[country] = efficiency_gains_cagr.loc[
+                country
+            ].fillna(efficiency_gains_cagr.loc["DEFAULT"])
         if country not in growth_factors_cagr.index:
             growth_factors_cagr.loc[country] = growth_factors_cagr.loc["DEFAULT"]
             _logger.warning(
@@ -85,21 +87,27 @@ if __name__ == "__main__":
                 + " using default data instead."
             )
         else:
-            growth_factors_cagr.loc[country] = growth_factors_cagr.loc[country].fillna(growth_factors_cagr.loc["DEFAULT"])
+            growth_factors_cagr.loc[country] = growth_factors_cagr.loc[country].fillna(
+                growth_factors_cagr.loc["DEFAULT"]
+            )
         if country not in fuel_shares.index:
             fuel_shares.loc[country] = fuel_shares.loc["DEFAULT"]
             _logger.warning(
                 "No fuel share data for " + country + " using default data instead."
             )
         else:
-            fuel_shares.loc[country] = fuel_shares.loc[country].fillna(fuel_shares.loc["DEFAULT"])
+            fuel_shares.loc[country] = fuel_shares.loc[country].fillna(
+                fuel_shares.loc["DEFAULT"]
+            )
         if country not in district_heating.index:
             district_heating.loc[country] = district_heating.loc["DEFAULT"]
             _logger.warning(
                 "No heating data for " + country + " using default data instead."
             )
         else:
-            district_heating.loc[country] = district_heating.loc[country].fillna(district_heating.loc["DEFAULT"])
+            district_heating.loc[country] = district_heating.loc[country].fillna(
+                district_heating.loc["DEFAULT"]
+            )
 
     growth_factors = calculate_end_values(growth_factors_cagr)
     efficiency_gains = calculate_end_values(efficiency_gains_cagr)
