@@ -533,11 +533,12 @@ def find_heat_exchanger_capacity(data, distance_threshold=1.0):
 
 if __name__ == "__main__":
 
-    snakemake = mock_snakemake(
-        "build_industrial_heating_demands",
-        simpl="",
-        clusters=10,
-    )
+    if "snakemake" not in globals():
+        snakemake = mock_snakemake(
+            "build_industrial_heating_demands",
+            simpl="",
+            clusters=10,
+        )
 
     gdf = prepare_demand_data(snakemake.input["demand_data"])
     logger.warning(
