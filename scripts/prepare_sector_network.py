@@ -3672,7 +3672,6 @@ if __name__ == "__main__":
     # remove conventional generators built in elec-only model
     remove_elec_base_techs(n)
 
-    
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     # remove H2 and battery technologies added in elec-only model
@@ -3734,14 +3733,11 @@ if __name__ == "__main__":
     #     constant=co2_limit,
     # )
 
-
     if snakemake.config["custom_data"]["water_costs"]:
         add_custom_water_cost(n)
 
     if options["dac"]:
         add_dac(n, costs)
-
-    
 
     n.export_to_netcdf(snakemake.output[0])
 
