@@ -1230,7 +1230,7 @@ rule prepare_sector_network:
         industrial_heating_costs=(
             "resources/" + SECDIR + "industrial_heating_costs.csv"
         ),
-        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
+        egs_potentials=["resources/" + SECDIR + "egs_potential_p100_h0.csv"],
         # lambda wildcards: [
         #     "resources/"
         #     + SECDIR
@@ -1471,6 +1471,7 @@ rule prepare_heat_data:
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        calib_dir="data/",
     output:
         nodal_energy_totals="resources/"
         + SECDIR
