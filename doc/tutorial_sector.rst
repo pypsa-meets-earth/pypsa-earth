@@ -30,15 +30,17 @@ Overnight Scenarios
 Configuration
 ---------------------------------------------
 
-The configuration for sector-coupled is present in the  ``config.default.yaml`` file.
-This foresight parameter is set to overnight by default. For the purpose of this tutorial, ``test/config.sector.yaml``
-will be used to run the sector-coupled model.
+All the configuration for a sector-coupled run are present in the ``config.default.yaml`` file.
+In particular, the default value for foresight parameter is set to ``overnight``. For the purpose
+of this tutorial, ``test/config.sector.yaml`` will be used in addition to ``config.default.yaml``
+to run the sector-coupled model. That allows to enable using a lightweight tutorial datakit
+enabled with tutorial: true.
 
 .. code:: yaml
 
     foresight: overnight
 
-Documentation for all options will be added successively to :ref:`config`.
+Documentation for all options is currently being updated in :ref:`config`.
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options.
 
