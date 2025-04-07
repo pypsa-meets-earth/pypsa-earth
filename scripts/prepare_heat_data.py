@@ -32,13 +32,7 @@ SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
 
 SHARE_DISTRICT_HEAT = 0.1
 
-CALIBRATE_LOAD = True
-
-# TODO Add to Snakemake
-CALIBR_DIR = snakemake.input.calib_dir
-
-CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
-CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
+CALIBRATE_LOAD = False
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -358,6 +352,11 @@ if __name__ == "__main__":
             planning_horizons=2030,
             demand="AB",
         )
+
+    # TODO Add to Snakemake
+    CALIBR_DIR = snakemake.input.calib_dir    
+    CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
+    CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"           
 
     n = pypsa.Network(snakemake.input.network)
 
