@@ -509,17 +509,26 @@ rule build_egs_potentials:
         costs=config["costs"],
         enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
-        egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
-        egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
-        egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
-        shapes=("resources/" + RDIR + "bus_regions/regions_onshore.geojson"),
+        # 'mode' refers to 'egs' for enhanced geothermal systems and 'hs' for hydrothermal systems
+        # egs_capex="data/p100_h0/Total_CAPEX_USDmm.tif",
+        # egs_opex="data/p100_h0/Average_OPEX_cUSDkW-h.tif",
+        # egs_gen="data/p100_h0/Average_Electric_Energy_Output_MWhyear.tif",
+        capex_power="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/power_surface_CAPEX_-_USDmm_stitched.tif",
+        capex_heat="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/resid._heat_surface_CAPEX_-_USDmm_stitched.tif",
+        capex_subsurf="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/subsurf_CAPEX_-_USDmm_stitched.tif",
+        opex_power="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/tot._power_surface_OPEX_-_USDmm_stitched.tif",
+        opex_heat="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/tot._resid._heat_surface_OPEX_-_USDmm_stitched.tif",
+        opex_subsurf="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/tot._subsurface_OPEX_-_USDmm_stitched.tif",
+        sales_power="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/avg._net_power_sales_-_MWe_stitched.tif",
+        sales_heat="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/avg._net_resid._heat_sales_-_MWth_stitched.tif",
+        shapes="resources/" + RDIR + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        egs_potentials=("resources/" + SECDIR + "egs_potential_p100_h0.csv"),
+        egs_potentials="resources/" + SECDIR + "geothermal_data/egs_potential_{mode}_s{simpl}_{clusters}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        RDIR + "benchmarks/build_egs_potentials/egs_potential"
+        "benchmarks/" + RDIR + "build_egs_potentials/egs_potential_{mode}_s{simpl}_{clusters}"
     script:
         "scripts/build_egs_potentials.py"
 
@@ -558,7 +567,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
-        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
+        # egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:
