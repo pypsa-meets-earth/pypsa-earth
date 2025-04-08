@@ -20,34 +20,71 @@ from shapely.geometry import Point
 from tqdm import tqdm
 
 
-def get_raster_file(tif_file):
+name_transformer = lambda x: Path(str(x).split('/')[-1]).name.replace('.tif', '')
 
-    with rasterio.open(tif_file) as src:
-
-        band1 = src.read(1)
-        transform = src.transform
-        rows, cols = band1.shape
-
-        row_indices, col_indices = np.meshgrid(
-            np.arange(rows), np.arange(cols), indexing="ij"
-        )
-        row_indices = row_indices.flatten()
-        col_indices = col_indices.flatten()
-        band1 = band1.flatten()
-
-        nodata = src.nodata
-        valid_mask = band1 != nodata
-        band1 = band1[valid_mask]
-        row_indices = row_indices[valid_mask]
-        col_indices = col_indices[valid_mask]
-
-        xs, ys = xy(transform, row_indices, col_indices)
-
-        df = pd.DataFrame({"value": band1, "x": xs, "y": ys})
-
-        geometry = [Point(xy) for xy in zip(df["x"], df["y"])]
-
-        return gpd.GeoDataFrame(df, geometry=geometry, crs=src.crs)
+def tif_to_gdf(tif_files, name_transformer=name_transformer):
+    """
+    Convert a list of .tif files into a GeoDataFrame where each pixel is represented as a square polygon.
+    
+    Parameters:
+    -----------
+    tif_files : list
+        List of paths to .tif files
+    
+    Returns:
+    --------
+    geopandas.GeoDataFrame
+        GeoDataFrame with pixel values and geometries
+    """
+    
+    # Dictionary to store values for each geometry
+    geometry_data = {}
+    
+    for tif_file in tqdm(tif_files, desc="Joining tif files to GeoDataFrame"):
+        with rasterio.open(tif_file) as src:
+            data = src.read(1)  # Read the first band
+            transform = src.transform
+            
+            # Get the file name without path and without .tif extension
+            source_name = name_transformer(tif_file)
+            
+            # Iterate through each pixel
+            for row in range(data.shape[0]):
+                for col in range(data.shape[1]):
+                    value = data[row, col]
+                    
+                    # Skip nodata values
+                    if value == src.nodata or (src.nodata is None and value == 0):
+                        continue
+                    
+                    # Get the pixel's coordinates
+                    x1, y1 = transform * (col, row)
+                    x2, y2 = transform * (col + 1, row + 1)
+                    
+                    # Create a box geometry for the pixel
+                    geometry = box(min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2))
+                    
+                    # Convert geometry to WKT for dictionary key
+                    geom_wkt = geometry.wkt
+                    
+                    # Initialize entry if this geometry hasn't been seen before
+                    if geom_wkt not in geometry_data:
+                        geometry_data[geom_wkt] = {'geometry': geometry}
+                    
+                    # Add the value for this source
+                    geometry_data[geom_wkt][source_name] = value
+    
+    # Convert dictionary to DataFrame
+    df = pd.DataFrame.from_dict(geometry_data, orient='index')
+    
+    # Extract geometry column
+    geometries = df.pop('geometry')
+    
+    # Create the GeoDataFrame
+    gdf = gpd.GeoDataFrame(df, geometry=geometries, crs=src.crs)
+    gdf.index = range(len(gdf))
+    
+    return gdf
 
 
 def myround(x):
