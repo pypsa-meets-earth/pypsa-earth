@@ -24,7 +24,9 @@ from shapely.geometry import Point
 from _helpers import configure_logging
 
 
-def tif_to_gdf(tif_files):
+name_transformer = lambda x: Path(str(x).split('/')[-1]).name.replace('.tif', '')
+
+def tif_to_gdf(tif_files, name_transformer=name_transformer):
     """
     Convert a list of .tif files into a GeoDataFrame where each pixel is represented as a square polygon.
     
@@ -48,7 +50,7 @@ def tif_to_gdf(tif_files):
             transform = src.transform
             
             # Get the file name without path and without .tif extension
-            source_name = Path(str(tif_file).split('/')[-1]).name.replace('.tif', '')
+            source_name = name_transformer(tif_file)
             
             # Iterate through each pixel
             for row in range(data.shape[0]):
