@@ -78,7 +78,7 @@ repos:
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.36.2
+  rev: v1.37.0
   hooks:
   - id: yamllint
     exclude: pinned\.yaml$
@@ -86,7 +86,7 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.10.2
+  rev: v0.11.0
   hooks:
   - id: snakefmt
 
