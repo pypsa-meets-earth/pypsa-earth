@@ -289,7 +289,7 @@ def prepare_heat_data(n, snapshots, countries):
         ).multiply(
             nodal_energy_totals[f"electricity residential {use}"]
             + nodal_energy_totals[f"electricity services {use}"]
-        ) * 1e6  # TODO v0.0.2
+        )  # * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
 
@@ -335,7 +335,7 @@ def prepare_heat_data(n, snapshots, countries):
                 nodal_energy_totals[f"cool residential space"]
                 + nodal_energy_totals[f"cool services space"]
             )
-        ) * 1e6
+        )  # * 1e6
 
     cooling_demand = pd.concat(cooling_demand, axis=1)
 
