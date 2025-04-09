@@ -111,7 +111,7 @@ def prepare_network(n, solve_opts, config):
 
     if solve_opts.get("load_shedding"):
         n.add("Carrier", "Load")
-        ac_buses = n.buses[n.buses.carrier=="AC"].index
+        ac_buses = n.buses[n.buses.carrier == "AC"].index
         n.madd(
             "Generator",
             ac_buses,
