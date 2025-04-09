@@ -111,11 +111,12 @@ def prepare_network(n, solve_opts, config):
 
     if solve_opts.get("load_shedding"):
         n.add("Carrier", "Load")
+        ac_buses = n.buses[n.buses.carrier=="AC"].index
         n.madd(
             "Generator",
-            n.buses.index,
+            ac_buses,
             " load",
-            bus=n.buses.index,
+            bus=ac_buses,
             carrier="load",
             sign=1e-3,  # Adjust sign to measure p and p_nom in kW instead of MW
             marginal_cost=1e2,  # Eur/kWh
