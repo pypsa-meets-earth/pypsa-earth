@@ -18,8 +18,8 @@ from _helpers import locate_bus, mock_snakemake
 #     - 2018 (commertial buildings)
 #     - 2020 (residential building)
 # Heating includes both space heating and hot water
-HEAT_DEMAND_TOTAL = 1
-COOL_DEMAND_TOTAL = 1
+HEAT_DEMAND_TOTAL = 275.0e6  # ~3.3 trln Btu -> 0.25 of el demand
+COOL_DEMAND_TOTAL = 275.0e6
 
 SHARE_HEAT_RESID_DEMAND = 0.12
 SHARE_WATER_RESID_DEMAND = 0.12
