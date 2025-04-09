@@ -310,7 +310,6 @@ def prepare_heat_data(n, snapshots, countries):
         - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
     )
 
-    # TODO probably no need to cool water
     # TODO it's possible to account for weekday/weekend differences
     for use in ["space"]:
         day_cooling = list(intraday_profiles_cooling[f"cooling {use}"])
