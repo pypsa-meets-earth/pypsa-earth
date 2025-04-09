@@ -272,14 +272,6 @@ def prepare_heat_data(n, snapshots, countries):
         else:
             heating_demand_shape = intraday_year_profile_heating
 
-        # TODO Account for the differences in a column name alternative/Voronoi clustering
-        heating_demand_shape = scale_demand(
-            data_df=heating_demand_shape,
-            calibr_df=calibr_heat_buses_df,
-            load_mode="heating",
-            geom_id="gadm_1",
-        )
-
         heat_demand[f"{sector} {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
@@ -300,6 +292,14 @@ def prepare_heat_data(n, snapshots, countries):
         ) * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
+
+    # TODO Account for the differences in a column name alternative/Voronoi clustering
+    heat_demand = scale_demand(
+        data_df=heat_demand,
+        calibr_df=calibr_heat_buses_df,
+        load_mode="heating",
+        geom_id="gadm_1",
+    )
 
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
 
@@ -328,14 +328,6 @@ def prepare_heat_data(n, snapshots, countries):
         else:
             cooling_demand_shape = intraday_year_profile_cooling
 
-        # TODO Account for the differences in a column name alternative/Voronoi clustering
-        cooling_demand_shape = scale_demand(
-            data_df=cooling_demand_shape,
-            calibr_df=calibr_cool_buses_df,
-            load_mode="cooling",
-            geom_id="gadm_1",
-        )
-
         cooling_demand[f"{use}"] = (
             cooling_demand_shape / cooling_demand_shape.sum()
         ).multiply(
@@ -346,6 +338,14 @@ def prepare_heat_data(n, snapshots, countries):
         ) * 1e6
 
     cooling_demand = pd.concat(cooling_demand, axis=1)
+
+    # TODO Account for the differences in a column name alternative/Voronoi clustering
+    cooling_demand = scale_demand(
+        data_df=cooling_demand,
+        calibr_df=calibr_cool_buses_df,
+        load_mode="cooling",
+        geom_id="gadm_1",
+    )
 
     return (
         nodal_energy_totals,
