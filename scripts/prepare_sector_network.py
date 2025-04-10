@@ -2916,7 +2916,7 @@ def add_industry_demand(n, demand):
 
     avail = spatial.nodes.intersection(demand.index)
 
-    carrier = "low temperature heat 50-100C for industry"
+    carrier = "low temperature heat 50-80C for industry"
 
     n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
@@ -2925,7 +2925,7 @@ def add_industry_demand(n, demand):
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(50-100C)[MW]"],
+        p_set=demand.loc[avail, "demand(50-80C)[MW]"].tolist(),
     )
 
     # Add a store for low temperature heat that can absorb an infinite amount of heat but cannot discharge it
@@ -2938,8 +2938,8 @@ def add_industry_demand(n, demand):
         capital_cost=0.0,
     )
 
-    # Medium temperature demand between 150C and 250C for industry
-    carrier = "medium temperature heat 100-200C for industry"
+    # Medium temperature demand between 80 and 150C for industry
+    carrier = "medium temperature heat 80-150C for industry"
 
     n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
@@ -2948,7 +2948,7 @@ def add_industry_demand(n, demand):
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(100-200C)[MW]"],
+        p_set=demand.loc[avail, "demand(80-150C)[MW]"].tolist(),
     )
 
     # Add a store for medium temperature heat that can absorb an infinite amount of heat but cannot discharge it
@@ -2961,8 +2961,8 @@ def add_industry_demand(n, demand):
         capital_cost=0.0,
     )
 
-    # High temperature demand between 200C and 250C for industry
-    carrier = "high temperature heat 200-250C for industry"
+    # High temperature demand between 150C and 250C for industry
+    carrier = "high temperature heat 150-250C for industry"
 
     n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
@@ -2971,7 +2971,7 @@ def add_industry_demand(n, demand):
         avail + " " + carrier,
         bus=avail + " " + carrier,
         carrier=carrier,
-        p_set=demand.loc[avail, "demand(200-250C)[MW]"],
+        p_set=demand.loc[avail, "demand(150-250C)[MW]"].tolist(),
     )
 
     # Add a store for high temperature heat that can absorb an infinite amount of heat but cannot discharge it
@@ -3678,7 +3678,6 @@ if __name__ == "__main__":
     # remove conventional generators built in elec-only model
     remove_elec_base_techs(n)
 
-    """
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     # remove H2 and battery technologies added in elec-only model
@@ -3697,7 +3696,7 @@ if __name__ == "__main__":
 
     add_biomass(n, costs)
 
-    add_industry(n, costs)
+    # add_industry(n, costs)
 
     add_shipping(n, costs)
 
@@ -3706,7 +3705,7 @@ if __name__ == "__main__":
 
     # prepare_transport_data(n)
 
-    add_land_transport(n, costs)
+    # add_land_transport(n, costs)
 
     # if snakemake.config["custom_data"]["transport_demand"]:
     add_rail_transport(n, costs)
@@ -3740,14 +3739,11 @@ if __name__ == "__main__":
     #     constant=co2_limit,
     # )
 
-
     if snakemake.config["custom_data"]["water_costs"]:
         add_custom_water_cost(n)
 
     if options["dac"]:
         add_dac(n, costs)
-
-    """
 
     n.export_to_netcdf(snakemake.output[0])
 

@@ -35,7 +35,7 @@ SHARE_DISTRICT_HEAT = 0.1
 CALIBRATE_LOAD = True
 
 # TODO Add to Snakemake
-CALIBR_DIR = "./data"
+CALIBR_DIR = snakemake.input.calib_dir
 
 CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
 CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
