@@ -87,6 +87,7 @@ import pandas as pd
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, override_component_attrs
+from add_electricity import load_costs
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
@@ -973,6 +974,27 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     n.model.add_constraints(lhs == 0, name="Link-bidirectional_sync")
 
 
+def add_bicharger_constraints(n, costs):
+    tech_type = costs.technology_type
+    carriers_bicharger = list(costs.loc[(tech_type == "bicharger"), "carrier"].unique())
+    carriers_config = n.config["electricity"]["extendable_carriers"]["Store"]
+    carriers_intersect = list(set(carriers_bicharger) & set(carriers_config))
+    for c in carriers_intersect:
+        nodes = n.buses.index[n.buses.carrier == c]
+        if nodes.empty or ("Link", "p_nom") not in n.variables.index:
+            return
+        link_p_nom = get_var(n, "Link", "p_nom")
+        lhs = linexpr(
+            (1, link_p_nom[nodes + " charger"]),
+            (
+                -n.links.loc[nodes + " discharger", "efficiency"].values,
+                link_p_nom[nodes + " discharger"].values,
+            ),
+        )
+        contraint_name = f"charger_ratio_{c}"
+        define_constraints(n, lhs, "=", 0, "Link", contraint_name)
+
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -983,6 +1005,14 @@ def extra_functionality(n, snapshots):
     """
     opts = n.opts
     config = n.config
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    costs = load_costs(
+        snakemake.input.tech_costs,
+        config["costs"],
+        config["electricity"],
+        Nyears,
+    )
+
     if "BAU" in opts and n.generators.p_nom_extendable.any():
         add_BAU_constraints(n, config)
     if "SAFE" in opts and n.generators.p_nom_extendable.any():
@@ -1001,6 +1031,7 @@ def extra_functionality(n, snapshots):
             add_EQ_constraints(n, o)
 
     add_battery_constraints(n)
+    add_bicharger_constraints(n, costs)
     add_lossy_bidirectional_link_constraints(n)
 
     if snakemake.config["sector"]["chp"]:
