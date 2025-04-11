@@ -14,6 +14,7 @@ from _helpers import BASE_DIR
 
 logger = logging.getLogger(__name__)
 
+
 def add_iso2_country_code(df):
     """
     Converts 'Country' names to ISO2 codes in a new 'country' column.
@@ -28,13 +29,14 @@ def add_iso2_country_code(df):
     df = df[df.country != "not found"]
 
     # Drop region names where country column contains list of countries
-    df = df.loc[df.country.apply(lambda x: isinstance(x, str)),:]
+    df = df.loc[df.country.apply(lambda x: isinstance(x, str)), :]
 
     return df
 
+
 def download_number_of_vehicles():
     """
-    Downloads and returns the number of registered vehicles as tabular data 
+    Downloads and returns the number of registered vehicles as tabular data
     from the Global Health Observatory (GHO) repository data and from Wikipedia.
 
     The csv data from the WHO website is imported
@@ -44,12 +46,12 @@ def download_number_of_vehicles():
     is also imported for completion (prio 2):
     'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita'.
     """
-    
+
     def _clean_data(df):
         df = df.dropna(subset=["number cars"])
-        df.loc[:,"number cars"] = df.loc[:,"number cars"].astype(int)
-        return df#[["Country", "number cars"]]
-    
+        df.loc[:, "number cars"] = df.loc[:, "number cars"].astype(int)
+        return df  # [["Country", "number cars"]]
+
     storage_options = {"User-Agent": "Mozilla/5.0"}
     url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
     try:
@@ -58,7 +60,7 @@ def download_number_of_vehicles():
         )
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file. Falling back on hard-coded data:",e)
+        logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
         return pd.DataFrame()
 
     vehicles_gho = vehicles_gho.rename(
@@ -83,7 +85,7 @@ def download_number_of_vehicles():
         )[0]
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file.",e)
+        logger.warning("Failed to read the file.", e)
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
 
     vehicles_wiki.rename(
@@ -94,16 +96,15 @@ def download_number_of_vehicles():
 
     vehicles_wiki = _clean_data(vehicles_wiki)
 
-    
     # Add missing countries, which are available in the wikipedia source.
     missing_countries = set(vehicles_wiki["country"]) - set(vehicles_gho["country"])
     print(f"Adding the missing countries {missing_countries} from Wikipedia source.")
 
-    vehicles_wiki_to_add = vehicles_wiki[vehicles_wiki["country"].isin(missing_countries)]
+    vehicles_wiki_to_add = vehicles_wiki[
+        vehicles_wiki["country"].isin(missing_countries)
+    ]
 
-    nbr_vehicles = pd.concat([vehicles_gho, vehicles_wiki_to_add], 
-        ignore_index=True
-    )
+    nbr_vehicles = pd.concat([vehicles_gho, vehicles_wiki_to_add], ignore_index=True)
 
     return nbr_vehicles
 
@@ -112,20 +113,20 @@ def download_CO2_emissions():
     """
     Downloads the CO2 emissions from transport in % of total fuel combustion.
     The data is used to estimate the average fuel consumption of land transport.
-    It is until the year 2014. # TODO: Maybe search for more recent years or another proxy to 
+    It is until the year 2014. # TODO: Maybe search for more recent years or another proxy to
     estimating the average fuel efficiency (MWh/100km).
-    
-    The live API of the World Bank has stopped providing the dataset since October 2024. 
+
+    The live API of the World Bank has stopped providing the dataset since October 2024.
     So this link is used: https://web.archive.org/web/20240527231108/https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
     """
     url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 
-   # Read the 'Data' sheet directly from the Excel file at the provided URL
+    # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
         CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file. Falling back on hard-coded data:",e)
+        logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
         return pd.DataFrame()
 
     CO2_emissions = CO2_emissions[
@@ -137,7 +138,7 @@ def download_CO2_emissions():
 
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
 
-    CO2_emissions = add_iso2_country_code(CO2_emissions) 
+    CO2_emissions = add_iso2_country_code(CO2_emissions)
 
     return CO2_emissions
 
@@ -165,9 +166,9 @@ if __name__ == "__main__":
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:
-        # Join the DataFrames by the 'country' column to prepare the tabular transport_data, 
+        # Join the DataFrames by the 'country' column to prepare the tabular transport_data,
         # which will be saved as transport_data.csv in the resource folder and used
-        # to prepare further (nodal) transport data in prepare_transport_data 
+        # to prepare further (nodal) transport data in prepare_transport_data
         # and to scale the e-mob parameters in prepare_sector_network.
         transport = pd.merge(nbr_vehicles, CO2_emissions, on="country")
         transport = transport[["country", "number cars", "average fuel efficiency"]]
@@ -177,7 +178,7 @@ if __name__ == "__main__":
             print(
                 "Missing data on fuel efficiency from:\n",
                 f"{list(transport.loc[missing].country)}.",
-                "\nFilling gaps with averaged data."
+                "\nFilling gaps with averaged data.",
             )
 
             fill_value = transport["average fuel efficiency"].mean()
