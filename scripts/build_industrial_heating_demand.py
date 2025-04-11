@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import rasterio
 import numpy as np
 import pandas as pd
+
+from shapely.geometry import Point
 from _helpers import mock_snakemake
 from _industry_heat_helpers import coords_to_relative_utm
 from scipy.sparse.csgraph import minimum_spanning_tree, shortest_path
@@ -542,7 +544,6 @@ if __name__ == "__main__":
             simpl="",
             clusters=10,
         )
-    
 
     from pprint import pprint
     pprint(snakemake.input)
@@ -550,11 +551,6 @@ if __name__ == "__main__":
     tif_files = {name: fn for name, fn in snakemake.input.items() if fn.endswith('.tif')}
     file_name_transformer = lambda x: '-'.join(str(x).split('/')[-2:]).replace('.tif', '')
 
-    # gdf = tif_to_gdf(tif_files.values(), name_transformer=file_name_transformer)
-    # gdf = gdf.rename(
-    #     columns={
-    #         file_name_transformer(item): key for key, item in tif_files.items()
-    #     })
     def process_techno_economic_data(df):
         """
         Process the techno-economic data for different technologies.
@@ -575,12 +571,8 @@ if __name__ == "__main__":
             'directheat_200': 'directheat200degC',
             'power_residheat_egs': 'pwr_residheat80degC_egs',
             'power_residheat_hs': 'pwr_residheat80degC_hs',
-            'steam175_egs': 'steam175degC_egs',
-            'steam175_hs': 'steam175degC_hs',
-            'steam200_egs': 'steam200degC_egs',
-            'steam200_hs': 'steam200degC_hs',
-            'steam225_egs': 'steam225degC_egs',
-            'steam225_hs': 'steam225degC_hs',
+            'steam150_egs': 'steam150degC_egs',
+            'steam150_hs': 'steam150degC_hs',
             'steam175_power_residheat80_egs': 'steam175degC_power_residheat80degC_egs',
             'steam175_power_residheat80_hs': 'steam175degC_power_residheat80degC_hs',
             'steam200_power_residheat80_egs': 'steam200degC_power_residheat80degC_egs',
@@ -588,11 +580,17 @@ if __name__ == "__main__":
             'steam225_power_residheat80_egs': 'steam225degC_power_residheat80degC_egs',
             'steam225_power_residheat80_hs': 'steam225degC_power_residheat80degC_hs'
         }
-        
+
         # Create a new DataFrame to store processed data
         result_data = {}
         result_data['geometry'] = df['geometry']
-        
+
+        lifetimes = {
+            'steam': 20,
+            'power': 25,
+            'directheat': 30
+        }
+
         # Process each technology type
         for tech_key, std_tech_name in tech_mapping.items():
             # Extract technology type and mode
@@ -602,133 +600,241 @@ if __name__ == "__main__":
                 mode = 'hs'
             else:
                 mode = None
-                
+
+            # Calculate original LCOE from raw data
+            if tech_key.startswith('directheat'):
+                temp = tech_key.split('_')[1]
+                prefix = f"directheat_{temp}"
+                lifetime = lifetimes['directheat']
+            elif tech_key.startswith('power_residheat'):
+                prefix = f"power_residheat_{mode}"
+                lifetime = lifetimes['power']
+            elif 'steam' in tech_key and 'power_residheat' not in tech_key:
+                temp = tech_key.split('_')[0].replace('steam', '')
+                prefix = f"steam{temp}_{mode}"
+                lifetime = lifetimes['steam']
+            elif 'steam' in tech_key and 'power_residheat' in tech_key:
+                parts = tech_key.split('_')
+                temp = parts[0].replace('steam', '')
+                prefix = f"steam{temp}_{mode}"
+                lifetime = lifetimes['power']
+            
+            # Get all capex, opex, and sales columns for this technology
+            capex_cols = [col for col in df.columns if col.startswith(prefix) and 'capex' in col]
+            opex_cols = [col for col in df.columns if col.startswith(prefix) and 'opex' in col]
+            sales_cols = [col for col in df.columns if col.startswith(prefix) and 'sales' in col]
+            
+            if capex_cols and opex_cols and sales_cols:
+                # Sum all capex, opex, and sales
+                total_capex = sum(df[col] for col in capex_cols)
+                total_opex = sum(df[col] for col in opex_cols)
+                total_sales = sum(df[col] for col in sales_cols)
+
+                # Calculate CRF (Capital Recovery Factor)
+                discount_rate = 0.07
+                crf = discount_rate * (1 + discount_rate)**lifetime / ((1 + discount_rate)**lifetime - 1)
+
+                # Calculate original LCOE
+                original_lcoe = (total_capex * crf + total_opex) / (total_sales * 8760)
+
+                # Store the original LCOE
+                # result_data[(std_tech_name, 'original_lcoe[USD/MWh]')] = original_lcoe * 1e6
+            
             # Process based on technology type
             if tech_key.startswith('directheat'):
                 # Direct heat technologies (only heat output)
                 temp = tech_key.split('_')[1]
-                
+
                 # Column prefixes
                 prefix = f"directheat_{temp}"
-                
-                # Check if required columns exist
+
+                # For directheat, sales, capex and opex are at the end of column names
                 sales_col = f"{prefix}_sales"
+
+                print([col for col in df.columns if col.startswith(prefix)])
                 if sales_col not in df.columns:
-                    continue
-                    
+                    error_msg = f"Sales column {sales_col} not found for technology {tech_key}"
+                    print(error_msg)
+                    raise ValueError(error_msg)
+                
+                # Get the appropriate lifetime for this technology
+                lifetime = lifetimes['directheat']
+                
                 # Calculate total lifetime output
-                lifetime_output = df[sales_col] * 8760 * 25  # 25 years lifetime
+                lifetime_output = df[sales_col] * 8760 * lifetime
                 result_data[(std_tech_name, 'total_output[MWhheat]')] = lifetime_output
                 
-                # Sum CAPEX components
-                capex_cols = [col for col in df.columns if col.startswith(prefix) and 'capex' in col]
-                total_capex = sum(df[col] for col in capex_cols)
-                result_data[(std_tech_name, 'capex[USD/MWheat]')] = total_capex.div(df[sales_col]).mul(1e6)
-                
-                # Sum OPEX components
+                # Get CAPEX
+                capex_col = f"{prefix}_capex"
+                if capex_col not in df.columns:
+                    error_msg = f"CAPEX column {capex_col} not found for technology {tech_key}"
+                    print(error_msg)
+                    raise ValueError(error_msg)
+                result_data[(std_tech_name, 'capex[USD/MWheat]')] = df[capex_col].div(df[sales_col]).mul(1e6)
+
+                # Get OPEX
                 opex_cols = [col for col in df.columns if col.startswith(prefix) and 'opex' in col]
+                if not opex_cols:
+                    error_msg = f"No OPEX columns found for technology {tech_key} with prefix {prefix}"
+                    print(error_msg)
+                    raise ValueError(error_msg)
+                # Sum all OPEX columns instead of just using the first one
                 total_opex = sum(df[col] for col in opex_cols)
                 result_data[(std_tech_name, 'opex[USD/MWhheat]')] = total_opex.div(lifetime_output).mul(1e6)
-                
+
             elif tech_key.startswith('power_residheat'):
                 # Power with residual heat (power and heat outputs)
                 prefix = f"power_residheat_{mode}"
+
+                sales_cols = [col for col in df.columns if col.startswith(prefix) and col.split('_')[-2] == 'sales']
+
+                output_types = [col.split('_')[-1] for col in sales_cols]
+
+                outputs = {}
+                for col, output_type in zip(sales_cols, output_types):
+                    if col in df.columns:
+                        outputs[output_type] = df[col]
+
+                if not outputs:
+                    error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
+                    # Show all columns that start with the tech prefix
+                    matching_cols = [col for col in df.columns if col.startswith(prefix)]
+                    print(f"Columns starting with '{prefix}':", matching_cols)
+                    print(error_msg)
+                    raise ValueError(error_msg)
+
+                # Calculate total output across all types
+                total_output = sum(outputs.values())
                 
-                # Check if required columns exist
-                power_sales_col = f"{prefix}_sales_power"
-                heat_sales_col = f"{prefix}_sales_heat"
+                # Calculate output shares relative to the total output (sum to 1)
+                for output_type, value in outputs.items():
+                    result_data[(std_tech_name, f'{output_type}_share')] = value.div(total_output)
+
+                # Get the appropriate lifetime for this technology
+                lifetime = lifetimes['power']
                 
-                if power_sales_col not in df.columns or heat_sales_col not in df.columns:
-                    continue
-                
-                # Calculate total lifetime output based on power (primary output)
-                lifetime_output = df[power_sales_col] * 8760 * 25
-                result_data[(std_tech_name, 'total_output[MWhepower]')] = lifetime_output
-                
+                # Calculate total lifetime output based on the total output
+                lifetime_output = total_output * 8760 * lifetime
+                result_data[(std_tech_name, f'total_output[MWh]')] = lifetime_output
+
                 # Sum CAPEX components
                 capex_cols = [col for col in df.columns if col.startswith(prefix) and 'capex' in col]
                 total_capex = sum(df[col] for col in capex_cols)
-                result_data[(std_tech_name, 'capex[USD/MWpower]')] = total_capex.div(df[power_sales_col]).mul(1e6)
-                
+                result_data[(std_tech_name, f'capex[USD/MW]')] = total_capex.div(total_output).mul(1e6)
+
                 # Sum OPEX components
                 opex_cols = [col for col in df.columns if col.startswith(prefix) and 'opex' in col]
                 total_opex = sum(df[col] for col in opex_cols)
-                result_data[(std_tech_name, 'opex[USD/MWhepower]')] = total_opex.div(lifetime_output).mul(1e6)
-                
-                # Calculate heat to power ratio
-                result_data[(std_tech_name, 'heat_share')] = df[heat_sales_col].div(df[power_sales_col])
+                result_data[(std_tech_name, f'opex[USD/MWh]')] = total_opex.div(lifetime_output).mul(1e6)
                 
             elif 'steam' in tech_key and 'power_residheat' not in tech_key:
                 # Steam only (heat output only)
                 temp = tech_key.split('_')[0].replace('steam', '')
                 prefix = f"steam{temp}_{mode}"
+
+                # Find all sales columns for this technology
+                sales_cols = [col for col in df.columns if col.startswith(prefix) and col.split('_')[-2] == 'sales']
+
+                # Extract output types from sales column names
+                output_types = [col.split('_')[-1] for col in sales_cols]
+
+                # Create a dictionary of output types to their sales values
+                outputs = {}
+                for col, output_type in zip(sales_cols, output_types):
+                    if col in df.columns:
+                        outputs[output_type] = df[col]
                 
-                # Check if required columns exist
-                steam_sales_col = f"{prefix}_sales_steam"
+                if not outputs:
+                    error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
+                    # Show all columns that start with the tech prefix
+                    matching_cols = [col for col in df.columns if col.startswith(prefix)]
+                    print(f"Columns starting with '{prefix}':", matching_cols)
+                    print(error_msg)
+                    raise ValueError(error_msg)
                 
-                if steam_sales_col not in df.columns:
-                    continue
+                # Calculate total output across all types
+                total_output = sum(outputs.values())
                 
-                # Calculate total lifetime output
-                lifetime_output = df[steam_sales_col] * 8760 * 25
-                result_data[(std_tech_name, 'total_output[MWhheat]')] = lifetime_output
+                # Calculate output shares relative to the total output (sum to 1)
+                for output_type, value in outputs.items():
+                    result_data[(std_tech_name, f'{output_type}_share')] = value.div(total_output)
+                
+                # Get the appropriate lifetime for this technology
+                lifetime = lifetimes['steam']
+                
+                # Calculate total lifetime output based on the total output
+                lifetime_output = total_output * 8760 * lifetime
+                result_data[(std_tech_name, f'total_output[MWh]')] = lifetime_output
                 
                 # Sum CAPEX components
                 capex_cols = [col for col in df.columns if col.startswith(prefix) and 'capex' in col]
                 total_capex = sum(df[col] for col in capex_cols)
-                result_data[(std_tech_name, 'capex[USD/MWheat]')] = total_capex.div(df[steam_sales_col]).mul(1e6)
-                
+                result_data[(std_tech_name, f'capex[USD/MW]')] = total_capex.div(total_output).mul(1e6)
+
                 # Sum OPEX components
                 opex_cols = [col for col in df.columns if col.startswith(prefix) and 'opex' in col]
                 total_opex = sum(df[col] for col in opex_cols)
-                result_data[(std_tech_name, 'opex[USD/MWhheat]')] = total_opex.div(lifetime_output).mul(1e6)
-                
+                result_data[(std_tech_name, f'opex[USD/MWh]')] = total_opex.div(lifetime_output).mul(1e6)
+
             elif 'steam' in tech_key and 'power_residheat' in tech_key:
                 # Combined steam, power, and residual heat
                 parts = tech_key.split('_')
                 temp = parts[0].replace('steam', '')
                 prefix = f"steam{temp}_{mode}"
                 
-                # Check if required columns exist
-                steam_sales_col = f"{prefix}_sales_steam"
-                power_sales_col = f"{prefix}_sales_power"
-                heat_sales_col = f"{prefix}_sales_heat"
+                # Find all sales columns for this technology
+                sales_cols = [col for col in df.columns if col.startswith(prefix) and col.split('_')[-2] == 'sales']
                 
-                if not all(col in df.columns for col in [steam_sales_col, power_sales_col, heat_sales_col]):
-                    continue
+                # Extract output types from sales column names
+                output_types = [col.split('_')[-1] for col in sales_cols]
                 
-                # Calculate total lifetime output based on power (primary output)
-                lifetime_output = df[power_sales_col] * 8760 * 25
-                result_data[(std_tech_name, 'total_output[MWhepower]')] = lifetime_output
+                # Create a dictionary of output types to their sales values
+                outputs = {}
+                for col, output_type in zip(sales_cols, output_types):
+                    if col in df.columns:
+                        outputs[output_type] = df[col]
+                
+                if not outputs:
+                    error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
+                    # Show all columns that start with the tech prefix
+                    matching_cols = [col for col in df.columns if col.startswith(prefix)]
+                    print(f"Columns starting with '{prefix}':", matching_cols)
+                    print(error_msg)
+                    raise ValueError(error_msg)
+                
+                # Calculate total output across all types
+                total_output = sum(outputs.values())
+                
+                # Calculate output shares relative to the total output (sum to 1)
+                for output_type, value in outputs.items():
+                    result_data[(std_tech_name, f'{output_type}_share')] = value.div(total_output)
+                
+                # Get the appropriate lifetime for this technology (using power as primary output)
+                lifetime = lifetimes['power']
+                
+                # Calculate total lifetime output based on the total output
+                lifetime_output = total_output * 8760 * lifetime
+                result_data[(std_tech_name, f'total_output[MWh]')] = lifetime_output
                 
                 # Sum CAPEX components
                 capex_cols = [col for col in df.columns if col.startswith(prefix) and 'capex' in col]
                 total_capex = sum(df[col] for col in capex_cols)
-                result_data[(std_tech_name, 'capex[USD/MWpower]')] = total_capex.div(df[power_sales_col]).mul(1e6)
+                result_data[(std_tech_name, f'capex[USD/MW]')] = total_capex.div(total_output).mul(1e6)
                 
                 # Sum OPEX components
                 opex_cols = [col for col in df.columns if col.startswith(prefix) and 'opex' in col]
                 total_opex = sum(df[col] for col in opex_cols)
-                result_data[(std_tech_name, 'opex[USD/MWhepower]')] = total_opex.div(lifetime_output).mul(1e6)
-                
-                # Calculate output ratios
-                result_data[(std_tech_name, 'steam_share')] = df[steam_sales_col].div(df[power_sales_col])
-                result_data[(std_tech_name, 'heat_share')] = df[heat_sales_col].div(df[power_sales_col])
-        
+                result_data[(std_tech_name, f'opex[USD/MWh]')] = total_opex.div(lifetime_output).mul(1e6)
+
         # Create DataFrame with MultiIndex columns
         result_df = pd.DataFrame(result_data)
-        
+
         return result_df
 
-    # gdf.to_csv('hold.csv')
-    # print('before')
-    # gdf.to_csv('hold.csv')
-    # print(gdf.head())
     gdf = pd.read_csv('hold.csv', index_col=0)
 
     print(gdf.head())
 
-    # Process the techno-economic data
     gdf = process_techno_economic_data(gdf)
 
     gdf.rename(columns={'geometry': ('geometry', '')}, inplace=True)
@@ -743,42 +849,154 @@ if __name__ == "__main__":
     # Iterate over unique technologies and show average techno-economic data
     print("\nTechnology Overview - Average Values:")
     print("-" * 80)
-    
-    for tech in gdf.columns.get_level_values(0).unique():
+
+    for tech in gdf.columns.get_level_values(0).unique()[::-1]:
         # Skip geometry column
         if tech == 'geometry':
             continue
-            
+
         # Get all columns for this technology
-        tech_data = gdf[tech].select_dtypes(include=['number'])
-        
+        idx = pd.IndexSlice
+        tech_data = gdf.loc[:, idx[tech, :, :]].dropna()
+
         if tech_data.empty:
             continue
-            
-        # Calculate averages, ignoring NaN values
+
+        # Calculate statistics, ignoring NaN values
         tech_averages = tech_data.mean(skipna=True)
+        tech_medians = tech_data.median(skipna=True)
+        tech_mins = tech_data.min(skipna=True)
+        tech_maxs = tech_data.max(skipna=True)
         
+        # Define discount rate and lifetimes for LCOE calculation
+        discount_rate = 0.07
+        
+        # Calculate LCOE for each technology type
+        lcoe_values = {}
+
+        # Determine which type this technology is
+        tech_type = None
+        if 'steam' in tech.lower():
+            tech_type = 'steam'
+        elif 'power' in tech.lower():
+            tech_type = 'power'
+        elif 'heat' in tech.lower():
+            tech_type = 'directheat'
+
+        lifetimes = {
+            'steam': 20,
+            'power': 25,
+            'directheat': 30
+        }
+
+        # Find capex and opex columns for this technology
+        capex_cols = [col for col in tech_data.columns.get_level_values(1) if 'capex[USD/MW' in col]
+        opex_cols = [col for col in tech_data.columns.get_level_values(1) if 'opex[USD/MWh' in col]
+        shares_cols = [col for col in tech_data.columns.get_level_values(1) if 'share' in col]
+        
+        # Get the first capex and opex columns (they should be for the same output type)
+        assert len(capex_cols) == 1
+        assert len(opex_cols) == 1
+
+        capex_col = capex_cols[0]
+        opex_col = opex_cols[0]
+        
+        # Extract the output type from the column name
+        if not shares_cols:
+            output_type = [tech]
+        else:
+            output_type = [col.split('_')[0] for col in shares_cols]
+        
+        lifetime = lifetimes.get(tech_type, 25)  # Default to 25 if type not found
+
+        # Calculate CRF (Capital Recovery Factor)
+        crf = discount_rate * (1 + discount_rate)**lifetime / ((1 + discount_rate)**lifetime - 1)
+
+        # Calculate LCOE for each row: LCOE = (CAPEX * CRF + OPEX)
+        if shares_cols:
+            shares = tech_data.loc[:, idx[:, shares_cols]].sum(axis=1)
+            assert np.allclose(shares, 1)
+        else:
+            shares = 1
+        lcoe = (
+            tech_data.loc[:, idx[:, capex_col]].values.flatten() * crf / 8760 +
+            tech_data.loc[:, idx[:, opex_col]].values.flatten()
+        )
+
+        lcoe = pd.Series(lcoe, index=tech_data.index)
+        
+        # Add LCOE values to the gdf dataframe
+        gdf.loc[lcoe.index, idx[tech, f'lcoe[USD/MWh]']] = lcoe
+        
+        # Calculate statistics for LCOE
+        lcoe_values = {
+            'mean': lcoe.mean(skipna=True),
+            'median': lcoe.median(skipna=True),
+            'min': lcoe.min(skipna=True),
+            'max': lcoe.max(skipna=True)
+        }
+
         print(f"\n{tech}:")
-        for metric, value in tech_averages.items():
+        for metric in tech_averages.index.get_level_values(1):
+
             # Format the output based on the metric type
             if 'capex' in metric:
-                print(f"  {metric}: ${value:,.2f}")
+                print("  {}: Mean=${:.2f}, Median=${:.2f}, Min=${:.2f}, Max=${:.2f}".format(
+                    metric, 
+                    float(tech_averages.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_medians.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_mins.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_maxs.loc[idx[:, metric]].iloc[0])))
             elif 'opex' in metric:
-                print(f"  {metric}: ${value:,.4f}")
+                print("  {}: Mean=${:.4f}, Median=${:.4f}, Min=${:.4f}, Max=${:.4f}".format(
+                    metric, 
+                    float(tech_averages.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_medians.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_mins.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_maxs.loc[idx[:, metric]].iloc[0])))
             elif 'share' in metric:
-                print(f"  {metric}: {value:.4f}")
+                print("  {}: Mean={:.4f}, Median={:.4f}, Min={:.4f}, Max={:.4f}".format(
+                    metric, 
+                    float(tech_averages.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_medians.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_mins.loc[idx[:, metric]].iloc[0]), 
+                    float(tech_maxs.loc[idx[:, metric]].iloc[0])))
             elif 'output' in metric or 'max' in metric:
-                print(f"  {metric}: {value:,.2f}")
+                continue
             else:
-                print(f"  {metric}: {value}")
-    
+                continue
+                # print("  {}: Mean={:.4f}, Median={:.4f}, Min={:.4f}, Max={:.4f}".format(
+                #     metric, 
+                #     float(tech_averages.loc[idx[:, metric]].iloc[0]), 
+                #     float(tech_medians.loc[idx[:, metric]].iloc[0]), 
+                #     float(tech_mins.loc[idx[:, metric]].iloc[0]), 
+                #     float(tech_maxs.loc[idx[:, metric]].iloc[0])))
+
+        # Print LCOE if calculated
+        if lcoe_values:
+            print("  LCOE[USD/MWh] ({}, {} years): Mean=${:.2f}, Median=${:.2f}, Min=${:.2f}, Max=${:.2f}".format(
+                tech_type, lifetimes[tech_type], 
+                float(lcoe_values['mean']), float(lcoe_values['median']), 
+                float(lcoe_values['min']), float(lcoe_values['max'])))
+            
+            # Print original LCOE if available
+            if 'original_lcoe[USD/MWh]' in tech_data.columns.get_level_values(1):
+                original_lcoe = tech_data.loc[:, idx[:, 'original_lcoe[USD/MWh]']]
+                original_lcoe_values = {
+                    'mean': original_lcoe.mean(skipna=True).iloc[0],
+                    'median': original_lcoe.median(skipna=True).iloc[0],
+                    'min': original_lcoe.min(skipna=True).iloc[0],
+                    'max': original_lcoe.max(skipna=True).iloc[0]
+                }
+                print("  Original LCOE[USD/MWh]: Mean=${:.2f}, Median=${:.2f}, Min=${:.2f}, Max=${:.2f}".format(
+                    float(original_lcoe_values['mean']), float(original_lcoe_values['median']), 
+                    float(original_lcoe_values['min']), float(original_lcoe_values['max'])))
+
     print("-" * 80)
 
+    print(gdf.columns.get_level_values(0).unique())
 
-    import sys
-    sys.exit()
-
-    gdf = prepare_demand_data(snakemake.input["demand_data"])
+    demand_gdf = prepare_demand_data(snakemake.input["demand_data"])
     logger.warning(
         "Inconsistency between temperature ranges in the data and this scripts."
         "This script has 50-80, 80-150, 150-250."
@@ -806,13 +1024,56 @@ if __name__ == "__main__":
         columns=["demand(50-80C)[MW]", "demand(80-150C)[MW]", "demand(150-250C)[MW]"],
     )
 
+    # Create a mapping from technology to applicable demand types
+    # Create a mapping from temperature bands to applicable technologies
+    demand_to_tech_mapping = {
+        '50-80C': [
+            'pwr_residheat80degC_egs',
+            'pwr_residheat80degC_hs',
+            'steam175degC_power_residheat80degC_egs',
+            'steam175degC_power_residheat80degC_hs',
+            'steam200degC_power_residheat80degC_egs',
+            'steam200degC_power_residheat80degC_hs',
+            'steam225degC_power_residheat80degC_egs',
+            'steam225degC_power_residheat80degC_hs'
+        ],
+        '80-150C': [
+            'directheat100degC',
+            'steam175degC_power_residheat80degC_egs',
+            'steam175degC_power_residheat80degC_hs',
+            'steam200degC_power_residheat80degC_egs',
+            'steam200degC_power_residheat80degC_hs',
+            'steam225degC_power_residheat80degC_egs',
+            'steam225degC_power_residheat80degC_hs'
+        ],
+        '150-250C': [
+            'directheat200degC',
+            'steam150degC_egs',
+            'steam150degC_hs',
+            'steam175degC_power_residheat80degC_egs',
+            'steam175degC_power_residheat80degC_hs',
+            'steam200degC_power_residheat80degC_egs',
+            'steam200degC_power_residheat80degC_hs',
+            'steam225degC_power_residheat80degC_egs',
+            'steam225degC_power_residheat80degC_hs'
+        ],
+    }
+
     regional_supplies = list()
     heat_exchanger_max_capacities = list()
+
+    print('preprocessed EGS data')
+    # Convert string geometries to shapely objects
+    if isinstance(gdf['geometry'].iloc[0], str):
+        from shapely import wkt
+        gdf['geometry'] = gdf['geometry'].apply(lambda x: wkt.loads(x))
+    gdf = gpd.GeoDataFrame(gdf, geometry='geometry', crs='EPSG:4326')
+    print(gdf)
 
     for region, geometry in tqdm(regions["geometry"].items()):
 
         regional_supply = pd.DataFrame(columns=supply_curve_columns)
-        ss = gdf.loc[gdf["geometry"].within(geometry)]
+        ss = demand_gdf.loc[demand_gdf["geometry"].within(geometry)]
 
         temp_bands = [
             ("50-80C", lambda x: (x >= 50) & (x <= 80)),
@@ -833,7 +1094,8 @@ if __name__ == "__main__":
                 logger.warning(f"No data for {region}")
                 continue
 
-            utm_coords = coords_to_relative_utm(band_data[["y", "x"]].values)
+            lonlat_coords = band_data[["y", "x"]].values
+            utm_coords = coords_to_relative_utm(lonlat_coords)
             avg_demand = band_data["avg_demand"].values
 
             clusters, cluster_info = greedy_clustering(
@@ -907,6 +1169,38 @@ if __name__ == "__main__":
                 cluster_supply.loc["capex[$/MW]"] = (
                     dummy_egs_query(cluster) * cluster_size + piping_cost * cluster_sp
                 ) / cluster_size
+
+                print('into egs query:')                
+                print(cluster)
+
+                print(lonlat_coords[cluster])
+                print(lonlat_coords[cluster].mean(axis=0))
+                print(utm_coords[cluster])
+
+                query_point = Point(lonlat_coords[cluster].mean(axis=0)[::-1])
+
+                print(band)
+                print(query_point)
+
+                # Create a buffer of 0.5 degrees around the query point
+                buffer_distance = 0.5  # in degrees
+                buffered_point = query_point.buffer(buffer_distance)
+                
+                # Select entries where the geometry intersects with the buffered point
+                geothermal_subset = gdf.loc[
+                    gdf.geometry.intersects(buffered_point)
+                ].iloc[0]
+
+                print(geothermal_subset)
+
+                idx = pd.IndexSlice
+                print(
+                    geothermal_subset.loc[idx[demand_to_tech_mapping[band],:]].dropna().unstack()
+                )
+
+                import sys
+                sys.exit()
+
 
                 cluster_supply.loc["avail_capacity[MW]"] = cluster_size
                 cluster_supply.loc["opex[$/MWh]"] = 0.0
