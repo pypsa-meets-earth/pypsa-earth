@@ -96,10 +96,10 @@ def download_number_of_vehicles():
 
     
     # Add missing countries, which are available in the wikipedia source.
-    missing_countries = set(vehicles_wiki["Country"]) - set(vehicles_gho["Country"])
+    missing_countries = set(vehicles_wiki["country"]) - set(vehicles_gho["country"])
     print(f"Adding the missing countries {missing_countries} from Wikipedia source.")
 
-    vehicles_wiki_to_add = vehicles_wiki[vehicles_wiki["Country"].isin(missing_countries)]
+    vehicles_wiki_to_add = vehicles_wiki[vehicles_wiki["country"].isin(missing_countries)]
 
     nbr_vehicles = pd.concat([vehicles_gho, vehicles_wiki_to_add], 
         ignore_index=True
@@ -132,7 +132,7 @@ def download_CO2_emissions():
         ["Country Name", "Country Code", "Indicator Name", "2014"]
     ]
 
-    # Estimate average fuel efficiency (MWh/100km) based on CO2 emissions from transport in % of total fuel combustion
+    # Estimate efficiency based on CO2 emissions from transport (% of total fuel combustion)
     CO2_emissions["average fuel efficiency"] = (100 - CO2_emissions["2014"]) / 100
 
     CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
