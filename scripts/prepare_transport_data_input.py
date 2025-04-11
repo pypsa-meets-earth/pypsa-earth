@@ -118,7 +118,7 @@ def download_CO2_emissions():
     The live API of the World Bank has stopped providing the dataset since October 2024. 
     So this link is used: https://web.archive.org/web/20240527231108/https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
     """
-    url = "https://web.archive.org/web/20240521093243/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+    url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 
    # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
@@ -172,11 +172,16 @@ if __name__ == "__main__":
         transport = pd.merge(nbr_vehicles, CO2_emissions, on="country")
         transport = transport[["country", "number cars", "average fuel efficiency"]]
 
-        transport = transport.dropna(subset=["average fuel efficiency"])
+        missing = transport.index[transport["average fuel efficiency"].isna()]
+        if not missing.empty:
+            print(
+                "Missing data on fuel efficiency from:\n",
+                f"{list(transport.loc[missing].country)}.",
+                "\nFilling gaps with averaged data."
+            )
 
-        transport["average fuel efficiency"] = transport[
-            "average fuel efficiency"
-        ].astype(float)
+            fill_value = transport["average fuel efficiency"].mean()
+            transport.loc[missing, "average fuel efficiency"] = fill_value
 
         transport.loc[:, "average fuel efficiency"] = transport[
             "average fuel efficiency"
