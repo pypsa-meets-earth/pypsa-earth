@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add Wikipedia as a source for the preparation of transport_data.csv  `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
+
 * Add a new page for sector-coupled tutorial `PR #1374 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1374>`__
 
 * Add an option to redefine countries into subregions which can be activated at various stages of the workflow. The subregions can be defined either by the GADM_ID or a custom map. Currently, it is only used in the ``simplify_network`` rule `PR #1300 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1300>`__
@@ -30,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
 **Minor Changes and bug-fixing**
+
+* Fix problem with a discontinued World Bank data source in prepare_transport_data_input `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
 
 * Fix bug in myopic run. `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
 
