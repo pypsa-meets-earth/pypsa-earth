@@ -110,16 +110,17 @@ def download_number_of_vehicles():
 
 def download_CO2_emissions():
     """
-    Downloads the CO2_emissions from vehicles as .csv File.
-
-    The dataset is downloaded from the following link: https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
-    It is until the year 2014. # TODO: Maybe search for more recent years.
+    Downloads the CO2 emissions from transport in % of total fuel combustion.
+    The data is used to estimate the average fuel consumption of land transport.
+    It is until the year 2014. # TODO: Maybe search for more recent years or another proxy to 
+    estimating the average fuel efficiency (MWh/100km).
+    
+    The live API of the World Bank has stopped providing the dataset since October 2024. 
+    So this link is used: https://web.archive.org/web/20240527231108/https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
     """
-    url = (
-        "https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
-    )
+    url = "https://web.archive.org/web/20240521093243/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 
-    # Read the 'Data' sheet directly from the Excel file at the provided URL
+   # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
         CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
         print("File read successfully.")
