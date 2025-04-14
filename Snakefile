@@ -928,7 +928,7 @@ rule build_industrial_heating_demands:
             f"steam{T}_{mode}_sales_heat": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/avg._net_resid._heat_sales_-_MWth_stitched.tif"
             for T in [175, 200, 225] for mode in ["egs", "hs"]
         },
-        
+
         # Steam only inputs for 150C
         **{
             f"steam150_{mode}_capex_steam": f"{gt_path}/pypsa_steam150degC_{mode}/steam_surface_CAPEX_-_USDmm_stitched.tif"
@@ -961,9 +961,9 @@ rule build_industrial_heating_demands:
             + SECDIR
             + "industrial_heating_demands_s{simpl}_{clusters}.csv"
         ),
-        heat_exchanger_capacity=(
-            "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
-        ),
+        # heat_exchanger_capacity=(
+        #     "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
+        # ),
     threads: 1
     log:
         "logs/" + SECDIR + "build_industrial_heating_demand_s{simpl}_{clusters}.log",
