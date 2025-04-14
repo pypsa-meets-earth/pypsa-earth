@@ -536,6 +536,145 @@ def find_heat_exchanger_capacity(data, distance_threshold=1.0):
     }
 
 
+def process_regional_supply_curves(data, supply_curve_step_number=3):
+    """
+    Process regional geothermal data to create discretized supply curves.
+    
+    For each region and technology combination:
+    - If fewer than supply_curve_step_number entries exist, just sort by capex
+    - If more entries exist, discretize the supply curve by splitting into equal-sized bins
+      based on cumulative demand
+    
+    Parameters:
+    -----------
+    data : pandas.DataFrame
+        DataFrame containing regional geothermal data
+    supply_curve_step_number : int, default=3
+        Number of steps to discretize the supply curve into
+    
+    Returns:
+    --------
+    pandas.DataFrame
+        Processed data with discretized supply curves
+    """
+    import numpy as np
+    
+    # Identify share columns
+    share_cols = [col for col in data.columns if 'share' in col]
+    
+    # Create empty list to store processed data
+    processed_data = []
+    
+    # Iterate over unique regions
+    for region in data.region.unique():
+        region_data = data[data.region == region]
+        
+        # Iterate over unique technologies in this region
+        for tech in region_data.tech.unique():
+            subset = region_data[region_data.tech == tech].copy()
+            
+            # Sort by capex
+            subset = subset.sort_values('capex[USD/MW]')
+            
+            # If fewer entries than supply_curve_step_number, just add numbering
+            if len(subset) <= supply_curve_step_number:
+                # Add numbering to tech - starting at 1 for each tech
+                for i, idx in enumerate(subset.index):
+                    subset.loc[idx, 'tech'] = f"{tech} {i+1}"
+                
+                processed_data.append(subset)
+            
+            # If more entries, discretize the supply curve
+            else:
+                # Create supply curve from heat_demand and capex
+                subset['cumulative_demand'] = subset['heat_demand[MW]'].cumsum()
+                
+                # Calculate demand-weighted average capex for original data
+                original_weighted_capex = (subset['capex[USD/MW]'] * subset['heat_demand[MW]']).sum() / subset['heat_demand[MW]'].sum()
+                
+                # Calculate total demand
+                total_demand = subset['heat_demand[MW]'].sum()
+                
+                # Create equal-sized bins based on cumulative demand
+                bin_size = total_demand / supply_curve_step_number
+                bin_boundaries = [i * bin_size for i in range(supply_curve_step_number + 1)]
+                
+                # Initialize discretized data
+                discretized_data = []
+                
+                # Create discretized steps based on bin boundaries
+                for step in range(supply_curve_step_number):
+                    step_start = bin_boundaries[step]
+                    step_end = bin_boundaries[step + 1]
+                    
+                    # Find rows that fall within this step
+                    if step == 0:
+                        # For the first step, ensure we include the first point
+                        mask = subset['cumulative_demand'] <= step_end
+                    else:
+                        mask = (subset['cumulative_demand'] > step_start) & (subset['cumulative_demand'] <= step_end)
+                    
+                    step_subset = subset[mask]
+                    
+                    # Ensure the first bin always has data
+                    if step == 0 and step_subset.empty:
+                        # If first bin is empty, include at least the first point
+                        step_subset = subset.iloc[[0]]
+                    
+                    if not step_subset.empty:
+                        # Create a new row for this step
+                        new_row = {}
+                        
+                        # Calculate demand-weighted average capex for this step
+                        new_row['capex[USD/MW]'] = (step_subset['capex[USD/MW]'] * step_subset['heat_demand[MW]']).sum() / step_subset['heat_demand[MW]'].sum()
+                        
+                        # Sum heat demand for this step
+                        new_row['heat_demand[MW]'] = step_subset['heat_demand[MW]'].sum()
+                        
+                        # Sum total output
+                        new_row['total_output[MWh]'] = step_subset['total_output[MWh]'].sum()
+                        
+                        # Average for opex and share columns
+                        new_row['opex[USD/MWh]'] = step_subset['opex[USD/MWh]'].mean()
+                        new_row['lcoe[USD/MWh]'] = step_subset['lcoe[USD/MWh]'].mean()
+                        
+                        for col in share_cols:
+                            if col in step_subset.columns:
+                                new_row[col] = step_subset[col].mean()
+                        
+                        # Add region and tech with numbering - starting at 1 for each tech
+                        new_row['region'] = region
+                        new_row['tech'] = f"{tech} {step+1}"
+                        
+                        discretized_data.append(new_row)
+                
+                # Convert discretized data to DataFrame
+                if discretized_data:
+                    discretized_df = pd.DataFrame(discretized_data)
+                    
+                    # Calculate demand-weighted average capex for discretized data
+                    discretized_weighted_capex = (discretized_df['capex[USD/MW]'] * discretized_df['heat_demand[MW]']).sum() / discretized_df['heat_demand[MW]'].sum()
+                    
+                    # Adjust capex values to ensure demand-weighted average matches original
+                    if discretized_weighted_capex != 0:  # Avoid division by zero
+                        adjustment_factor = original_weighted_capex / discretized_weighted_capex
+                        discretized_df['capex[USD/MW]'] = discretized_df['capex[USD/MW]'] * adjustment_factor
+                    
+                    processed_data.append(discretized_df)
+        # break
+    
+    # Combine all processed data
+    if processed_data:
+        result = pd.concat(processed_data, ignore_index=True)
+        
+        # Set multi-index for region and tech
+        result = result.set_index(['region', 'tech'])
+        
+        return result
+    else:
+        return pd.DataFrame()
+
+
 if __name__ == "__main__":
 
     if "snakemake" not in globals():
@@ -546,7 +685,6 @@ if __name__ == "__main__":
         )
 
     from pprint import pprint
-    pprint(snakemake.input)
 
     tif_files = {name: fn for name, fn in snakemake.input.items() if fn.endswith('.tif')}
     file_name_transformer = lambda x: '-'.join(str(x).split('/')[-2:]).replace('.tif', '')
@@ -862,22 +1000,16 @@ if __name__ == "__main__":
 
     gdf = pd.read_csv('hold.csv', index_col=0)
 
-    print(gdf.head())
-
     gdf = process_techno_economic_data(gdf)
 
     gdf.rename(columns={'geometry': ('geometry', '')}, inplace=True)
     gdf.columns = pd.MultiIndex.from_tuples(gdf.columns)
-    print(gdf.head())
     
     tech_levels = gdf.columns.get_level_values(0).unique()
     
     new_parts = [gdf[['geometry']]]
 
     idx = pd.IndexSlice
-
-    print('before shape:')
-    print(gdf.shape)
 
     for tech in tech_levels:
         if tech == 'geometry':
@@ -887,23 +1019,6 @@ if __name__ == "__main__":
     
     gdf = pd.concat(new_parts, axis=1)
 
-    print('after shape:')
-    print(gdf.shape)
-
-    print(gdf.head())
-
-    # import sys
-    # sys.exit()
-
-    print("Processed DataFrame with MultiIndex columns:")
-    print(gdf.head())
-    print(f"Number of technologies: {len(gdf.columns.levels[0]) if isinstance(gdf.columns, pd.MultiIndex) else 0}")
-
-    print(gdf.columns.get_level_values(0).unique())
-    print(gdf.columns.get_level_values(1).unique())
-    # Iterate over unique technologies and show average techno-economic data
-    print("\nTechnology Overview - Average Values:")
-    print("-" * 80)
 
     for tech in gdf.columns.get_level_values(0).unique()[::-1]:
         # Skip geometry column
@@ -1020,12 +1135,6 @@ if __name__ == "__main__":
                 continue
             else:
                 continue
-                # print("  {}: Mean={:.4f}, Median={:.4f}, Min={:.4f}, Max={:.4f}".format(
-                #     metric, 
-                #     float(tech_averages.loc[idx[:, metric]].iloc[0]), 
-                #     float(tech_medians.loc[idx[:, metric]].iloc[0]), 
-                #     float(tech_mins.loc[idx[:, metric]].iloc[0]), 
-                #     float(tech_maxs.loc[idx[:, metric]].iloc[0])))
 
         # Print LCOE if calculated
         if lcoe_values:
@@ -1114,6 +1223,8 @@ if __name__ == "__main__":
     print(gdf)
 
     regional_supply_shapes = pd.Series(index=regions.index)
+
+    total_results = []
 
     for region, geometry in tqdm(regions["geometry"].items()):
 
@@ -1213,21 +1324,7 @@ if __name__ == "__main__":
                 cluster_size = sum(avg_demand[cluster])
                 total_cluster_size += cluster_size
 
-                # cluster_supply.loc["capex[$/MW]"] = (
-                #     dummy_egs_query(cluster) * cluster_size + piping_cost * cluster_sp
-                # ) / cluster_size
-
-                print('into egs query:')                
-                print(cluster)
-
-                print(lonlat_coords[cluster])
-                print(lonlat_coords[cluster].mean(axis=0))
-                print(utm_coords[cluster])
-
                 query_point = Point(lonlat_coords[cluster].mean(axis=0)[::-1])
-
-                print(band)
-                print(query_point)
 
                 # Create a buffer of 0.5 degrees around the query point
                 buffer_distance = 0.5  # in degrees
@@ -1243,8 +1340,6 @@ if __name__ == "__main__":
                     continue
                 else:
                     geothermal_subset = geothermal_subset.iloc[0]
-
-                print(geothermal_subset)
 
                 idx = pd.IndexSlice
 
@@ -1273,8 +1368,6 @@ if __name__ == "__main__":
                 }
                 band_centroids.append(appendage)
 
-        print('===============================')
-
         if not regional_supply:
             continue
 
@@ -1283,121 +1376,20 @@ if __name__ == "__main__":
         regional_supply_shapes.loc[region] = len(regional_supply)
         regional_supply.to_csv(f'hold/regional_supply_{region}.csv')
 
-        continue
-        
+        regional_supply.loc[:, 'region'] = region
+        total_results.append(regional_supply)
 
-        heat_exchanger_capacity = pd.Series(
-            find_heat_exchanger_capacity(band_centroids, distance_threshold=2),
-            name=region,
-        )
+        # heat_exchanger_capacity = pd.Series(
+        #     find_heat_exchanger_capacity(band_centroids, distance_threshold=2),
+        #     name=region,
+        # )
 
-        regional_supply.loc[:, "capex[$/MW]"] = regional_supply.loc[
-            :, "capex[$/MW]"
-        ].round(3)
+    total_results = pd.concat(total_results).reset_index().rename(columns={'index': 'tech'})
+    total_results = process_regional_supply_curves(total_results).replace(np.nan, 0)
 
-        # Process each temperature band separately
-        temperature_bands = regional_supply["temperature"].unique()
-        processed_supplies = []
-
-        for temp_band in temperature_bands:
-
-            temp_supply = regional_supply[
-                regional_supply["temperature"] == temp_band
-            ].copy()
-
-            temp_supply = temp_supply.dropna()
-
-            temp_supply = (
-                temp_supply.groupby("capex[$/MW]")
-                .agg(
-                    {
-                        "avail_capacity[MW]": "sum",
-                        "opex[$/MWh]": "mean",
-                        "temperature": "first",
-                    }
-                )
-                .reset_index()
-            )
-
-            if temp_supply.empty:
-                continue
-
-            if len(temp_supply) <= n_cost_steps:  # nothing needs to be done
-                temp_supply["level"] = temp_supply["capex[$/MW]"].values
-                pass
-
-            else:
-                logger.warning("Check this method once real data is used!!")
-                bins = pd.Series(
-                    np.linspace(
-                        temp_supply["capex[$/MW]"].min(),
-                        temp_supply["capex[$/MW]"].max(),
-                        n_cost_steps + 1,
-                    )
-                )
-
-                labels = bins.rolling(2).mean().dropna().tolist()
-
-                temp_supply["level"] = pd.cut(
-                    temp_supply["capex[$/MW]"],
-                    bins=bins,
-                    labels=labels,
-                    duplicates="drop",
-                )
-
-            temp_supply = temp_supply.dropna()
-
-            temp_supply = (
-                temp_supply.groupby("level", observed=False)[
-                    ["avail_capacity[MW]", "opex[$/MWh]", "temperature"]
-                ]
-                .agg(
-                    {
-                        "avail_capacity[MW]": "sum",
-                        "opex[$/MWh]": "mean",
-                        "temperature": "first",
-                    }
-                )
-                .reset_index()
-                .rename(columns={"level": "capex[$/MW]"})
-            )
-
-            temp_supply = temp_supply.dropna()
-            temp_supply.index = pd.MultiIndex.from_arrays(
-                [
-                    [region] * len(temp_supply),
-                    temp_supply["temperature"].values,
-                    range(len(temp_supply)),
-                ],
-                names=["region", "temperature", "cost_step"],
-            )
-
-            temp_supply.drop(columns=["temperature"], inplace=True)
-            processed_supplies.append(temp_supply)
-
-        if processed_supplies:
-            regional_supply = pd.concat(processed_supplies)
-            regional_supplies.append(regional_supply)
-
-        heat_exchanger_max_capacities.append(
-            pd.Series(heat_exchanger_capacity, name=region)
-        )
-    
-    print(regional_supply_shapes.replace(np.nan, 0))
-    print(regional_supply_shapes.replace(np.nan, 0).mean())
-    import sys
-    sys.exit()
-
-    logger.warning(
-        "Assumes that EGS drilling cost are added somewhere else to the model."
-    )
-    (
-        pd.concat(regional_supplies)
-        .dropna()
-        .to_csv(snakemake.output["industrial_heating_egs_supply_curves"])
-    )
-
+    total_results.to_csv(snakemake.output["industrial_heating_egs_supply_curves"])
     final_demands.to_csv(snakemake.output["industrial_heating_demands"])
-    pd.concat(heat_exchanger_max_capacities, axis=1).to_csv(
-        snakemake.output["heat_exchanger_capacity"]
-    )
+
+    # pd.concat(heat_exchanger_max_capacities, axis=1).to_csv(
+    #     snakemake.output["heat_exchanger_capacity"]
+    # )
