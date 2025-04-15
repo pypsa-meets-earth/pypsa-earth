@@ -15,6 +15,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add rule ``retrieve_cutout`` to separate the retrieval of cutouts from ``retrieve_databundle_light`` rule while using the same script. Additionally, if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, it will reroute to the ``_cli.py`` script to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
 
+* Add a new page for sector-coupled tutorial `PR #1374 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1374>`__
+
 * Add an option to redefine countries into subregions which can be activated at various stages of the workflow. The subregions can be defined either by the GADM_ID or a custom map. Currently, it is only used in the ``simplify_network`` rule `PR #1300 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1300>`__
 
 * Drop duplication of retrieve_data and COST_DIR, add params and update technology-data version `PR #1249 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1249>`__
