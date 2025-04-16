@@ -50,11 +50,11 @@ After initial run and successful generation of custom cutouts, ``build_cutout`` 
 
     No need to configure the `Copernicus API` if the weather year 2013 is used, as pre-compiled cutouts are automatically downloaded.
 
-    Additionally, if you encounter issues with failed ``retrieve_databundle`` or ``retrieve_cutout``, you can use the following script to debug it through the command line interface (CLI):
+    Additionally, if you encounter issues with failed ``retrieve_databundle``, you can use the following script to debug it through the command line interface (CLI):
 
     .. code:: bash
 
-        .../pypsa-earth (pypsa-earth) $ python scripts/_cli.py
+        .../pypsa-earth (pypsa-earth) $ python scripts/non_workflow/databundle_cli.py
 
 Specify the weather year scope
 ------------------------------

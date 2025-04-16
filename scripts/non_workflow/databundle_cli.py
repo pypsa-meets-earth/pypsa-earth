@@ -3,6 +3,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import textwrap
+import sys
+import os
+
+# Add parent directory to sys.path
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, parent_dir)
 
 from _helpers import mock_snakemake
 from retrieve_databundle_light import *
@@ -138,19 +144,20 @@ def databundle_check(bundles_to_download, config):
 
 if __name__ == "__main__":
 
-    snakemake = mock_snakemake("retrieve_databundle_light")
-
     console_markdown(
         """
 
     # PyPSA-Earth Databundle Retrieval Command-Line Interface (CLI)
 
-    Find the missing file for your snakemake run and solve them your own way. Please make sure to:
+    Find the missing file for your snakemake run and solve them your own way. 
+    To prevent snakemake from trying to re-download the file again during the workflow, make sure to:
 
     - Set `retrieve_databundle` as false
 
     """
     )
+
+    snakemake = mock_snakemake("retrieve_databundle_light")
 
     rootpath = "."
     tutorial = snakemake.config["tutorial"]

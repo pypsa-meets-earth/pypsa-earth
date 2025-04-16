@@ -13,7 +13,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Add rule ``retrieve_cutout`` to separate the retrieval of cutouts from ``retrieve_databundle_light`` rule while using the same script. Additionally, if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, it will reroute to the ``_cli.py`` script to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
+* Add a command-line interface in ``databundle_cli.py`` that will be triggered if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, providing a fallback to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
 
 * Add a new page for sector-coupled tutorial `PR #1374 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1374>`__
 
