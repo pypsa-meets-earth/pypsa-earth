@@ -500,4 +500,3 @@ dependencies:
       - fake-useragent==2.2.0
       - googledrivedownloader==0.4
 prefix: C:\Miniconda\envs\pypsa-earth
-
