@@ -33,6 +33,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update the applications list for PyPSA-Earth model. `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
+
 * Fix problem with a discontinued World Bank data source in prepare_transport_data_input `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
 
 * Fix bug in myopic run. `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
