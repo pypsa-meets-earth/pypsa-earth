@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import textwrap
-import sys
 import os
+import sys
+import textwrap
 
 # Add parent directory to sys.path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     # PyPSA-Earth Databundle Retrieval Command-Line Interface (CLI)
 
-    Find the missing file for your snakemake run and solve them your own way. 
+    Find the missing file for your snakemake run and solve them your own way.
     To prevent snakemake from trying to re-download the file again during the workflow, make sure to:
 
     - Set `retrieve_databundle` as false
