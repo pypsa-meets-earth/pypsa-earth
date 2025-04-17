@@ -340,6 +340,29 @@ def terminate_if_cutout_exists(config=config):
             )
 
 
+if config["enable"].get("build_cutout", False):
+    terminate_if_cutout_exists(config)
+
+    rule build_cutout:
+        params:
+            snapshots=config["snapshots"],
+            cutouts=config["atlite"]["cutouts"],
+        input:
+            onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+            offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        output:
+            "cutouts/" + CDIR + "{cutout}.nc",
+        log:
+            "logs/" + RDIR + "build_cutout/{cutout}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "build_cutout_{cutout}"
+        threads: ATLITE_NPROCESSES
+        resources:
+            mem_mb=ATLITE_NPROCESSES * 1000,
+        script:
+            "scripts/build_cutout.py"
+
+
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
