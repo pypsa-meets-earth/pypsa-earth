@@ -19,7 +19,10 @@ from _helpers import (
     BASE_DIR,
 )
 from build_demand_profiles import get_load_paths_gegis
-from retrieve_databundle_light import datafiles_retrivedatabundle
+from retrieve_databundle_light import (
+    datafiles_retrivedatabundle,
+    get_best_bundles_in_snakemake,
+)
 from pathlib import Path
 
 
@@ -138,13 +141,16 @@ rule plot_all_summaries:
 
 if config["enable"].get("retrieve_databundle", True):
 
+    bundles_to_download = get_best_bundles_in_snakemake(config)
+
     rule retrieve_databundle_light:
         params:
-            countries=config["countries"],
-            tutorial=config["tutorial"],
+            bundles_to_download=bundles_to_download,
             hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
-            expand("{file}", file=datafiles_retrivedatabundle(config)),
+            expand(
+                "{file}", file=datafiles_retrivedatabundle(config, bundles_to_download)
+            ),
             directory("data/landcover"),
         log:
             "logs/" + RDIR + "retrieve_databundle.log",
@@ -330,7 +336,7 @@ def terminate_if_cutout_exists(config=config):
             raise Exception(
                 "An option `build_cutout` is enabled, while a cutout file '"
                 + cutout_fl
-                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
+                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` and `retrieve_cutout` rule in the config file."
             )
 
 

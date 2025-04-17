@@ -85,6 +85,9 @@ dependencies:
 - glpk
 - gurobi
 
+# Command Line Interface
+- rich
+
 - pip:
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
   - chaospy  # lastest version only available on pip
