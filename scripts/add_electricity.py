@@ -934,8 +934,8 @@ if __name__ == "__main__":
     )
     attach_hydro(n, costs, ppl)
 
-    if snakemake.params.renewable["enhanced_geothermal"]["enable"]:
-        attach_enhanced_geothermal(n)
+    # if snakemake.params.renewable["enhanced_geothermal"]["enable"]:
+    #     attach_enhanced_geothermal(n)
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
