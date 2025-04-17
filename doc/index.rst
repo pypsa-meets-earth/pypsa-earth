@@ -136,6 +136,25 @@ Documentation
    configuration
    costs
 
+**Rules Overview**
+
+* :doc:`retrieve`
+* :doc:`preparation`
+* :doc:`sector`
+* :doc:`solving`
+* :doc:`plotting`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Rules Overview
+
+   retrieve
+   preparation
+   sector
+   solving
+   plotting
+
 **Work flow and API**
 
 * :doc:`structure`
