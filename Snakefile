@@ -1357,21 +1357,8 @@ rule prepare_sector_network:
         industrial_heating_costs=(
             "resources/" + SECDIR + "industrial_heating_costs.csv"
         ),
-        egs_potentials=["resources/" + SECDIR + "egs_potential_p100_h0.csv"],
-        # lambda wildcards: [
-        #     "resources/"
-        #     + SECDIR
-        #     + f"egs_potential_s{wildcards.simpl}_{wildcards.clusters}_p{ps}_h{hs}.csv"
-        #     for ps, hs in zip(
-        #         [100, 50], [0, 50]
-        #         # get_power_steps(
-        #         #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
-        #         # ),
-        #         # get_heat_steps(
-        #         #     config["enhanced_geothermal"]["power_heat_ratio_steps"]
-        #         # )
-        #     )
-        #     ],
+        egs_potentials_egs="resources/" + SECDIR + "geothermal_data/potential_egs_s{simpl}_{clusters}.csv",
+        egs_potentials_hs="resources/" + SECDIR + "geothermal_data/potential_hs_s{simpl}_{clusters}.csv",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",

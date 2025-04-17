@@ -2910,79 +2910,46 @@ def add_industry_demand(n, demand):
 
     avail = spatial.nodes.intersection(demand.index)
 
-    carrier = "low temperature heat 50-80C for industry"
+    for col in demand.columns:
+        carrier = 'industry heat ' + col
 
-    n.madd("Bus", avail + " " + carrier, carrier=carrier)
+        n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
-    n.madd(
-        "Load",
-        avail + " " + carrier,
-        bus=avail + " " + carrier,
-        carrier=carrier,
-        p_set=demand.loc[avail, "demand(50-80C)[MW]"].tolist(),
-    )
+        n.madd(
+            "Load",
+            avail + " " + carrier,
+            bus=avail + " " + carrier,
+            carrier=carrier,
+            p_set=demand.loc[avail, col].tolist(),
+        )
 
-    # Add a store for low temperature heat that can absorb an infinite amount of heat but cannot discharge it
-    n.madd(
-        "StorageUnit",
-        avail + " " + carrier + " store",
-        bus=avail + " " + carrier,
-        p_nom_extendable=True,
-        p_max_pu=0.0,
-        capital_cost=0.0,
-    )
-
-    # Medium temperature demand between 80 and 150C for industry
-    carrier = "medium temperature heat 80-150C for industry"
-
-    n.madd("Bus", avail + " " + carrier, carrier=carrier)
-
-    n.madd(
-        "Load",
-        avail + " " + carrier,
-        bus=avail + " " + carrier,
-        carrier=carrier,
-        p_set=demand.loc[avail, "demand(80-150C)[MW]"].tolist(),
-    )
-
-    # Add a store for medium temperature heat that can absorb an infinite amount of heat but cannot discharge it
-    n.madd(
-        "StorageUnit",
-        avail + " " + carrier + " store",
-        bus=avail + " " + carrier,
-        p_nom_extendable=True,
-        p_max_pu=0.0,
-        capital_cost=0.0,
-    )
-
-    # High temperature demand between 150C and 250C for industry
-    carrier = "high temperature heat 150-250C for industry"
-
-    n.madd("Bus", avail + " " + carrier, carrier=carrier)
-
-    n.madd(
-        "Load",
-        avail + " " + carrier,
-        bus=avail + " " + carrier,
-        carrier=carrier,
-        p_set=demand.loc[avail, "demand(150-250C)[MW]"].tolist(),
-    )
-
-    # Add a store for high temperature heat that can absorb an infinite amount of heat but cannot discharge it
-    n.madd(
-        "StorageUnit",
-        avail + " " + carrier + " store",
-        bus=avail + " " + carrier,
-        p_nom_extendable=True,
-        p_max_pu=0.0,
-        capital_cost=0.0,
-    )
+        # Add a store for heat that can absorb an infinite amount of heat but cannot discharge it
+        n.madd(
+            "StorageUnit",
+            avail + " " + carrier + " store",
+            bus=avail + " " + carrier,
+            p_nom_extendable=True,
+            p_max_pu=0.0,
+            capital_cost=0.0,
+        )
 
 
-def add_egs_industry_supply(n, supply_curve):
+def add_geothermal_industry_supply(n, supply_curve):
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
     lifetime = snakemake.params.enhanced_geothermal["lifetime"]
+
+    lifetimes = {
+        'steam': 20,
+        'power': 25,
+        'directheat': 30
+    }
+
+    print(supply_curve.drop(columns=['total_output[MWh]']).head())
+
+
+    import sys
+    sys.exit()
 
     # annuitize capex
     supply_curve["capex[$/MW]"] = (
@@ -3335,112 +3302,73 @@ def remove_carrier_related_components(n, carriers_to_drop):
     n.mremove("Link", links_to_remove)
 
 
-def attach_enhanced_geothermal(n, potential):
+def attach_enhanced_geothermal(n, potential, mode):
 
     logger.warning("Adding EGS for electricity generation in prepare_sector_network.py")
 
     egs_potential = pd.read_csv(potential, index_col=[0, 1])
-    assert egs_potential.index.names == ["network_region", "capital_cost[$/kW]"]
 
-    heat_share = int(re.search(r"_h(\d+)", potential).group(1)) / 100
-    power_share = int(re.search(r"_p(\d+)", potential).group(1)) / 100
+    print(egs_potential)
+
+    assert egs_potential.index.names == ["network_region", "supply_curve_step"]
+    assert mode in ["egs", "hs"]
 
     # remove EGS from electricity only implementation
     to_be_removed = n.links.index[n.links.index.str.contains("EGS electricity")]
     if not to_be_removed.empty:
         n.remove("Link", to_be_removed)
 
+    # Calculate annuity factor for capital cost
+    discount_rate = float(snakemake.wildcards.discountrate)
+    lifetime = 25  # years
+    annuity_factor = (
+        discount_rate * (1 + discount_rate) ** lifetime / ((1 + discount_rate) ** lifetime - 1)
+    )
+
     idx = pd.IndexSlice
 
-    if "EGS" not in n.buses.index:
-
+    if f"Geothermal Power {mode}" not in n.buses.index:
         n.add(
             "Bus",
-            "EGS",
+            f"Geothermal Power {mode}",
             carrier="geothermal heat",
             unit="MWh_th",
         )
 
         n.add(
             "Generator",
-            "EGS",
-            bus="EGS",
+            f"Geothermal Power {mode}",
+            bus=f"Geothermal Power {mode}",
             carrier="geothermal heat",
             p_nom_extendable=True,
         )
 
     for bus in tqdm(
         egs_potential.index.get_level_values(0).unique(),
-        desc="Adding enhanced geothermal",
+        desc=f"Adding {mode.upper()} geothermal",
     ):
-
         ss = egs_potential.loc[idx[bus, :]]
 
-        # For each region (bus) create a bus for general industry heat if not already present
-        industry_bus = f"{bus} general industry heat"
-        if industry_bus not in n.buses.index:
-            n.add("Bus", industry_bus, carrier="general industry heat")
+        # Loop over each supply-curve step for this region
+        for i, (supply_curve_step, row) in enumerate(ss.iterrows()):
+            capacity = row["p_nom_max[MWe]"]
+            # Annuitize the capital cost
+            capital_cost = row["capital_cost[USD/MWe]"] * annuity_factor
+            opex = row["opex[USD/MWhe]"]
 
-        # Loop over each supply‐curve point (i.e. each potential) for this region
-        for i, (capital_cost, row) in enumerate(ss.iterrows()):
-            capacity = row["available_capacity[MW]"]
-            # Convert the cost index from $/kW to $/MW and annuitize the capex
-            capital_cost = float(capital_cost) * 1000  # $/kW -> $/MW
+            # Build an identifier that encodes the region name and supply-curve step
+            identifier = f"{bus} Geothermal Power {mode.upper()} curve{i}"
 
-            # Build an identifier that encodes the region name, heat share, power share, and supply‐curve index
-            identifier = f"{bus}_H{heat_share:.2f}_P{power_share:.2f}_curve{i}"
-
-            # Create the first link: connects the AC bus with the regional bus.
-            # It also uses the bus2 keyword to link to the corresponding low-temperature bus.
+            # Create the link: connects the EGS bus with the regional bus
             n.add(
                 "Link",
-                name=f"EGS ORC {identifier}",
-                bus0="EGS",
+                name=identifier,
+                bus0=f"Geothermal Power {mode}",
                 bus1=bus,
-                bus2=f"{bus} low temperature heat 50-150C for industry",
-                carrier="enhanced geothermal ORC",
+                carrier="geothermal {mode}",
                 p_nom_max=capacity,
                 capital_cost=capital_cost,
-                p_nom_extendable=True,
-            )
-
-            # Create the second link: connects the EGS Generator (on bus "EGS") with the general industry heat bus.
-            # Both links share the identifier so that they can be paired.
-            n.add(
-                "Link",
-                name=f"EGS industry heat {identifier}",
-                bus0="EGS",
-                bus1=industry_bus,
-                carrier="enhanced geothermal industry heat",
-                p_nom_max=capacity,
-                p_nom_extendable=True,
-            )
-
-        # Connect general industry heat to medium temperature industry heat demand ("heat distribution")
-        if (
-            industry_bus in n.buses.index
-            and "medium temperature heat 150-250C for industry" in n.buses.index
-        ):
-            n.add(
-                "Link",
-                name="EGS industry heat distribution",
-                bus0=industry_bus,
-                bus1="medium temperature heat 150-250C for industry",
-                carrier="heat distribution",
-                p_nom_extendable=True,
-            )
-
-        # Connect general industry heat to low temperature industry heat demand ("heat exchanger")
-        if (
-            industry_bus in n.buses.index
-            and "low temperature heat 50-150C for industry" in n.buses.index
-        ):
-            n.add(
-                "Link",
-                name="EGS industry heat exchanger",
-                bus0=industry_bus,
-                bus1="low temperature heat 50-150C for industry",
-                carrier="heat exchanger",
+                marginal_cost=opex,
                 p_nom_extendable=True,
             )
 
@@ -3596,6 +3524,12 @@ if __name__ == "__main__":
     ######### Functions adding EGS-US project demands and generators #########
     ##########################################################################
 
+    for potential, mode in [
+        (snakemake.input["egs_potentials_egs"], "egs"),
+        (snakemake.input["egs_potentials_hs"], "hs"),
+    ]:
+        attach_enhanced_geothermal(n, potential, mode)
+
     industry_demands = pd.read_csv(
         snakemake.input["industrial_heating_demands"], index_col=0
     )
@@ -3603,15 +3537,12 @@ if __name__ == "__main__":
     logger.info("Adding industrial heating demands.")
     add_industry_demand(n, industry_demands)
 
-    for potential in snakemake.input["egs_potentials"]:
-        attach_enhanced_geothermal(n, potential)
-
     industry_egs_supply = pd.read_csv(
         snakemake.input["industrial_heating_egs_supply_curves"], index_col=[0, 1]
     )
 
-    logger.info("Adding EGS supply for industry.")
-    add_egs_industry_supply(n, industry_egs_supply)
+    logger.info("Adding geothermal supply for industry.")
+    add_geothermal_industry_supply(n, industry_egs_supply)
 
     industry_heating_costs = pd.read_csv(
         snakemake.input["industrial_heating_costs"], index_col=[0, 1]
