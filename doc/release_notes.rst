@@ -15,6 +15,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add a command-line interface in ``databundle_cli.py`` that will be triggered if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, providing a fallback to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
 
+* Add Wikipedia as a source for the preparation of transport_data.csv  `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
+
 * Add a new page for sector-coupled tutorial `PR #1374 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1374>`__
 
 * Add an option to redefine countries into subregions which can be activated at various stages of the workflow. The subregions can be defined either by the GADM_ID or a custom map. Currently, it is only used in the ``simplify_network`` rule `PR #1300 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1300>`__
@@ -32,6 +34,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
 **Minor Changes and bug-fixing**
+
+* Update the applications list for PyPSA-Earth model. `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
+
+* Fix problem with a discontinued World Bank data source in prepare_transport_data_input `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
 
 * Fix bug in myopic run. `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
 
@@ -60,6 +66,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Minor revision docker workflow to have it working on upstream `PR #1343 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1343>`__
 
 * Fix the scaling factor for time-varying loads of the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1372>`__
+
+* Integrate EIA data for US-specific CAGR and fuel shares for the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1400>`__
 
 PyPSA-Earth 0.6.0
 =================
