@@ -35,6 +35,7 @@ def get(item, investment_year=None):
 def calculate_end_values(df):
     return (1 + df) ** no_years
 
+
 def fill_country_data(df, country, default_key="DEFAULT", label="", logger=_logger):
     if country not in df.index:
         df.loc[country] = df.loc[default_key]
