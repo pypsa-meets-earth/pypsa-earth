@@ -6,5 +6,4 @@
 version: 0.6.0
 
 monte_carlo:
-  options:
-    add_to_snakefile: true
+  add_to_snakefile: true

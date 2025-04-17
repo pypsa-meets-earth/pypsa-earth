@@ -410,6 +410,7 @@ monte_carlo:
   # Make sure add_to_snakefile is set to true to enable Monte-Carlo
   options:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
+    method: "global_sensitivity"  # or single_best_in_worst for technology assessment # TODO: add management of the method
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "chaospy" # "pydoe2", "chaospy", "scipy", packages that are supported
     seed: 42 # set seedling for reproducibilty
@@ -435,6 +436,9 @@ monte_carlo:
     generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
       type: beta
       args: [0.5, 2]
+    # stores.capital_cost:  # for single_best_in_worst
+    #   type: uniform
+    #   args: [0.8, 1.2]
 
 # ------------------- SECTOR OPTIONS -------------------
 
