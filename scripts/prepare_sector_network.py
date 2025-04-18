@@ -2932,7 +2932,7 @@ def add_industry_demand(n, demand):
             p_max_pu=0.0,
             capital_cost=0.0,
         )
-
+    
 
 def add_geothermal_industry_supply(n, supply_curve):
 
@@ -3040,14 +3040,26 @@ def add_industry_heating(n, costs):
     costs = costs["value"].unstack()
 
     low_temp_buses = n.buses.loc[
-        n.buses.carrier == "low temperature heat 50-150C for industry"
+        n.buses.carrier == "industry heat demand(50-80C)"
     ].index
     medium_temp_buses = n.buses.loc[
-        n.buses.carrier == "medium temperature heat 150-250C for industry"
+        n.buses.carrier == "industry heat demand(80-150C)"
+    ].index
+    high_temp_buses = n.buses.loc[
+        n.buses.carrier == "industry heat demand(150-250C)"
     ].index
 
     nodes_low = low_temp_buses.str.split(" ").str[0]
     nodes_medium = medium_temp_buses.str.split(" ").str[0]
+    nodes_high = high_temp_buses.str.split(" ").str[0]
+
+    assert (nodes_low.isin(n.buses.index)).all()
+    assert (nodes_medium.isin(n.buses.index)).all()
+    assert (nodes_high.isin(n.buses.index)).all()
+
+    assert (low_temp_buses.isin(n.buses.index)).all()
+    assert (medium_temp_buses.isin(n.buses.index)).all()
+    assert (high_temp_buses.isin(n.buses.index)).all()
 
     # Add carriers if not already present
     carriers = [
@@ -3066,12 +3078,12 @@ def add_industry_heating(n, costs):
             n.add("Carrier", name=carrier)
 
     # 1. Low-temp molten salt store (Store)
-    n.madd("Bus", nodes_medium + " molten salt store", carrier="molten sand store")
+    n.madd("Bus", nodes_high + " molten salt store", carrier="molten sand store")
 
     n.madd(
         "Store",
-        nodes_medium + " molten salt store",
-        bus=nodes_medium + " molten salt store",
+        nodes_high + " molten salt store",
+        bus=nodes_high + " molten salt store",
         carrier="molten salt store",
         e_nom_extendable=True,
         capital_cost=costs.at["low-temp molten salt store", "fixed"],
@@ -3083,9 +3095,9 @@ def add_industry_heating(n, costs):
     # Assumes the discharger converts stored heat in the same bus to usable heat at the same bus
     n.madd(
         "Link",
-        nodes_medium + " molten salt discharger",
-        bus0=nodes_medium + " molten salt store",
-        bus1=medium_temp_buses,
+        nodes_high + " molten salt discharger",
+        bus0=nodes_high + " molten salt store",
+        bus1=high_temp_buses,
         carrier="low-temp molten salt discharger",
         p_nom_extendable=True,
         capital_cost=costs.at["low-temp molten salt discharger", "fixed"],
@@ -3098,9 +3110,9 @@ def add_industry_heating(n, costs):
     logger.warning("Yet to get techno-economic data for molten sand charger")
     n.madd(
         "Link",
-        nodes_medium + " molten salt charger",
-        bus0=medium_temp_buses,
-        bus1=nodes_medium + " molten salt store",
+        nodes_high + " molten salt charger",
+        bus0=high_temp_buses,
+        bus1=nodes_high + " molten salt store",
         carrier="low-temp molten salt charger",
         p_nom_extendable=True,
         # capital_cost=costs.at["low-temp molten salt charger", "fixed"],
@@ -3146,10 +3158,24 @@ def add_industry_heating(n, costs):
         marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
     )
 
+    n.madd(
+        "Link",
+        nodes_medium + " industrial heat pump high temperature",
+        bus0=nodes_medium,
+        bus1=medium_temp_buses,
+        carrier="industrial heat pump high temperature",
+        p_nom_extendable=True,
+        capital_cost=costs.at["industrial heat pump high temperature", "fixed"],
+        lifetime=costs.at["industrial heat pump high temperature", "lifetime"],
+        efficiency=costs.at["industrial heat pump high temperature", "efficiency"],
+        marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
+    )
+
     # 6. CSP-tower (Generator)
     logger.warning("Yet to add capacity factor for CSP for industrial processes")
     # Typically CSP is solar thermal. Here, we assume it just generates heat at bus.
-    p_max_pu = n.generators_t.p_max_pu.loc[:, nodes_medium + " csp"]
+    csp_gens = n.generators.index[n.generators.carrier == "csp"]
+    p_max_pu = n.generators_t.p_max_pu.loc[:, csp_gens]
     p_max_pu.rename(
         columns={name + " csp": name + " csp-tower" for name in nodes_medium},
         inplace=True,
@@ -3157,17 +3183,27 @@ def add_industry_heating(n, costs):
 
     n.madd(
         "Generator",
-        nodes_medium + " csp-tower",
+        nodes_medium + " industry csp-tower medium temp",
         bus=medium_temp_buses,
         carrier="csp-tower",
         p_nom_extendable=True,
         capital_cost=costs.at["csp-tower", "fixed"],
         lifetime=costs.at["csp-tower", "lifetime"],
-        p_max_pu=p_max_pu,  # Added solar thermal profiles similarly to other solar thermal generators
+        p_max_pu=p_max_pu.rename(columns={name + " csp-tower": name + " industry csp-tower medium temp" for name in nodes_medium}),
+    )
+
+    n.madd(
+        "Generator",
+        nodes_high + " industry csp-tower high temp",
+        bus=high_temp_buses,
+        carrier="csp-tower",
+        p_nom_extendable=True,
+        capital_cost=costs.at["csp-tower", "fixed"],
+        lifetime=costs.at["csp-tower", "lifetime"],
+        p_max_pu=p_max_pu.rename(columns={name + " csp-tower": name + " industry csp-tower high temp" for name in nodes_high}),
     )
 
     # 7. Steam boiler gas cond (Generator)
-    # Typically converts gas input to heat output. Assuming both on same bus for demonstration.
     n.madd(
         "Generator",
         nodes_medium + " steam boiler gas cond",
@@ -3181,7 +3217,19 @@ def add_industry_heating(n, costs):
         + costs.at["biogas", "fuel cost"],
     )
 
-    # 8. Hot water boiler gas cond (Generator)
+    n.madd(
+        "Generator",
+        nodes_high + " steam boiler gas cond",
+        bus=high_temp_buses,
+        carrier="steam boiler gas cond",
+        p_nom_extendable=True,
+        capital_cost=costs.at["steam boiler gas cond", "fixed"],
+        lifetime=costs.at["steam boiler gas cond", "lifetime"],
+        efficiency=costs.at["steam boiler gas cond", "efficiency"],
+        marginal_cost=costs.at["steam boiler gas cond", "VOM"]
+        + costs.at["biogas", "fuel cost"],
+    )
+
     n.madd(
         "Generator",
         nodes_low + " hot water boiler gas cond",
@@ -3574,6 +3622,8 @@ if __name__ == "__main__":
     industry_heating_costs = pd.read_csv(
         snakemake.input["industrial_heating_costs"], index_col=[0, 1]
     )
+
+    add_industry_heating(n, industry_heating_costs)
 
     """
     industry_heating_costs = (
