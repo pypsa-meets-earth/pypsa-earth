@@ -2911,7 +2911,7 @@ def add_industry_demand(n, demand):
     avail = spatial.nodes.intersection(demand.index)
 
     for col in demand.columns:
-        carrier = 'industry heat ' + col
+        carrier = 'industry heat ' + col.split('[')[0]
 
         n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
@@ -2937,57 +2937,86 @@ def add_industry_demand(n, demand):
 def add_geothermal_industry_supply(n, supply_curve):
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
-    lifetime = snakemake.params.enhanced_geothermal["lifetime"]
-
     lifetimes = {
         'steam': 20,
         'power': 25,
+        'pwr': 25,
         'directheat': 30
     }
 
-    print(supply_curve.drop(columns=['total_output[MWh]']).head())
+    # Create a mapping for temperature bands to bus suffixes
+    temp_band_mapping = {
+        "50-80C": "industry heat demand(50-80C)",
+        "80-150C": "industry heat demand(80-150C)",
+        "150-250C": "industry heat demand(150-250C)",
+        "AC": "AC"  # For electrical output
+    }
 
-
-    import sys
-    sys.exit()
-
-    # annuitize capex
-    supply_curve["capex[$/MW]"] = (
-        supply_curve["capex[$/MW]"] * dr / (1 - (1 + dr) ** (-lifetime))
-    )
-
-    for (region, cost_index), row in supply_curve.loc[
-        supply_curve["avail_capacity[MW]"] != 0.0
-    ].iterrows():
-
-        full_name = {
-            "low temperature industry": "low temperature heat 50-150C for industry",
-            "medium temperature industry": "medium temperature heat 150-250C for industry",
+    # Add a global geothermal source bus and generator
+    geo_bus = "geothermal industry heat"
+    if geo_bus not in n.buses.index:
+        n.add("Bus", geo_bus, carrier="geothermal heat")
+        n.add(
+            "Generator",
+            "geothermal heat source",
+            bus=geo_bus,
+            carrier="geothermal heat",
+            p_nom_extendable=True,
+            marginal_cost=0
+        )
+    
+    for (region, tech), group in supply_curve.groupby(level=[0, 1]):
+        # Create a dictionary with all possible buses for the region
+        buses = {
+            "bus0": geo_bus,
+            "bus1": f"{region} {temp_band_mapping['50-80C']}",
+            "bus2": f"{region} {temp_band_mapping['80-150C']}",
+            "bus3": f"{region} {temp_band_mapping['150-250C']}",
+            "bus4": f"{region}"  # AC bus
         }
 
-        for carrier in [
-            "low temperature industry",
-            "medium temperature industry",
-        ]:
+        for _, row in group.iterrows():
+            
+            # Determine lifetime based on technology name
+            lifetime = None
+            for key, value in lifetimes.items():
+                if key in tech:
+                    lifetime = value
+                    break
+            
+            if lifetime is None:
+                lifetime = lifetimes['power']  # Default to power lifetime if no match
 
-            bus1 = region + " " + full_name[carrier]
-            if bus1 not in n.buses.index:
-                continue
+            # Annuitize capex for this specific technology
+            capex_annualized = row["capex[USD/MW]"] * dr / (1 - (1 + dr) ** (-lifetime))
 
-            n.add(
-                "Link",
-                region + " EGS " + carrier + " " + str(cost_index),
-                bus0=region + " general industry heat",
-                bus1=bus1,
-                carrier=carrier,
-                capital_cost=row["capex[$/MW]"],
-                marginal_cost=row["opex[$/MWh]"],
-                p_nom_max=row["avail_capacity[MW]"],
-                efficiency=snakemake.params["enhanced_geothermal"][
-                    "heat_distribution_network_efficiency"
-                ],
-                p_nom_extendable=True,
-            )
+            efficiencies = {}
+
+            # Check for non-zero output shares in the row
+            efficiencies["AC"] = row["AC_share"]
+            efficiencies["50-80C"] = row["50-80C_share"]
+            efficiencies["80-150C"] = row["80-150C_share"]
+            efficiencies["150-250C"] = row["150-250C_share"]
+        
+            # Create a MultiLink for this technology
+            link_name = f"{region} {tech}"
+
+            # Only add the link if we have at least one valid output bus
+            if len(buses) > 1:
+                n.add(
+                    "Link",
+                    link_name,
+                    carrier=tech,
+                    capital_cost=capex_annualized,
+                    marginal_cost=row["opex[USD/MWh]"],
+                    p_nom_max=row["heat_demand[MW]"],
+                    efficiency=efficiencies["50-80C"],
+                    efficiency2=efficiencies["80-150C"],
+                    efficiency3=efficiencies["150-250C"],
+                    efficiency4=efficiencies["AC"],
+                    p_nom_extendable=True,
+                    **buses
+                )
 
 
 def add_industry_heating(n, costs):
@@ -3308,8 +3337,6 @@ def attach_enhanced_geothermal(n, potential, mode):
 
     egs_potential = pd.read_csv(potential, index_col=[0, 1])
 
-    print(egs_potential)
-
     assert egs_potential.index.names == ["network_region", "supply_curve_step"]
     assert mode in ["egs", "hs"]
 
@@ -3547,7 +3574,6 @@ if __name__ == "__main__":
     industry_heating_costs = pd.read_csv(
         snakemake.input["industrial_heating_costs"], index_col=[0, 1]
     )
-    print(industry_heating_costs)
 
     """
     industry_heating_costs = (
@@ -3616,29 +3642,29 @@ if __name__ == "__main__":
 
     h2_hc_conversions(n, costs)
 
-    add_heat(n, costs)
-    add_cooling(n, costs)
+    # add_heat(n, costs)
+    # add_cooling(n, costs)
 
-    add_biomass(n, costs)
+    # add_biomass(n, costs)
 
     # add_industry(n, costs)
 
-    add_shipping(n, costs)
+    # add_shipping(n, costs)
 
     # Add_aviation runs with dummy data
-    add_aviation(n, costs)
+    # add_aviation(n, costs)
 
     # prepare_transport_data(n)
 
     # add_land_transport(n, costs)
 
     # if snakemake.config["custom_data"]["transport_demand"]:
-    add_rail_transport(n, costs)
+    # add_rail_transport(n, costs)
 
     # if snakemake.config["custom_data"]["custom_sectors"]:
-    add_agriculture(n, costs)
-    add_residential(n, costs)
-    add_services(n, costs)
+    # add_agriculture(n, costs)
+    # add_residential(n, costs)
+    # add_services(n, costs)
 
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)
