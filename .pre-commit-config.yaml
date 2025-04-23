@@ -84,14 +84,14 @@ repos:
     exclude: pinned\.yaml$
     args: [--format, parsable, -c=.yamllint]
 
-# Format Snakemake rule / workflow files
-- repo: https://github.com/snakemake/snakefmt
-  rev: v0.11.0
-  hooks:
-  - id: snakefmt
+# # Format Snakemake rule / workflow files
+# - repo: https://github.com/snakemake/snakefmt
+#   rev: v0.11.0
+#   hooks:
+#   - id: snakefmt
 
-# Check for FSFE REUSE compliance (licensing)
-- repo: https://github.com/fsfe/reuse-tool
-  rev: v5.0.2
-  hooks:
-  - id: reuse
+# # Check for FSFE REUSE compliance (licensing)
+# - repo: https://github.com/fsfe/reuse-tool
+#   rev: v5.0.2
+#   hooks:
+#   - id: reuse

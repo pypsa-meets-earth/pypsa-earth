@@ -30,7 +30,7 @@ Overnight Scenarios
 Configuration
 ---------------------------------------------
 
-All the configuration for a sector-coupled run are present in the ``config.default.yaml`` file.
+The major configuration parameters for a sector-coupled run are present in the ``config.default.yaml`` file.
 In particular, the default value for foresight parameter is set to ``overnight``. For the purpose
 of this tutorial, ``test/config.sector.yaml`` will be used in addition to ``config.default.yaml``
 to run the sector-coupled model. That allows to enable using a lightweight tutorial datakit
