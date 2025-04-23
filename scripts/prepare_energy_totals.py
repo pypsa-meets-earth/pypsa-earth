@@ -36,6 +36,14 @@ def calculate_end_values(df):
     return (1 + df) ** no_years
 
 
+def fill_country_data(df, country, default_key="DEFAULT", label="", logger=_logger):
+    if country not in df.index:
+        df.loc[country] = df.loc[default_key]
+        logger.warning(f"No {label} data for {country} — using default data instead.")
+    else:
+        df.loc[country] = df.loc[country].fillna(df.loc[default_key])
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -66,34 +74,15 @@ if __name__ == "__main__":
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.params.base_year
     )
-    growth_factors = calculate_end_values(growth_factors_cagr)
-    efficiency_gains = calculate_end_values(efficiency_gains_cagr)
 
     for country in countries:
-        if country not in efficiency_gains.index:
-            efficiency_gains.loc[country] = efficiency_gains.loc["DEFAULT"]
-            _logger.warning(
-                "No efficiency gains cagr data for "
-                + country
-                + " using default data instead."
-            )
-        if country not in growth_factors.index:
-            growth_factors.loc[country] = growth_factors.loc["DEFAULT"]
-            _logger.warning(
-                "No growth factors cagr data for "
-                + country
-                + " using default data instead."
-            )
-        if country not in fuel_shares.index:
-            fuel_shares.loc[country] = fuel_shares.loc["DEFAULT"]
-            _logger.warning(
-                "No fuel share data for " + country + " using default data instead."
-            )
-        if country not in district_heating.index:
-            district_heating.loc[country] = district_heating.loc["DEFAULT"]
-            _logger.warning(
-                "No heating data for " + country + " using default data instead."
-            )
+        fill_country_data(efficiency_gains_cagr, country, label="efficiency gains CAGR")
+        fill_country_data(growth_factors_cagr, country, label="growth factors CAGR")
+        fill_country_data(fuel_shares, country, label="fuel share")
+        fill_country_data(district_heating, country, label="heating")
+
+    growth_factors = calculate_end_values(growth_factors_cagr)
+    efficiency_gains = calculate_end_values(efficiency_gains_cagr)
 
     efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
     fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]

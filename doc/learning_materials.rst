@@ -20,6 +20,10 @@ We host **training** and **presentation** videos about PyPSA ecosystem tools mad
 - `Presentation playlist <https://www.youtube.com/playlist?list=PLz1RcE1NdLlHpsyopZUKDkeyAuQotfOE7>`_
 - `Youtube channel <https://www.youtube.com/@pypsameetsearth7475/featured>`_
 
+External community resources
+
+- `Energy System Modelling Playlist <https://www.youtube.com/playlist?list=PLaXo6_ws0ZKJUYyUu-e6HRUcjuZnen7pA>`_ by Anton Achhammer: An in-depth series exploring advanced energy system modeling techniques and insights from an experienced researcher in the field.
+
 
 PyPSA Introduction (essential)
 -------------------------------
