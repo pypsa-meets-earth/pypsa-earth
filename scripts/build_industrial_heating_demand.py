@@ -803,7 +803,6 @@ if __name__ == "__main__":
                 # For directheat, sales, capex and opex are at the end of column names
                 sales_col = f"{prefix}_sales"
 
-                print([col for col in df.columns if col.startswith(prefix)])
                 if sales_col not in df.columns:
                     error_msg = f"Sales column {sales_col} not found for technology {tech_key}"
                     print(error_msg)
@@ -1353,23 +1352,6 @@ if __name__ == "__main__":
                     continue
 
                 cluster_supply['band_lcoe'] = cluster_supply['lcoe[USD/MWh]'].mul(1 - cluster_supply[f'{band}_share'])
-
-                '''
-                if len(cluster_supply) > 2:
-
-                    print('')
-                    print(band)
-                    print(cluster_supply.sort_values(by='lcoe[USD/MWh]').head())
-
-                    cluster_supply['band_lcoe'] = cluster_supply['lcoe[USD/MWh]'].mul(1 - cluster_supply[f'{band}_share'])
-
-                    print('')
-                    print(band)
-                    print(cluster_supply.sort_values(by='band_lcoe').head())
-
-                    import sys
-                    sys.exit()
-                '''
 
                 cluster_supply = cluster_supply.sort_values(by=['band_lcoe', 'lcoe[USD/MWh]']).iloc[[0]]
                 cluster_supply.drop(columns=['band_lcoe'], inplace=True)
