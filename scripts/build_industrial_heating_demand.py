@@ -684,8 +684,6 @@ if __name__ == "__main__":
             clusters=10,
         )
 
-    from pprint import pprint
-
     tif_files = {name: fn for name, fn in snakemake.input.items() if fn.endswith('.tif')}
     file_name_transformer = lambda x: '-'.join(str(x).split('/')[-2:]).replace('.tif', '')
 
@@ -721,18 +719,18 @@ if __name__ == "__main__":
 
         # Mapper for output types and their temperature bands
         tech_output_mapping = {
-            'directheat100degC': {'heat': '80-150C'},
-            'directheat200degC': {'heat': '150-250C'},
+            'directheat100degC': {'heat': '80-150C', 'heat': '50-80C'},
+            'directheat200degC': {'heat': '150-250C', 'heat': '80-150C', 'heat': '50-80C'},
             'pwr_residheat80degC_egs': {'heat': '50-80C', 'power': 'AC'},
             'pwr_residheat80degC_hs': {'heat': '50-80C', 'power': 'AC'},
-            'steam150degC_egs': {'steam': '80-150C'},
-            'steam150degC_hs': {'steam': '80-150C'},
-            'steam175degC_power_residheat80degC_egs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},
-            'steam175degC_power_residheat80degC_hs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},
-            'steam200degC_power_residheat80degC_egs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},
-            'steam200degC_power_residheat80degC_hs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},
-            'steam225degC_power_residheat80degC_egs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},
-            'steam225degC_power_residheat80degC_hs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'}
+            'steam150degC_egs': {'steam': '80-150C', 'heat': '50-80C'},
+            'steam150degC_hs': {'steam': '80-150C', 'heat': '50-80C'},
+            'steam175degC_power_residheat80degC_egs': {'power': 'AC', 'heat': '50-80C', 'steam': '80-150C'},
+            'steam175degC_power_residheat80degC_hs': {'power': 'AC', 'heat': '50-80C', 'steam': '80-150C'},
+            'steam200degC_power_residheat80degC_egs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},#, 'steam': '80-150C'},
+            'steam200degC_power_residheat80degC_hs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},#, 'steam': '80-150C'},
+            'steam225degC_power_residheat80degC_egs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},#, 'steam': '80-150C'},
+            'steam225degC_power_residheat80degC_hs': {'steam': '150-250C', 'power': 'AC', 'heat': '50-80C'},#, 'steam': '80-150C'}
         }
 
         # Create a new DataFrame to store processed data
@@ -1343,12 +1341,38 @@ if __name__ == "__main__":
 
                 idx = pd.IndexSlice
 
-                cluster_supply = geothermal_subset.loc[idx[demand_to_tech_mapping[band],:]].dropna().unstack()
+                cluster_supply = (
+                    geothermal_subset
+                    .loc[idx[demand_to_tech_mapping[band],:]]
+                    .dropna()
+                    .unstack()
+                    .replace(np.nan, 0)
+                )
 
-                if cluster_supply.empty:
+                if cluster_supply.empty or f'{band}_share' not in cluster_supply.columns:
                     continue
 
-                cluster_supply = cluster_supply.sort_values(by='lcoe[USD/MWh]').iloc[[0]]
+                cluster_supply['band_lcoe'] = cluster_supply['lcoe[USD/MWh]'].mul(1 - cluster_supply[f'{band}_share'])
+
+                '''
+                if len(cluster_supply) > 2:
+
+                    print('')
+                    print(band)
+                    print(cluster_supply.sort_values(by='lcoe[USD/MWh]').head())
+
+                    cluster_supply['band_lcoe'] = cluster_supply['lcoe[USD/MWh]'].mul(1 - cluster_supply[f'{band}_share'])
+
+                    print('')
+                    print(band)
+                    print(cluster_supply.sort_values(by='band_lcoe').head())
+
+                    import sys
+                    sys.exit()
+                '''
+
+                cluster_supply = cluster_supply.sort_values(by=['band_lcoe', 'lcoe[USD/MWh]']).iloc[[0]]
+                cluster_supply.drop(columns=['band_lcoe'], inplace=True)
 
                 cluster_supply.loc[cluster_supply.index[0], ['heat_demand[MW]']] = cluster_size
                 cluster_supply.loc[cluster_supply.index[0], 'capex[USD/MW]'] = (
