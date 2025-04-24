@@ -941,5 +941,5 @@ if __name__ == "__main__":
     )
 
     # if some files are still missing, reroute to command-line-interface
-    if any(not os.path.isfile(file) for file in snakemake.output):
+    if any(not os.path.isfile(file) if file != "data/landcover" else False for file in snakemake.output):
         os.system("python scripts/non_workflow/databundle_cli.py")

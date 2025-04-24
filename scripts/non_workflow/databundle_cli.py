@@ -10,7 +10,6 @@ import textwrap
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, parent_dir)
 
-from _helpers import mock_snakemake
 from retrieve_databundle_light import *
 from rich.console import Console
 from rich.markdown import Markdown
@@ -158,7 +157,8 @@ if __name__ == "__main__":
     )
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
-    snakemake = mock_snakemake("retrieve_databundle_light")
+
+        snakemake = mock_snakemake("retrieve_databundle_light")
 
     rootpath = "."
     tutorial = snakemake.config["tutorial"]
