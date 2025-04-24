@@ -63,7 +63,8 @@ else:
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 # Define the geothermal data path with raw string to avoid escape sequence warnings
-gt_path = r'data/pypsa_inputs_draft_20250403'
+gt_path = r"data/pypsa_inputs_draft_20250403"
+
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -520,14 +521,22 @@ rule build_egs_potentials:
         opex_subsurf="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/tot._subsurface_OPEX_-_USDmm_stitched.tif",
         sales_power="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/avg._net_power_sales_-_MWe_stitched.tif",
         sales_heat="data/pypsa_inputs_draft_20250403/pypsa_pwr_residheat80degC_{mode}/avg._net_resid._heat_sales_-_MWth_stitched.tif",
-        shapes="resources/" + RDIR + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        shapes="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        egs_potentials="resources/" + SECDIR + "geothermal_data/potential_{mode}_s{simpl}_{clusters}.csv",
+        egs_potentials="resources/"
+        + SECDIR
+        + "geothermal_data/potential_{mode}_s{simpl}_{clusters}.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
-        "benchmarks/" + RDIR + "build_egs_potentials/potential_{mode}_s{simpl}_{clusters}"
+        (
+            "benchmarks/"
+            + RDIR
+            + "build_egs_potentials/potential_{mode}_s{simpl}_{clusters}"
+        )
     script:
         "scripts/build_egs_potentials.py"
 
@@ -825,13 +834,6 @@ rule build_industrial_heating_demands:
     params:
         enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
-        demand_data="data/nrel_epa_flight_heating_demand_disagg.geojson",
-        regions=(
-            "resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
-        ),
-        # Direct heat inputs for 100C and 200C
         **{
             f"directheat_{T}_capex": f"{gt_path}/pypsa_directheat{T}degC/tot._CAPEX_-_USDmm_stitched.tif"
             for T in [100, 200]
@@ -848,7 +850,6 @@ rule build_industrial_heating_demands:
             f"directheat_{T}_sales": f"{gt_path}/pypsa_directheat{T}degC/avg._net_direct_heat_sales_-_MWth_stitched.tif"
             for T in [100, 200]
         },
-        
         # Power and residual heat inputs for EGS and HS
         **{
             f"power_residheat_{mode}_capex_power": f"{gt_path}/pypsa_pwr_residheat80degC_{mode}/power_surface_CAPEX_-_USDmm_stitched.tif"
@@ -882,53 +883,62 @@ rule build_industrial_heating_demands:
             f"power_residheat_{mode}_sales_heat": f"{gt_path}/pypsa_pwr_residheat80degC_{mode}/avg._net_resid._heat_sales_-_MWth_stitched.tif"
             for mode in ["egs", "hs"]
         },
-        
         # Steam, power and residual heat inputs for different temperatures and modes
         **{
             f"steam{T}_{mode}_capex_steam": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/steam_surface_CAPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_capex_power": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/power_surface_CAPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_capex_heat": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/resid._heat_surface_CAPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_capex_subsurf": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/subsurf_CAPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_opex_steam": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/tot._steam_surface_OPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_opex_power": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/tot._power_surface_OPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_opex_heat": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/tot._resid._heat_surface_OPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_opex_subsurf": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/tot._subsurface_OPEX_-_USDmm_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_sales_steam": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/avg._net_steam_heat_sales_-_MWth_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_sales_power": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/avg._net_power_sales_-_MWe_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
         **{
             f"steam{T}_{mode}_sales_heat": f"{gt_path}/pypsa_steam{T}degC_power_residheat80degC_{mode}/avg._net_resid._heat_sales_-_MWth_stitched.tif"
-            for T in [175, 200, 225] for mode in ["egs", "hs"]
+            for T in [175, 200, 225]
+            for mode in ["egs", "hs"]
         },
-
         # Steam only inputs for 150C
         **{
             f"steam150_{mode}_capex_steam": f"{gt_path}/pypsa_steam150degC_{mode}/steam_surface_CAPEX_-_USDmm_stitched.tif"
@@ -950,6 +960,13 @@ rule build_industrial_heating_demands:
             f"steam150_{mode}_sales_steam": f"{gt_path}/pypsa_steam150degC_{mode}/avg._net_steam_heat_sales_-_MWth_stitched.tif"
             for mode in ["egs", "hs"]
         },
+        demand_data="data/nrel_epa_flight_heating_demand_disagg.geojson",
+        regions=(
+            "resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
+        ),
+        # Direct heat inputs for 100C and 200C
     output:
         industrial_heating_egs_supply_curves=(
             "resources/"
@@ -1357,8 +1374,12 @@ rule prepare_sector_network:
         industrial_heating_costs=(
             "resources/" + SECDIR + "industrial_heating_costs.csv"
         ),
-        egs_potentials_egs="resources/" + SECDIR + "geothermal_data/potential_egs_s{simpl}_{clusters}.csv",
-        egs_potentials_hs="resources/" + SECDIR + "geothermal_data/potential_hs_s{simpl}_{clusters}.csv",
+        egs_potentials_egs="resources/"
+        + SECDIR
+        + "geothermal_data/potential_egs_s{simpl}_{clusters}.csv",
+        egs_potentials_hs="resources/"
+        + SECDIR
+        + "geothermal_data/potential_hs_s{simpl}_{clusters}.csv",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
