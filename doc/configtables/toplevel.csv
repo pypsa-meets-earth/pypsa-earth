@@ -6,9 +6,10 @@ logging,,,
 -- format,--,,Custom format for log messages. See `LogRecord <https://docs.python.org/3/library/logging.html#logging.LogRecord>`_ attributes.
 countries,--,"Any two-letter country code on earth (60% are working, the team works on making it 100%), any continent, or any user-specific region",World countries defined by their `Two-letter country codes (ISO 3166-1) <https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2>`_ which should be included in the energy system model.
 enable,,,
--- retrieve_databundle,bool,"{True, False}",Switch to retrieve databundle from zenodo via the rule :mod:`retrieve_databundle` or whether to keep a custom databundle located in the corresponding folder.
+-- retrieve_databundle,bool,"{True, False}",Switch to retrieve databundle from zenodo via the rule :mod:`retrieve_databundle_light` or whether to keep a custom databundle located in the corresponding folder.
 -- retrieve_cost_data,bool,"{True, False}","True: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv"
--- download_osm_data, bool,"{True, False}",True: OpenStreetMap data will be downloaded for the above given countries.
+-- download_osm_data,bool,"{True, False}",True: OpenStreetMap data will be downloaded for the above given countries.
 -- build_natura_raster,bool,"{True, False}",Switch to enable the creation of the raster ``natura.tiff`` via the rule :mod:`build_natura_raster`.
+-- retrieve_cutout,bool,"{True, False}",Switch to retrieve cutout_databundle from gdrive via the rule :mod:`retrieve_databundle_light`.
 -- build_cutout,bool,"{True, False}",Switch to enable the building of cutouts via the rule :mod:`build_cutout`.
 custom_rules,list,"Empty in case no custom rules are needed [], otherwise e.g. [""my_folder/my_rules.smk""]",Enable the addition of custom rules to the Snakefile

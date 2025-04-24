@@ -251,6 +251,13 @@ Note that data load will need about 1.6GB and model building will take a while (
         .../pypsa-earth (pypsa-earth) $ snakemake solve_all_networks -n
 
 
+    Additionally, if you encounter issues with the rule ``retrieve_databundle_light``, you can use the following script to debug it through the command line interface (CLI):
+
+    .. code:: bash
+
+        .../pypsa-earth (pypsa-earth) $ python scripts/non_workflow/databundle_cli.py
+
+
 
 Analyse the solved networks
 ------------------------------------
