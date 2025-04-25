@@ -176,14 +176,13 @@ def load_demand_csv(path):
     )
     return gegis_load
 
-
 def build_demand_profiles(
     n,
     load_paths,
     regions,
     admin_shapes,
     countries,
-    scale,
+    load_options,
     start_date,
     end_date,
     out_path,
@@ -202,8 +201,8 @@ def build_demand_profiles(
         contains subregional gdp, population and shape data
     countries : list
         List of countries that is config input
-    scale : float
-        The scale factor is multiplied with the load (1.3 = 30% more load)
+    load_options : dict
+        Dictionary of load options
     start_date: parameter
         The start_date is the first hour of the first day of the snapshots
     end_date: parameter
@@ -216,6 +215,8 @@ def build_demand_profiles(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
     load_paths = load_paths
+
+    scale = load_options.get("scale", 1.0)
 
     gegis_load_list = []
 
@@ -249,7 +250,12 @@ def build_demand_profiles(
         logger.info(f"Load data scaled with scaling factor {scale}.")
         gegis_load["Electricity demand"] *= scale
 
-    shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
+    disagg_opt = load_options["disaggregation"]
+
+    if disagg_opt["method"] == "geospatial":
+        shapes = gpd.read_file(disagg_opt["geospatial"]["source"])
+    else:
+        shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
 
     def upsample(cntry, group):
@@ -262,18 +268,26 @@ def build_demand_profiles(
         else:
             shapes_cntry = shapes.loc[shapes.country == cntry]
             transfer = shapes_to_shapes(group, shapes_cntry.geometry).T.tocsr()
-            gdp_n = pd.Series(
-                transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
-            )
-            pop_n = pd.Series(
-                transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
-            )
 
-            # relative factors 0.6 and 0.4 have been determined from a linear
-            # regression on the country to EU continent load data
-            # (refer to vresutils.load._upsampling_weights)
-            # TODO: require adjustment for Africa
-            factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
+            if disagg_opt["method"] == "geospatial": 
+                factors = pd.Series(
+                    transfer.dot(shapes_cntry["demand"].fillna(0.0).values), index=group.index
+                )
+                if disagg_opt["geospatial"]["scaling"] == "absolute":
+                    factors /= l.sum()
+            else:
+                gdp_n = pd.Series(
+                    transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
+                )
+                pop_n = pd.Series(
+                    transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
+                )
+                # relative factors 0.6 and 0.4 have been determined from a linear
+                # regression on the country to EU continent load data
+                # (refer to vresutils.load._upsampling_weights)
+                # TODO: require adjustment for Africa
+                factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
+            
             return pd.DataFrame(
                 factors.values * l.values[:, np.newaxis],
                 index=l.index,
@@ -311,7 +325,7 @@ if __name__ == "__main__":
     load_paths = snakemake.input["load"]
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
-    scale = snakemake.params.load_options.get("scale", 1.0)
+    load_options = snakemake.params.load_options
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
@@ -322,7 +336,7 @@ if __name__ == "__main__":
         regions,
         admin_shapes,
         countries,
-        scale,
+        load_options,
         start_date,
         end_date,
         out_path,

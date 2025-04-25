@@ -150,6 +150,12 @@ load_options:
   weather_year: 2013 # Load scenarios available with different weather year (different renewable potentials)
   prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
+  disaggregation:
+    method: default  # supported values. "default" is based on standard approach, "geospatial" employs a geospatial shape to scale demand
+    geospatial:
+      source: "data/demand.geojson"  # path to the geospatial file, the column "demand" is needed
+      scaling: "absolute" # "absolute" or "relative": relative means that entries of the geospatial file are scaled to the total load of the country, absolute means that entries represent the total demand
+
 
 electricity:
   base_voltage: 380.
