@@ -146,11 +146,11 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
     #Specific filtering for the US 
     # To-do: Improved handling if a list of countries including US is used
-    if 'US' in snakemake.params.countries:
-        scenario = config['scenario']
-        market = config['financial_case']
-        costs = costs[costs.scenario.isin([scenario, np.nan])]
-        costs =  costs[costs.financial_case.isin([market, np.nan])]
+    # if 'US' in snakemake.params.countries:
+    scenario = config['scenario']
+    market = config['financial_case']
+    costs = costs[costs.scenario.isin([scenario, np.nan])]
+    costs =  costs[costs.financial_case.isin([market, np.nan])]
     
     costs = costs.value.unstack().fillna(config["fill_values"])
 
