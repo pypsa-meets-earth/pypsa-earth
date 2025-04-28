@@ -133,7 +133,7 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     n.import_components_from_dataframe(emissions, "Carrier")
 
 
-def load_costs(tech_costs, config, elec_config, countries, Nyears=1):
+def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     Set all asset costs and other parameters.
     """
@@ -146,11 +146,12 @@ def load_costs(tech_costs, config, elec_config, countries, Nyears=1):
 
     #Specific filtering for the US 
     # To-do: Improved handling if a list of countries including US is used
-    if 'US' in countries:
-        scenario = config.scenario
-        market = config.financial_case
-        costs = costs[costs.scenario.isin([scenario, np.nan])]
-        costs =  costs[costs.financial_case.isin([market, np.nan])]
+    # if 'US' in snakemake.params.countries:
+    scenario = config['scenario']
+    market = config['financial_case']
+    costs = costs[costs.scenario.isin([scenario, np.nan])]
+    costs =  costs[costs.financial_case.isin([market, np.nan])]
+    
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
@@ -893,7 +894,6 @@ if __name__ == "__main__":
         snakemake.input.tech_costs,
         snakemake.params.costs,
         snakemake.params.electricity,
-        snakemake.params.countries,
         Nyears,
     )
     ppl = load_powerplants(snakemake.input.powerplants)
