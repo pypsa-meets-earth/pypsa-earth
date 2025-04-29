@@ -56,8 +56,10 @@ def select_ports(n):
 
     # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
     if ports_sel.empty:
-        hydrogen_buses_ports = n.buses[n.buses.carrier=="H2"]
-        logger.info("No hydrogen export ports are found. Setting all hydrogen buses as export nodes")
+        hydrogen_buses_ports = n.buses[n.buses.carrier == "H2"]
+        logger.info(
+            "No hydrogen export ports are found. Setting all hydrogen buses as export nodes"
+        )
     else:
         hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
 
