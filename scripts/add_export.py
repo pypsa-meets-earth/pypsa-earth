@@ -200,20 +200,20 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-144H",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="3H",
             discountrate="0.071",
-            demand="AB",
-            h2export="120",
+            demand="AP",
+            h2export="3",
             # configfile="test/config.test1.yaml",
         )
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    countries = list(n.buses.country.unique())
+    countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
     export_profile = create_export_profile()
