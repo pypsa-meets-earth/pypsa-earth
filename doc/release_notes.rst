@@ -69,6 +69,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Integrate EIA data for US-specific CAGR and fuel shares for the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1400>`__
 
+* Revise naming of Wikipedia data for vehicles `PR #1422 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1422>`__
+
 PyPSA-Earth 0.6.0
 =================
 
