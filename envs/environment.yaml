@@ -29,6 +29,7 @@ dependencies:
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
+- pyscipopt
 - lxml
 - numpy
 # starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
