@@ -551,6 +551,7 @@ def mock_snakemake(
     import os
 
     import snakemake as sm
+
     try:
         from pypsa.descriptors import Dict
     except:
