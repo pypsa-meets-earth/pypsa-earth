@@ -54,8 +54,15 @@ def select_ports(n):
     gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
-    # Select the hydrogen buses based on nodes with ports
-    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+    # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
+    if ports_sel.empty:
+        hydrogen_buses_ports = n.buses[n.buses.carrier == "H2"]
+        logger.info(
+            "No hydrogen export ports are found. Setting all hydrogen buses as export nodes"
+        )
+    else:
+        hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
@@ -200,20 +207,20 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-144H",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="3H",
             discountrate="0.071",
-            demand="AB",
-            h2export="120",
+            demand="AP",
+            h2export="3",
             # configfile="test/config.test1.yaml",
         )
 
     overrides = override_component_attrs(snakemake.input.overrides)
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    countries = list(n.buses.country.unique())
+    countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
     export_profile = create_export_profile()
