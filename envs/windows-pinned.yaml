@@ -61,7 +61,7 @@ dependencies:
   - cfgv=3.3.1
   - cftime=1.6.4
   - chaospy=4.3.19
-  - charset-normalizer=3.4.1
+  - charset-normalizer=3.4.2
   - click=8.1.8
   - click-plugins=1.1.1
   - cligj=0.7.2
@@ -469,3 +469,4 @@ dependencies:
   - pip:
       - googledrivedownloader==1.1.0
 prefix: C:\Miniconda\envs\pypsa-earth
+
