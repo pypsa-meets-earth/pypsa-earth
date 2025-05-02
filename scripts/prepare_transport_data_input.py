@@ -89,7 +89,8 @@ def download_number_of_vehicles():
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
 
     vehicles_wiki.rename(
-        columns={"Location": "Country", "Vehicles": "number cars"}, inplace=True
+        columns={"Location": "Country", "Road motor vehicles": "number cars"},
+        inplace=True,
     )
 
     vehicles_wiki = add_iso2_country_code(vehicles_wiki)
