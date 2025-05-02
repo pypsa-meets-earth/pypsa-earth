@@ -466,7 +466,7 @@ dependencies:
   - websocket-client=1.8.0
   - wheel=0.45.1
   - wrapt=1.17.2
-  - xarray=2025.4.0
+  - xarray=2025.1.2
   - xerces-c=3.2.5
   - xlrd=2.0.1
   - xorg-libxau=1.0.12

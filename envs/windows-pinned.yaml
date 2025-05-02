@@ -443,7 +443,7 @@ dependencies:
   - win_inet_pton=1.1.0
   - winpty=0.4.3
   - wrapt=1.17.2
-  - xarray=2025.4.0
+  - xarray=2025.1.2
   - xerces-c=3.2.5
   - xlrd=2.0.1
   - xorg-libice=1.1.2
@@ -469,3 +469,4 @@ dependencies:
   - pip:
       - googledrivedownloader==1.1.0
 prefix: C:\Miniconda\envs\pypsa-earth
+
