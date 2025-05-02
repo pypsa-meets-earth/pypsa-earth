@@ -514,7 +514,7 @@ dependencies:
   - websocket-client=1.8.0
   - wheel=0.45.1
   - wrapt=1.17.2
-  - xarray=2025.4.0
+  - xarray=2025.1.2
   - xcb-util=0.4.1
   - xcb-util-cursor=0.1.5
   - xcb-util-image=0.4.0
