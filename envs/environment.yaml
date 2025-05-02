@@ -8,7 +8,7 @@ channels:
 - bioconda
 - gurobi
 dependencies:
-- python>=3.8
+- python>=3.8, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 - pip
 - mamba   # esp for windows build
 
