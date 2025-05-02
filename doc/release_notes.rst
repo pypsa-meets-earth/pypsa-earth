@@ -71,6 +71,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Revise naming of Wikipedia data for vehicles `PR #1422 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1422>`__
 
+* Monte Carlo: move qmc.discrepancy to logging only `PR #1418 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1418>`__
+
 PyPSA-Earth 0.6.0
 =================
 
