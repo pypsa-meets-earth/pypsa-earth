@@ -56,7 +56,7 @@ jobs:
 
     - name: Update environment
       if: steps.cache-env.outputs.cache-hit != 'true'
-      run: conda env update -n pypsa-eur -f ${{ matrix.env_file }}
+      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
 
     - name: Conda list
       run: conda list
