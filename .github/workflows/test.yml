@@ -51,12 +51,12 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ env.CONDA }}/envs
-        key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
+        key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', matrix.env_file)) }}
       id: cache-env
 
     - name: Update environment
       if: steps.cache-env.outputs.cache-hit != 'true'
-      run: conda env update -n pypsa-eur -f ${{ env.env_file }}
+      run: conda env update -n pypsa-eur -f ${{ matrix.env_file }}
 
     - name: Conda list
       run: conda list
