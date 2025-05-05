@@ -33,6 +33,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix prepare_ports script to generate both outputs if export ports with custom data is selected. `PR #1424 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1424>`__
+
 * Update the applications list for PyPSA-Earth model. `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
 
 * Fix problem with a discontinued World Bank data source in prepare_transport_data_input `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
