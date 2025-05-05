@@ -946,7 +946,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                     + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
                     **config["scenario"],
                 ),
-    
+
     #else: #qui devo mettere gli altri metodi
     if config["monte_carlo"]["options"]["method"] == "global_sensitivity":
 

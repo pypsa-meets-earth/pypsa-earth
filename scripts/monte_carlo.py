@@ -75,35 +75,34 @@ import pandas as pd
 import pypsa
 import seaborn as sns
 from _helpers import configure_logging, create_logger
+from add_electricity import load_costs
 from pyDOE2 import lhs
 from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
 from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
-from add_electricity import load_costs
 
 logger = create_logger(__name__)
 sns.set(style="whitegrid")
 
+
 # CREAZIONE WILDCARD PER MONTE CARLO: SE GLOBAL SENSITIVITY FARA' NUMERO ITERAZIONI UGUALE AI SAMPLE DEFINITI NEL CONFIG
 # SE SINGLE BEST IN WORST FARA' NUMERO ITERAZIONI UGUALE AL NUMERO DI STORES DEFINITI NEL CONFIG
-def wildcard_creator(config):#, method=None):
-    
-    #Creates wildcard for monte-carlo simulations.
-    
+def wildcard_creator(config):  # , method=None):
+
+    # Creates wildcard for monte-carlo simulations.
+
     method = config["monte_carlo"]["options"].get("method")
+    """ 
     if method == "global_sensitivity":
         return [f"h{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
-
+ """
     if method == "single_best_in_worst":
         return [
             f"a{i}"
             for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
         ]
     if method == "MC":
-        return [
-            f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
-        ]
-       
+        return [f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
 
 
 def monte_carlo_sampling_pydoe2(
@@ -144,7 +143,13 @@ def monte_carlo_sampling_pydoe2(
     return lh
 
 
-def monte_carlo_sampling_chaospy(N_FEATURES: int,SAMPLES: int,uncertainties_values: dict,seed: int,rule: str = "latin_hypercube",) -> np.ndarray:
+def monte_carlo_sampling_chaospy(
+    N_FEATURES: int,
+    SAMPLES: int,
+    uncertainties_values: dict,
+    seed: int,
+    rule: str = "latin_hypercube",
+) -> np.ndarray:
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
 
@@ -155,13 +160,17 @@ def monte_carlo_sampling_chaospy(N_FEATURES: int,SAMPLES: int,uncertainties_valu
     from scipy.stats import qmc
 
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
-    N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES #NUMERO PARAMS AFFETTO DA UNCERTAINTY
+    N_FEATURES = (
+        "chaospy.Uniform(0, 1), " * N_FEATURES
+    )  # NUMERO PARAMS AFFETTO DA UNCERTAINTY
     uniform_cube = eval(
         f"chaospy.J({N_FEATURES})"
     )  # writes Nfeatures times the chaospy.uniform... command)
-    lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T  #ESTRAZIONE RANDOMICA
+    lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T  # ESTRAZIONE RANDOMICA
 
-    lh = rescale_distribution(lh, uncertainties_values) #RESCALING RISPETTO AL TIPO DI DISTRIBUZIONE
+    lh = rescale_distribution(
+        lh, uncertainties_values
+    )  # RESCALING RISPETTO AL TIPO DI DISTRIBUZIONE
     discrepancy = qmc.discrepancy(lh)
     logger.info(
         "Discrepancy is:", discrepancy, " more details in function documentation."
@@ -169,7 +178,8 @@ def monte_carlo_sampling_chaospy(N_FEATURES: int,SAMPLES: int,uncertainties_valu
 
     return lh
 
-def monte_carlo_sampling_chaospy2(N_FEATURES, SAMPLES, SEED, rule="latin_hypercube"):
+
+#def monte_carlo_sampling_chaospy2(N_FEATURES, SAMPLES, SEED, rule="latin_hypercube"):
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
 
@@ -183,10 +193,11 @@ def monte_carlo_sampling_chaospy2(N_FEATURES, SAMPLES, SEED, rule="latin_hypercu
         f"chaospy.J({N_FEATURES})"
     )  # writes Nfeatures times the chaospy.uniform... command)
     lh = uniform_cube.sample(SAMPLES, rule=rule, seed=SEED).T
-    #discrepancy = qmc.discrepancy(lh)
-    #logger.info("Hypercube discrepancy is:", discrepancy)
+    # discrepancy = qmc.discrepancy(lh)
+    # logger.info("Hypercube discrepancy is:", discrepancy)
 
     return lh
+
 
 def monte_carlo_sampling_scipy(
     N_FEATURES: int,
@@ -273,7 +284,8 @@ def single_best_in_worst_list(worst_list, best_list):
 
     return new_list
 
-#QUI RISCALA I VALORI COMPRENDENDOLI DA  A 1 CONSIDERATO CHE ESTRAE DA UNA DISTRIBUZIONE DIFFERENTE DI VALORI DIFFERENTI CON MAX MIN DIVERSI
+
+# QUI RISCALA I VALORI COMPRENDENDOLI DA  A 1 CONSIDERATO CHE ESTRAE DA UNA DISTRIBUZIONE DIFFERENTE DI VALORI DIFFERENTI CON MAX MIN DIVERSI
 def rescale_distribution(
     latin_hypercube: np.ndarray, uncertainties_values: dict
 ) -> np.ndarray:
@@ -317,11 +329,11 @@ def rescale_distribution(
 
         match dist:
             case "uniform":
-                l_bounds, u_bounds = params               
+                l_bounds, u_bounds = params
                 latin_hypercube[:, idx] = minmax_scale(
                     latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
                 )
-                
+
             case "normal":
                 mean, std = params
                 latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
@@ -446,71 +458,107 @@ if __name__ == "__main__":
     j = 0
 
     ### PREPARAZIONE VARIABLES PER MONTE CARLO GLOBAL SENSIIVITY
-    if monte_carlo_config["options"]["method"] == "MC":
-        
-        # SCENARIO INPUTS
-        ###
-        MONTE_CARLO_PYPSA_FEATURES = [k for k in monte_carlo_config["uncertainties"].keys() if k]  # removes key value pairs with empty value e.g. []
+    method = monte_carlo_config["options"]["method"]
+    distributions = monte_carlo_config.get("distributions", {})
+    
+    if method == "MC":
+        uncertainties_config = distributions.get("MC", {}).get("uncertainties", {})
+        MONTE_CARLO_PYPSA_FEATURES = [k for k in uncertainties_config if k]
+        N_FEATURES = len(MONTE_CARLO_PYPSA_FEATURES)
+        # COMMON PARAMETERS
+        # Parametri comuni
         MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
-        N_FEATURES = len(MONTE_CARLO_PYPSA_FEATURES)  # only counts features when specified in config
-        SAMPLES = MONTE_CARLO_OPTIONS.get("samples")  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
+        SAMPLES = MONTE_CARLO_OPTIONS.get("samples")
         SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
-        UNCERTAINTIES_VALUES = monte_carlo_config["uncertainties"].values()
-
         SEED = MONTE_CARLO_OPTIONS.get("seed")
-
+        UNCERTAINTIES_VALUES = uncertainties_config.values()
         # PARAMETERS VALIDATION
         # validates the parameters supplied from config file
         validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
 
-    if monte_carlo_config["options"]["method"] == "global_sensitivity":
+    elif method == "single_best_in_worst":
+    # Sottocaso di MC → usa le bounds specifiche
+        uncertainties_config = distributions.get("single_best_in_worst", {}).get("uncertainties", {})
+        L_BOUNDS = [item[0] for item in uncertainties_config.values()]
+        U_BOUNDS = [item[1] for item in uncertainties_config.values()]
+    else:
+        uncertainties_config = {}
+
+    
+    """
+    if monte_carlo_config["options"]["method"] == "MC":
+
+        # SCENARIO INPUTS
+        ###
+        MONTE_CARLO_PYPSA_FEATURES = [
+            k for k in monte_carlo_config["uncertainties"].keys() if k
+        ]  # removes key value pairs with empty value e.g. []
+        MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
+        N_FEATURES = len(
+            MONTE_CARLO_PYPSA_FEATURES
+        )  # only counts features when specified in config
+        SAMPLES = MONTE_CARLO_OPTIONS.get(
+            "samples"
+        )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
+        SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
+        UNCERTAINTIES_VALUES = monte_carlo_config["uncertainties"].values()
+
+        SEED = MONTE_CARLO_OPTIONS.get("seed")
+        """
+
+        # PARAMETERS VALIDATION
+        # validates the parameters supplied from config file
+    #validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
+
+    """ if monte_carlo_config["options"]["method"] == "global_sensitivity":
         PYPSA_FEATURES = monte_carlo_config["pypsa_standard"]
         OPTIONS = monte_carlo_config["options"]
         L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
         U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
         N_FEATURES = len(PYPSA_FEATURES)
-        SAMPLES = OPTIONS.get("samples")  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
+        SAMPLES = OPTIONS.get(
+            "samples"
+        )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
         SAMPLING_STRATEGY = OPTIONS.get("sampling_strategy")
-        SEED = OPTIONS.get("seed")
+        SEED = OPTIONS.get("seed") """
 
-    if monte_carlo_config["options"]["method"] == "single_best_in_worst": 
+    """ if monte_carlo_config["options"]["method"] == "single_best_in_worst":
         # PREPARAZIONE VARIABLES PER MONTE CARLO SINGLE BEST IN WORST
         PYPSA_FEATURES = monte_carlo_config["pypsa_standard"]
         OPTIONS = monte_carlo_config["options"]
         L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
         U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
-        N_FEATURES = len(PYPSA_FEATURES) 
-
+        N_FEATURES = len(PYPSA_FEATURES) """
 
     if monte_carlo_config["options"]["method"] == "MC":
         if SAMPLING_STRATEGY == "pydoe2":
-                        lh = monte_carlo_sampling_pydoe2(
-                            N_FEATURES,
-                            SAMPLES,
-                            UNCERTAINTIES_VALUES,
-                            random_state=SEED,
-                            criterion=None,
-                            iteration=None,
-                            correlation_matrix=None,
-                        )
+            lh = monte_carlo_sampling_pydoe2(
+                N_FEATURES,
+                SAMPLES,
+                UNCERTAINTIES_VALUES,
+                random_state=SEED,
+                criterion=None,
+                iteration=None,
+                correlation_matrix=None,
+            )
         if SAMPLING_STRATEGY == "scipy":
-                        lh = monte_carlo_sampling_scipy(
-                            N_FEATURES,
-                            SAMPLES,
-                            UNCERTAINTIES_VALUES,
-                            seed=SEED,
-                            strength=2,
-                            optimization=None,
-                        )
+            lh = monte_carlo_sampling_scipy(
+                N_FEATURES,
+                SAMPLES,
+                UNCERTAINTIES_VALUES,
+                seed=SEED,
+                strength=2,
+                optimization=None,
+            )
         if SAMPLING_STRATEGY == "chaospy":
-                        lh = monte_carlo_sampling_chaospy(
-                            N_FEATURES,
-                            SAMPLES,
-                            UNCERTAINTIES_VALUES,  #RESCALING AFTER SAMPLING
-                            seed=SEED,
-                            rule="latin_hypercube",
-                        )
-        
+            lh = monte_carlo_sampling_chaospy(
+                N_FEATURES,
+                SAMPLES,
+                UNCERTAINTIES_VALUES,  # RESCALING AFTER SAMPLING
+                seed=SEED,
+                rule="latin_hypercube",
+            )
+
     if monte_carlo_config["options"]["method"] == "global_sensitivity":
         if SAMPLING_STRATEGY == "pydoe2":
             lh = monte_carlo_sampling_pydoe2(
@@ -535,22 +583,22 @@ if __name__ == "__main__":
                 N_FEATURES,
                 SAMPLES,
                 SEED,
-                rule="latin_hypercube"
-                 #ONLY SAMPLING
+                rule="latin_hypercube",
+                # ONLY SAMPLING
             )
-        scenarios = qmc.scale(lh, L_BOUNDS, U_BOUNDS) #HERE RESCALING
+        scenarios = qmc.scale(lh, L_BOUNDS, U_BOUNDS)  # HERE RESCALING
 
     elif monte_carlo_config["options"]["method"] == "single_best_in_worst":
-                carrier_no = len(n.stores.carrier.unique())
-                #L_BOUNDS = [item[0] for item in UNCERTAINTIES_VALUES]
-                #U_BOUNDS = [item[1] for item in UNCERTAINTIES_VALUES]
-                #L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
-                #U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
-                worst_list = U_BOUNDS * carrier_no
-                best_list = L_BOUNDS * carrier_no
-                scenarios = single_best_in_worst_list(worst_list, best_list) #matrix of upper and lower bounds for each stores listed in config.yaml (fattori moltiplicativi)
-                
-    
+        carrier_no = len(n.stores.carrier.unique())
+        # L_BOUNDS = [item[0] for item in UNCERTAINTIES_VALUES]
+        # U_BOUNDS = [item[1] for item in UNCERTAINTIES_VALUES]
+        # L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
+        # U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
+        worst_list = U_BOUNDS * carrier_no
+        best_list = L_BOUNDS * carrier_no
+        scenarios = single_best_in_worst_list(
+            worst_list, best_list
+        )  # matrix of upper and lower bounds for each stores listed in config.yaml (fattori moltiplicativi)
 
     """
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
@@ -561,12 +609,12 @@ if __name__ == "__main__":
         config["costs"],
         config["electricity"],
         Nyears,
-    )     
+    )
     """
-    
+
     if monte_carlo_config["options"]["method"] == "MC":
-        #for k, v in enumerate(MONTE_CARLO_PYPSA_FEATURES): #.items():
-        for k in MONTE_CARLO_PYPSA_FEATURES:    
+        # for k, v in enumerate(MONTE_CARLO_PYPSA_FEATURES): #.items():
+        for k in MONTE_CARLO_PYPSA_FEATURES:
             # this loop sets in one scenario each "i" feature assumption
             # k is the config input key "loads_t.p_set"
             # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
@@ -577,20 +625,22 @@ if __name__ == "__main__":
             logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
             j = j + 1
 
+    """  
     if monte_carlo_config["options"]["method"] == "global_sensitivity":
-        #for k, v in enumerate(MONTE_CARLO_PYPSA_FEATURES): #.items():
-        for k, v in PYPSA_FEATURES.items():
-            # this loop sets in one scenario each "i" feature assumption
-            # k is the config input key "loads_t.p_set"
-            # v is the lower and upper bound [0.8,1.3], that was used for scenarios
-            # i, j interation number to pick values of experimental setup
-            # Example: n.loads_t.p_set = n.loads_t.p_set * scenarios[0,0]
-            exec(f"n.{k} = n.{k} * {scenarios[i,j]}")
-            logger.info(f"Scaled n.{k} by factor {scenarios[i,j]} in the {i} scenario")
-            j = j + 1
+            # for k, v in enumerate(MONTE_CARLO_PYPSA_FEATURES): #.items():
+            for k, v in PYPSA_FEATURES.items():
+                # this loop sets in one scenario each "i" feature assumption
+                # k is the config input key "loads_t.p_set"
+                # v is the lower and upper bound [0.8,1.3], that was used for scenarios
+                # i, j interation number to pick values of experimental setup
+                # Example: n.loads_t.p_set = n.loads_t.p_set * scenarios[0,0]
+                exec(f"n.{k} = n.{k} * {scenarios[i,j]}")
+                logger.info(f"Scaled n.{k} by factor {scenarios[i,j]} in the {i} scenario")
+                j = j + 1 
+                """
 
     if monte_carlo_config["options"]["method"] == "single_best_in_worst":
-        for k, _ in PYPSA_FEATURES.items():
+        for k, _ in uncertainties_config.items():
             type = k.split(".")[0]  # "stores", "generators", ...
             feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
 
@@ -618,27 +668,28 @@ if __name__ == "__main__":
                 cost_value = costs.loc[costs.index == c, 'capital_cost'].values[0]
                 n.stores.loc[n.stores['carrier'] == c, 'capital_cost']  = cost_value
                 n.stores.loc[n.stores['carrier'] == c, 'capital_cost'] *= scenarios[i][j] # =
-                #(costs.loc[costs.index == c , feature]) *= scenarios[i][j] #float(costs.loc[costs.index == c , feature]) *= scenarios[i][j] #n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j] 
+                #(costs.loc[costs.index == c , feature]) *= scenarios[i][j] #float(costs.loc[costs.index == c , feature]) *= scenarios[i][j] #n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j]
                 n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[i][j]
                 logger.info(
                     f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario"
                 )
                 j += 1 """
 
- 
     ### EXPORT AND METADATA
+    """ 
     if monte_carlo_config["options"]["method"] == "global_sensitivity":
-        scenario_dict = (
-        pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
-         ).to_dict()
-        n.meta.update(scenario_dict)
-        n.export_to_netcdf(snakemake.output[0])
+            scenario_dict = (
+                pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
+            ).to_dict()
+            n.meta.update(scenario_dict)
+            n.export_to_netcdf(snakemake.output[0]) 
+            """
 
     if monte_carlo_config["options"]["method"] == "MC":
         latin_hypercube_dict = (
             pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
         ).to_dict()
-        n.meta.update(latin_hypercube_dict) #AGGIORNA I DATI DEL NETWORK
+        n.meta.update(latin_hypercube_dict)  # AGGIORNA I DATI DEL NETWORK
         n.export_to_netcdf(snakemake.output[0])
 
     if monte_carlo_config["options"]["method"] == "single_best_in_worst":
@@ -647,7 +698,5 @@ if __name__ == "__main__":
         ).to_dict()
         n.meta.update(scenario_dict)
         n.export_to_netcdf(snakemake.output[0])
-    
 
-        #configure_logging(snakemake)
-    
+        # configure_logging(snakemake)

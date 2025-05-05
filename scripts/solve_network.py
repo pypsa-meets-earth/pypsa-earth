@@ -86,12 +86,18 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, override_component_attrs
+from _helpers import (
+    add_storage_col_to_costs,
+    configure_logging,
+    create_logger,
+    nested_storage_dict,
+    override_component_attrs,
+    read_csv_nafix,
+    update_p_nom_max,
+)
 from add_electricity import load_costs
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
-from pypsa.optimization.optimize import optimize
 from pypsa.linopf import (
     define_constraints,
     define_variables,
@@ -101,15 +107,8 @@ from pypsa.linopf import (
     linexpr,
     network_lopf,
 )
-
-from _helpers import (
-    add_storage_col_to_costs,
-    configure_logging,
-    create_logger,
-    nested_storage_dict,
-    read_csv_nafix,
-    update_p_nom_max,
-)
+from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
+from pypsa.optimization.optimize import optimize
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
@@ -1024,15 +1023,14 @@ def extra_functionality(n, snapshots):
     opts = n.opts
     config = n.config
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    
+
     """costs = load_costs(
         snakemake.input.tech_costs,
         config["costs"],
         config["electricity"],
         Nyears,
-    ) 
+    )
     """
-    
 
     if "BAU" in opts and n.generators.p_nom_extendable.any():
         add_BAU_constraints(n, config)
@@ -1052,7 +1050,7 @@ def extra_functionality(n, snapshots):
             add_EQ_constraints(n, o)
 
     add_battery_constraints(n)
-    #add_bicharger_constraints(n, costs)
+    # add_bicharger_constraints(n, costs)
     add_lossy_bidirectional_link_constraints(n)
 
     if snakemake.config["sector"]["chp"]:
@@ -1207,6 +1205,8 @@ if __name__ == "__main__":
         log_fn=snakemake.log.solver,
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
-    n.export_to_netcdf(snakemake.output[0])   #snakemake.output[0] aggiornato da R monte carlo
+    n.export_to_netcdf(
+        snakemake.output[0]
+    )  # snakemake.output[0] aggiornato da R monte carlo
     logger.info(f"Objective function: {n.objective}")
     logger.info(f"Objective constant: {n.objective_constant}")

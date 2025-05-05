@@ -557,14 +557,14 @@ if __name__ == "__main__":
     transformers = snakemake.params.transformers
     voltages = snakemake.params.voltages
 
-    #creating the base network
+    # creating the base network
     n = base_network(
-        inputs, # resources\\base networks and shapes content
-        base_network_config, #da config.yaml base_network:({'min_voltage_substation_offshore': 51000, 'min_voltage_rebase_voltage': 51000},)
-        countries, #da config.yaml
-        hvdc_as_lines, #da config.yaml True: HVDC cables are modelled as PyPSA Line components. False: HVDC cables are modeled as PyPSA Link components.
-        lines, #da config.yaml
-        links, #da config.yaml {'p_max_pu': 1.0, 'p_nom_max': inf, 'under_construction': 'zero'}
+        inputs,  # resources\\base networks and shapes content
+        base_network_config,  # da config.yaml base_network:({'min_voltage_substation_offshore': 51000, 'min_voltage_rebase_voltage': 51000},)
+        countries,  # da config.yaml
+        hvdc_as_lines,  # da config.yaml True: HVDC cables are modelled as PyPSA Line components. False: HVDC cables are modeled as PyPSA Link components.
+        lines,  # da config.yaml
+        links,  # da config.yaml {'p_max_pu': 1.0, 'p_nom_max': inf, 'under_construction': 'zero'}
         snapshots,
         transformers,
         voltages,
