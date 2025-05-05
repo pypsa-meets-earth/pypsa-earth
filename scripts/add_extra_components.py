@@ -53,6 +53,7 @@ The rule :mod:`add_extra_components` attaches additional extendable components t
 - ``Stores`` of carrier 'H2' and/or 'battery' in combination with ``Links``. If this option is chosen, the script adds extra buses with corresponding carrier where energy ``Stores`` are attached and which are connected to the corresponding power buses via two links, one each for charging and discharging. This leads to three investment variables for the energy capacity, charging and discharging capacity of the storage unit.
 """
 import os
+import re
 
 import numpy as np
 import pandas as pd
@@ -111,7 +112,7 @@ def attach_storageunits(n, costs, config):
     # automated attach of storage_units from database
     for carrier in carriers_database:
         tech_type = costs.technology_type
-        charger_or_bicharger_filter = (costs.carrier == carrier) & (
+        charger_or_bicharger_filter = (costs.carrier[carrier] == carrier) & (
             (tech_type == "charger") | (tech_type == "bicharger")
         )
         discharger_or_bicharger_filter = (costs.carrier == carrier) & (
@@ -126,13 +127,11 @@ def attach_storageunits(n, costs, config):
             p_nom_extendable=True,
             capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
-            efficiency_store=float(
-                costs.loc[charger_or_bicharger_filter, "efficiency"]
-            ),
-            efficiency_dispatch=float(
+            efficiency_store=(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+            efficiency_dispatch=(
                 costs.loc[discharger_or_bicharger_filter, "efficiency"]
             ),
-            max_hours=max_hours[carrier],
+            # max_hours=max_hours[carrier],
             cyclic_state_of_charge=True,
         )
 
@@ -235,18 +234,40 @@ def attach_stores(n, costs, config):
     # automated attach of store-link storages from database
     for c in carriers_database:
         carrier_buses_i = n.madd("Bus", buses_i + f" {c}", carrier=c, **bus_sub_dict)
-        tech_type = costs.technology_type
-        carrier = costs.carrier
+        tech_type = costs["technology_type"]  # tech_type = costs.technology_type
+        carrier = costs["carrier"].str.replace(
+            r"elec|,", "", regex=True
+        )  # costs["carrier"] #carrier = costs.carrier
         # filters for pypsa store
-        store_filter = (carrier == c) & (tech_type == "store")
+        # store_filter = (carrier == c) & (tech_type == "store")
+        # store_filter = (
+        # costs.carrier.str.contains(r"\b" + re.escape(c) + r"\b", case=False)
+        #      ) & (tech_type == "store")
+        store_filter = (costs["carrier"].str.contains(c, case=False)) & (
+            costs["technology_type"] == "store"
+        )
         # filters for pypsa charger or bicharger
+        charger_or_bicharger_filter = (
+            costs.carrier.str.contains(r"\b" + re.escape(c) + r"\b", case=False)
+        ) & (  #
+            (tech_type == "charger") | (tech_type == "bicharger")
+        )
+        """
         charger_or_bicharger_filter = (carrier == c) & (
             (tech_type == "charger") | (tech_type == "bicharger")
         )
+        """
         # filters for pypsa discharger or bicharger
+        discharger_or_bicharger_filter = (
+            costs.carrier.str.contains(r"\b" + re.escape(c) + r"\b", case=False)
+        ) & (  # (carrier.str.contains(c, na=False))
+            (tech_type == "discharger") | (tech_type == "bicharger")
+        )
+        """
         discharger_or_bicharger_filter = (carrier == c) & (
             (tech_type == "discharger") | (tech_type == "bicharger")
         )
+        """
         n.madd(
             "Store",
             carrier_buses_i,
@@ -255,6 +276,7 @@ def attach_stores(n, costs, config):
             e_nom_extendable=True,
             e_cyclic=True,
             capital_cost=float(costs.loc[store_filter, "capital_cost"]),
+            # capital_cost=float(costs.loc[store_filter, "capital_cost"]),
         )
 
         n.madd(
@@ -269,6 +291,9 @@ def attach_stores(n, costs, config):
             marginal_cost=float(
                 costs.loc[charger_or_bicharger_filter, "marginal_cost"]
             ),
+            # efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+            # capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
+            # marginal_cost=float(costs.loc[charger_or_bicharger_filter, "marginal_cost"]
         )
 
         # capital cost of discharger is None if bicharger since already added in previous link

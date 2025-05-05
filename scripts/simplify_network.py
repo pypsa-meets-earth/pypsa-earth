@@ -76,13 +76,21 @@ Description
 
 The rule :mod:`simplify_network` does up to four things:
 
-1. Create an equivalent transmission network in which all voltage levels are mapped to the 380 kV level by the function ``simplify_network(...)``.
+1. Create an equivalent transmission network in which all voltage levels are mapped to the 380 kV level 
+by the function ``simplify_network(...)``.
 
-2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the capital costs of the generator.
+2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a 
+single representative link in the function ``simplify_links(...)``. 
+The components attached to buses in between are moved to the nearest endpoint. 
+The grid connection cost of offshore wind generators are added to the capital costs of the generator.
 
-3. Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
+3. Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network
+ in the function ``remove_stubs(...)``. Components are moved along.
 
-4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), the network is clustered to this number of clusters with the routines from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. This step is usually skipped!
+4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), 
+the network is clustered to this number of clusters with the routines 
+from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. 
+This step is usually skipped!
 """
 import os
 import sys
@@ -283,6 +291,8 @@ def _aggregate_and_move_components(
         busmap,
         "Generator",
         carriers=carriers,
+        buses = None,
+        with_time=False,
         custom_strategies=generator_strategies,
     )
 

@@ -198,16 +198,43 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs.loc["csp"] = costs.loc["csp-tower"]
 
     def costs_for_storageunit(store, link1, link2=pd.DataFrame(), max_hours=1.0):
-        capital_cost = float(link1["capital_cost"]) + float(max_hours) * float(
+        """
+        capital_cost = link1["capital_cost"]+ (max_hours) * (
             store["capital_cost"]
         )
         if not link2.empty:
+            capital_cost += (link2["capital_cost"])
+        return pd.Series(
+            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
+        )
+        """
+
+        capital_cost = float(link1["capital_cost"]) + max_hours * float(
+            store["capital_cost"]
+        )
+        # if link2 is not None:
+        if not link2.empty and "capital_cost" in link2:
             capital_cost += float(link2["capital_cost"])
         return pd.Series(
             dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
         )
+        """
+        if isinstance(link2["capital_cost"], pd.Series) and not link2["capital_cost"].empty:
+            capital_cost += float(link2["capital_cost"].iloc[0])  # Aggiungi il valore del primo elemento
+        else:
+            capital_cost += 0.0
+ """
+
+        """
+        if not link2.empty and "capital_cost" in link2:
+            capital_cost += float(link2["capital_cost"].iloc[0]) if not link2["capital_cost"].empty else 0.0 # float(link2["capital_cost"])
+        return pd.Series(
+            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
+        )
+        """
 
     max_hours = elec_config["max_hours"]
+
     costs.loc["battery"] = costs_for_storageunit(
         costs.loc["battery storage"],
         costs.loc["battery inverter"],
@@ -224,18 +251,42 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
 
     # add capital_cost to all storage_units indexed by carrier e.g. "lead" or "concrete"
-    for c in costs.loc[storage_techs, "carrier"].unique():
-        carrier = costs.carrier
-        tech_type = costs.technology_type
+    for c in (
+        costs.loc[storage_techs, "carrier"]
+        .str.replace("elec", "", regex=False)
+        .str.replace(r",,+", ",", regex=True)
+        .str.strip(",")
+    ):  # costs.loc[storage_techs, "carrier"].unique():
+
+        carrier = (
+            costs.carrier[storage_techs]
+            .str.replace("elec", "", regex=False)
+            .str.replace(r",,+", ",", regex=True)
+            .str.strip(",")
+        )  # costs.carrier
+        tech_type = costs.technology_type[storage_techs]  # costs.technology_type
+
         store_filter = (carrier == c) & (tech_type == "store")
         charger_or_bicharger_filter = (carrier == c) & (
             (tech_type == "bicharger") | (tech_type == "charger")
         )
         discharger_filter = (carrier == c) & (tech_type == "discharger")
+
+        if not costs.loc[storage_techs][discharger_filter].empty:
+            discharger_filter = costs.loc[storage_techs][discharger_filter]
+        else:
+            discharger_filter = pd.DataFrame()
+
         costs.loc[c] = costs_for_storageunit(
-            costs.loc[store_filter],
-            costs.loc[charger_or_bicharger_filter],
-            costs.loc[discharger_filter],
+            costs[
+                costs.index.isin(store_filter[store_filter].index)
+            ],  # costs.loc[store_filter],
+            costs[
+                costs.index.isin(
+                    charger_or_bicharger_filter[charger_or_bicharger_filter].index
+                )
+            ],  # costs.loc[charger_or_bicharger_filter],
+            discharger_filter,  # costs[costs.index.isin(discharger_filter[discharger_filter].index)], #costs.loc[discharger_filter],
             max_hours=max_hours["battery"],
             # TODO: max_hours data should be read as costs.loc[carrier==c,max_hours] (easy possible)
         )

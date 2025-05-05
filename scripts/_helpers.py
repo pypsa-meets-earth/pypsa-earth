@@ -892,9 +892,11 @@ def add_storage_col_to_costs(costs, storage_meta_dict, storage_techs):
     """
     # add storage specific columns to costs.csv
     for c in ["carrier", "technology_type", "type"]:
+
         costs.loc[storage_techs, c] = [
-            storage_meta_dict[X][c] for X in costs.loc[storage_techs].index
+            ",".join(storage_meta_dict[X][c]) for X in costs.loc[storage_techs].index
         ]
+
     # remove all 'elec's from carrier columns and read carrier as string
     for i in range(len(costs.loc[storage_techs])):
         costs.loc[storage_techs[i], "carrier"] = "".join(
