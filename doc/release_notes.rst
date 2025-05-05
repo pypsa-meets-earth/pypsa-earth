@@ -33,6 +33,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix: Use the mean value instead of the sum to remove duplicates in the urban percentage data per country and year. `PR #1420 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1420>`__
+
 * Update the applications list for PyPSA-Earth model. `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
 
 * Fix problem with a discontinued World Bank data source in prepare_transport_data_input `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
@@ -66,6 +68,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix the scaling factor for time-varying loads of the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1372>`__
 
 * Integrate EIA data for US-specific CAGR and fuel shares for the sector model `PR #1372 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1400>`__
+
+* Revise naming of Wikipedia data for vehicles `PR #1422 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1422>`__
 
 PyPSA-Earth 0.6.0
 =================
