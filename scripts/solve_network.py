@@ -118,10 +118,7 @@ def prepare_network(n, solve_opts, config):
             bus=n.buses.index,
             carrier="load",
             sign=1e-3,  # Adjust sign to measure p and p_nom in kW instead of MW
-            marginal_cost=1e2,  # Eur/kWh
-            # intersect between macroeconomic and surveybased
-            # willingness to pay
-            # http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full
+            marginal_cost=solve_opts.get("load_shedding")/1000,  # Eur/kWh
             p_nom=1e9,  # kW
         )
 
@@ -1101,16 +1098,17 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-144H",
             planning_horizons="2030",
             discountrate="0.071",
-            demand="AB",
-            sopts="144H",
-            h2export="120",
-            configfile="config.tutorial.yaml",
+            demand="AP",
+            sopts="3H",
+            h2export="3",
+            # configfile="config.tutorial.yaml",
         )
+        # results/first_sec/postnetworks/elec_s_10_ec_lcopt_Co2L-144h_3h_2030_0.071_AP_3export.nc
 
     configure_logging(snakemake)
 
