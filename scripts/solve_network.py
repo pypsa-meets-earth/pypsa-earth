@@ -1098,17 +1098,16 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_sector_network",
             simpl="",
-            clusters="10",
-            ll="copt",
-            opts="Co2L-144H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             discountrate="0.071",
-            demand="AP",
-            sopts="3H",
-            h2export="3",
-            # configfile="config.tutorial.yaml",
+            demand="AB",
+            sopts="144H",
+            h2export="120",
+            configfile="config.tutorial.yaml",
         )
-        # results/first_sec/postnetworks/elec_s_10_ec_lcopt_Co2L-144h_3h_2030_0.071_AP_3export.nc
 
     configure_logging(snakemake)
 
