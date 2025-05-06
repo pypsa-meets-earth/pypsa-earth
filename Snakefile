@@ -1094,7 +1094,6 @@ rule prepare_sector_network:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         international_bunkers=config["sector"]["international_bunkers"],
-        hydrogen_colors=config["sector"]["hydrogen"]["hydrogen_colors"],
         h2_policy=config["policy_config"]["hydrogen"],
         sector_options=config["sector"],
         foresight=config["foresight"],
