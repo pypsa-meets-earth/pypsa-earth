@@ -118,7 +118,7 @@ def prepare_network(n, solve_opts, config):
             bus=n.buses.index,
             carrier="load",
             sign=1e-3,  # Adjust sign to measure p and p_nom in kW instead of MW
-            marginal_cost=solve_opts.get("load_shedding")/1000,  # Eur/kWh
+            marginal_cost=solve_opts.get("load_shedding") / 1000,  # Eur/kWh
             p_nom=1e9,  # kW
         )
 
