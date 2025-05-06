@@ -428,7 +428,7 @@ monte_carlo:
   uncertainties:
     loads_t.p_set:
       type: uniform
-      args: [0, 1]
+      args: [0.5, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
       type: lognormal
       args: [1.5]
