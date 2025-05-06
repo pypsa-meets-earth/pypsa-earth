@@ -1087,7 +1087,9 @@ rule prepare_sector_network:
         h2_network_routes=config["sector"]["hydrogen"]["network_routes"],
         solid_biomass_potential=config["sector"]["solid_biomass_potential"],
         biogas_potential=config["sector"]["biogas_potential"],
-        biomass_transport_default_cost=config["sector"]["biomass_transport_default_cost"],
+        biomass_transport_default_cost=config["sector"][
+            "biomass_transport_default_cost"
+        ],
         cc=config["sector"]["cc"],
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
@@ -1097,7 +1099,6 @@ rule prepare_sector_network:
         sector_options=config["sector"],
         foresight=config["foresight"],
         water_costs=config["custom_data"]["water_costs"],
-
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
