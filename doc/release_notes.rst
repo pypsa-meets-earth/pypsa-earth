@@ -35,6 +35,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix params for prepare_sector_network script. `PR #1427 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1427>`__
+
 * Fix prepare_ports script to generate both outputs if export ports with custom data is selected. `PR #1424 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1424>`__
 
 * Update the applications list for PyPSA-Earth model. `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
