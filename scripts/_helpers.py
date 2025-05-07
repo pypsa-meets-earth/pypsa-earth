@@ -954,9 +954,10 @@ def prepare_costs(
     # if 'US' in snakemake.params.countries:
 
     if "scenario" in costs.columns:
-        costs = costs[costs.scenario.isin([scenario, np.nan])]
-    if "market" in costs.columns:
-        costs =  costs[costs.financial_case.isin([market, np.nan])]
+        costs = costs[costs['scenario'].isin([scenario, np.nan])]
+    if "financial_case" in costs.columns:
+        costs =  costs[costs['financial_case'].isin([market, np.nan])]
+
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
     costs = (
@@ -1303,7 +1304,7 @@ def locate_bus(
             geometry=gpd.points_from_xy(sub_df.x, sub_df.y),
             crs="EPSG:4326",
         )
-
+        
         gdf_merged = gpd.sjoin_nearest(gdf, gdf_shape, how="inner", rsuffix="right")
 
         df.loc[gdf_merged.index, col_out] = gdf_merged[col]

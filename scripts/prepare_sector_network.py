@@ -3506,6 +3506,7 @@ if __name__ == "__main__":
         snakemake.params.costs["financial_case"],
         Nyears,
     )
+    
     # TODO Replace a temporary solution with a more stable one
     cooling_costs = prepare_costs(
         snakemake.input.cooling_costs,
@@ -3605,7 +3606,7 @@ if __name__ == "__main__":
     ##########################################################################
     ######### Functions adding EGS-US project demands and generators #########
     ##########################################################################
-
+    """
     industry_demands = pd.read_csv(
         snakemake.input["industrial_heating_demands"], index_col=0
     )
@@ -3629,14 +3630,14 @@ if __name__ == "__main__":
     print(industry_heating_costs)
 
     """
-    industry_heating_costs = (
-        prepare_costs(
-            industry_heating_costs,
-            snakemake.params.costs["USD2013_to_EUR2013"],
-            snakemake.params.costs["fill_values"],
-            Nyears,
-        )
-    )
+    #industry_heating_costs = (
+    #    prepare_costs(
+    #        industry_heating_costs,
+    #        snakemake.params.costs["USD2013_to_EUR2013"],
+    #        snakemake.params.costs["fill_values"],
+    #        Nyears,
+    #    )
+    #)
     """
 
     conversion_rates = {2019: 1.12, 2020: 1.10, 2021: 1.15, 2022: 1.05}
@@ -3658,6 +3659,7 @@ if __name__ == "__main__":
 
     logger.info("Adding industrial heating technologies.")
     add_industry_heating(n, industry_heating_costs)
+    """
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
@@ -3707,9 +3709,9 @@ if __name__ == "__main__":
     # Add_aviation runs with dummy data
     add_aviation(n, costs)
 
-    # prepare_transport_data(n)
+    #prepare_transport_data(n)
 
-    # add_land_transport(n, costs)
+    #add_land_transport(n, costs)
 
     # if snakemake.config["custom_data"]["transport_demand"]:
     add_rail_transport(n, costs)
