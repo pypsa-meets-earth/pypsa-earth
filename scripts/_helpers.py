@@ -940,7 +940,12 @@ def annuity(n, r):
 
 
 def prepare_costs(
-    cost_file: str, USD_to_EUR: float, fill_values: dict, scenario: str, market: str, Nyears: float | int = 1
+    cost_file: str,
+    USD_to_EUR: float,
+    fill_values: dict,
+    scenario: str,
+    market: str,
+    Nyears: float | int = 1,
 ):
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
@@ -949,15 +954,14 @@ def prepare_costs(
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
 
-    #Specific filtering for the US 
+    # Specific filtering for the US
     # To-do: Improved handling if a list of countries including US is used
     # if 'US' in snakemake.params.countries:
 
     if "scenario" in costs.columns:
-        costs = costs[costs['scenario'].isin([scenario, np.nan])]
+        costs = costs[costs["scenario"].isin([scenario, np.nan])]
     if "financial_case" in costs.columns:
-        costs =  costs[costs['financial_case'].isin([market, np.nan])]
-
+        costs = costs[costs["financial_case"].isin([market, np.nan])]
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
     costs = (
@@ -1304,7 +1308,7 @@ def locate_bus(
             geometry=gpd.points_from_xy(sub_df.x, sub_df.y),
             crs="EPSG:4326",
         )
-        
+
         gdf_merged = gpd.sjoin_nearest(gdf, gdf_shape, how="inner", rsuffix="right")
 
         df.loc[gdf_merged.index, col_out] = gdf_merged[col]
