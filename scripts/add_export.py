@@ -225,6 +225,8 @@ if __name__ == "__main__":
         snakemake.input.costs,
         snakemake.params.costs["USD2013_to_EUR2013"],
         snakemake.params.costs["fill_values"],
+        snakemake.params.costs["scenario"],
+        snakemake.params.costs["financial_case"],
         Nyears,
     )
 
