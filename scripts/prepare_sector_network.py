@@ -2743,7 +2743,7 @@ def add_residential(n, costs):
     # Revise residential electricity demand
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
 
-    # Removing static loads from the time varying demand to preserve the distribution profile afer normalization
+    # Removing static loads from the time varying demand to preserve the distribution profile after normalization
     static_load = (
         n.loads.query('carrier.str.contains("electricity")').groupby("bus").p_set.sum()
     )
