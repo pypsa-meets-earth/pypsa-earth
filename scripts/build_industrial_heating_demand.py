@@ -702,14 +702,17 @@ if __name__ == "__main__":
             clusters=10,
         )
 
-    tif_files = {name: fn for name, fn in snakemake.input.items() if fn.endswith('.tif')}
-    file_name_transformer = lambda x: '-'.join(str(x).split('/')[-2:]).replace('.tif', '')
+    tif_files = {
+        name: fn for name, fn in snakemake.input.items() if fn.endswith(".tif")
+    }
+    file_name_transformer = lambda x: "-".join(str(x).split("/")[-2:]).replace(
+        ".tif", ""
+    )
 
     gdf = tif_to_gdf(tif_files.values(), name_transformer=file_name_transformer)
     gdf = gdf.rename(
-        columns={
-            file_name_transformer(item): key for key, item in tif_files.items()
-        })
+        columns={file_name_transformer(item): key for key, item in tif_files.items()}
+    )
 
     def process_techno_economic_data(df):
         """
