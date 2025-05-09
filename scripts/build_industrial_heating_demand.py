@@ -687,6 +687,12 @@ if __name__ == "__main__":
     tif_files = {name: fn for name, fn in snakemake.input.items() if fn.endswith('.tif')}
     file_name_transformer = lambda x: '-'.join(str(x).split('/')[-2:]).replace('.tif', '')
 
+    gdf = tif_to_gdf(tif_files.values(), name_transformer=file_name_transformer)
+    gdf = gdf.rename(
+        columns={
+            file_name_transformer(item): key for key, item in tif_files.items()
+        })
+
     def process_techno_economic_data(df):
         """
         Process the techno-economic data for different technologies.
@@ -885,7 +891,7 @@ if __name__ == "__main__":
                 opex_cols = [col for col in df.columns if col.startswith(prefix) and 'opex' in col]
                 total_opex = sum(df[col] for col in opex_cols)
                 result_data[(std_tech_name, f'opex[USD/MWh]')] = total_opex.div(lifetime_output).mul(1e6)
-                
+
             elif 'steam' in tech_key and 'power_residheat' not in tech_key:
                 # Steam only (heat output only)
                 temp = tech_key.split('_')[0].replace('steam', '')
@@ -902,7 +908,7 @@ if __name__ == "__main__":
                 for col, output_type in zip(sales_cols, output_types):
                     if col in df.columns:
                         outputs[output_type] = df[col]
-                
+
                 if not outputs:
                     error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
                     # Show all columns that start with the tech prefix
@@ -910,10 +916,10 @@ if __name__ == "__main__":
                     print(f"Columns starting with '{prefix}':", matching_cols)
                     print(error_msg)
                     raise ValueError(error_msg)
-                
+
                 # Calculate total output across all types
                 total_output = sum(outputs.values())
-                
+
                 # Calculate output shares relative to the total output (sum to 1)
                 for output_type, value in outputs.items():
                     # result_data[(std_tech_name, f'{output_type}_share')] = value.div(total_output)
@@ -994,8 +1000,6 @@ if __name__ == "__main__":
         result_df = pd.DataFrame(result_data)
 
         return result_df
-
-    gdf = pd.read_csv('hold.csv', index_col=0)
 
     gdf = process_techno_economic_data(gdf)
 
