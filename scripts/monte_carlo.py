@@ -135,10 +135,6 @@ def monte_carlo_sampling_pydoe2(
     )
 
     lh = rescale_distribution(lh, uncertainties_values)
-    discrepancy = qmc.discrepancy(lh)
-    logger.info(
-        "Discrepancy is:", discrepancy, " more details in function documentation."
-    )
 
     return lh
 
@@ -168,13 +164,7 @@ def monte_carlo_sampling_chaospy(
     )  # writes Nfeatures times the chaospy.uniform... command)
     lh = uniform_cube.sample(SAMPLES, rule=rule, seed=seed).T  # ESTRAZIONE RANDOMICA
 
-    lh = rescale_distribution(
-        lh, uncertainties_values
-    )  # RESCALING RISPETTO AL TIPO DI DISTRIBUZIONE
-    discrepancy = qmc.discrepancy(lh)
-    logger.info(
-        "Discrepancy is:", discrepancy, " more details in function documentation."
-    )
+    lh = rescale_distribution(lh, uncertainties_values)
 
     return lh
 
@@ -235,12 +225,24 @@ def monte_carlo_sampling_scipy(
     lh = sampler.random(n=SAMPLES)
 
     lh = rescale_distribution(lh, uncertainties_values)
-    discrepancy = qmc.discrepancy(lh)
+
+    return lh
+
+
+def report_discrepancy(latin_hypercube: np.ndarray):
+    """
+    Calculates the discrepancy of a Latin hypercube sample (LHS) using the
+    `scipy.stats.qmc` module. The discrepancy is a measure of how uniformly
+    the sample points are distributed in the multi-dimensional space.
+    """
+    # samples space needs to be from 0 to 1
+    mm = MinMaxScaler(feature_range=(0, 1), clip=True)
+    lht = mm.fit_transform(latin_hypercube)
+
+    discrepancy = qmc.discrepancy(lht)
     logger.info(
         "Discrepancy is:", discrepancy, " more details in function documentation."
     )
-
-    return lh
 
 
 def single_best_in_worst_list(worst_list, best_list):
@@ -352,9 +354,7 @@ def rescale_distribution(
                     latin_hypercube[:, idx], shape, scale
                 )
 
-    # samples space needs to be from 0 to 1
-    mm = MinMaxScaler(feature_range=(0, 1), clip=True)
-    latin_hypercube = mm.fit_transform(latin_hypercube)
+    report_discrepancy(latin_hypercube)
 
     return latin_hypercube
 
@@ -442,7 +442,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "monte_carlo",
             simpl="",
-            clusters="9",
+            clusters="6",
             ll="copt",
             opts="Co2L-3H",
             unc="m0",

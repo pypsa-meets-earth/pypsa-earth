@@ -38,8 +38,10 @@ The model can be adapted to include any selected country. But this tutorial is l
 
     countries: ["NG", "BJ"]
 
-It's recommended to set ``retrieve_databundle: true`` when building the model for the first time to download all needed common data files.
-When the first run is completed and all the necessary data are extracted, it may be a good idea to set ``retrieve_databundle: false`` to avoid data loss.
+.. note::
+
+    It's recommended to set ``retrieve_databundle: true`` when building the model for the first time to download all needed common data files.
+    When the first run is completed and all the necessary data are extracted, it may be a good idea to set ``retrieve_databundle: false`` to avoid data loss.
 
 .. code:: yaml
 
@@ -249,6 +251,13 @@ Note that data load will need about 1.6GB and model building will take a while (
         .../pypsa-earth (pypsa-earth) $ snakemake solve_all_networks -n
 
 
+    Additionally, if you encounter issues with the rule ``retrieve_databundle_light``, you can use the following script to debug it through the command line interface (CLI):
+
+    .. code:: bash
+
+        .../pypsa-earth (pypsa-earth) $ python scripts/non_workflow/databundle_cli.py
+
+
 
 Analyse the solved networks
 ------------------------------------
@@ -291,4 +300,4 @@ It is also possible to make manual clean-up removing folders "resources", "netwo
   To use the model in and outside Africa, you should also read
   `How to create a model for you region of interest with PyPSA-Earth? <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/505>`_
 
-:ref:`tutorial` section elaborates on building and running a full PyPSA-Earth model.
+:ref:`model_customization` section elaborates on building and running a full PyPSA-Earth model.

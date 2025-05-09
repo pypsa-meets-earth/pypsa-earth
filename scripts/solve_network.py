@@ -86,27 +86,9 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import (
-    add_storage_col_to_costs,
-    configure_logging,
-    create_logger,
-    nested_storage_dict,
-    override_component_attrs,
-    read_csv_nafix,
-    update_p_nom_max,
-)
-from add_electricity import load_costs
+from _helpers import configure_logging, create_logger, override_component_attrs
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.linopf import (
-    define_constraints,
-    define_variables,
-    get_var,
-    ilopf,
-    join_exprs,
-    linexpr,
-    network_lopf,
-)
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
 
@@ -135,12 +117,9 @@ def prepare_network(n, solve_opts, config):
             " load",
             bus=n.buses.index,
             carrier="load",
-            sign=1e-3,  # Adjust sign to measure p and p_nom in kW instead of MW
-            marginal_cost=1e2,  # Eur/kWh
-            # intersect between macroeconomic and surveybased
-            # willingness to pay
-            # http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full
-            p_nom=1e9,  # kW
+            sign=1,
+            marginal_cost=solve_opts.get("load_shedding") * 1000,  # convert to Eur/MWh
+            p_nom=1e12,
         )
 
     if solve_opts.get("noisy_costs"):
@@ -991,27 +970,6 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     n.model.add_constraints(lhs == 0, name="Link-bidirectional_sync")
 
 
-def add_bicharger_constraints(n, costs):
-    tech_type = costs.technology_type
-    carriers_bicharger = list(costs.loc[(tech_type == "bicharger"), "carrier"].unique())
-    carriers_config = n.config["electricity"]["extendable_carriers"]["Store"]
-    carriers_intersect = list(set(carriers_bicharger) & set(carriers_config))
-    for c in carriers_intersect:
-        nodes = n.buses.index[n.buses.carrier == c]
-        if nodes.empty or ("Link", "p_nom") not in n.variables.index:
-            return
-        link_p_nom = get_var(n, "Link", "p_nom")
-        lhs = linexpr(
-            (1, link_p_nom[nodes + " charger"]),
-            (
-                -n.links.loc[nodes + " discharger", "efficiency"].values,
-                link_p_nom[nodes + " discharger"].values,
-            ),
-        )
-        contraint_name = f"charger_ratio_{c}"
-        define_constraints(n, lhs, "=", 0, "Link", contraint_name)
-
-
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -1022,16 +980,6 @@ def extra_functionality(n, snapshots):
     """
     opts = n.opts
     config = n.config
-    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-
-    """costs = load_costs(
-        snakemake.input.tech_costs,
-        config["costs"],
-        config["electricity"],
-        Nyears,
-    )
-    """
-
     if "BAU" in opts and n.generators.p_nom_extendable.any():
         add_BAU_constraints(n, config)
     if "SAFE" in opts and n.generators.p_nom_extendable.any():
@@ -1050,7 +998,6 @@ def extra_functionality(n, snapshots):
             add_EQ_constraints(n, o)
 
     add_battery_constraints(n)
-    # add_bicharger_constraints(n, costs)
     add_lossy_bidirectional_link_constraints(n)
 
     if snakemake.config["sector"]["chp"]:
@@ -1205,8 +1152,6 @@ if __name__ == "__main__":
         log_fn=snakemake.log.solver,
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
-    n.export_to_netcdf(
-        snakemake.output[0]
-    )  # snakemake.output[0] aggiornato da R monte carlo
+    n.export_to_netcdf(snakemake.output[0])
     logger.info(f"Objective function: {n.objective}")
     logger.info(f"Objective constant: {n.objective_constant}")
