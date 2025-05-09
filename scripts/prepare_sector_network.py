@@ -2911,7 +2911,7 @@ def add_industry_demand(n, demand):
     avail = spatial.nodes.intersection(demand.index)
 
     for col in demand.columns:
-        carrier = 'industry heat ' + col.split('[')[0]
+        carrier = "industry heat " + col.split("[")[0]
 
         n.madd("Bus", avail + " " + carrier, carrier=carrier)
 
@@ -2932,24 +2932,19 @@ def add_industry_demand(n, demand):
             p_max_pu=0.0,
             capital_cost=0.0,
         )
-    
+
 
 def add_geothermal_industry_supply(n, supply_curve):
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
-    lifetimes = {
-        'steam': 20,
-        'power': 25,
-        'pwr': 25,
-        'directheat': 30
-    }
+    lifetimes = {"steam": 20, "power": 25, "pwr": 25, "directheat": 30}
 
     # Create a mapping for temperature bands to bus suffixes
     temp_band_mapping = {
         "50-80C": "industry heat demand(50-80C)",
         "80-150C": "industry heat demand(80-150C)",
         "150-250C": "industry heat demand(150-250C)",
-        "AC": "AC"  # For electrical output
+        "AC": "AC",  # For electrical output
     }
 
     # Add a global geothermal source bus and generator
@@ -2962,9 +2957,9 @@ def add_geothermal_industry_supply(n, supply_curve):
             bus=geo_bus,
             carrier="geothermal heat",
             p_nom_extendable=True,
-            marginal_cost=0
+            marginal_cost=0,
         )
-    
+
     for (region, tech), group in supply_curve.groupby(level=[0, 1]):
         # Create a dictionary with all possible buses for the region
         buses = {
@@ -2972,20 +2967,20 @@ def add_geothermal_industry_supply(n, supply_curve):
             "bus1": f"{region} {temp_band_mapping['50-80C']}",
             "bus2": f"{region} {temp_band_mapping['80-150C']}",
             "bus3": f"{region} {temp_band_mapping['150-250C']}",
-            "bus4": f"{region}"  # AC bus
+            "bus4": f"{region}",  # AC bus
         }
 
         for _, row in group.iterrows():
-            
+
             # Determine lifetime based on technology name
             lifetime = None
             for key, value in lifetimes.items():
                 if key in tech:
                     lifetime = value
                     break
-            
+
             if lifetime is None:
-                lifetime = lifetimes['power']  # Default to power lifetime if no match
+                lifetime = lifetimes["power"]  # Default to power lifetime if no match
 
             # Annuitize capex for this specific technology
             capex_annualized = row["capex[USD/MW]"] * dr / (1 - (1 + dr) ** (-lifetime))
@@ -2997,7 +2992,7 @@ def add_geothermal_industry_supply(n, supply_curve):
             efficiencies["50-80C"] = row["50-80C_share"]
             efficiencies["80-150C"] = row["80-150C_share"]
             efficiencies["150-250C"] = row["150-250C_share"]
-        
+
             # Create a MultiLink for this technology
             link_name = f"{region} {tech}"
 
@@ -3015,7 +3010,7 @@ def add_geothermal_industry_supply(n, supply_curve):
                     efficiency3=efficiencies["150-250C"],
                     efficiency4=efficiencies["AC"],
                     p_nom_extendable=True,
-                    **buses
+                    **buses,
                 )
 
 
@@ -3189,7 +3184,12 @@ def add_industry_heating(n, costs):
         p_nom_extendable=True,
         capital_cost=costs.at["csp-tower", "fixed"],
         lifetime=costs.at["csp-tower", "lifetime"],
-        p_max_pu=p_max_pu.rename(columns={name + " csp-tower": name + " industry csp-tower medium temp" for name in nodes_medium}),
+        p_max_pu=p_max_pu.rename(
+            columns={
+                name + " csp-tower": name + " industry csp-tower medium temp"
+                for name in nodes_medium
+            }
+        ),
     )
 
     n.madd(
@@ -3200,7 +3200,12 @@ def add_industry_heating(n, costs):
         p_nom_extendable=True,
         capital_cost=costs.at["csp-tower", "fixed"],
         lifetime=costs.at["csp-tower", "lifetime"],
-        p_max_pu=p_max_pu.rename(columns={name + " csp-tower": name + " industry csp-tower high temp" for name in nodes_high}),
+        p_max_pu=p_max_pu.rename(
+            columns={
+                name + " csp-tower": name + " industry csp-tower high temp"
+                for name in nodes_high
+            }
+        ),
     )
 
     # 7. Steam boiler gas cond (Generator)
@@ -3397,7 +3402,9 @@ def attach_enhanced_geothermal(n, potential, mode):
     discount_rate = float(snakemake.wildcards.discountrate)
     lifetime = 25  # years
     annuity_factor = (
-        discount_rate * (1 + discount_rate) ** lifetime / ((1 + discount_rate) ** lifetime - 1)
+        discount_rate
+        * (1 + discount_rate) ** lifetime
+        / ((1 + discount_rate) ** lifetime - 1)
     )
 
     idx = pd.IndexSlice
