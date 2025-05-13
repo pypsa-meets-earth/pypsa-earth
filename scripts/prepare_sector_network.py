@@ -508,7 +508,10 @@ def add_hydrogen(n, costs):
         if len(h2_links) > 0:
             if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
-            if snakemake.params.sector_options["hydrogen"]["network_routes"] == "greenfield":
+            if (
+                snakemake.params.sector_options["hydrogen"]["network_routes"]
+                == "greenfield"
+            ):
                 add_links_elec_routing_new_H2_pipelines()
             else:
                 add_links_new_H2_pipelines()
@@ -709,7 +712,9 @@ def add_biomass(n, costs):
     # TODO get biomass potentials dataset and enable spatially resolved potentials
 
     # Get biomass and biogas potentials from config and convert from TWh to MWh
-    biomass_pot = snakemake.params.sector_options["solid_biomass_potential"] * 1e6  # MWh
+    biomass_pot = (
+        snakemake.params.sector_options["solid_biomass_potential"] * 1e6
+    )  # MWh
     biogas_pot = snakemake.params.sector_options["biogas_potential"] * 1e6  # MWh
     logger.info("Biomass and Biogas potential fetched from config")
 
