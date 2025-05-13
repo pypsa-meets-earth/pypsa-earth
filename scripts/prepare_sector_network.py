@@ -1469,7 +1469,7 @@ def add_industry(n, costs):
         p_nom_extendable=True,
         efficiency=1.0,
     )
-    if snakemake.sector_options["cc"]:
+    if snakemake.params.sector_options["cc"]:
         n.madd(
             "Link",
             spatial.biomass.industry_cc,
@@ -1534,7 +1534,7 @@ def add_industry(n, costs):
         efficiency=1.0,
         efficiency2=costs.at["gas", "CO2 intensity"],
     )
-    if snakemake.sector_options["cc"]:
+    if snakemake.params.sector_options["cc"]:
         n.madd(
             "Link",
             spatial.gas.industry_cc,
@@ -1702,7 +1702,7 @@ def add_industry(n, costs):
     )
 
     # assume enough local waste heat for CC
-    if snakemake.sector_options["cc"]:
+    if snakemake.params.sector_options["cc"]:
         n.madd(
             "Link",
             spatial.co2.locations,
@@ -2186,7 +2186,7 @@ def add_heat(n, costs):
                 efficiency3=costs.at["gas", "CO2 intensity"],
                 lifetime=costs.at["central gas CHP", "lifetime"],
             )
-            if snakemake.sector_options["cc"]:
+            if snakemake.params.sector_options["cc"]:
                 n.madd(
                     "Link",
                     h_nodes[name] + " urban central gas CHP CC",
