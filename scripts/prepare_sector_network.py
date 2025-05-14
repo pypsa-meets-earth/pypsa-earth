@@ -65,7 +65,7 @@ def add_carrier_buses(n, carrier, nodes=None):
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
     # initial fossil reserves
-    e_initial = (snakemake.config["fossil_reserves"]).get(carrier, 0) * 1e6
+    e_initial = (snakemake.params.fossil_reserves).get(carrier, 0) * 1e6
     # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
     n.madd(
         "Store",
@@ -202,7 +202,7 @@ def add_hydrogen(n, costs):
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
 
-    if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
+    if snakemake.params.sector_options["hydrogen"]["hydrogen_colors"]:
         n.madd(
             "Bus",
             nodes + " grid H2",
@@ -264,8 +264,8 @@ def add_hydrogen(n, costs):
 
     cavern_nodes = pd.DataFrame()
 
-    if snakemake.config["sector"]["hydrogen"]["underground_storage"]:
-        if snakemake.config["custom_data"]["h2_underground"]:
+    if snakemake.params.sector_options["hydrogen"]["underground_storage"]:
+        if snakemake.params.h2_underground:
             custom_cavern = pd.read_csv(
                 os.path.join(
                     BASE_DIR,
@@ -275,7 +275,7 @@ def add_hydrogen(n, costs):
                 )
             )
             # countries = n.buses.country.unique().to_list()
-            countries = snakemake.config["countries"]
+            countries = snakemake.params.countries
             custom_cavern = custom_cavern[custom_cavern.country.isin(countries)]
 
             cavern_nodes = n.buses[n.buses.country.isin(custom_cavern.country)]
@@ -485,7 +485,7 @@ def add_hydrogen(n, costs):
         )
 
     # Add H2 Links:
-    if snakemake.config["sector"]["hydrogen"]["network"]:
+    if snakemake.params.sector_options["hydrogen"]["network"]:
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
@@ -506,9 +506,12 @@ def add_hydrogen(n, costs):
         )
 
         if len(h2_links) > 0:
-            if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
+            if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
-            if snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
+            if (
+                snakemake.params.sector_options["hydrogen"]["network_routes"]
+                == "greenfield"
+            ):
                 add_links_elec_routing_new_H2_pipelines()
             else:
                 add_links_new_H2_pipelines()
@@ -518,7 +521,7 @@ def add_hydrogen(n, costs):
             )  # TODO change to logger.info
             add_links_elec_routing_new_H2_pipelines()
 
-        if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
+        if snakemake.params.sector_options["hydrogen"]["hydrogen_colors"]:
             nuclear_gens_bus = n.generators[
                 n.generators.carrier == "nuclear"
             ].bus.values
@@ -709,8 +712,10 @@ def add_biomass(n, costs):
     # TODO get biomass potentials dataset and enable spatially resolved potentials
 
     # Get biomass and biogas potentials from config and convert from TWh to MWh
-    biomass_pot = snakemake.config["sector"]["solid_biomass_potential"] * 1e6  # MWh
-    biogas_pot = snakemake.config["sector"]["biogas_potential"] * 1e6  # MWh
+    biomass_pot = (
+        snakemake.params.sector_options["solid_biomass_potential"] * 1e6
+    )  # MWh
+    biogas_pot = snakemake.params.sector_options["biogas_potential"] * 1e6  # MWh
     logger.info("Biomass and Biogas potential fetched from config")
 
     # Convert from total to nodal potentials,
@@ -802,18 +807,18 @@ def add_biomass(n, costs):
             logger.info(
                 "No transport values found for {0}, using default value of {1}".format(
                     ", ".join(countries_not_in_index),
-                    snakemake.config["sector"]["biomass_transport_default_cost"],
+                    snakemake.params.sector_options["biomass_transport_default_cost"],
                 )
             )
 
         bus0_costs = biomass_transport.bus0.apply(
             lambda x: transport_costs.get(
-                x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]
+                x[:2], snakemake.params.sector_options["biomass_transport_default_cost"]
             )
         )
         bus1_costs = biomass_transport.bus1.apply(
             lambda x: transport_costs.get(
-                x[:2], snakemake.config["sector"]["biomass_transport_default_cost"]
+                x[:2], snakemake.params.sector_options["biomass_transport_default_cost"]
             )
         )
         biomass_transport["costs"] = pd.concat([bus0_costs, bus1_costs], axis=1).mean(
@@ -869,7 +874,7 @@ def add_biomass(n, costs):
             lifetime=costs.at[key, "lifetime"],
         )
 
-        if snakemake.config["sector"]["cc"]:
+        if snakemake.params.sector_options["cc"]:
             n.madd(
                 "Link",
                 urban_central + " urban central solid biomass CHP CC",
@@ -1022,7 +1027,7 @@ def add_aviation(n, cost):
     airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
-    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+    gadm_layer_id = snakemake.params.gadm_layer_id
 
     # Map airports location to gadm location
     airports = locate_bus(
@@ -1030,7 +1035,7 @@ def add_aviation(n, cost):
         countries,
         gadm_layer_id,
         snakemake.input.shapes_path,
-        snakemake.config["cluster_options"]["alternative_clustering"],
+        snakemake.params.alternative_clustering,
     ).set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
@@ -1054,7 +1059,7 @@ def add_aviation(n, cost):
         p_set=airports["p_set"],
     )
 
-    if snakemake.config["sector"]["international_bunkers"]:
+    if snakemake.params.sector_options["international_bunkers"]:
         co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
     else:
         domestic_to_total = energy_totals["total domestic aviation"] / (
@@ -1167,7 +1172,7 @@ def h2_hc_conversions(n, costs):
         )
 
     if options["SMR CC"]:
-        if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
+        if snakemake.params.sector_options["hydrogen"]["hydrogen_colors"]:
             n.madd(
                 "Bus",
                 spatial.nodes + " blue H2",
@@ -1226,7 +1231,7 @@ def h2_hc_conversions(n, costs):
             )
 
     if options["SMR"]:
-        if snakemake.config["sector"]["hydrogen"]["hydrogen_colors"]:
+        if snakemake.params.sector_options["hydrogen"]["hydrogen_colors"]:
             n.madd(
                 "Bus",
                 spatial.nodes + " grey H2",
@@ -1283,7 +1288,7 @@ def add_shipping(n, costs):
     ).squeeze()
     ports = ports[ports.country.isin(countries)]
 
-    gadm_layer_id = snakemake.config["build_shape_options"]["gadm_layer_id"]
+    gadm_layer_id = snakemake.params.gadm_layer_id
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
@@ -1305,7 +1310,7 @@ def add_shipping(n, costs):
         countries,
         gadm_layer_id,
         snakemake.input.shapes_path,
-        snakemake.config["cluster_options"]["alternative_clustering"],
+        snakemake.params.alternative_clustering,
     ).set_index("gadm_{}".format(gadm_layer_id))
 
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
@@ -1353,8 +1358,8 @@ def add_shipping(n, costs):
         shipping_bus = spatial.nodes + " H2"
 
     if not (
-        snakemake.config["policy_config"]["hydrogen"]["is_reference"]
-        and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
+        snakemake.params.h2_policy["is_reference"]
+        and snakemake.params.h2_policy["remove_h2_load"]
     ):
         n.madd(
             "Load",
@@ -1381,7 +1386,7 @@ def add_shipping(n, costs):
             p_set=ports["p_set"],
         )
 
-        if snakemake.config["sector"]["international_bunkers"]:
+        if snakemake.params.sector_options["international_bunkers"]:
             co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
         else:
             domestic_to_total = energy_totals["total domestic navigation"] / (
@@ -1469,7 +1474,7 @@ def add_industry(n, costs):
         p_nom_extendable=True,
         efficiency=1.0,
     )
-    if snakemake.config["sector"]["cc"]:
+    if snakemake.params.sector_options["cc"]:
         n.madd(
             "Link",
             spatial.biomass.industry_cc,
@@ -1534,7 +1539,7 @@ def add_industry(n, costs):
         efficiency=1.0,
         efficiency2=costs.at["gas", "CO2 intensity"],
     )
-    if snakemake.config["sector"]["cc"]:
+    if snakemake.params.sector_options["cc"]:
         n.madd(
             "Link",
             spatial.gas.industry_cc,
@@ -1559,8 +1564,8 @@ def add_industry(n, costs):
     #################################################### CARRIER = HYDROGEN
 
     if not (
-        snakemake.config["policy_config"]["hydrogen"]["is_reference"]
-        and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
+        snakemake.params.h2_policy["is_reference"]
+        and snakemake.params.h2_policy["remove_h2_load"]
     ):
         n.madd(
             "Load",
@@ -1702,7 +1707,7 @@ def add_industry(n, costs):
     )
 
     # assume enough local waste heat for CC
-    if snakemake.config["sector"]["cc"]:
+    if snakemake.params.sector_options["cc"]:
         n.madd(
             "Link",
             spatial.co2.locations,
@@ -1866,8 +1871,8 @@ def add_land_transport(n, costs):
 
     if fuel_cell_share > 0:
         if not (
-            snakemake.config["policy_config"]["hydrogen"]["is_reference"]
-            and snakemake.config["policy_config"]["hydrogen"]["remove_h2_load"]
+            snakemake.params.h2_policy["is_reference"]
+            and snakemake.params.h2_policy["remove_h2_load"]
         ):
             n.madd(
                 "Load",
@@ -2186,7 +2191,7 @@ def add_heat(n, costs):
                 efficiency3=costs.at["gas", "CO2 intensity"],
                 lifetime=costs.at["central gas CHP", "lifetime"],
             )
-            if snakemake.config["sector"]["cc"]:
+            if snakemake.params.sector_options["cc"]:
                 n.madd(
                     "Link",
                     h_nodes[name] + " urban central gas CHP CC",
@@ -2921,7 +2926,7 @@ if __name__ == "__main__":
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Load all sector wildcards
-    options = snakemake.config["sector"]
+    options = snakemake.params.sector_options
 
     # Load input network
     overrides = override_component_attrs(snakemake.input.overrides)
@@ -2929,7 +2934,7 @@ if __name__ == "__main__":
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
-    countries = snakemake.config["countries"]
+    countries = snakemake.params.countries
     # Locate all the AC buses
     nodes = n.buses[
         n.buses.carrier == "AC"
@@ -2959,7 +2964,7 @@ if __name__ == "__main__":
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
 
-    if snakemake.config["foresight"] in ["myopic", "perfect"]:
+    if snakemake.params.foresight in ["myopic", "perfect"]:
         add_lifetime_wind_solar(n, costs)
 
     # TODO logging
@@ -3104,7 +3109,7 @@ if __name__ == "__main__":
     if options["dac"]:
         add_dac(n, costs)
 
-    if snakemake.config["custom_data"]["water_costs"]:
+    if snakemake.params.water_costs:
         add_custom_water_cost(n)
 
     n.export_to_netcdf(snakemake.output[0])
