@@ -1882,7 +1882,7 @@ def add_land_transport(n, costs):
                 carrier="land transport fuel cell",
                 p_set=fuel_cell_share
                 / options["transport_fuel_cell_efficiency"]
-                * transport[nodes],
+                * transport[[node for node in nodes if node in transport.index]],
             )
 
     if ice_share > 0:
@@ -2945,7 +2945,9 @@ if __name__ == "__main__":
     n.buses.location = n.buses.index
 
     # Set carrier of AC loads
-    n.loads.loc[nodes, "carrier"] = "AC"
+    existing_nodes = [node for node in nodes if node in n.loads.index]
+    if len(existing_nodes) < len(nodes): print("fWarning: For {len(nodes) - len(valid_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped.")
+    n.loads.loc[existing_nodes, "carrier"] = "AC"
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
