@@ -2946,7 +2946,10 @@ if __name__ == "__main__":
 
     # Set carrier of AC loads
     existing_nodes = [node for node in nodes if node in n.loads.index]
-    if len(existing_nodes) < len(nodes): print("fWarning: For {len(nodes) - len(valid_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped.")
+    if len(existing_nodes) < len(nodes):
+        print(
+            "fWarning: For {len(nodes) - len(valid_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
+        )
     n.loads.loc[existing_nodes, "carrier"] = "AC"
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
