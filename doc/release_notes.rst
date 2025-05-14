@@ -35,6 +35,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix params for prepare_sector_network script. `PR #1427 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1427>`__
+
 * Add option to adjust load shedding costs. `PR #1403 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1403>`__
 
 * Fix: Use the mean value instead of the sum to remove duplicates in the urban percentage data per country and year. `PR #1420 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1420>`__
