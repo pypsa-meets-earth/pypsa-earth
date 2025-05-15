@@ -1204,7 +1204,7 @@ rule override_respot:
         countries=config["countries"],
     input:
         **{
-            f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": "resources/"
+            f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": "data/custom/"
             + SECDIR
             + f"custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
             for tech in config["custom_data"]["renewables"]
@@ -1212,7 +1212,7 @@ rule override_respot:
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
         **{
-            f"custom_res_ins_{tech}_{planning_horizons}_{discountrate}": "resources/"
+            f"custom_res_ins_{tech}_{planning_horizons}_{discountrate}": "data/custom/"
             + SECDIR
             + f"custom_renewables/{tech}_{planning_horizons}_{discountrate}_installable.csv"
             for tech in config["custom_data"]["renewables"]
