@@ -22,6 +22,7 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
+    save_to_geojson,
     three_2_two_digits_country,
     two_2_three_digits_country,
     two_digits_2_name_country,
@@ -154,7 +155,7 @@ def filter_gadm(
             f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
         )
         # take the first row only to re-define geometry keeping other columns
-        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
+        geodf = geodf.iloc[[0]].set_geometry([geodf.union_all()])
 
     # debug output to file
     if output_nonstd_to_csv and not geodf_non_std.empty:
@@ -305,23 +306,6 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
     return africa_shape
 
 
-def save_to_geojson(df, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)  # remove file if it exists
-    if not isinstance(df, gpd.GeoDataFrame):
-        df = gpd.GeoDataFrame(dict(geometry=df))
-
-    # save file if the GeoDataFrame is non-empty
-    if df.shape[0] > 0:
-        df = df.reset_index()
-        schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-        df.to_file(fn, driver="GeoJSON", schema=schema)
-    else:
-        # create empty file to avoid issues with snakemake
-        with open(fn, "w") as fp:
-            pass
-
-
 def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
     """
     Function to load the database of the Exclusive Economic Zones.
@@ -363,6 +347,7 @@ def eez(
     distance=0.01,
     minarea=0.01,
     tolerance=0.01,
+    simplify_gadm=True,
 ):
     """
     Creates offshore shapes by buffer smooth countryshape (=offset country
@@ -381,28 +366,32 @@ def eez(
         {
             "name": eez_countries,
             "geometry": [
-                df_eez.geometry.loc[df_eez.name == cc].geometry.unary_union
+                df_eez.geometry.loc[df_eez.name == cc].geometry.union_all()
                 for cc in eez_countries
             ],
         }
     ).set_index("name")
 
-    ret_df = ret_df.geometry.map(
-        lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
-    )
+    if simplify_gadm:
+        ret_df = ret_df.geometry.map(
+            lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+        )
 
-    ret_df = ret_df.apply(lambda x: make_valid(x))
+        ret_df = ret_df.apply(lambda x: make_valid(x))
 
     country_shapes_with_buffer = country_shapes.buffer(distance)
     ret_df_new = ret_df.difference(country_shapes_with_buffer)
 
-    # repeat to simplify after the buffer correction
-    ret_df_new = ret_df_new.map(
-        lambda x: (
-            x if x is None else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+    if simplify_gadm:
+        # repeat to simplify after the buffer correction
+        ret_df_new = ret_df_new.map(
+            lambda x: (
+                x
+                if x is None
+                else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
+            )
         )
-    )
-    ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
+        ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
@@ -1253,6 +1242,7 @@ def gadm(
     out_logging=False,
     year=2020,
     nprocesses=None,
+    simplify_gadm=True,
 ):
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
@@ -1302,13 +1292,75 @@ def gadm(
         lambda x: x if x.find(".") == 0 else "." + x
     )
     df_gadm.set_index("GADM_ID", inplace=True)
-    df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
+
+    if simplify_gadm:
+        df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
     df_gadm.geometry = df_gadm.geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
     )
     df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
 
     return df_gadm
+
+
+def crop_country(gadm_shapes, subregion_config):
+    """
+    The crop_country function reconstructs country geometries by combining
+    individual GADM shapes, incorporating subregions specified in a configuration.
+    It returns a new GeoDataFrame where the country column includes both full countries
+    and their respective subregions, merging the geometries accordingly.
+    """
+
+    country_shapes_new = gpd.GeoDataFrame(columns=["name", "geometry"]).set_index(
+        "name"
+    )
+    remain_gadm_shapes = gadm_shapes.copy(deep=True)
+
+    for sub_region in subregion_config:
+
+        region_GADM = subregion_config[sub_region]
+        sub_gadm = remain_gadm_shapes.loc[remain_gadm_shapes.index.isin(region_GADM)]
+        sub_geometry = sub_gadm.union_all()
+
+        if not sub_geometry:
+            logger.warning(f"No subregion shape generated for {sub_region}")
+            continue
+
+        logger.info(
+            f"Created the {sub_region} subregion based on {list(sub_gadm.index)}"
+        )
+
+        sub_country_shapes = gpd.GeoDataFrame(
+            {
+                "name": sub_region,
+                "geometry": [sub_geometry],
+            }
+        ).set_index("name")
+
+        country_shapes_new = pd.concat([country_shapes_new, sub_country_shapes])
+
+        remain_gadm_shapes = remain_gadm_shapes.loc[
+            ~remain_gadm_shapes.index.isin(region_GADM)
+        ]
+
+    for country in remain_gadm_shapes.country.unique():
+        country_geometry_new = remain_gadm_shapes.query(
+            "country == @country"
+        ).union_all()
+        country_shapes_country = gpd.GeoDataFrame(
+            {
+                "name": country,
+                "geometry": [country_geometry_new],
+            }
+        ).set_index("name")
+
+        country_shapes_new = pd.concat([country_shapes_new, country_shapes_country])
+
+    return gpd.GeoDataFrame(
+        country_shapes_new,
+        crs=offshore_shapes.crs,
+        geometry=country_shapes_new.geometry,
+    )
 
 
 if __name__ == "__main__":
@@ -1335,6 +1387,7 @@ if __name__ == "__main__":
     contended_flag = snakemake.params.build_shape_options["contended_flag"]
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
+    simplify_gadm = snakemake.params.build_shape_options["simplify_gadm"]
 
     country_shapes = countries(
         countries_list,
@@ -1346,7 +1399,7 @@ if __name__ == "__main__":
     country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
-        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging
+        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging, simplify_gadm
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
@@ -1368,5 +1421,15 @@ if __name__ == "__main__":
         out_logging,
         year,
         nprocesses=nprocesses,
+        simplify_gadm=simplify_gadm,
     )
+
     save_to_geojson(gadm_shapes, out.gadm_shapes)
+
+    subregion_config = snakemake.params.subregion["define_by_gadm"]
+    if subregion_config:
+        subregion_shapes = crop_country(gadm_shapes, subregion_config)
+    else:
+        subregion_shapes = pd.DataFrame()
+
+    save_to_geojson(subregion_shapes, out.subregion_shapes)

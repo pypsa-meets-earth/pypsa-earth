@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+version: 0.6.0
+logging_level: INFO
+tutorial: true
+
+results_dir: results/
+summary_dir: results/
+
+enable:
+  retrieve_databundle: true
+  retrieve_databundle_sector: true
+
+run:
+  name: "test_myopic" # use this to keep track of runs with different settings
+  name_subworkflow: "tutorial"  # scenario name of the pypsa-earth subworkflow
+  shared_cutouts: true  # set to true to share the default cutout(s) across runs; Note: value false requires build_cutout to be enabled
+foresight: myopic
+
+# option to disable the subworkflow to ease the analyses
+disable_subworkflow: true
+
+scenario:
+  simpl: [""]
+  clusters: [4]
+  planning_horizons: [2030] # investment years for myopcondaic and perfect; or costs year for overnight
+  ll: ["c1"]
+  opts: ["Co2L-24H"]
+  sopts: ["144h"]
+  demand: ["DF"]
+
+cluster_options:
+  alternative_clustering: false
+
+countries: ['NG', 'BJ']
+
+export:
+  store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
+  h2export: [120] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
+  export_profile: "ship" # use "ship" or "constant". Only considered, if ["export"]["endogenous"] is set to false
+
+
+existing_capacities:
+  grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]
+  grouping_years_heat: [1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2019] # these should not extend 2020
+  threshold_capacity: 10
+  default_heating_lifetime: 20
+  conventional_carriers:
+  - lignite
+  - coal
+  - oil
+  - uranium
+
+sector:
+  solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+# snapshots are originally set in PyPSA-Earth/config.yaml but used again by PyPSA-Earth-Sec
+snapshots:
+  # arguments to pd.date_range
+  start: "2013-03-1"
+  end: "2013-03-7"
+  inclusive: "left" # end is not inclusive
+
+
+solving:
+  solver:
+    name: glpk

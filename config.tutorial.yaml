@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.4.2
+version: 0.6.0
 tutorial: true
 
 
 countries: ["NG", "BJ"]
 
 enable:
+  retrieve_databundle: true
+  retrieve_databundle_sector: true
   build_natura_raster: true
   progress_bar: false
 

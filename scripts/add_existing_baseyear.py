@@ -334,7 +334,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
                 continue
 
             bus0 = vars(spatial)[carrier[generator]].nodes
-            if "EU" not in vars(spatial)[carrier[generator]].locations:
+            if "Earth" not in vars(spatial)[carrier[generator]].locations:
                 bus0 = bus0.intersection(capacity.index + " " + carrier[generator])
 
             # check for missing bus
@@ -586,11 +586,11 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             ll="c1",
-            opts="Co2L",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="DF",
+            demand="AB",
             h2export="120",
         )
 

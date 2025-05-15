@@ -7,8 +7,9 @@ sphinx
 sphinx_book_theme
 sphinxcontrib-bibtex
 myst-parser  # recommark is deprecated, https://stackoverflow.com/a/71660856/13573820
+sphinx-copybutton
 
-pypsa
+pypsa >=0.24, <0.25
 vresutils>=0.3.1
 powerplantmatching>=0.5.5
 atlite>=0.2.9
@@ -33,7 +34,9 @@ gitpython
 chaospy
 numba
 ruamel.yaml<=0.17.26
-earth-osm>=0.1.0, <0.2.0
+earth-osm>=2.3.post1
 reverse-geocode
 pyDOE2
-# graphviz
+graphviz
+
+fake_useragent

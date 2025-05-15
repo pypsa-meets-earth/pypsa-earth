@@ -39,7 +39,7 @@ Outputs
 Description
 -----------
 
-The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendmends. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
+The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendments. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
 
 1. Adding all powerplants from custom:
 
@@ -111,6 +111,7 @@ import yaml
 from _helpers import (
     configure_logging,
     create_logger,
+    locate_bus,
     read_csv_nafix,
     to_csv_nafix,
     two_digits_2_name_country,
@@ -300,7 +301,7 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    with open(snakemake.input.pm_config, "r") as f:
+    with open(snakemake.input.pm_config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     filepath_osm_ppl = snakemake.input.osm_powerplants
@@ -337,13 +338,16 @@ if __name__ == "__main__":
     else:
         config["main_query"] = ""
 
-    ppl = (
-        pm.powerplants(from_url=False, update=True, config_update=config)
-        .powerplant.fill_missing_decommissioning_years()
-        .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
-        .powerplant.convert_country_to_alpha2()
-        .pipe(replace_natural_gas_technology)
-    )
+    if snakemake.config["electricity"]["custom_powerplants"] != "replace":
+        ppl = (
+            pm.powerplants(from_url=False, update=True, config_update=config)
+            .powerplant.fill_missing_decommissioning_years()
+            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .powerplant.convert_country_to_alpha2()
+            .pipe(replace_natural_gas_technology)
+        )
+    else:
+        ppl = pd.DataFrame()
 
     ppl = add_custom_powerplants(
         ppl, snakemake.input, snakemake.config
@@ -371,28 +375,13 @@ if __name__ == "__main__":
         country_list = snakemake.params.countries
         geo_crs = snakemake.params.geo_crs
 
-        gdf = gpd.read_file(snakemake.input.gadm_shapes)
-
-        def locate_bus(coords, co):
-            gdf_co = gdf[gdf["GADM_ID"].str.contains(co)]
-
-            point = Point(coords["lon"], coords["lat"])
-
-            try:
-                return gdf_co[gdf_co.contains(point)][
-                    "GADM_ID"
-                ].item()  # filter gdf_co which contains point and returns the bus
-
-            except ValueError:
-                return gdf_co[
-                    gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))
-                ][
-                    "GADM_ID"
-                ].item()  # looks for closest one shape=node
-                # fixing https://github.com/pypsa-meets-earth/pypsa-earth/pull/670
-
-        ppl["region_id"] = ppl[["lon", "lat", "Country"]].apply(
-            lambda pp: locate_bus(pp[["lon", "lat"]], pp["Country"]), axis=1
-        )
+        ppl = locate_bus(
+            ppl.rename(columns={"lon": "x", "lat": "y", "Country": "country"}),
+            country_list,
+            gadm_layer_id,
+            snakemake.input.gadm_shapes,
+            snakemake.params.alternative_clustering,
+            col_out="region_id",
+        ).rename(columns={"x": "lon", "y": "lat", "country": "Country"})
 
     ppl.to_csv(snakemake.output.powerplants)
