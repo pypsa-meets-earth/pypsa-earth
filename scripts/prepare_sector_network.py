@@ -3140,7 +3140,9 @@ def add_industry_heating(n, costs):
 
     # 5. Industrial heat pump high temperature (Link)
     # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
-    logger.warning("Currently manually adjusts units for industrial heat pump high temperature")
+    logger.warning(
+        "Currently manually adjusts units for industrial heat pump high temperature"
+    )
     n.madd(
         "Link",
         nodes_low + " industrial heat pump high temperature",
@@ -3154,7 +3156,9 @@ def add_industry_heating(n, costs):
         marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
     )
 
-    logger.warning("Currently manually adjusts units for industrial heat pump high temperature")
+    logger.warning(
+        "Currently manually adjusts units for industrial heat pump high temperature"
+    )
     n.madd(
         "Link",
         nodes_medium + " industrial heat pump high temperature",
