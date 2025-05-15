@@ -76,7 +76,7 @@ wildcard_constraints:
     sopts="[-+a-zA-Z0-9\.\s]*",
     discountrate="[-+a-zA-Z0-9\.\s]*",
     demand="[-+a-zA-Z0-9\.\s]*",
-    h2export="[0-9]+(\.[0-9]+)",
+    h2export="[0-9]+(\.[0-9]+)?",
     planning_horizons="20[2-9][0-9]|2100",
 
 
