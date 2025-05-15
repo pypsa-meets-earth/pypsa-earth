@@ -146,7 +146,7 @@ def prepare_transport_data(n):
     # and multiply back in the heating/cooling demand for EVs
     ice_correction = (transport_shape * (1 + dd_ICE)).sum() / transport_shape.sum()
 
-    if snakemake.config["custom_data"]["transport_demand"]:
+    if snakemake.config["custom_data"]["sectoral_energy_demand"]:
         energy_totals_transport = nodal_energy_totals["total road"]
 
         transport = transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears

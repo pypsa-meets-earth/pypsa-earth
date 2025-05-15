@@ -153,7 +153,7 @@ if __name__ == "__main__":
     )
 
     # Add options
-    options = snakemake.config["sector"]
+    options = snakemake.params.sector_options
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760

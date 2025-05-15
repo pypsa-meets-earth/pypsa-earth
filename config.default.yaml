@@ -106,6 +106,7 @@ cluster_options:
       efficiency: mean
 
 build_shape_options:
+  custom_gadm_shapes: false # If "true" then a custom shape file shall be added in (...\data\custom\gadm_shapes_custom.geojson). And gadm_layer_id becomes oboslete.
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
   simplify_gadm: true # When true, shape polygons are simplified else no
   update_file: false # When true, all the input files are downloaded again and replace the existing files
@@ -476,15 +477,16 @@ export:
 
 custom_data:
   renewables: [] # ['csp', 'rooftop-solar', 'solar']
-  elec_demand: false
-  heat_demand: false
+  sectoral_energy_demand: false
+  # elec_demand: false
+  # heat_demand: false
   industry_demand: false
   industry_database: false
-  transport_demand: false
+  # transport_demand: false
   water_costs: false
   h2_underground: false
   add_existing: false
-  custom_sectors: false
+  # custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
   export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
   airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.

@@ -1,0 +1,10 @@
+,Unit,Values,Description
+renewables,str, "List of Str like [ 'solar', 'onwind', 'rooftop-solar', 'csp'] or empy list []", ""True: a custom .csv file must be placed in data/custom/custom_renewables/{}_{}_{}_installable.csv.format(technology planning_horizon interest_rate) as well as potential""
+sectoral_energy_demand, bool, "{True, False}", "True: a custom .csv file must be placed in data/custom/energy_totals_{}_{}.csv.format(demand and planning_horizon)"
+industry_demand,bool, "{True, False}", "True: then a custom .csv file must be placed in "data/custom/industry_demand.csv""
+industry_database, bool, "{True, False}", "True: then a custom .csv file must be placed in "data/custom/industry_database.csv""
+water_costs, bool, "{True, False}", "True: a custom .csv file must be placed in "data/custom/{}_water_costs.csv.format(country)""
+h2_underground,bool, "{True, False}", "True: a custom .csv file must be placed in data/custom/h2_underground_{}_{}.csv.format(demand, planning_horizon)"
+gas_network,bool, "{True, False}", "True: a custom .csv file must be placed in resources/custom_data/pipelines.csv. False: the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below."
+export_ports, bool, "{True, False}", "True: a custom .csv file must be placed in "data/custom/export_ports.csv""
+airports,bool, "{True, False}", "True: then a custom .csv file must be placed in "data/custom/airports.csv""
