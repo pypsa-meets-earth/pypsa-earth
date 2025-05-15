@@ -294,7 +294,7 @@ def add_hydrogen(n, costs):
             y=n.buses.loc[list(nodes)].y.values,
         )
         if snakemake.config["sector"]["hydrogen"]["water_network"]:
-            add_with_water_network(n, costs)
+            add_water_network(n, costs)
         else:
             n.madd(
                 "Link",
@@ -321,7 +321,7 @@ def add_hydrogen(n, costs):
 
     else:
         if snakemake.config["sector"]["hydrogen"]["water_network"]:
-            add_with_water_network(n, costs)
+            add_water_network(n, costs)
         else:
             n.madd(
                 "Link",
@@ -577,22 +577,21 @@ def add_hydrogen(n, costs):
 
         # Order buses to detect equal pairs for bidirectional pipelines
         buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
-
-        # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
-        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-        # Create index column
-        h2_links["buses_idx"] = (
-            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
-        )
-
-        # Aggregate pipelines applying mean on length and sum on capacities
-        h2_links = h2_links.groupby("buses_idx").agg(
-            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
-        )
-
         if len(h2_links) > 0:
+            # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
+            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+
+            # Create index column
+            h2_links["buses_idx"] = (
+                "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+            )
+
+            # Aggregate pipelines applying mean on length and sum on capacities
+            h2_links = h2_links.groupby("buses_idx").agg(
+                {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+            )
+            
             if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
             if snakemake.config["sector"]["hydrogen"]["network_routes"] == "greenfield":
@@ -3006,9 +3005,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-3H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
