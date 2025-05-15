@@ -3140,6 +3140,7 @@ def add_industry_heating(n, costs):
 
     # 5. Industrial heat pump high temperature (Link)
     # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
+    logger.warning("Currently manually adjusts units for industrial heat pump high temperature")
     n.madd(
         "Link",
         nodes_low + " industrial heat pump high temperature",
@@ -3147,12 +3148,13 @@ def add_industry_heating(n, costs):
         bus1=low_temp_buses,
         carrier="industrial heat pump high temperature",
         p_nom_extendable=True,
-        capital_cost=costs.at["industrial heat pump high temperature", "fixed"],
+        capital_cost=costs.at["industrial heat pump high temperature", "fixed"] * 1000,
         lifetime=costs.at["industrial heat pump high temperature", "lifetime"],
         efficiency=costs.at["industrial heat pump high temperature", "efficiency"],
         marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
     )
 
+    logger.warning("Currently manually adjusts units for industrial heat pump high temperature")
     n.madd(
         "Link",
         nodes_medium + " industrial heat pump high temperature",
@@ -3160,7 +3162,7 @@ def add_industry_heating(n, costs):
         bus1=medium_temp_buses,
         carrier="industrial heat pump high temperature",
         p_nom_extendable=True,
-        capital_cost=costs.at["industrial heat pump high temperature", "fixed"],
+        capital_cost=costs.at["industrial heat pump high temperature", "fixed"] * 1000,
         lifetime=costs.at["industrial heat pump high temperature", "lifetime"],
         efficiency=costs.at["industrial heat pump high temperature", "efficiency"],
         marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
@@ -3249,13 +3251,14 @@ def add_industry_heating(n, costs):
     )
 
     # 9. Hot water tank (Store)
+    logger.warning("Currently manually adjusts units for hot water tank")
     n.madd(
         "Store",
         nodes_low + " hot water storage",
         bus=low_temp_buses,
         carrier="hot water storage",
         e_nom_extendable=True,
-        capital_cost=costs.at["central water tank storage", "fixed"],
+        capital_cost=costs.at["central water tank storage", "fixed"] * 1000,
         lifetime=costs.at["central water tank storage", "lifetime"],
         # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
     )
@@ -3447,7 +3450,7 @@ def attach_enhanced_geothermal(n, potential, mode):
                 name=identifier,
                 bus0=f"Geothermal Power {mode}",
                 bus1=bus,
-                carrier="geothermal {mode}",
+                carrier=f"geothermal {mode}",
                 p_nom_max=capacity,
                 capital_cost=capital_cost,
                 marginal_cost=opex,
