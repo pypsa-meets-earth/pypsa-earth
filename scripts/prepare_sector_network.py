@@ -3112,7 +3112,6 @@ if __name__ == "__main__":
     #     constant=co2_limit,
     # )
 
-
     n.export_to_netcdf(snakemake.output[0])
 
     # TODO changes in case of myopic oversight

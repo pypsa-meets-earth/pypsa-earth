@@ -1252,7 +1252,10 @@ def gadm(
             "Fetching custom GADM shapes.. expecting file at 'data/custom/gadm_shapes_custom.geojson'"
         )
 
-        df_gadm = gpd.read_file(os.path.join(BASE_DIR, "data/custom/gadm_shapes_custom.geojson"), driver = "GeoJSON")
+        df_gadm = gpd.read_file(
+            os.path.join(BASE_DIR, "data/custom/gadm_shapes_custom.geojson"),
+            driver="GeoJSON",
+        )
     else:
         # download data if needed and get the desired layer_id
         df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)

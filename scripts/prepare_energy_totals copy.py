@@ -71,7 +71,6 @@ if __name__ == "__main__":
             index_col=[0],
         )
 
-
     else:
         base_energy_totals = read_csv_nafix(snakemake.input.unsd_paths, index_col=0)
         growth_factors_cagr = read_csv_nafix(
@@ -127,7 +126,8 @@ if __name__ == "__main__":
             demand_sc + "_" + str(investment_year),
         )
         electric_share = get(
-            options["land_transport_electric_share"], demand_sc + "_" + str(investment_year)
+            options["land_transport_electric_share"],
+            demand_sc + "_" + str(investment_year),
         )
 
         hydrogen_shipping_share = get(
