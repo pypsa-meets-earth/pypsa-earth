@@ -16,7 +16,7 @@ or `google drive <https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQ
 and extracts it in the ``data``, ``resources`` and ``cutouts`` sub-directory.
 Bundle data are then deleted once downloaded and unzipped.
 
-The :ref:`tutorial` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_
+The :ref:`tutorial_electricity` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_
 than required for the full model (around 500 MB)
 
 The required bundles are downloaded automatically according to the list names, in agreement to
@@ -233,7 +233,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
 
         return True
     else:
-        logger.error(f"Host {host} not implemented")
+        logger.error(f"Host gdrive not implemented")
         return False
 
 
@@ -497,7 +497,7 @@ def download_and_unzip_hydrobasins(
     url_templ = config["urls"]["hydrobasins"]["base_url"]
     suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
-    level_code = snakemake.config["renewable"]["hydro"]["hydrobasins_level"]
+    level_code = config["level_code"]
     level_code = "{:02d}".format(int(level_code))
 
     all_downloaded = True
@@ -693,7 +693,14 @@ def get_best_bundles_by_category(
     return returned_bundles
 
 
-def get_best_bundles(countries, config_bundles, tutorial, config_enable):
+def get_best_bundles(
+    countries,
+    config_bundles,
+    tutorial,
+    config_enable,
+    include_categories=[],
+    exclude_categories=[],
+):
     """
     get_best_bundles(countries, category, config_bundles, tutorial)
 
@@ -720,7 +727,8 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
         Whether data for tutorial shall be downloaded
     config_enable : dict
         Dictionary of the enabled/disabled scripts
-
+    exclude_category : List
+        (Optional) Lists of config bundle categories to exclude
     Outputs
     -------
     returned_bundles : list
@@ -731,6 +739,15 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
     categories = list(
         set([config_bundles[conf]["category"] for conf in config_bundles])
     )
+    if include_categories:
+        categories = [
+            category for category in categories if category in exclude_categories
+        ]
+
+    if exclude_categories:
+        categories = [
+            category for category in categories if category not in exclude_categories
+        ]
 
     # identify matched countries for every bundle
     for bname in config_bundles:
@@ -761,12 +778,7 @@ def get_best_bundles(countries, config_bundles, tutorial, config_enable):
     return bundles_to_download
 
 
-def datafiles_retrivedatabundle(config):
-    """
-    Function to get the output files from the bundles, given the target
-    countries, tutorial settings, etc.
-    """
-
+def get_best_bundles_in_snakemake(config, include_categories=[], exclude_categories=[]):
     tutorial = config["tutorial"]
     countries = config["countries"]
     config_enable = config["enable"]
@@ -774,8 +786,22 @@ def datafiles_retrivedatabundle(config):
     config_bundles = load_databundle_config(config["databundles"])
 
     bundles_to_download = get_best_bundles(
-        countries, config_bundles, tutorial, config_enable
+        countries,
+        config_bundles,
+        tutorial,
+        config_enable,
+        include_categories=include_categories,
+        exclude_categories=exclude_categories,
     )
+
+    return bundles_to_download
+
+
+def datafiles_retrivedatabundle(config, bundles_to_download):
+    """
+    Function to get the output files from the bundles, given the target
+    countries, tutorial settings, etc.
+    """
 
     listoutputs = list(
         set(
@@ -810,30 +836,13 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
 
-if __name__ == "__main__":
-    if "snakemake" not in globals():
-
-        from _helpers import mock_snakemake
-
-        snakemake = mock_snakemake("retrieve_databundle_light")
-
-    # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
-    configure_logging(snakemake)
-
-    rootpath = "."
-    tutorial = snakemake.params.tutorial
-    countries = snakemake.params.countries
-    logger.info(f"Retrieving data for {len(countries)} countries.")
-
-    # load enable configuration
-    config_enable = snakemake.config["enable"]
-    # load databundle configuration
-    config_bundles = load_databundle_config(snakemake.config["databundles"])
-    disable_progress = not config_enable["progress_bar"]
-
-    bundles_to_download = get_best_bundles(
-        countries, config_bundles, tutorial, config_enable
-    )
+def retrieve_databundle(
+    bundles_to_download,
+    config_bundles,
+    hydrobasins_level,
+    rootpath=".",
+    disable_progress=False,
+):
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
@@ -844,6 +853,12 @@ if __name__ == "__main__":
     )
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
+
+    hydrobasin_bundles = [
+        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
+    ]
+    if len(hydrobasin_bundles) > 0:
+        config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
 
     # initialize downloaded and missing bundles
     downloaded_bundles = []
@@ -874,12 +889,8 @@ if __name__ == "__main__":
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
-    hydrobasin_bundles = [
-        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
-    ]
     if len(hydrobasin_bundles) > 0:
         logger.info("Merging regional hydrobasins files into a global shapefile")
-        hydrobasins_level = snakemake.params["hydrobasins_level"]
         merge_hydrobasins_shape(
             config_bundles[hydrobasin_bundles[0]], hydrobasins_level
         )
@@ -895,3 +906,43 @@ if __name__ == "__main__":
             "The following bundles could not be downloaded:\n\t"
             + "\n\t".join(list(missing_bundles))
         )
+
+
+if __name__ == "__main__":
+    if "snakemake" not in globals():
+
+        from _helpers import mock_snakemake
+
+        snakemake = mock_snakemake("retrieve_databundle_light")
+
+    # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
+    configure_logging(snakemake)
+
+    rootpath = "."
+    # tutorial = snakemake.params.tutorial
+    # countries = snakemake.params.countries
+    # logger.info(f"Retrieving data for {len(countries)} countries.")
+
+    # load enable configuration
+    config_enable = snakemake.config["enable"]
+    # load databundle configuration
+    config_bundles = load_databundle_config(snakemake.config["databundles"])
+    disable_progress = not config_enable["progress_bar"]
+    hydrobasins_level = snakemake.params["hydrobasins_level"]
+
+    bundles_to_download = snakemake.params["bundles_to_download"]
+
+    retrieve_databundle(
+        bundles_to_download,
+        config_bundles,
+        hydrobasins_level,
+        rootpath=rootpath,
+        disable_progress=disable_progress,
+    )
+
+    # if some files are still missing, reroute to command-line-interface
+    if any(
+        not os.path.isfile(file) if file != "data/landcover" else False
+        for file in snakemake.output
+    ):
+        os.system("python scripts/non_workflow/databundle_cli.py")
