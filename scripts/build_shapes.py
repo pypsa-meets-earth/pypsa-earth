@@ -1248,7 +1248,7 @@ def gadm(
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
 
     if snakemake.params.build_shape_options["custom_gadm_shapes"]:
-        _logger.info(
+        logger.info(
             "Fetching custom GADM shapes.. expecting file at 'data/custom/gadm_shapes_custom.geojson'"
         )
 

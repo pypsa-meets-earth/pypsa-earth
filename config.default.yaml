@@ -106,7 +106,7 @@ cluster_options:
       efficiency: mean
 
 build_shape_options:
-  custom_gadm_shapes: true # If "true" then a custom shape file shall be added in (...\data\custom\gadm_shapes_custom.geojson). And gadm_layer_id becomes oboslete.
+  custom_gadm_shapes: false # If "true" then a custom shape file shall be added in (...\data\custom\gadm_shapes_custom.geojson). And gadm_layer_id becomes oboslete.
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
   simplify_gadm: true # When true, shape polygons are simplified else no
   update_file: false # When true, all the input files are downloaded again and replace the existing files
