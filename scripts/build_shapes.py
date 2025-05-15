@@ -1247,8 +1247,15 @@ def gadm(
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
 
-    # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
+    if snakemake.params.build_shape_options["custom_gadm_shapes"]:
+        _logger.info(
+            "Fetching custom GADM shapes.. expecting file at 'data/custom/gadm_shapes_custom.geojson'"
+        )
+
+        df_gadm = gpd.read_file(os.path.join(BASE_DIR, "data/custom/gadm_shapes_custom.geojson"), driver = "GeoJSON")
+    else:
+        # download data if needed and get the desired layer_id
+        df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
 
     # select and rename columns
     df_gadm.rename(columns={"GID_0": "country"}, inplace=True)

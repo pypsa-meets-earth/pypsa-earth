@@ -102,15 +102,16 @@ if __name__ == "__main__":
         else:
             print("No RES potential techs to override...")
 
-        if snakemake.params.custom_data["elec_demand"]:
-            for country in countries:
-                n.loads_t.p_set.filter(like=country)[buses] = (
-                    (
-                        n.loads_t.p_set.filter(like=country)[buses]
-                        / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
-                    )
-                    * energy_totals.loc[country, "electricity residential"]
-                    * 1e6
-                )
+        """Removed here because this is taken care of in prepare_sector_network"""
+        # if snakemake.params.custom_data["elec_demand"]:
+        #     for country in countries:
+        #         n.loads_t.p_set.filter(like=country)[buses] = (
+        #             (
+        #                 n.loads_t.p_set.filter(like=country)[buses]
+        #                 / n.loads_t.p_set.filter(like=country)[buses].sum().sum()
+        #             )
+        #             * energy_totals.loc[country, "electricity residential"]
+        #             * 1e6
+        #         )
 
     n.export_to_netcdf(snakemake.output[0])

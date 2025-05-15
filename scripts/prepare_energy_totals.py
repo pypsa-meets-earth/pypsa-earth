@@ -61,237 +61,257 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons)
     demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
 
-    base_energy_totals = read_csv_nafix(snakemake.input.unsd_paths, index_col=0)
-    growth_factors_cagr = read_csv_nafix(
-        snakemake.input.growth_factors_cagr, index_col=0
-    )
-    efficiency_gains_cagr = read_csv_nafix(
-        snakemake.input.efficiency_gains_cagr, index_col=0
-    )
-    fuel_shares = read_csv_nafix(snakemake.input.fuel_shares, index_col=0)
-    district_heating = read_csv_nafix(snakemake.input.district_heating, index_col=0)
-
-    no_years = int(snakemake.wildcards.planning_horizons) - int(
-        snakemake.params.base_year
-    )
-
-    for country in countries:
-        fill_country_data(efficiency_gains_cagr, country, label="efficiency gains CAGR")
-        fill_country_data(growth_factors_cagr, country, label="growth factors CAGR")
-        fill_country_data(fuel_shares, country, label="fuel share")
-        fill_country_data(district_heating, country, label="heating")
-
-    growth_factors = calculate_end_values(growth_factors_cagr)
-    efficiency_gains = calculate_end_values(efficiency_gains_cagr)
-
-    efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
-    fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
-    district_heating = district_heating[district_heating.index.isin(countries)]
-    growth_factors = growth_factors[growth_factors.index.isin(countries)]
-
-    options = snakemake.params.sector_options
-
-    fuel_cell_share = get(
-        options["land_transport_fuel_cell_share"],
-        demand_sc + "_" + str(investment_year),
-    )
-    electric_share = get(
-        options["land_transport_electric_share"], demand_sc + "_" + str(investment_year)
-    )
-
-    hydrogen_shipping_share = get(
-        options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
-    )
-
-    energy_totals = (
-        base_energy_totals
-        * efficiency_gains.loc[countries]
-        * growth_factors.loc[countries]
-    )
-
-    # Residential
-    efficiency_heat_oil_to_elec = snakemake.params.sector_options[
-        "efficiency_heat_oil_to_elec"
-    ]
-    efficiency_heat_biomass_to_elec = snakemake.params.sector_options[
-        "efficiency_heat_biomass_to_elec"
-    ]
-    efficiency_heat_gas_to_elec = snakemake.params.sector_options[
-        "efficiency_heat_gas_to_elec"
-    ]
-
-    energy_totals["electricity residential space"] = (
-        base_energy_totals["total residential space"]
-        + (
-            fuel_shares["biomass to elec heat share"]
-            * fuel_shares["biomass residential heat share"]
-            * (fuel_shares["space to water heat share"])
-            * base_energy_totals["residential biomass"]
-            * efficiency_heat_biomass_to_elec
+    if snakemake.params.energy_demand:
+        _logger.info(
+            "Fetching custom sectoral energy demand data.. expecting file at 'data/custom/energy_totals_{0}_{1}.csv'".format(
+                snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
+            )
         )
-        + (
-            fuel_shares["oil to elec heat share"]
+
+        energy_totals = pd.read_csv(
+            os.path.join(
+                BASE_DIR,
+                "data/custom/energy_totals_{0}_{1}.csv".format(
+                    snakemake.wildcards["demand"],
+                    snakemake.wildcards["planning_horizons"],
+                ),
+            ),
+            index_col=[0],
+        )
+
+
+    else:
+        base_energy_totals = read_csv_nafix(snakemake.input.unsd_paths, index_col=0)
+        growth_factors_cagr = read_csv_nafix(
+            snakemake.input.growth_factors_cagr, index_col=0
+        )
+        efficiency_gains_cagr = read_csv_nafix(
+            snakemake.input.efficiency_gains_cagr, index_col=0
+        )
+        fuel_shares = read_csv_nafix(snakemake.input.fuel_shares, index_col=0)
+        district_heating = read_csv_nafix(snakemake.input.district_heating, index_col=0)
+
+        no_years = int(snakemake.wildcards.planning_horizons) - int(
+            snakemake.params.base_year
+        )
+
+        for country in countries:
+            fill_country_data(efficiency_gains_cagr, country, label="efficiency gains CAGR")
+            fill_country_data(growth_factors_cagr, country, label="growth factors CAGR")
+            fill_country_data(fuel_shares, country, label="fuel share")
+            fill_country_data(district_heating, country, label="heating")
+
+        growth_factors = calculate_end_values(growth_factors_cagr)
+        efficiency_gains = calculate_end_values(efficiency_gains_cagr)
+
+        efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
+        fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
+        district_heating = district_heating[district_heating.index.isin(countries)]
+        growth_factors = growth_factors[growth_factors.index.isin(countries)]
+
+        options = snakemake.params.sector_options
+
+        fuel_cell_share = get(
+            options["land_transport_fuel_cell_share"],
+            demand_sc + "_" + str(investment_year),
+        )
+        electric_share = get(
+            options["land_transport_electric_share"], demand_sc + "_" + str(investment_year)
+        )
+
+        hydrogen_shipping_share = get(
+            options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
+        )
+
+        energy_totals = (
+            base_energy_totals
+            * efficiency_gains.loc[countries]
+            * growth_factors.loc[countries]
+        )
+
+        # Residential
+        efficiency_heat_oil_to_elec = snakemake.params.sector_options[
+            "efficiency_heat_oil_to_elec"
+        ]
+        efficiency_heat_biomass_to_elec = snakemake.params.sector_options[
+            "efficiency_heat_biomass_to_elec"
+        ]
+        efficiency_heat_gas_to_elec = snakemake.params.sector_options[
+            "efficiency_heat_gas_to_elec"
+        ]
+
+        energy_totals["electricity residential space"] = (
+            base_energy_totals["total residential space"]
+            + (
+                fuel_shares["biomass to elec heat share"]
+                * fuel_shares["biomass residential heat share"]
+                * (fuel_shares["space to water heat share"])
+                * base_energy_totals["residential biomass"]
+                * efficiency_heat_biomass_to_elec
+            )
+            + (
+                fuel_shares["oil to elec heat share"]
+                * fuel_shares["oil residential heat share"]
+                * (fuel_shares["space to water heat share"])
+                * base_energy_totals["residential oil"]
+                * efficiency_heat_oil_to_elec
+            )
+            + (
+                fuel_shares["gas to elec heat share"]
+                * fuel_shares["gas residential heat share"]
+                * (fuel_shares["space to water heat share"])
+                * base_energy_totals["residential gas"]
+                * efficiency_heat_gas_to_elec
+            )
+        )
+
+        energy_totals["electricity residential water"] = (
+            base_energy_totals["total residential water"]
+            + (
+                fuel_shares["biomass to elec heat share"]
+                * fuel_shares["biomass residential heat share"]
+                * (1 - fuel_shares["space to water heat share"])
+                * base_energy_totals["residential biomass"]
+                * efficiency_heat_biomass_to_elec
+            )
+            + (
+                fuel_shares["oil to elec heat share"]
+                * fuel_shares["oil residential heat share"]
+                * (1 - fuel_shares["space to water heat share"])
+                * base_energy_totals["residential oil"]
+                * efficiency_heat_oil_to_elec
+            )
+            + (
+                fuel_shares["gas to elec heat share"]
+                * fuel_shares["gas residential heat share"]
+                * (1 - fuel_shares["space to water heat share"])
+                * base_energy_totals["residential gas"]
+                * efficiency_heat_gas_to_elec
+            )
+        )
+
+        energy_totals["residential heat oil"] = (
+            base_energy_totals["residential oil"]
             * fuel_shares["oil residential heat share"]
-            * (fuel_shares["space to water heat share"])
-            * base_energy_totals["residential oil"]
-            * efficiency_heat_oil_to_elec
+            * (1 - fuel_shares["oil to elec heat share"])
+            * efficiency_gains["residential heat oil"]
+            * growth_factors["residential heat oil"]
         )
-        + (
-            fuel_shares["gas to elec heat share"]
-            * fuel_shares["gas residential heat share"]
-            * (fuel_shares["space to water heat share"])
-            * base_energy_totals["residential gas"]
-            * efficiency_heat_gas_to_elec
-        )
-    )
 
-    energy_totals["electricity residential water"] = (
-        base_energy_totals["total residential water"]
-        + (
-            fuel_shares["biomass to elec heat share"]
-            * fuel_shares["biomass residential heat share"]
-            * (1 - fuel_shares["space to water heat share"])
-            * base_energy_totals["residential biomass"]
-            * efficiency_heat_biomass_to_elec
-        )
-        + (
-            fuel_shares["oil to elec heat share"]
-            * fuel_shares["oil residential heat share"]
-            * (1 - fuel_shares["space to water heat share"])
-            * base_energy_totals["residential oil"]
-            * efficiency_heat_oil_to_elec
-        )
-        + (
-            fuel_shares["gas to elec heat share"]
-            * fuel_shares["gas residential heat share"]
-            * (1 - fuel_shares["space to water heat share"])
-            * base_energy_totals["residential gas"]
-            * efficiency_heat_gas_to_elec
-        )
-    )
-
-    energy_totals["residential heat oil"] = (
-        base_energy_totals["residential oil"]
-        * fuel_shares["oil residential heat share"]
-        * (1 - fuel_shares["oil to elec heat share"])
-        * efficiency_gains["residential heat oil"]
-        * growth_factors["residential heat oil"]
-    )
-
-    energy_totals["residential oil"] = (
-        base_energy_totals["residential oil"]
-        * (1 - fuel_shares["oil residential heat share"])
-        * (1 - fuel_shares["oil to elec share"])
-        * efficiency_gains["residential oil"]
-        * growth_factors["residential oil"]
-    )
-
-    energy_totals["residential heat biomass"] = (
-        base_energy_totals["residential biomass"]
-        * fuel_shares["biomass residential heat share"]
-        * (1 - fuel_shares["biomass to elec heat share"])
-        * efficiency_gains["residential heat biomass"]
-        * growth_factors["residential heat biomass"]
-    )
-
-    energy_totals["residential biomass"] = (
-        base_energy_totals["residential biomass"]
-        * (1 - fuel_shares["biomass residential heat share"])
-        * (1 - fuel_shares["biomass to elec share"])
-        * efficiency_gains["residential biomass"]
-        * growth_factors["residential biomass"]
-    )
-
-    energy_totals["residential heat gas"] = (
-        base_energy_totals["residential gas"]
-        * fuel_shares["gas residential heat share"]
-        * (1 - fuel_shares["gas to elec heat share"])
-        * efficiency_gains["residential heat gas"]
-        * growth_factors["residential heat gas"]
-    )
-
-    energy_totals["residential gas"] = (
-        base_energy_totals["residential gas"]
-        * (1 - fuel_shares["gas residential heat share"])
-        * (1 - fuel_shares["gas to elec share"])
-        * efficiency_gains["residential gas"]
-        * growth_factors["residential gas"]
-    )
-
-    energy_totals["total residential space"] = energy_totals[
-        "electricity residential space"
-    ] + (
-        energy_totals["residential heat oil"]
-        + energy_totals["residential heat biomass"]
-        + energy_totals["residential heat gas"]
-    ) * (
-        fuel_shares["space to water heat share"]
-    )
-
-    energy_totals["total residential water"] = energy_totals[
-        "electricity residential water"
-    ] + (
-        energy_totals["residential heat oil"]
-        + energy_totals["residential heat biomass"]
-        + energy_totals["residential heat gas"]
-    ) * (
-        1 - fuel_shares["space to water heat share"]
-    )
-
-    energy_totals["electricity residential"] = (
-        energy_totals["electricity residential"]
-        + (
-            fuel_shares["oil to elec share"]
+        energy_totals["residential oil"] = (
+            base_energy_totals["residential oil"]
             * (1 - fuel_shares["oil residential heat share"])
-            * base_energy_totals["residential oil"]
+            * (1 - fuel_shares["oil to elec share"])
+            * efficiency_gains["residential oil"]
+            * growth_factors["residential oil"]
         )
-        + (
-            fuel_shares["biomass to elec share"]
+
+        energy_totals["residential heat biomass"] = (
+            base_energy_totals["residential biomass"]
+            * fuel_shares["biomass residential heat share"]
+            * (1 - fuel_shares["biomass to elec heat share"])
+            * efficiency_gains["residential heat biomass"]
+            * growth_factors["residential heat biomass"]
+        )
+
+        energy_totals["residential biomass"] = (
+            base_energy_totals["residential biomass"]
             * (1 - fuel_shares["biomass residential heat share"])
-            * base_energy_totals["residential biomass"]
+            * (1 - fuel_shares["biomass to elec share"])
+            * efficiency_gains["residential biomass"]
+            * growth_factors["residential biomass"]
         )
-        + (
-            fuel_shares["gas to elec share"]
+
+        energy_totals["residential heat gas"] = (
+            base_energy_totals["residential gas"]
+            * fuel_shares["gas residential heat share"]
+            * (1 - fuel_shares["gas to elec heat share"])
+            * efficiency_gains["residential heat gas"]
+            * growth_factors["residential heat gas"]
+        )
+
+        energy_totals["residential gas"] = (
+            base_energy_totals["residential gas"]
             * (1 - fuel_shares["gas residential heat share"])
-            * base_energy_totals["residential gas"]
+            * (1 - fuel_shares["gas to elec share"])
+            * efficiency_gains["residential gas"]
+            * growth_factors["residential gas"]
         )
-    )
 
-    # Road
-    energy_totals["total road"] = (
-        (1 - fuel_cell_share - electric_share)
-        * efficiency_gains["total road ice"]
-        * base_energy_totals["total road"]
-        + fuel_cell_share
-        * efficiency_gains["total road fcev"]
-        * base_energy_totals["total road"]
-        + electric_share
-        * efficiency_gains["total road ev"]
-        * base_energy_totals["total road"]
-    ) * growth_factors["total road"]
+        energy_totals["total residential space"] = energy_totals[
+            "electricity residential space"
+        ] + (
+            energy_totals["residential heat oil"]
+            + energy_totals["residential heat biomass"]
+            + energy_totals["residential heat gas"]
+        ) * (
+            fuel_shares["space to water heat share"]
+        )
 
-    # Navigation
-    energy_totals["total domestic navigation"] = (
-        (1 - hydrogen_shipping_share)
-        * efficiency_gains["total navigation oil"]
-        * base_energy_totals["total domestic navigation"]
-        + hydrogen_shipping_share
-        * efficiency_gains["total navigation hydrogen"]
-        * base_energy_totals["total domestic navigation"]
-    ) * growth_factors["total domestic navigation"]
+        energy_totals["total residential water"] = energy_totals[
+            "electricity residential water"
+        ] + (
+            energy_totals["residential heat oil"]
+            + energy_totals["residential heat biomass"]
+            + energy_totals["residential heat gas"]
+        ) * (
+            1 - fuel_shares["space to water heat share"]
+        )
 
-    energy_totals["total international navigation"] = (
-        (1 - hydrogen_shipping_share)
-        * efficiency_gains["total navigation oil"]
-        * base_energy_totals["total international navigation"]
-        + hydrogen_shipping_share
-        * efficiency_gains["total navigation hydrogen"]
-        * base_energy_totals["total international navigation"]
-    ) * growth_factors["total international navigation"]
+        energy_totals["electricity residential"] = (
+            energy_totals["electricity residential"]
+            + (
+                fuel_shares["oil to elec share"]
+                * (1 - fuel_shares["oil residential heat share"])
+                * base_energy_totals["residential oil"]
+            )
+            + (
+                fuel_shares["biomass to elec share"]
+                * (1 - fuel_shares["biomass residential heat share"])
+                * base_energy_totals["residential biomass"]
+            )
+            + (
+                fuel_shares["gas to elec share"]
+                * (1 - fuel_shares["gas residential heat share"])
+                * base_energy_totals["residential gas"]
+            )
+        )
 
-    energy_totals["district heat share"] = district_heating["current"]
+        # Road
+        energy_totals["total road"] = (
+            (1 - fuel_cell_share - electric_share)
+            * efficiency_gains["total road ice"]
+            * base_energy_totals["total road"]
+            + fuel_cell_share
+            * efficiency_gains["total road fcev"]
+            * base_energy_totals["total road"]
+            + electric_share
+            * efficiency_gains["total road ev"]
+            * base_energy_totals["total road"]
+        ) * growth_factors["total road"]
 
-    energy_totals["electricity services space"] = 0
-    energy_totals["electricity services water"] = 0
+        # Navigation
+        energy_totals["total domestic navigation"] = (
+            (1 - hydrogen_shipping_share)
+            * efficiency_gains["total navigation oil"]
+            * base_energy_totals["total domestic navigation"]
+            + hydrogen_shipping_share
+            * efficiency_gains["total navigation hydrogen"]
+            * base_energy_totals["total domestic navigation"]
+        ) * growth_factors["total domestic navigation"]
+
+        energy_totals["total international navigation"] = (
+            (1 - hydrogen_shipping_share)
+            * efficiency_gains["total navigation oil"]
+            * base_energy_totals["total international navigation"]
+            + hydrogen_shipping_share
+            * efficiency_gains["total navigation hydrogen"]
+            * base_energy_totals["total international navigation"]
+        ) * growth_factors["total international navigation"]
+
+        energy_totals["district heat share"] = district_heating["current"]
+
+        energy_totals["electricity services space"] = 0
+        energy_totals["electricity services water"] = 0
 
     energy_totals.fillna(0).to_csv(snakemake.output.energy_totals)

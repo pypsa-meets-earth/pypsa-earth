@@ -1318,6 +1318,8 @@ rule build_cop_profiles:
 
 
 rule prepare_heat_data:
+    params:
+        sector_options=config["sector"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="resources/"
@@ -1386,6 +1388,7 @@ rule prepare_energy_totals:
         countries=config["countries"],
         base_year=config["demand_data"]["base_year"],
         sector_options=config["sector"],
+        energy_demand=config["custom_data"]["sectoral_energy_demand"],
     input:
         unsd_paths="resources/" + SECDIR + "energy_totals_base.csv",
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
