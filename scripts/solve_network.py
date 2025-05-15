@@ -84,9 +84,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyomo.environ as pyo
 import pypsa
 import xarray as xr
-import pyomo.environ as pyo
 from _helpers import configure_logging, create_logger, override_component_attrs
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
@@ -695,8 +695,14 @@ def get_weighted_monthly_sum(variable, weightings, index):
 
 def monthly_constraints(n, n_ref):
     res_techs = [
-        "csp", "rooftop-solar", "solar", "onwind", "onwind2",
-        "offwind", "offwind2", "ror"
+        "csp",
+        "rooftop-solar",
+        "solar",
+        "onwind",
+        "onwind2",
+        "offwind",
+        "offwind2",
+        "ror",
     ]
     allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
     additionality = snakemake.config["policy_config"]["hydrogen"]["additionality"]
@@ -731,9 +737,13 @@ def monthly_constraints(n, n_ref):
         res_ref = n_ref.generators_t.p[res_index].multiply(snapshot_weights, axis=0)
         res_ref_monthly = res_ref.groupby(res_ref.index.month).sum().sum(axis=1)
 
-        elec_ref = -n_ref.links_t.p0.loc[:, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")]
+        elec_ref = -n_ref.links_t.p0.loc[
+            :, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")
+        ]
         elec_ref_weighted = elec_ref.multiply(snapshot_weights, axis=0)
-        elec_ref_monthly = elec_ref_weighted.groupby(elec_ref.index.month).sum().sum(axis=1)
+        elec_ref_monthly = (
+            elec_ref_weighted.groupby(elec_ref.index.month).sum().sum(axis=1)
+        )
 
         for month in range(1, 13):
             lhs = res_monthly[month] + elec_monthly[month]
