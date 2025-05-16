@@ -3088,6 +3088,7 @@ def add_industry_heating(n, costs):
 
     # 2. Low-temp molten salt discharger (Link)
     # Assumes the discharger converts stored heat in the same bus to usable heat at the same bus
+    logger.warning("Hot-fixing molten salt discharger; units appear to be wrong")
     n.madd(
         "Link",
         nodes_high + " molten salt discharger",
@@ -3095,13 +3096,14 @@ def add_industry_heating(n, costs):
         bus1=high_temp_buses,
         carrier="low-temp molten salt discharger",
         p_nom_extendable=True,
-        capital_cost=costs.at["low-temp molten salt discharger", "fixed"],
+        capital_cost=costs.at["low-temp molten salt discharger", "fixed"] * 1000.,
         lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
         efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
         p_min_pu=0.0,
     )
 
     # 3. Low-temp molten salt charger (Link)
+    logger.warning("Hot-fixing molten salt charger; units appear to be wrong")
     logger.warning("Yet to get techno-economic data for molten sand charger")
     n.madd(
         "Link",
@@ -3113,7 +3115,7 @@ def add_industry_heating(n, costs):
         # capital_cost=costs.at["low-temp molten salt charger", "fixed"],
         # lifetime=costs.at["low-temp molten salt charger", "lifetime"],
         # efficiency=costs.at["low-temp molten salt charger", "efficiency"],
-        capital_cost=costs.at["low-temp molten salt discharger", "fixed"],
+        capital_cost=costs.at["low-temp molten salt discharger", "fixed"] * 1000,
         lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
         efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
         p_min_pu=0.0,
@@ -3256,6 +3258,18 @@ def add_industry_heating(n, costs):
         "Store",
         nodes_low + " hot water storage",
         bus=low_temp_buses,
+        carrier="hot water storage",
+        e_nom_extendable=True,
+        capital_cost=costs.at["central water tank storage", "fixed"] * 1000,
+        lifetime=costs.at["central water tank storage", "lifetime"],
+        # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
+    )
+    
+    # Hot water tank for medium temperature (Store)
+    n.madd(
+        "Store",
+        nodes_medium + " hot water storage",
+        bus=medium_temp_buses,
         carrier="hot water storage",
         e_nom_extendable=True,
         capital_cost=costs.at["central water tank storage", "fixed"] * 1000,
