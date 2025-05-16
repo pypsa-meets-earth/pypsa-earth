@@ -3096,7 +3096,7 @@ def add_industry_heating(n, costs):
         bus1=high_temp_buses,
         carrier="low-temp molten salt discharger",
         p_nom_extendable=True,
-        capital_cost=costs.at["low-temp molten salt discharger", "fixed"] * 1000.,
+        capital_cost=costs.at["low-temp molten salt discharger", "fixed"] * 1000.0,
         lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
         efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
         p_min_pu=0.0,
@@ -3268,7 +3268,7 @@ def add_industry_heating(n, costs):
         lifetime=costs.at["central water tank storage", "lifetime"],
         # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
     )
-    
+
     # Hot water tank for medium temperature (Store)
     n.madd(
         "Store",
