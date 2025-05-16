@@ -129,8 +129,8 @@ import geopandas as gpd
 import linopy
 import numpy as np
 import pandas as pd
-import pypsa
 import pycountry
+import pypsa
 from _helpers import (
     REGION_COLS,
     configure_logging,
