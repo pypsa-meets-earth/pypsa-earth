@@ -130,6 +130,7 @@ import linopy
 import numpy as np
 import pandas as pd
 import pypsa
+import pycountry
 from _helpers import (
     REGION_COLS,
     configure_logging,
@@ -177,8 +178,9 @@ def weighting_for_country(n, x):
     w = g + l
 
     if w.max() == 0.0:
+        country = pycountry.countries.get(alpha_2=x.name[0])
         logger.warning(
-            f"Null weighting for buses of country {x.country.iloc[0]}: returned default uniform weighting"
+            f"Null weighting for buses of country {country.name if country else x.name[0]}: returned default uniform weighting"
         )
         return pd.Series(1.0, index=w.index)
     else:
