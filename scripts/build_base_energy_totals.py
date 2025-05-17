@@ -452,7 +452,7 @@ if __name__ == "__main__":
 
     other_energy = [
         "consumption not elsewhere specified (other)",
-        "consumption not elsewhere specified (other)"
+        "consumption not elsewhere specified (other)",
         "Consumption not elsewhere specified (other)",
         "Consumption by other consumers not elsewhere specified",
         "consumption by other consumers not elsewhere specified",
