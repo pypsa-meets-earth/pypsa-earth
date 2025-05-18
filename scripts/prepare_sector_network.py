@@ -2789,7 +2789,7 @@ def add_custom_water_cost(n):
         water_costs = pd.read_csv(
             os.path.join(
                 BASE_DIR,
-                "resources/custom_data/{}_water_costs.csv".format(country),
+                "data/custom/{}_water_costs.csv".format(country),
                 sep=",",
                 index_col=0,
             )
@@ -3085,6 +3085,12 @@ if __name__ == "__main__":
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)
 
+    if options["dac"]:
+        add_dac(n, costs)
+
+    if snakemake.params.water_costs:
+        add_custom_water_cost(n)
+
     sopts = snakemake.wildcards.sopts.split("-")
 
     for o in sopts:
@@ -3105,12 +3111,6 @@ if __name__ == "__main__":
     #     sense="<=",
     #     constant=co2_limit,
     # )
-
-    if options["dac"]:
-        add_dac(n, costs)
-
-    if snakemake.params.water_costs:
-        add_custom_water_cost(n)
 
     n.export_to_netcdf(snakemake.output[0])
 
