@@ -362,7 +362,7 @@ renewable:
 # Costs Configuration
 costs:
   year: 2030
-  version: v0.11.0
+  version: v0.12.0
   discountrate: [0.071] #, 0.086, 0.111]
   output_currency: "EUR"
   rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
