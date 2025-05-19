@@ -1468,7 +1468,7 @@ def safe_divide(numerator, denominator, default_value=np.nan):
         logging.warning(
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
-        return np.nan
+        return pd.DataFrame(np.nan, index=numerator.index, columns=numerator.columns)
 
 
 def lossy_bidirectional_links(n, carrier):
