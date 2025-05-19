@@ -1470,6 +1470,7 @@ def safe_divide(numerator, denominator, default_value=np.nan):
         )
         return pd.DataFrame(np.nan, index=numerator.index, columns=numerator.columns)
 
+
 def lossy_bidirectional_links(n, carrier):
     """
     Split bidirectional links of type carrier into two unidirectional links to include transmission losses.
