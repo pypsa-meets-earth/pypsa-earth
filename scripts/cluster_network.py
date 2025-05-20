@@ -178,7 +178,7 @@ def weighting_for_country(n, x):
 
     if w.max() == 0.0:
         logger.warning(
-            f"Null weighting for buses of country {x.country.iloc[0]}: returned default uniform weighting"
+            f"Null weighting for buses of country {x.name[0]}: returned default uniform weighting"
         )
         return pd.Series(1.0, index=w.index)
     else:

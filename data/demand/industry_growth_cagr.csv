@@ -1,4 +1,6 @@
 country,chemical and petrochemical,construction,food and tobacco,iron and steel,machinery,mining and quarrying,non-ferrous metals,non-metallic minerals,paper pulp and print,textile and leather,transport equipment,wood and wood products,other
 DEFAULT,0.03,0.015,0.02,0.017,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03
 MA,0.03,0.015,0.02,0.017,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03
+TN,0.128, 0.167, 0.073,,,0.45,,,,0.079,,,0.096
+NA,0.0037,-0.0024, -0.0338,,,0.1888,-0.048,-0.0624,,0.0354,,0.0278,
 US,0.017,0.008,0.0094,0.005,0.014,0.002,0.011,0.008,0.003,-0.001,0.014,0.001,0.009

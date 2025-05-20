@@ -427,7 +427,7 @@ monte_carlo:
   uncertainties:
     loads_t.p_set:
       type: uniform
-      args: [0, 1]
+      args: [0.5, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
       type: lognormal
       args: [1.5]
@@ -703,7 +703,7 @@ sector:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: true
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
