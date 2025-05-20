@@ -13,21 +13,20 @@ env:
 
 jobs:
   update-pinned-environment:
-    # if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
     name: Update pinned envs
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [ubuntu, macos] #os: [ubuntu, macos, windows]
         include:
         - os: ubuntu
           suffix: "linux"
         - os: macos
           suffix: "macos"
-        - os: windows
-          suffix: "windows"
+        # - os: windows
+        #   suffix: "windows"
 
     steps:
     - uses: actions/checkout@v4
@@ -76,7 +75,7 @@ jobs:
         mkdir -p envs
         mv linux-pinned/* envs/linux-pinned.yaml
         mv macos-pinned/* envs/macos-pinned.yaml
-        mv windows-pinned/* envs/windows-pinned.yaml
+        # mv windows-pinned/* envs/windows-pinned.yaml
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
