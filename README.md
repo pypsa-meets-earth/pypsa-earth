@@ -33,7 +33,7 @@ PyPSA-Earth is the first open-source global cross-sectoral energy system model w
 
 All the data needed for a simulation are automatically and flexibly retrieved from open sources. This includes, in particular, energy demand across sectors, generation capacities, medium- to high-voltage networks, and renewable energy potentials. Custom datasets can also be integrated as needed, and kept private if required. At the same time, PyPSA-Earth-Status provides functionality to share regional insights. If you are willing to contribute your regional expertise, feel free to open an issue there.
 
-PyPSA-Earth is capable of providing the modelling evidence needed to translate the implications of energy scenarios into actionable regional strategies. By making this tool openly available, we aim to foster collaboration, innovation, and informed decision-making to support sustainable and efficient energy solutions worldwide. 
+PyPSA-Earth is capable of providing the modelling evidence needed to translate the implications of energy scenarios into actionable regional strategies. By making this tool openly available, we aim to foster collaboration, innovation, and informed decision-making to support sustainable and efficient energy solutions worldwide.
 
 Details on the model are available in the following academic publications:
 
