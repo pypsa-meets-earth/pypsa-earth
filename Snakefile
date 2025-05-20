@@ -20,7 +20,10 @@ from _helpers import (
     BASE_DIR,
 )
 from build_demand_profiles import get_load_paths_gegis
-from retrieve_databundle_light import datafiles_retrivedatabundle
+from retrieve_databundle_light import (
+    datafiles_retrivedatabundle,
+    get_best_bundles_in_snakemake,
+)
 from pathlib import Path
 
 
@@ -74,7 +77,7 @@ wildcard_constraints:
     sopts="[-+a-zA-Z0-9\.\s]*",
     discountrate="[-+a-zA-Z0-9\.\s]*",
     demand="[-+a-zA-Z0-9\.\s]*",
-    h2export="[0-9]+m?|all",
+    h2export="[0-9]+(\.[0-9]+)?",
     planning_horizons="20[2-9][0-9]|2100",
 
 
@@ -139,13 +142,16 @@ rule plot_all_summaries:
 
 if config["enable"].get("retrieve_databundle", True):
 
+    bundles_to_download = get_best_bundles_in_snakemake(config)
+
     rule retrieve_databundle_light:
         params:
-            countries=config["countries"],
-            tutorial=config["tutorial"],
+            bundles_to_download=bundles_to_download,
             hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
-            expand("{file}", file=datafiles_retrivedatabundle(config)),
+            expand(
+                "{file}", file=datafiles_retrivedatabundle(config, bundles_to_download)
+            ),
             directory("data/landcover"),
         log:
             "logs/" + RDIR + "retrieve_databundle.log",
@@ -331,7 +337,7 @@ def terminate_if_cutout_exists(config=config):
             raise Exception(
                 "An option `build_cutout` is enabled, while a cutout file '"
                 + cutout_fl
-                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` rule in the config file."
+                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` and `retrieve_cutout` rule in the config file."
             )
 
 
@@ -1068,6 +1074,15 @@ rule prepare_sector_network:
     params:
         costs=config["costs"],
         electricity=config["electricity"],
+        fossil_reserves=config["fossil_reserves"],
+        h2_underground=config["custom_data"]["h2_underground"],
+        countries=config["countries"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        h2_policy=config["policy_config"]["hydrogen"],
+        sector_options=config["sector"],
+        foresight=config["foresight"],
+        water_costs=config["custom_data"]["water_costs"],
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
@@ -1981,14 +1996,13 @@ if config["foresight"] == "myopic":
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
             busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
-            busmap=pypsaearth(
-                "resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv"
-            ),
+            busmap="resources/"
+            + RDIR
+            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
             clustered_pop_layout="resources/"
             + SECDIR
             + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-            costs=CDIR
-            + "costs_{}.csv".format(config["scenario"]["planning_horizons"][0]),
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             cop_soil_total="resources/"
             + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -2058,7 +2072,7 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
-            costs=CDIR + "costs_{planning_horizons}.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             cop_soil_total="resources/"
             + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -2092,11 +2106,12 @@ if config["foresight"] == "myopic":
             co2_sequestration_potential=config["scenario"].get(
                 "co2_sequestration_potential", 200
             ),
+            augmented_line_connection=config["augmented_line_connection"],
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            costs=CDIR + "costs_{planning_horizons}.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
         output:
             network=RESDIR
@@ -2123,7 +2138,7 @@ if config["foresight"] == "myopic":
         script:
             "./scripts/solve_network.py"
 
-    rule solve_all_networks_myopic:
+    rule solve_sector_networks_myopic:
         input:
             networks=expand(
                 RESDIR

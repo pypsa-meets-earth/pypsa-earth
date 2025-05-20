@@ -371,31 +371,31 @@ databundles:
       protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
     output: [data/landcover/world_protected_areas/*]
 
-  # Backup tutorial bundles with no gadm-like data; for reference:
-  # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1258
-  #
-  # # tutorial bundle specific for Nigeria and Benin only, without gadm-like data
-  # bundle_tutorial_NGBJ:
-  #   countries: [NG, BJ]
-  #   tutorial: true
-  #   category: data
-  #   destination: "data"
-  #   urls:
-  #     zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_NGBJ.zip?download=1
-  #     gdrive: https://drive.google.com/file/d/1Vb1ISjhy7iwTTZYeezGd6S4nLt-EDGme/view?usp=drive_link
-  #   output:
-  #   - data/gebco/GEBCO_2021_TID.nc
-  #   - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    # # Backup tutorial bundles with no gadm-like data; for reference:
+    # # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1258
 
-  # # tutorial bundle specific for Botswana only, without gadm-like data
-  # bundle_tutorial_BW:
-  #   countries: [BW]
-  #   tutorial: true
-  #   category: data
-  #   destination: "data"
-  #   urls:
-  #     zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_BW.zip?download=1
-  #     gdrive: https://drive.google.com/file/d/19IXvTD8gVSzgTInL85ta7QjaNI8ZPCCY/view?usp=drive_link
-  #   output:
-  #   - data/gebco/GEBCO_2021_TID.nc
-  #   - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    # # tutorial bundle specific for Nigeria and Benin only, without gadm-like data
+    # bundle_tutorial_NGBJ:
+    #   countries: [NG, BJ]
+    #   tutorial: true
+    #   category: data
+    #   destination: "data"
+    #   urls:
+    #     zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_NGBJ.zip?download=1
+    #     gdrive: https://drive.google.com/file/d/1Vb1ISjhy7iwTTZYeezGd6S4nLt-EDGme/view?usp=drive_link
+    #   output:
+    #   - data/gebco/GEBCO_2021_TID.nc
+    #   - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+
+    # # tutorial bundle specific for Botswana only, without gadm-like data
+    # bundle_tutorial_BW:
+    #   countries: [BW]
+    #   tutorial: true
+    #   category: data
+    #   destination: "data"
+    #   urls:
+    #     zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_BW.zip?download=1
+    #     gdrive: https://drive.google.com/file/d/19IXvTD8gVSzgTInL85ta7QjaNI8ZPCCY/view?usp=drive_link
+    #   output:
+    #   - data/gebco/GEBCO_2021_TID.nc
+    #   - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
