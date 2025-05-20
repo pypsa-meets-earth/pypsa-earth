@@ -23,17 +23,17 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
     model_country_list = list(snakemake.params.countries)
-    future_year = snakemake.params.costs["year"]
+    costs_year = snakemake.params.costs["year"]
     url_technology_data = snakemake.params.costs["technology_data_url"]
     version_technology_data = snakemake.params.costs["version"]
     base_url_to_use = "/".join(
         (url_technology_data, version_technology_data, "outputs")
     )
     base_output_path = pathlib.Path(BASE_DIR, snakemake.output.output_path)
-    cost_file_name = f"costs_{future_year}.csv"
+    cost_file_name = f"costs_{costs_year}.csv"
     base_output_path.mkdir(parents=True, exist_ok=True)
 
-    if len(model_country_list) == 1 and "US" in model_country_list:
+    if len(model_country_list) == 1 and "US" in model_country_list and snakemake.params.costs["technology_data_US"]:
         # take technology-data/outputs/US/costs_yyyy.csv
         output_path = pathlib.Path(base_output_path, cost_file_name)
         url_to_use = "/".join((base_url_to_use, "US", cost_file_name))
