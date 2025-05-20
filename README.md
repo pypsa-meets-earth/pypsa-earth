@@ -53,7 +53,9 @@ Details on the model are available in the following academic publications:
 
 The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
 
-![alt text](https://ars.els-cdn.com/content/image/1-s2.0-S0306261925000467-gr5_lrg.jpg)
+<p align="center">
+  <img src="https://ars.els-cdn.com/content/image/1-s2.0-S0306261925000467-gr5_lrg.jpg" width=75%>
+</p>
 
 ## Livetracker. Most popular global models:
 
