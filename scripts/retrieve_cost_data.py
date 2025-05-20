@@ -25,7 +25,7 @@ if __name__ == "__main__":
     model_country_list = list(snakemake.params.countries)
     costs_year = snakemake.params.costs["year"]
     url_technology_data = snakemake.params.costs["technology_data_url"]
-    version_technology_data = snakemake.params.costs["version"]
+    version_technology_data = snakemake.params.costs["technology_data_version"]
     base_url_to_use = "/".join(
         (url_technology_data, version_technology_data, "outputs")
     )
