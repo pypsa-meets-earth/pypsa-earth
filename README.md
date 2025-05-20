@@ -48,7 +48,7 @@ Details on the model are available in the following academic publications:
   <img src="https://forum.openmod.org/uploads/db8804/original/1X/6af089c376b19b72ad148e4e4326c162b94db68f.png" width=34.5%>
 </p>
 
-<p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a>https://zenodo.org/records/10080766</a></p>
+<p align="center"><b> Figure:</b> Example power systems build with PyPSA-Earth. See images of ~193 more countries at <a href="https://zenodo.org/records/10080766">Zenodo</a></p>
 
 
 The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
