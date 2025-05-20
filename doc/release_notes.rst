@@ -35,7 +35,6 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
-
 **Minor Changes and bug-fixing**
 
 * Redefine h2export wildcard_constraint to allow digits + optional dot followed by more digites (decimals). `PR #1434 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1434>`__
