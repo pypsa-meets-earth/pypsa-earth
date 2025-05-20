@@ -2948,7 +2948,7 @@ if __name__ == "__main__":
     existing_nodes = [node for node in nodes if node in n.loads.index]
     if len(existing_nodes) < len(nodes):
         print(
-            "fWarning: For {len(nodes) - len(valid_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
+            "fWarning: For {len(nodes) - len(existing_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
         )
     n.loads.loc[existing_nodes, "carrier"] = "AC"
 
