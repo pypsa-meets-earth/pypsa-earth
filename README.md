@@ -51,7 +51,7 @@ For more details, the model is described in the Applied Energy article "PyPSA-Ea
 
 The diagram below depicts one representative clustered node for the sector-coupled model with its generation, storage and conversion technologies.
 
-![alt text](doc/SCPE_v0.2.png)
+![alt text](https://ars.els-cdn.com/content/image/1-s2.0-S0306261925000467-gr5_lrg.jpg)
 
 ## Livetracker. Most popular global models:
 
