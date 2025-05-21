@@ -936,10 +936,11 @@ if not snakemake.params.custom_gas_network:
         print("total_system_capacity = ", total_system_capacity)
 
     else:
-        print(
-            "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
-            + ", ".join(bus_regions_onshore.country.unique().tolist())
-        )
+        if hasattr(bus_regions_onshore, "country"):
+            print(
+                "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
+                + ", ".join(bus_regions_onshore.country.unique().tolist())
+            )
 
         # Create an empty DataFrame with the specified column names
         pipelines = {"bus0": [], "bus1": [], "capacity": [], "length": [], "GWKm": []}
