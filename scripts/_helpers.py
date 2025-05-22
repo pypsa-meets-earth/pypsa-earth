@@ -959,9 +959,8 @@ def annuity(n, r):
 
 
 def get_yearly_currency_exchange_average(
-    initial_currency: str, output_currency: str, year: int
+    initial_currency: str, output_currency: str, year: int, default_exchange_rate: float = None,
 ):
-
     if calendar.isleap(year):
         days_per_year = 366
     else:
@@ -970,20 +969,28 @@ def get_yearly_currency_exchange_average(
     initial_date = datetime(year, 1, 1)
     for day_index in range(days_per_year):
         date_to_use = initial_date + timedelta(days=day_index)
-        currency_exchange_rate += currency_converter.convert(
-            1, initial_currency, output_currency, date_to_use
-        )
+        try:
+            rate = currency_converter.convert(
+                1, initial_currency, output_currency, date_to_use
+            )
+        except Exception:
+            if default_exchange_rate is not None:
+                rate = default_exchange_rate
+            else:
+                raise #fails if no default value is found
+        currency_exchange_rate += rate
+
     currency_exchange_rate /= days_per_year
     return currency_exchange_rate
 
-
-def convert_currency_and_unit(cost_dataframe, output_currency: str):
+def convert_currency_and_unit(cost_dataframe, output_currency: str, default_exchange_rate: float = None):
     currency_list = currency_converter.currencies
     cost_dataframe["value"] = cost_dataframe.apply(
         lambda x: (
             x["value"]
             * get_yearly_currency_exchange_average(
-                x["unit"][0:3], output_currency, int(x["currency_year"])
+                x["unit"][0:3], output_currency, int(x["currency_year"]),
+                default_exchange_rate
             )
             if x["unit"][0:3] in currency_list
             else x["value"]
@@ -1002,7 +1009,7 @@ def convert_currency_and_unit(cost_dataframe, output_currency: str):
 
 
 def prepare_costs(
-    cost_file: str, output_currency: str, fill_values: dict, Nyears: float | int = 1
+    cost_file: str, output_currency: str, fill_values: dict, Nyears: float | int = 1, default_exchange_rate: float = None,
 ):
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
@@ -1010,7 +1017,7 @@ def prepare_costs(
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
 
-    modified_costs = convert_currency_and_unit(costs, output_currency)
+    modified_costs = convert_currency_and_unit(costs, output_currency, default_exchange_rate)
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
     modified_costs = (
