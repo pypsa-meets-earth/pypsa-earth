@@ -93,6 +93,7 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
 from powerplantmatching.export import map_country_bus
+from tqdm import tqdm
 
 idx = pd.IndexSlice
 
@@ -142,6 +143,14 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
     costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
+
+    # Specific filtering for the US
+    # To-do: Improved handling if a list of countries including US is used
+    # if 'US' in snakemake.params.countries:
+    scenario = config["scenario"]
+    market = config["financial_case"]
+    costs = costs[costs.scenario.isin([scenario, np.nan])]
+    costs = costs[costs.financial_case.isin([market, np.nan])]
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
@@ -801,6 +810,55 @@ def estimate_renewable_capacities_irena(
             ] * float(p_nom_max)
 
 
+def attach_enhanced_geothermal(n):
+
+    egs_potential = pd.read_csv(snakemake.input["egs_potentials"], index_col=[0, 1])
+    assert egs_potential.index.names == ["network_region", "capital_cost[$/kW]"]
+
+    idx = pd.IndexSlice
+
+    n.add(
+        "Bus",
+        "EGS",
+        carrier="geothermal heat",
+        unit="MWh_th",
+    )
+
+    n.add(
+        "Generator",
+        "EGS",
+        bus="EGS",
+        carrier="geothermal heat",
+        p_nom_extendable=True,
+    )
+
+    for bus in tqdm(
+        egs_potential.index.get_level_values(0).unique(),
+        desc="Adding enhanced geothermal",
+    ):
+
+        ss = egs_potential.loc[idx[bus, :]]
+
+        # Loop over supply‐curve point (i.e. each potential) for this region
+        for i, (capital_cost, row) in enumerate(ss.iterrows()):
+            capacity = row["available_capacity[MW]"]
+            # Convert the cost index from $/kW to $/MW and annuitize the capex
+            capital_cost = float(capital_cost) * 1000  # $/kW -> $/MW
+
+            identifier = f"{bus}_curve{i}"
+
+            n.add(
+                "Link",
+                name=f"EGS electricity {identifier}",
+                bus0="EGS",
+                bus1=bus,
+                carrier="enhanced geothermal ORC",
+                p_nom_max=capacity,
+                capital_cost=capital_cost,
+                p_nom_extendable=True,
+            )
+
+
 def add_nice_carrier_names(n, config):
     carrier_i = n.carriers.index
     nice_names = (
@@ -883,6 +941,9 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(n, costs, ppl)
+
+    if snakemake.params.renewable["enhanced_geothermal"]["enable"]:
+        attach_enhanced_geothermal(n)
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
