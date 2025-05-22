@@ -1,3 +1,4 @@
 country,oil residential heat share,biomass residential heat share,biomass to elec heat share,oil to elec heat share,biomass to elec share,oil to elec share,space to water heat share,gas to elec share,gas to elec heat share,gas residential heat share
-DEFAULT, 0.6667, 0.75,0.0, 0.5, 0.0, 0.5,0.6,0,0,0.75
-MA, 0.6667, 0.75,0.0, 0.5, 0.0, 0.5,0.6,0,0,0.75
+DEFAULT,0.6667,0.75,0,0.5,0,0.5,0.6,0,0,0.75
+MA,0.6667,0.75,0,0.5,0,0.5,0.6,0,0,0.75
+US,0.88,1,0,0,0,0,0,0,0,0.72
