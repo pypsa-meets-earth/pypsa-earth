@@ -2611,11 +2611,14 @@ def add_residential(n, costs):
             n.loads_t.p_set.filter(like=country)[heat_buses],
             n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
         )
-        n.loads_t.p_set.loc[:, heat_buses] = np.where(
-            ~np.isnan(safe_division),
-            (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
-            0.0,
+        raw_heat = safe_division * (rem_heat_demand * 1e6)
+        raw_heat_df = pd.DataFrame(
+            raw_heat,
+            index=n.loads_t.p_set.index,
+            columns=heat_buses
         )
+        raw_heat_df = raw_heat_df.divide(temporal_resolution, axis=0).fillna(0.0)
+        n.loads_t.p_set.loc[:, heat_buses] = raw_heat_df
 
     # Revise residential electricity demand
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
