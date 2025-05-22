@@ -1029,6 +1029,11 @@ def prepare_costs(
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
 
+    if default_exchange_rate is not None:
+        logger.warning(
+            f"Using default exchange rate {default_exchange_rate} instead of actual rates for currency conversion to {output_currency}."
+        )
+
     modified_costs = convert_currency_and_unit(
         costs, output_currency, default_exchange_rate
     )
