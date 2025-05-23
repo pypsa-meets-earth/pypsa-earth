@@ -36,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
+
 * Redefine h2export wildcard_constraint to allow digits + optional dot followed by more digites (decimals). `PR #1434 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1434>`__
 
 * Update the AL_production.csv data from another source with more countries. `PR #1428 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1428>`__
