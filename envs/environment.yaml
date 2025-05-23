@@ -13,13 +13,12 @@ dependencies:
 - mamba   # esp for windows build
 
 - pypsa>=0.25
-# - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
+- atlite>=0.4.1
 - dask
 # currently the packages are being installed with pip
 # need to move back to conda once the issues will be resolved
 - powerplantmatching>=0.5.19
 - earth-osm>=2.3.post1
-- atlite>=0.3
 
 # Dependencies of the workflow itself
 - xlrd

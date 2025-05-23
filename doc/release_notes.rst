@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
+
 * Add a command-line interface in ``databundle_cli.py`` that will be triggered if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, providing a fallback to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
 
 * Add Wikipedia as a source for the preparation of transport_data.csv  `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
@@ -34,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
 **Minor Changes and bug-fixing**
+
+* Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
 
 * Modified how_to_contribute documentation page. `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
 
