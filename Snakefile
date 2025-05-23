@@ -3,11 +3,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import sys
+import os
+import pathlib
 
 sys.path.append("./scripts")
 
-from os.path import normpath, exists, isdir
-from shutil import copyfile, move
+from shutil import copyfile
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -397,14 +398,18 @@ if not config["enable"].get("build_natura_raster", False):
             shutil.copyfile(input[0], output[0])
 
 
-if config["enable"].get("retrieve_cost_data", True):
+    if config["countries"] == ["US"] and config["costs"]["technology_data_US"]:
+        cost_directory = "US"
+    else:
+        cost_directory = ""
+
 
     rule retrieve_cost_data:
         params:
-            version=config["costs"]["version"],
+            version=config["costs"]["technology_data_version"],
         input:
             HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}/"
                 + "costs_{year}.csv",
                 keep_local=True,
             ),
@@ -830,7 +835,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
-            solver=normpath(
+            solver=os.path.normpath(
                 "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
@@ -901,7 +906,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             + RDIR
             + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
         log:
-            solver=normpath(
+            solver=os.path.normpath(
                 "logs/"
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
