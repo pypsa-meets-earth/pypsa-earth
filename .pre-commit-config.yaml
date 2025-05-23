@@ -78,7 +78,7 @@ repos:
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.37.0
+  rev: v1.37.1
   hooks:
   - id: yamllint
     exclude: pinned\.yaml$
