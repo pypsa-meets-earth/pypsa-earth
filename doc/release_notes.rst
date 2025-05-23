@@ -12,6 +12,7 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
 
 * Add a command-line interface in ``databundle_cli.py`` that will be triggered if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, providing a fallback to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
 
