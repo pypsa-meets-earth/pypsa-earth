@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CACHE_NUMBER: 1  # Change this value to manually reset the environment cache
+  CACHE_NUMBER: 0  # Change this value to manually reset the environment cache
 
 jobs:
   run-tests:
