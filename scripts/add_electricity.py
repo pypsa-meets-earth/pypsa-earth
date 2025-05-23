@@ -151,21 +151,21 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # apply filter on financial_case and scenario, if they are contained in the cost dataframe
     wished_cost_scenario = config["costs"]["cost_scenario"]
     wished_financial_case = config["costs"]["financial_case"]
-    if "scenario" in costs.columns and "financial_case" in costs.columns:
-        # both financial_case and scenario are NOT NULL
-        query_string_part_one = (
-            "financial_case.str.casefold() == @f & scenario.str.casefold() == @s"
-        )
+    for col in ["scenario", "financial_case"]:
+        if col in costs.columns:
+            costs[col] = costs[col].replace("", pd.NA)
 
-        # both financial case and scenario are NULL
-        query_string_part_two = "financial_case.isnull() | scenario.isnull()"
+    if "scenario" in costs.columns:
+        costs = costs[
+            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold()) |
+            (costs["scenario"].isnull())
+            ]
 
-        query_string = " | ".join([query_string_part_one, query_string_part_two])
-
-        costs = costs.query(
-            query_string,
-            local_dict={"f": wished_financial_case, "s": wished_cost_scenario},
-        )
+    if "financial_case" in costs.columns:
+        costs = costs[
+            (costs["financial_case"].str.casefold() == wished_financial_case.casefold()) |
+            (costs["financial_case"].isnull())
+            ]
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
         overwrites = config.get(attr)

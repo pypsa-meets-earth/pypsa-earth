@@ -398,21 +398,29 @@ if not config["enable"].get("build_natura_raster", False):
             shutil.copyfile(input[0], output[0])
 
 
-if config["enable"].get("retrieve_cost_data", True):
+    if config["countries"] == ["US"] and config["costs"]["technology_data_US"]:
+        cost_directory = "US"
+    else:
+        cost_directory = ""
+
 
     rule retrieve_cost_data:
         params:
-            countries=config["countries"],
-            costs=config["costs"],
+            version=config["costs"]["technology_data_version"],
+        input:
+            HTTP.remote(
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}/"
+                + "costs_{year}.csv",
+                keep_local=True,
+            ),
         output:
-            output_path=directory(pathlib.Path("resources", RDIR)),
+            "resources/" + RDIR + "costs_{year}.csv",
         log:
-            "logs/" + RDIR + "retrieve_cost_data.log",
-        threads: 1
+            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:
             mem_mb=5000,
-        script:
-            "scripts/retrieve_cost_data.py"
+        run:
+            move(input[0], output[0])
 
 
 rule build_demand_profiles:
