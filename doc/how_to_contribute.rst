@@ -95,7 +95,8 @@ The images for documentation should be placed into `documentation <https://githu
 
 Please, if you have problems with the documentation create an issue and let us know
 
-
+How to build it locally
+------------------------
 To create the documentation locally, you need `Sphinx <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ . It can be installed using specifications
 from `doc/requirements.txt`. First, we recommend creating a fresh conda environment and activate it:
 
