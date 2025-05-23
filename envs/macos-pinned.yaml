@@ -61,15 +61,15 @@ dependencies:
   - cached-property=1.5.2
   - cached_property=1.5.2
   - cairo=1.18.4
-  - capnproto=1.0.2
-  - cartopy=0.23.0
+  - cartopy=0.24.0
   - cdsapi=0.7.6
   - certifi=2025.4.26
   - cffi=1.17.1
   - cfgv=3.3.1
   - cftime=1.6.4
+  - chaospy=4.3.19
   - charset-normalizer=3.4.2
-  - click=8.2.0
+  - click=8.2.1
   - click-plugins=1.1.1
   - cligj=0.7.2
   - cloudpickle=3.1.1
@@ -92,8 +92,8 @@ dependencies:
   - cpython=3.11.12
   - cycler=0.12.1
   - cytoolz=1.0.1
-  - dask=2025.5.0
-  - dask-core=2025.5.0
+  - dask=2025.5.1
+  - dask-core=2025.5.1
   - datashader=0.18.1
   - datrie=0.8.2
   - debugpy=1.8.14
@@ -102,7 +102,7 @@ dependencies:
   - deprecation=2.1.0
   - descartes=1.1.0
   - distlib=0.3.9
-  - distributed=2025.5.0
+  - distributed=2025.5.1
   - docutils=0.21.2
   - dpath=2.2.0
   - earth-osm=2.3.post1
@@ -129,7 +129,7 @@ dependencies:
   - freetype=2.13.3
   - freexl=2.0.0
   - fribidi=1.0.10
-  - fsspec=2025.3.2
+  - fsspec=2025.5.0
   - future=1.0.0
   - gdk-pixbuf=2.42.12
   - geographiclib=2.0
@@ -144,7 +144,7 @@ dependencies:
   - giflib=5.2.2
   - gitdb=4.0.12
   - gitpython=3.1.44
-  - glib-tools=2.84.1
+  - glib-tools=2.84.2
   - glog=0.7.1
   - glpk=5.0
   - gmp=6.3.0
@@ -155,7 +155,7 @@ dependencies:
   - gurobi=12.0.2
   - h11=0.16.0
   - h2=4.2.0
-  - harfbuzz=11.1.0
+  - harfbuzz=11.2.1
   - hdf4=4.2.15
   - hdf5=1.14.6
   - hicolor-icon-theme=0.17
@@ -170,8 +170,8 @@ dependencies:
   - icu=75.1
   - identify=2.6.10
   - idna=3.10
-  - importlib-metadata=8.6.1
-  - importlib_metadata=8.6.1
+  - importlib-metadata=8.7.0
+  - importlib_metadata=8.7.0
   - importlib_resources=6.5.2
   - inflate64=1.0.1
   - iniconfig=2.0.0
@@ -182,7 +182,7 @@ dependencies:
   - isoduration=20.11.0
   - jedi=0.19.2
   - jinja2=3.1.6
-  - joblib=1.5.0
+  - joblib=1.5.1
   - json-c=0.18
   - json5=0.12.0
   - jsonpointer=3.0.0
@@ -217,7 +217,7 @@ dependencies:
   - libcrc32c=1.1.2
   - libcurl=8.13.0
   - libcxx=20.1.5
-  - libdeflate=1.23
+  - libdeflate=1.24
   - libedit=3.1.20250104
   - libev=4.33
   - libevent=2.1.12
@@ -229,7 +229,7 @@ dependencies:
   - libgdal-core=3.10.3
   - libgfortran=5.0.0
   - libgfortran5=14.2.0
-  - libglib=2.84.1
+  - libglib=2.84.2
   - libgoogle-cloud=2.36.0
   - libgoogle-cloud-storage=2.36.0
   - libgrpc=1.71.0
@@ -249,7 +249,6 @@ dependencies:
   - libopentelemetry-cpp-headers=1.20.0
   - libparquet=20.0.0
   - libpng=1.6.47
-  - libpq=17.5
   - libprotobuf=5.29.3
   - libre2-11=2024.07.02
   - librsvg=2.58.4
@@ -270,7 +269,7 @@ dependencies:
   - libzip=1.11.2
   - libzlib=1.3.1
   - linkify-it-py=2.0.3
-  - linopy=0.3.11
+  - linopy=0.5.5
   - llvm-openmp=20.1.5
   - llvmlite=0.44.0
   - locket=1.0.0
@@ -283,8 +282,8 @@ dependencies:
   - markdown=3.8
   - markdown-it-py=3.0.0
   - markupsafe=3.0.2
-  - matplotlib=3.10.1
-  - matplotlib-base=3.10.1
+  - matplotlib=3.10.3
+  - matplotlib-base=3.10.3
   - matplotlib-inline=0.1.7
   - mdit-py-plugins=0.4.2
   - mdurl=0.1.2
@@ -312,8 +311,6 @@ dependencies:
   - nlohmann_json=3.11.3
   - nodeenv=1.9.1
   - notebook-shim=0.2.4
-  - nspr=4.36
-  - nss=3.111
   - numba=0.61.2
   - numexpr=2.10.2
   - numpoly=1.2.14
@@ -343,11 +340,8 @@ dependencies:
   - platformdirs=4.3.8
   - pluggy=1.6.0
   - ply=3.11
-  - polars=1.29.0
-  - polars-default=1.29.0
-  - poppler=24.12.0
-  - poppler-data=0.4.12
-  - postgresql=17.5
+  - polars=1.30.0
+  - polars-default=1.30.0
   - powerplantmatching=0.7.1
   - pre-commit=4.2.0
   - progressbar2=4.5.0
@@ -374,13 +368,13 @@ dependencies:
   - pygments=2.19.1
   - pyobjc-core=11.0
   - pyobjc-framework-cocoa=11.0
-  - pyogrio=0.10.0
+  - pyogrio=0.11.0
   - pyomo=6.9.2
   - pyparsing=3.2.3
   - pyppmd=1.1.0
   - pyproj=3.7.1
   - pypsa=0.30.0
-  - pyscipopt=5.4.1
+  - pyscipopt=5.5.0
   - pyshp=2.3.1
   - pysocks=1.7.1
   - pytables=3.10.2
@@ -397,7 +391,7 @@ dependencies:
   - pyviz_comms=3.0.4
   - pyyaml=6.0.2
   - pyzmq=26.4.0
-  - pyzstd=0.16.2
+  - pyzstd=0.17.0
   - qhull=2020.2
   - rasterio=1.4.3
   - re2=2024.07.02
@@ -412,7 +406,7 @@ dependencies:
   - rfc3986-validator=0.1.1
   - rich=14.0.0
   - rioxarray=0.19.0
-  - rpds-py=0.24.0
+  - rpds-py=0.25.1
   - ruamel.yaml=0.17.26
   - ruamel.yaml.clib=0.2.8
   - scikit-learn=1.6.1
@@ -421,7 +415,7 @@ dependencies:
   - seaborn=0.13.2
   - seaborn-base=0.13.2
   - send2trash=1.8.3
-  - setuptools=80.1.0
+  - setuptools=80.8.0
   - shapely=2.1.1
   - simdjson=3.12.3
   - six=1.17.0
@@ -433,7 +427,6 @@ dependencies:
   - snuggs=1.4.7
   - sortedcontainers=2.4.0
   - soupsieve=2.7
-  - spdlog=1.15.3
   - sqlite=3.49.2
   - stack_data=0.6.3
   - statsmodels=0.14.4
@@ -450,7 +443,7 @@ dependencies:
   - tomli=2.2.1
   - toolz=1.0.0
   - toposort=1.10
-  - tornado=6.5
+  - tornado=6.5.1
   - tqdm=4.67.1
   - traitlets=5.14.3
   - tsam=2.3.6
