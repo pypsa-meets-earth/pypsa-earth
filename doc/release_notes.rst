@@ -35,6 +35,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Modified how_to_contribute documentation page. `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
+ 
 * Update the AL_production.csv data from another source with more countries. `PR #1428 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1428>`__
 
 * Fix params for prepare_sector_network script. `PR #1427 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1427>`__
