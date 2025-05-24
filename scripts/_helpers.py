@@ -228,6 +228,7 @@ def load_network(import_name=None, custom_components=None):
     pypsa.Network
     """
     import pypsa
+
     try:
         from pypsa.descriptors import Dict
     except:
@@ -554,6 +555,7 @@ def mock_snakemake(
     import os
 
     import snakemake as sm
+
     try:
         from pypsa.descriptors import Dict
     except:
