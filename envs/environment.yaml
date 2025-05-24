@@ -10,14 +10,11 @@ channels:
 dependencies:
 - python>=3.8, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 - pip
-- mamba   # esp for windows build
 
 - pypsa>=0.25, <=0.30.3
 - atlite>=0.4.1
 - dask
-# currently the packages are being installed with pip
-# need to move back to conda once the issues will be resolved
-- powerplantmatching>=0.5.19
+- powerplantmatching>=0.5.19  # due to this https://github.com/PyPSA/powerplantmatching/pull/202
 - earth-osm>=2.3.post1
 
 # Dependencies of the workflow itself
@@ -50,11 +47,17 @@ dependencies:
 - tsam>=1.1.0
 - fake-useragent
 - chaospy
+- geopy
+- tqdm
+- pytz
+- country_converter
 
-# Keep in conda environment when calling ipython
-- ipython
+# Cloud download
+# - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
+
 # Jupyter notebook requirement
 - ipykernel
+- ipython
 - jupyterlab
 
 # GIS dependencies:
@@ -68,15 +71,6 @@ dependencies:
 - graphviz
 - contextily
 - graphviz
-
-# PyPSA-Eur-Sec Dependencies
-- geopy
-- tqdm
-- pytz
-- country_converter
-
-# Cloud download
-# - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged: PR installed using pip
 
 # Default solver for tests (required for CI)
 - glpk
