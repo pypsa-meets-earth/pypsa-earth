@@ -27,7 +27,7 @@ tables
 descartes
 
 rioxarray
-google-drive-downloader>=1.1
+googledrivedownloader>=1.1
 
 gitpython
 
