@@ -223,6 +223,7 @@ if __name__ == "__main__":
 
     costs = prepare_costs(
         snakemake.input.costs,
+        snakemake.config["costs"],
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
