@@ -45,7 +45,7 @@ jobs:
       run: |
         git fetch origin main
         if git diff --name-only origin/main | grep -E '(${{env.BASE_ENV }}|.*lock.yaml)$'; then
-          if git diff --name-only origin/main | grep -E '*lock.yaml'; then
+          if git diff --name-only origin/main | grep -E '.*lock.yaml'; then
             echo "Lock files changed. Using lock files."
             echo "env_file=${{ matrix.env_file }}" >> $GITHUB_ENV
           else
