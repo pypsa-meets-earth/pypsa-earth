@@ -12,7 +12,7 @@ dependencies:
 - pip
 - mamba   # esp for windows build
 
-- pypsa>=0.25, <=0.30
+- pypsa>=0.25, <=0.30.3
 - atlite>=0.4.1
 - dask
 # currently the packages are being installed with pip
@@ -59,7 +59,6 @@ dependencies:
 
 # GIS dependencies:
 - cartopy
-- descartes
 - rasterio
 - rioxarray
 
@@ -77,7 +76,7 @@ dependencies:
 - country_converter
 
 # Cloud download
-# - googledrivedownloader  # Commented until https://github.com/ndrplz/google-drive-downloader/pull/28 is merged: PR installed using pip
+# - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged: PR installed using pip
 
 # Default solver for tests (required for CI)
 - glpk
