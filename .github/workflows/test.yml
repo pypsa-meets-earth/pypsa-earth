@@ -42,32 +42,25 @@ jobs:
     - uses: actions/checkout@v4
 
 
-    - name: Setup micromamba
-      uses: mamba-org/setup-micromamba@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
-        micromamba-version: '1.5.9-1'
-        environment-file: ${{ matrix.env_file }}
-        log-level: debug
-        init-shell: bash
-        cache-environment: true
-        cache-downloads: true
+        miniforge-version: latest
+        activate-environment: pypsa-earth
+        conda-remove-defaults: true
 
-
-    - name: Set cache dates
-      run: |
-        echo "WEEK=$(date +'%Y%U')" >> $GITHUB_ENV
-
-    - name: Cache data and cutouts folders
+    - name: Cache Conda env
       uses: actions/cache@v4
       with:
-        path: |
-          data
-          cutouts
-        key: data-cutouts-${{ env.WEEK }}-${{ env.CACHE_NUMBER }}
+        path: ${{ env.CONDA }}/envs
+        key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', matrix.env_file)) }}
+      id: cache-env
 
+    - name: Update environment
+      if: steps.cache-env.outputs.cache-hit != 'true'
+      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
 
-    - name: Micromamba list
-      run: micromamba list
+    - name: Conda list
+      run: conda list
 
     - name: Run Test
       run: make test
