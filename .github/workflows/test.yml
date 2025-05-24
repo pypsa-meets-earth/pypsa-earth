@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, macos] #, windows]
+        os: [ubuntu, macos, windows]
         include:
         - os: ubuntu
           env_file: envs/linux-64.lock.yaml

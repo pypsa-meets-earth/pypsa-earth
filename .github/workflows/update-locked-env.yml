@@ -96,5 +96,5 @@ jobs:
 
           These files were generated using conda-lock for improved dependency resolution and reproducibility.
 
-          **Note: Do not merge without manual test execution. Either update the branch to trigger tests, or use `workflow_dispatch` to run tests manually. Unlike standard PRs, tests will not run automatically.**
+          **Note: The CI does not test the locked files in PRs and commits where the base environment files.Check before merging this PR that the updated environment are tested either by local testing or by checking that the locked files are used in the CI. To do that, check the step `Use base env file if it was changed` and ensure locked files are being used.**
         commit-message: "Update locked environment files for all platforms"
