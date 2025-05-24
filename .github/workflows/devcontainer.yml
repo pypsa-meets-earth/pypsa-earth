@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-    - envs/linux-pinned.yaml
+    - envs/linux-64.lock.yaml
 
 env:
   IMAGE_NAME: pypsa-earth
