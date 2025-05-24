@@ -40,3 +40,4 @@ pyDOE2
 graphviz
 
 fake_useragent
+currencyconverter
