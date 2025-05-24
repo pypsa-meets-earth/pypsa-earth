@@ -12,7 +12,7 @@ dependencies:
 - pip
 - mamba   # esp for windows build
 
-- pypsa>=0.25, <=0.30.3
+- pypsa>=0.25, <=0.31
 - atlite>=0.4.1
 - dask
 # currently the packages are being installed with pip
