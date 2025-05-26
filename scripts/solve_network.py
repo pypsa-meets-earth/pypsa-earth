@@ -788,7 +788,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         columns=res_gen_index,
     )
 
-    res = linexpr((weightings_gen, get_var(n, "Generator", "p")[res_gen_index])).sum(
+    res = linexpr((weightings_gen, get_var(n, "Generator", "p")[res_gen_index])).sum( #TODO needs to be adapted to linopy
         axis=1
     )
 
@@ -799,7 +799,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
             columns=res_stor_index,
         )
         res += linexpr(
-            (weightings_stor, get_var(n, "StorageUnit", "p_dispatch")[res_stor_index])
+            (weightings_stor, get_var(n, "StorageUnit", "p_dispatch")[res_stor_index]) #TODO needs to be adapted to linopy
         ).sum(axis=1)
 
     if time_period == "month":
@@ -807,7 +807,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     elif time_period == "year":
         res = res.groupby(res.index.year).sum()
 
-    electrolysis = get_var(n, "Link", "p")[
+    electrolysis = get_var(n, "Link", "p")[ #TODO needs to be adapted to linopy
         n.links.index[n.links.index.str.contains("H2 Electrolysis")]
     ]
     weightings_electrolysis = pd.DataFrame(
@@ -818,7 +818,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         columns=electrolysis.columns,
     )
 
-    elec_input = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum(
+    elec_input = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum( #TODO needs to be adapted to linopy
         axis=1
     )
 
@@ -863,7 +863,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         for i in range(len(res.index)):
             lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
             rhs = res_ref.iloc[i].sum() + elec_input_ref.iloc[i].sum()
-            con = define_constraints(
+            con = define_constraints( #TODO needs to be adapted to linopy
                 n, lhs, ">=", rhs, f"RESconstraints_{i}", f"REStarget_{i}"
             )
 
@@ -871,7 +871,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         for i in range(len(res.index)):
             lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
 
-            con = define_constraints(
+            con = define_constraints( #TODO needs to be adapted to linopy
                 n, lhs, ">=", 0.0, f"RESconstraints_{i}", f"REStarget_{i}"
             )
     # else:
