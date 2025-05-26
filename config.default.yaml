@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.4.2
+version: 0.6.0
 tutorial: false
 
 logging:
@@ -11,7 +11,6 @@ logging:
 
 results_dir: results/
 summary_dir: results/
-costs_dir: data/ # TODO change to the equivalent of technology data
 
 foresight: overnight
 
@@ -46,11 +45,11 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [Co2L-3H]
+  opts: [Co2L-3h]
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   sopts:
-  - "144H"
+  - "144h"
   demand:
   - "AB"
 
@@ -82,10 +81,10 @@ cluster_options:
     feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
     exclude_carriers: []
     remove_stubs: true
-    remove_stubs_across_borders: true
+    remove_stubs_across_borders: false
     p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
     p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
-    s_threshold_fetch_isolated: 0.05 # [-] a share of the national load for merging an isolated network into a backbone network
+    s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -99,6 +98,7 @@ cluster_options:
       p_nom_max: sum
       p_nom_min: sum
       p_min_pu: mean
+      p_max_pu: weighted_average
       marginal_cost: mean
       committable: any
       ramp_limit_up: max
@@ -107,6 +107,7 @@ cluster_options:
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  simplify_gadm: true # When true, shape polygons are simplified else no
   update_file: false # When true, all the input files are downloaded again and replace the existing files
   out_logging: true # When true, logging is printed to console
   year: 2020 # reference year used to derive shapes, info on population and info on GDP
@@ -115,6 +116,10 @@ build_shape_options:
   # false (not "false") no pop addition to shape which is useful when generating only cutout
   gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
+
+subregion:
+  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
+  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
 
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
@@ -329,7 +334,7 @@ renewable:
     clip_min_inflow: 1.0
     extendable: true
     normalization:
-      method: hydro_capacities # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
+      method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
   csp:
@@ -354,9 +359,10 @@ renewable:
     csp_model: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa.
+# Costs Configuration
 costs:
   year: 2030
-  version: v0.6.2
+  version: v0.12.0
   discountrate: [0.071] #, 0.086, 0.111]
   # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
   USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
@@ -422,7 +428,7 @@ monte_carlo:
   uncertainties:
     loads_t.p_set:
       type: uniform
-      args: [0, 1]
+      args: [0.5, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
       type: lognormal
       args: [1.5]
@@ -481,6 +487,7 @@ custom_data:
   custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
   export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
+  airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.
 
 industry:
   reference_year: 2015
@@ -596,6 +603,16 @@ sector:
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
 
+  electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
+  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
+  transmission_efficiency:
+    electricity distribution grid:
+      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+    H2 pipeline:
+      efficiency_per_1000km: 1
+      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
+
   dynamic_transport:
     enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
     land_transport_electric_share:
@@ -650,7 +667,6 @@ sector:
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
-  hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
 
@@ -665,7 +681,6 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
@@ -686,11 +701,10 @@ sector:
     biomass: biomass
   keep_existing_capacities: true
 
-
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: true
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6

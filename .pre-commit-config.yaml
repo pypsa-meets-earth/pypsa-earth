@@ -21,14 +21,14 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 5.13.2
+  rev: 6.0.1
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.1
   hooks:
   - id: codespell
     args: ['--ignore-regex="(\b[A-Z]+\b)"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,fo,FO']
@@ -52,7 +52,7 @@ repos:
 
 # Formatting with "black" coding style
 - repo: https://github.com/psf/black
-  rev: 24.10.0
+  rev: 25.1.0
   hooks:
   # Format Python files
   - id: black
@@ -61,7 +61,7 @@ repos:
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.1
   hooks:
   - id: codespell
     args: ['--ignore-regex="\b[A-Z]+\b"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,vor'] # Ignore capital case words, e.g. country codes
@@ -73,18 +73,20 @@ repos:
   rev: v2.14.0
   hooks:
   - id: pretty-format-yaml
+    exclude: pinned\.yaml$
     args: [--autofix, --indent, '2', --preserve-quotes]
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.35.1
+  rev: v1.37.1
   hooks:
   - id: yamllint
+    exclude: pinned\.yaml$
     args: [--format, parsable, -c=.yamllint]
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.10.2
+  rev: v0.11.0
   hooks:
   - id: snakefmt
 

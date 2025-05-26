@@ -60,7 +60,8 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
             f"The current version of 'config.yaml' doesn't match to the code version:\n\r"
             f" {current_config_version} provided, {actual_config_version} expected.\n\r"
             f"That can lead to weird errors during execution of the workflow.\n\r"
-            f"Please update 'config.yaml' according to 'config.default.yaml' ."
+            f"Please update 'config.yaml' according to 'config.default.yaml.'\n\r"
+            "If issues persist, consider to update the environment to the latest version."
         )
 
 
@@ -921,6 +922,16 @@ def get_last_commit_message(path):
     return last_commit_message
 
 
+def update_config_dictionary(
+    config_dict,
+    parameter_key_to_fill="lines",
+    dict_to_use={"geometry": "first", "bounds": "first"},
+):
+    config_dict.setdefault(parameter_key_to_fill, {})
+    config_dict[parameter_key_to_fill].update(dict_to_use)
+    return config_dict
+
+
 # PYPSA-EARTH-SEC
 def annuity(n, r):
     """
@@ -1132,18 +1143,20 @@ def get_country(target, **keys):
     target: str
         Desired type of country code.
         Examples:
-            - 'alpha_3' for 3-digit
-            - 'alpha_2' for 2-digit
-            - 'name' for full country name
+        - 'alpha_3' for 3-digit
+        - 'alpha_2' for 2-digit
+        - 'name' for full country name
     keys: dict
         Specification of the country name and reference system.
         Examples:
-            - alpha_3="ZAF" for 3-digit
-            - alpha_2="ZA" for 2-digit
-            - name="South Africa" for full country name
+        - alpha_3="ZAF" for 3-digit
+        - alpha_2="ZA" for 2-digit
+        - name="South Africa" for full country name
+
     Returns
     -------
     country code as requested in keys or np.nan, when country code is not recognized
+
     Example of usage
     -------
     - Convert 2-digit code to 3-digit codes: get_country('alpha_3', alpha_2="ZA")
@@ -1214,11 +1227,8 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
+def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
     """
-    Function to retrieve a specific layer id of a geopackage for a selection of
-    countries.
-
     Parameters
     ----------
     country_list : str
@@ -1228,104 +1238,82 @@ def get_GADM_layer(country_list, layer_id, update=False, outlogging=False):
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
     """
-    # initialization of the list of geodataframes
-    geodf_list = []
+    from build_shapes import get_GADM_layer
 
-    for country_code in country_list:
-        # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
-
-        # get layers of a geopackage
-        list_layers = fiona.listlayers(file_gpkg)
-
-        # get layer name
-        if layer_id < 0 | layer_id >= len(list_layers):
-            # when layer id is negative or larger than the number of layers, select the last layer
-            layer_id = len(list_layers) - 1
-        code_layer = np.mod(layer_id, len(list_layers))
-        layer_name = (
-            f"gadm36_{two_2_three_digits_country(country_code).upper()}_{code_layer}"
-        )
-
-        # read gpkg file
-        geodf_temp = gpd.read_file(file_gpkg, layer=layer_name)
-
-        # convert country name representation of the main country (GID_0 column)
-        geodf_temp["GID_0"] = [
-            three_2_two_digits_country(twoD_c) for twoD_c in geodf_temp["GID_0"]
-        ]
-
-        # create a subindex column that is useful
-        # in the GADM processing of sub-national zones
-        geodf_temp["GADM_ID"] = geodf_temp[f"GID_{code_layer}"]
-
-        # concatenate geodataframes
-        geodf_list = pd.concat([geodf_list, geodf_temp])
-
-    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geodf_list[0].crs, inplace=True)
-
-    return geodf_GADM
-
-
-def locate_bus(
-    coords,
-    co,
-    gadm_level,
-    path_to_gadm=None,
-    gadm_clustering=False,
-    col="name",
-):
-    """
-    Function to locate the right node for a coordinate set input coords of
-    point.
-
-    Parameters
-    ----------
-    coords: pandas dataseries
-        dataseries with 2 rows x & y representing the longitude and latitude
-    co: string (code for country where coords are MA Morocco)
-        code of the countries where the coordinates are
-    """
     col = "name"
     if not gadm_clustering:
-        gdf = gpd.read_file(path_to_gadm)
+        gdf_shapes = gpd.read_file(path_to_gadm)
     else:
         if path_to_gadm:
-            gdf = gpd.read_file(path_to_gadm)
-            if "GADM_ID" in gdf.columns:
+            gdf_shapes = gpd.read_file(path_to_gadm)
+            if "GADM_ID" in gdf_shapes.columns:
                 col = "GADM_ID"
 
-                if gdf[col][0][
+                if gdf_shapes[col][0][
                     :3
                 ].isalpha():  # TODO clean later by changing all codes to 2 letters
-                    gdf[col] = gdf[col].apply(
+                    gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
         else:
-            gdf = get_GADM_layer(co, gadm_level)
-            col = "GID_{}".format(gadm_level)
+            gdf_shapes = get_GADM_layer(co, gadm_layer_id)
+            col = "GID_{}".format(gadm_layer_id)
+    gdf_shapes = gdf_shapes[gdf_shapes[col].str.contains(co)]
+    return gdf_shapes, col
 
-        # gdf.set_index("GADM_ID", inplace=True)
-    gdf_co = gdf[
-        gdf[col].str.contains(co)
-    ]  # geodataframe of entire continent - output of prev function {} are placeholders
-    # in strings - conditional formatting
-    # insert any variable into that place using .format - extract string and filter for those containing co (MA)
-    point = Point(coords["x"], coords["y"])  # point object
 
-    if gdf_co.empty:
-        return None
+def locate_bus(
+    df,
+    countries,
+    gadm_level,
+    path_to_gadm=None,
+    gadm_clustering=False,
+    dropnull=True,
+    col_out=None,
+):
+    """
+    Function to locate the points of the dataframe df into the GADM shapefile.
 
-    try:
-        return gdf_co[gdf_co.contains(point)][
-            col
-        ].item()  # filter gdf_co which contains point and returns the bus
+    Parameters
+    ----------
+    df: pd.Dataframe
+        Dataframe with mandatory x, y and country columns
+    countries: list
+        List of target countries
+    gadm_level: int
+        GADM level to be used
+    path_to_gadm: str (default None)
+        Path to the GADM shapefile
+    gadm_clustering: bool (default False)
+        True if gadm clustering is adopted
+    dropnull: bool (default True)
+        True if the rows with null values should be dropped
+    col_out: str (default gadm_{gadm_level})
+        Name of the output column
+    """
+    if col_out is None:
+        col_out = "gadm_{}".format(gadm_level)
+    df = df[df.country.isin(countries)]
+    df[col_out] = None
+    for co in countries:
+        gdf_shape, col = _get_shape_col_gdf(
+            path_to_gadm, co, gadm_level, gadm_clustering
+        )
+        sub_df = df.loc[df.country == co, ["x", "y", "country"]]
+        gdf = gpd.GeoDataFrame(
+            sub_df,
+            geometry=gpd.points_from_xy(sub_df.x, sub_df.y),
+            crs="EPSG:4326",
+        )
 
-    except ValueError:
-        return gdf_co[gdf_co.geometry == min(gdf_co.geometry, key=(point.distance))][
-            col
-        ].item()  # looks for closest one shape=node
+        gdf_merged = gpd.sjoin_nearest(gdf, gdf_shape, how="inner", rsuffix="right")
+
+        df.loc[gdf_merged.index, col_out] = gdf_merged[col]
+
+    if dropnull:
+        df = df[df[col_out].notnull()]
+
+    return df
 
 
 def get_conv_factors(sector):
@@ -1480,4 +1468,92 @@ def safe_divide(numerator, denominator, default_value=np.nan):
         logging.warning(
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
-        return np.nan
+        return pd.DataFrame(np.nan, index=numerator.index, columns=numerator.columns)
+
+
+def lossy_bidirectional_links(n, carrier):
+    """
+    Split bidirectional links of type carrier into two unidirectional links to include transmission losses.
+    """
+
+    # identify all links of type carrier
+    carrier_i = n.links.query("carrier == @carrier").index
+
+    if carrier_i.empty:
+        return
+
+    logger.info(f"Splitting bidirectional links with the carrier {carrier}")
+
+    # set original links to be unidirectional
+    n.links.loc[carrier_i, "p_min_pu"] = 0
+
+    # add a new links that mirror the original links, but represent the reversed flow direction
+    # the new links have a cost and length of 0 to not distort the overall cost and network length
+    rev_links = (
+        n.links.loc[carrier_i].copy().rename({"bus0": "bus1", "bus1": "bus0"}, axis=1)
+    )
+    rev_links["length_original"] = rev_links[
+        "length"
+    ]  # tracker for the length of the original links length
+    rev_links["capital_cost"] = 0
+    rev_links["length"] = 0
+    rev_links["reversed"] = True  # tracker for easy identification of reversed links
+    rev_links.index = rev_links.index.map(lambda x: x + "-reversed")
+
+    # add the new reversed links to the network and fill the newly created trackers with default values for the other links
+    n.links = pd.concat([n.links, rev_links], sort=False)
+    n.links["reversed"] = n.links["reversed"].fillna(False).infer_objects(copy=False)
+    n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
+
+
+def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency):
+    """
+    Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
+    Additionally add the length based electricity demand required for compression (if applicable).
+    The bus_suffix refers to the suffix that differentiates the links bus0 from the corresponding electricity bus, i.e. " H2".
+    Important:
+    Call this function AFTER lossy_bidirectional_links when creating links that are both bidirectional and lossy,
+    and have a length based electricity demand for compression. Otherwise the compression will not consistently take place at
+    the inflow bus and instead vary between the inflow and the outflow bus.
+    """
+
+    # get the links length based efficiency and required compression
+    if carrier not in transmission_efficiency:
+        raise KeyError(
+            f"An error occurred when setting the length based efficiency for the Links of type {carrier}."
+            f"The Link type {carrier} was not found in the config under config['sector']['transmission_efficiency']."
+        )
+    efficiencies = transmission_efficiency[carrier]
+    efficiency_static = efficiencies.get("efficiency_static", 1)
+    efficiency_per_1000km = efficiencies.get("efficiency_per_1000km", 1)
+    compression_per_1000km = efficiencies.get("compression_per_1000km", 0)
+
+    # indetify all links of type carrier
+    carrier_i = n.links.loc[n.links.carrier == carrier].index
+
+    # identify the lengths of all links of type carrier
+    # use "length_original" for lossy bidirectional links and "length" for any other link
+    if ("reversed" in n.links.columns) and any(n.links.loc[carrier_i, "reversed"]):
+        lengths = n.links.loc[carrier_i, "length_original"]
+    else:
+        lengths = n.links.loc[carrier_i, "length"]
+
+    # set the links' length based efficiency
+    n.links.loc[carrier_i, "efficiency"] = (
+        efficiency_static * efficiency_per_1000km ** (lengths / 1e3)
+    )
+
+    # set the links's electricity demand for compression
+    if compression_per_1000km > 0:
+        # connect the links to their corresponding electricity buses
+        n.links.loc[carrier_i, "bus2"] = n.links.loc[
+            carrier_i, "bus0"
+        ].str.removesuffix(bus_suffix)
+        # TODO: use these lines to set bus 2 instead, once n.buses.location is functional and remove bus_suffix.
+        """
+        n.links.loc[carrier_i, "bus2"] = n.links.loc[carrier_i, "bus0"].map(
+            n.buses.location
+        )  # electricity
+        """
+        # set the required compression demand
+        n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3

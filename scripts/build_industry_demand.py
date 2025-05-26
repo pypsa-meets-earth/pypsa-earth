@@ -35,7 +35,7 @@ def country_to_nodal(industrial_production, keys):
     for country, sector in product(countries, sectors):
         buses = keys.index[keys.country == country]
 
-        if sector not in dist_keys.columns or dist_keys[sector].sum() == 0:
+        if sector not in keys.columns or keys[sector].sum() == 0:
             mapping = "gdp"
         else:
             mapping = sector
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_industry_demand",
             simpl="",
-            clusters=10,
+            clusters="4",
             planning_horizons=2030,
             demand="AB",
         )
@@ -115,6 +115,8 @@ if __name__ == "__main__":
                     + country
                     + " using default data instead."
                 )
+            else:
+                cagr.loc[country] = cagr.loc[country].fillna(cagr.loc["DEFAULT"])
 
         cagr = cagr[cagr.index.isin(countries)]
 
@@ -226,7 +228,8 @@ if __name__ == "__main__":
         # Reindex and fill missing values with 0.0
         AL_prod_tom = AL_prod_tom.reindex(countries_geo, fill_value=0.0)
 
-        AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"]
+        # Estimate emissions for aluminum production and converting from ktons to tons
+        AL_emissions = AL_prod_tom * emission_factors["non-ferrous metals"] * 1000
 
         Steel_emissions = (
             geo_locs[geo_locs.industry == "iron and steel"]

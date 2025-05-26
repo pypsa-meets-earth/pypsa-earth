@@ -12,17 +12,15 @@ dependencies:
 - pip
 - mamba   # esp for windows build
 
-- pypsa>=0.24, <0.25
+- pypsa>=0.25
+- atlite>=0.4.1
 - dask
 # currently the packages are being installed with pip
 # need to move back to conda once the issues will be resolved
 - powerplantmatching>=0.5.19
-# - earth-osm>=2.1
-# until the release will incorporate all the fixes needed
-# to work with CDS beta
-- atlite>=0.3
+- earth-osm>=2.3.post1
 
-  # Dependencies of the workflow itself
+# Dependencies of the workflow itself
 - xlrd
 - openpyxl
 - seaborn
@@ -30,11 +28,14 @@ dependencies:
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
+- pyscipopt # added to compy with the quadratic objective requirement of the clustering script
 - lxml
 - numpy
+# starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
+- numpoly<=1.3.4
 - pandas
-- geopandas>=0.11.0, <=0.14.3
-- fiona<1.10.0
+- geopandas>=1
+- fiona>=1.10
 - xarray>=2023.11.0, <2023.12.0
 - netcdf4
 - networkx
@@ -42,50 +43,51 @@ dependencies:
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
-- pyomo
+- scip!=9.2.0  # dependency of pyscipopt, temporary fix
 - matplotlib<=3.5.2
 - reverse-geocode
 - country_converter
 - pyogrio
 - numba
 - py7zr
+- tsam>=1.1.0
 
-  # Keep in conda environment when calling ipython
+# Keep in conda environment when calling ipython
 - ipython
-  # Jupyter notebook requirement
+# Jupyter notebook requirement
 - ipykernel
 - jupyterlab
 
-  # GIS dependencies:
+# GIS dependencies:
 - cartopy
 - descartes
 - rasterio!=1.2.10, <=1.3.11
 - rioxarray
 
- # Plotting
+# Plotting
 - geoviews
 - hvplot
 - graphviz
 - contextily
 - graphviz
 
-  # PyPSA-Eur-Sec Dependencies
+# PyPSA-Eur-Sec Dependencies
 - geopy
 - tqdm
 - pytz
 - country_converter
 
-  # Cloud download
+# Cloud download
 # - googledrivedownloader  # Commented until https://github.com/ndrplz/google-drive-downloader/pull/28 is merged: PR installed using pip
 
 # Default solver for tests (required for CI)
 - glpk
-- ipopt
 - gurobi
 
+# Command Line Interface
+- rich
+
 - pip:
-  - earth-osm>=2.2 # until conda release it out for earth-osm
   - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
-  - tsam>=1.1.0
   - chaospy  # lastest version only available on pip
   - fake_useragent

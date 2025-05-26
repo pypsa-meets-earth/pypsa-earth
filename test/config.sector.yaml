@@ -2,26 +2,36 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: 0.4.1
+version: 0.6.0
 tutorial: true
 
+enable:
+  retrieve_databundle: true
+  retrieve_databundle_sector: true
+
 run:
-  name: test1
+  name: sector
   shared_cutouts: true
 
 scenario:
-  clusters: # number of nodes in Europe, any integer between 37 (1 node per country-zone) and several hundred
-  - 4
-  ll:
-  - "c1"
+  simpl: [""]
+  ll: ["copt"]
+  clusters: [4]
+  opts: [Co2L-24h]
+  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  - 2030
+  sopts:
+  - "144h"
+  demand:
+  - "AB"
 
 countries: ["NG", "BJ"]
 
 
 electricity:
   extendable_carriers:
-    Store: []
-    Link: []
+    Store: [H2]
+    Link: [H2 pipeline]
 
   co2limit: 7.75e7
 
@@ -43,7 +53,6 @@ existing_capacities:
 
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
-  gadm_level: 2
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
@@ -51,4 +60,4 @@ snapshots:
 
 solving:
   solver:
-    name: gurobi
+    name: glpk

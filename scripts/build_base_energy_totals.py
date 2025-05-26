@@ -357,7 +357,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_energy_totals",
             simpl="",
-            clusters=19,
+            clusters=4,
             demand="AB",
             planning_horizons=2030,
         )
@@ -452,7 +452,7 @@ if __name__ == "__main__":
 
     other_energy = [
         "consumption not elsewhere specified (other)",
-        "consumption not elsewhere specified (other)"
+        "consumption not elsewhere specified (other)",
         "Consumption not elsewhere specified (other)",
         "Consumption by other consumers not elsewhere specified",
         "consumption by other consumers not elsewhere specified",
