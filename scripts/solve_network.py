@@ -760,6 +760,123 @@ def monthly_constraints(n, n_ref):
     # else:
     #     logger.info("ignoring H2 export constraint as wildcard is set to 0")
 
+def hydrogen_temporal_constraint(n, n_ref, time_period):
+    res_techs = [
+        "csp",
+        "rooftop-solar",
+        "solar",
+        "onwind",
+        "onwind2",
+        "onwind3",
+        "offwind",
+        "offwind2",
+        "ror",
+    ]
+
+    res_stor_techs = ["hydro"]
+
+    allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
+
+    res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_stor_index = n.storage_units.loc[
+        n.storage_units.carrier.isin(res_stor_techs)
+    ].index
+
+    weightings_gen = pd.DataFrame(
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_gen_index)),
+        index=n.snapshots,
+        columns=res_gen_index,
+    )
+
+    res = linexpr((weightings_gen, get_var(n, "Generator", "p")[res_gen_index])).sum(
+        axis=1
+    )
+
+    if not res_stor_index.empty:
+        weightings_stor = pd.DataFrame(
+            np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_stor_index)),
+            index=n.snapshots,
+            columns=res_stor_index,
+        )
+        res += linexpr(
+            (weightings_stor, get_var(n, "StorageUnit", "p_dispatch")[res_stor_index])
+        ).sum(axis=1)
+
+    if time_period == "month":
+        res = res.groupby(res.index.month).sum()
+    elif time_period == "year":
+        res = res.groupby(res.index.year).sum()
+
+    electrolysis = get_var(n, "Link", "p")[
+        n.links.index[n.links.index.str.contains("H2 Electrolysis")]
+    ]
+    weightings_electrolysis = pd.DataFrame(
+        np.outer(
+            n.snapshot_weightings["generators"], [1.0] * len(electrolysis.columns)
+        ),
+        index=n.snapshots,
+        columns=electrolysis.columns,
+    )
+
+    elec_input = linexpr((-allowed_excess * weightings_electrolysis, electrolysis)).sum(
+        axis=1
+    )
+
+    if time_period == "month":
+        elec_input = elec_input.groupby(elec_input.index.month).sum()
+    elif time_period == "year":
+        elec_input = elec_input.groupby(elec_input.index.year).sum()
+
+    if snakemake.config["policy_config"]["hydrogen"]["additionality"]:
+        res_ref_gen = n_ref.generators_t.p[res_gen_index] * weightings_gen
+
+        if not res_stor_index.empty:
+            res_ref_store = (
+                n_ref.storage_units_t.p_dispatch[res_stor_index] * weightings_stor
+            )
+            res_ref = pd.concat([res_ref_gen, res_ref_store], axis=1)
+        else:
+            res_ref = res_ref_gen
+
+        if time_period == "month":
+            res_ref = (
+                res_ref.groupby(n_ref.generators_t.p.index.month).sum().sum(axis=1)
+            )
+        elif time_period == "year":
+            res_ref = res_ref.groupby(n_ref.generators_t.p.index.year).sum().sum(axis=1)
+
+        elec_input_ref = (
+            -n_ref.links_t.p0.loc[
+                :, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")
+            ]
+            * weightings_electrolysis
+        )
+        if time_period == "month":
+            elec_input_ref = (
+                -elec_input_ref.groupby(elec_input_ref.index.month).sum().sum(axis=1)
+            )
+        elif time_period == "year":
+            elec_input_ref = (
+                -elec_input_ref.groupby(elec_input_ref.index.year).sum().sum(axis=1)
+            )
+
+        for i in range(len(res.index)):
+            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
+            rhs = res_ref.iloc[i].sum() + elec_input_ref.iloc[i].sum()
+            con = define_constraints(
+                n, lhs, ">=", rhs, f"RESconstraints_{i}", f"REStarget_{i}"
+            )
+
+    else:
+        for i in range(len(res.index)):
+            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
+
+            con = define_constraints(
+                n, lhs, ">=", 0.0, f"RESconstraints_{i}", f"REStarget_{i}"
+            )
+    # else:
+    #     logger.info("ignoring H2 export constraint as wildcard is set to 0")
+
 
 def add_chp_constraints(n):
     electric_bool = (
