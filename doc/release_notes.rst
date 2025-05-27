@@ -93,6 +93,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Monte Carlo: move qmc.discrepancy to logging only `PR #1418 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1418>`__
 
+* Extending powerplant filter option to custom powerplants `PR #1465 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1465>`__
+
 PyPSA-Earth 0.6.0
 =================
 
