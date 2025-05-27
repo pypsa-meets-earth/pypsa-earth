@@ -351,7 +351,7 @@ if __name__ == "__main__":
 
     ppl = add_custom_powerplants(
         ppl, snakemake.input, snakemake.config
-    )  # add carriers from own powerplant files
+    ).query(ppl_query)  # add carriers from own powerplant files
 
     cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]
 
