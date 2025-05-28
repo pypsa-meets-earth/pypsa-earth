@@ -789,6 +789,32 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         columns=res_gen_index,
     )
 
+
+    ###### Linopy
+    # Add store stuff?
+
+    p_gen_var = n.model["Generator-p"].loc[:, res_gen_index]
+
+
+    # single line sum
+    res = (weightings_gen * p_gen_var).sum()
+
+    # Next: grouping
+    if time_period == "month":
+        res = res.groupby(res.index.month).sum()
+    elif time_period == "year":
+        res = res.groupby(res.index.year).sum()
+
+
+
+    # Electrolysis
+    link_p = n.model["Link-p"]
+    electrolysis = link_p.loc[
+        n.links.index[:, n.links.index.str.contains("H2 Electrolysis")]
+    ]
+
+
+    #######
     res = linexpr(
         (weightings_gen, get_var(n, "Generator", "p")[res_gen_index])
     ).sum(  # TODO needs to be adapted to linopy
@@ -1225,15 +1251,15 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-3H",
             planning_horizons="2030",
             discountrate="0.071",
             demand="AB",
             sopts="144H",
-            h2export="120",
-            configfile="config.tutorial.yaml",
+            h2export="10",
+            configfile="config.yaml",
         )
 
     configure_logging(snakemake)
