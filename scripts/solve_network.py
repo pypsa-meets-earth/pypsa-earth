@@ -789,12 +789,10 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         columns=res_gen_index,
     )
 
-
     ###### Linopy
     # Add store stuff?
 
     p_gen_var = n.model["Generator-p"].loc[:, res_gen_index]
-
 
     # single line sum
     res = (weightings_gen * p_gen_var).sum()
@@ -805,14 +803,11 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     elif time_period == "year":
         res = res.groupby(res.index.year).sum()
 
-
-
     # Electrolysis
     link_p = n.model["Link-p"]
     electrolysis = link_p.loc[
         n.links.index[:, n.links.index.str.contains("H2 Electrolysis")]
     ]
-
 
     #######
     res = linexpr(
