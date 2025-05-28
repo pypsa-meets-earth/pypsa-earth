@@ -266,7 +266,15 @@ def attach_load(n, demand_profiles):
     """
     demand_df = read_csv_nafix(demand_profiles, index_col=0, parse_dates=True)
 
-    n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
+    load_carrier = demand_df.columns.map(n.buses["carrier"])
+
+    n.madd(
+        "Load",
+        demand_df.columns,
+        bus=demand_df.columns,
+        p_set=demand_df,
+        carrier=load_carrier,
+    )
 
 
 def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):

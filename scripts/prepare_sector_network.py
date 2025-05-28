@@ -2944,9 +2944,6 @@ if __name__ == "__main__":
     # Add location. TODO: move it into pypsa-earth
     n.buses.location = n.buses.index
 
-    # Set carrier of AC loads
-    n.loads.loc[nodes, "carrier"] = "AC"
-
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
     # Fetch wildcards
