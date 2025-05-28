@@ -794,7 +794,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
     res = (weightings_gen * p_gen_var).sum(dim="Generator")
 
-
     # Store
     if not res_stor_index.empty:
         weightings_stor = pd.DataFrame(
@@ -809,7 +808,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
         res = res + store
 
-
     # Electrolysis
     electrolysis_index = n.links.index[n.links.index.str.contains("H2 Electrolysis")]
 
@@ -817,14 +815,14 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     electrolysis = link_p.loc[:, electrolysis_index]
 
     weightings_electrolysis = pd.DataFrame(
-        np.outer(
-            n.snapshot_weightings["generators"], [1.0] * len(electrolysis_index)
-        ),
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(electrolysis_index)),
         index=n.snapshots,
         columns=electrolysis_index,
     )
 
-    elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(dim="Link")
+    elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(
+        dim="Link"
+    )
 
     # Grouping
     if time_period == "hour":
@@ -843,7 +841,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     for label in res.coords[time_period].values:
         lhs = res.loc[label] + elec_input.loc[label]
         n.model.add_constraints(lhs >= 0.0, name=f"RESconstraints_{label}")
-
 
     # if snakemake.config["policy_config"]["hydrogen"]["additionality"]:
     #     res_ref_gen = n_ref.generators_t.p[res_gen_index] * weightings_gen
@@ -894,7 +891,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     #         )
     # else:
     #     logger.info("ignoring H2 export constraint as wildcard is set to 0")
-
 
 
 def add_chp_constraints(n):
