@@ -789,20 +789,16 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         columns=res_gen_index,
     )
 
-
     ###### Linopy
     # Add store stuff?
-
 
     p_gen_var = n.model["Generator-p"].loc[:, res_gen_index]
 
     # single line sum
     res = (weightings_gen * p_gen_var).sum(dim="Generator")
 
-
     # MISSING: stores/storage_units
     #
-
 
     # Electrolysis
     electrolysis_index = n.links.index[n.links.index.str.contains("H2 Electrolysis")]
@@ -811,16 +807,14 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     electrolysis = link_p.loc[:, electrolysis_index]
 
     weightings_electrolysis = pd.DataFrame(
-        np.outer(
-            n.snapshot_weightings["generators"], [1.0] * len(electrolysis_index)
-        ),
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(electrolysis_index)),
         index=n.snapshots,
         columns=electrolysis_index,
     )
 
-    elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(dim="Link")
-
-
+    elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(
+        dim="Link"
+    )
 
     # Grouping
     if time_period == "month":
@@ -829,7 +823,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     elif time_period == "year":
         res = res.groupby("snapshot.year").sum()
         elec_input = elec_input.groupby("snapshot.year").sum()
-
 
     # MISSING: if-else clause on additionality
     #
@@ -840,7 +833,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         label = res.coords[dim].values[i]  # Safely extract the value
         lhs = res.loc[label] + elec_input.loc[label]
         n.model.add_constraints(lhs >= 0.0, name=f"RESconstraints_{label}")
-
 
     for i in range(res.shape[0]):
         lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
