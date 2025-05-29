@@ -13,6 +13,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Revised pinned to locked environments. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
+
+* Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
+
 * Add a command-line interface in ``databundle_cli.py`` that will be triggered if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, providing a fallback to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
 
 * Add Wikipedia as a source for the preparation of transport_data.csv  `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
@@ -36,6 +40,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
 
 **Minor Changes and bug-fixing**
+
+* Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
+
+* Modified how_to_contribute documentation page. `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
 
 * Redefine h2export wildcard_constraint to allow digits + optional dot followed by more digites (decimals). `PR #1434 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1434>`__
 
@@ -86,6 +94,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise naming of Wikipedia data for vehicles `PR #1422 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1422>`__
 
 * Monte Carlo: move qmc.discrepancy to logging only `PR #1418 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1418>`__
+
+* Extending powerplant filter option to custom powerplants `PR #1465 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1465>`__
 
 PyPSA-Earth 0.6.0
 =================
