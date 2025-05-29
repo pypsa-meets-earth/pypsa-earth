@@ -54,11 +54,11 @@ competitive alternatives that promote science, robust technical analysis, collab
 Yet, two issues slow the adoption: open models are often designed with limited geographic scope, hindering synergies to collaborate,
 or are based on low spatially resolved data, limiting their utility.
 
-*PyPSA-Earth* is the first open-source global energy system model with data in high spatial and temporal resolution. It enables
-large-scale collaboration by providing a tool that can model the world energy system or any subset of it. This work is derived
-from the European PyPSA-Eur model using new data and functions. It is suitable for operational as well as combined generation,
-storage and transmission expansion studies. We work hard to extend the PyPSA-Earth model by end of this year to include sector-coupling,
-myopic and perfect pathway expansion capabilities.
+PyPSA-Earth is the first open-source global cross-sectoral energy system model with high spatial and temporal resolution. The workflow
+provide capabilities for modelling the energy systems of any country in the world, enabling large-scale collaboration and transparent
+analysis for an inclusive and sustainable energy future. PyPSA-Earth is suitable for both operational studies and capacity expansion
+studies. Its sector-coupled modeling capabilities enable features for the detailed optimization of multi-energy systems, covering
+electricity, heating, transport, industry, hydrogen and more.
 
 *PyPSA meets Earth initiative* members are maintaining the *PyPSA-Earth* repository as well as many other tools.
 The `website <https://pypsa-meets-earth.github.io/>`_ provides more context of the initiative and the associated projects.
@@ -166,7 +166,6 @@ Documentation
 
 * :doc:`release_notes`
 * :doc:`how_to_contribute`
-* :doc:`how_to_docs`
 * :doc:`software_hints`
 * :doc:`learning_materials`
 
@@ -177,7 +176,6 @@ Documentation
 
    release_notes
    how_to_contribute
-   how_to_docs
    software_hints
    learning_materials
 
