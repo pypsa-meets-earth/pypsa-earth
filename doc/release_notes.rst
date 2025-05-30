@@ -39,6 +39,12 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
+
+* Fix missing country attribute in cluster_network. `PR #1443 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1443>`__
+
+* Fix numpy TypeErrors. `PR #1430 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1430>`__
+
 * Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
 
 * Modified how_to_contribute documentation page. `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
