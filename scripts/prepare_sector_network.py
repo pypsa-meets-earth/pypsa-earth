@@ -1882,7 +1882,7 @@ def add_land_transport(n, costs):
                 carrier="land transport fuel cell",
                 p_set=fuel_cell_share
                 / options["transport_fuel_cell_efficiency"]
-                * transport[[node for node in nodes if node in transport.index]],
+                * transport[nodes],
             )
 
     if ice_share > 0:
