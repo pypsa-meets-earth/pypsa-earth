@@ -229,7 +229,7 @@ def add_water_network(n, costs):
             p_nom_extendable=True,
             carrier="H2 Electrolysis",
             efficiency=costs.at["electrolysis", "efficiency"],
-            efficiency2=costs.at["electrolysis", "efficiency"]
+            efficiency2=-costs.at["electrolysis", "efficiency"]
             * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
             / 33
             * 1000,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh TODO: integrate ratio_water_elec in technology data
@@ -2698,7 +2698,7 @@ def add_residential(n, costs):
             n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
         )
         n.loads_t.p_set.loc[:, heat_buses] = np.where(
-            ~np.isnan(safe_division),
+            safe_division.notna(),
             (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
             0.0,
         )
