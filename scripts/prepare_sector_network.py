@@ -193,9 +193,7 @@ def add_water_network(n, costs):
     """
     logger.info("Adding water")
 
-    n.add(
-        "Carrier", "H2O"
-    )  # TODO: water is not a carrier, not a bus and also not any of the other pypsa components ?
+    n.add("Carrier", "H2O")
     n.madd(
         "Bus",
         spatial.nodes + " H2O",
@@ -216,7 +214,8 @@ def add_water_network(n, costs):
             efficiency=costs.at["electrolysis", "efficiency"],
             efficiency2=costs.at["electrolysis", "efficiency"]
             * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-            / 33,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % TODO: integrate ratio_water_elec in technology data
+            / 33
+            * 1000,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh TODO: integrate ratio_water_elec in technology data
             capital_cost=costs.at["electrolysis", "fixed"],
             lifetime=costs.at["electrolysis", "lifetime"],
         )
@@ -230,12 +229,44 @@ def add_water_network(n, costs):
             p_nom_extendable=True,
             carrier="H2 Electrolysis",
             efficiency=costs.at["electrolysis", "efficiency"],
-            efficiency2=costs.at["electrolysis", "efficiency"]
+            efficiency2=-costs.at["electrolysis", "efficiency"]
             * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-            / 33,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % TODO: integrate ratio_water_elec in technology data
+            / 33
+            * 1000,  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh TODO: integrate ratio_water_elec in technology data
             capital_cost=costs.at["electrolysis", "fixed"],
             lifetime=costs.at["electrolysis", "lifetime"],
         )
+
+    # DEVELOPMENT STAGE 1
+
+    n.madd(
+        "Generator",
+        spatial.nodes
+        + " H20",  # Output unit of generator is in liters, this is defined by the electrolysis.
+        bus=spatial.nodes + " H2O",
+        carrier="H2O",
+        p_nom_extendable=True,
+        # capital_cost
+        # marginal_cost
+        # life
+        efficiency=1,
+        lifetime=costs.at["seawater desalination", "lifetime"],
+    )
+
+    # DEVELOPMENT STAGE 2
+
+    # n.madd(
+    #     "Link",
+    #     spatial.nodes + " desalination",
+    #     bus0=spatial.nodes,
+    #     bus1=spatial.nodes + " H20",
+    #     carrier="desalination",
+    #     p_nom_extendable=True,
+    #     efficiency=costs.at["seawater desalination", "electricity-input"],
+    #     capital_cost=costs.at["seawater desalination", "fixed"],
+    #     marginal_cost=costs.at["seawater desalination", "FOM"],
+    #     lifetime=costs.at["seawater desalination", "lifetime"],
+    # )
 
 
 def add_hydrogen(n, costs):
@@ -263,7 +294,7 @@ def add_hydrogen(n, costs):
             y=n.buses.loc[list(nodes)].y.values,
         )
         if snakemake.config["sector"]["hydrogen"]["water_network"]:
-            add_with_water_network(n, costs)
+            add_water_network(n, costs)
         else:
             n.madd(
                 "Link",
@@ -290,7 +321,7 @@ def add_hydrogen(n, costs):
 
     else:
         if snakemake.config["sector"]["hydrogen"]["water_network"]:
-            add_with_water_network(n, costs)
+            add_water_network(n, costs)
         else:
             n.madd(
                 "Link",
@@ -545,24 +576,23 @@ def add_hydrogen(n, costs):
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
-        # buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
-
-        # Appending string for carrier specification '_AC'
-        # h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        # h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-        # Create index column
-        h2_links["buses_idx"] = (
-            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
-        )
-
-        # Aggregate pipelines applying mean on length and sum on capacities
-        h2_links = h2_links.groupby("buses_idx").agg(
-            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
-        )
-
+        buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
         if len(h2_links) > 0:
-            if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
+            # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
+            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+
+            # Create index column
+            h2_links["buses_idx"] = (
+                "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+            )
+
+            # Aggregate pipelines applying mean on length and sum on capacities
+            h2_links = h2_links.groupby("buses_idx").agg(
+                {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+            )
+            
+            if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
             if (
                 snakemake.params.sector_options["hydrogen"]["network_routes"]
@@ -2668,7 +2698,7 @@ def add_residential(n, costs):
             n.loads_t.p_set.filter(like=country)[heat_buses].sum().sum(),
         )
         n.loads_t.p_set.loc[:, heat_buses] = np.where(
-            ~np.isnan(safe_division),
+            safe_division.notna(),
             (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
             0.0,
         )
@@ -2969,9 +2999,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-3H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
