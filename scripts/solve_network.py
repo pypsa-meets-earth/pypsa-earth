@@ -632,134 +632,6 @@ def add_h2_network_cap(n, cap):
     n.model.add_constraints(lhs <= rhs, name="h2_network_cap")
 
 
-def H2_export_yearly_constraint(n):
-    res = [
-        "csp",
-        "rooftop-solar",
-        "solar",
-        "onwind",
-        "onwind2",
-        "offwind",
-        "offwind2",
-        "ror",
-    ]
-    res_index = n.generators.loc[n.generators.carrier.isin(res)].index
-
-    weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
-        index=n.snapshots,
-        columns=res_index,
-    )
-    capacity_variable = n.model["Generator-p"]
-
-    # single line sum
-    res = (weightings * capacity_variable.loc[res_index]).sum()
-
-    load_ind = n.loads[n.loads.carrier == "AC"].index.intersection(
-        n.loads_t.p_set.columns
-    )
-
-    load = (
-        n.loads_t.p_set[load_ind].sum(axis=1) * n.snapshot_weightings["generators"]
-    ).sum()
-
-    h2_export = n.loads.loc["H2 export load"].p_set * 8760
-
-    lhs = res
-
-    include_country_load = snakemake.config["policy_config"]["yearly"][
-        "re_country_load"
-    ]
-
-    if include_country_load:
-        elec_efficiency = (
-            n.links.filter(like="Electrolysis", axis=0).loc[:, "efficiency"].mean()
-        )
-        rhs = (
-            h2_export * (1 / elec_efficiency) + load
-        )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
-    else:
-        rhs = h2_export * (1 / 0.7)
-
-    n.model.add_constraints(lhs >= rhs, name="H2ExportConstraint-RESproduction")
-
-
-def monthly_constraints(n, n_ref):
-    res_techs = [
-        "csp",
-        "rooftop-solar",
-        "solar",
-        "onwind",
-        "onwind2",
-        "offwind",
-        "offwind2",
-        "ror",
-    ]
-    allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
-
-    res_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
-
-    weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
-        index=n.snapshots,
-        columns=res_index,
-    )
-    capacity_variable = n.model["Generator-p"]
-
-    # single line sum
-    res = (weightings * capacity_variable[res_index]).sum(axis=1)
-    res = res.groupby(res.index.month).sum()
-
-    link_p = n.model["Link-p"]
-    electrolysis = link_p.loc[
-        n.links.index[n.links.index.str.contains("H2 Electrolysis")]
-    ]
-
-    weightings_electrolysis = pd.DataFrame(
-        np.outer(
-            n.snapshot_weightings["generators"], [1.0] * len(electrolysis.columns)
-        ),
-        index=n.snapshots,
-        columns=electrolysis.columns,
-    )
-
-    elec_input = ((-allowed_excess * weightings_electrolysis) * electrolysis).sum(
-        axis=1
-    )
-
-    elec_input = elec_input.groupby(elec_input.index.month).sum()
-
-    if snakemake.config["policy_config"]["hydrogen"]["additionality"]:
-        res_ref = n_ref.generators_t.p[res_index] * weightings
-        res_ref = res_ref.groupby(n_ref.generators_t.p.index.month).sum().sum(axis=1)
-
-        elec_input_ref = (
-            n_ref.links_t.p0.loc[
-                :, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")
-            ]
-            * weightings_electrolysis
-        )
-        elec_input_ref = (
-            -elec_input_ref.groupby(elec_input_ref.index.month).sum().sum(axis=1)
-        )
-
-        for i in range(len(res.index)):
-            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
-            rhs = res_ref.iloc[i] + elec_input_ref.iloc[i]
-            n.model.add_constraints(
-                lhs >= rhs, name=f"RESconstraints_{i}-REStarget_{i}"
-            )
-
-    else:
-        for i in range(len(res.index)):
-            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
-
-            n.model.add_constraints(
-                lhs >= 0.0, name=f"RESconstraints_{i}-REStarget_{i}"
-            )
-    # else:
-    #     logger.info("ignoring H2 export constraint as wildcard is set to 0")
-
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
     res_techs = [
@@ -1238,7 +1110,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             discountrate="0.071",
             demand="AB",
-            sopts="144H",
+            sopts="25H",
             h2export="10",
             configfile="config.yaml",
         )
