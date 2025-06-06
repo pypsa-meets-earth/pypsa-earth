@@ -71,10 +71,10 @@ jobs:
       run: |
         echo ">>> Conda environments"
         conda info --envs || true
-    
+
         echo ">>> Where is snakemake"
         which snakemake || true
-    
+
         echo ">>> Snakemake version"
         snakemake --version || true
 
