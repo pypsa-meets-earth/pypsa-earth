@@ -86,6 +86,13 @@ jobs:
     - name: Conda list
       run: conda list
 
+    - name: Check Snakemake installation
+      run: |
+        conda info --envs
+        which snakemake || echo "snakemake not found"
+        snakemake --version || echo "snakemake not working"
+        conda list | grep snakemake || echo "snakemake not in environment"
+
     - name: Run Test
       run: make test
 
