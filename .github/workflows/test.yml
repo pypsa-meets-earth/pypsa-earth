@@ -91,13 +91,13 @@ jobs:
       run: |
         echo ">>> Conda environments"
         conda info --envs || echo "conda info failed"
-    
+
         echo ">>> Where is snakemake"
         which snakemake || echo "snakemake not found"
-    
+
         echo ">>> Snakemake version"
         snakemake --version || echo "snakemake not working"
-    
+
         echo ">>> Conda list of snakemake"
         conda list | grep snakemake || echo "snakemake not in environment"
 
