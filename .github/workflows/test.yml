@@ -64,17 +64,31 @@ jobs:
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
       id: cache-env
 
-    - name: Install conda-lock with micromamba
+    - name: Install micromamba and conda-lock
       shell: bash
       run: |
-        curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+        # Choose correct platform
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          PLATFORM="linux-64"
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          PLATFORM="osx-arm64"
+        else
+          echo "Unsupported OS: $RUNNER_OS"
+          exit 1
+        fi
+
+        # Download and extract micromamba
+        curl -Ls https://micro.mamba.pm/api/micromamba/${PLATFORM}/latest | tar -xvj bin/micromamba
+
+        # Create env and install conda-lock
         ./bin/micromamba create -y -n lockenv -c conda-forge conda-lock
+        ./bin/micromamba run -n lockenv conda-lock --version
+
+        # Add to PATH for next steps
         echo "$(pwd)/bin" >> $GITHUB_PATH
-        echo "$(pwd)/envs/lockenv/bin" >> $GITHUB_PATH
 
     - name: Install environment using lock file
-      shell: bash -l {0}
-      run: conda-lock install --name pypsa-earth envs/${{ matrix.env_file }}
+      run: micromamba run -n lockenv conda-lock install --name pypsa-earth envs/${{ matrix.env_file }}
 
     - name: Force install snakemake via pip
       run: conda run -n pypsa-earth pip install 'snakemake<8'
