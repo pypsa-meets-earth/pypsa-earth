@@ -36,7 +36,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash {0}
 
     steps:
     - uses: actions/checkout@v4
@@ -79,14 +79,11 @@ jobs:
       run: conda list
 
     - name: Run Test
-      shell: bash -l {0}
       run: |
-        echo ">>> Activating conda env and running make test"
-        source ~/.bashrc
-        conda activate pypsa-earth
-        which snakemake || echo "Snakemake not found"
-        snakemake --version || echo "Snakemake version error"
-        make test
+        echo ">>> Running tests inside conda env"
+        conda run -n pypsa-earth which snakemake || echo "Snakemake not found"
+        conda run -n pypsa-earth snakemake --version || echo "Snakemake version error"
+        conda run -n pypsa-earth make test
 
     - name: Upload artifacts
       if: always()
