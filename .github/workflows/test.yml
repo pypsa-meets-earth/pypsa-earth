@@ -64,47 +64,40 @@ jobs:
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
       id: cache-env
 
-    - name: Install micromamba and conda-lock
-      shell: bash
+    - name: Set up micromamba
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-name: pypsa-earth
+        condarc: |
+          channels:
+            - conda-forge
+        cache-downloads: true
+        cache-environment: true
+
+    - name: Install environment using conda-lock
+      shell: bash -l {0}
       run: |
-        # Choose correct platform
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          PLATFORM="linux-64"
-        elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          PLATFORM="osx-arm64"
-        else
-          echo "Unsupported OS: $RUNNER_OS"
-          exit 1
-        fi
-
-        # Download and extract micromamba
-        curl -Ls https://micro.mamba.pm/api/micromamba/${PLATFORM}/latest | tar -xvj bin/micromamba
-
-        # Create env and install conda-lock
-        ./bin/micromamba create -y -n lockenv -c conda-forge conda-lock
-        ./bin/micromamba run -n lockenv conda-lock --version
-
-        # Add to PATH for next steps
-        echo "$(pwd)/bin" >> $GITHUB_PATH
+        micromamba install -n base -c conda-forge conda-lock
+        conda-lock install --name pypsa-earth ${{ matrix.env_file }}
 
     - name: Install environment using lock file
       run: micromamba run -n lockenv conda-lock install --name pypsa-earth envs/${{ matrix.env_file }}
 
     - name: Force install snakemake via pip
-      run: conda run -n pypsa-earth pip install 'snakemake<8'
+      run: micromamba run -n pypsa-earth pip install 'snakemake<8'
 
     - name: Downgrade pulp for snakemake compatibility
-      run: conda run -n pypsa-earth pip install 'pulp==2.6.0'
+      run: micromamba run -n pypsa-earth pip install 'pulp==2.6.0'
 
     - name: Conda list
-      run: conda list
+      run: micromamba run -n pypsa-earth conda list
 
     - name: Run Test
       run: |
         echo ">>> Running tests inside conda env"
-        conda run -n pypsa-earth which snakemake || echo "Snakemake not found"
-        conda run -n pypsa-earth snakemake --version || echo "Snakemake version error"
-        conda run -n pypsa-earth make test
+        micromamba run -n pypsa-earth which snakemake || echo "Snakemake not found"
+        micromamba run -n pypsa-earth snakemake --version || echo "Snakemake version error"
+        micromamba run -n pypsa-earth make test
 
     - name: Upload artifacts
       if: always()
