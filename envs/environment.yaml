@@ -50,6 +50,7 @@ dependencies:
 - geopy
 - tqdm
 - pytz
+- country_converter
 
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
@@ -79,7 +80,4 @@ dependencies:
 - rich
 
 - pip:
-  - pip
-  - country_converter
-  - currencyconverter
   - googledrivedownloader>=1.1
