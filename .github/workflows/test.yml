@@ -64,9 +64,9 @@ jobs:
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
       id: cache-env
 
-    - name: Update environment
+    - name: Install envronment from lock file
       if: steps.cache-env.outputs.cache-hit != 'true'
-      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
+      run: conda-lock install --name pypsa-earth ${{ matrix.env_file }}
 
     - name: Force install snakemake via pip
       run: conda run -n pypsa-earth pip install 'snakemake<8'
