@@ -64,6 +64,9 @@ jobs:
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
       id: cache-env
 
+    - name: Install conda-lock
+      run: conda install -n base -c conda-forge conda-lock
+
     - name: Install envronment from lock file
       if: steps.cache-env.outputs.cache-hit != 'true'
       run: conda-lock install --name pypsa-earth ${{ matrix.env_file }}
