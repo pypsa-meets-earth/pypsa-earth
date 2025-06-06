@@ -71,6 +71,9 @@ jobs:
     - name: Force install snakemake via pip
       run: conda run -n pypsa-earth pip install 'snakemake<8'
 
+    - name: Downgrade pulp for snakemake compatibility
+      run: conda run -n pypsa-earth pip install 'pulp==2.6.0'
+
     - name: Conda list
       run: conda list
 
