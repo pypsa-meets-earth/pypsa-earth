@@ -68,6 +68,9 @@ jobs:
       if: steps.cache-env.outputs.cache-hit != 'true'
       run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
 
+    - name: Force install snakemake via pip
+      run: conda run -n pypsa-earth pip install snakemake<8
+
     - name: Conda list
       run: conda list
 
