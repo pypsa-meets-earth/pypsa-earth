@@ -37,7 +37,7 @@ To use packages in python, it is highly recommended to use a ``conda`` package m
 
 .. code:: bash
 
-    conda --version
+    $ conda --version
 
 If ``conda`` is not installed, follow `miniconda installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
@@ -58,7 +58,7 @@ PyPSA-Earth currently needs Java redistribution to work properly. To check if Ja
 
 .. code:: bash
 
-    java --version
+    $ java --version
 
 The expected output should resemble the following:
 
@@ -86,9 +86,7 @@ The following commands can be executed in command prompt of ``miniconda``, termi
 
 .. code:: bash
 
-    /some/other/path % cd /some/path/without/spaces
-
-    /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
+    $ git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
 
 Install Dependencies
 -------------------------
@@ -97,15 +95,36 @@ PyPSA-Earth relies on a set of other Python packages to function.
 The python package requirements are located in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file. We install only `mamba` in the conda base environment to accelerate the installation.
 **Please keep the base environment always clean, meaning don't install anything there!** It will allow to ensure compatibility of all the packages needed to work with PyPSA-Earth model.
 
-The environment can be installed and activated like this:
+There are also regularly updated locked environment files for
+each platform generated with conda-lock to ensure reproducibility. Choose the correct file for your platform:
 
-.. code:: bash
+* For Intel/AMD processors:
 
-    .../pypsa-earth (base) % conda install -c conda-forge mamba
+  - Linux: ``envs/linux-64.lock.yaml``
 
-    .../pypsa-earth % mamba env create -f envs/environment.yaml
+  - macOS: ``envs/osx-64.lock.yaml``
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+  - Windows: ``envs/win-64.lock.yaml``
+
+* For ARM processors:
+
+  - macOS (Apple Silicon): ``envs/osx-arm64.lock.yaml``
+
+  - Linux (ARM): Currently not supported via lock files; requires building certain packages, such as ``PySCIPOpt``, from source
+
+We recommend using these locked files for a stable environment.
+
+.. note::
+
+    you can check and verify your platform with ``conda info``
+
+.. code:: console
+
+    $ conda install -c conda-forge mamba
+
+    $ mamba env create -f envs/linux-64.lock.yaml # select the appropriate file for your platform
+
+    $ conda activate pypsa-earth
 
 Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you
 open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.
@@ -114,9 +133,28 @@ In case mamba did not work for you, you might want to try conda instead:
 
 .. code:: bash
 
-    .../pypsa-earth % conda env create -f envs/environment.yaml
+    $ conda env create -f envs/linux-64.lock.yaml
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+    $ conda activate pypsa-earth
+
+
+Generating the Lock Files
+------------------------
+If a pre-generated lock file is not available for your platform (e.g., ``aarch64``, ARM Mac, etc.), you can generate one using the following:
+
+1. Ensure ``conda-lock`` is installed:
+
+   .. code-block:: bash
+
+      $ conda install conda-lock -c conda-forge
+
+2. Generate lock files for target platforms:
+
+   .. code-block:: bash
+
+      $ conda-lock lock -p <your-platform> -k env -f envs/environment.yaml
+
+For platform codes, refer to the `conda-lock documentation <https://conda.github.io/conda-lock/>`_ or use ``conda info`` to determine your platform.
 
 
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
@@ -125,7 +163,7 @@ To confirm the installation, run the following command in the activated environm
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake --version
+    $ snakemake --version
 
 
 Solver Installation
@@ -163,5 +201,5 @@ We use Jupyter notebooks to share examples on how to use the model and analyse t
 
 .. code:: bash
 
-    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
-    .../pypsa-earth % jupyter lab
+    $ ipython kernel install --user --name=pypsa-earth
+    $ jupyter lab
