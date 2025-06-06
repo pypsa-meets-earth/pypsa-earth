@@ -81,6 +81,5 @@ dependencies:
 
 - pip:
   - pip
-  - snakemake
   - currencyconverter
   - googledrivedownloader>=1.1
