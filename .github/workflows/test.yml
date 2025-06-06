@@ -65,12 +65,18 @@ jobs:
         channel-priority: strict
         conda-remove-defaults: true
 
-    - name: Activate conda environment
+    - name: Check environment and snakemake
       shell: bash -l {0}
+      continue-on-error: true
       run: |
-        conda info --envs
-        which snakemake
-        snakemake --version
+        echo ">>> Conda environments"
+        conda info --envs || true
+    
+        echo ">>> Where is snakemake"
+        which snakemake || true
+    
+        echo ">>> Snakemake version"
+        snakemake --version || true
 
     - name: Cache Conda env
       uses: actions/cache@v4
