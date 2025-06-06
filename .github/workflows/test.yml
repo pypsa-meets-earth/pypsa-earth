@@ -45,8 +45,10 @@ jobs:
       run: echo "env_file=${{ env.BASE_ENV }}" >> $GITHUB_ENV
 
     - name: Show env file being used
-      run:
-      echo "Using env file: ${{ env.env_file }}"
+      run: |
+        echo "All environment variables:"
+        env | sort
+        echo "Using env file: $env_file"
 
     - uses: conda-incubator/setup-miniconda@v3
       with:
