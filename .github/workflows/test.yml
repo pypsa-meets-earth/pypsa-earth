@@ -65,11 +65,12 @@ jobs:
       id: cache-env
 
     - name: Install conda-lock
+      shell: bash -l {0}
       run: conda install -n base -c conda-forge conda-lock
 
-    - name: Install envronment from lock file
-      if: steps.cache-env.outputs.cache-hit != 'true'
-      run: conda-lock install --name pypsa-earth ${{ matrix.env_file }}
+    - name: Install environment using lock file
+      shell: bash -l {0}
+      run: conda-lock install --name pypsa-earth envs/${{ matrix.env_file }}
 
     - name: Force install snakemake via pip
       run: conda run -n pypsa-earth pip install 'snakemake<8'
