@@ -87,12 +87,12 @@ jobs:
       run: conda list
 
     - name: Check Snakemake installation
-      continue-on-error: true
       run: |
         conda info --envs
         which snakemake || echo "snakemake not found"
         snakemake --version || echo "snakemake not working"
         conda list | grep snakemake || echo "snakemake not in environment"
+      continue-on-error: true
 
     - name: Run Test
       run: make test
