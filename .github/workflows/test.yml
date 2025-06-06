@@ -64,9 +64,13 @@ jobs:
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
       id: cache-env
 
-    - name: Install conda-lock
-      shell: bash -l {0}
-      run: conda install -n base -c conda-forge conda-lock
+    - name: Install conda-lock with micromamba
+      shell: bash
+      run: |
+        curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+        ./bin/micromamba create -y -n lockenv -c conda-forge conda-lock
+        echo "$(pwd)/bin" >> $GITHUB_PATH
+        echo "$(pwd)/envs/lockenv/bin" >> $GITHUB_PATH
 
     - name: Install environment using lock file
       shell: bash -l {0}
