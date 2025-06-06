@@ -80,5 +80,6 @@ dependencies:
 - rich
 
 - pip:
+  - pip
   - currencyconverter
   - googledrivedownloader>=1.1
