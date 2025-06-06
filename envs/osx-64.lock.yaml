@@ -13,7 +13,7 @@
 version: 1
 metadata:
   content_hash:
-    osx-64: a1cd4802d52a4bfa019c47b180d62c840011c6e026a9d304086b83f2d3a73001
+    osx-64: d215f1d1a043f1857c824f79208ceb08ead8b22804cd62c256fc8564d45509ff
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -6975,6 +6975,27 @@ package:
     sha256: c171c43d0c47eed45085112cb00c8c7d4f0caa5a32d47f2daca727e45fb98dca
   category: main
   optional: false
+- name: argparse-dataclass
+  version: 2.0.0
+  manager: pip
+  platform: osx-64
+  dependencies: {}
+  url: https://files.pythonhosted.org/packages/b3/66/e6c0a808950ba5a4042e2fcedd577fc7401536c7db063de4d7c36be06f84/argparse_dataclass-2.0.0-py3-none-any.whl
+  hash:
+    sha256: 3ffc8852a88d9d98d1364b4441a712491320afb91fb56049afd8a51d74bb52d2
+  category: main
+  optional: false
+- name: conda-inject
+  version: 1.3.2
+  manager: pip
+  platform: osx-64
+  dependencies:
+    pyyaml: '>=6.0,<7.0'
+  url: https://files.pythonhosted.org/packages/87/4c/fc30b69fb4062aee57e3ab7ff493647c4220144908f0839c619f912045bf/conda_inject-1.3.2-py3-none-any.whl
+  hash:
+    sha256: 6e641b408980c2814e3e527008c30749117909a21ff47392f07ef807da93a564
+  category: main
+  optional: false
 - name: currencyconverter
   version: 0.18.6
   manager: pip
@@ -6994,5 +7015,114 @@ package:
   url: https://files.pythonhosted.org/packages/0a/74/674a4cfe65440441b8a9296346173fe5df9c83decde09094c16826aa06fc/googledrivedownloader-1.1.0-py3-none-any.whl
   hash:
     sha256: f4579f16520a995d97c036964b466304c5842f05ffbebeb66c3f539cbb9f3e25
+  category: main
+  optional: false
+- name: immutables
+  version: '0.21'
+  manager: pip
+  platform: osx-64
+  dependencies: {}
+  url: https://files.pythonhosted.org/packages/85/39/2d7d54f6cf33f6fcb3f78e985142166d2ec6ff93be761a17dfee31a372cd/immutables-0.21-cp311-cp311-macosx_10_9_x86_64.whl
+  hash:
+    sha256: 5d780c38067047911a2e06a86ba063ba0055618ab5573c8198ef3f368e321303
+  category: main
+  optional: false
+- name: snakemake
+  version: 9.5.1
+  manager: pip
+  platform: osx-64
+  dependencies:
+    appdirs: '*'
+    conda-inject: '>=1.3.1,<2.0'
+    configargparse: '*'
+    connection-pool: '>=0.0.3'
+    docutils: '*'
+    dpath: '>=2.1.6,<3.0.0'
+    gitpython: '*'
+    humanfriendly: '*'
+    immutables: '*'
+    jinja2: '>=3.0,<4.0'
+    jsonschema: '*'
+    nbformat: '*'
+    packaging: '*'
+    psutil: '*'
+    pulp: '>=2.3.1,<3.2'
+    pyyaml: '*'
+    requests: '>=2.8.1,<3.0'
+    reretry: '*'
+    smart-open: '>=4.0,<8.0'
+    snakemake-interface-common: '>=1.17.0,<2.0'
+    snakemake-interface-executor-plugins: '>=9.3.2,<10.0'
+    snakemake-interface-logger-plugins: '>=1.1.0,<2.0.0'
+    snakemake-interface-report-plugins: '>=1.1.0,<2.0.0'
+    snakemake-interface-storage-plugins: '>=4.1.0,<5.0'
+    tabulate: '*'
+    throttler: '*'
+    wrapt: '*'
+    yte: '>=1.5.5,<2.0'
+  url: https://files.pythonhosted.org/packages/a7/8f/2c833a74447bfc1134f22d5f17d467cc1b862572eeb4c73ba9ed2c47b243/snakemake-9.5.1-py3-none-any.whl
+  hash:
+    sha256: bf0803c703a352482a3bc0bc3a5a5c236cdebcbfc7157d426b9e4a0f08776b03
+  category: main
+  optional: false
+- name: snakemake-interface-common
+  version: 1.18.0
+  manager: pip
+  platform: osx-64
+  dependencies:
+    argparse-dataclass: '>=2.0.0'
+    configargparse: '>=1.7'
+  url: https://files.pythonhosted.org/packages/db/86/503051d3c1141cd32543223084fa2f4b7393fd1cd663a2f4852915747615/snakemake_interface_common-1.18.0-py3-none-any.whl
+  hash:
+    sha256: 793fc01a55bd6dd28ad15a35ef71a895bfdbc9cf4776868e157687b7fbc2ba3e
+  category: main
+  optional: false
+- name: snakemake-interface-executor-plugins
+  version: 9.3.5
+  manager: pip
+  platform: osx-64
+  dependencies:
+    argparse-dataclass: '>=2.0.0'
+    snakemake-interface-common: '>=1.17.4'
+    throttler: '>=1.2.2'
+  url: https://files.pythonhosted.org/packages/aa/37/7503fd074a2f1610f97105b45272531cd072bb1eadf8af6a6b25eef0db7b/snakemake_interface_executor_plugins-9.3.5-py3-none-any.whl
+  hash:
+    sha256: a1fcc305248169c4a83ec1c9f4e590f787dce5605ee4cf0aa8a8fb8da47aea2b
+  category: main
+  optional: false
+- name: snakemake-interface-logger-plugins
+  version: 1.2.3
+  manager: pip
+  platform: osx-64
+  dependencies:
+    snakemake-interface-common: '>=1.17.4'
+  url: https://files.pythonhosted.org/packages/fa/36/3e631b82c4822569e7af783e05e0feb29d33b3bd886977b0d70183f9ed4a/snakemake_interface_logger_plugins-1.2.3-py3-none-any.whl
+  hash:
+    sha256: 95dd1dd83f04f2c7191c9cfdea78bf1dd7e216b838d91f86d4780aa11a4ce276
+  category: main
+  optional: false
+- name: snakemake-interface-report-plugins
+  version: 1.1.0
+  manager: pip
+  platform: osx-64
+  dependencies:
+    snakemake-interface-common: '>=1.16.0,<2.0.0'
+  url: https://files.pythonhosted.org/packages/35/89/f5f4e48b72fca04458a2fe4f4b02e10f95fb47772b0d0ea889ac929c3b1e/snakemake_interface_report_plugins-1.1.0-py3-none-any.whl
+  hash:
+    sha256: 00749eb3c5c7ce465757d0fc9f04e6c4d3f5af4f463809c34b92c8b5efea0fd5
+  category: main
+  optional: false
+- name: snakemake-interface-storage-plugins
+  version: 4.2.1
+  manager: pip
+  platform: osx-64
+  dependencies:
+    reretry: '>=0.11.8'
+    snakemake-interface-common: '>=1.12.0'
+    throttler: '>=1.2.2'
+    wrapt: '>=1.15.0'
+  url: https://files.pythonhosted.org/packages/20/91/5dab248aa54f523184d6289bbfa9ce763ef4c9556ffcd1f8c8c5b394e65c/snakemake_interface_storage_plugins-4.2.1-py3-none-any.whl
+  hash:
+    sha256: 780904853a80ea96e69bc8047fec8281b1f18c2b525044ffffb2b053fc29f50b
   category: main
   optional: false
