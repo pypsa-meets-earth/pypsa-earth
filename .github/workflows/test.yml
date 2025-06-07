@@ -87,7 +87,7 @@ jobs:
         source $CONDA/etc/profile.d/conda.sh
         conda create -n lock-env -y python=3.11
         conda install -n lock-env -y conda-lock
-        conda run -n lock-env conda-lock install conda-lock.yaml --name pypsa-earth
+        conda run -n lock-env conda-lock install -p $CONDA/envs/pypsa-earth conda-lock.yaml
 
     - name: Conda list
       run: conda list
