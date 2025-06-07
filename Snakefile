@@ -1042,6 +1042,18 @@ rule prepare_transport_data_input:
     script:
         "scripts/prepare_transport_data_input.py"
 
+rule build_salt_cavern_potentials:
+    input:
+        regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
+        regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
+    output:
+        h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s_{clusters}.csv",
+    threads: 1
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/build_salt_cavern_potentials.py"
+
 
 if not config["custom_data"]["gas_network"]:
 
@@ -1090,7 +1102,11 @@ rule prepare_sector_network:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
-        h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
+        h2_cavern=(
+            "data/hydrogen_salt_cavern_potentials.csv"
+            if config["custom_data"]["h2_underground"]
+            else "resources/" + RDIR + "salt_cavern_potentials_s_{clusters}.csv"
+        ),
         nodal_energy_totals="resources/"
         + SECDIR
         + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",

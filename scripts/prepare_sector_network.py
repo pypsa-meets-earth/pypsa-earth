@@ -262,10 +262,24 @@ def add_hydrogen(n, costs):
         lifetime=costs.at["fuel cell", "lifetime"],
     )
 
-    cavern_nodes = pd.DataFrame()
+    n.madd(
+            "Link",
+            spatial.nodes + " H2 turbine",
+            bus0=spatial.nodes + " H2",
+            bus1=spatial.nodes,
+            p_nom_extendable=True,
+            carrier="H2 turbine",
+            efficiency=costs.at["OCGT", "efficiency"],
+            capital_cost=costs.at["OCGT", "fixed"]
+            * costs.at["OCGT", "efficiency"],  # NB: fixed cost is per MWel
+            marginal_cost=costs.at["OCGT", "VOM"],
+            lifetime=costs.at["OCGT", "lifetime"],
+        )      
+
 
     if snakemake.params.sector_options["hydrogen"]["underground_storage"]:
         if snakemake.params.h2_underground:
+            cavern_nodes = pd.DataFrame()
             custom_cavern = pd.read_csv(
                 os.path.join(
                     BASE_DIR,
@@ -333,50 +347,51 @@ def add_hydrogen(n, costs):
             )
 
         else:
-            h2_salt_cavern_potential = pd.read_csv(
-                snakemake.input.h2_cavern, index_col=0
-            ).squeeze()
-            h2_cavern_ct = h2_salt_cavern_potential[~h2_salt_cavern_potential.isna()]
-            cavern_nodes = n.buses[n.buses.country.isin(h2_cavern_ct.index)]
+            cavern_types = snakemake.params.sector_options["hydrogen"]["hydrogen_underground_storage_locations"]
+            h2_caverns = pd.read_csv(snakemake.input.h2_cavern, index_col=0)
+            if (
+                not h2_caverns.empty
+                and set(cavern_types).intersection(h2_caverns.columns)
+            ):
+                h2_caverns = h2_caverns[cavern_types].sum(axis=1)
 
-            h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
+                # only use sites with at least 2 TWh potential
+                h2_caverns = h2_caverns[h2_caverns > 2]
 
-            # assumptions: weight storage potential in a country by population
-            # TODO: fix with real geographic potentials
-            # convert TWh to MWh with 1e6
-            h2_pot = h2_cavern_ct.loc[cavern_nodes.country]
-            h2_pot.index = cavern_nodes.index
+                # convert TWh to MWh
+                h2_caverns = h2_caverns * 1e6
 
-            # distribute underground potential equally over all nodes #TODO change with real data
-            s = pd.Series(h2_pot.index, index=h2_pot.index)
-            country_codes = s.str[:2]
-            code_counts = country_codes.value_counts()
-            fractions = country_codes.map(code_counts).rdiv(1)
-            h2_pot = h2_pot * fractions * 1e6
+                # clip at 1000 TWh for one location
+                h2_caverns.clip(upper=1e9, inplace=True)
 
-            # n.add("Carrier", "H2 UHS")
+                logger.info("Add hydrogen underground storage")
 
-            n.madd(
-                "Bus",
-                nodes + " H2 UHS",
-                location=nodes,
-                carrier="H2 UHS",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
-            )
+                h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
 
-            n.madd(
-                "Store",
-                cavern_nodes.index + " H2 UHS",
-                bus=cavern_nodes.index + " H2 UHS",
-                e_nom_extendable=True,
-                e_nom_max=h2_pot.values,
-                e_cyclic=True,
-                carrier="H2 UHS",
-                capital_cost=h2_capital_cost,
-            )
+                # n.add("Carrier", "H2 UHS")
 
-            n.madd(
+                n.madd(
+                    "Bus",
+                    nodes + " H2 UHS",
+                    location=nodes,
+                    carrier="H2 UHS",
+                    x=n.buses.loc[list(nodes)].x.values,
+                    y=n.buses.loc[list(nodes)].y.values,
+                )
+
+                n.madd(
+                    "Store",
+                    h2_caverns.index + " H2 UHS",
+                    bus=h2_caverns.index + " H2 UHS",
+                    e_nom_extendable=True,
+                    e_nom_max=h2_caverns.values,
+                    e_cyclic=True,
+                    carrier="H2 UHS",
+                    capital_cost=h2_capital_cost,
+                    lifetime=costs.at["hydrogen storage underground", "lifetime"],
+                )
+
+                n.madd(
                 "Link",
                 nodes + " H2 UHS charger",
                 bus0=nodes,
@@ -399,6 +414,7 @@ def add_hydrogen(n, costs):
                 p_nom_extendable=True,
                 # lifetime=costs.at["battery inverter", "lifetime"],
             )
+            
 
     # hydrogen stored overground (where not already underground)
     h2_capital_cost = costs.at[
