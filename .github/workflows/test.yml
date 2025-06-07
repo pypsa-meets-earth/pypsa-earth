@@ -81,10 +81,13 @@ jobs:
         conda activate base
         conda install -y conda-lock
 
-    - name: Install environment from conda-lock.yaml
+    - name: Install conda-lock and environment
       if: steps.cache-env.outputs.cache-hit != 'true'
       run: |
         source $CONDA/etc/profile.d/conda.sh
+        conda create -n lock-env -y python=3.11
+        conda activate lock-env
+        conda install -y conda-lock
         conda-lock install --name pypsa-earth --lockfile conda-lock.yaml
 
     - name: Conda list
