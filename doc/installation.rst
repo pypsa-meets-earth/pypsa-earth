@@ -72,7 +72,7 @@ In case you don't have Java, you have to install it from the `official website <
 
 
 Installation with Conda/Mamba
-========================
+===============================
 
 Clone the Repository
 --------------------
@@ -139,7 +139,7 @@ In case mamba did not work for you, you might want to try conda instead:
 
 
 Generating the Lock Files
-------------------------
+---------------------------
 If a pre-generated lock file is not available for your platform (e.g., ``aarch64``, ARM Mac, etc.), you can generate one using the following:
 
 1. Ensure ``conda-lock`` is installed:
@@ -191,7 +191,7 @@ To further improve performances, commercial solvers like
     However, solving capabilities of ``glpk`` are limited.
     To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
-A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
+A recommended instruction to install the HiGHS solver is given `here (link to highs) <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
 
 Install Jupyter Lab
@@ -206,7 +206,7 @@ We use Jupyter notebooks to share examples on how to use the model and analyse t
 
 
 Alternate installation with Docker
-================================
+=====================================
 This is an alternative way to create a development environment for PyPSA-Earth. This method is useful for users who are not familiar with programming or Python, or who do not want to install Python on their local machine. It uses Docker containers to create a development environment for PyPSA-Earth.
 
 This section provides a step-by-step guide on how to set up and use Docker containers to run PyPSA-Earth.
@@ -223,9 +223,9 @@ Steps:
 
     Ensure Docker is installed on your system.
 
-2. You can use the link `here <https://code.visualstudio.com/download>`_ to install Visual Studio Code on your operating system. Ensure to select the most compatible file for your operating system.
+2. You can use the link `here (link to VSC) <https://code.visualstudio.com/download>`_ to install Visual Studio Code on your operating system. Ensure to select the most compatible file for your operating system.
 
-3. Install GitHub Desktop for your OS `here <https://desktop.github.com/download/>`_.
+3. Install GitHub Desktop for your OS `here (link to github desktop) <https://desktop.github.com/download/>`_.
 
 4. Clone the repository:
 
