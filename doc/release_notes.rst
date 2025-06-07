@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Remove duplicates in environment file. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
+
 * Revised pinned to locked environments. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
 
 * Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
