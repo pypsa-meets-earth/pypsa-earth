@@ -71,15 +71,27 @@ jobs:
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
       id: cache-env
 
-    - name: Update environment
+#    - name: Update environment
+#      if: steps.cache-env.outputs.cache-hit != 'true'
+#      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
+
+    - name: Install environment from conda-lock.yaml
       if: steps.cache-env.outputs.cache-hit != 'true'
-      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
+      run: |
+        conda install -n base conda-lock
+        conda-lock install --name pypsa-earth --lockfile conda-lock.yaml
 
     - name: Conda list
       run: conda list
 
+#    - name: Run Test
+#      run: make test
     - name: Run Test
-      run: make test
+      run: |
+        source $CONDA/etc/profile.d/conda.sh
+        conda activate pypsa-earth
+        make test
+
 
     - name: Upload artifacts
       if: always()
