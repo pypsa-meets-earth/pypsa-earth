@@ -75,14 +75,16 @@ jobs:
 #      if: steps.cache-env.outputs.cache-hit != 'true'
 #      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
 
+    - name: Install conda-lock
+      run: |
+        source $CONDA/etc/profile.d/conda.sh
+        conda activate base
+        conda install -y conda-lock
+
     - name: Install environment from conda-lock.yaml
       if: steps.cache-env.outputs.cache-hit != 'true'
       run: |
         source $CONDA/etc/profile.d/conda.sh
-        conda activate base
-        conda install -y -n base conda-lock
-        conda create -y -n pypsa-earth python=3.11
-        conda activate pypsa-earth
         conda-lock install --name pypsa-earth --lockfile conda-lock.yaml
 
     - name: Conda list
