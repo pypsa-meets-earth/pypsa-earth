@@ -50,7 +50,6 @@ dependencies:
 - geopy
 - tqdm
 - pytz
-- country_converter
 
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
@@ -70,7 +69,6 @@ dependencies:
 - hvplot
 - graphviz
 - contextily
-- graphviz
 
 # Default solver for tests (required for CI)
 - glpk
