@@ -269,7 +269,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/1zR_UC1WDLVt5vJhUV1IXFR6WQMM6vomg/view?usp=drive_link
+      gdrive: https://drive.google.com/file/d/1Ao_kuHssRaP1qLV-IEG91Hu7E04-nBZg/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
