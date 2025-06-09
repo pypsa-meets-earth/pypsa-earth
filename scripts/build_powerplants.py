@@ -349,8 +349,8 @@ if __name__ == "__main__":
     else:
         ppl = pd.DataFrame()
 
-    ppl = add_custom_powerplants(
-        ppl, snakemake.input, snakemake.config
+    ppl = add_custom_powerplants(ppl, snakemake.input, snakemake.config).query(
+        ppl_query
     )  # add carriers from own powerplant files
 
     cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]

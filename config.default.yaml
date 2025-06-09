@@ -366,6 +366,7 @@ costs:
   technology_data_US: false # true if you want to use US-specific costs from technology-data/outputs/US instead of technology-data/outputs
   cost_scenario: "moderate" # only used if `technology_data_US: true`; can be "moderate", "advanced" or "conservative"
   financial_case: "market" # only used if `technology_data_US: true`; can be "market" or "r&d"
+
   discountrate: [0.071] #, 0.086, 0.111]
   output_currency: "EUR"
   rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)

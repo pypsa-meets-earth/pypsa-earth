@@ -2945,7 +2945,12 @@ if __name__ == "__main__":
     n.buses.location = n.buses.index
 
     # Set carrier of AC loads
-    n.loads.loc[nodes, "carrier"] = "AC"
+    existing_nodes = [node for node in nodes if node in n.loads.index]
+    if len(existing_nodes) < len(nodes):
+        print(
+            "fWarning: For {len(nodes) - len(existing_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
+        )
+    n.loads.loc[existing_nodes, "carrier"] = "AC"
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
@@ -2984,7 +2989,9 @@ if __name__ == "__main__":
     )
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    transport = pd.read_csv(snakemake.input.transport, index_col=0, parse_dates=True)
+    transport = pd.read_csv(
+        snakemake.input.transport, index_col=0, parse_dates=True
+    ).reindex(columns=nodes, fill_value=0.0)
 
     avail_profile = pd.read_csv(
         snakemake.input.avail_profile, index_col=0, parse_dates=True
