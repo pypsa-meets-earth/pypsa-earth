@@ -15,7 +15,7 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["NG", "BJ"]
+countries: ["TN"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 enable:
@@ -521,9 +521,9 @@ sector:
     network_limit: 2000 #GWkm
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
-    underground_storage: false
+    underground_storage: true
     hydrogen_underground_storage_locations:
-    # - onshore  # more than 50 km from sea
+    - onshore  # more than 50 km from sea
     - nearshore    # within 50 km of sea
     # - offshore
     hydrogen_colors: false
