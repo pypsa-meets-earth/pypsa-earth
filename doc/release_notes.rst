@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Remove duplicates in environment file. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
+
 * Revised bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
 
 * Revised pinned to locked environments. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
