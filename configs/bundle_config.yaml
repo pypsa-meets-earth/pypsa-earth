@@ -263,13 +263,13 @@ databundles:
 
   # cutouts bundle of the cutouts folder for the North American continent
   # Coordinate bounds: [long -172 to -47, lat 1.5-74]
-  # Size about 25 GB (zipped)
+  # Size about 27 GB (zipped)
   bundle_cutouts_northamerica:
     countries: [NorthAmerica]
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/1W0rEa7SrAUjqREycKSbl1dkylj_-xmpT/view?usp=drive_link
+      gdrive: https://drive.google.com/file/d/1zR_UC1WDLVt5vJhUV1IXFR6WQMM6vomg/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
