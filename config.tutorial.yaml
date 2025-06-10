@@ -61,6 +61,7 @@ renewable:
   csp:
     cutout: cutout-2013-era5-tutorial
 
+
 solving:
   solver:
     name: glpk
