@@ -61,6 +61,12 @@ renewable:
   csp:
     cutout: cutout-2013-era5-tutorial
 
+costs:
+  year: 2030
+  technology_data_version: v0.12.0
+  technology_data_US: false
+  cost_scenario: "moderate"
+  financial_case: "market"
 
 solving:
   solver:

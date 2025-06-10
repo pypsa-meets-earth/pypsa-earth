@@ -407,7 +407,7 @@ if not config["enable"].get("build_natura_raster", False):
             version=config["costs"]["technology_data_version"],
         input:
             HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs{cost_directory}/"
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}/"
                 + "costs_{year}.csv",
                 keep_local=True,
             ),
