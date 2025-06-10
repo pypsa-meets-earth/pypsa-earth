@@ -21,7 +21,7 @@ countries: ["NG", "BJ"]
 enable:
   retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: true
-  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cost_data: false # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false # If True, then an exclusion raster will be build
   build_cutout: false
@@ -363,7 +363,7 @@ renewable:
 costs:
   year: 2030
   technology_data_version: v0.12.0
-  technology_data_US: false # true if you want to use US-specific costs from technology-data/outputs/US instead of technology-data/outputs
+  technology_data_US: false # true if you want to use US-specific costs from technology-data/outputs/US instead of technology-data/outputs (also requires country: ["US"])
   cost_scenario: "moderate" # only used if `technology_data_US: true`; can be "moderate", "advanced" or "conservative"
   financial_case: "market" # only used if `technology_data_US: true`; can be "market" or "r&d"
 
