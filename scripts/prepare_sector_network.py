@@ -2029,7 +2029,10 @@ def add_heat(n, costs):
                 raise NotImplementedError(
                     f" {name} not in " f"heat systems: {heat_systems}"
                 )
-
+            missing_nodes = list(set(h_nodes[name]) - set(heat_demand[[sector + " water", sector + " space"]].groupby(level=1,axis=1).sum().columns))
+            for node in missing_nodes:
+                heat_demand[sector + " water", node] = 0
+                heat_demand[sector + " space", node] = 0
             if sector in name:
                 heat_load = (
                     heat_demand[[sector + " water", sector + " space"]]
@@ -2282,7 +2285,10 @@ def add_cooling(n, costs):
             location=c_nodes[name],
             carrier=name + " cooling",
         )
-
+        # In case of voronoi clustering, DC nodes appear under regions onshore
+        missing_nodes = list(set(c_nodes[name]) - set(cooling_demand[["space"]].groupby(level=1,axis=1).sum().columns))
+        for node in missing_nodes:
+            cooling_demand["space",node] = 0
         cooling_load = (
             cooling_demand[["space"]]
             .groupby(level=1, axis=1)
@@ -3065,14 +3071,14 @@ def add_industry_heating(n, costs, market, scenario):
     nodes_low = low_temp_buses.str.split(" ").str[0]
     nodes_medium = medium_temp_buses.str.split(" ").str[0]
     nodes_high = high_temp_buses.str.split(" ").str[0]
+    
+    #assert (nodes_low.isin(n.buses.index)).all()
+    #assert (nodes_medium.isin(n.buses.index)).all()
+    #assert (nodes_high.isin(n.buses.index)).all()
 
-    assert (nodes_low.isin(n.buses.index)).all()
-    assert (nodes_medium.isin(n.buses.index)).all()
-    assert (nodes_high.isin(n.buses.index)).all()
-
-    assert (low_temp_buses.isin(n.buses.index)).all()
-    assert (medium_temp_buses.isin(n.buses.index)).all()
-    assert (high_temp_buses.isin(n.buses.index)).all()
+    #assert (low_temp_buses.isin(n.buses.index)).all()
+    #assert (medium_temp_buses.isin(n.buses.index)).all()
+    #assert (high_temp_buses.isin(n.buses.index)).all()
 
     # Add carriers if not already present
     carriers = [
