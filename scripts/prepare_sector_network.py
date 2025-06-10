@@ -2029,7 +2029,15 @@ def add_heat(n, costs):
                 raise NotImplementedError(
                     f" {name} not in " f"heat systems: {heat_systems}"
                 )
-            missing_nodes = list(set(h_nodes[name]) - set(heat_demand[[sector + " water", sector + " space"]].groupby(level=1,axis=1).sum().columns))
+            missing_nodes = list(
+                set(h_nodes[name])
+                - set(
+                    heat_demand[[sector + " water", sector + " space"]]
+                    .groupby(level=1, axis=1)
+                    .sum()
+                    .columns
+                )
+            )
             for node in missing_nodes:
                 heat_demand[sector + " water", node] = 0
                 heat_demand[sector + " space", node] = 0
@@ -2286,9 +2294,12 @@ def add_cooling(n, costs):
             carrier=name + " cooling",
         )
         # In case of voronoi clustering, DC nodes appear under regions onshore
-        missing_nodes = list(set(c_nodes[name]) - set(cooling_demand[["space"]].groupby(level=1,axis=1).sum().columns))
+        missing_nodes = list(
+            set(c_nodes[name])
+            - set(cooling_demand[["space"]].groupby(level=1, axis=1).sum().columns)
+        )
         for node in missing_nodes:
-            cooling_demand["space",node] = 0
+            cooling_demand["space", node] = 0
         cooling_load = (
             cooling_demand[["space"]]
             .groupby(level=1, axis=1)
@@ -3033,6 +3044,19 @@ def add_industry_heating(n, costs):
     idx = pd.IndexSlice
 
     investment_costs = costs.loc[idx[:, "investment"], :]
+    if "scenario" in investment_costs.columns:
+        investment_costs = investment_costs[
+            investment_costs.scenario.isin([scenario, np.nan])
+        ]
+    if "financial_case" in investment_costs.columns:
+        investment_costs = investment_costs[
+            investment_costs.financial_case.isin([market, np.nan])
+        ]
+
+    if "scenario" in costs.columns:
+        costs = costs[costs.scenario.isin([scenario, np.nan])]
+    if "financial_case" in costs.columns:
+        costs = costs[costs.financial_case.isin([market, np.nan])]
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
     lifetime = snakemake.params.costs["fill_values"]["lifetime"]
@@ -3046,6 +3070,7 @@ def add_industry_heating(n, costs):
         [(x[0], "fixed") for x in investment_costs.index]
     )
     costs = pd.concat([costs, investment_costs])
+
     costs = costs["value"].unstack()
 
     low_temp_buses = n.buses.loc[
@@ -3061,14 +3086,14 @@ def add_industry_heating(n, costs):
     nodes_low = low_temp_buses.str.split(" ").str[0]
     nodes_medium = medium_temp_buses.str.split(" ").str[0]
     nodes_high = high_temp_buses.str.split(" ").str[0]
-    
-    #assert (nodes_low.isin(n.buses.index)).all()
-    #assert (nodes_medium.isin(n.buses.index)).all()
-    #assert (nodes_high.isin(n.buses.index)).all()
 
-    #assert (low_temp_buses.isin(n.buses.index)).all()
-    #assert (medium_temp_buses.isin(n.buses.index)).all()
-    #assert (high_temp_buses.isin(n.buses.index)).all()
+    # assert (nodes_low.isin(n.buses.index)).all()
+    # assert (nodes_medium.isin(n.buses.index)).all()
+    # assert (nodes_high.isin(n.buses.index)).all()
+
+    # assert (low_temp_buses.isin(n.buses.index)).all()
+    # assert (medium_temp_buses.isin(n.buses.index)).all()
+    # assert (high_temp_buses.isin(n.buses.index)).all()
 
     # Add carriers if not already present
     carriers = [
@@ -3670,7 +3695,12 @@ if __name__ == "__main__":
         snakemake.input["industrial_heating_costs"], index_col=[0, 1]
     )
 
-    add_industry_heating(n, industry_heating_costs)
+    add_industry_heating(
+        n,
+        industry_heating_costs,
+        snakemake.params.costs["financial_case"],
+        snakemake.params.costs["scenario"],
+    )
 
     """
     # industry_heating_costs = (
@@ -3701,8 +3731,12 @@ if __name__ == "__main__":
     industry_heating_costs = industry_heating_costs.apply(convert_row, axis=1)
 
     logger.info("Adding industrial heating technologies.")
-    add_industry_heating(n, industry_heating_costs)
-    """
+    add_industry_heating(
+        n,
+        industry_heating_costs,
+        snakemake.params.costs["financial_case"],
+        snakemake.params.costs["scenario"],
+    )
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
@@ -3757,12 +3791,12 @@ if __name__ == "__main__":
     # add_land_transport(n, costs)
 
     # if snakemake.config["custom_data"]["transport_demand"]:
-    # add_rail_transport(n, costs)
+    add_rail_transport(n, costs)
 
     # if snakemake.config["custom_data"]["custom_sectors"]:
-    # add_agriculture(n, costs)
-    # add_residential(n, costs)
-    # add_services(n, costs)
+    add_agriculture(n, costs)
+    add_residential(n, costs)
+    add_services(n, costs)
 
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)

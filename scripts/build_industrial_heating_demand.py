@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import os
 import random
 from copy import deepcopy
 
@@ -1557,6 +1558,9 @@ if __name__ == "__main__":
         regional_supply = pd.concat(regional_supply).replace(np.nan, 0)
 
         regional_supply_shapes.loc[region] = len(regional_supply)
+
+        os.makedirs("hold", exist_ok=True)
+
         regional_supply.to_csv(f"hold/regional_supply_{region}.csv")
 
         regional_supply.loc[:, "region"] = region
