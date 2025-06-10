@@ -41,6 +41,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
+* Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
+
 **Minor Changes and bug-fixing**
 
 * Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
