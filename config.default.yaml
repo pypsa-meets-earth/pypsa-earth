@@ -362,7 +362,7 @@ renewable:
 # Costs Configuration
 costs:
   year: 2030
-  technology_data_version: v0.13.0
+  technology_data_version: v0.13.1
   technology_data_US: false # true if you want to use US-specific costs from technology-data/outputs/US instead of technology-data/outputs (also requires country: ["US"])
   cost_scenario: "moderate" # only used if `technology_data_US: true`; can be "moderate", "advanced" or "conservative"
   financial_case: "market" # only used if `technology_data_US: true`; can be "market" or "r&d"
