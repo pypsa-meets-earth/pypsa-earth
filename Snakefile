@@ -397,6 +397,7 @@ if not config["enable"].get("build_natura_raster", False):
 
             shutil.copyfile(input[0], output[0])
 
+
 if config["countries"] == ["US"] and config["costs"]["technology_data_US"]:
     cost_directory = "US"
 else:
