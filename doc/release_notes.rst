@@ -13,6 +13,12 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Remove duplicates in environment file. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
+
+* Revised bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
+
+* Revised pinned to locked environments. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
+
 * Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
 
 * Add a command-line interface in ``databundle_cli.py`` that will be triggered if ``retrieve_databundle_light.py`` fails to retrieve all necessary files, providing a fallback to assist with debugging the issue `PR #1366 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1366>`__
@@ -35,7 +41,15 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
+* Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
+
 **Minor Changes and bug-fixing**
+
+* Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
+
+* Fix missing country attribute in cluster_network. `PR #1443 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1443>`__
+
+* Fix numpy TypeErrors. `PR #1430 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1430>`__
 
 * Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
 
@@ -90,6 +104,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise naming of Wikipedia data for vehicles `PR #1422 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1422>`__
 
 * Monte Carlo: move qmc.discrepancy to logging only `PR #1418 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1418>`__
+
+* Extending powerplant filter option to custom powerplants `PR #1465 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1465>`__
 
 PyPSA-Earth 0.6.0
 =================
