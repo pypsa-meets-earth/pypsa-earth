@@ -45,6 +45,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0. `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
+
 * Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
 
 * Fix missing country attribute in cluster_network. `PR #1443 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1443>`__
