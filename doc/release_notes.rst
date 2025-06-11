@@ -39,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0. `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
+
 * Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
 
 * Modified how_to_contribute documentation page. `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
