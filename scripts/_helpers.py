@@ -211,7 +211,7 @@ def read_osm_config(*args):
             base_folder = os.path.dirname(base_folder)
     else:
         base_folder = os.getcwd()
-    osm_config_path = os.path.join(base_folder, "configs", REGIONS_CONFIG)
+    osm_config_path = os.path.join(base_folder, "configs", "gp", REGIONS_CONFIG)
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
