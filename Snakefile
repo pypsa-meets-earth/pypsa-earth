@@ -530,7 +530,7 @@ rule build_powerplants:
         powerplants_filter=config["electricity"]["powerplants_filter"],
     input:
         base_network="networks/" + RDIR + "base.nc",
-        pm_config="configs/powerplantmatching_config.yaml",
+        pm_config="configs/gp/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
