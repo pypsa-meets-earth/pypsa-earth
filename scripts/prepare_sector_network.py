@@ -329,11 +329,11 @@ def add_hydrogen(n, costs):
             "cost_name": "H2 production natural gas steam reforming",
             "bus0": spatial.gas.nodes,
             "bus1": spatial.nodes + " grey H2",
-            "bus2": -spatial.nodes,
+            "bus2": spatial.nodes,
             "bus3": "co2 atmosphere",
             "efficiency": 1
             / costs.at["H2 production natural gas steam reforming", "gas-input"],
-            "efficiency2": costs.at[
+            "efficiency2": -costs.at[
                 "H2 production natural gas steam reforming", "electricity-input"
             ]
             / costs.at["H2 production natural gas steam reforming", "gas-input"],
