@@ -391,7 +391,7 @@ def add_hydrogen(n, costs):
             "bus0": spatial.oil.nodes,
             "bus1": spatial.nodes + " grey H2",
             "bus2": spatial.nodes,
-            "bus3": "co2 atmoshpere",
+            "bus3": "co2 atmosphere",
             "efficiency": 1
             / costs.at["H2 production heavy oil partial oxidation", "oil-input"],
             "efficiency2": -costs.at[
