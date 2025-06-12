@@ -43,6 +43,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
 
+* Introduce US-specific cost configurations `PR #1448 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448>`__
+
 **Minor Changes and bug-fixing**
 
 * Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0. `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
