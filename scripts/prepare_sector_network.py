@@ -202,9 +202,8 @@ def add_hydrogen(n, costs):
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
 
-    # Read hydrogen production options
-    h2_options = options.get("hydrogen", {})
-    h2_techs = h2_options.get("production", [])
+    # Read hydrogen production technologies
+    h2_techs = options["hydrogen"].get("production", [])
     # H2 production technologies by color
     grid_h2_techs = [
         "H2 Electrolysis",
@@ -402,7 +401,7 @@ def add_hydrogen(n, costs):
         },
     }
 
-    if h2_options.get("hydrogen_colors", False):
+    if options["hydrogen"].get("hydrogen_colors", False):
         # Add infrastructure for grid hydrogen
         if set(h2_techs) & set(grid_h2_techs):
             n.madd(
@@ -492,7 +491,7 @@ def add_hydrogen(n, costs):
     # Add hydrogen production technologies
     for h2_tech in h2_techs:
         # Set H2 buses as production output if colors are not used
-        if not h2_options.get("hydrogen_colors", False):
+        if not options["hydrogen"].get("hydrogen_colors", False):
             tech_params[h2_tech]["bus1"] = spatial.nodes + " H2"
 
         n.madd(
