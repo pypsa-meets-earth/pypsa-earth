@@ -258,7 +258,8 @@ def add_hydrogen(n, costs):
             "cost_name": "PEM electrolyzer small size",
             "bus0": spatial.nodes,
             "bus1": spatial.nodes + " grid H2",
-            "efficiency": 1 / costs.at["PEM electrolyzer small size", "electricity-input"],
+            "efficiency": 1
+            / costs.at["PEM electrolyzer small size", "electricity-input"],
         },
         "SOEC": {
             "cost_name": "SOEC",
