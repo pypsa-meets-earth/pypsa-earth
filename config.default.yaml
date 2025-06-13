@@ -362,7 +362,7 @@ renewable:
 # Costs Configuration
 costs:
   year: 2030
-  version: v0.13.1
+  version: v0.13.2
   discountrate: [0.071] #, 0.086, 0.111]
   output_currency: "EUR"
   default_USD_to_EUR: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html

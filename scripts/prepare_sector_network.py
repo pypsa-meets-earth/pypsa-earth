@@ -209,6 +209,7 @@ def add_hydrogen(n, costs):
         "H2 Electrolysis",
         "Alkaline electrolyzer large",
         "Alkaline electrolyzer medium",
+        "Alkaline electrolyzer small",
         "PEM electrolyzer",
         "SOEC",
     ]
