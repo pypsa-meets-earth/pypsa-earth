@@ -2956,14 +2956,15 @@ if __name__ == "__main__":
 
     # Fetch wildcards
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
-    demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
+    demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
     # Prepare the costs dataframe
     costs = prepare_costs(
         snakemake.input.costs,
-        snakemake.params.costs["USD2013_to_EUR2013"],
+        snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
+        snakemake.params.costs["default_USD_to_EUR"],
     )
 
     # Define spatial for biomass and co2. They require the same spatial definition

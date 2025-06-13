@@ -13,6 +13,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Remove duplicates in environment file. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
+
+* Revised bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
+
 * Revised pinned to locked environments. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
 
 * Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
@@ -37,7 +41,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
+* Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
+
 **Minor Changes and bug-fixing**
+
+* Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0. `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
 
 * Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
 
