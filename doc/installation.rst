@@ -37,7 +37,7 @@ To use packages in python, it is highly recommended to use a ``conda`` package m
 
 .. code:: bash
 
-    conda --version
+    $ conda --version
 
 If ``conda`` is not installed, follow `miniconda installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
@@ -58,7 +58,7 @@ PyPSA-Earth currently needs Java redistribution to work properly. To check if Ja
 
 .. code:: bash
 
-    java --version
+    $ java --version
 
 The expected output should resemble the following:
 
@@ -72,7 +72,7 @@ In case you don't have Java, you have to install it from the `official website <
 
 
 Installation with Conda/Mamba
-========================
+===============================
 
 Clone the Repository
 --------------------
@@ -86,9 +86,7 @@ The following commands can be executed in command prompt of ``miniconda``, termi
 
 .. code:: bash
 
-    /some/other/path % cd /some/path/without/spaces
-
-    /some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
+    $ git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
 
 Install Dependencies
 -------------------------
@@ -97,15 +95,36 @@ PyPSA-Earth relies on a set of other Python packages to function.
 The python package requirements are located in the `envs/environment.yaml <https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml>`_ file. We install only `mamba` in the conda base environment to accelerate the installation.
 **Please keep the base environment always clean, meaning don't install anything there!** It will allow to ensure compatibility of all the packages needed to work with PyPSA-Earth model.
 
-The environment can be installed and activated like this:
+There are also regularly updated locked environment files for
+each platform generated with conda-lock to ensure reproducibility. Choose the correct file for your platform:
 
-.. code:: bash
+* For Intel/AMD processors:
 
-    .../pypsa-earth (base) % conda install -c conda-forge mamba
+  - Linux: ``envs/linux-64.lock.yaml``
 
-    .../pypsa-earth % mamba env create -f envs/environment.yaml
+  - macOS: ``envs/osx-64.lock.yaml``
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+  - Windows: ``envs/win-64.lock.yaml``
+
+* For ARM processors:
+
+  - macOS (Apple Silicon): ``envs/osx-arm64.lock.yaml``
+
+  - Linux (ARM): Currently not supported via lock files; requires building certain packages, such as ``PySCIPOpt``, from source
+
+We recommend using these locked files for a stable environment.
+
+.. note::
+
+    you can check and verify your platform with ``conda info``
+
+.. code:: console
+
+    $ conda install -c conda-forge mamba
+
+    $ mamba env create -f envs/linux-64.lock.yaml # select the appropriate file for your platform
+
+    $ conda activate pypsa-earth
 
 Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you
 open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.
@@ -114,9 +133,28 @@ In case mamba did not work for you, you might want to try conda instead:
 
 .. code:: bash
 
-    .../pypsa-earth % conda env create -f envs/environment.yaml
+    $ conda env create -f envs/linux-64.lock.yaml
 
-    .../pypsa-earth (pypsa-earth) % conda activate pypsa-earth
+    $ conda activate pypsa-earth
+
+
+Generating the Lock Files
+---------------------------
+If a pre-generated lock file is not available for your platform (e.g., ``aarch64``, ARM Mac, etc.), you can generate one using the following:
+
+1. Ensure ``conda-lock`` is installed:
+
+   .. code-block:: bash
+
+      $ conda install conda-lock -c conda-forge
+
+2. Generate lock files for target platforms:
+
+   .. code-block:: bash
+
+      $ conda-lock lock -p <your-platform> -k env -f envs/environment.yaml
+
+For platform codes, refer to the `conda-lock documentation <https://conda.github.io/conda-lock/>`_ or use ``conda info`` to determine your platform.
 
 
 For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
@@ -125,7 +163,7 @@ To confirm the installation, run the following command in the activated environm
 
 .. code:: bash
 
-    .../pypsa-earth (pypsa-earth) % snakemake --version
+    $ snakemake --version
 
 
 Solver Installation
@@ -153,7 +191,7 @@ To further improve performances, commercial solvers like
     However, solving capabilities of ``glpk`` are limited.
     To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
-A recommended instruction to install the HiGHS solver is given `here <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
+A recommended instruction to install the HiGHS solver is given `here (link to highs) <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
 
 Install Jupyter Lab
@@ -163,5 +201,55 @@ We use Jupyter notebooks to share examples on how to use the model and analyse t
 
 .. code:: bash
 
-    .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
-    .../pypsa-earth % jupyter lab
+    $ ipython kernel install --user --name=pypsa-earth
+    $ jupyter lab
+
+
+Alternate installation with Docker
+=====================================
+This is an alternative way to create a development environment for PyPSA-Earth. This method is useful for users who are not familiar with programming or Python, or who do not want to install Python on their local machine. It uses Docker containers to create a development environment for PyPSA-Earth.
+
+This section provides a step-by-step guide on how to set up and use Docker containers to run PyPSA-Earth.
+
+Steps:
+
+1. Install Docker: Follow the instructions for your operating system:
+
+   * `Windows <https://docs.docker.com/desktop/install/windows-install/>`_
+   * `Linux <https://docs.docker.com/desktop/install/linux/>`_
+   * `MacOS <https://docs.docker.com/desktop/install/mac-install/>`_
+
+.. note::
+
+    Ensure Docker is installed on your system.
+
+2. You can use the link `here (link to VSC) <https://code.visualstudio.com/download>`_ to install Visual Studio Code on your operating system. Ensure to select the most compatible file for your operating system.
+
+3. Install GitHub Desktop for your OS `here (link to github desktop) <https://desktop.github.com/download/>`_.
+
+4. Clone the repository:
+
+   * Open GitHub Desktop.
+   * Click on "File" in the top left corner.
+   * Click on "Clone Repository".
+   * Paste the following URL in the URL field:
+
+   .. code:: bash
+
+    https://github.com/pypsa-meets-earth/pypsa-earth.git
+
+   * Click on "Clone".
+   * Choose the location where you want to save the repository.
+   * Click on "Current Branch: main" and select `devContainers`.
+   * Click on "Open in Visual Studio Code".
+
+   ``The repository will be cloned to your local machine.``
+
+5. Rebuild and open in a container:
+
+   * Open the repository in VSCode.
+   * Click on the icon in the far bottom left corner of the VSCode window.
+   * Click on "Reopen in Container".
+   * Wait for the container to build and open the repository in the container.
+
+The environment will be ready for use. You can now run PyPSA-Earth in the container.

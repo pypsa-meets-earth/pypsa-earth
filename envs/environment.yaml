@@ -16,6 +16,7 @@ dependencies:
 - dask
 - powerplantmatching>=0.5.19  # due to this https://github.com/PyPSA/powerplantmatching/pull/202
 - earth-osm>=2.3.post1
+- conda-lock
 
 # Dependencies of the workflow itself
 - xlrd

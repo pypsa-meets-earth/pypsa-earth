@@ -100,7 +100,6 @@ Documentation
 
 * :doc:`introduction`
 * :doc:`installation`
-* :doc:`docker_containers`
 * :doc:`tutorial_electricity`
 * :doc:`tutorial_sector`
 * :doc:`model_customization`
@@ -114,7 +113,6 @@ Documentation
 
    introduction
    installation
-   docker_containers
    tutorial_electricity
    tutorial_sector
    model_customization
