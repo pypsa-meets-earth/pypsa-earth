@@ -9,6 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import numpy as np
 import pandas as pd
 from _helpers import configure_logging
 
@@ -21,8 +22,9 @@ if __name__ == "__main__":
     cost_year = int(snakemake.params["cost_year"])
 
     temperature_bands = {
-        "low": "<= 150C",
-        "medium": "150C - 300C",
+        "low": "<= 80C",
+        "medium": "80C - 150C",
+        "high": "150C - 250C",
     }
 
     idx = pd.IndexSlice
@@ -32,180 +34,67 @@ if __name__ == "__main__":
         index=pd.MultiIndex.from_tuples((), names=techdata.index.names),
     )
 
-    # add molten salt storage costs
-    manual_costs.loc[idx["low-temp molten salt store", "investment"], "value"] = 41_600
-    manual_costs.loc[idx["low-temp molten salt store", "investment"], "unit"] = (
-        "$/MWhth"
-    )
-    manual_costs.loc[idx["low-temp molten salt store", "investment"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
+    # solar thermal (parabolic trough delivering heat at 150C-250C):
     manual_costs.loc[
-        idx["low-temp molten salt store", "investment"], "further description"
-    ] = "Salt Media + Storage Tank, for a system with 1000MWh capacity"
-
-    manual_costs.loc[idx["low-temp molten salt store", "FOM"], "value"] = 1.5
-    manual_costs.loc[idx["low-temp molten salt store", "FOM"], "unit"] = "%"
-    manual_costs.loc[idx["low-temp molten salt store", "FOM"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
+        idx["solar thermal parabolic trough", "investment"], "value"
+    ] = 400_000
     manual_costs.loc[
-        idx["low-temp molten salt store", "FOM"], "further description"
-    ] = "Salt Media + Storage Tank, for a system with 1000MWh capacity"
-
-    manual_costs.loc[idx["low-temp molten salt store", "lifetime"], "value"] = 35
-    manual_costs.loc[idx["low-temp molten salt store", "lifetime"], "unit"] = "years"
-    manual_costs.loc[idx["low-temp molten salt store", "lifetime"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
-    manual_costs.loc[
-        idx["low-temp molten salt store", "lifetime"], "further description"
-    ] = "Taken from a typical range of 30-50 years"
-
-    manual_costs.loc[idx["low-temp molten salt store", "efficiency"], "value"] = 99.95
-    manual_costs.loc[idx["low-temp molten salt store", "efficiency"], "unit"] = "%/hour"
-    manual_costs.loc[idx["low-temp molten salt store", "efficiency"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
-    manual_costs.loc[
-        idx["low-temp molten salt store", "efficiency"], "further description"
-    ] = "Typical value assumed for molten salt storage with a daily thermal loss of 1-2% per day"
-
-    manual_costs.loc[idx["low-temp molten salt discharger", "investment"], "value"] = (
-        30_000
-    )
-    manual_costs.loc[idx["low-temp molten salt discharger", "investment"], "unit"] = (
-        "$/MWth"
-    )
-    manual_costs.loc[idx["low-temp molten salt discharger", "investment"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "investment"], "further description"
-    ] = "Assumes output is heat only, and does not need conversion to AC"
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "investment"], "currency_year"
-    ] = 2022.0
-
-    manual_costs.loc[idx["low-temp molten salt discharger", "FOM"], "value"] = 1.0
-    manual_costs.loc[idx["low-temp molten salt discharger", "FOM"], "unit"] = "%"
-    manual_costs.loc[idx["low-temp molten salt discharger", "FOM"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "FOM"], "further description"
-    ] = "Assumes output is heat only, and does not need conversion to AC"
-    manual_costs.loc[idx["low-temp molten salt discharger", "FOM"], "currency_year"] = (
-        2022.0
-    )
-
-    manual_costs.loc[idx["low-temp molten salt discharger", "lifetime"], "value"] = 35
-    manual_costs.loc[idx["low-temp molten salt discharger", "lifetime"], "unit"] = (
-        "years"
-    )
-    manual_costs.loc[idx["low-temp molten salt discharger", "lifetime"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "lifetime"], "further description"
-    ] = "Taken from a typical range of 30-50 years"
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "lifetime"], "currency_year"
-    ] = 2022.0
-
-    manual_costs.loc[idx["low-temp molten salt discharger", "efficiency"], "value"] = (
-        98.0
-    )
-    manual_costs.loc[idx["low-temp molten salt discharger", "efficiency"], "unit"] = "%"
-    manual_costs.loc[idx["low-temp molten salt discharger", "efficiency"], "source"] = (
-        "Viswanathan_2022 - Energy Storage Grand Challenge Cost and Performance Assessment 2022"
-    )
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "efficiency"], "further description"
-    ] = "Typical value for heat exchangers"
-    manual_costs.loc[
-        idx["low-temp molten salt discharger", "efficiency"], "currency_year"
-    ] = 2022.0
-
-    # add SHIP costs
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "investment"], "value"
-    ] = 350_000
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "investment"], "unit"
+        idx["solar thermal parabolic trough", "investment"], "unit"
     ] = "$/MWth"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "investment"], "source"
-    ] = "IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
+        idx["solar thermal parabolic trough", "investment"], "source"
+    ] = "https://proceedings.ises.org/conference/eurosun2024/papers/eurosun2024-0042-Akar.pdf"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "investment"], "further description"
-    ] = "For temperatures between 100-400C; Assumes Solar Collectors Coupled with Thermal Storage; Value reverse-engineered from LCOH; kWth is nameplate capacity"
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "investment"], "currency_year"
-    ] = 2022.0
+        idx["solar thermal parabolic trough", "investment"], "further description"
+    ] = "Varies between 300-500$/kWth depending on assumptions on building materials"
 
-    manual_costs.loc[idx["solar heat for industrial processes", "FOM"], "value"] = 2
-    manual_costs.loc[idx["solar heat for industrial processes", "FOM"], "unit"] = "%"
-    manual_costs.loc[idx["solar heat for industrial processes", "FOM"], "source"] = (
-        "IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
-    )
+    manual_costs.loc[idx["solar thermal parabolic trough", "lifetime"], "value"] = 25
+    manual_costs.loc[idx["solar thermal parabolic trough", "lifetime"], "unit"] = "years"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "FOM"], "further description"
-    ] = "Typical value for solar thermal"
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "FOM"], "currency_year"
-    ] = 2022.0
+        idx["solar thermal parabolic trough", "lifetime"], "source"
+    ] = "https://proceedings.ises.org/conference/eurosun2024/papers/eurosun2024-0042-Akar.pdf"
 
+    manual_costs.loc[idx["solar thermal parabolic trough", "FOM"], "value"] = 0.012
+    manual_costs.loc[idx["solar thermal parabolic trough", "FOM"], "unit"] = "$/MWth"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-mexico"], "value"
-    ] = 30
+        idx["solar thermal parabolic trough", "FOM"], "source"
+    ] = "https://proceedings.ises.org/conference/eurosun2024/papers/eurosun2024-0042-Akar.pdf"
+
+    # oil-based storage unit coupled to solar thermal
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-mexico"], "unit"
-    ] = "%"
+        idx["oil-based storage unit", "investment"], "value"
+    ] = 150_000 / 6 # 6 is the E-P ratio. investment is expressed as power-capacity, because it is implemented as a storage unit in PyPSA 
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-mexico"], "source"
-    ] = "IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
+        idx["oil-based storage unit", "investment"], "unit"
+    ] = "$/MWth"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-mexico"],
-        "further description",
-    ] = "Data point number one for capacity factor in Mexico. Should be used to interpolate capacity factor for other locations"
+        idx["oil-based storage unit", "investment"], "source"
+    ] = "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-mexico"], "currency_year"
-    ] = 2022.0
+        idx["oil-based storage unit", "investment"], "further description"
+    ] = "This assumes the heat-transfer fluid of the solar field is also used for storage"
 
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-germany"], "value"
-    ] = 20
+        idx["oil-based storage unit", "efficiency"], "source"
+    ] = np.sqrt(0.9)
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-germany"], "unit"
-    ] = "%"
+        idx["oil-based storage unit", "efficiency"], "unit"
+    ] = "per unit"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-germany"], "source"
-    ] = "IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-germany"],
-        "further description",
-    ] = "Data point number two for capacity factor in Germany/Austria. Should be used to interpolate capacity factor for other locations"
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "efficiency-germany"],
-        "currency_year",
-    ] = 2022.0
+        idx["oil-based storage unit", "efficiency"], "source"
+    ] = "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
 
+    manual_costs.loc[idx["oil-based storage unit", "lifetime"], "value"] = 25
+    manual_costs.loc[idx["oil-based storage unit", "lifetime"], "unit"] = "years"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "lifetime"], "value"
-    ] = 25
-    manual_costs.loc[idx["solar heat for industrial processes", "lifetime"], "unit"] = (
-        "years"
-    )
+        idx["oil-based storage unit", "lifetime"], "source"
+    ] = "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
+
+    manual_costs.loc[idx["oil-based storage unit", "max_hours"], "value"] = 6 # 6 is the E-P ratio. investment is expressed as power-capacity, because it is implemented as a storage unit in PyPSA 
+    manual_costs.loc[idx["oil-based storage unit", "max_hours"], "unit"] = "hours"
     manual_costs.loc[
-        idx["solar heat for industrial processes", "lifetime"], "source"
-    ] = "IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "lifetime"], "further description"
-    ] = "Typical value for solar thermal"
-    manual_costs.loc[
-        idx["solar heat for industrial processes", "lifetime"], "currency_year"
-    ] = 2022.0
+        idx["oil-based storage unit", "max_hours"], "source"
+    ] = "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
 
     # add heat pump costs
     manual_costs = pd.concat(
@@ -223,8 +112,85 @@ if __name__ == "__main__":
         ]
     )
 
-    # add solar thermal costs
-    manual_costs = pd.concat([manual_costs, techdata.loc[idx[["csp-tower"], :]]])
+    # solar thermal for 80-150C temperature band: Linear Fresnel Reflectors
+    manual_costs.loc[
+        idx["linear fresnel reflector", "investment"], "value"
+    ] = 250_000
+    manual_costs.loc[
+        idx["linear fresnel reflector", "investment"], "unit"
+    ] = "$/MWth"
+    manual_costs.loc[
+        idx["linear fresnel reflector", "investment"], "source"
+    ] = "https://task64.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
+
+    manual_costs.loc[idx["linear fresnel reflector", "lifetime"], "value"] = 25
+    manual_costs.loc[idx["linear fresnel reflector", "lifetime"], "unit"] = "years"
+    manual_costs.loc[
+        idx["linear fresnel reflector", "lifetime"], "source"
+    ] = "https://task64.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
+
+    manual_costs.loc[idx["linear fresnel reflector", "VOM"], "value"] = 0.005
+    manual_costs.loc[idx["linear fresnel reflector", "VOM"], "unit"] = "$/MWthh"
+    manual_costs.loc[
+        idx["linear fresnel reflector", "VOM"], "source"
+    ] = "https://docs.nrel.gov/docs/fy25osti/93381.pdf"
+
+    manual_costs.loc[idx["linear fresnel reflector", "lifetime"], "value"] = 25
+    manual_costs.loc[idx["linear fresnel reflector", "lifetime"], "unit"] = "years"
+    manual_costs.loc[
+        idx["linear fresnel reflector", "lifetime"], "source"
+    ] = "https://docs.nrel.gov/docs/fy25osti/93381.pdf"
+
+    # for storage the same thermal-oil based storage unit is used
+
+    # Solar for 50-80C temperature band: glazed flat plate collectors
+    manual_costs.loc[
+        idx["glazed flat plate collector", "investment"], "value"
+    ] = 550_000
+    manual_costs.loc[
+        idx["glazed flat plate collector", "investment"], "unit"
+    ] = "$/MWth"
+    manual_costs.loc[
+        idx["glazed flat plate collector", "investment"], "source"
+    ] = "https://solarthermalworld.org/news/cost-comparison-of-industrial-heat-from-solar-thermal-and-pv/"
+    
+    manual_costs.loc[idx["glazed flat plate collector", "VOM"], "value"] = 1.8
+    manual_costs.loc[idx["glazed flat plate collector", "VOM"], "unit"] = "$/MWthh"
+    manual_costs.loc[
+        idx["glazed flat plate collector", "VOM"], "source"
+    ] = "https://solarthermalworld.org/news/cost-comparison-of-industrial-heat-from-solar-thermal-and-pv/"
+
+    manual_costs.loc[idx["glazed flat plate collector", "lifetime"], "value"] = 25
+    manual_costs.loc[idx["glazed flat plate collector", "lifetime"], "unit"] = "years"
+    manual_costs.loc[
+        idx["glazed flat plate collector", "lifetime"], "source"
+    ] = "https://task64.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
+    
+    # Steel or concrete water tank for 6h 50-80C storage
+    manual_costs.loc[
+        idx["steel or concrete water tank", "investment"], "value"
+    ] = 5_000 / 6 # 6 is the E-P ratio. investment is expressed as power-capacity, because it is implemented as a storage unit in PyPSA 
+    manual_costs.loc[
+        idx["steel or concrete water tank", "investment"], "unit"
+    ] = "$/MWth"
+    manual_costs.loc[
+        idx["steel or concrete water tank", "investment"], "source"
+    ] = "https://iea-es.org/wp-content/uploads/public/FactSheet_Thermal_Sensible_Water_2024-07-10.pdf"
+    manual_costs.loc[
+        idx["steel or concrete water tank", "investment"], "further description"
+    ] = "Investment is expressed as power-capacity, because it is implemented as a StorageUnit in PyPSA"
+
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency"], "value"] = np.sqrt(0.9)
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency"], "unit"] = "per unit"
+    manual_costs.loc[
+        idx["steel or concrete water tank", "efficiency"], "source"
+    ] = "https://iea-es.org/wp-content/uploads/public/FactSheet_Thermal_Sensible_Water_2024-07-10.pdf"
+
+    manual_costs.loc[idx["steel or concrete water tank", "max_hours"], "value"] = 6
+    manual_costs.loc[idx["steel or concrete water tank", "max_hours"], "unit"] = "hours"
+    manual_costs.loc[
+        idx["steel or concrete water tank", "max_hours"], "source"
+    ] = "https://iea-es.org/wp-content/uploads/public/FactSheet_Thermal_Sensible_Water_2024-07-10.pdf"
 
     # add biogas costs
     manual_costs.loc[idx["biogas", "fuel cost"], "value"] = 79.0
@@ -347,8 +313,8 @@ if __name__ == "__main__":
     )
 
     # lower temperature thermal storage
-    manual_costs = pd.concat(
-        [manual_costs, techdata.loc[idx[["central water tank storage"], :]]]
-    )
+    # manual_costs = pd.concat(
+    #     [manual_costs, techdata.loc[idx[["central water tank storage"], :]]]
+    # )
 
     manual_costs.to_csv(snakemake.output["industrial_heating_costs"])
