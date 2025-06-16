@@ -3102,21 +3102,30 @@ def add_industry_heating(n, costs):
             columns={name + " csp": name + " " + solar_tech for name in nodes_medium},
         )
 
-    # 2. Low-temp molten salt discharger (Link)
-    # Assumes the discharger converts stored heat in the same bus to usable heat at the same bus
-    logger.warning("Hot-fixing molten salt discharger; units appear to be wrong")
-    n.madd(
-        "Link",
-        nodes_high + " molten salt discharger",
-        bus0=nodes_high + " molten salt store",
-        bus1=high_temp_buses,
-        carrier="low-temp molten salt discharger",
-        p_nom_extendable=True,
-        capital_cost=costs.at["low-temp molten salt discharger", "fixed"] * 1000.0,
-        lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
-        efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
-        p_min_pu=0.0,
-    )
+        n.madd(
+            "Generator",
+            nod + " " + solar_tech,
+            bus=nod,
+            carrier=solar_tech,
+            p_nom_extendable=True,
+            capital_cost=costs.at[solar_tech, "investment"],
+            efficiency=costs.at[solar_tech, "efficiency"],
+            marginal_cost=costs.at[solar_tech, "VOM"],
+            p_max_pu=p_max_pu,
+        )
+        
+        n.madd(
+            "StorageUnit",
+            nod + " " + storage_tech_name,
+            bus=nod,
+            carrier=storage_tech_carrier_name,
+            p_nom_extendable=True,
+            capital_cost=costs.at[storage_tech_name, "investment"],
+            efficiency_store=costs.at[storage_tech_name, "efficiency"],
+            efficiency_dispatch=costs.at[storage_tech_name, "efficiency"],
+            max_hours=costs.at[storage_tech_name, "max_hours"],
+            marginal_cost=costs.at[storage_tech_name, "VOM"]
+        )
 
     for nod, boiler_tech_name, boiler_tech_carrier_name in zip(
         [nodes_low, nodes_medium, nodes_high],
