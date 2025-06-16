@@ -3102,30 +3102,21 @@ def add_industry_heating(n, costs):
             columns={name + " csp": name + " " + solar_tech for name in nodes_medium},
         )
 
-        n.madd(
-            "Generator",
-            nod + " " + solar_tech,
-            bus=nod,
-            carrier=solar_tech,
-            p_nom_extendable=True,
-            capital_cost=costs.at[solar_tech, "investment"],
-            efficiency=costs.at[solar_tech, "efficiency"],
-            marginal_cost=costs.at[solar_tech, "VOM"],
-            p_max_pu=p_max_pu,
-        )
-        
-        n.madd(
-            "StorageUnit",
-            nod + " " + storage_tech_name,
-            bus=nod,
-            carrier=storage_tech_carrier_name,
-            p_nom_extendable=True,
-            capital_cost=costs.at[storage_tech_name, "investment"],
-            efficiency_store=costs.at[storage_tech_name, "efficiency"],
-            efficiency_dispatch=costs.at[storage_tech_name, "efficiency"] ** 0.5,
-            max_hours=costs.at[storage_tech_name, "max_hours"],
-            marginal_cost=costs.at[storage_tech_name, "VOM"]
-        )
+    # 2. Low-temp molten salt discharger (Link)
+    # Assumes the discharger converts stored heat in the same bus to usable heat at the same bus
+    logger.warning("Hot-fixing molten salt discharger; units appear to be wrong")
+    n.madd(
+        "Link",
+        nodes_high + " molten salt discharger",
+        bus0=nodes_high + " molten salt store",
+        bus1=high_temp_buses,
+        carrier="low-temp molten salt discharger",
+        p_nom_extendable=True,
+        capital_cost=costs.at["low-temp molten salt discharger", "fixed"] * 1000.0,
+        lifetime=costs.at["low-temp molten salt discharger", "lifetime"],
+        efficiency=costs.at["low-temp molten salt discharger", "efficiency"],
+        p_min_pu=0.0,
+    )
 
     for nod, boiler_tech_name, boiler_tech_carrier_name in zip(
         [nodes_low, nodes_medium, nodes_high],
@@ -3269,7 +3260,31 @@ def add_industry_heating(n, costs):
         marginal_cost=costs.at["hot water boiler gas cond", "VOM"]
         + costs.at["biogas", "fuel cost"],
     )
-    '''
+
+    # 9. Hot water tank (Store)
+    logger.warning("Currently manually adjusts units for hot water tank")
+    n.madd(
+        "Store",
+        nodes_low + " hot water storage",
+        bus=low_temp_buses,
+        carrier="hot water storage",
+        e_nom_extendable=True,
+        capital_cost=costs.at["central water tank storage", "fixed"] * 1000,
+        lifetime=costs.at["central water tank storage", "lifetime"],
+        # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
+    )
+
+    # Hot water tank for medium temperature (Store)
+    n.madd(
+        "Store",
+        nodes_medium + " hot water storage",
+        bus=medium_temp_buses,
+        carrier="hot water storage",
+        e_nom_extendable=True,
+        capital_cost=costs.at["central water tank storage", "fixed"] * 1000,
+        lifetime=costs.at["central water tank storage", "lifetime"],
+        # If you want to incorporate energy_to_power_ratio or FOM, you can handle that in capital costs or elsewhere.
+    )
 
 
 def add_custom_water_cost(n):
