@@ -206,6 +206,7 @@ if __name__ == "__main__":
     investemt_costs = {
         2020: 60_000,  # EUR/MW
         2030: 50_000,  # EUR/MW
+        2035: 50_000,  # EUR/MW
         2040: 50_000,  # EUR/MW
         2050: 50_000,  # EUR/MW
     }
@@ -259,6 +260,7 @@ if __name__ == "__main__":
     investemt_costs = {
         2020: 50_000,  # EUR/MW
         2030: 40_000,  # EUR/MW
+        2035: 40_000,  # EUR/MW
         2040: 40_000,  # EUR/MW
         2050: 40_000,  # EUR/MW
     }

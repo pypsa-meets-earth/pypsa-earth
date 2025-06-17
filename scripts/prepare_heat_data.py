@@ -18,6 +18,9 @@ from _helpers import locate_bus, mock_snakemake
 #     - 2018 (commertial buildings)
 #     - 2020 (residential building)
 # Heating includes both space heating and hot water
+HEAT_DEMAND_TOTAL = 275.0e6  # ~3.3 trln Btu -> 0.25 of el demand
+COOL_DEMAND_TOTAL = 275.0e6
+
 SHARE_HEAT_RESID_DEMAND = 0.12
 SHARE_WATER_RESID_DEMAND = 0.12
 
@@ -30,15 +33,9 @@ SHARE_COOL_SERVICES_DEMAND = 0.11
 SHARE_ELECTRICITY_RESID_SPACE = 0.10
 SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
 
-SHARE_DISTRICT_HEAT = 0.1
+SHARE_DISTRICT_HEAT = 0.0
 
-CALIBRATE_LOAD = True
-
-# TODO Add to Snakemake
-CALIBR_DIR = snakemake.input.calib_dir
-
-CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
-CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
+CALIBRATE_LOAD = False
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -63,7 +60,7 @@ def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     return week_df
 
 
-def scale_demand(data_df, calibr_df, load_mode, geom_id):
+def scale_demand(data_df, calibr_df, load_mode, geom_id, k=1):
     """
     Apply a linear transformation to the demand dataframe to match
     the demand values with the measured or modeled ones.
@@ -82,14 +79,24 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id):
 
     data_col = "scaling_" + load_mode
 
-    scale_coeff = calibr_df[[data_col, geom_id]].set_index(geom_id)
-    # some states can be missed from the scaling factors calculations
-    states_missed = data_df.columns.difference(scale_coeff.index)
-    default_scaling = pd.DataFrame(
-        data=[1.0] * len(states_missed), index=states_missed, columns=[data_col]
-    )
-    scale_coeff_clean = pd.concat([scale_coeff[data_col], default_scaling])
-    data_df.mul(scale_coeff_clean.to_dict()[data_col], axis=1)
+    if calibr_df is not None:
+        scale_coeff = calibr_df[[data_col, geom_id]].set_index(geom_id)
+        # some states can be missed from the scaling factors calculations
+        states_missed = data_df.columns.difference(scale_coeff.index)
+        default_scaling = pd.DataFrame(
+            data=[1.0] * len(states_missed), index=states_missed, columns=[data_col]
+        )
+        scale_coeff_clean = pd.concat([scale_coeff[data_col], default_scaling])
+        data_df.mul(scale_coeff_clean.to_dict()[data_col], axis=1)
+    # TODO Avoid using the global variables
+    elif load_mode == "heating":
+        k = HEAT_DEMAND_TOTAL / data_df.sum().sum()
+        data_df = k * data_df
+    elif load_mode == "cooling":
+        k = COOL_DEMAND_TOTAL / data_df.sum().sum()
+        data_df = k * data_df
+    else:
+        data_df = k * data_df
     return data_df
 
 
@@ -207,28 +214,37 @@ def prepare_heat_data(n, snapshots, countries):
         snakemake.input.cooling_profile, index_col=0
     )  # TODO GHALAT
 
-    calibr_heat_df = pd.read_csv(os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0)
-    calibr_cool_df = pd.read_csv(os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0)
+    if CALIBRATE_LOAD:
+        calibr_heat_df = pd.read_csv(
+            os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0
+        )
+        calibr_cool_df = pd.read_csv(
+            os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0
+        )
 
-    calibr_heat_buses_df = locate_bus(
-        df=calibr_heat_df,
-        countries=countries,
-        gadm_level=1,
-        path_to_gadm=snakemake.input.shapes_path,
-        gadm_clustering=True,
-        dropnull=True,
-        col_out=None,
-    )
+        calibr_heat_buses_df = locate_bus(
+            df=calibr_heat_df,
+            countries=countries,
+            gadm_level=1,
+            path_to_gadm=snakemake.input.shapes_path,
+            gadm_clustering=True,
+            dropnull=True,
+            col_out=None,
+        )
 
-    calibr_cool_buses_df = locate_bus(
-        df=calibr_cool_df,
-        countries=countries,
-        gadm_level=1,
-        path_to_gadm=snakemake.input.shapes_path,
-        gadm_clustering=True,
-        dropnull=True,
-        col_out=None,
-    )
+        calibr_cool_buses_df = locate_bus(
+            df=calibr_cool_df,
+            countries=countries,
+            gadm_level=1,
+            path_to_gadm=snakemake.input.shapes_path,
+            gadm_clustering=True,
+            dropnull=True,
+            col_out=None,
+        )
+
+    else:
+        calibr_heat_buses_df = None
+        calibr_cool_buses_df = None
 
     loads = ["heating", "cooling"]
     sectors = ["residential", "services"]
@@ -256,35 +272,34 @@ def prepare_heat_data(n, snapshots, countries):
         else:
             heating_demand_shape = intraday_year_profile_heating
 
-        if CALIBRATE_LOAD:
-            # TODO Account for the differences in a column name alternative/Voronoi clustering
-            heating_demand_shape = scale_demand(
-                data_df=heating_demand_shape,
-                calibr_df=calibr_heat_buses_df,
-                load_mode="heating",
-                geom_id="gadm_1",
-            )
-
         heat_demand[f"{sector} {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
             nodal_energy_totals[f"total {sector} {use}"]
-        ) * 1e6  # TODO v0.0.2
+        )  # * 1e6  # TODO v0.0.2
 
         electric_heat_supply[f"{sector} {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
             nodal_energy_totals[f"electricity {sector} {use}"]
-        ) * 1e6  # TODO v0.0.2
+        )  # * 1e6  # TODO v0.0.2
 
         electric_heat_supply[f"total {use}"] = (
             heating_demand_shape / heating_demand_shape.sum()
         ).multiply(
             nodal_energy_totals[f"electricity residential {use}"]
             + nodal_energy_totals[f"electricity services {use}"]
-        ) * 1e6  # TODO v0.0.2
+        )  # * 1e6  # TODO v0.0.2
 
     heat_demand = pd.concat(heat_demand, axis=1)
+
+    # TODO Account for the differences in a column name alternative/Voronoi clustering
+    heat_demand = scale_demand(
+        data_df=heat_demand,
+        calibr_df=calibr_heat_buses_df,
+        load_mode="heating",
+        geom_id="gadm_1",
+    )
 
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
 
@@ -295,7 +310,6 @@ def prepare_heat_data(n, snapshots, countries):
         - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
     )
 
-    # TODO probably no need to cool water
     # TODO it's possible to account for weekday/weekend differences
     for use in ["space"]:
         day_cooling = list(intraday_profiles_cooling[f"cooling {use}"])
@@ -313,15 +327,6 @@ def prepare_heat_data(n, snapshots, countries):
         else:
             cooling_demand_shape = intraday_year_profile_cooling
 
-        if CALIBRATE_LOAD:
-            # TODO Account for the differences in a column name alternative/Voronoi clustering
-            cooling_demand_shape = scale_demand(
-                data_df=cooling_demand_shape,
-                calibr_df=calibr_cool_buses_df,
-                load_mode="cooling",
-                geom_id="gadm_1",
-            )
-
         cooling_demand[f"{use}"] = (
             cooling_demand_shape / cooling_demand_shape.sum()
         ).multiply(
@@ -329,9 +334,17 @@ def prepare_heat_data(n, snapshots, countries):
                 nodal_energy_totals[f"cool residential space"]
                 + nodal_energy_totals[f"cool services space"]
             )
-        ) * 1e6
+        )  # * 1e6
 
     cooling_demand = pd.concat(cooling_demand, axis=1)
+
+    # TODO Account for the differences in a column name alternative/Voronoi clustering
+    cooling_demand = scale_demand(
+        data_df=cooling_demand,
+        calibr_df=calibr_cool_buses_df,
+        load_mode="cooling",
+        geom_id="gadm_1",
+    )
 
     return (
         nodal_energy_totals,
@@ -358,6 +371,11 @@ if __name__ == "__main__":
             planning_horizons=2030,
             demand="AB",
         )
+
+    # TODO Add to Snakemake
+    CALIBR_DIR = snakemake.input.calib_dir
+    CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
+    CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
 
     n = pypsa.Network(snakemake.input.network)
 

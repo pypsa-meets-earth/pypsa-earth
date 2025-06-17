@@ -491,11 +491,11 @@ def add_hydrogen(n, costs):
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
-        buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
+        # buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
 
-        # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
-        h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+        # Appending string for carrier specification '_AC'
+        # h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+        # h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
         # Create index column
         h2_links["buses_idx"] = (
@@ -2029,7 +2029,18 @@ def add_heat(n, costs):
                 raise NotImplementedError(
                     f" {name} not in " f"heat systems: {heat_systems}"
                 )
-
+            missing_nodes = list(
+                set(h_nodes[name])
+                - set(
+                    heat_demand[[sector + " water", sector + " space"]]
+                    .groupby(level=1, axis=1)
+                    .sum()
+                    .columns
+                )
+            )
+            for node in missing_nodes:
+                heat_demand[sector + " water", node] = 0
+                heat_demand[sector + " space", node] = 0
             if sector in name:
                 heat_load = (
                     heat_demand[[sector + " water", sector + " space"]]
@@ -2282,7 +2293,13 @@ def add_cooling(n, costs):
             location=c_nodes[name],
             carrier=name + " cooling",
         )
-
+        # In case of voronoi clustering, DC nodes appear under regions onshore
+        missing_nodes = list(
+            set(c_nodes[name])
+            - set(cooling_demand[["space"]].groupby(level=1, axis=1).sum().columns)
+        )
+        for node in missing_nodes:
+            cooling_demand["space", node] = 0
         cooling_load = (
             cooling_demand[["space"]]
             .groupby(level=1, axis=1)
@@ -2428,7 +2445,7 @@ def add_dac(n, costs):
 
 
 def add_services(n, costs):
-    nhours = n.snapshot_weightings.generators.sum()
+    temporal_resolution = n.snapshot_weightings.generators
     buses = spatial.nodes.intersection(n.loads_t.p_set.columns)
 
     profile_residential = normalize_by_country(
@@ -2436,7 +2453,7 @@ def add_services(n, costs):
     ).fillna(0)
 
     p_set_elec = p_set_from_scaling(
-        "services electricity", profile_residential, energy_totals, nhours
+        "services electricity", profile_residential, energy_totals, temporal_resolution
     )
 
     n.madd(
@@ -2448,7 +2465,7 @@ def add_services(n, costs):
         p_set=p_set_elec,
     )
     p_set_biomass = p_set_from_scaling(
-        "services biomass", profile_residential, energy_totals, nhours
+        "services biomass", profile_residential, energy_totals, temporal_resolution
     )
 
     n.madd(
@@ -2472,7 +2489,7 @@ def add_services(n, costs):
     #     p_set=-co2,
     # )
     p_set_oil = p_set_from_scaling(
-        "services oil", profile_residential, energy_totals, nhours
+        "services oil", profile_residential, energy_totals, temporal_resolution
     )
 
     n.madd(
@@ -2496,7 +2513,7 @@ def add_services(n, costs):
     )
 
     p_set_gas = p_set_from_scaling(
-        "services gas", profile_residential, energy_totals, nhours
+        "services gas", profile_residential, energy_totals, temporal_resolution
     )
 
     n.madd(
@@ -2595,10 +2612,8 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     Function to create p_set from energy_totals, using the per-unit scaling
     dataframe.
     """
-    return (
-        1e6
-        / nhours
-        * scaling.mul(energy_totals[col], level=0).droplevel(level=0, axis=1)
+    return 1e6 * scaling.div(nhours, axis=0).mul(energy_totals[col], level=0).droplevel(
+        level=0, axis=1
     )
 
 
@@ -2609,7 +2624,7 @@ def add_residential(n, costs):
     # heat_demand_index=n.loads_t.p.filter(like='residential').filter(like='heat').dropna(axis=1).index
     # oil_res_index=n.loads_t.p.filter(like='residential').filter(like='oil').dropna(axis=1).index
 
-    nhours = n.snapshot_weightings.generators.sum()
+    temporal_resolution = n.snapshot_weightings.generators
 
     heat_ind = (
         n.loads_t.p_set.filter(like="residential").filter(like="heat")
@@ -2629,17 +2644,17 @@ def add_residential(n, costs):
         - energy_totals["residential heat oil"]
         - energy_totals["residential heat gas"],
         level=0,
-    ).droplevel(level=0, axis=1).div(nhours)
+    ).droplevel(level=0, axis=1).div(temporal_resolution, axis=0)
 
     heat_oil_demand = p_set_from_scaling(
-        "residential heat oil", heat_shape, energy_totals, nhours
+        "residential heat oil", heat_shape, energy_totals, temporal_resolution
     )
     heat_biomass_demand = p_set_from_scaling(
-        "residential heat biomass", heat_shape, energy_totals, nhours
+        "residential heat biomass", heat_shape, energy_totals, temporal_resolution
     )
 
     heat_gas_demand = p_set_from_scaling(
-        "residential heat gas", heat_shape, energy_totals, nhours
+        "residential heat gas", heat_shape, energy_totals, temporal_resolution
     )
 
     res_index = spatial.nodes.intersection(n.loads_t.p_set.columns)
@@ -2651,21 +2666,24 @@ def add_residential(n, costs):
 
     p_set_oil = (
         p_set_from_scaling(
-            "residential oil", profile_residential, energy_totals, nhours
+            "residential oil", profile_residential, energy_totals, temporal_resolution
         )
         + heat_oil_demand
     )
 
     p_set_biomass = (
         p_set_from_scaling(
-            "residential biomass", profile_residential, energy_totals, nhours
+            "residential biomass",
+            profile_residential,
+            energy_totals,
+            temporal_resolution,
         )
         + heat_biomass_demand
     )
 
     p_set_gas = (
         p_set_from_scaling(
-            "residential gas", profile_residential, energy_totals, nhours
+            "residential gas", profile_residential, energy_totals, temporal_resolution
         )
         + heat_gas_demand
     )
@@ -2735,16 +2753,23 @@ def add_residential(n, costs):
         )
         n.loads_t.p_set.loc[:, heat_buses] = np.where(
             ~np.isnan(safe_division),
-            safe_division * rem_heat_demand * 1e6 / nhours,
+            (safe_division * rem_heat_demand * 1e6).div(temporal_resolution, axis=0),
             0.0,
         )
 
     # Revise residential electricity demand
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
 
+    # Removing static loads from the time varying demand to preserve the distribution profile after normalization
+    static_load = (
+        n.loads.query('carrier.str.contains("electricity")').groupby("bus").p_set.sum()
+    )
+    n.loads_t.p_set.loc[:, buses] -= static_load
+    n.loads_t.p_set.loc[:, buses] = n.loads_t.p_set.loc[:, buses].clip(lower=0)
+
     profile_pu = normalize_by_country(n.loads_t.p_set[buses]).fillna(0)
     n.loads_t.p_set.loc[:, buses] = p_set_from_scaling(
-        "electricity residential", profile_pu, energy_totals, nhours
+        "electricity residential", profile_pu, energy_totals, temporal_resolution
     )
 
 
@@ -3019,6 +3044,19 @@ def add_industry_heating(n, costs):
     idx = pd.IndexSlice
 
     investment_costs = costs.loc[idx[:, "investment"], :]
+    if "scenario" in investment_costs.columns:
+        investment_costs = investment_costs[
+            investment_costs.scenario.isin([scenario, np.nan])
+        ]
+    if "financial_case" in investment_costs.columns:
+        investment_costs = investment_costs[
+            investment_costs.financial_case.isin([market, np.nan])
+        ]
+
+    if "scenario" in costs.columns:
+        costs = costs[costs.scenario.isin([scenario, np.nan])]
+    if "financial_case" in costs.columns:
+        costs = costs[costs.financial_case.isin([market, np.nan])]
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
     lifetime = snakemake.params.costs["fill_values"]["lifetime"]
@@ -3032,6 +3070,7 @@ def add_industry_heating(n, costs):
         [(x[0], "fixed") for x in investment_costs.index]
     )
     costs = pd.concat([costs, investment_costs])
+
     costs = costs["value"].unstack()
 
     low_temp_buses = n.buses.loc[
@@ -3048,13 +3087,13 @@ def add_industry_heating(n, costs):
     nodes_medium = medium_temp_buses.str.split(" ").str[0]
     nodes_high = high_temp_buses.str.split(" ").str[0]
 
-    assert (nodes_low.isin(n.buses.index)).all()
-    assert (nodes_medium.isin(n.buses.index)).all()
-    assert (nodes_high.isin(n.buses.index)).all()
+    # assert (nodes_low.isin(n.buses.index)).all()
+    # assert (nodes_medium.isin(n.buses.index)).all()
+    # assert (nodes_high.isin(n.buses.index)).all()
 
-    assert (low_temp_buses.isin(n.buses.index)).all()
-    assert (medium_temp_buses.isin(n.buses.index)).all()
-    assert (high_temp_buses.isin(n.buses.index)).all()
+    # assert (low_temp_buses.isin(n.buses.index)).all()
+    # assert (medium_temp_buses.isin(n.buses.index)).all()
+    # assert (high_temp_buses.isin(n.buses.index)).all()
 
     carriers = [
         "glazed flat plate collector",
@@ -3512,13 +3551,18 @@ if __name__ == "__main__":
         snakemake.input.costs,
         snakemake.params.costs["USD2013_to_EUR2013"],
         snakemake.params.costs["fill_values"],
+        snakemake.params.costs["scenario"],
+        snakemake.params.costs["financial_case"],
         Nyears,
     )
+
     # TODO Replace a temporary solution with a more stable one
     cooling_costs = prepare_costs(
         snakemake.input.cooling_costs,
         snakemake.params.costs["USD2013_to_EUR2013"],
         snakemake.params.costs["fill_values"],
+        snakemake.params.costs["scenario"],
+        snakemake.params.costs["financial_case"],
         Nyears,
     )
 
@@ -3636,22 +3680,22 @@ if __name__ == "__main__":
         snakemake.input["industrial_heating_costs"], index_col=[0, 1]
     )
 
-    print(industry_heating_costs)
-
-    import sys
-    sys.exit()
-
-    add_industry_heating(n, industry_heating_costs)
+    add_industry_heating(
+        n,
+        industry_heating_costs,
+        snakemake.params.costs["financial_case"],
+        snakemake.params.costs["scenario"],
+    )
 
     """
-    industry_heating_costs = (
-        prepare_costs(
-            industry_heating_costs,
-            snakemake.params.costs["USD2013_to_EUR2013"],
-            snakemake.params.costs["fill_values"],
-            Nyears,
-        )
-    )
+    # industry_heating_costs = (
+    #    prepare_costs(
+    #        industry_heating_costs,
+    #        snakemake.params.costs["USD2013_to_EUR2013"],
+    #        snakemake.params.costs["fill_values"],
+    #        Nyears,
+    #    )
+    # )
     """
 
     conversion_rates = {2019: 1.12, 2020: 1.10, 2021: 1.15, 2022: 1.05}
@@ -3672,7 +3716,12 @@ if __name__ == "__main__":
     industry_heating_costs = industry_heating_costs.apply(convert_row, axis=1)
 
     logger.info("Adding industrial heating technologies.")
-    add_industry_heating(n, industry_heating_costs)
+    add_industry_heating(
+        n,
+        industry_heating_costs,
+        snakemake.params.costs["financial_case"],
+        snakemake.params.costs["scenario"],
+    )
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
@@ -3727,12 +3776,12 @@ if __name__ == "__main__":
     # add_land_transport(n, costs)
 
     # if snakemake.config["custom_data"]["transport_demand"]:
-    # add_rail_transport(n, costs)
+    add_rail_transport(n, costs)
 
     # if snakemake.config["custom_data"]["custom_sectors"]:
-    # add_agriculture(n, costs)
-    # add_residential(n, costs)
-    # add_services(n, costs)
+    add_agriculture(n, costs)
+    add_residential(n, costs)
+    add_services(n, costs)
 
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)

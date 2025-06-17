@@ -398,7 +398,7 @@ if config["enable"].get("retrieve_cost_data", True):
             version=config["costs"]["version"],
         input:
             HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/US/"
                 + "costs_{year}.csv",
                 keep_local=True,
             ),
@@ -1886,7 +1886,7 @@ rule build_population_layouts:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        urban_percent="data/urban_percent.csv",
+        urban_percent="resources/" + RDIR + "urban_percent.csv",
         cutout="cutouts/"
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
