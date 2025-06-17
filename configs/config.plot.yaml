@@ -214,6 +214,7 @@ plotting:
     today: "#D2691E"
     Ambient: "k"
 
+
   nice_names:
     OCGT: Open-Cycle Gas
     CCGT: Combined-Cycle Gas

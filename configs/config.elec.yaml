@@ -95,8 +95,3 @@ transformers:
   x: 0.1
   s_nom: 2000.
   type: ""
-
-sector:
-  electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
-  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
-  home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
