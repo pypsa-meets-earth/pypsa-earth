@@ -63,19 +63,38 @@ configfile: "config.default.yaml"
 configfile: "config.yaml"
 
 
+# Define filders ----------------------------------------------------------
+run = config.get("run", {})
+RDIR = run["name"] + "/" if run.get("name") else ""
+CDIR = RDIR if not run.get("shared_cutouts") else ""
+SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
+SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
+RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
+
+# Check configs ---------------------------------------------------------------
 check_config_keys(config, fl="config.yaml")
 
 config = update_cutout(config, "config.yaml")
 
+# provide a modeling-relevant summary of the config variable
+# filtering is used to exclude technical keys which a
+write_config(
+    config,
+    fl_name="run_config.yaml",
+    output_dir=RESDIR,
+    config_exclude=config_technical,
+)
 
-# Provide summary of the actually used configs --------------------------------
-write_config(config, "run_config.yaml", config_exclude=config_technical)
-
-# in case config Snakemake variable must be checked
-write_config(config, "full_run_config.yaml", config_exclude=None)
+# provide the full list of config dictionary used by Snakemake
+write_config(
+    config,
+    fl_name="full_run_config.yaml",
+    output_dir=RESDIR,
+    config_exclude=None,
+)
 
 # check_config_version(config=config)
-parse_config(config)
+# parse_config(config)
 
 # Prepare variable for the workflow -------------------------------------------
 config.update({"git_commit": get_last_commit_message(".")})
@@ -88,14 +107,6 @@ config["countries"] = create_country_list(config["countries"])
 config["scenario"]["unc"] = [
     f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
 ]
-
-
-run = config.get("run", {})
-RDIR = run["name"] + "/" if run.get("name") else ""
-CDIR = RDIR if not run.get("shared_cutouts") else ""
-SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
-SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
-RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 load_data_paths = get_load_paths_gegis("data", config)
 

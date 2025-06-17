@@ -54,7 +54,12 @@ CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 CONFIGS_STORE_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
-def write_config(config, fl_name, config_exclude=False):
+def write_config(
+    config,
+    fl_name,
+    output_dir,
+    config_exclude=None,
+):
     """
     Outputs config dictionary into a file
 
@@ -100,8 +105,10 @@ def write_config(config, fl_name, config_exclude=False):
     else:
         config_clean = config
 
-    # TODO keep a copy if the file exists?
-    with open(fl_name, "w") as outfile:
+    p = Path(output_dir)
+    p.mkdir(parents=True, exist_ok=True)
+    fl_p = Path(output_dir, fl_name)
+    with fl_p.open("w") as outfile:
         outfile.write(license_str)
         yaml.dump(config_clean, outfile, default_flow_style=False)
 
