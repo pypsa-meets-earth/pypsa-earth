@@ -143,7 +143,7 @@ def compare_configs(current_config, benchmark_config):
 
     col_diff = set(df_current_config.columns).difference(df_benchm_config.columns)
     if len(col_diff) > 0:
-        logger.warning(f"Columns missed in the actual config folder: {col_diff}")
+        logger.error(f"Columns missed in the actual config folder: {col_diff}")
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
