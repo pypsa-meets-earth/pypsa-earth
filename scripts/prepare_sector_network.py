@@ -3639,7 +3639,6 @@ if __name__ == "__main__":
     print(industry_heating_costs)
 
     import sys
-
     sys.exit()
 
     add_industry_heating(n, industry_heating_costs)
