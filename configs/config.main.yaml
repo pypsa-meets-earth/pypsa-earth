@@ -43,17 +43,17 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [Co2L-3H]
+  opts: [Co2L-3h]
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   sopts:
-  - "144H"
+  - "144h"
   demand:
   - "AB"
 
 snapshots:
   start: "2013-01-01"
-  end: "2013-01-07"
+  end: "2014-01-01"
   inclusive: "left" # end is not inclusive
 
 augmented_line_connection:
