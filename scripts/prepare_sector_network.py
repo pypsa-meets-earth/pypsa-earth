@@ -3686,7 +3686,17 @@ if __name__ == "__main__":
 
     sys.exit()
 
-    add_industry_heating(n, industry_heating_costs)
+    print(industry_heating_costs)
+    import sys
+
+    sys.exit()
+
+    add_industry_heating(
+        n,
+        industry_heating_costs,
+        snakemake.params.costs["financial_case"],
+        snakemake.params.costs["scenario"],
+    )
 
     """
     # industry_heating_costs = (
