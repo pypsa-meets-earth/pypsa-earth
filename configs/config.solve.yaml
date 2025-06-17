@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.4.1
-
 monte_carlo:
   # Description: Specify Monte Carlo sampling options for uncertainty analysis.
   # Define the option list for Monte Carlo sampling.
