@@ -143,7 +143,11 @@ def compare_configs(current_config, benchmark_config):
 
     col_diff = set(df_current_config.columns).difference(df_benchm_config.columns)
     if len(col_diff) > 0:
-        logger.error(f"Columns missed in the actual config folder: {col_diff}")
+        logger.error(
+            f"Keys missed in the config files placed in `config` folder as compared with `config.default.yaml`: {col_diff}. "
+            + "Please make sure to update files in `config` folder."
+        )
+        raise Exception("Configs mismatch")
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
