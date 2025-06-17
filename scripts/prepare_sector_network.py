@@ -413,7 +413,7 @@ def add_hydrogen(n, costs):
             "blue H2": [
                 "SMR CC",
                 "Natural gas steam reforming CC",
-                "Coal gasification CC"
+                "Coal gasification CC",
             ],
         }
 
@@ -442,7 +442,11 @@ def add_hydrogen(n, costs):
     for h2_tech in h2_techs:
         # Set H2 buses as production output if colors are not used
         params = tech_params[h2_tech]
-        bus1 = params["bus1"] if options["hydrogen"].get("hydrogen_colors", False) else spatial.nodes + " H2"
+        bus1 = (
+            params["bus1"]
+            if options["hydrogen"].get("hydrogen_colors", False)
+            else spatial.nodes + " H2"
+        )
 
         n.madd(
             "Link",
