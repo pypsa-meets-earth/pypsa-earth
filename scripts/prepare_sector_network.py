@@ -204,27 +204,6 @@ def add_hydrogen(n, costs):
 
     # Read hydrogen production technologies
     h2_techs = options["hydrogen"].get("production", [])
-    # H2 production technologies by color
-    grid_h2_techs = [
-        "H2 Electrolysis",
-        "Alkaline electrolyzer large",
-        "Alkaline electrolyzer medium",
-        "Alkaline electrolyzer small",
-        "PEM electrolyzer",
-        "SOEC",
-    ]
-    green_h2_techs = [
-        "Solid biomass steam reforming",
-        "Biomass gasification",
-        "Biomass gasification CC",
-    ]
-    grey_h2_techs = [
-        "SMR",
-        "Natural gas steam reforming",
-        "Coal gasification",
-        "Heavy oil partial oxidation",
-    ]
-    blue_h2_techs = ["SMR CC", "Natural gas steam reforming CC", "Coal gasification CC"]
 
     # Dictionary containing distinct parameters of H2 production technologies
     tech_params = {
@@ -411,114 +390,76 @@ def add_hydrogen(n, costs):
     }
 
     if options["hydrogen"].get("hydrogen_colors", False):
-        # Add infrastructure for grid hydrogen
-        if set(h2_techs) & set(grid_h2_techs):
-            n.madd(
-                "Bus",
-                nodes + " grid H2",
-                location=nodes,
-                carrier="grid H2",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
-            )
+        color_techs = {
+            "grid H2": [
+                "H2 Electrolysis",
+                "Alkaline electrolyzer large",
+                "Alkaline electrolyzer medium",
+                "Alkaline electrolyzer small",
+                "PEM electrolyzer",
+                "SOEC",
+            ],
+            "green H2": [
+                "Solid biomass steam reforming",
+                "Biomass gasification",
+                "Biomass gasification CC",
+            ],
+            "grey H2": [
+                "SMR",
+                "Natural gas steam reforming",
+                "Coal gasification",
+                "Heavy oil partial oxidation",
+            ],
+            "blue H2": [
+                "SMR CC",
+                "Natural gas steam reforming CC",
+                "Coal gasification CC"
+            ],
+        }
 
-            n.madd(
-                "Link",
-                nodes + " grid H2",
-                bus0=nodes + " grid H2",
-                bus1=nodes + " H2",
-                p_nom_extendable=True,
-                carrier="grid H2",
-                efficiency=1,
-                capital_cost=0,
-            )
-
-        # Add infrastructure for green hydrogen
-        if set(h2_techs) & set(green_h2_techs):
-            n.madd(
-                "Bus",
-                nodes + " green H2",
-                location=nodes,
-                carrier="green H2",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                nodes + " green H2",
-                bus0=nodes + " green H2",
-                bus1=nodes + " H2",
-                p_nom_extendable=True,
-                carrier="green H2",
-                efficiency=1,
-                capital_cost=0,
-            )
-
-        # Add infrastructure for grey hydrogen
-        if set(h2_techs) & set(grey_h2_techs):
-            n.madd(
-                "Bus",
-                spatial.nodes + " grey H2",
-                location=spatial.nodes,
-                carrier="grey H2",
-                x=n.buses.loc[list(spatial.nodes)].x.values,
-                y=n.buses.loc[list(spatial.nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes + " grey H2",
-                bus0=spatial.nodes + " grey H2",
-                bus1=spatial.nodes + " H2",
-                carrier="grey H2",
-                capital_cost=0,
-                p_nom_extendable=True,
-            )
-
-        # Add infrastructure for blue hydrogen
-        if set(h2_techs) & set(blue_h2_techs):
-            n.madd(
-                "Bus",
-                spatial.nodes + " blue H2",
-                location=spatial.nodes,
-                carrier="blue H2",
-                x=n.buses.loc[list(spatial.nodes)].x.values,
-                y=n.buses.loc[list(spatial.nodes)].y.values,
-            )
-
-            n.madd(
-                "Link",
-                spatial.nodes + " blue H2",
-                bus0=spatial.nodes + " blue H2",
-                bus1=spatial.nodes + " H2",
-                carrier="blue H2",
-                capital_cost=0,
-                p_nom_extendable=True,
-            )
+        for color, techs in color_techs.items():
+            if set(h2_techs) & set(techs):
+                n.madd(
+                    "Bus",
+                    spatial.nodes + f" {color}",
+                    location=spatial.nodes,
+                    carrier=color,
+                    x=n.buses.loc[list(spatial.nodes)].x.values,
+                    y=n.buses.loc[list(spatial.nodes)].y.values,
+                )
+                n.madd(
+                    "Link",
+                    spatial.nodes + f" {color}",
+                    bus0=spatial.nodes + f" {color}",
+                    bus1=spatial.nodes + " H2",
+                    p_nom_extendable=True,
+                    carrier=color,
+                    efficiency=1,
+                    capital_cost=0,
+                )
 
     # Add hydrogen production technologies
     for h2_tech in h2_techs:
         # Set H2 buses as production output if colors are not used
-        if not options["hydrogen"].get("hydrogen_colors", False):
-            tech_params[h2_tech]["bus1"] = spatial.nodes + " H2"
+        params = tech_params[h2_tech]
+        bus1 = params["bus1"] if options["hydrogen"].get("hydrogen_colors", False) else spatial.nodes + " H2"
 
         n.madd(
             "Link",
             spatial.nodes + " " + h2_tech,
-            bus0=tech_params[h2_tech]["bus0"],
-            bus1=tech_params[h2_tech]["bus1"],
-            bus2=tech_params[h2_tech].get("bus2", None),
-            bus3=tech_params[h2_tech].get("bus3", None),
-            bus4=tech_params[h2_tech].get("bus4", None),
+            bus0=params["bus0"],
+            bus1=bus1,
+            bus2=params.get("bus2", None),
+            bus3=params.get("bus3", None),
+            bus4=params.get("bus4", None),
             p_nom_extendable=True,
             carrier=h2_tech,
-            efficiency=tech_params[h2_tech]["efficiency"],
-            efficiency2=tech_params[h2_tech].get("efficiency2", 1.0),
-            efficiency3=tech_params[h2_tech].get("efficiency3", 1.0),
-            efficiency4=tech_params[h2_tech].get("efficiency4", 1.0),
-            capital_cost=costs.at[tech_params[h2_tech]["cost_name"], "fixed"],
-            lifetime=costs.at[tech_params[h2_tech]["cost_name"], "lifetime"],
+            efficiency=params["efficiency"],
+            efficiency2=params.get("efficiency2", 1.0),
+            efficiency3=params.get("efficiency3", 1.0),
+            efficiency4=params.get("efficiency4", 1.0),
+            capital_cost=costs.at[params["cost_name"], "fixed"],
+            lifetime=costs.at[params["cost_name"], "lifetime"],
         )
 
     n.madd(
