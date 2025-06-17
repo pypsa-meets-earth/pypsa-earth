@@ -969,9 +969,7 @@ rule build_district_heating_demands:
         # Direct heat inputs for 100C and 200C
     output:
         district_heating_demands=(
-            "resources/"
-            + SECDIR
-            + "district_heating_s{simpl}_{clusters}.csv"
+            "resources/" + SECDIR + "district_heating_s{simpl}_{clusters}.csv"
         ),
         district_heating_geothermal_supply_curves=(
             "resources/"
