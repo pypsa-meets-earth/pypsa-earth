@@ -12,6 +12,7 @@ from shutil import copyfile, move
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 from _helpers import (
+    compare_configs,
     create_country_list,
     get_last_commit_message,
     check_config_version,
@@ -45,6 +46,7 @@ copy_default_files()
 # from all the configs which can be unintended. An example: `atlite:cutouts`
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/gp/powerplantmatching_config.yaml"
+
 
 config_technical = config.copy()
 
@@ -132,6 +134,15 @@ rule clean:
             shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
             pass
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
+
+
+rule check_default_config:
+    input:
+        config_folder="configs",
+    log:
+        "logs/check_default_config.log",
+    script:
+        "test/check_default_config.py"
 
 
 rule solve_all_networks:

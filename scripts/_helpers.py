@@ -129,6 +129,23 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
         )
 
 
+def compare_configs(current_config, benchmark_config):
+    import json
+
+    import pandas as pd
+    import yaml
+
+    current_config_json = json.loads(json.dumps(current_config))
+    benchm_config_json = json.loads(json.dumps(benchmark_config))
+
+    df_benchm_config = pd.json_normalize(benchm_config_json, sep="+")
+    df_current_config = pd.json_normalize(current_config_json, sep="+")
+
+    col_diff = set(df_current_config.columns).difference(df_benchm_config.columns)
+    if len(col_diff) > 0:
+        logger.warning(f"Columns missed in the actual config folder: {col_diff}")
+
+
 def handle_exception(exc_type, exc_value, exc_traceback):
     """
     Customise errors traceback.
