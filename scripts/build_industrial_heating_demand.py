@@ -8,11 +8,10 @@ import os
 import random
 from copy import deepcopy
 
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
-
+import numpy as np
+import pandas as pd
 from _helpers import mock_snakemake
 from _industry_heat_helpers import coords_to_relative_utm
 from build_egs_potentials import tif_to_gdf
@@ -692,7 +691,7 @@ def process_regional_supply_curves(data, supply_curve_step_number=3):
         return result
     else:
         return pd.DataFrame()
-    
+
 
 def process_techno_economic_data(df):
     """
@@ -872,9 +871,7 @@ def process_techno_economic_data(df):
 
             # Get OPEX
             opex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "opex" in col
+                col for col in df.columns if col.startswith(prefix) and "opex" in col
             ]
             if not opex_cols:
                 error_msg = f"No OPEX columns found for technology {tech_key} with prefix {prefix}"
@@ -915,9 +912,7 @@ def process_techno_economic_data(df):
             if not outputs:
                 error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
                 # Show all columns that start with the tech prefix
-                matching_cols = [
-                    col for col in df.columns if col.startswith(prefix)
-                ]
+                matching_cols = [col for col in df.columns if col.startswith(prefix)]
                 print(f"Columns starting with '{prefix}':", matching_cols)
                 print(error_msg)
                 raise ValueError(error_msg)
@@ -943,9 +938,7 @@ def process_techno_economic_data(df):
 
             # Sum CAPEX components
             capex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "capex" in col
+                col for col in df.columns if col.startswith(prefix) and "capex" in col
             ]
             total_capex = sum(df[col] for col in capex_cols)
             result_data[(std_tech_name, f"capex[USD/MW]")] = total_capex.div(
@@ -954,9 +947,7 @@ def process_techno_economic_data(df):
 
             # Sum OPEX components
             opex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "opex" in col
+                col for col in df.columns if col.startswith(prefix) and "opex" in col
             ]
             total_opex = sum(df[col] for col in opex_cols)
             result_data[(std_tech_name, f"opex[USD/MWh]")] = total_opex.div(
@@ -987,9 +978,7 @@ def process_techno_economic_data(df):
             if not outputs:
                 error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
                 # Show all columns that start with the tech prefix
-                matching_cols = [
-                    col for col in df.columns if col.startswith(prefix)
-                ]
+                matching_cols = [col for col in df.columns if col.startswith(prefix)]
                 print(f"Columns starting with '{prefix}':", matching_cols)
                 print(error_msg)
                 raise ValueError(error_msg)
@@ -1016,9 +1005,7 @@ def process_techno_economic_data(df):
 
             # Sum CAPEX components
             capex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "capex" in col
+                col for col in df.columns if col.startswith(prefix) and "capex" in col
             ]
             total_capex = sum(df[col] for col in capex_cols)
             result_data[(std_tech_name, f"capex[USD/MW]")] = total_capex.div(
@@ -1027,9 +1014,7 @@ def process_techno_economic_data(df):
 
             # Sum OPEX components
             opex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "opex" in col
+                col for col in df.columns if col.startswith(prefix) and "opex" in col
             ]
             total_opex = sum(df[col] for col in opex_cols)
             result_data[(std_tech_name, f"opex[USD/MWh]")] = total_opex.div(
@@ -1061,9 +1046,7 @@ def process_techno_economic_data(df):
             if not outputs:
                 error_msg = f"No output types found for technology {tech_key} with prefix {prefix}"
                 # Show all columns that start with the tech prefix
-                matching_cols = [
-                    col for col in df.columns if col.startswith(prefix)
-                ]
+                matching_cols = [col for col in df.columns if col.startswith(prefix)]
                 print(f"Columns starting with '{prefix}':", matching_cols)
                 print(error_msg)
                 raise ValueError(error_msg)
@@ -1089,9 +1072,7 @@ def process_techno_economic_data(df):
 
             # Sum CAPEX components
             capex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "capex" in col
+                col for col in df.columns if col.startswith(prefix) and "capex" in col
             ]
             total_capex = sum(df[col] for col in capex_cols)
             result_data[(std_tech_name, f"capex[USD/MW]")] = total_capex.div(
@@ -1100,9 +1081,7 @@ def process_techno_economic_data(df):
 
             # Sum OPEX components
             opex_cols = [
-                col
-                for col in df.columns
-                if col.startswith(prefix) and "opex" in col
+                col for col in df.columns if col.startswith(prefix) and "opex" in col
             ]
             total_opex = sum(df[col] for col in opex_cols)
             result_data[(std_tech_name, f"opex[USD/MWh]")] = total_opex.div(
@@ -1339,11 +1318,15 @@ if __name__ == "__main__":
     regions = gpd.read_file(snakemake.input["regions"]).set_index("name")
 
     egs_params = snakemake.params["enhanced_geothermal"]
-    max_network_diameter = egs_params["max_network_diameter"] # km, default 20.
-    min_network_average_capacity = egs_params["min_network_average_capacity"] # MWh, default 10.
-    max_network_average_capacity = egs_params["max_network_average_capacity"] # MWh, default 30.
+    max_network_diameter = egs_params["max_network_diameter"]  # km, default 20.
+    min_network_average_capacity = egs_params[
+        "min_network_average_capacity"
+    ]  # MWh, default 10.
+    max_network_average_capacity = egs_params[
+        "max_network_average_capacity"
+    ]  # MWh, default 30.
 
-    n_cost_steps = egs_params["industrial_heating_n_cost_steps"] # 2
+    n_cost_steps = egs_params["industrial_heating_n_cost_steps"]  # 2
 
     supply_curve_columns = [
         # "capex[$/MW]",
@@ -1459,7 +1442,9 @@ if __name__ == "__main__":
                     utm_coords[assignments != -1],
                     assignments[assignments != -1],
                     max_iterations=10,
-                    size_threshold=egs_params["min_network_average_capacity"], # MWh, default 10.
+                    size_threshold=egs_params[
+                        "min_network_average_capacity"
+                    ],  # MWh, default 10.
                 )
 
                 new_clusters = []
@@ -1484,24 +1469,31 @@ if __name__ == "__main__":
             else:
                 new_clusters = clusters
 
-            piping_cost = egs_params["piping_cost"] # $/km, default 1_300_000$/km
+            piping_cost = egs_params["piping_cost"]  # $/km, default 1_300_000$/km
 
             total_cluster_size = 0
             for cluster in new_clusters:
 
                 # Create MultiPoint from cluster coordinates
-                from shapely.geometry import MultiPoint, MultiLineString, LineString, Point
+                from shapely.geometry import (
+                    LineString,
+                    MultiLineString,
+                    MultiPoint,
+                    Point,
+                )
 
-                cluster_points = MultiPoint([Point(coord) for coord in lonlat_coords[cluster]])
-                
+                cluster_points = MultiPoint(
+                    [Point(coord) for coord in lonlat_coords[cluster]]
+                )
+
                 # Create minimum spanning tree as MultiLineString
 
                 # Calculate pairwise distances between all points in the cluster
                 dist_matrix = distance_matrix(utm_coords[cluster], utm_coords[cluster])
-                
+
                 # Get MST as a CSR matrix
                 mst_csr = minimum_spanning_tree(dist_matrix)
-                
+
                 # Convert to array and find edges
                 mst_array = mst_csr.toarray()
                 mst_edges = []
@@ -1509,23 +1501,28 @@ if __name__ == "__main__":
                 for i, j in zip(rows, cols):
                     if i < j:  # Only add each edge once (avoid duplicates)
                         mst_edges.append((i, j))
-                
+
                 # Create lines for the MST
-                mst_lines = [LineString([lonlat_coords[cluster][i], lonlat_coords[cluster][j]]) for i, j in mst_edges]
-                
+                mst_lines = [
+                    LineString([lonlat_coords[cluster][i], lonlat_coords[cluster][j]])
+                    for i, j in mst_edges
+                ]
+
                 # If no edges (single point), create empty MultiLineString
                 if len(mst_lines) == 0:
                     cluster_mst = MultiLineString([])
                 else:
                     cluster_mst = MultiLineString(mst_lines)
-                
+
                 # Append both to total_clusters with labels
-                total_clusters.append({
-                    'points': cluster_points,
-                    'mst': cluster_mst,
-                    'region': region,
-                    'band': band
-                })
+                total_clusters.append(
+                    {
+                        "points": cluster_points,
+                        "mst": cluster_mst,
+                        "region": region,
+                        "band": band,
+                    }
+                )
 
                 cluster_supply = pd.Series()
                 cluster_sp, _ = compute_mst_cost_and_diameter(utm_coords[cluster])
@@ -1621,7 +1618,7 @@ if __name__ == "__main__":
     total_results = process_regional_supply_curves(total_results).replace(np.nan, 0)
 
     df = pd.DataFrame((total_clusters))
-    df.to_csv('clusters.csv')
+    df.to_csv("clusters.csv")
 
     total_results.to_csv(snakemake.output["industrial_heating_egs_supply_curves"])
     final_demands.to_csv(snakemake.output["industrial_heating_demands"])

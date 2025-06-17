@@ -4,26 +4,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-
-from tqdm import tqdm
-
 from build_egs_potentials import tif_to_gdf
 from build_industrial_heating_demand import process_techno_economic_data
+from tqdm import tqdm
 
 if __name__ == "__main__":
 
-    regions = gpd.read_file(
-        snakemake.input.regions
-    )
-    district_gdf = gpd.read_file(
-        snakemake.input.demand_data
-    )
-    district_gdf['heating_demand_mwh'] = district_gdf['heating_by_pop'] * 2.93071e-7
-    district_gdf['avg_heat_mw'] = district_gdf['heating_demand_mwh'] / 8760
-    
+    regions = gpd.read_file(snakemake.input.regions)
+    district_gdf = gpd.read_file(snakemake.input.demand_data)
+    district_gdf["heating_demand_mwh"] = district_gdf["heating_by_pop"] * 2.93071e-7
+    district_gdf["avg_heat_mw"] = district_gdf["heating_demand_mwh"] / 8760
+
     tif_files = {
         name: fn for name, fn in snakemake.input.items() if fn.endswith(".tif")
     }
@@ -40,7 +34,7 @@ if __name__ == "__main__":
     # print(gdf.head())
     # gdf.to_csv('hold.csv')
 
-    gdf = pd.read_csv('hold.csv', index_col=0)
+    gdf = pd.read_csv("hold.csv", index_col=0)
 
     regional_supplies = list()
 
@@ -69,16 +63,16 @@ if __name__ == "__main__":
         ss = district_gdf.loc[district_gdf["geometry"].within(geometry)]
 
         print(ss.head())
-    
+
         techs = [
             # "pwr_residheat80degC_egs",
             # "pwr_residheat80degC_hs",
             "directheat100degC",
         ]
 
-        for index, row in ss[['avg_heat_mw', 'geometry']].iterrows():
-        
-            query_point = row['geometry']
+        for index, row in ss[["avg_heat_mw", "geometry"]].iterrows():
+
+            query_point = row["geometry"]
 
             buffer_distance = 0.1  # in degrees
             buffered_point = query_point.buffer(buffer_distance)
@@ -92,7 +86,9 @@ if __name__ == "__main__":
             else:
                 geothermal_subset = geothermal_subset.iloc[0]
 
-            final_demands.loc[region, "district_heating_demand[MW]"] += row['avg_heat_mw']
+            final_demands.loc[region, "district_heating_demand[MW]"] += row[
+                "avg_heat_mw"
+            ]
 
             idx = pd.IndexSlice
 
@@ -104,9 +100,7 @@ if __name__ == "__main__":
             )
 
             print(district_supply.head())
-            if (
-                district_supply.empty
-            ):
+            if district_supply.empty:
                 continue
 
             continue
@@ -134,8 +128,9 @@ if __name__ == "__main__":
             tech_data = tech.loc[tech["geometry"].within(geometry)]
             print(tech_data.head())
             regional_supply.append(tech_data["avg_heat_mw"].sum())
-        
+
         regional_supply_shapes.loc[region] = regional_supply
 
     import sys
+
     sys.exit()
