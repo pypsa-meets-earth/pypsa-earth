@@ -243,7 +243,7 @@ def load_powerplants(ppl_fn):
     null_ppls = ppl[ppl.p_nom <= 0]
     if not null_ppls.empty:
         logger.warning(f"Drop powerplants with null capacity: {list(null_ppls.name)}.")
-        ppl = ppl.drop(null_ppls.index).reset_index(drop=True)
+        ppl = ppl.drop(null_ppls.index)
     return ppl
 
 
@@ -461,8 +461,259 @@ def attach_conventional_generators(
                 # Single value affecting all generators of technology k indiscriminantely of country
                 n.generators.loc[idx, attr] = values
 
+def ror_conversion(ror, inflow_GloFAS_h, q_min, eff):
+    """
+    Convert inflow data for Run-Of-River (RoR) power plants to their power production potential.
+    
+    Parameters:
+        ror: DataFrame containing information about Run-Of-River plants.
+        inflow_GloFAS_h: Dataset with hourly inflow data in m3/s.
+        
+    Returns:
+        p_max_pu_ror: Dataset with per-unit maximum power production values for each plant.
+    """
+    ror_indices = ror.index
+    inflow_Glofas_ror = inflow_GloFAS_h.sel(name=ror_indices)
+
+    # Load the data to ensure all computations are in memory
+    inflow_Glofas_ror = inflow_Glofas_ror.load()
+
+    # Defaults and parameters
+    median_dam_height_ror = ror["damheight_m"].median(skipna=True)
+    head_m_default_ror = median_dam_height_ror
+    q_min_percentage = q_min
+    eff = eff
+
+    # Create a zero-like DataArray for p_max_pu_ror_lin
+    p_max_pu_ror_lin = xr.zeros_like(inflow_Glofas_ror)
+
+    for plant_index in inflow_Glofas_ror.coords['name'].values:
+        capacity = ror.loc[plant_index, "p_nom"]
+        head_m = ror.loc[plant_index, "damheight_m"]
+
+        if pd.isna(head_m):
+            print(f"Missing 'head_m' value for plant: {ror.loc[plant_index, 'name']}. Using default value: {head_m_default_ror}")
+            head_m = head_m_default_ror
+
+        # Calculate qmax and qmin
+        qmax = capacity / (9.81 * head_m * 1e-3 * eff)
+        qmin = q_min_percentage * qmax
+        inflow_series = inflow_Glofas_ror.sel(name=plant_index)
+
+        # Apply the formula for per-unit max power production
+        p_max_pu_series_lin = xr.zeros_like(inflow_series)
+        p_max_pu_series_lin = xr.where(inflow_series < qmin, 0, p_max_pu_series_lin)
+        p_max_pu_series_lin = xr.where(inflow_series > qmax, 1, p_max_pu_series_lin)
+
+        in_between = (inflow_series >= qmin) & (inflow_series <= qmax)
+        p_max_pu_series_lin = xr.where(
+            in_between,
+            (inflow_series - qmin) / (qmax - qmin),
+            p_max_pu_series_lin
+        )
+
+        # Assign the calculated series to the overall DataArray
+        p_max_pu_ror_lin.loc[dict(name=plant_index)] = p_max_pu_series_lin
+        
+        p_max_pu_ror_df = (
+            p_max_pu_ror_lin
+            .to_dataframe(name="p_max_pu")
+            .reset_index()  # Trasforma le coordinate in colonne
+        )
+        
+        p_max_pu_ror_df_wide = p_max_pu_ror_df.pivot(index="time", columns="name", values="p_max_pu")
+
+    return p_max_pu_ror_df_wide
 
 
+def reservoir_conversion(hydro, inflow_GloFAS_h, eff):
+    """
+    Convert inflow data for Reservoir power plants to power production potential.
+    
+    Parameters:
+        hydro: DataFrame containing information about Reservoir plants.
+        inflow_GloFAS_h: Dataset with hourly inflow data in m3/s.
+        
+    Returns:
+        inflow_GloFAS_sto_MW: DataFrame with hourly inflow Reservoir data in MW, with shape (time, plant).
+    """
+    # Select reservoir plant indices
+    reservoir_indices = hydro.index
+
+    # Select data specific to reservoir plants and load into memory
+    inflow_Glofas_sto = inflow_GloFAS_h.sel(name=reservoir_indices).load()
+
+    # Calculate median dam height excluding NaN values
+    default_dam_sto_height = hydro["damheight_m"].median(skipna=True)
+    eff = eff
+
+    # Dictionary to store converted inflow for each plant
+    converted_values = {}
+    for plant_index in inflow_Glofas_sto.coords['name'].values:
+        # Get dam height for this plant
+        dam_height = hydro.loc[plant_index, "damheight_m"]
+
+        # Use default dam height if missing or invalid
+        if np.isnan(dam_height) or dam_height <= 0:
+            print(f"Invalid damheight_m for for plant: {hydro.loc[plant_index, 'name']}. using default value: {default_dam_sto_height}")
+            dam_height = default_dam_sto_height
+
+        # Extract inflow time series (m3/s)
+        inflow_series = inflow_Glofas_sto.sel(name=plant_index).values
+
+        # Convert inflow to power potential (MW)
+        converted_series = inflow_series * 9.81 * 1e-3 * dam_height * eff
+
+        # Add to dictionary with the plant name as the key
+        converted_values[plant_index] = converted_series
+
+    # Convert dictionary to a DataFrame (time as index, plants as columns)
+    inflow_GloFAS_sto_MW = pd.DataFrame(
+        data=converted_values, 
+        index=inflow_Glofas_sto.coords["time"].values
+    )
+
+    return inflow_GloFAS_sto_MW
+
+def attach_hydro_GloFAS(n, costs, ppl, q_min, eff):
+    if "hydro" not in snakemake.params.renewable:
+        return
+    c = snakemake.params.renewable["hydro"]
+    carriers = c.get("carriers", ["ror", "PHS", "hydro"])
+
+    _add_missing_carriers_from_costs(n, costs, carriers)
+
+    ppl = (
+        ppl.query('carrier == "hydro"')
+        .assign(ppl_id=lambda df: df.index)
+        .reset_index(drop=True)
+        .rename(index=lambda s: str(s) + " hydro")
+    )
+    
+    q_min = q_min
+    eff = eff
+    # Current fix, NaN technologies set to ROR
+    if ppl.technology.isna().any():
+        n_nans = ppl.technology.isna().sum()
+        logger.warning(
+            f"Identified {n_nans} hydro powerplants with unknown technology.\n"
+            "Initialized to 'Run-Of-River'"
+        )
+        ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
+
+    ror = ppl.query('technology == "Run-Of-River"')
+    phs = ppl.query('technology == "Pumped Storage"')
+    hydro = ppl.query('technology == "Reservoir"')
+
+    inflow_idx = ror.index.union(hydro.index)
+    if not inflow_idx.empty:
+        with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
+            found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
+            missing_plants_idxs = ppl.index.difference(found_plants.index)
+
+            # if missing time series are found, notify the user and exclude missing hydro plants
+            if not missing_plants_idxs.empty:
+                # original total p_nom
+                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
+
+                ror = ror.loc[ror.index.intersection(found_plants.index)]
+                hydro = hydro.loc[hydro.index.intersection(found_plants.index)]
+                # loss of p_nom
+                loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
+
+                logger.warning(
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants_idxs)}."
+                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
+                )
+
+            # if there are any plants for which runoff data are available
+            if not found_plants.empty:
+                inflow_t = (
+                    inflow.sel(plant=found_plants.values)
+                    .assign_coords(plant=found_plants.index)
+                    .rename({"plant": "name"})
+                    .transpose("time", "name")
+                )
+                #apply power conversion
+                p_max_pu_ror_lin_wide = ror_conversion(ror, inflow_t, q_min, eff)
+                inflow_Glofas_sto_MW = reservoir_conversion(hydro, inflow_t, eff)
+
+    if "ror" in carriers and not ror.empty:
+        n.madd(
+            "Generator",
+            ror.index,
+            carrier="ror",
+            bus=ror["bus"],
+            p_nom=ror["p_nom"],
+            efficiency=costs.at["ror", "efficiency"],
+            capital_cost=costs.at["ror", "capital_cost"],
+            weight=ror["p_nom"],
+            p_max_pu=p_max_pu_ror_lin_wide,
+        )
+
+    if "PHS" in carriers and not phs.empty:
+        # fill missing max hours to config value and
+        # assume no natural inflow due to lack of data
+        phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
+        n.madd(
+            "StorageUnit",
+            phs.index,
+            carrier="PHS",
+            bus=phs["bus"],
+            p_nom=phs["p_nom"],
+            capital_cost=costs.at["PHS", "capital_cost"],
+            max_hours=phs["max_hours"],
+            efficiency_store=np.sqrt(costs.at["PHS", "efficiency"]),
+            efficiency_dispatch=np.sqrt(costs.at["PHS", "efficiency"]),
+            cyclic_state_of_charge=True,
+        )
+
+    if "hydro" in carriers and not hydro.empty:
+
+        reservoir_plants = hydro[["p_nom", "volume_mm3", "damheight_m"]].copy()
+
+        # Calculate the median dam height for available values
+        default_dam_sto_height = hydro["damheight_m"].median(skipna=True)
+        default_dam_res_volume = hydro["volume_mm3"].median(skipna=True)
+
+        # Converting volume to energy (reservoir_mwh)
+        # Formula: P = Q * H * 9.81 * 1e-3 / 3600 then considering 70% as live storage volume
+        reservoir_plants["reservoir_mwh"] = reservoir_plants.apply(
+                lambda row: 
+                    (row["volume_mm3"] if not np.isnan(row["volume_mm3"]) else default_dam_res_volume) * 1e6 * 
+                    (row["damheight_m"] if not np.isnan(row["damheight_m"]) else default_dam_sto_height) * 
+                    9.81 * 0.7 * 1e-3 / 3600 ,
+                axis=1
+        )
+
+        #Calculate the `max_hours` column as the ratio of `reservoir_mwh` to `p_nom`
+        reservoir_plants["max_hours"] = reservoir_plants["reservoir_mwh"] / reservoir_plants["p_nom"]
+        hydro_max_hours = reservoir_plants[["max_hours"]]
+        hydro_max_hours.index = hydro.index  
+        hydro_max_hours = hydro_max_hours.reset_index()[["index", "max_hours"]].set_index("index") 
+        hydro_max_hours = hydro_max_hours["max_hours"]  
+
+        n.madd(
+            "StorageUnit",
+            hydro.index,
+            carrier="hydro",
+            bus=hydro["bus"],
+            p_nom=hydro["p_nom"],
+            max_hours=hydro_max_hours,
+            capital_cost=(
+                costs.at["hydro", "capital_cost"]
+                #if c.get("hydro_capital_cost")
+                #else 0.0
+            ),
+            marginal_cost=costs.at["hydro", "marginal_cost"],
+            p_max_pu=1.0,  # dispatch
+            p_min_pu=0.0,  # store
+            efficiency_dispatch=costs.at["hydro", "efficiency"],
+            efficiency_store=1.0,
+            cyclic_state_of_charge=True,
+            inflow=inflow_Glofas_sto_MW.loc[:, hydro.index],
+        )
+        
 def attach_hydro(n, costs, ppl):
     if "hydro" not in snakemake.params.renewable:
         return
@@ -473,6 +724,7 @@ def attach_hydro(n, costs, ppl):
 
     ppl = (
         ppl.query('carrier == "hydro"')
+        .assign(ppl_id=lambda df: df.index)
         .reset_index(drop=True)
         .rename(index=lambda s: str(s) + " hydro")
     )
@@ -489,65 +741,36 @@ def attach_hydro(n, costs, ppl):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
-    if snakemake.params.alternative_clustering:
-        bus_id = ppl["region_id"]
-    else:
-        bus_id = ppl["bus"]
 
     inflow_idx = ror.index.union(hydro.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            inflow_buses = bus_id[inflow_idx]
-            missing_plants = pd.Index(inflow_buses.unique()).difference(
-                inflow.indexes["plant"]
-            )
-            # map power plants index (regions_onshore) into power plants ids (powerplants.csv)
-            # plants_to_keep correspond to "plant" index of regions_onshore
-            # plants_to_keep.index corresponds to bus_id of PyPSA network
-            plants_with_data = inflow_buses[inflow_buses.isin(inflow.indexes["plant"])]
-            plants_to_keep = plants_with_data.to_numpy()
+            found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
+            missing_plants_idxs = ppl.index.difference(found_plants.index)
 
             # if missing time series are found, notify the user and exclude missing hydro plants
-            if not missing_plants.empty:
+            if not missing_plants_idxs.empty:
                 # original total p_nom
                 total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
-                # update plants_with_data to ensure proper match between "plant" index and bus_id
-                plants_with_data = inflow_buses[inflow_buses.isin(plants_to_keep)]
-                network_buses_to_keep = plants_with_data.index
-                plants_to_keep = plants_with_data.to_numpy()
 
-                ror = ror.loc[ror.index.intersection(network_buses_to_keep)]
-                hydro = hydro.loc[hydro.index.intersection(network_buses_to_keep)]
+                ror = ror.loc[ror.index.intersection(found_plants.index)]
+                hydro = hydro.loc[hydro.index.intersection(found_plants.index)]
                 # loss of p_nom
                 loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
 
                 logger.warning(
-                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants)}."
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants_idxs)}."
                     f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
                 )
 
             # if there are any plants for which runoff data are available
-            if not plants_with_data.empty:
-                network_buses_to_keep = plants_with_data.index
-                plants_to_keep = plants_with_data.to_numpy()
-
-                # hydro_inflow_factor is used to divide the inflow between the various units of each power plant
-                if not snakemake.params.alternative_clustering:
-                    hydro_inflow_factor = hydro["p_nom"] / hydro.groupby("bus")[
-                        "p_nom"
-                    ].transform("sum")
-                else:
-                    hydro_inflow_factor = hydro["p_nom"] / hydro.groupby("region_id")[
-                        "p_nom"
-                    ].transform("sum")
-
+            if not found_plants.empty:
                 inflow_t = (
-                    inflow.sel(plant=plants_to_keep)
+                    inflow.sel(plant=found_plants.values)
+                    .assign_coords(plant=found_plants.index)
                     .rename({"plant": "name"})
-                    .assign_coords(name=network_buses_to_keep)
                     .transpose("time", "name")
                     .to_pandas()
-                    * hydro_inflow_factor
                 )
 
     if "ror" in carriers and not ror.empty:
@@ -888,7 +1111,11 @@ if __name__ == "__main__":
         extendable_carriers,
         snakemake.params.length_factor,
     )
-    attach_hydro(n, costs, ppl)
+    
+    if snakemake.params.hydro_methods == 'GloFAS':
+        attach_hydro_GloFAS(n, costs, ppl, snakemake.params.q_min, snakemake.params.eff)
+    else:
+        attach_hydro(n, costs, ppl)
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
