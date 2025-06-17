@@ -44,8 +44,7 @@ copy_default_files()
 # the different values will be not overwritten but concatenated
 # from all the configs which can be unintended. An example: `atlite:cutouts`
 configfile: "configs/bundle_config.yaml"
-configfile: "configs/powerplantmatching_config.yaml"
-
+configfile: "configs/gp/powerplantmatching_config.yaml"
 
 config_technical = config.copy()
 
