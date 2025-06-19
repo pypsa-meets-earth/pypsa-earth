@@ -972,27 +972,38 @@ def get_yearly_currency_exchange_average(
     year: int,
     default_exchange_rate: float = None,
 ):
-    if calendar.isleap(year):
+    today = datetime.today()
+    effective_year = min(year, today.year)  # for future years, use the latest available value
+
+    if calendar.isleap(effective_year):
         days_per_year = 366
     else:
         days_per_year = 365
-    currency_exchange_rate = 0.0
-    initial_date = datetime(year, 1, 1)
+
+    rates = []
+    initial_date = datetime(effective_year, 1, 1)
+
     for day_index in range(days_per_year):
         date_to_use = initial_date + timedelta(days=day_index)
         try:
-            rate = currency_converter.convert(
-                1, initial_currency, output_currency, date_to_use
-            )
+            rate = currency_converter.convert(1, initial_currency, output_currency, date_to_use)
+            rates.append(rate)
         except Exception:
-            if default_exchange_rate is not None:
-                rate = default_exchange_rate
-            else:
-                raise  # fails if no default value is found
-        currency_exchange_rate += rate
+            continue
 
-    currency_exchange_rate /= days_per_year
-    return currency_exchange_rate
+    if rates:
+        avg_rate = sum(rates) / len(rates)
+        return avg_rate
+
+    if default_exchange_rate is not None:
+        logger.warning(
+            f"No exchange rates found for {initial_currency}->{output_currency} in {effective_year}. Using default {default_exchange_rate}."
+        )
+        return default_exchange_rate
+
+    raise RuntimeError(
+        f"No exchange rate data found for {initial_currency}->{output_currency} in {effective_year}, and no default rate provided."
+    )
 
 
 def convert_currency_and_unit(
