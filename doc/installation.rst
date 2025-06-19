@@ -18,9 +18,6 @@ Ensure that your system meets the minimum hardware specifications to run PyPSA-E
 
 * Storage (HDD/SSD) capacity depends on the region of interest. Africa model requires 40 GB, the world `--`` 250 GB, a single country `--` between 1-10 GB. Tutorial requires just below 2 GB. Thus, considering all required software tools, at least 40 GB of storage space is recommended.
 
-.. note::
-
-    The subsequently described installation steps are demonstrated as shell commands, where the path before the ``%`` sign denotes the directory in which the commands following the ``%`` should be entered.
 
 Software Prerequisites
 ======================
@@ -87,6 +84,13 @@ The following commands can be executed in command prompt of ``miniconda``, termi
 .. code:: bash
 
     $ git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
+    $ cd pypsa-earth
+
+.. note::
+
+    Make sure that you are in the ``pypsa-earth`` root directory. If you are not sure, you can check it with ``pwd`` command in Linux or MacOS, or ``cd`` command in Windows.
+    If you are in the wrong directory, you can navigate to the ``pypsa-earth`` root directory with ``cd path/to/pypsa-earth`` command.
+
 
 Install Dependencies
 -------------------------
@@ -116,7 +120,7 @@ We recommend using these locked files for a stable environment.
 
 .. note::
 
-    you can check and verify your platform with ``conda info``
+    You can check and verify your platform with ``conda info``.
 
 .. code:: console
 
@@ -137,10 +141,19 @@ In case mamba did not work for you, you might want to try conda instead:
 
     $ conda activate pypsa-earth
 
+If a pre-generated lock file is not available for your platform (e.g., ``aarch64``, ``ARM Mac``, etc.), you can simply install the environment using the ``environment.yaml`` file, which is not locked and may lead to compatibility issues.
 
-Generating the Lock Files
+.. code:: bash
+
+    $ conda install -c conda-forge mamba
+
+    $ mamba env create -f envs/environment.yaml
+
+
+Generating the Lock Files (Advanced Users)
 ---------------------------
-If a pre-generated lock file is not available for your platform (e.g., ``aarch64``, ARM Mac, etc.), you can generate one using the following:
+
+If you wish to generate lock-files for your platform, you can use the following commands:
 
 1. Ensure ``conda-lock`` is installed:
 
@@ -156,8 +169,9 @@ If a pre-generated lock file is not available for your platform (e.g., ``aarch64
 
 For platform codes, refer to the `conda-lock documentation <https://conda.github.io/conda-lock/>`_ or use ``conda info`` to determine your platform.
 
+.. seealso::
 
-For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
+    For more on information on how to install conda and work with it you can look into :ref:`software_hints`.
 
 To confirm the installation, run the following command in the activated environment:
 
@@ -175,11 +189,11 @@ With the goal of supporting completely open source initiative, we focus on relyi
 
 * `GLPK <https://www.gnu.org/software/glpk/>`_ and `WinGLPK <http://winglpk.sourceforge.net/>`_ (is included into pypsa-earth environment and installed automatically during environment creation);
 
-* `HiGHS <https://github.com/ERGO-Code/HiGHS>`_.
+* `HiGHS <https://github.com/ERGO-Code/HiGHS>`_. (Installed automatically as a dependency for PyPSA)
 
 To further improve performances, commercial solvers like
 
-* `Gurobi <http://www.gurobi.com/>`_;
+* `Gurobi <http://www.gurobi.com/>`_ (the Gurobi package is pre-installed in the environment, but you must obtain and activate your own license; see the `Gurobi documentation <https://www.gurobi.com/documentation/>`_ for details);
 
 * `CPLEX <https://www.ibm.com/analytics/cplex-optimizer>`_.
 
@@ -187,11 +201,10 @@ To further improve performances, commercial solvers like
 
 .. note::
 
-    No need to install ``glpk`` separately, as they are included in ``envs/environment.yaml`` and installed during ``conda`` environment creation.
+    ``glpk``, ``gurobi``, and ``highs`` are installed automatically with the environment.
     However, solving capabilities of ``glpk`` are limited.
     To run the model with high temporal and spatial resolution, it is recommended to use ``cplex``, ``gurobi``, or ``highs``.
 
-A recommended instruction to install the HiGHS solver is given `here (link to highs) <https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632>`_.
 
 
 Install Jupyter Lab
