@@ -694,7 +694,10 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    electrolysis_index = n.links.index[n.links.index.str.contains("H2 Electrolysis")]
+    matching_technologies = snakemake.config["policy_config"]["hydrogen"][
+        "matching_technologies"
+    ]
+    electrolysis_index = n.links.index[n.links.carrier.isin(matching_technologies)]
 
     link_p = n.model["Link-p"]
     electrolysis = link_p.loc[:, electrolysis_index]
