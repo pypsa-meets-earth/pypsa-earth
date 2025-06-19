@@ -56,7 +56,7 @@ PyPSA, PyPSA-Eur, PyPSA-Eur-Sec
 Publications:
 -------------
 
-`Click here to see the full list of publications in the PyPSA ecosystem. <https://www.pypsa.org/publications/index.html>`_
+`Click here to see the full list of publications in the PyPSA ecosystem. <https://pypsa.org/#research>`_
 
 Selected list:
 
