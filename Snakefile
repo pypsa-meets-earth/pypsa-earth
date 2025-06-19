@@ -4,6 +4,7 @@
 
 import sys
 import os
+import warnings
 import pathlib
 
 sys.path.append("./scripts")
@@ -400,6 +401,12 @@ if not config["enable"].get("build_natura_raster", False):
 
 if config["countries"] == ["US"] and config["costs"]["technology_data_US"]:
     cost_directory = "US"
+elif config["costs"]["technology_data_US"]:
+    cost_directory = ""
+    warnings.warn(
+        "Please note that you're using US-specific costs. If that is not intentional, "
+        "set the config parameter \"technology_data_US\" to false"
+    )
 else:
     cost_directory = ""
 
