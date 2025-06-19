@@ -633,26 +633,36 @@ def add_h2_network_cap(n, cap):
 
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
-    res_techs = [
-        "csp",
-        "rooftop-solar",
-        "solar",
-        "onwind",
-        "onwind2",
-        "onwind3",
-        "offwind",
-        "offwind2",
-        "ror",
-    ]
-
-    res_stor_techs = ["hydro"]
-
+    """
+    Applies temporal constraints for hydrogen production based on renewable energy sources (RES) 
+    and electrolysis within a specified time period. The function ensures that the hydrogen production 
+    adheres to policy configurations such as temporal matching and allowed excess.
+    Parameters:
+    -----------
+    n : pypsa.Network
+        The PyPSA network object containing the current state of the energy system model.
+    n_ref : pypsa.Network
+        A reference PyPSA network object used for additionality constraints (if enabled).
+    time_period : str
+        The time period for grouping constraints. Can be one of "hour", "month", or "year".
+    Returns:
+    --------
+    None
+        Adds constraints directly to the PyPSA network model.
+    Raises:
+    -------
+    KeyError
+        If required configuration keys are missing in `snakemake.config`.
+    ValueError
+        If an unsupported `time_period` is provided.
+    """
+    temporal_matching_carriers = snakemake.config["policy_config"]["hydrogen"]["temporal_matching_carriers"]
     allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
 
     # Generation
-    res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_gen_index = n.generators.loc[n.generators.carrier.isin(temporal_matching_carriers)].index
     res_stor_index = n.storage_units.loc[
-        n.storage_units.carrier.isin(res_stor_techs)
+        n.storage_units.carrier.isin(temporal_matching_carriers)
     ].index
 
     weightings_gen = pd.DataFrame(
@@ -1023,18 +1033,18 @@ def extra_functionality(n, snapshots):
             logger.info("preparing reference case for additionality constraint")
         else:
             logger.info(
-                "setting h2 export to {}ly matching constraint with additionality".format(
+                "setting h2 export to {} matching constraint with additionality".format(
                     temportal_matching_period
                 )
             )
-            hydrogen_temporal_constraint(n, n_ref, temportal_matching_period)
+            hydrogen_temporal_constraint(n, n_ref, temportal_matching_period.strip("ly"))
     elif not additionality:
         logger.info(
-            "setting h2 export to {}ly matching constraint without additionality".format(
+            "setting h2 export to {} matching constraint without additionality".format(
                 temportal_matching_period
             )
         )
-        hydrogen_temporal_constraint(n, n_ref, temportal_matching_period)
+        hydrogen_temporal_constraint(n, n_ref, temportal_matching_period.strip("ly"))
 
     else:
         raise ValueError(
@@ -1140,7 +1150,7 @@ if __name__ == "__main__":
         snakemake.config["policy_config"]["hydrogen"]["additionality"]
         and not snakemake.config["policy_config"]["hydrogen"]["is_reference"]
         and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-        != "no_res_matching"
+        != "no_temporal_matching"
         and is_sector_coupled
     ):
         n_ref_path = snakemake.config["policy_config"]["hydrogen"]["path_to_ref"]
