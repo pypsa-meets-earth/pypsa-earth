@@ -634,8 +634,8 @@ def add_h2_network_cap(n, cap):
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
     """
-    Applies temporal constraints for hydrogen production based on renewable energy sources (RES) 
-    and electrolysis within a specified time period. The function ensures that the hydrogen production 
+    Applies temporal constraints for hydrogen production based on renewable energy sources (RES)
+    and electrolysis within a specified time period. The function ensures that the hydrogen production
     adheres to policy configurations such as temporal matching and allowed excess.
     Parameters:
     -----------
@@ -656,11 +656,15 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     ValueError
         If an unsupported `time_period` is provided.
     """
-    temporal_matching_carriers = snakemake.config["policy_config"]["hydrogen"]["temporal_matching_carriers"]
+    temporal_matching_carriers = snakemake.config["policy_config"]["hydrogen"][
+        "temporal_matching_carriers"
+    ]
     allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
 
     # Generation
-    res_gen_index = n.generators.loc[n.generators.carrier.isin(temporal_matching_carriers)].index
+    res_gen_index = n.generators.loc[
+        n.generators.carrier.isin(temporal_matching_carriers)
+    ].index
     res_stor_index = n.storage_units.loc[
         n.storage_units.carrier.isin(temporal_matching_carriers)
     ].index
@@ -1037,7 +1041,9 @@ def extra_functionality(n, snapshots):
                     temportal_matching_period
                 )
             )
-            hydrogen_temporal_constraint(n, n_ref, temportal_matching_period.strip("ly"))
+            hydrogen_temporal_constraint(
+                n, n_ref, temportal_matching_period.strip("ly")
+            )
     elif not additionality:
         logger.info(
             "setting h2 export to {} matching constraint without additionality".format(
