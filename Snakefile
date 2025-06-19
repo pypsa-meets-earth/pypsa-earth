@@ -405,9 +405,9 @@ countries = config.get("countries", [])
 if country_data and countries == [country_data]:
     cost_directory = country_data
 elif country_data:
-    cost_directory = ""
+    cost_directory = country_data
     warnings.warn(
-        f"'country_specific_data' is set to '{country_data}', but 'countries' is {countries}. Make sure this is intentional."
+        f"'country_specific_data' is set to '{country_data}', but 'countries' is {countries}. Make sure the '{country_data}' directory exists and that this is intentional."
     )
 else:
     cost_directory = ""
