@@ -399,13 +399,15 @@ if not config["enable"].get("build_natura_raster", False):
             shutil.copyfile(input[0], output[0])
 
 
-if config["countries"] == ["US"] and config["costs"]["technology_data_US"]:
-    cost_directory = "US"
-elif config["costs"]["technology_data_US"]:
+country_data = config["costs"].get("country_specific_data", "")
+countries = config.get("countries", [])
+
+if country_data and countries == [country_data]:
+    cost_directory = country_data
+elif country_data:
     cost_directory = ""
     warnings.warn(
-        "Please note that you're using US-specific costs. If that is not intentional, "
-        "set the config parameter \"technology_data_US\" to false"
+        f"'country_specific_data' is set to '{country_data}', but 'countries' is {countries}. Make sure this is intentional."
     )
 else:
     cost_directory = ""
