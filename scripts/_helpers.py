@@ -973,7 +973,9 @@ def get_yearly_currency_exchange_average(
     default_exchange_rate: float = None,
 ):
     today = datetime.today()
-    effective_year = min(year, today.year)  # for future years, use the value corresponding to the latest available year
+    effective_year = min(
+        year, today.year
+    )  # for future years, use the value corresponding to the latest available year
 
     if calendar.isleap(effective_year):
         days_per_year = 366
@@ -987,7 +989,8 @@ def get_yearly_currency_exchange_average(
         date_to_use = initial_date + timedelta(days=day_index)
         try:
             rate = currency_converter.convert(
-                1, initial_currency, output_currency, date_to_use)
+                1, initial_currency, output_currency, date_to_use
+            )
             rates.append(rate)
         except Exception:
             continue
