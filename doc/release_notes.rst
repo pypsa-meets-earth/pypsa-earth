@@ -45,6 +45,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix logic for selection of default exchange rate. `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
+
 * Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0. `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
 
 * Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
