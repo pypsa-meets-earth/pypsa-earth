@@ -986,7 +986,8 @@ def get_yearly_currency_exchange_average(
     for day_index in range(days_per_year):
         date_to_use = initial_date + timedelta(days=day_index)
         try:
-            rate = currency_converter.convert(1, initial_currency, output_currency, date_to_use)
+            rate = currency_converter.convert(
+                1, initial_currency, output_currency, date_to_use)
             rates.append(rate)
         except Exception:
             continue
