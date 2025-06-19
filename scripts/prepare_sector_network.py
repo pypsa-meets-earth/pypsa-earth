@@ -3190,6 +3190,7 @@ def add_industry_heating(n, costs):
     )
 
     # the HP is medium temperature relative to its normal operational window
+    # !!! the mixing of 'low' and 'medium' temperature is NOT an accident !!!
     n.madd(
         "Link",
         nodes_low + " industrial heat pump low temperature",
@@ -3208,6 +3209,7 @@ def add_industry_heating(n, costs):
         "Currently manually adjusts units for industrial heat pump high temperature"
     )
     # the HP is high temperature relative to its normal operational window
+    # !!! the mixing of 'medium' and 'high' temperature is NOT an accident !!!
     n.madd(
         "Link",
         nodes_medium + " industrial heat pump medium temperature",
@@ -3680,13 +3682,27 @@ if __name__ == "__main__":
         snakemake.input["industrial_heating_costs"], index_col=[0, 1]
     )
 
-    print(industry_heating_costs)
+    # quick fix unit conversion
+    eur_dollar_conversion = 1.15
+    industry_heating_costs.loc[
+        industry_heating_costs["unit"].str.contains("EUR"), "value"
+        ] *= eur_dollar_conversion
+
+    industry_heating_costs.loc[
+        industry_heating_costs["unit"].str.contains("EUR"), "unit"
+        ] = industry_heating_costs.loc[
+            industry_heating_costs["unit"].str.contains("EUR"), "unit"
+            ].str.replace("EUR", "$")
+
+    add_industry_heating(
+        n,
+        industry_heating_costs,
+        snakemake.params.costs["financial_case"],
+        snakemake.params.costs["scenario"],
+    )
 
     import sys
-
     sys.exit()
-
-    add_industry_heating(n, industry_heating_costs)
 
     """
     # industry_heating_costs = (

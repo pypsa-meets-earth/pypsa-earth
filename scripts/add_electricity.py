@@ -383,6 +383,25 @@ def attach_wind_and_solar(
                 capital_cost = costs.at[tech, "capital_cost"]
 
             if not df.query("carrier == @tech").empty:
+
+                print('===========================================================')
+                print('tech', tech)
+
+                print('n.buses.index first 10')
+                print(n.buses.index[:10])
+                print('ds.indexes["bus"] first 10')
+                print(ds.indexes["bus"][:10])
+
+                print('n.buses.index last 10')
+                print(n.buses.index[-10:])
+                print('ds.indexes["bus"] last 10')
+                print(ds.indexes["bus"][-10:])
+
+
+
+                print('===========================================================')
+
+
                 buses = n.buses.loc[ds.indexes["bus"]]
                 caps = map_country_bus(df.query("carrier == @tech"), buses)
                 caps = caps.groupby(["bus"]).p_nom.sum()
