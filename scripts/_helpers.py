@@ -973,7 +973,7 @@ def get_yearly_currency_exchange_average(
     default_exchange_rate: float = None,
 ):
     today = datetime.today()
-    effective_year = min(year, today.year)  # for future years, use the latest available value
+    effective_year = min(year, today.year)  # for future years, use the value corresponding to the latest available year
 
     if calendar.isleap(effective_year):
         days_per_year = 366
