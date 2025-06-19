@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from build_egs_potentials import tif_to_gdf
 from build_industrial_heating_demand import process_regional_supply_curves
+
 # from build_industrial_heating_demand import process_techno_economic_data
 from tqdm import tqdm
 
@@ -36,7 +37,6 @@ def process_techno_economic_data(df):
     tech_output_mapping = {
         "directheat100degC": {"heat": "50-80C"},
     }
-
 
     # Create a new DataFrame to store processed data
     result_data = {}
@@ -99,9 +99,7 @@ def process_techno_economic_data(df):
         sales_col = f"{prefix}_sales"
 
         if sales_col not in df.columns:
-            error_msg = (
-                f"Sales column {sales_col} not found for technology {tech_key}"
-            )
+            error_msg = f"Sales column {sales_col} not found for technology {tech_key}"
             print(error_msg)
             raise ValueError(error_msg)
 
@@ -115,9 +113,7 @@ def process_techno_economic_data(df):
         # Get CAPEX
         capex_col = f"{prefix}_capex"
         if capex_col not in df.columns:
-            error_msg = (
-                f"CAPEX column {capex_col} not found for technology {tech_key}"
-            )
+            error_msg = f"CAPEX column {capex_col} not found for technology {tech_key}"
             print(error_msg)
             raise ValueError(error_msg)
         result_data[(std_tech_name, "capex[USD/MW]")] = (
@@ -129,7 +125,9 @@ def process_techno_economic_data(df):
             col for col in df.columns if col.startswith(prefix) and "opex" in col
         ]
         if not opex_cols:
-            error_msg = f"No OPEX columns found for technology {tech_key} with prefix {prefix}"
+            error_msg = (
+                f"No OPEX columns found for technology {tech_key} with prefix {prefix}"
+            )
             print(error_msg)
             raise ValueError(error_msg)
         # Sum all OPEX columns instead of just using the first one
@@ -153,7 +151,7 @@ def process_techno_economic_data(df):
 
 if __name__ == "__main__":
 
-    regions = gpd.read_file(snakemake.input.regions).set_index('name')
+    regions = gpd.read_file(snakemake.input.regions).set_index("name")
     district_gdf = gpd.read_file(snakemake.input.demand_data)
     district_gdf["heating_demand_mwh"] = district_gdf["heating_by_pop"] * 2.93071e-7
     district_gdf["avg_heat_mw"] = district_gdf["heating_demand_mwh"] / 8760
@@ -209,7 +207,7 @@ if __name__ == "__main__":
 
         # Define discount rate and lifetimes for LCOE calculation
         discount_rate = 0.07
-        lifetime = 30.
+        lifetime = 30.0
         lcoe_values = {}
 
         tech_type = "directheat"
@@ -265,7 +263,6 @@ if __name__ == "__main__":
         # Add LCOE values to the gdf dataframe
         gdf.loc[lcoe.index, idx[tech, f"lcoe[USD/MWh]"]] = lcoe
 
-
     regional_supplies = list()
 
     # Convert string geometries to shapely objects
@@ -279,7 +276,6 @@ if __name__ == "__main__":
 
     total_results = []
     total_clusters = []
-
 
     for region, geometry in tqdm(regions["geometry"].items()):
 
@@ -312,28 +308,28 @@ if __name__ == "__main__":
 
             geothermal_subset.index = geothermal_subset.index.get_level_values(1)
 
-            supply_curve_step = pd.Series({
-                'heat_demand[MW]': row['avg_heat_mw'],
-                'capex[USD/MW]': geothermal_subset.loc['capex[USD/MW]'],
-                'opex[USD/MWh]': geothermal_subset.loc['opex[USD/MWh]'],
-            })
+            supply_curve_step = pd.Series(
+                {
+                    "heat_demand[MW]": row["avg_heat_mw"],
+                    "capex[USD/MW]": geothermal_subset.loc["capex[USD/MW]"],
+                    "opex[USD/MWh]": geothermal_subset.loc["opex[USD/MWh]"],
+                }
+            )
             regional_supply.append(supply_curve_step)
 
         if len(regional_supply) == 0:
             continue
 
         regional_supply = pd.concat(regional_supply, axis=1).T
-        regional_supply['region'] = region
-        regional_supply['tech'] = 'directheat100degC'
-        regional_supply[['lcoe[USD/MWh]', 'total_output[MWh]']] = np.nan
+        regional_supply["region"] = region
+        regional_supply["tech"] = "directheat100degC"
+        regional_supply[["lcoe[USD/MWh]", "total_output[MWh]"]] = np.nan
 
         regional_supply = process_regional_supply_curves(regional_supply)
         total_results.append(regional_supply)
 
     total_results = pd.concat(total_results)[
-        ['heat_demand[MW]', 'capex[USD/MW]', 'opex[USD/MWh]']
-        ]
+        ["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
+    ]
 
-    total_results.to_csv(snakemake.output[
-        'district_heating_geothermal_supply_curves']
-        )
+    total_results.to_csv(snakemake.output["district_heating_geothermal_supply_curves"])

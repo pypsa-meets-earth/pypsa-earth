@@ -384,23 +384,20 @@ def attach_wind_and_solar(
 
             if not df.query("carrier == @tech").empty:
 
-                print('===========================================================')
-                print('tech', tech)
+                print("===========================================================")
+                print("tech", tech)
 
-                print('n.buses.index first 10')
+                print("n.buses.index first 10")
                 print(n.buses.index[:10])
                 print('ds.indexes["bus"] first 10')
                 print(ds.indexes["bus"][:10])
 
-                print('n.buses.index last 10')
+                print("n.buses.index last 10")
                 print(n.buses.index[-10:])
                 print('ds.indexes["bus"] last 10')
                 print(ds.indexes["bus"][-10:])
 
-
-
-                print('===========================================================')
-
+                print("===========================================================")
 
                 buses = n.buses.loc[ds.indexes["bus"]]
                 caps = map_country_bus(df.query("carrier == @tech"), buses)

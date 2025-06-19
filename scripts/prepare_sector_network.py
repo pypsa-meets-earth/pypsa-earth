@@ -3686,13 +3686,15 @@ if __name__ == "__main__":
     eur_dollar_conversion = 1.15
     industry_heating_costs.loc[
         industry_heating_costs["unit"].str.contains("EUR"), "value"
-        ] *= eur_dollar_conversion
+    ] *= eur_dollar_conversion
 
     industry_heating_costs.loc[
         industry_heating_costs["unit"].str.contains("EUR"), "unit"
-        ] = industry_heating_costs.loc[
-            industry_heating_costs["unit"].str.contains("EUR"), "unit"
-            ].str.replace("EUR", "$")
+    ] = industry_heating_costs.loc[
+        industry_heating_costs["unit"].str.contains("EUR"), "unit"
+    ].str.replace(
+        "EUR", "$"
+    )
 
     add_industry_heating(
         n,
@@ -3702,6 +3704,7 @@ if __name__ == "__main__":
     )
 
     import sys
+
     sys.exit()
 
     print(industry_heating_costs)
