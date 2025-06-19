@@ -405,13 +405,13 @@ if config["enable"].get("retrieve_cost_data", True):
         input:
             HTTP.remote(
                 f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
-                + "costs_{year}.csv",
+                + f"costs_{config['costs']['year']}.csv",
                 keep_local=True,
             ),
         output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            COSTS,
         log:
-            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+            "logs/" + RDIR + f"retrieve_cost_data_{config['costs']['year']}.log",
         resources:
             mem_mb=5000,
         run:
@@ -1089,7 +1089,7 @@ rule prepare_sector_network:
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=COSTS,
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
         + SECDIR
@@ -1183,7 +1183,7 @@ rule add_export:
     input:
         overrides="data/override_component_attrs",
         export_ports="resources/" + SECDIR + "export_ports.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=COSTS,
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -1650,7 +1650,7 @@ if config["foresight"] == "overnight":
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+            costs=COSTS,
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
         output:
             RESDIR
@@ -1695,7 +1695,7 @@ rule make_sector_summary:
             **config["costs"],
             **config["export"],
         ),
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=COSTS,
         plots=expand(
             RESDIR
             + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
@@ -1933,7 +1933,7 @@ rule build_industry_demand:  #default data
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         industrial_database="data/industrial_database.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=COSTS,
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
         industrial_energy_demand_per_node="resources/"
