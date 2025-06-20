@@ -866,7 +866,7 @@ rule build_district_heating_demands:
             "resources/"
             + SECDIR
             + "district_heating_geothermal_supply_curves_s{simpl}_{clusters}.csv"
-        ),
+        )
         # heat_exchanger_capacity=(
         #     "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
         # ),
@@ -1429,14 +1429,11 @@ rule prepare_sector_network:
         egs_potentials_hs="resources/"
         + SECDIR
         + "geothermal_data/potential_hs_s{simpl}_{clusters}.csv",
-        district_heating_demands=(
-            "resources/" + SECDIR + "district_heating_s{simpl}_{clusters}.csv"
-        ),
         district_heating_geothermal_supply_curves=(
             "resources/"
             + SECDIR
             + "district_heating_geothermal_supply_curves_s{simpl}_{clusters}.csv"
-        ),
+        )
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
