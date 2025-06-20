@@ -3083,9 +3083,21 @@ def add_industry_heating(n, costs):
         n.buses.carrier == "industry heat demand(150-250C)"
     ].index
 
-    nodes_low = low_temp_buses.str.split(" ").str[0] + " " + low_temp_buses.str.split(" ").str[1]
-    nodes_medium = medium_temp_buses.str.split(" ").str[0] + " " + medium_temp_buses.str.split(" ").str[1]
-    nodes_high = high_temp_buses.str.split(" ").str[0] + " " + high_temp_buses.str.split(" ").str[1]
+    nodes_low = (
+        low_temp_buses.str.split(" ").str[0]
+        + " "
+        + low_temp_buses.str.split(" ").str[1]
+    )
+    nodes_medium = (
+        medium_temp_buses.str.split(" ").str[0]
+        + " "
+        + medium_temp_buses.str.split(" ").str[1]
+    )
+    nodes_high = (
+        high_temp_buses.str.split(" ").str[0]
+        + " "
+        + high_temp_buses.str.split(" ").str[1]
+    )
 
     # assert (nodes_low.isin(n.buses.index)).all()
     # assert (nodes_medium.isin(n.buses.index)).all()
@@ -3505,6 +3517,7 @@ def attach_enhanced_geothermal(n, potential, mode):
                 p_nom_extendable=True,
             )
 
+
 def add_geothermal_district_heating_supply(n, egs_potential):
 
     discount_rate = float(snakemake.wildcards.discountrate)
@@ -3515,18 +3528,22 @@ def add_geothermal_district_heating_supply(n, egs_potential):
         / ((1 + discount_rate) ** lifetime - 1)
     )
 
-    network_cost_factor = 1.28 # maximally simple estimate of heat network cost, taken from
+    network_cost_factor = (
+        1.28  # maximally simple estimate of heat network cost, taken from
+    )
     # https://vb.nweurope.eu/media/21149/2022_04_dge_rollout_dt123_socio_economic_potential_mapping_for_dge_urg.pdf
 
-    egs_potential['capex[USD/MW]'] = egs_potential['capex[USD/MW]'] * annuity_factor * network_cost_factor
+    egs_potential["capex[USD/MW]"] = (
+        egs_potential["capex[USD/MW]"] * annuity_factor * network_cost_factor
+    )
 
     for (bus, supply_curve_step), row in egs_potential.iterrows():
 
-        supply_curve_step = supply_curve_step.split(' ')[1]
+        supply_curve_step = supply_curve_step.split(" ")[1]
 
-        capacity = row['heat_demand[MW]']
-        capital_cost = row['capex[USD/MW]']
-        opex = row['opex[USD/MWh]']
+        capacity = row["heat_demand[MW]"]
+        capital_cost = row["capex[USD/MW]"]
+        opex = row["opex[USD/MWh]"]
 
         identifier = f"{bus} geothermal district heating {supply_curve_step}"
 
@@ -3748,19 +3765,6 @@ if __name__ == "__main__":
 
     logger.info("Adding geothermal supply for district heating.")
     add_geothermal_district_heating_supply(n, district_heat_egs_supply)
-
-
-    print(industry_heating_costs)
-    import sys
-
-    sys.exit()
-
-    add_industry_heating(
-        n,
-        industry_heating_costs,
-        snakemake.params.costs["financial_case"],
-        snakemake.params.costs["scenario"],
-    )
 
     """
     # industry_heating_costs = (
