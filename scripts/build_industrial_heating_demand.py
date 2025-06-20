@@ -54,6 +54,9 @@ def prepare_demand_data(fn):
     )
 
     # df_melted['Heating Demand (MWh)'] = df_melted['Heating Demand (BBtu)'] * 293.07107
+    df_melted["Heating Demand (BBtu)"] = (
+        df_melted["Heating Demand (BBtu)"] * 1e9
+    )  # returns new data to old scaling
     df_melted["Heating Demand (MWh)"] = df_melted["Heating Demand (BBtu)"] * 2.9307e-7
 
     df_melted = df_melted.drop(columns=["Heating Demand (BBtu)"])
@@ -67,12 +70,12 @@ def prepare_demand_data(fn):
     df_melted = df_melted.reset_index(drop=True)
 
     temp_mapper = {
-        "0 to 49°C": 50,
-        "50 to 99°C": 100,
-        "100 to 149°C": 150,
-        "150 to 199°C": 200,
-        "200 to 249°C": 250,
-        "250 to 299°C": 300,
+        "0 to 49°C": 50,  # this dict implies choices about the temperature bands
+        "50 to 79°C": 79,  # only demands up to 249C are relevant
+        "80 to 149°C": 149,
+        "150 to 199°C": 199,
+        "200 to 249°C": 249,
+        "250 to 299°C": 299,
         "300 to 349°C": 350,
         "350 to 399°C": 400,
         "400 to 449°C": 450,
