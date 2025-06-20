@@ -3127,6 +3127,17 @@ def add_industry_heating(n, costs):
     csp_gens = n.generators.index[n.generators.carrier == "csp"]
     solar_thermal_p_max_pu = n.generators_t.p_max_pu.loc[:, csp_gens]
 
+    # based on the avg capacity factors of each tech in...
+    # http://article.sapub.org/10.5923.j.ijee.20221201.02.html
+    # https://pdf.sciencedirectassets.com/277910/1-s2.0-S1876610214X00068/1-s2.0-S1876610214002690/main.pdf
+    # ... we scale the concentrated_solar_power capacity factors to the avg capacity factors of each tech
+
+    capacity_factors = {
+        "glazed flat plate collector": 0.3,
+        "linear fresnel reflector": 0.51,
+        "solar thermal parabolic trough": 0.45,
+    }
+
     # solar thermal for each temperature band
     for nod, solar_tech, storage_tech_name, storage_tech_carrier_name in zip(
         [low_temp_buses, medium_temp_buses, high_temp_buses],
@@ -3151,6 +3162,8 @@ def add_industry_heating(n, costs):
             columns={name + " csp": name + " " + solar_tech for name in nod},
         )
 
+        cf_scaling = capacity_factors[solar_tech] / p_max_pu.mean().mean()
+
         n.madd(
             "Generator",
             nod + " " + solar_tech,
@@ -3160,7 +3173,7 @@ def add_industry_heating(n, costs):
             capital_cost=costs.at[solar_tech, "investment"],
             efficiency=costs.at[solar_tech, "efficiency"],
             marginal_cost=costs.at[solar_tech, "VOM"],
-            p_max_pu=p_max_pu,
+            p_max_pu=p_max_pu * cf_scaling,
         )
 
         n.madd(
@@ -3175,6 +3188,9 @@ def add_industry_heating(n, costs):
             max_hours=costs.at[storage_tech_name, "max_hours"],
             marginal_cost=costs.at[storage_tech_name, "VOM"],
         )
+    
+    import sys
+    sys.exit()
 
     for nod, boiler_tech_name, boiler_tech_carrier_name in zip(
         [low_temp_buses, medium_temp_buses, high_temp_buses],
