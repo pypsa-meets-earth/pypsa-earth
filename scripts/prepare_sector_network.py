@@ -203,7 +203,7 @@ def add_hydrogen(n, costs):
     )
 
     # Read hydrogen production technologies
-    h2_techs = options["hydrogen"].get("production", [])
+    h2_techs = options["hydrogen"].get("production_technologies", [])
 
     # Dictionary containing distinct parameters of H2 production technologies
     tech_params = {
