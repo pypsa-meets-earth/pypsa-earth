@@ -3026,7 +3026,7 @@ def add_geothermal_industry_supply(n, supply_curve):
                 n.add(
                     "Link",
                     link_name,
-                    carrier=tech.split(' ')[0],
+                    carrier=tech.split(" ")[0],
                     capital_cost=capex_annualized,
                     marginal_cost=row["opex[USD/MWh]"],
                     p_nom_max=row["heat_demand[MW]"],
