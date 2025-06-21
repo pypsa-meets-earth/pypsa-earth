@@ -3189,10 +3189,6 @@ def add_industry_heating(n, costs):
             marginal_cost=costs.at[storage_tech_name, "VOM"],
         )
 
-    import sys
-
-    sys.exit()
-
     for nod, boiler_tech_name, boiler_tech_carrier_name in zip(
         [low_temp_buses, medium_temp_buses, high_temp_buses],
         [
