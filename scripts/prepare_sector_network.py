@@ -3181,8 +3181,20 @@ def add_industry_heating(n, costs):
             marginal_cost=costs.at[storage_tech_name, "VOM"],
         )
 
-    for nod, boiler_tech_name, boiler_tech_carrier_name in zip(
+    # n.add('Bus', 'biogas', carrier='biogas')
+    # n.add(
+    #     'Generator',
+    #     'biogas',
+    #     bus='biogas',
+    #     carrier='biogas',
+    #     marginal_cost=costs.at['hot water boiler gas cond', "VOM"],
+    #     capital_cost=0.,
+    #     p_nom_extendable=True,
+    #     )
+
+    for nod, locs, boiler_tech_name, boiler_tech_carrier_name in zip(
         [low_temp_buses, medium_temp_buses, high_temp_buses],
+        [nodes_low, nodes_medium, nodes_high],
         [
             "hot water boiler gas cond",
             "hot water boiler gas cond",
@@ -3194,16 +3206,29 @@ def add_industry_heating(n, costs):
             "steam boiler cond high temperature",
         ],
     ):
-        n.madd(
-            "Generator",
-            nod + " " + boiler_tech_name,
-            bus=nod,
-            carrier=boiler_tech_carrier_name,
-            p_nom_extendable=True,
-            capital_cost=costs.at[boiler_tech_name, "investment"],
-            efficiency=costs.at[boiler_tech_name, "efficiency"],
-            marginal_cost=costs.at[boiler_tech_name, "VOM"],
-        )
+
+        for fuel in ['biogas', 'gas']:
+
+            if fuel == 'biogas':
+                bus0 = 'biogas'
+            else:
+                bus0 = [
+                    bus for bus in spatial.gas.nodes
+                    if ' '.join(bus.split(' ')[:2]) in locs]
+
+            name = nod + " " + boiler_tech_name + " " + fuel + '-powered'
+
+            n.madd(
+                "Link",
+                name,
+                bus0=bus0,
+                bus1=nod,
+                carrier=boiler_tech_carrier_name + ' ' + fuel + '-powered',
+                p_nom_extendable=True,
+                capital_cost=costs.at[boiler_tech_name, "investment"],
+                efficiency=costs.at[boiler_tech_name, "efficiency"],
+            )
+    
 
     # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
     logger.warning(
