@@ -3099,14 +3099,6 @@ def add_industry_heating(n, costs):
         + high_temp_buses.str.split(" ").str[1]
     )
 
-    # assert (nodes_low.isin(n.buses.index)).all()
-    # assert (nodes_medium.isin(n.buses.index)).all()
-    # assert (nodes_high.isin(n.buses.index)).all()
-
-    # assert (low_temp_buses.isin(n.buses.index)).all()
-    # assert (medium_temp_buses.isin(n.buses.index)).all()
-    # assert (high_temp_buses.isin(n.buses.index)).all()
-
     carriers = [
         "glazed flat plate collector",
         "steel or concrete water tank",
