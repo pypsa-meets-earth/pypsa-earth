@@ -3207,28 +3207,29 @@ def add_industry_heating(n, costs):
         ],
     ):
 
-        for fuel in ['biogas', 'gas']:
+        for fuel in ["biogas", "gas"]:
 
-            if fuel == 'biogas':
-                bus0 = 'biogas'
+            if fuel == "biogas":
+                bus0 = "biogas"
             else:
                 bus0 = [
-                    bus for bus in spatial.gas.nodes
-                    if ' '.join(bus.split(' ')[:2]) in locs]
+                    bus
+                    for bus in spatial.gas.nodes
+                    if " ".join(bus.split(" ")[:2]) in locs
+                ]
 
-            name = nod + " " + boiler_tech_name + " " + fuel + '-powered'
+            name = nod + " " + boiler_tech_name + " " + fuel + "-powered"
 
             n.madd(
                 "Link",
                 name,
                 bus0=bus0,
                 bus1=nod,
-                carrier=boiler_tech_carrier_name + ' ' + fuel + '-powered',
+                carrier=boiler_tech_carrier_name + " " + fuel + "-powered",
                 p_nom_extendable=True,
                 capital_cost=costs.at[boiler_tech_name, "investment"],
                 efficiency=costs.at[boiler_tech_name, "efficiency"],
             )
-    
 
     # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
     logger.warning(
