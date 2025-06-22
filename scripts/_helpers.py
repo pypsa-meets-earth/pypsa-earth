@@ -966,48 +966,74 @@ def annuity(n, r):
         return 1 / n
 
 
+# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
+_conversion_cache = {}
+
+
 def get_yearly_currency_exchange_average(
     initial_currency: str,
     output_currency: str,
     year: int,
     default_exchange_rate: float = None,
 ):
-    today = datetime.today()
-    effective_year = min(
-        year, today.year
-    )  # for future years, use the value corresponding to the latest available year
+    key = (initial_currency, output_currency, year)
+    if key in _conversion_cache:
+        return _conversion_cache[key]
 
-    if calendar.isleap(effective_year):
-        days_per_year = 366
-    else:
-        days_per_year = 365
+    successful_years = []
+    default_years = []
 
-    rates = []
-    initial_date = datetime(effective_year, 1, 1)
+    # Helper inner function to handle one year at a time
+    def _average_for_year(y):
+        if initial_currency == "EUR":
+            # EUR has no direct rates, use USD dates as reference
+            available_dates = sorted(currency_converter._rates["USD"].keys())
+        else:
+            if initial_currency not in currency_converter._rates:
+                if default_exchange_rate is not None:
+                    default_years.append(y)
+                    return default_exchange_rate
+                raise RuntimeError(
+                    f"No data for currency {initial_currency} and no default rate provided."
+                )
+            available_dates = sorted(currency_converter._rates[initial_currency].keys())
 
-    for day_index in range(days_per_year):
-        date_to_use = initial_date + timedelta(days=day_index)
-        try:
-            rate = currency_converter.convert(
-                1, initial_currency, output_currency, date_to_use
-            )
-            rates.append(rate)
-        except Exception:
-            continue
+        max_date = available_dates[-1]
+        effective_year = min(y, max_date.year)
+        dates_to_use = [d for d in available_dates if d.year == effective_year]
 
-    if rates:
-        avg_rate = sum(rates) / len(rates)
-        return avg_rate
+        rates = []
+        for date in dates_to_use:
+            try:
+                rate = currency_converter.convert(
+                    1, initial_currency, output_currency, date
+                )
+                rates.append(rate)
+            except Exception:
+                continue
 
-    if default_exchange_rate is not None:
-        logger.warning(
-            f"No exchange rates found for {initial_currency}->{output_currency} in {effective_year}. Using default {default_exchange_rate}."
+        if rates:
+            successful_years.append(effective_year)
+            return sum(rates) / len(rates)
+
+        if default_exchange_rate is not None:
+            default_years.append(effective_year)
+            return default_exchange_rate
+
+        raise RuntimeError(
+            f"No exchange rate data found for {initial_currency}->{output_currency} in {effective_year}, and no default rate provided."
         )
-        return default_exchange_rate
 
-    raise RuntimeError(
-        f"No exchange rate data found for {initial_currency}->{output_currency} in {effective_year}, and no default rate provided."
-    )
+    avg_rate = _average_for_year(year)
+
+    # Log only once per call, avoiding multiple repeated messages
+    if successful_years:
+        logger.info(f"Currency conversion succeeded for years: {successful_years}")
+    if default_years:
+        logger.warning(f"Using default exchange rate for years: {default_years}")
+
+    _conversion_cache[key] = avg_rate
+    return avg_rate
 
 
 def convert_currency_and_unit(
@@ -1051,11 +1077,6 @@ def prepare_costs(
 
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-
-    if default_exchange_rate is not None:
-        logger.warning(
-            f"Using default exchange rate {default_exchange_rate} instead of actual rates for currency conversion to {output_currency}."
-        )
 
     modified_costs = convert_currency_and_unit(
         costs, output_currency, default_exchange_rate
