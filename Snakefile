@@ -20,11 +20,6 @@ from _helpers import (
     write_config,
     BASE_DIR,
 )
-from _helpers_output import (
-    check_config_keys,
-    update_cutout,
-    parse_config,
-)
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
@@ -72,10 +67,6 @@ SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 # Check configs ---------------------------------------------------------------
-check_config_keys(config, fl="config.yaml")
-
-config = update_cutout(config, "config.yaml")
-
 # provide a modeling-relevant summary of the config variable
 # filtering is used to exclude technical keys which a
 write_config(
@@ -94,7 +85,6 @@ write_config(
 )
 
 # check_config_version(config=config)
-# parse_config(config)
 
 # Prepare variable for the workflow -------------------------------------------
 config.update({"git_commit": get_last_commit_message(".")})
