@@ -125,7 +125,7 @@ Atlite configurations can be adjusted in ``config.yaml``:
 
 Please note that a temporal dimension of the cutout should be consistent with the values set for `snapshots` parameter. A time range of the cutout is determined by the parameters set when building this cutout while the time resolution corresponds to those of the used climate archives. In case of ERA5 dataset used in PyPSA-Earth by default, hourly resolution is implied.
 
-Advanced configuraiton options
+Advanced configuration options
 ------------------------------
 
 Incremental update of the configuration files:
