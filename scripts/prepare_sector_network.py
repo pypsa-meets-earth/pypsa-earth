@@ -3210,7 +3210,11 @@ def add_industry_heating(n, costs):
         for fuel in ["biogas", "gas"]:
 
             if fuel == "biogas":
-                bus0 = "biogas"
+                bus0 = [
+                    bus
+                    for bus in spatial.biomass.nodes
+                    if " ".join(bus.split(" ")[:2]) in locs
+                ]
             else:
                 bus0 = [
                     bus
