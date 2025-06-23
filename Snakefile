@@ -851,7 +851,7 @@ rule build_district_heating_demands:
             for T in [100]
         },
         # Power and residual heat inputs for EGS and HS
-        demand_data="data/5km_us_98percentile.geojson",
+        demand_data="data/heating_30tj_min.geojson",
         regions=(
             "resources/"
             + RDIR

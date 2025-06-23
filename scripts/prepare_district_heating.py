@@ -153,8 +153,31 @@ if __name__ == "__main__":
 
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
     district_gdf = gpd.read_file(snakemake.input.demand_data)
-    district_gdf["heating_demand_mwh"] = district_gdf["heating_by_pop"] * 2.93071e-7
-    district_gdf["avg_heat_mw"] = district_gdf["heating_demand_mwh"] / 8760
+
+    # district_gdf["heating_demand_mwh"] = district_gdf["heating_by_pop"] * 2.93071e-7
+    # district_gdf["avg_heat_mw"] = district_gdf["heating_demand_mwh"] / 8760
+
+    district_gdf["avg_heat_mw"] = district_gdf["mwh"] / 8760
+    
+    # this relates to the piping-cost incured in each region
+    district_gdf["boreholes_per_sqkm"] = district_gdf["avg_heat_mw"] / 10
+
+    # we assume that a typical square kilometer of residential area that
+    # can be supplied by district heating needs around 20km or piping
+    # https://ojs.library.queensu.ca/index.php/cpp/article/download/13406/9382/31196
+    # [ validated against Google Maps for DH-eligible area in Chicago ]
+
+    # piping-cost [USD/m] * 20km / boreholes_per_sqkm = network-cost per borehole (i.e. network-cost per 10MW of borehole heat)
+
+    # for piping-cost, we go with numbers from https://www.npro.energy/main/en/help/technology-costs
+    # assuming Urban / Paved Surfaces
+    # should be around 3250 Euro/m for a 0.30m diameter pipe
+    # 1.15 is the conversion factor from Euro to USD
+    piping_cost_per_m = 3250 * 1.15 # USD/m
+
+    district_gdf["network_cost_per_mw"] = (
+        piping_cost_per_m * 20_000 / district_gdf["boreholes_per_sqkm"] / 10
+    )
 
     tif_files = {
         name: fn for name, fn in snakemake.input.items() if fn.endswith(".tif")
@@ -283,13 +306,16 @@ if __name__ == "__main__":
 
         ss = district_gdf.loc[district_gdf["geometry"].within(geometry)]
 
+        if ss.empty:
+            continue
+
         techs = [
             # "pwr_residheat80degC_egs",
             # "pwr_residheat80degC_hs",
             "directheat100degC",
         ]
 
-        for index, row in ss[["avg_heat_mw", "geometry"]].iterrows():
+        for index, row in ss[["avg_heat_mw", "network_cost_per_mw", "geometry"]].iterrows():
 
             query_point = row["geometry"]
 
@@ -311,7 +337,7 @@ if __name__ == "__main__":
             supply_curve_step = pd.Series(
                 {
                     "heat_demand[MW]": row["avg_heat_mw"],
-                    "capex[USD/MW]": geothermal_subset.loc["capex[USD/MW]"],
+                    "capex[USD/MW]": geothermal_subset.loc["capex[USD/MW]"] + row["network_cost_per_mw"],
                     "opex[USD/MWh]": geothermal_subset.loc["opex[USD/MWh]"],
                 }
             )
@@ -331,5 +357,6 @@ if __name__ == "__main__":
     total_results = pd.concat(total_results)[
         ["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
     ]
+
 
     total_results.to_csv(snakemake.output["district_heating_geothermal_supply_curves"])
