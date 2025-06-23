@@ -320,7 +320,7 @@ if __name__ == "__main__":
         if "EXTERNAL_DATABASE" not in config:
             logger.error(
                 "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
-                "Please check file configs/powerplantmatching_config.yaml"
+                "Please check file configs/gp/powerplantmatching_config.yaml"
             )
         logger.info("Parsing OSM generator data to powerplantmatching format")
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
