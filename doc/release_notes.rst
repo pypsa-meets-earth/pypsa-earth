@@ -43,6 +43,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
 
+* Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
+
 **Minor Changes and bug-fixing**
 
 * Update code to reflect the Wikipedia source page for `prepare_transport_data_input`. `PR #1486 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1486>`__
