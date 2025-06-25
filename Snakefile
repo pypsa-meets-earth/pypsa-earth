@@ -429,19 +429,37 @@ if config["enable"].get("retrieve_cost_data", True):
             version=config["costs"]["version"],
             resolved_costs_path=lambda wildcards: get_costs_path(wildcards, config),
         input:
-            lambda wildcards: HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
-                + f"costs_{determine_cost_year(wildcards, config)}.csv",
-                keep_local=True,
-            ),
+            [
+                HTTP.remote(
+                    f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs_{cost_year}.csv",
+                    keep_local=True,
+                )
+                for cost_year in [
+                    config["costs"]["horizon_to_cost_year"][ph]
+                    for ph in config["scenario"]["planning_horizons"]
+                ]
+            ],
         output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            expand(
+                "resources/" + RDIR + "costs_{cost_year}.csv",
+                cost_year=[
+                    config["costs"]["horizon_to_cost_year"][ph]
+                    for ph in config["scenario"]["planning_horizons"]
+                ],
+            ),
         log:
-            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+            expand(
+                "logs/" + RDIR + "retrieve_cost_data_{cost_year}.log",
+                cost_year=[
+                    config["costs"]["horizon_to_cost_year"][ph]
+                    for ph in config["scenario"]["planning_horizons"]
+                ],
+            ),
         resources:
             mem_mb=5000,
         run:
-            move(input[0], params.resolved_costs_path)
+            for input_file, output_file in zip(input, output):
+                move(input_file, output_file)
 
 
 rule build_demand_profiles:
