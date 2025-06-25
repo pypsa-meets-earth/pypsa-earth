@@ -60,6 +60,7 @@ RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 load_data_paths = get_load_paths_gegis("data", config)
 
+
 def determine_cost_year(wildcards, config):
     """
     Determine the cost year based on the wildcard or fallback to the first planning horizon.
@@ -73,10 +74,13 @@ def determine_cost_year(wildcards, config):
 
     # Ensure the planning_horizon exists in the cost_year_mapping
     if planning_horizon not in config["costs"]["horizon_to_cost_year"]:
-        raise ValueError(f"Planning horizon {planning_horizon} is not defined in the horizon_to_cost_year mapping.")
+        raise ValueError(
+            f"Planning horizon {planning_horizon} is not defined in the horizon_to_cost_year mapping."
+        )
 
     # Return the corresponding cost year
     return config["costs"]["horizon_to_cost_year"][planning_horizon]
+
 
 def get_costs_path(wildcards, config):
     """
@@ -87,6 +91,7 @@ def get_costs_path(wildcards, config):
         return f"resources/{RDIR}costs_{cost_year}.csv"
     else:
         return "data/costs.csv"
+
 
 COSTS = lambda wildcards: get_costs_path(wildcards, config)
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
@@ -460,6 +465,7 @@ if config["enable"].get("retrieve_cost_data", True):
         run:
             for input_file, output_file in zip(input, output):
                 move(input_file, output_file)
+
 
 
 rule build_demand_profiles:
