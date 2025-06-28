@@ -43,6 +43,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
 
+* Introduce US-specific cost configurations and update to `technology_data_version` v0.13.2 `PR #1448 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448>`__
+
 **Minor Changes and bug-fixing**
 
 * Update code to reflect the Wikipedia source page for `prepare_transport_data_input`. `PR #1486 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1486>`__
