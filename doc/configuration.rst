@@ -500,7 +500,7 @@ Specifies the options for Monte Carlo sampling.
    :file: configtables/monte-carlo.csv
 
 
-.. sector_cf:
+.. _sector_cf:
 
 ``sector``
 =============
