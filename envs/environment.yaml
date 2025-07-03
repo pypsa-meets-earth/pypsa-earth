@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-name: pypsa-earth
+name: pypsa-earth-online
 channels:
 - conda-forge
 - bioconda
 - gurobi
+- nodefaults
 dependencies:
 - python>=3.8
 - pip
@@ -32,6 +33,8 @@ dependencies:
 - pyscipopt # added to compy with the quadratic objective requirement of the clustering script
 - lxml
 - numpy
+# starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
+- numpoly<=1.3.4
 # starting from 1.3.5 numpoly requires numpy>2.0 which leads to issues
 - numpoly<=1.3.4
 - pandas
