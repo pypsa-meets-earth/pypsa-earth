@@ -3453,7 +3453,7 @@ def attach_enhanced_geothermal(n, potential, mode):
             opex = row["opex[USD/MWhe]"]
 
             # Build an identifier that encodes the region name and supply-curve step
-            identifier = f"{bus} Geothermal Power {mode.upper()} curve{i}"
+            identifier = f"{bus} Geothermal Power {mode.upper()} curve {supply_curve_step}"
 
             # Create the link: connects the EGS bus with the regional bus
             n.add(
