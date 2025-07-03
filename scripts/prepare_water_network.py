@@ -181,6 +181,24 @@ def download_shorelines():
 
 
 def clip_shorelines_country(shoreline_gdf, country_shapes):
+    """
+    Clips the shorelines to the boundaries of a given country with a buffer applied.
+
+    Parameters:
+    - shoreline_gdf (GeoDataFrame): GeoDataFrame containing shoreline geometries.
+    - country_shapes (GeoDataFrame): GeoDataFrame containing country boundary geometries.
+
+    Returns:
+    - clipped_shoreline (GeoDataFrame): GeoDataFrame containing the clipped shoreline geometries.
+
+    Functionality:
+    - Ensures the country GeoDataFrame is in a projected CRS (e.g., UTM) for accurate buffering.
+    - Applies a buffer of 3000 meters to the country boundaries.
+    - Converts the country GeoDataFrame back to its original CRS (EPSG:4326).
+    - Ensures CRS consistency between the shoreline and country GeoDataFrames.
+    - Extracts the boundary (exterior) of the shoreline polygons.
+    - Clips the shoreline boundary to the buffered country boundary using a spatial intersection.
+    """
     country_gdf = country_shapes.copy()
 
     # Ensure the GeoDataFrame is in a projected CRS (e.g., UTM)
@@ -211,6 +229,25 @@ def clip_shorelines_country(shoreline_gdf, country_shapes):
 
 
 def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
+    """
+    Clips the shorelines based on Natura 2000 raster data and a 4 km buffer areas.
+
+    Parameters:
+    - natura_tiff_path (str): Path to the Natura 2000 raster file.
+    - country_shapes (GeoDataFrame): GeoDataFrame containing country boundary geometries.
+    - clipped_shoreline (GeoDataFrame): GeoDataFrame containing previously clipped shoreline geometries.
+
+    Returns:
+    - clipped_shoreline_natura (GeoDataFrame): GeoDataFrame containing the shoreline geometries after removing buffered Natura 2000 areas.
+
+    Functionality:
+    - Ensures CRS consistency between the raster, country shapes, and shoreline GeoDataFrames.
+    - Clips the raster using the country geometry and extracts positive value areas.
+    - Converts positive raster areas into polygons and buffers them by 4 km.
+    - Removes buffered Natura 2000 areas from the clipped shoreline using spatial difference.
+    - Ensures the final GeoDataFrames are in EPSG:4326 for plotting.
+    - Saves the resulting GeoDataFrames to files specified by `snakemake.output`.
+    """
     # Ensure CRS of shoreline matches the raster and country_shapes
     with rasterio.open(natura_tiff_path) as src:
         if country_shapes.crs != src.crs:
@@ -262,6 +299,23 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
 
 
 def prepare_gebco(country_shapes, gebco_path):
+    """
+    Prepares GEBCO raster data by clipping it to country boundaries and reprojecting it.
+
+    Parameters:
+    - country_shapes (GeoDataFrame): GeoDataFrame containing country boundary geometries.
+    - gebco_path (str): Path to the GEBCO raster file.
+
+    Returns:
+    - gebco_raster (rasterio.DatasetReader): Reprojected raster dataset clipped to the country boundaries.
+
+    Functionality:
+    - Clips the GEBCO raster using the unified geometry of the country shapes.
+    - Saves the clipped raster to a file.
+    - Reprojects the clipped raster to EPSG:3857 for distance calculations.
+    - Saves the reprojected raster to a file.
+    - Returns the reprojected raster for further processing.
+    """
 
     # Clip the raster using the geometry of country_shapes
     with rasterio.open(gebco_path) as src:
@@ -325,6 +379,24 @@ def prepare_gebco(country_shapes, gebco_path):
 
 
 def prepare_aqueduct(regions_onshore, aqueduct_file_path):
+    """
+    Prepares aqueduct data by filtering, intersecting, and aggregating water stress values.
+
+    Parameters:
+    - regions_onshore (GeoDataFrame): GeoDataFrame containing onshore regions with country information.
+    - aqueduct_file_path (str): Path to the aqueduct GeoDatabase file.
+
+    Returns:
+    - regions_onshore_aqueduct (GeoDataFrame): GeoDataFrame with aggregated water stress values and additional columns for visualization.
+
+    Functionality:
+    - Filters aqueduct data to include only features matching the countries in `regions_onshore`.
+    - Computes the intersection between aqueduct data and onshore regions.
+    - Removes invalid water stress values and caps them to a maximum of 1.
+    - Calculates the area of intersected geometries and aggregates water stress values using a weighted average.
+    - Adds columns for scaled percentages, classification, and color mapping for visualization.
+    - Saves the processed GeoDataFrame to a file specified by `snakemake.output.regions_onshore_aqueduct`.
+    """
     # List all layers in the GeoDatabase
     layers = gpd.io.file.fiona.listlayers(aqueduct_file_path)
     layer_name = 'baseline_annual'  # TODO To put this in config file for user to choose if baseline or future
@@ -383,6 +455,27 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
 
 
 def calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura, gebco_raster):
+    """
+    Calculates distances and altitude changes from onshore aqueduct regions to the nearest shoreline.
+
+    Parameters:
+    - regions_onshore_aqueduct (GeoDataFrame): GeoDataFrame containing onshore aqueduct regions with water stress classification.
+    - clipped_shoreline_natura (GeoDataFrame): GeoDataFrame containing shoreline geometries clipped by Natura 2000 areas.
+    - gebco_raster (rasterio.DatasetReader): GEBCO raster dataset for altitude data.
+
+    Returns:
+    - shortest_distance_lines (GeoDataFrame): GeoDataFrame containing LineStrings connecting centroids to nearest shoreline points, 
+      along with calculated distances and altitude changes.
+
+    Functionality:
+    - Filters aqueduct regions with water stress classification 'above_40'.
+    - Computes centroids for filtered regions and finds the nearest shoreline points.
+    - Creates LineStrings connecting centroids to nearest shoreline points.
+    - Calculates altitude differences along the LineStrings using GEBCO raster data.
+    - Computes distances in kilometers and applies a routing factor for adjusted distances and altitude changes.
+    - Reprojects geometries to EPSG:4326 for output.
+    - Saves desalination regions to a file specified by `snakemake.output.regions_onshore_aqueduct_desalination`.
+    """
     # Filter GeoDataFrame for regions with 'above_40'
     gadm_desal = regions_onshore_aqueduct[regions_onshore_aqueduct.color_category == 'above_40']
 

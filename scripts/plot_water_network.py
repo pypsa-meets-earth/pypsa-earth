@@ -25,6 +25,23 @@ from _helpers import (
 
 
 def plot_water_networks (regions_onshore_aqueduct, regions_onshore_aqueduct_desalination, clustered_water_network, shorelines_natura):
+    """
+    Plots the water network visualization including altitude changes along pipelines.
+
+    Parameters:
+    - regions_onshore_aqueduct (GeoDataFrame): GeoDataFrame containing onshore aqueduct regions with polygon geometries.
+    - regions_onshore_aqueduct_desalination (GeoDataFrame): GeoDataFrame containing desalination regions with centroid geometries.
+    - clustered_water_network (GeoDataFrame): GeoDataFrame representing the clustered water network with altitude change data.
+    - shorelines_natura (GeoDataFrame): GeoDataFrame containing shoreline geometries.
+
+    The function creates a plot with the following elements:
+    - Clipped shorelines in blue.
+    - Original aqueduct polygons with specified colors and transparency.
+    - Desalination centroids in red.
+    - Clustered water network lines colored by total positive altitude change.
+
+    The plot is saved to a file specified by `snakemake.output.water_network`.
+    """
 
     # Plot the lines with altitude changes
     fig, ax = plt.subplots(1, 1, figsize=(12, 8))
