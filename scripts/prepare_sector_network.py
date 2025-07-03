@@ -3259,12 +3259,15 @@ def add_industry_heating(n, costs, market, scenario):
     n.madd(
         "Generator",
         nodes_medium + " steam boiler gas cond",
-        bus=medium_temp_buses,
+        bus0=spatial.gas.nodes,
+        bus1=medium_temp_buses,
+        bus2="co2 atmosphere",
         carrier="steam boiler gas cond",
         p_nom_extendable=True,
         capital_cost=costs.at["steam boiler gas cond", "fixed"],
         lifetime=costs.at["steam boiler gas cond", "lifetime"],
         efficiency=costs.at["steam boiler gas cond", "efficiency"],
+        efficiency2=costs.at["gas", "CO2 intensity"],
         marginal_cost=costs.at["steam boiler gas cond", "VOM"]
         + costs.at["biogas", "fuel cost"],
     )
@@ -3272,12 +3275,15 @@ def add_industry_heating(n, costs, market, scenario):
     n.madd(
         "Generator",
         nodes_high + " steam boiler gas cond",
-        bus=high_temp_buses,
+        bus0=spatial.gas.nodes,
+        bus1=high_temp_buses,
+        bus2="co2 atmosphere",
         carrier="steam boiler gas cond",
         p_nom_extendable=True,
         capital_cost=costs.at["steam boiler gas cond", "fixed"],
         lifetime=costs.at["steam boiler gas cond", "lifetime"],
         efficiency=costs.at["steam boiler gas cond", "efficiency"],
+        efficiency2=costs.at["gas", "CO2 intensity"],
         marginal_cost=costs.at["steam boiler gas cond", "VOM"]
         + costs.at["biogas", "fuel cost"],
     )
@@ -3285,12 +3291,15 @@ def add_industry_heating(n, costs, market, scenario):
     n.madd(
         "Generator",
         nodes_low + " hot water boiler gas cond",
-        bus=low_temp_buses,
+        bus0=spatial.gas.nodes,
+        bus1=low_temp_buses,
+        bus2="co2 atmosphere",
         carrier="hot water boiler gas cond",
         p_nom_extendable=True,
         capital_cost=costs.at["hot water boiler gas cond", "fixed"],
         lifetime=costs.at["hot water boiler gas cond", "lifetime"],
         efficiency=costs.at["hot water boiler gas cond", "efficiency"],
+        efficiency2=costs.at["gas", "CO2 intensity"],
         marginal_cost=costs.at["hot water boiler gas cond", "VOM"]
         + costs.at["biogas", "fuel cost"],
     )
