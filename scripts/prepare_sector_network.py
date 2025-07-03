@@ -3215,14 +3215,22 @@ def add_industry_heating(n, costs):
                     for bus in spatial.biomass.nodes
                     if " ".join(bus.split(" ")[:2]) in locs
                 ]
+                kwargs = dict()
             else:
                 bus0 = [
                     bus
                     for bus in spatial.gas.nodes
                     if " ".join(bus.split(" ")[:2]) in locs
                 ]
+                kwargs = dict(
+                    bus2='co2 atmosphere',
+                    efficiency2=0.2,  
+                    # co2 intensity [tCO2/MWh] per burned caloric mwh in gas 
+                    # source: https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf
+                )
 
             name = nod + " " + boiler_tech_name + " " + fuel + "-powered"
+
 
             n.madd(
                 "Link",
@@ -3233,6 +3241,7 @@ def add_industry_heating(n, costs):
                 p_nom_extendable=True,
                 capital_cost=costs.at[boiler_tech_name, "investment"],
                 efficiency=costs.at[boiler_tech_name, "efficiency"],
+                **kwargs
             )
 
     # Typically this would convert electricity (bus0) to heat (bus1). For simplicity, assume same bus.
