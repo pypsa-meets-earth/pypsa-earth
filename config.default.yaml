@@ -363,7 +363,7 @@ renewable:
 costs:
   year: 2030
   technology_data_version: v0.13.2
-  country_specific_data: "" # (optional) country-specific data are currently available only for "US". Use "US" to apply US-specific costs.
+  country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
   cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
   financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
 
