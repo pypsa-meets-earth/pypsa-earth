@@ -357,8 +357,14 @@ if __name__ == "__main__":
         regional_supply = process_regional_supply_curves(regional_supply)
         total_results.append(regional_supply)
 
-    total_results = pd.concat(total_results)[
-        ["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
-    ]
+    try:
+        total_results = pd.concat(total_results)[
+            ["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
+        ]
+    except ValueError:
+        raise ValueError("Total results is empty")
+        total_results = pd.DataFrame(
+            columns=["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
+        )
 
     total_results.to_csv(snakemake.output["district_heating_geothermal_supply_curves"])
