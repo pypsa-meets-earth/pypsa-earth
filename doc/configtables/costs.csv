@@ -4,7 +4,7 @@ technology_data_version,,"vX.X.X; e.g. 'v0.1.0'","Version of ``technology-data``
 country_specific_data,bool,"""{"""",""US""}""",Reference to the desired `technology-data` directory for techno-economic input data
 cost_scenario,,"{"moderate","Only used if `country_specific_data`: ""US""` to select the desired NREL financial case",,
 financial_case,,"{"market","Only used if `country_specific_data: ""US""` to select the desired NREL financial case",
-discountrate,,"{0.071,0.086,0.111}","Rate of return used to discount future cash flows back to their present value"
+discountrate,,float,"Rate of return used to discount future cash flows back to their present value"
 output_currency,,"""{""EUR"",""USD""}""",Reference currency for all costs,
 rooftop_share,,float,"Share of rooftop PV when calculating capital cost of solar (joint rooftop and utility-scale PV)."
 fill_values,,float,"Default values if not specified for a technology in ``resources/costs.csv``."
