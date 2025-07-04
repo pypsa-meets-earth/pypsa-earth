@@ -3240,7 +3240,7 @@ def add_industry_heating(n, costs):
                 carrier=boiler_tech_carrier_name + " " + fuel + "-powered",
                 p_nom_extendable=True,
                 capital_cost=costs.at[boiler_tech_name, "investment"],
-                efficiency=costs.at[boiler_tech_name, "efficiency"],
+                efficiency=costs.at[boiler_tech_name, "efficiency"] * 0.01,
                 **kwargs
             )
 
