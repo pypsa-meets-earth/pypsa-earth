@@ -362,7 +362,6 @@ if __name__ == "__main__":
             ["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
         ]
     except ValueError:
-        raise ValueError("Total results is empty")
         total_results = pd.DataFrame(
             columns=["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
         )
