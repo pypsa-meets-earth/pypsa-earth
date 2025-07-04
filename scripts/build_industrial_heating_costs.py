@@ -74,11 +74,19 @@ if __name__ == "__main__":
         idx["oil-based storage unit", "investment"], "further description"
     ] = "This assumes the heat-transfer fluid of the solar field is also used for storage"
 
-    manual_costs.loc[idx["oil-based storage unit", "efficiency"], "source"] = np.sqrt(
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_store"], "source"] = np.sqrt(
         0.9
     )
-    manual_costs.loc[idx["oil-based storage unit", "efficiency"], "unit"] = "per unit"
-    manual_costs.loc[idx["oil-based storage unit", "efficiency"], "source"] = (
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_store"], "unit"] = "per unit"
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_store"], "source"] = (
+        "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
+    )
+
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_dispatch"], "source"] = np.sqrt(
+        0.9
+    )
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_dispatch"], "unit"] = "per unit"
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_dispatch"], "source"] = (
         "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
     )
 
