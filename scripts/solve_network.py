@@ -854,94 +854,38 @@ def add_existing(n):
             n.generators.loc[tech_index, tech] = existing_res
 
 
-def add_EGS_constraints(n):
-    """
-    Enforce capacity and dispatch ratio constraints for each EGS link pair.
+def add_flexible_geothermal_constraints(n):
+    # Get all reservoir buses
+    reservoir_buses = n.buses.index[n.buses.index.str.contains('reservoir')]
 
-    For each pair of links added in attach_enhanced_geothermal—
-      • one named "EGS ORC <identifier>" (representing electricity generation) and
-      • its partner "EGS industry heat <identifier>" (representing heat output),
+    for bus in reservoir_buses:
+        # Find injector and producer links connected to this reservoir
+        injector = n.links.index[
+            (n.links.index.str.contains('injector')) & 
+            (n.links.bus1 == bus)
+        ]
+        producer = n.links.index[
+            (n.links.index.str.contains('producer')) & 
+            (n.links.bus0 == bus)
+        ]
 
-    the identifier is expected to contain the target shares in the format:
-      ..._H<heat_share>_P<power_share>...
-    where both shares are positive floats less than 1.
+        # Assert that exactly one injector and producer were found
+        assert len(injector) == 1, f"Expected 1 injector link for {bus}, found {len(injector)}"
+        assert len(producer) == 1, f"Expected 1 producer link for {bus}, found {len(producer)}"
 
-    Two sets of constraints are imposed:
+        injector = injector[0]
+        producer = producer[0]
 
-    1. Capacity constraints (on "p_nom"): the capacities are forced to obey
-         heat_share * p_nom[ORC] - power_share * p_nom[industry] == 0,
-       i.e. p_nom[ORC] / p_nom[industry] must equal power_share/heat_share.
-
-    2. Dispatch constraints (on "p"): the instantaneous dispatches (d_elec and d_heat)
-       must satisfy
-           d_elec >= (power_share - 0.1) * (d_elec + d_heat)
-       and
-           d_elec <= (power_share + 0.1) * (d_elec + d_heat),
-       which ensures that the ratio d_elec/(d_elec+d_heat) is within ±10% of power_share.
-    """
-    # Retrieve the variables for link capacities and dispatch
-    link_p_nom = get_var(n, "Link", "p_nom")
-    link_p = get_var(n, "Link", "p")
-
-    # Identify all EGS ORC links by name prefix.
-    egs_orc_links = [lnk for lnk in n.links.index if lnk.startswith("EGS ORC ")]
-    assert len(egs_orc_links) > 0, "No EGS ORC links found in the network."
-
-    for orc_link in egs_orc_links:
-        # The partner industry heat link should have the same identifier.
-        # Extract the identifier from the ORC link name.
-        identifier = orc_link.split("EGS ORC ", 1)[1]
-        industry_link = "EGS industry heat " + identifier
-        if industry_link not in n.links.index:
-            logger.warning(
-                f"Missing industry heat link for {orc_link}; skipping EGS pair."
-            )
-            continue
-
-        # Extract the target shares from the identifier using a regex.
-        m = re.search(
-            r"_H(?P<heat>[0-9]*\.?[0-9]+)_P(?P<power>[0-9]*\.?[0-9]+)", identifier
+        # Add constraint that injector and producer must have same nominal capacity
+        link_p_nom = get_var(n, "Link", "p_nom")
+        
+        lhs = linexpr(
+            (1, link_p_nom[injector]),
+            (-1, link_p_nom[producer])
         )
-        if not m:
-            logger.warning(
-                f"Could not extract shares from identifier: {identifier}; skipping EGS pair."
-            )
-            continue
-        try:
-            heat_share = float(m.group("heat"))
-            power_share = float(m.group("power"))
-        except ValueError:
-            logger.warning(
-                f"Invalid share values in identifier: {identifier}; skipping EGS pair."
-            )
-            continue
+        
+        define_constraints(n, lhs, "=", 0, "flex_geothermal", f"capacity_constraint_{bus}")
 
-        # --- Capacity Constraint (Exact Ratio) ---
-        # Enforce: heat_share * p_nom[EGS ORC] - power_share * p_nom[EGS industry heat] == 0
-        lhs_cap = (
-            heat_share * link_p_nom.loc[orc_link]
-            - power_share * link_p_nom.loc[industry_link]
-        )
-        define_constraints(n, lhs_cap, "=", 0, f"EGS capacity ratio {identifier}")
-
-        # --- Dispatch Constraints (Within 10% Tolerance) ---
-        # Let d_elec = p[EGS ORC] and d_heat = p[EGS industry heat].
-        # Desired: d_elec/(d_elec+d_heat) is within [power_share - 0.1, power_share + 0.1].
-        # These can be written as two inequalities:
-        #   Lower bound: d_elec - (power_share - 0.1) * (d_elec + d_heat) >= 0
-        #   Upper bound: (power_share + 0.1) * (d_elec + d_heat) - d_elec >= 0
-        d_elec = link_p[orc_link]
-        d_heat = link_p[industry_link]
-
-        lhs_disp_lower = d_elec - (power_share - 0.1) * (d_elec + d_heat)
-        lhs_disp_upper = (power_share + 0.1) * (d_elec + d_heat) - d_elec
-
-        define_constraints(
-            n, lhs_disp_lower, ">=", 0, f"EGS dispatch lower ratio {identifier}"
-        )
-        define_constraints(
-            n, lhs_disp_upper, ">=", 0, f"EGS dispatch upper ratio {identifier}"
-        )
 
 
 def extra_functionality(n, snapshots):
@@ -1018,6 +962,7 @@ def extra_functionality(n, snapshots):
         set_h2_colors(n)
 
     add_co2_sequestration_limit(n, snapshots)
+    add_flexible_geothermal_constraints(n)
 
 
 def solve_network(n, config, solving={}, opts="", **kwargs):

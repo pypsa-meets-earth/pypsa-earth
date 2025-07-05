@@ -2973,27 +2973,20 @@ def add_geothermal_industry_supply(n, supply_curve):
     }
 
     # Add a global geothermal source bus and generator
-    geo_bus = "geothermal industry heat"
-    if geo_bus not in n.buses.index:
-        n.add("Bus", geo_bus, carrier="geothermal heat")
+    generator_bus = "geothermal industry heat"
+    if generator_bus not in n.buses.index:
+        n.add("Bus", generator_bus, carrier="geothermal industry heat")
         n.add(
             "Generator",
-            "geothermal heat source",
-            bus=geo_bus,
-            carrier="geothermal heat",
+            "geothermal industry heat",
+            bus=generator_bus,
+            carrier="geothermal industry heat",
             p_nom_extendable=True,
             marginal_cost=0,
         )
 
     for (region, tech), group in supply_curve.groupby(level=[0, 1]):
         # Create a dictionary with all possible buses for the region
-        buses = {
-            "bus0": geo_bus,
-            "bus1": f"{region} {temp_band_mapping['50-80C']}",
-            "bus2": f"{region} {temp_band_mapping['80-150C']}",
-            "bus3": f"{region} {temp_band_mapping['150-250C']}",
-            "bus4": f"{region}",  # AC bus
-        }
 
         for _, row in group.iterrows():
 
@@ -3021,21 +3014,59 @@ def add_geothermal_industry_supply(n, supply_curve):
             # Create a MultiLink for this technology
             link_name = f"{region} {tech}"
 
+            reservoir_bus = link_name + " reservoir"
+
+            output_buses = {
+                "bus1": f"{region} {temp_band_mapping['50-80C']}",
+                "bus2": f"{region} {temp_band_mapping['80-150C']}",
+                "bus3": f"{region} {temp_band_mapping['150-250C']}",
+                "bus4": f"{region}",  # AC bus
+            }
+
             # Only add the link if we have at least one valid output bus
-            if len(buses) > 1:
+            if len(output_buses) > 1:
+
+                if reservoir_bus not in n.buses.index:
+                    n.add("Bus", reservoir_bus, carrier="geothermal industry heat")
+
                 n.add(
                     "Link",
-                    link_name,
+                    link_name + " injector",
+                    bus0=generator_bus,
+                    bus1=reservoir_bus,
+                    carrier=tech.split(" ")[0],
+                    p_nom_extendable=True,
+                    capital_cost=0.,
+                    marginal_cost=0.,
+                )
+
+                if 'gtflex' in snakemake.wildcards.sopts:
+                    n.add(
+                        "StorageUnit",
+                        name=link_name + " reservoir",
+                        bus=reservoir_bus,
+                        carrier=tech.split(" ")[0],
+                        p_nom_extendable=True,
+                        p_nom_max=row["heat_demand[MW]"],
+                        max_hours=120 / ((n.snapshots[1] - n.snapshots[0]).total_seconds() / 3600),
+                        cyclic_state_of_charge=True,
+                    )
+
+                n.add(
+                    "Link",
+                    link_name + " producer",
+                    bus0=reservoir_bus,
                     carrier=tech.split(" ")[0],
                     capital_cost=capex_annualized,
                     marginal_cost=row["opex[USD/MWh]"],
                     p_nom_max=row["heat_demand[MW]"],
+                    p_max_pu=1.25,  # generation boost after storing in reservoir
                     efficiency=efficiencies["50-80C"],
                     efficiency2=efficiencies["80-150C"],
                     efficiency3=efficiencies["150-250C"],
                     efficiency4=efficiencies["AC"],
                     p_nom_extendable=True,
-                    **buses,
+                    **output_buses,
                 )
 
 
@@ -3432,19 +3463,19 @@ def attach_enhanced_geothermal(n, potential, mode):
 
     idx = pd.IndexSlice
 
-    if f"Geothermal Power {mode}" not in n.buses.index:
+    if f"geothermal power {mode}" not in n.buses.index:
         n.add(
             "Bus",
-            f"Geothermal Power {mode}",
-            carrier="geothermal heat",
+            f"geothermal power {mode}",
+            carrier="geothermal heat " + mode,
             unit="MWh_th",
         )
 
         n.add(
             "Generator",
-            f"Geothermal Power {mode}",
-            bus=f"Geothermal Power {mode}",
-            carrier="geothermal heat",
+            f"geothermal power {mode}",
+            bus=f"geothermal power {mode}",
+            carrier="geothermal power " + mode,
             p_nom_extendable=True,
         )
 
@@ -3462,16 +3493,48 @@ def attach_enhanced_geothermal(n, potential, mode):
             opex = row["opex[USD/MWhe]"]
 
             # Build an identifier that encodes the region name and supply-curve step
-            identifier = f"{bus} Geothermal Power {mode.upper()} curve {supply_curve_step}"
+            identifier = f"{bus} geothermal power {mode.lower()} curve {supply_curve_step}"
+
+            n.add(
+                "Bus",
+                name=identifier + " reservoir",
+                carrier="geothermal heat",
+                unit="MWh_th",
+            )            
 
             # Create the link: connects the EGS bus with the regional bus
             n.add(
                 "Link",
-                name=identifier,
-                bus0=f"Geothermal Power {mode}",
+                name=identifier + " injector",
+                bus0='geothermal power ' + mode,
+                bus1=identifier + " reservoir",
+                carrier=f"geothermal {mode}",
+                capital_cost=0,
+                marginal_cost=0,
+                p_nom_max=capacity,
+                p_nom_extendable=True,
+            )
+
+            if 'gtflex' in snakemake.wildcards.sopts:
+                n.add(
+                    "StorageUnit",
+                    name=identifier + " reservoir",
+                    bus=identifier + " reservoir",
+                    carrier=f"geothermal {mode}",
+                    p_nom_extendable=True,
+                    p_nom_max=capacity,
+                    max_hours=120 / ((n.snapshots[1] - n.snapshots[0]).total_seconds() / 3600),
+                    cyclic_state_of_charge=True,
+                )
+
+            n.add(
+                "Link",
+                name=identifier + " producer",
+                bus0=identifier + " reservoir",
                 bus1=bus,
                 carrier=f"geothermal {mode}",
                 p_nom_max=capacity,
+                p_max_pu=1.25,  # generation boost after storing in reservoir
                 capital_cost=capital_cost,
                 marginal_cost=opex,
                 p_nom_extendable=True,
@@ -3532,6 +3595,22 @@ def add_geothermal_district_heating_supply(n, egs_potential):
         egs_potential["capex[USD/MW]"] * annuity_factor * network_cost_factor
     )
 
+    if f"geothermal district heat" not in n.buses.index:
+        n.add(
+            "Bus",
+            f"geothermal district heat",
+            carrier="geothermal district heat",
+            unit="MWh_th",
+        )
+
+        n.add(
+            "Generator",
+            f"geothermal district heat",
+            bus=f"geothermal district heat",
+            carrier="geothermal district heat",
+            p_nom_extendable=True,
+        )
+
     for (bus, supply_curve_step), row in egs_potential.iterrows():
 
         supply_curve_step = supply_curve_step.split(" ")[1]
@@ -3542,12 +3621,45 @@ def add_geothermal_district_heating_supply(n, egs_potential):
 
         identifier = f"{bus} geothermal district heating {supply_curve_step}"
 
+        # Add reservoir bus if it doesn't exist
+        reservoir_bus = identifier + " reservoir"
+        if reservoir_bus not in n.buses.index:
+            n.add("Bus", reservoir_bus, carrier="geothermal district heat")
+
+        # Add injector link
         n.add(
-            "Generator",
-            name=identifier,
-            bus=bus + " residential urban decentral heat",
-            carrier=f"geothermal district heat",
+            "Link",
+            identifier + " injector",
+            bus0="geothermal district heat",
+            bus1=reservoir_bus,
+            carrier="geothermal district heat",
+            p_nom_extendable=True,
+            capital_cost=0.,
+            marginal_cost=0.,
+        )
+
+        # Add storage if gtflex in wildcards
+        if 'gtflex' in snakemake.wildcards.sopts:
+            n.add(
+                "StorageUnit",
+                name=identifier + " reservoir",
+                bus=reservoir_bus,
+                carrier="geothermal district heat",
+                p_nom_extendable=True,
+                p_nom_max=capacity,
+                max_hours=120 / ((n.snapshots[1] - n.snapshots[0]).total_seconds() / 3600),
+                cyclic_state_of_charge=True,
+            )
+
+        # Add producer link
+        n.add(
+            "Link",
+            identifier + " producer",
+            bus0=reservoir_bus,
+            bus1=bus + " residential urban decentral heat",
+            carrier="geothermal district heat",
             p_nom_max=capacity,
+            p_max_pu=1.25,  # generation boost after storing in reservoir
             capital_cost=capital_cost,
             marginal_cost=opex,
             p_nom_extendable=True,
@@ -3709,6 +3821,9 @@ if __name__ == "__main__":
     ##########################################################################
     ######### Functions adding EGS-US project demands and generators #########
     ##########################################################################
+
+    # import sys
+    # sys.exit()
 
     for potential, mode in [
         (snakemake.input["egs_potentials_egs"], "egs"),
