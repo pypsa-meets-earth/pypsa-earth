@@ -3048,7 +3048,7 @@ def add_geothermal_industry_supply(n, supply_curve):
                         carrier=tech.split(" ")[0],
                         p_nom_extendable=True,
                         p_nom_max=row["heat_demand[MW]"],
-                        max_hours=120 / ((n.snapshots[1] - n.snapshots[0]).total_seconds() / 3600),
+                        max_hours=120,
                         cyclic_state_of_charge=True,
                     )
 
@@ -3523,7 +3523,7 @@ def attach_enhanced_geothermal(n, potential, mode):
                     carrier=f"geothermal {mode}",
                     p_nom_extendable=True,
                     p_nom_max=capacity,
-                    max_hours=120 / ((n.snapshots[1] - n.snapshots[0]).total_seconds() / 3600),
+                    max_hours=120,
                     cyclic_state_of_charge=True,
                 )
 
@@ -3647,7 +3647,7 @@ def add_geothermal_district_heating_supply(n, egs_potential):
                 carrier="geothermal district heat",
                 p_nom_extendable=True,
                 p_nom_max=capacity,
-                max_hours=120 / ((n.snapshots[1] - n.snapshots[0]).total_seconds() / 3600),
+                max_hours=120,
                 cyclic_state_of_charge=True,
             )
 
