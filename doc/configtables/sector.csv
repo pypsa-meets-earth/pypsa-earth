@@ -9,3 +9,24 @@
 -- -- remove_h2_load,bool,"{true, false}",Specifies whether to remove hydrogen load from the network in the reference case. It is relevant only if ``is_reference`` is true.
 -- -- path_to_ref,--,string,Path to the reference case network for additionality calculation. It is relevant only if ``addtionality`` is true and ``is_reference`` is false.
 -- -- re_country_load,bool,"{true, false}","If true, forces renewable electricity to match hydrogen export and country electricity load. If false, renewable electricity is only matched to hydrogen export."
+
+**demand_data**,,,
+-- update_data,bool,"{true, false}","If true, the workflow downloads the energy balances data saved in ``data/demand/unsd/data`` again."
+-- base_year,int,"Any year (e.g. 2019)","Specifies the base year for energy balances data. Default year is 2019. If interested in a different year, please check presense of data for selected base year and country in ``data/demand/unsd/data``."
+-- other_industries,bool,"{true, false}","Determines whether to include unspecified industries. Note that some countries may have inflated numbers; review cautiously."
+-- aluminium_year,int,"Any year between 2015 and 2022","Year of the aluminium production data specified in ``data/AL_production.csv``. Default year is 2019."
+
+**fossil_reserves**,,,
+-- oil,TWh,float,"Specifies the total oil reserves in TWh per each bus."
+
+**export**,,,
+-- endogenous,bool,"{true, false}","If true, the export demand is endogenously determined by the model."
+-- endogenous_price,EUR/MWh,float,"Market price at which hydrogen for endogenous exports is sold. Only considered if ``endogenous`` is true."
+-- store,bool,"{true, false}","Indicates whether an export store is implemented to balance hydrogen export demand."
+-- store_capital_costs,--,"One of {'standard_costs', 'no_costs'}","Specifies the costs of the export store. 'standard_costs' uses CAPEX of 'hydrogen storage tank type 1 including compressor'."
+-- h2export,TWh,float,"Specifies the yearly hydrogen export demand in TWh. This parameter is only applicable if ``endogenous`` is set to false."
+-- export_profile,--,"One of {'ship', 'constant'}","Specifies the export profile. Only considered if ``endogenous`` is false."
+-- ship_capacity,TWh,float,"Specifies the ship capacity for hydrogen export. Example values: 0.05 TWh for new ships, 0.003 TWh for Susio Frontier, and 0.4 TWh based on Hampp2021. This corresponds to 11,360 t of liquid hydrogen (LHV of 33.3333 MWh/t_H2) as per Cihlar et al. 2020, referencing IEA 2019, Table 3-B."
+-- travel_time,hours,int,"Travel time for hydrogen export shipping (e.g., from Agadir to Rotterdam and back takes 288 hours)."
+-- fill_time,hours,int,"Time required to fill the ship for hydrogen export. 48 hours is needed to fill Hampp2021 ship."
+-- unload_time,hours,int,"Time required to unload the ship for hydrogen export. 48 hours is needed to unload Hampp2021 ship."
