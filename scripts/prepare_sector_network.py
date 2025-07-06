@@ -1001,21 +1001,6 @@ def add_co2(n, costs):
         bus=spatial.co2.nodes,
     )
 
-    # logger.info("Adding CO2 network.")
-    co2_links = create_network_topology(n, "CO2 pipeline ")
-
-    cost_onshore = (
-        (1 - co2_links.underwater_fraction)
-        * costs.at["CO2 pipeline", "fixed"]
-        * co2_links.length
-    )
-    cost_submarine = (
-        co2_links.underwater_fraction
-        * costs.at["CO2 submarine pipeline", "fixed"]
-        * co2_links.length
-    )
-    capital_cost = cost_onshore + cost_submarine
-
 
 def add_aviation(n, cost):
     all_aviation = ["total international aviation", "total domestic aviation"]
