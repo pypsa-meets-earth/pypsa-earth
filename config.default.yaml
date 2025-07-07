@@ -361,7 +361,14 @@ renewable:
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration
 costs:
-  year: 2030
+  horizon_to_cost_year: # For planning horizon X, use cost year Y in a form of X: Y
+    2020: 2020  # Planning horizon 2020 uses cost data from 2020
+    2025: 2025  # Planning horizon 2025 uses cost data from 2025
+    2030: 2030
+    2035: 2035
+    2040: 2040
+    2045: 2045
+    2050: 2050
   version: v0.12.0
   discountrate: [0.071] #, 0.086, 0.111]
   output_currency: "EUR"

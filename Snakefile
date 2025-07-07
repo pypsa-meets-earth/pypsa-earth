@@ -60,10 +60,40 @@ RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 load_data_paths = get_load_paths_gegis("data", config)
 
-if config["enable"].get("retrieve_cost_data", True):
-    COSTS = "resources/" + RDIR + f"costs_{config['costs']['year']}.csv"
-else:
-    COSTS = "data/costs.csv"
+
+def determine_cost_year(wildcards, config):
+    """
+    Determine the cost year based on the wildcard or fallback to the first planning horizon.
+    """
+    # Check if the wildcard for planning_horizons is defined
+    if hasattr(wildcards, "planning_horizons") and wildcards.planning_horizons:
+        planning_horizon = int(wildcards.planning_horizons)
+    else:
+        # Fallback to the first entry in config["scenario"]["planning_horizons"]
+        planning_horizon = config["scenario"]["planning_horizons"][0]
+
+    # Ensure the planning_horizon exists in the cost_year_mapping
+    if planning_horizon not in config["costs"]["horizon_to_cost_year"]:
+        raise ValueError(
+            f"Planning horizon {planning_horizon} is not defined in the horizon_to_cost_year mapping."
+        )
+
+    # Return the corresponding cost year
+    return config["costs"]["horizon_to_cost_year"][planning_horizon]
+
+
+def get_costs_path(wildcards, config):
+    """
+    Determine the path to the costs file based on the configuration and wildcards.
+    """
+    if config["enable"].get("retrieve_cost_data", True):
+        cost_year = determine_cost_year(wildcards, config)
+        return f"resources/{RDIR}costs_{cost_year}.csv"
+    else:
+        return "data/costs.csv"
+
+
+COSTS = lambda wildcards: get_costs_path(wildcards, config)
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -402,20 +432,40 @@ if config["enable"].get("retrieve_cost_data", True):
     rule retrieve_cost_data:
         params:
             version=config["costs"]["version"],
+            resolved_costs_path=lambda wildcards: get_costs_path(wildcards, config),
         input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/"
-                + "costs_{year}.csv",
-                keep_local=True,
-            ),
+            [
+                HTTP.remote(
+                    f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['version']}/outputs/costs_{cost_year}.csv",
+                    keep_local=True,
+                )
+                for cost_year in [
+                    config["costs"]["horizon_to_cost_year"][ph]
+                    for ph in config["scenario"]["planning_horizons"]
+                ]
+            ],
         output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            expand(
+                "resources/" + RDIR + "costs_{cost_year}.csv",
+                cost_year=[
+                    config["costs"]["horizon_to_cost_year"][ph]
+                    for ph in config["scenario"]["planning_horizons"]
+                ],
+            ),
         log:
-            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+            expand(
+                "logs/" + RDIR + "retrieve_cost_data_{cost_year}.log",
+                cost_year=[
+                    config["costs"]["horizon_to_cost_year"][ph]
+                    for ph in config["scenario"]["planning_horizons"]
+                ],
+            ),
         resources:
             mem_mb=5000,
         run:
-            move(input[0], output[0])
+            for input_file, output_file in zip(input, output):
+                move(input_file, output_file)
+
 
 
 rule build_demand_profiles:
@@ -537,7 +587,7 @@ rule add_electricity:
             if str(fn).startswith("data/")
         },
         base_network="networks/" + RDIR + "base.nc",
-        tech_costs=COSTS,
+        tech_costs=lambda wildcards: COSTS(wildcards),
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
@@ -575,7 +625,7 @@ rule simplify_network:
         subregion=config["subregion"],
     input:
         network="networks/" + RDIR + "elec.nc",
-        tech_costs=COSTS,
+        tech_costs=lambda wildcards: COSTS(wildcards),
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -635,7 +685,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
-            tech_costs=COSTS,
+            tech_costs=lambda wildcards: COSTS(wildcards),
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
             regions_onshore="resources/"
@@ -668,7 +718,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             electricity=config["electricity"],
             costs=config["costs"],
         input:
-            tech_costs=COSTS,
+            tech_costs=lambda wildcards: COSTS(wildcards),
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
             regions_onshore="resources/"
             + RDIR
@@ -721,7 +771,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
-            tech_costs=COSTS,
+            tech_costs=lambda wildcards: COSTS(wildcards),
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
             regions_onshore="resources/"
@@ -753,7 +803,7 @@ rule add_extra_components:
     input:
         overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        tech_costs=COSTS,
+        tech_costs=lambda wildcards: COSTS(wildcards),
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
@@ -776,7 +826,7 @@ rule prepare_network:
         costs=config["costs"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
-        tech_costs=COSTS,
+        tech_costs=lambda wildcards: COSTS(wildcards),
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
@@ -962,7 +1012,7 @@ rule make_summary:
         scenario=config["scenario"],
     input:
         input_make_summary,
-        tech_costs=COSTS,
+        tech_costs=lambda wildcards: COSTS(wildcards),
     output:
         directory(
             "results/"
@@ -1089,7 +1139,7 @@ rule prepare_sector_network:
     input:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=lambda wildcards: COSTS(wildcards),
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
         + SECDIR
@@ -1183,7 +1233,7 @@ rule add_export:
     input:
         overrides="data/override_component_attrs",
         export_ports="resources/" + SECDIR + "export_ports.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=lambda wildcards: COSTS(wildcards),
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
@@ -1650,7 +1700,7 @@ if config["foresight"] == "overnight":
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+            costs=lambda wildcards: COSTS(wildcards),
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
         output:
             RESDIR
@@ -1695,7 +1745,7 @@ rule make_sector_summary:
             **config["costs"],
             **config["export"],
         ),
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=lambda wildcards: COSTS(wildcards),
         plots=expand(
             RESDIR
             + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
@@ -1755,7 +1805,7 @@ rule plot_network:
         + RDIR
         + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
-        tech_costs=COSTS,
+        tech_costs=lambda wildcards: COSTS(wildcards),
     output:
         only_map="results/"
         + RDIR
@@ -1933,7 +1983,7 @@ rule build_industry_demand:  #default data
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         industrial_database="data/industrial_database.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs=lambda wildcards: COSTS(wildcards),
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
         industrial_energy_demand_per_node="resources/"
