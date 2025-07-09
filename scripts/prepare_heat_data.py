@@ -12,12 +12,7 @@ import pytz
 import xarray as xr
 from _helpers import locate_bus, mock_snakemake
 
-# TODO Add to the data properly
-# Data on space heating and cooling may be missed from UN database
-# Data sourse: EIA Surveys
-#     - 2018 (commertial buildings)
-#     - 2020 (residential building)
-# Heating includes both space heating and hot water
+# TODO Add to the parameters into a configuration file
 HEAT_DEMAND_TOTAL = 1
 COOL_DEMAND_TOTAL = 1
 
@@ -393,13 +388,8 @@ if __name__ == "__main__":
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760
-    # TODO The approach simplifies runs in a debug mode
-    # minimising interactions between different states of the model
-    # Thouhg, it's not fully consistent with the approach used across
-    # the codebase
     config_snapshots = pd.date_range(**snakemake.config["snapshots"], freq="h")
 
-    # Prepare transport data
     (
         nodal_energy_totals,
         heat_demand,
