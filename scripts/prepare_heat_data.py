@@ -391,7 +391,6 @@ if __name__ == "__main__":
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760
-    config_snapshots = pd.date_range(**snakemake.config["snapshots"], freq="h")
 
     (
         nodal_energy_totals,
@@ -404,7 +403,7 @@ if __name__ == "__main__":
         ac_cooling_total_cop,
         apft_abch_cooling_total_cop,
         district_heat_share,
-    ) = prepare_heat_data(n, config_snapshots, country_list)
+    ) = prepare_heat_data(n, n.snapshots, country_list)
 
     # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
