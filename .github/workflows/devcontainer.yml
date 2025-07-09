@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-    - envs/linux-pinned.yaml
+    - envs/linux-64.lock.yaml
 
 env:
   IMAGE_NAME: pypsa-earth
@@ -26,7 +26,7 @@ jobs:
 
     - name: Log in to registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        #
+
     - name: Push image
       run: |
         IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME

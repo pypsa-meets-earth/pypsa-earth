@@ -362,10 +362,10 @@ renewable:
 # Costs Configuration
 costs:
   year: 2030
-  version: v0.10.0
+  version: v0.12.0
   discountrate: [0.071] #, 0.086, 0.111]
-  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
-  USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  output_currency: "EUR"
+  default_USD_to_EUR: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
   rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
   fill_values:
     FOM: 0
@@ -428,7 +428,7 @@ monte_carlo:
   uncertainties:
     loads_t.p_set:
       type: uniform
-      args: [0, 1]
+      args: [0.5, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
       type: lognormal
       args: [1.5]
@@ -704,7 +704,7 @@ sector:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: true
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6

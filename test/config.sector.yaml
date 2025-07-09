@@ -5,15 +5,25 @@
 version: 0.6.0
 tutorial: true
 
+enable:
+  retrieve_databundle: true
+  retrieve_databundle_sector: true
+
 run:
   name: sector
   shared_cutouts: true
 
 scenario:
-  clusters: # number of nodes
-  - 4
-  ll:
-  - "c1"
+  simpl: [""]
+  ll: ["copt"]
+  clusters: [4]
+  opts: [Co2L-24h]
+  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  - 2030
+  sopts:
+  - "144h"
+  demand:
+  - "AB"
 
 countries: ["NG", "BJ"]
 
@@ -50,4 +60,4 @@ snapshots:
 
 solving:
   solver:
-    name: gurobi
+    name: glpk

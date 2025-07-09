@@ -9,6 +9,10 @@ tutorial: true
 results_dir: results/
 summary_dir: results/
 
+enable:
+  retrieve_databundle: true
+  retrieve_databundle_sector: true
+
 run:
   name: "test_myopic" # use this to keep track of runs with different settings
   name_subworkflow: "tutorial"  # scenario name of the pypsa-earth subworkflow
@@ -19,20 +23,13 @@ foresight: myopic
 disable_subworkflow: true
 
 scenario:
-  simpl:
-  - ""
-  clusters: # number of nodes
-  - 4
-  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
-  - 2030
-  ll:
-  - "c1"
-  opts:
-  - "Co2L-24H"
-  sopts:
-  - "144h"
-  demand:
-  - "DF"
+  simpl: [""]
+  clusters: [4]
+  planning_horizons: [2030] # investment years for myopcondaic and perfect; or costs year for overnight
+  ll: ["c1"]
+  opts: ["Co2L-24H"]
+  sopts: ["144h"]
+  demand: ["DF"]
 
 cluster_options:
   alternative_clustering: false
