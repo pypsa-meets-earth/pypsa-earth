@@ -2328,6 +2328,7 @@ def add_cooling(n, costs):
             lifetime=cooling_costs.at["air conditioner", "lifetime"],
         )
 
+        # TODO Needs to be aligned better with the heating part
         # Add heat pumps working in a cooling mode
         efficiency = (
             cop["heat pump cooling"][c_nodes[name]]
@@ -2358,7 +2359,7 @@ def add_cooling(n, costs):
             else cooling_costs.at["absorption chiller", "efficiency"]
         )
 
-        # TODO Add EGS as a source
+        # TODO A heat source is needed to make this part work
         # n.madd(
         #    "Link",
         #    c_nodes[name],
