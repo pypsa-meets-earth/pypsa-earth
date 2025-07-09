@@ -31,6 +31,7 @@ SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
 SHARE_DISTRICT_HEAT = 0.1
 
 CALIBRATE_LOAD = False
+CALIBRATION_LEVEL = CALIBRATION_LEVEL
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -295,7 +296,7 @@ def prepare_heat_data(n, snapshots, countries):
         data_df=heat_demand,
         calibr_df=calibr_heat_buses_df,
         load_mode="heating",
-        geom_id="gadm_1",
+        geom_id=CALIBRATION_LEVEL,
     )
 
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
@@ -340,7 +341,7 @@ def prepare_heat_data(n, snapshots, countries):
         data_df=cooling_demand,
         calibr_df=calibr_cool_buses_df,
         load_mode="cooling",
-        geom_id="gadm_1",
+        geom_id=CALIBRATION_LEVEL,
     )
 
     return (
