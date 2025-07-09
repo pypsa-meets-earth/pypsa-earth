@@ -19,6 +19,9 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_heat_demand", simpl="", clusters="4")
+        snakemake = mock_snakemake(
+            "build_heat_demand", simpl="", clusters="10", planning_horizons="2030"
+        )
 
     time = pd.date_range(freq="h", **snakemake.params.snapshots)
     cutout_config = snakemake.input.cutout
@@ -39,6 +42,10 @@ if __name__ == "__main__":
         stacked_pop = pop_layout.stack(spatial=("y", "x"))
         M = I.T.dot(np.diag(I.dot(stacked_pop)))
 
-        heat_demand = cutout.heat_demand(matrix=M.T, index=clustered_regions.index)
+        cooling_demand = cutout.cooling_demand(
+            matrix=M.T, index=clustered_regions.index, threshold=19
+        )
+        cooling_demand.to_netcdf(snakemake.output[f"cooling_demand_{area}"])
 
+        heat_demand = cutout.heat_demand(matrix=M.T, index=clustered_regions.index)
         heat_demand.to_netcdf(snakemake.output[f"heat_demand_{area}"])
