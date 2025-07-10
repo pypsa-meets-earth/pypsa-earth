@@ -2,10 +2,10 @@
 year,,"YYYY; e.g. '2030'","Year for which to retrieve cost assumptions of ``resources/costs.csv``."
 technology_data_version,,"vX.X.X; e.g. 'v0.1.0'","Version of ``technology-data`` repository to use."
 country_specific_data,bool,"""{"""",""US""}""",Reference to the desired `technology-data` directory for techno-economic input data
-cost_scenario,,"{"moderate","Only used if `country_specific_data`: ""US""` to select the desired NREL financial case",,
-financial_case,,"{"market","Only used if `country_specific_data: ""US""` to select the desired NREL financial case",
+cost_scenario,,"""{""moderate"",""advanced"",""conservative""}""","Only used if `country_specific_data`: ""US""` to select the desired NREL financial case",,
+financial_case,,"""{""market"",""r&d""}""","Only used if `country_specific_data: ""US""` to select the desired NREL financial case",
 discountrate,,float,"Rate of return used to discount future cash flows back to their present value"
-output_currency,,"""{""EUR"",""USD""}""",Reference currency for all costs,
+output_currency,,"""{""EUR"",""USD"",""JPY"",""CAD"",""CNY""}""","Reference currency for all costs (EUR is the base unit for the conversion, and the full list of supported currencies is available at [currencyconverter](https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv) ",
 rooftop_share,,float,"Share of rooftop PV when calculating capital cost of solar (joint rooftop and utility-scale PV)."
 fill_values,,float,"Default values if not specified for a technology in ``resources/costs.csv``."
 marginal_cost,EUR/MWh,"Keys should be in the 'technology' column of ``resources/costs.csv``. Values can be any float.","For the given technologies, assumptions about their marginal operating costs are set to the corresponding value. Optional; overwrites cost assumptions from ``resources/costs.csv``."
