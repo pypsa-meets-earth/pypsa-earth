@@ -633,7 +633,7 @@ def add_h2_network_cap(n, cap):
 
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
-    
+
     res_techs = [
         "csp",
         "solar",
