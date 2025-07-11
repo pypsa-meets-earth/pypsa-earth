@@ -1120,13 +1120,16 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
 
         if pd.isna(year):
             logger.warning(
-                f"Missing currency_year for row with unit '{x['unit']}' and value '{x['value']}'. Skipping currency conversion.")
+                f"Missing currency_year for row with unit '{x['unit']}' and value '{x['value']}'. Skipping currency conversion."
+            )
             return pd.Series([x["value"], x["unit"]])
 
         try:
             year = int(year)
         except ValueError:
-            logger.warning(f"Invalid currency_year value '{year}' for row. Skipping currency conversion.")
+            logger.warning(
+                f"Invalid currency_year value '{year}' for row. Skipping currency conversion."
+            )
             return pd.Series([x["value"], x["unit"]])
 
         key = (currency, output_currency, year)
