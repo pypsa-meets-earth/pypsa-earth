@@ -1017,10 +1017,14 @@ def get_yearly_currency_exchange_rate(
         if y > max_date.year:
             if future_exchange_rate_strategy == "custom":
                 if custom_future_exchange_rate is not None:
-                    logger.info(f"Using custom future exchange rate for {initial_currency}->{output_currency} in {y}")
+                    logger.info(
+                        f"Using custom future exchange rate for {initial_currency}->{output_currency} in {y}"
+                    )
                     return custom_future_exchange_rate
                 else:
-                    raise RuntimeError("Custom future exchange rate strategy selected, but no value was provided.")
+                    raise RuntimeError(
+                        "Custom future exchange rate strategy selected, but no value was provided."
+                    )
             # fallback to using latest year available
             effective_year = max_date.year
         else:
@@ -1061,7 +1065,14 @@ def get_yearly_currency_exchange_rate(
     _currency_conversion_cache[key] = avg_rate
     return avg_rate
 
-def build_currency_conversion_cache(df, output_currency, default_exchange_rate=None, future_exchange_rate_strategy: str = "latest", custom_future_exchange_rate: float = None):
+
+def build_currency_conversion_cache(
+    df,
+    output_currency,
+    default_exchange_rate=None,
+    future_exchange_rate_strategy: str = "latest",
+    custom_future_exchange_rate: float = None,
+):
     """
     Builds a cache of exchange rates for all unique (output_currency, year) pairs in the dataset.
 
@@ -1085,8 +1096,8 @@ def build_currency_conversion_cache(df, output_currency, default_exchange_rate=N
                 year,
                 default_exchange_rate,
                 _currency_conversion_cache=_currency_conversion_cache,
-                future_exchange_rate_strategy,
-                custom_future_exchange_rate,
+                future_exchange_rate_strategy=future_exchange_rate_strategy,
+                custom_future_exchange_rate=custom_future_exchange_rate,
             )
             _currency_conversion_cache[key] = rate
         except Exception as e:
@@ -1094,6 +1105,7 @@ def build_currency_conversion_cache(df, output_currency, default_exchange_rate=N
             continue
 
     return _currency_conversion_cache
+
 
 def apply_currency_conversion(cost_dataframe, output_currency, cache):
     """
@@ -1140,7 +1152,11 @@ def prepare_costs(
 
     # Create a shared cache for exchange rates
     _currency_conversion_cache = build_currency_conversion_cache(
-        costs, output_currency, default_exchange_rate, future_exchange_rate_strategy, custom_future_exchange_rate
+        costs,
+        output_currency,
+        default_exchange_rate,
+        future_exchange_rate_strategy,
+        custom_future_exchange_rate,
     )
 
     modified_costs = apply_currency_conversion(

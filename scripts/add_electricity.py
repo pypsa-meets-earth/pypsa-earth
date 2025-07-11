@@ -90,9 +90,9 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import (
-    configure_logging,
-    build_currency_conversion_cache,
     apply_currency_conversion,
+    build_currency_conversion_cache,
+    configure_logging,
     create_logger,
     read_csv_nafix,
     update_p_nom_max,
@@ -150,10 +150,14 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         costs,
         config["output_currency"],
         config["default_exchange_rate"],
-        future_exchange_rate_strategy=config.get("future_exchange_rate_strategy", "latest"),
+        future_exchange_rate_strategy=config.get(
+            "future_exchange_rate_strategy", "latest"
+        ),
         custom_future_exchange_rate=config.get("custom_future_rate", None),
     )
-    costs = apply_currency_conversion(costs, config["output_currency"], _currency_conversion_cache)
+    costs = apply_currency_conversion(
+        costs, config["output_currency"], _currency_conversion_cache
+    )
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
