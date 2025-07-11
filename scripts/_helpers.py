@@ -1115,14 +1115,28 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     currency_list = currency_converter.currencies
 
     def convert_row(x):
-        currency = x["unit"][:3]
-        year = int(x["currency_year"])
+        currency = x["unit"][0:3]
+        year = x["currency_year"]
+
+        if pd.isna(year):
+            logger.warning(
+                f"Missing currency_year for row with unit '{x['unit']}' and value '{x['value']}'. Skipping currency conversion.")
+            return pd.Series([x["value"], x["unit"]])
+
+        try:
+            year = int(year)
+        except ValueError:
+            logger.warning(f"Invalid currency_year value '{year}' for row. Skipping currency conversion.")
+            return pd.Series([x["value"], x["unit"]])
+
         key = (currency, output_currency, year)
+
         if currency in currency_list and key in cache:
             rate = cache[key]
             value = x["value"] * rate
             unit = x["unit"].replace(currency, output_currency)
             return pd.Series([value, unit])
+
         return pd.Series([x["value"], x["unit"]])
 
     cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
