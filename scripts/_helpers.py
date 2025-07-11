@@ -1161,24 +1161,10 @@ def prepare_costs(
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     """
-    # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
     # correct units to MW
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-
-    # Create a shared cache for exchange rates
-    _currency_conversion_cache = build_currency_conversion_cache(
-        costs,
-        output_currency,
-        default_exchange_rate,
-        future_exchange_rate_strategy,
-        custom_future_exchange_rate,
-    )
-
-    modified_costs = apply_currency_conversion(
-        costs, output_currency, _currency_conversion_cache
-    )
 
     # apply filter on financial_case and scenario, if they are contained in the cost dataframe
     wished_cost_scenario = config["cost_scenario"]
@@ -1199,9 +1185,22 @@ def prepare_costs(
             | (costs["financial_case"].isnull())
         ]
 
-    modified_costs = convert_currency_and_unit(costs, output_currency)
+    if costs["currency_year"].isnull().any():
+        logger.warning("Some rows are missing 'currency_year' and will be skipped in currency conversion.")
 
-    # min_count=1 is important to generate NaNs which are then filled by fillna
+    # Create a shared cache for exchange rates
+    _currency_conversion_cache = build_currency_conversion_cache(
+        costs,
+        output_currency,
+        default_exchange_rate,
+        future_exchange_rate_strategy,
+        custom_future_exchange_rate,
+    )
+
+    modified_costs = apply_currency_conversion(
+        costs, output_currency, _currency_conversion_cache
+    )
+
     modified_costs = (
         modified_costs.loc[:, "value"]
         .unstack(level=1)
@@ -1215,7 +1214,7 @@ def prepare_costs(
 
     modified_costs["fixed"] = [
         annuity_factor(v) * v["investment"] * Nyears
-        for i, v in modified_costs.iterrows()
+        for _, v in modified_costs.iterrows()
     ]
 
     return modified_costs
