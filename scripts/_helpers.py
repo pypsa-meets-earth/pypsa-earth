@@ -1186,7 +1186,9 @@ def prepare_costs(
         ]
 
     if costs["currency_year"].isnull().any():
-        logger.warning("Some rows are missing 'currency_year' and will be skipped in currency conversion.")
+        logger.warning(
+            "Some rows are missing 'currency_year' and will be skipped in currency conversion."
+        )
 
     # Create a shared cache for exchange rates
     _currency_conversion_cache = build_currency_conversion_cache(
