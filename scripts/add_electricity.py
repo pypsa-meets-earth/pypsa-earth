@@ -91,7 +91,8 @@ import pypsa
 import xarray as xr
 from _helpers import (
     configure_logging,
-    convert_currency_and_unit,
+    build_currency_conversion_cache,
+    apply_currency_conversion,
     create_logger,
     read_csv_nafix,
     update_p_nom_max,
@@ -145,7 +146,8 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
-    costs = convert_currency_and_unit(costs, config["output_currency"])
+    _currency_conversion_cache = build_currency_conversion_cache(costs, config["output_currency"], config["default_exchange_rate"])
+    costs = apply_currency_conversion(costs, config["output_currency"], _currency_conversion_cache)
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):

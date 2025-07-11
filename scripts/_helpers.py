@@ -967,18 +967,30 @@ def annuity(n, r):
 
 
 # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
-_conversion_cache = {}
+_currency_conversion_cache = {}
 
 
+# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 def get_yearly_currency_exchange_average(
     initial_currency: str,
     output_currency: str,
     year: int,
     default_exchange_rate: float = None,
+    _currency_conversion_cache: dict = None,
 ):
+    """
+    Returns the average EUR-to-output currency exchange rate and the currency year.
+
+    Uses cached values if available; otherwise computes the average from daily rates.
+    Falls back to a default exchange rate if provided and no data is available.
+    """
+
+    if _currency_conversion_cache is None:
+        _currency_conversion_cache = {}  # Use empty cache if not provided
+
     key = (initial_currency, output_currency, year)
-    if key in _conversion_cache:
-        return _conversion_cache[key]
+    if key in _currency_conversion_cache:
+        return _currency_conversion_cache[key]
 
     successful_years = []
     default_years = []
@@ -1032,36 +1044,62 @@ def get_yearly_currency_exchange_average(
     if default_years:
         logger.warning(f"Using default exchange rate for years: {default_years}")
 
-    _conversion_cache[key] = avg_rate
+    # Save computed rate to cache
+    _currency_conversion_cache[key] = avg_rate
     return avg_rate
 
+def build_currency_conversion_cache(df, output_currency, default_exchange_rate=None):
+    """
+    Builds a cache of exchange rates for all unique (output_currency, year) pairs in the dataset.
 
-def convert_currency_and_unit(
-    cost_dataframe, output_currency: str, default_exchange_rate: float = None
-):
+    Rates are computed once and stored for reuse to improve performance.
+    """
     currency_list = currency_converter.currencies
-    cost_dataframe["value"] = cost_dataframe.apply(
-        lambda x: (
-            x["value"]
-            * get_yearly_currency_exchange_average(
-                x["unit"][0:3],
+
+    unique_keys = {
+        (x["unit"][0:3], output_currency, int(x["currency_year"]))
+        for _, x in df.iterrows()
+        if x["unit"][0:3] in currency_list
+    }
+
+    _currency_conversion_cache = {}
+    for key in unique_keys:
+        initial_currency, _, year = key
+        try:
+            rate = get_yearly_currency_exchange_average(
+                initial_currency,
                 output_currency,
-                int(x["currency_year"]),
+                year,
                 default_exchange_rate,
+                _currency_conversion_cache=_currency_conversion_cache
             )
-            if x["unit"][0:3] in currency_list
-            else x["value"]
-        ),
-        axis=1,
-    )
-    cost_dataframe["unit"] = cost_dataframe.apply(
-        lambda x: (
-            x["unit"].replace(x["unit"][0:3], output_currency)
-            if x["unit"][0:3] in currency_list
-            else x["unit"]
-        ),
-        axis=1,
-    )
+            _currency_conversion_cache[key] = rate
+        except Exception as e:
+            logger.warning(f"Failed to get rate for {key}: {e}")
+            continue
+
+    return _currency_conversion_cache
+
+def apply_currency_conversion(cost_dataframe, output_currency, cache):
+    """
+    Applies exchange rates from the cache to convert all cost values and units.
+
+    Converts only rows with recognized output_currency units.
+    """
+    currency_list = currency_converter.currencies
+
+    def convert_row(x):
+        currency = x["unit"][:3]
+        year = int(x["currency_year"])
+        key = (currency, output_currency, year)
+        if currency in currency_list and key in cache:
+            rate = cache[key]
+            value = x["value"] * rate
+            unit = x["unit"].replace(currency, output_currency)
+            return pd.Series([value, unit])
+        return pd.Series([x["value"], x["unit"]])
+
+    cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
     return cost_dataframe
 
 
@@ -1072,14 +1110,24 @@ def prepare_costs(
     Nyears: float | int = 1,
     default_exchange_rate: float = None,
 ):
+    """
+    Loads and processes cost data, converting units and currency to a common format.
+
+    Applies currency conversion, fills missing values, and computes fixed annualized costs.
+    """
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
 
-    modified_costs = convert_currency_and_unit(
+    # Create a shared cache for exchange rates
+    _currency_conversion_cache = build_currency_conversion_cache(
         costs, output_currency, default_exchange_rate
+    )
+
+    modified_costs = apply_currency_conversion(
+        costs, output_currency, _currency_conversion_cache
     )
 
     # min_count=1 is important to generate NaNs which are then filled by fillna

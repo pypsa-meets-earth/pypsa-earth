@@ -45,7 +45,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Fix logic for selection of default exchange rate. `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
+* Fix fallback logic for missing currency data by correctly applying the default exchange rate and build cache for storing commonly used exchange rates. `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
 
 * Update code to reflect the Wikipedia source page for `prepare_transport_data_input`. `PR #1486 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1486>`__
 
