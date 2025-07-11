@@ -146,7 +146,13 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
-    _currency_conversion_cache = build_currency_conversion_cache(costs, config["output_currency"], config["default_exchange_rate"])
+    _currency_conversion_cache = build_currency_conversion_cache(
+        costs,
+        config["output_currency"],
+        config["default_exchange_rate"],
+        future_exchange_rate_strategy=config.get("future_exchange_rate_strategy", "latest"),
+        custom_future_exchange_rate=config.get("custom_future_rate", None),
+    )
     costs = apply_currency_conversion(costs, config["output_currency"], _currency_conversion_cache)
     costs = costs.value.unstack().fillna(config["fill_values"])
 

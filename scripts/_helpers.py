@@ -971,12 +971,14 @@ _currency_conversion_cache = {}
 
 
 # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
-def get_yearly_currency_exchange_average(
+def get_yearly_currency_exchange_rate(
     initial_currency: str,
     output_currency: str,
     year: int,
     default_exchange_rate: float = None,
     _currency_conversion_cache: dict = None,
+    future_exchange_rate_strategy: str = "latest",
+    custom_future_exchange_rate: float = None,
 ):
     """
     Returns the average EUR-to-output currency exchange rate and the currency year.
@@ -1011,7 +1013,18 @@ def get_yearly_currency_exchange_average(
             available_dates = sorted(currency_converter._rates[initial_currency].keys())
 
         max_date = available_dates[-1]
-        effective_year = min(y, max_date.year)
+        # If year is beyond available data and strategy is "custom", return custom value
+        if y > max_date.year:
+            if future_exchange_rate_strategy == "custom":
+                if custom_future_exchange_rate is not None:
+                    logger.info(f"Using custom future exchange rate for {initial_currency}->{output_currency} in {y}")
+                    return custom_future_exchange_rate
+                else:
+                    raise RuntimeError("Custom future exchange rate strategy selected, but no value was provided.")
+            # fallback to using latest year available
+            effective_year = max_date.year
+        else:
+            effective_year = y
         dates_to_use = [d for d in available_dates if d.year == effective_year]
 
         rates = []
@@ -1048,7 +1061,7 @@ def get_yearly_currency_exchange_average(
     _currency_conversion_cache[key] = avg_rate
     return avg_rate
 
-def build_currency_conversion_cache(df, output_currency, default_exchange_rate=None):
+def build_currency_conversion_cache(df, output_currency, default_exchange_rate=None, future_exchange_rate_strategy: str = "latest", custom_future_exchange_rate: float = None):
     """
     Builds a cache of exchange rates for all unique (output_currency, year) pairs in the dataset.
 
@@ -1066,12 +1079,14 @@ def build_currency_conversion_cache(df, output_currency, default_exchange_rate=N
     for key in unique_keys:
         initial_currency, _, year = key
         try:
-            rate = get_yearly_currency_exchange_average(
+            rate = get_yearly_currency_exchange_rate(
                 initial_currency,
                 output_currency,
                 year,
                 default_exchange_rate,
-                _currency_conversion_cache=_currency_conversion_cache
+                _currency_conversion_cache=_currency_conversion_cache,
+                future_exchange_rate_strategy,
+                custom_future_exchange_rate,
             )
             _currency_conversion_cache[key] = rate
         except Exception as e:
@@ -1109,6 +1124,8 @@ def prepare_costs(
     fill_values: dict,
     Nyears: float | int = 1,
     default_exchange_rate: float = None,
+    future_exchange_rate_strategy: str = "latest",
+    custom_future_exchange_rate: float = None,
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
@@ -1123,7 +1140,7 @@ def prepare_costs(
 
     # Create a shared cache for exchange rates
     _currency_conversion_cache = build_currency_conversion_cache(
-        costs, output_currency, default_exchange_rate
+        costs, output_currency, default_exchange_rate, future_exchange_rate_strategy, custom_future_exchange_rate
     )
 
     modified_costs = apply_currency_conversion(
