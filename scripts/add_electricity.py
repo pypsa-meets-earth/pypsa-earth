@@ -158,6 +158,26 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs = apply_currency_conversion(
         costs, config["output_currency"], _currency_conversion_cache
     )
+
+    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
+    wished_cost_scenario = config["cost_scenario"]
+    wished_financial_case = config["financial_case"]
+    for col in ["scenario", "financial_case"]:
+        if col in costs.columns:
+            costs[col] = costs[col].replace("", pd.NA)
+
+    if "scenario" in costs.columns:
+        costs = costs[
+            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold())
+            | (costs["scenario"].isnull())
+        ]
+
+    if "financial_case" in costs.columns:
+        costs = costs[
+            (costs["financial_case"].str.casefold() == wished_financial_case.casefold())
+            | (costs["financial_case"].isnull())
+        ]
+
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):

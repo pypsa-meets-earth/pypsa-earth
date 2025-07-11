@@ -26,7 +26,6 @@ import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
-from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
@@ -1132,6 +1131,7 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
 
 def prepare_costs(
     cost_file: str,
+    config: dict,
     output_currency: str,
     fill_values: dict,
     Nyears: float | int = 1,
@@ -1147,7 +1147,7 @@ def prepare_costs(
     # set all asset costs and other parameters
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
-    # correct units to MW and EUR
+    # correct units to MW
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
 
     # Create a shared cache for exchange rates
@@ -1162,6 +1162,27 @@ def prepare_costs(
     modified_costs = apply_currency_conversion(
         costs, output_currency, _currency_conversion_cache
     )
+
+    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
+    wished_cost_scenario = config["cost_scenario"]
+    wished_financial_case = config["financial_case"]
+    for col in ["scenario", "financial_case"]:
+        if col in costs.columns:
+            costs[col] = costs[col].replace("", pd.NA)
+
+    if "scenario" in costs.columns:
+        costs = costs[
+            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold())
+            | (costs["scenario"].isnull())
+        ]
+
+    if "financial_case" in costs.columns:
+        costs = costs[
+            (costs["financial_case"].str.casefold() == wished_financial_case.casefold())
+            | (costs["financial_case"].isnull())
+        ]
+
+    modified_costs = convert_currency_and_unit(costs, output_currency)
 
     # min_count=1 is important to generate NaNs which are then filled by fillna
     modified_costs = (
