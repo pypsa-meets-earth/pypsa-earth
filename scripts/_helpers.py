@@ -1017,15 +1017,16 @@ def get_yearly_currency_exchange_rate(
             if future_exchange_rate_strategy == "custom":
                 if custom_future_exchange_rate is not None:
                     logger.info(
-                        f"Using custom future exchange rate for {initial_currency}->{output_currency} in {y}"
+                        f"Using custom future exchange rate ({custom_future_exchange_rate}) for {initial_currency}->{output_currency} in {y}."
                     )
                     return custom_future_exchange_rate
                 else:
-                    raise RuntimeError(
-                        "Custom future exchange rate strategy selected, but no value was provided."
-                    )
-            # fallback to using latest year available
+                    raise RuntimeError("Custom future exchange rate strategy selected, but no value was provided.")
+            # fallback to latest available year
             effective_year = max_date.year
+            logger.info(
+                f"Using latest available year ({effective_year}) for future exchange rate of {initial_currency}->{output_currency} in {y}."
+            )
         else:
             effective_year = y
         dates_to_use = [d for d in available_dates if d.year == effective_year]
@@ -1080,9 +1081,9 @@ def build_currency_conversion_cache(
     currency_list = currency_converter.currencies
 
     unique_keys = {
-        (x["unit"][0:3], output_currency, int(x["currency_year"]))
+        (x["unit"][:3], output_currency, int(x["currency_year"]))
         for _, x in df.iterrows()
-        if x["unit"][0:3] in currency_list
+        if x["unit"][:3] in currency_list
     }
 
     _currency_conversion_cache = {}
@@ -1110,37 +1111,42 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     """
     Applies exchange rates from the cache to convert all cost values and units.
 
-    Converts only rows with recognized output_currency units.
+    Converts only rows with monetary units that start with a known currency symbol and contain '/'.
     """
     currency_list = currency_converter.currencies
 
     def convert_row(x):
-        currency = x["unit"][0:3]
-        year = x["currency_year"]
+        unit = x["unit"]
+        value = x["value"]
 
-        if pd.isna(year):
-            logger.warning(
-                f"Missing currency_year for row with unit '{x['unit']}' and value '{x['value']}'. Skipping currency conversion."
-            )
-            return pd.Series([x["value"], x["unit"]])
-
-        try:
-            year = int(year)
-        except ValueError:
-            logger.warning(
-                f"Invalid currency_year value '{year}' for row. Skipping currency conversion."
-            )
-            return pd.Series([x["value"], x["unit"]])
-
-        key = (currency, output_currency, year)
-
-        if currency in currency_list and key in cache:
-            rate = cache[key]
-            value = x["value"] * rate
-            unit = x["unit"].replace(currency, output_currency)
+        if not isinstance(unit, str) or "/" not in unit:
             return pd.Series([value, unit])
 
-        return pd.Series([x["value"], x["unit"]])
+        currency = unit[:3]
+        year = x.get("currency_year")
+
+        if currency not in currency_list:
+            return pd.Series([value, unit])
+
+        if pd.isnull(year):
+            logger.warning(
+                f"Missing currency_year for row with unit '{unit}' and value '{value}'. Skipping currency conversion."
+            )
+            return pd.Series([value, unit])
+
+        try:
+            key = (currency, output_currency, int(year))
+            rate = cache.get(key)
+            if rate is not None:
+                new_value = value * rate
+                new_unit = unit.replace(currency, output_currency)
+                return pd.Series([new_value, new_unit])
+            else:
+                logger.warning(f"Missing exchange rate for {key}. Skipping conversion.")
+        except Exception as e:
+            logger.warning(f"Failed to convert row {x.name}: {e}")
+
+        return pd.Series([value, unit])
 
     cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
     return cost_dataframe
