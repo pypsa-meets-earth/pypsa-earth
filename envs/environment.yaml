@@ -63,6 +63,7 @@ dependencies:
 - cartopy
 - rasterio
 - rioxarray
+- libgdal-hdf5  # to open gebco file
 
 # Plotting
 - geoviews
