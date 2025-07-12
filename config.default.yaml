@@ -19,8 +19,8 @@ countries: ["US"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 enable:
-  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_databundle_sector: false
+  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false # If True, then an exclusion raster will be build
@@ -369,7 +369,7 @@ costs:
   cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
   financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
   # Management of output currencies and exchange rates
-  output_currency: "US" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
+  output_currency: "EUR" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
   default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
   # Only needed if customized exchange rates are needed for future years
   future_exchange_rate_strategy: "latest" # "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
