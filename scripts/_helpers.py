@@ -1021,7 +1021,9 @@ def get_yearly_currency_exchange_rate(
                     )
                     return custom_future_exchange_rate
                 else:
-                    raise RuntimeError("Custom future exchange rate strategy selected, but no value was provided.")
+                    raise RuntimeError(
+                        "Custom future exchange rate strategy selected, but no value was provided."
+                    )
             # fallback to latest available year
             effective_year = max_date.year
             logger.info(
