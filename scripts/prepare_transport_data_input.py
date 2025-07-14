@@ -89,7 +89,7 @@ def download_number_of_vehicles():
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
 
     vehicles_wiki.rename(
-        columns={"Location": "Country", "Road motor vehicles": "number cars"},
+        columns={"Region": "Country", "Road motor vehicles": "number cars"},
         inplace=True,
     )
 
