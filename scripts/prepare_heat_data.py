@@ -12,6 +12,11 @@ import pytz
 import xarray as xr
 from _helpers import locate_bus, mock_snakemake
 
+# TODO Add to Snakemake
+CALIBR_DIR = snakemake.input.calib_dir
+CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
+CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
+
 # TODO Add to the parameters into a configuration file
 HEAT_DEMAND_TOTAL = 1
 COOL_DEMAND_TOTAL = 1
@@ -188,9 +193,6 @@ def prepare_heat_data(n, snapshots, countries):
     nodal_energy_totals[f"electricity services space"] = (
         SHARE_ELECTRICITY_SERVICES_SPACE * energy_services
     )
-
-    # TODO Add a local fix to make test with pre-compiled networks
-    # snapshots = n.snapshots
 
     # heating/cooling demand profiles
     # copy forward the daily average heat demand into each hour, so it can be multiplied by the intraday profile
@@ -369,11 +371,6 @@ if __name__ == "__main__":
             planning_horizons=2030,
             demand="AB",
         )
-
-    # TODO Add to Snakemake
-    CALIBR_DIR = snakemake.input.calib_dir
-    CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
-    CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
 
     n = pypsa.Network(snakemake.input.network)
 
