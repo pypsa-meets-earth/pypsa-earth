@@ -14,7 +14,6 @@ summary_dir: results/
 
 foresight: overnight
 
-
 countries: ["NG", "BJ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
@@ -155,32 +154,16 @@ atlite:
 renewable:
   onwind:
     cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: Vestas_V112_3MW
     capacity_per_sqkm: 3 # conservative, ScholzPhd Tab 4.3.1: 10MW/km^2
-    natura: true
   offwind-ac:
     cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: NREL_ReferenceTurbine_5MW_offshore
     capacity_per_sqkm: 2
   offwind-dc:
     cutout: cutout-2013-era5
-    resource:
-      method: wind
-      turbine: NREL_ReferenceTurbine_5MW_offshore
     # ScholzPhd Tab 4.3.1: 10MW/km^2
     capacity_per_sqkm: 3
   solar:
     cutout: cutout-2013-era5
-    resource:
-      method: pv
-      panel: CSi
-      orientation: latitude_optimal # will lead into optimal design
-      # slope: 0.  # slope: 0 represent a flat panel
-      # azimuth: 180.  # azimuth: 180 south orientation
     capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
@@ -192,17 +175,12 @@ renewable:
     cutout: cutout-2013-era5
     hydrobasins_level: 6
     resource:
-      method: hydro
       hydrobasins: data/hydrobasins/hybas_world.shp
-      flowspeed: 1.0 # m/s
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
     hydro_max_hours_default: 6.0 # (optional, default 6) Default value of max_hours for hydro when NaN values are found
   csp:
     cutout: cutout-2013-era5
-    resource:
-      method: csp
-      installation: SAM_solar_tower
     capacity_per_sqkm: 2.392 # From 1.7 to 4.6 addresses issue #361
 
 # TODO: Needs to be adjusted for Africa.
