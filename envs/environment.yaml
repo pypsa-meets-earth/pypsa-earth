@@ -34,7 +34,7 @@ dependencies:
 - xarray>=2023.11.0, <=2025.01.2
 - netcdf4
 - networkx
-- scipy
+- scipy<1.16
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
@@ -63,6 +63,7 @@ dependencies:
 - cartopy
 - rasterio
 - rioxarray
+- libgdal-hdf5  # to open gebco file
 
 # Plotting
 - geoviews
