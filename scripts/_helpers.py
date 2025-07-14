@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
+"""
+Set of helper functions for all occasions.
+"""
 
 import calendar
 import io
@@ -47,6 +50,66 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+CONFIGS_STORE_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+
+
+def write_config(
+    config,
+    fl_name,
+    output_dir,
+    config_exclude=None,
+):
+    """
+    Outputs config dictionary into a file
+
+    Parameters
+    ----------
+    config : dict
+        Dictionary formed from Snakemake `config` global variable
+
+    config_exclude : dict
+        Dictionary formed from Snakemake `config` global variable
+        used to subtract from `config`. Needed to get rid of technical
+        configuration parameters not relevant for modeling runs
+
+    fl_name : str
+        File name to store the useful config
+
+    Returns
+    -------
+    tuple or str or dict
+        If a single key is provided, returns the corresponding value from the
+        regions config file. If multiple keys are provided, returns a tuple
+        containing values corresponding to the provided keys.
+
+
+    """
+
+    # Avoid confusing REUSE as in https://reuse.software/faq/#exclude-lines
+    # REUSE-IgnoreStart
+    license_str_list = [
+        "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors",
+        "# SPDX-License-Identifier: AGPL-3.0-or-later",
+        "#",
+        "\n\r",
+    ]
+    # REUSE-IgnoreEnd
+    license_str = "\n\r".join(license_str_list)
+
+    if config_exclude:
+        keys_exclude = set(config.keys()) - set(config_exclude.keys())
+        config_clean = dict()
+        for key in keys_exclude:
+            config_clean[key] = config.get(key)
+    else:
+        config_clean = config
+
+    p = Path(output_dir)
+    p.mkdir(parents=True, exist_ok=True)
+    fl_p = Path(output_dir, fl_name)
+    with fl_p.open("w") as outfile:
+        outfile.write(license_str)
+        yaml.dump(config_clean, outfile, default_flow_style=False)
 
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
@@ -70,6 +133,27 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
             f"Please update 'config.yaml' according to 'config.default.yaml.'\n\r"
             "If issues persist, consider to update the environment to the latest version."
         )
+
+
+def compare_configs(current_config, benchmark_config):
+    import json
+
+    import pandas as pd
+    import yaml
+
+    current_config_json = json.loads(json.dumps(current_config))
+    benchm_config_json = json.loads(json.dumps(benchmark_config))
+
+    df_benchm_config = pd.json_normalize(benchm_config_json, sep="+")
+    df_current_config = pd.json_normalize(current_config_json, sep="+")
+
+    col_diff = set(df_current_config.columns).difference(df_benchm_config.columns)
+    if len(col_diff) > 0:
+        logger.error(
+            f"Keys missed in the config files placed in `config` folder as compared with `config.default.yaml`: {col_diff}. "
+            + "Please make sure to update files in `config` folder."
+        )
+        raise Exception("Configs mismatch")
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -154,7 +238,7 @@ def read_osm_config(*args):
             base_folder = os.path.dirname(base_folder)
     else:
         base_folder = os.getcwd()
-    osm_config_path = os.path.join(base_folder, "configs", REGIONS_CONFIG)
+    osm_config_path = os.path.join(base_folder, "configs", "gp", REGIONS_CONFIG)
     with open(osm_config_path, "r") as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
