@@ -218,6 +218,17 @@ sector:
   reduce_space_heat_exogenously: true # reduces space heat demand by a given factor (applied before losses in DH)
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
 
+  boilers: true
+  oil_boilers: false
+  chp: true
+  micro_chp: false
+  solar_thermal: true
+
+  v2g: true #allows feed-in to grid from EV battery
+  bev_dsm: true #turns on EV battery
+  bev_energy: 0.05 #average battery size in MWh
+  bev_availability: 0.5 #How many cars do smart charging
+
   biomass_transport: true # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
   solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
@@ -273,6 +284,9 @@ sector:
     AP_2050: 0.42
     NZ_2050: 0.68
     DF_2050: 0.011
+
+  hydrogen:
+    network: true
 
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
