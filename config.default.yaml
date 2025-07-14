@@ -91,19 +91,6 @@ cluster_options:
     exclude_carriers: []
   alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ["load"] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
-  out_logging: true # When "True", logging is printed to console
-  aggregation_strategies:
-    generators: # use "min" for more conservative assumptions
-      p_nom: sum
-      p_nom_max: sum
-      p_nom_min: sum
-      p_min_pu: mean
-      p_max_pu: weighted_average
-      marginal_cost: mean
-      committable: any
-      ramp_limit_up: max
-      ramp_limit_down: max
-      efficiency: mean
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
@@ -195,29 +182,11 @@ electricity:
       PV: [solar]
 
 lines:
-  ac_types:
-    132.: "243-AL1/39-ST1A 20.0"
-    220.: "Al/St 240/40 2-bundle 220.0"
-    300.: "Al/St 240/40 3-bundle 300.0"
-    380.: "Al/St 240/40 4-bundle 380.0"
-    500.: "Al/St 240/40 4-bundle 380.0"
-    750.: "Al/St 560/50 4-bundle 750.0"
-  dc_types:
-    500.: "HVDC XLPE 1000"
-  s_max_pu: 0.7
-  s_nom_max: .inf
   length_factor: 1.25
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 links:
-  p_max_pu: 1.0
-  p_nom_max: .inf
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
-
-transformers:
-  x: 0.1
-  s_nom: 2000.
-  type: ""
 
 atlite:
   nprocesses: 4
@@ -240,26 +209,7 @@ renewable:
       turbine: Vestas_V112_3MW
     capacity_per_sqkm: 3 # conservative, ScholzPhd Tab 4.3.1: 10MW/km^2
     # correction_factor: 0.93
-    copernicus:
-      # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
-      #  development of the REMix model and application for Europe. ( p.42 / p.28)
-      # CLC grid codes:
-      # 11X/12X - Various forest types
-      # 20  - Shrubs
-      # 30  - Herbaceus vegetation
-      # 40  - Cropland
-      # 50  - Urban
-      # 60  - Bare / Sparse vegetation
-      # 80  - Permanent water bodies
-      # 100 - Moss and lichen
-      # 200 - Open sea
-      grid_codes: [20, 30, 40, 60, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
-      distance: 1000
-      distance_grid_codes: [50]
     natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
   offwind-ac:
     cutout: cutout-2013-era5
     resource:
@@ -275,9 +225,6 @@ renewable:
     natura: true
     max_depth: 50
     max_shore_distance: 30000
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
   offwind-dc:
     cutout: cutout-2013-era5
     resource:
@@ -289,14 +236,9 @@ renewable:
     # proxy for wake losses
     # from 10.1016/j.energy.2018.08.153
     # until done more rigorously in #153
-    copernicus:
-      grid_codes: [80, 200]
     natura: true
     max_depth: 50
     min_shore_distance: 30000
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
   solar:
     cutout: cutout-2013-era5
     resource:
@@ -315,9 +257,6 @@ renewable:
     copernicus:
       grid_codes: [20, 30, 40, 50, 60, 90, 100]
     natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
   hydro:
     cutout: cutout-2013-era5
     hydrobasins_level: 6
@@ -329,10 +268,7 @@ renewable:
       # show_progress: true
     carriers: [ror, PHS, hydro]
     PHS_max_hours: 6
-    hydro_max_hours: "energy_capacity_totals_by_country" # not active
     hydro_max_hours_default: 6.0 # (optional, default 6) Default value of max_hours for hydro when NaN values are found
-    clip_min_inflow: 1.0
-    extendable: true
     normalization:
       method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
@@ -349,14 +285,9 @@ renewable:
     # sector: The economic potential of photovoltaics and concentrating solar
     # power." Applied Energy 135 (2014): 704-720.
     copernicus:
-      grid_codes: [20, 30, 40, 60, 90]
       distancing_codes: [50]
       distance_to_codes: 3000
     natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
-    csp_model: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration
@@ -409,50 +340,10 @@ costs:
 
 
 monte_carlo:
-  # Description: Specify Monte Carlo sampling options for uncertainty analysis.
-  # Define the option list for Monte Carlo sampling.
-  # Make sure add_to_snakefile is set to true to enable Monte-Carlo
   options:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
-    samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
-    sampling_strategy: "chaospy" # "pydoe2", "chaospy", "scipy", packages that are supported
-    seed: 42 # set seedling for reproducibilty
-  # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
-  # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
-  # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
-  # The arguments of the distribution are passed using the key 'args'  as follows, tailored by distribution type
-  # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
-  # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
-  # More info on the distributions are documented in the Chaospy reference guide...
-  # https://chaospy.readthedocs.io/en/master/reference/distribution/index.html
-  # An abstract example is as follows:
-  # {pypsa network object, e.g. "loads_t.p_set"}:
-  # type: {any supported distribution among the previous: "uniform", "normal", ...}
-  # args: {arguments passed as a list depending on the distribution, see the above and more at https://pypsa.readthedocs.io/}
-  uncertainties:
-    loads_t.p_set:
-      type: uniform
-      args: [0.5, 1]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
-      type: lognormal
-      args: [1.5]
-    generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
-      type: beta
-      args: [0.5, 2]
 
 # ------------------- SECTOR OPTIONS -------------------
-
-policy_config:
-  hydrogen:
-    temporal_matching: "no_res_matching" # either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
-    spatial_matching: false
-    additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
-    allowed_excess: 1.0
-    is_reference: false # Whether or not this network is a reference case network, relevant only if additionality is _true_
-    remove_h2_load: false #Whether or not to remove the h2 load from the network, relevant only if is_reference is _true_
-    path_to_ref: "" # Path to the reference case network for additionality calculation, relevant only if additionality is _true_ and is_reference is _false_
-    re_country_load: false # Set to "True" to force the RE electricity to be equal to the electricity required for hydrogen export and the country electricity load. "False" excludes the country electricity load from the constraint.
-
 
 demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
@@ -460,10 +351,6 @@ demand_data:
 
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
-
-
-fossil_reserves:
-  oil: 100 #TWh Maybe redundant
 
 export:
   endogenous: false # If true, the export demand is endogenously determined by the model
