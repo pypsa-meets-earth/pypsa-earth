@@ -503,7 +503,7 @@ def base_network(
     converters = _set_electrical_parameters_converters(links_config, converters)
 
     n = pypsa.Network()
-    n.name = "PyPSA-Earth"
+    n.name = "PyPSA-ASEAN"
 
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()

@@ -66,6 +66,14 @@ else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
+if config["electricity"]["base_network"] in ["osm-prebuilt", "osm-plus-prebuilt"]:
+    base_network_name = config["electricity"]["base_network"]
+    base_network_version = config["electricity"].get("base_network_version",0.1)
+    OSMDIR = f"data/{base_network_name}/{base_network_version}/"
+    osm_powerplants_fn=OSMDIR + "all_clean_generators.csv"
+else:
+    OSMDIR = "resources/" + RDIR + "base_network/"
+    osm_powerplants_fn="resources/" + RDIR + "osm/clean/all_clean_generators.csv"
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -270,14 +278,10 @@ rule base_network:
         countries=config["countries"],
         base_network=config["base_network"],
     input:
-        osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
-        osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
-        osm_converters="resources/"
-        + RDIR
-        + "base_network/all_converters_build_network.csv",
-        osm_transformers="resources/"
-        + RDIR
-        + "base_network/all_transformers_build_network.csv",
+        osm_buses=OSMDIR + "all_buses_build_network.csv",
+        osm_lines=OSMDIR + "all_lines_build_network.csv",
+        osm_converters=OSMDIR + "all_converters_build_network.csv",
+        osm_transformers=OSMDIR + "all_transformers_build_network.csv",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
     output:
@@ -493,7 +497,7 @@ rule build_powerplants:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
-        osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
+        osm_powerplants=osm_powerplants_fn,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
