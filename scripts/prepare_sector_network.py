@@ -393,15 +393,15 @@ def add_hydrogen(n, costs):
             )
 
             n.madd(
-            "Link",
-            nodes + " H2 UHS charger",
-            bus0=nodes,
-            bus1=nodes + " H2 UHS",
-            carrier="H2 UHS charger",
-            # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            capital_cost=0,
-            p_nom_extendable=True,
-            # lifetime=costs.at["battery inverter", "lifetime"],
+                "Link",
+                nodes + " H2 UHS charger",
+                bus0=nodes,
+                bus1=nodes + " H2 UHS",
+                carrier="H2 UHS charger",
+                # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+                capital_cost=0,
+                p_nom_extendable=True,
+                # lifetime=costs.at["battery inverter", "lifetime"],
             )
 
             n.madd(

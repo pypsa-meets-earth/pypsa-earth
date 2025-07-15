@@ -1046,11 +1046,11 @@ rule prepare_transport_data_input:
 rule build_salt_cavern_potentials:
     input:
         regions_onshore="resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         regions_offshore="resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        + RDIR
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
     output:
         h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
     threads: 1
