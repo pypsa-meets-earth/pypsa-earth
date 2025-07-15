@@ -21,7 +21,7 @@ def download_potash_data():
     url = "https://pubs.usgs.gov/sir/2010/5090/s/PotashGIS.zip"
 
     # Download directory
-    download_dir = "resources/potash_gis"
+    download_dir = "data/potash_gis"
     zip_path = os.path.join(download_dir, "PotashGIS.zip")
 
     # Ensure directory exists
@@ -57,15 +57,6 @@ def download_potash_data():
 
     # Load the shapefile
     gdf = gpd.read_file(shp_path)
-
-    # Optionally: remove all files except the ones in the same folder as the shapefile
-    for item in os.listdir(download_dir):
-        full_path = os.path.join(download_dir, item)
-        if full_path != os.path.dirname(shp_path):
-            if os.path.isdir(full_path):
-                shutil.rmtree(full_path)
-            else:
-                os.remove(full_path)
 
     return gdf
 
@@ -142,7 +133,7 @@ def salt_cavern_potential_by_region(cavern, regions):
     # calculate share of cavern area inside region
     overlay["share"] = area(overlay) / overlay["area_caverns"]
 
-    overlay["e_nom"] = overlay.eval("capacity_per_area * share * area_caverns / 1e6")
+    overlay["e_nom"] = overlay.eval("capacity_per_area * share * area_caverns / 1000")
     cavern_regions = overlay.pivot_table(
         index="name", columns="region_type", values="e_nom", aggfunc="sum"
     ).fillna(0.0)
