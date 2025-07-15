@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Build salt cavern potentials for hydrogen storage.
 
@@ -5,13 +6,15 @@ https://doi.org/10.3133/sir20105090S
 """
 
 import os
-import requests
-import zipfile
 import shutil
+import zipfile
+from pathlib import Path
+
 import geopandas as gpd
 import pandas as pd
-from pathlib import Path
+import requests
 from _helpers import mock_snakemake
+
 
 def download_potash_data():
     # URL of the Potash GIS data
@@ -33,7 +36,7 @@ def download_potash_data():
         raise Exception(f"Download failed with status code {response.status_code}")
 
     # Extract full archive to preserve directory structure
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(path=download_dir)
 
     # Remove ZIP after extraction
@@ -63,8 +66,9 @@ def download_potash_data():
                 shutil.rmtree(full_path)
             else:
                 os.remove(full_path)
-    
+
     return gdf
+
 
 def estimate_h2_potential_from_potash(
     potash_gdf,
@@ -88,8 +92,8 @@ def estimate_h2_potential_from_potash(
 
     # Filter nach Geologie und Mindestfläche
     filtered = potash_gdf[
-        potash_gdf.apply(is_salt_related, axis=1) &
-        (potash_gdf["Area_km2"] > min_area_km2)
+        potash_gdf.apply(is_salt_related, axis=1)
+        & (potash_gdf["Area_km2"] > min_area_km2)
     ].copy()
 
     # Potenzialabschätzung
@@ -97,6 +101,7 @@ def estimate_h2_potential_from_potash(
     filtered["storage_type"] = "salt_cavern"
 
     return filtered
+
 
 def concat_gdf(gdf_list, crs="EPSG:4326"):
     """
@@ -164,7 +169,7 @@ if __name__ == "__main__":
 
     fn_onshore = snakemake.input.regions_onshore
     fn_offshore = snakemake.input.regions_offshore
-    
+
     regions = load_bus_regions(fn_onshore, fn_offshore)
 
     # Compute potential

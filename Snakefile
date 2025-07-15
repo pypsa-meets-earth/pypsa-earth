@@ -1042,6 +1042,7 @@ rule prepare_transport_data_input:
     script:
         "scripts/prepare_transport_data_input.py"
 
+
 rule build_salt_cavern_potentials:
     input:
         regions_onshore="resources/"

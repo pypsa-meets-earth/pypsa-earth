@@ -263,19 +263,18 @@ def add_hydrogen(n, costs):
     )
 
     n.madd(
-            "Link",
-            spatial.nodes + " H2 turbine",
-            bus0=spatial.nodes + " H2",
-            bus1=spatial.nodes,
-            p_nom_extendable=True,
-            carrier="H2 turbine",
-            efficiency=costs.at["OCGT", "efficiency"],
-            capital_cost=costs.at["OCGT", "fixed"]
-            * costs.at["OCGT", "efficiency"],  # NB: fixed cost is per MWel
-            marginal_cost=costs.at["OCGT", "VOM"],
-            lifetime=costs.at["OCGT", "lifetime"],
-        )      
-
+        "Link",
+        spatial.nodes + " H2 turbine",
+        bus0=spatial.nodes + " H2",
+        bus1=spatial.nodes,
+        p_nom_extendable=True,
+        carrier="H2 turbine",
+        efficiency=costs.at["OCGT", "efficiency"],
+        capital_cost=costs.at["OCGT", "fixed"]
+        * costs.at["OCGT", "efficiency"],  # NB: fixed cost is per MWel
+        marginal_cost=costs.at["OCGT", "VOM"],
+        lifetime=costs.at["OCGT", "lifetime"],
+    )
 
     if snakemake.params.sector_options["hydrogen"]["underground_storage"]:
         if snakemake.params.h2_underground:
@@ -347,11 +346,12 @@ def add_hydrogen(n, costs):
             )
 
         else:
-            cavern_types = snakemake.params.sector_options["hydrogen"]["hydrogen_underground_storage_locations"]
+            cavern_types = snakemake.params.sector_options["hydrogen"][
+                "hydrogen_underground_storage_locations"
+            ]
             h2_caverns = pd.read_csv(snakemake.input.h2_cavern, index_col=0)
-            if (
-                not h2_caverns.empty
-                and set(cavern_types).intersection(h2_caverns.columns)
+            if not h2_caverns.empty and set(cavern_types).intersection(
+                h2_caverns.columns
             ):
                 available_caverns = [c for c in cavern_types if c in h2_caverns.columns]
                 h2_caverns = h2_caverns[available_caverns].sum(axis=1)
@@ -415,7 +415,6 @@ def add_hydrogen(n, costs):
                 p_nom_extendable=True,
                 # lifetime=costs.at["battery inverter", "lifetime"],
             )
-            
 
     # hydrogen stored overground (where not already underground)
     h2_capital_cost = costs.at[
