@@ -144,10 +144,7 @@ def salt_cavern_potential_by_region(cavern, regions):
 
     overlay["e_nom"] = overlay.eval("capacity_per_area * share * area_caverns / 1e6")
     cavern_regions = overlay.pivot_table(
-        index="name",
-        columns="region_type",
-        values="e_nom",
-        aggfunc="sum"
+        index="name", columns="region_type", values="e_nom", aggfunc="sum"
     ).fillna(0.0)
     return cavern_regions
 
@@ -156,7 +153,9 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_salt_cavern_potentials", clusters="20", simpl="")
+        snakemake = mock_snakemake(
+            "build_salt_cavern_potentials", clusters="20", simpl=""
+        )
 
     area_crs = snakemake.params.crs["area_crs"]
     geo_crs = snakemake.params.crs["geo_crs"]
