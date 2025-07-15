@@ -1053,6 +1053,9 @@ rule build_salt_cavern_potentials:
             + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
     output:
         h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
+    params:
+        area_crs=config["crs"]["area_crs"],
+        geo_crs=config["crs"]["geo_crs"],
     threads: 1
     resources:
         mem_mb=2000,

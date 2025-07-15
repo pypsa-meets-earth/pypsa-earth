@@ -103,12 +103,12 @@ def estimate_h2_potential_from_potash(
     return filtered
 
 
-def concat_gdf(gdf_list, crs="EPSG:4326"):
+def concat_gdf(gdf_list):
     """
     Concatenate multiple geopandas dataframes with common coordinate reference
     system (crs).
     """
-    return gpd.GeoDataFrame(pd.concat(gdf_list), crs=crs)
+    return gpd.GeoDataFrame(pd.concat(gdf_list), crs=geo_crs)
 
 
 def load_bus_regions(onshore_path, offshore_path):
@@ -130,7 +130,7 @@ def area(gdf):
     """
     Returns area of GeoDataFrame geometries in square kilometers.
     """
-    return gdf.to_crs(epsg=3035).area / 1e6  # in km²
+    return gdf.to_crs(area_crs).area / 1e6  # in km²
 
 
 def salt_cavern_potential_by_region(cavern, regions):
@@ -157,6 +157,9 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_salt_cavern_potentials", clusters="20", simpl="")
+
+    area_crs = snakemake.params.crs["area_crs"]
+    geo_crs = snakemake.params.crs["geo_crs"]
 
     # Load potash deposits shapefile
     gdf = download_potash_data()
