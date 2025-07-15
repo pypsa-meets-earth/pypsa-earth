@@ -1054,8 +1054,7 @@ rule build_salt_cavern_potentials:
     output:
         h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
     params:
-        area_crs=config["crs"]["area_crs"],
-        geo_crs=config["crs"]["geo_crs"],
+        crs=config["crs"],
     threads: 1
     resources:
         mem_mb=2000,
