@@ -13,7 +13,10 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 import requests
-from _helpers import mock_snakemake
+from _helpers import (
+    mock_snakemake,
+    to_csv_nafix,
+)
 
 
 def download_potash_data():
@@ -168,4 +171,4 @@ if __name__ == "__main__":
     # Compute potential
     cavern_regions = salt_cavern_potential_by_region(cavern_potential, regions)
 
-    cavern_regions.to_csv(snakemake.output.h2_cavern)
+    to_csv_nafix(cavern_regions, snakemake.output.h2_cavern)
