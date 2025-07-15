@@ -108,12 +108,16 @@ def concat_gdf(gdf_list, crs="EPSG:4326"):
 
 def load_bus_regions(onshore_path, offshore_path):
     """
-    Load on- and offshore regions and concat.
+    Load on- and offshore regions and concat with region_type.
     """
     bus_regions_offshore = gpd.read_file(offshore_path)
+    bus_regions_offshore["region_type"] = "offshore"
+
     bus_regions_onshore = gpd.read_file(onshore_path)
+    bus_regions_onshore["region_type"] = "onshore"
+
     bus_regions = concat_gdf([bus_regions_offshore, bus_regions_onshore])
-    bus_regions = bus_regions.dissolve(by="name", aggfunc="sum")
+    bus_regions = bus_regions.dissolve(by=["name", "region_type"], aggfunc="sum")
     return bus_regions
 
 
@@ -133,15 +137,21 @@ def salt_cavern_potential_by_region(cavern, regions):
     # calculate share of cavern area inside region
     overlay["share"] = area(overlay) / overlay["area_caverns"]
 
-    overlay["e_nom"] = overlay.eval("capacity_per_area * share * area_caverns / 1000")  # TWh
-    return overlay.groupby(["name", "storage_type"]).e_nom.sum().unstack("storage_type")
+    overlay["e_nom"] = overlay.eval("capacity_per_area * share * area_caverns / 1e6")
+    cavern_regions = overlay.pivot_table(
+        index="name",
+        columns="region_type",
+        values="e_nom",
+        aggfunc="sum"
+    ).fillna(0.0)
+    return cavern_regions
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_salt_cavern_potentials", clusters="37")
+        snakemake = mock_snakemake("build_salt_cavern_potentials", clusters="20", simpl="")
 
     # Load potash deposits shapefile
     gdf = download_potash_data()

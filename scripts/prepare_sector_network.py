@@ -353,7 +353,8 @@ def add_hydrogen(n, costs):
                 not h2_caverns.empty
                 and set(cavern_types).intersection(h2_caverns.columns)
             ):
-                h2_caverns = h2_caverns[cavern_types].sum(axis=1)
+                available_caverns = [c for c in cavern_types if c in h2_caverns.columns]
+                h2_caverns = h2_caverns[available_caverns].sum(axis=1)
 
                 # only use sites with at least 2 TWh potential
                 h2_caverns = h2_caverns[h2_caverns > 2]
@@ -370,37 +371,37 @@ def add_hydrogen(n, costs):
 
                 # n.add("Carrier", "H2 UHS")
 
-                n.madd(
-                    "Bus",
-                    nodes + " H2 UHS",
-                    location=nodes,
-                    carrier="H2 UHS",
-                    x=n.buses.loc[list(nodes)].x.values,
-                    y=n.buses.loc[list(nodes)].y.values,
-                )
+            n.madd(
+                "Bus",
+                nodes + " H2 UHS",
+                location=nodes,
+                carrier="H2 UHS",
+                x=n.buses.loc[list(nodes)].x.values,
+                y=n.buses.loc[list(nodes)].y.values,
+            )
 
-                n.madd(
-                    "Store",
-                    h2_caverns.index + " H2 UHS",
-                    bus=h2_caverns.index + " H2 UHS",
-                    e_nom_extendable=True,
-                    e_nom_max=h2_caverns.values,
-                    e_cyclic=True,
-                    carrier="H2 UHS",
-                    capital_cost=h2_capital_cost,
-                    lifetime=costs.at["hydrogen storage underground", "lifetime"],
-                )
+            n.madd(
+                "Store",
+                h2_caverns.index + " H2 UHS",
+                bus=h2_caverns.index + " H2 UHS",
+                e_nom_extendable=True,
+                e_nom_max=h2_caverns.values,
+                e_cyclic=True,
+                carrier="H2 UHS",
+                capital_cost=h2_capital_cost,
+                lifetime=costs.at["hydrogen storage underground", "lifetime"],
+            )
 
-                n.madd(
-                "Link",
-                nodes + " H2 UHS charger",
-                bus0=nodes,
-                bus1=nodes + " H2 UHS",
-                carrier="H2 UHS charger",
-                # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-                capital_cost=0,
-                p_nom_extendable=True,
-                # lifetime=costs.at["battery inverter", "lifetime"],
+            n.madd(
+            "Link",
+            nodes + " H2 UHS charger",
+            bus0=nodes,
+            bus1=nodes + " H2 UHS",
+            carrier="H2 UHS charger",
+            # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+            capital_cost=0,
+            p_nom_extendable=True,
+            # lifetime=costs.at["battery inverter", "lifetime"],
             )
 
             n.madd(
@@ -2929,9 +2930,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-3H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,

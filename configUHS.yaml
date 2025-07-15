@@ -523,9 +523,8 @@ sector:
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: true
     hydrogen_underground_storage_locations:
-    - onshore  # more than 50 km from sea
-    - nearshore    # within 50 km of sea
-    # - offshore
+    - onshore
+    - offshore
     hydrogen_colors: false
     set_color_shares: false
     blue_share: 0.40

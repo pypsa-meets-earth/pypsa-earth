@@ -1044,10 +1044,14 @@ rule prepare_transport_data_input:
 
 rule build_salt_cavern_potentials:
     input:
-        regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
-        regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
+        regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s_{clusters}.csv",
+        h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
     threads: 1
     resources:
         mem_mb=2000,
@@ -1105,7 +1109,7 @@ rule prepare_sector_network:
         h2_cavern=(
             "data/hydrogen_salt_cavern_potentials.csv"
             if config["custom_data"]["h2_underground"]
-            else "resources/" + RDIR + "salt_cavern_potentials_s_{clusters}.csv"
+            else "resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv"
         ),
         nodal_energy_totals="resources/"
         + SECDIR
