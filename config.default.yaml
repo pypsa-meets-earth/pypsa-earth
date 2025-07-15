@@ -526,6 +526,10 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+    hydrogen_underground_storage_locations:
+    # - onshore  # more than 50 km from sea
+    - nearshore    # within 50 km of sea
+    # - offshore
     hydrogen_colors: false
     set_color_shares: false
     blue_share: 0.40
