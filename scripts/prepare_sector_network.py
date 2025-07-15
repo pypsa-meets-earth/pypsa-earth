@@ -3041,7 +3041,9 @@ if __name__ == "__main__":
     gshp_cop = read_csv_nafix(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
 
     # Share of district heating at each node
-    district_heat_share = read_csv_nafix(snakemake.input.district_heat_share, index_col=0)
+    district_heat_share = read_csv_nafix(
+        snakemake.input.district_heat_share, index_col=0
+    )
 
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat
