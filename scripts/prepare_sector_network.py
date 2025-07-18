@@ -3001,8 +3001,8 @@ def add_geothermal_industry_supply(n, supply_curve):
                 lifetime = lifetimes["power"]  # Default to power lifetime if no match
 
             # Annuitize capex for this specific technology
-            # capex_annualized = row["capex[USD/MW]"] * dr / (1 - (1 + dr) ** (-lifetime))
-            capex_annualized = row["capex[USD/MW]"] / lifetime
+            capex_annualized = row["capex[USD/MW]"] * dr / (1 - (1 + dr) ** (-lifetime))
+            # capex_annualized = row["capex[USD/MW]"] / lifetime
 
             efficiencies = {}
 
@@ -3211,6 +3211,7 @@ def add_industry_heating(n, costs):
             efficiency_dispatch=costs.at[storage_tech_name, "efficiency"] ** 0.5,
             max_hours=costs.at[storage_tech_name, "max_hours"],
             marginal_cost=costs.at[storage_tech_name, "VOM"],
+            cyclic_state_of_charge=True,
         )
 
     # n.add('Bus', 'biogas', carrier='biogas')
@@ -3456,13 +3457,18 @@ def attach_enhanced_geothermal(n, potential_fn, mode):
     # Calculate annuity factor for capital cost
     discount_rate = float(snakemake.wildcards.discountrate)
     lifetime = 25  # years
-    # annuity_factor = (
-    #     discount_rate
-    #     * (1 + discount_rate) ** lifetime
-    #     / ((1 + discount_rate) ** lifetime - 1)
-    # )
+    annuity_factor = (
+        discount_rate
+        * (1 + discount_rate) ** lifetime
+        / ((1 + discount_rate) ** lifetime - 1)
+    )
 
-    annuity_factor = 1 / lifetime # cost of capital are already accounted for in the capital cost
+    # annuity_factor = 1 / lifetime # cost of capital are already accounted for in the capital cost
+
+    # print(f"Annuity factor with capital cost: {annuity_factor_withcc}")
+    # print(f"Annuity factor without capital cost: {annuity_factor}")
+    # import sys
+    # sys.exit()
 
     idx = pd.IndexSlice
 
@@ -3584,12 +3590,12 @@ def add_geothermal_district_heating_supply(n, egs_potential):
     discount_rate = float(snakemake.wildcards.discountrate)
     lifetime = 25  # years
 
-    # annuity_factor = (
-    #     discount_rate
-    #     * (1 + discount_rate) ** lifetime
-    #     / ((1 + discount_rate) ** lifetime - 1)
-    # )
-    annuity_factor = 1 / lifetime # cost of capital are already accounted for in the capital cost
+    annuity_factor = (
+        discount_rate
+        * (1 + discount_rate) ** lifetime
+        / ((1 + discount_rate) ** lifetime - 1)
+    )
+    # annuity_factor = 1 / lifetime # cost of capital are already accounted for in the capital cost
 
     network_cost_factor = (
         1.28  # maximally simple estimate of heat network cost, taken from
