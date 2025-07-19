@@ -2951,11 +2951,12 @@ def add_industry_demand(n, demand):
         # Add a store for heat that can absorb an infinite amount of heat but cannot discharge it
         n.madd(
             "StorageUnit",
-            avail + " " + carrier + " store",
+            avail + " " + carrier + " dump",
             bus=avail + " " + carrier,
             p_nom_extendable=True,
             p_max_pu=0.0,
             capital_cost=0.0,
+            carrier=carrier + ' dump',
         )
 
 
