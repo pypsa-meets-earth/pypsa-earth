@@ -5,7 +5,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Creates the network topology from a OpenStreetMap.
+Checks relevance of `config.default.yaml`.
 
 Relevant Settings
 -----------------
