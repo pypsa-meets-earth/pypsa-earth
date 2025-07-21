@@ -86,7 +86,7 @@ write_config(
     config_exclude=None,
 )
 
-# check_config_version(config=config)
+check_config_version(config=config)
 
 # Prepare variable for the workflow -------------------------------------------
 config.update({"git_commit": get_last_commit_message(".")})
