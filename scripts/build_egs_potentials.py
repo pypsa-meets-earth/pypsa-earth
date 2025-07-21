@@ -133,8 +133,7 @@ if __name__ == "__main__":
     size = 12_756 * np.pi / (360 / x_stepsize)
     area = size**2
 
-    plant_extent = 100  # km2
-    plants_per_datapoint = area / plant_extent
+    capacity_per_datapoint = area * 6 * 100 # assuming a 6MW/ha footprint; 100 converts ha to km2
 
     gdf = gdf.rename(
         columns={
@@ -165,7 +164,8 @@ if __name__ == "__main__":
 
     gdf["heat_share"] = gdf["sales_heat"].div(gdf["sales_power"])
 
-    gdf["p_nom_max[MWe]"] = gdf["sales_power"] * plants_per_datapoint
+    # gdf["p_nom_max[MWe]"] = gdf["sales_power"] * plants_per_datapoint
+    gdf["p_nom_max[MWe]"] = capacity_per_datapoint
 
     nodal_egs_potentials = pd.DataFrame(
         np.nan,
