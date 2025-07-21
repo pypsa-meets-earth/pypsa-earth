@@ -134,10 +134,9 @@ Incremental update of the configuration files:
 - `config.default.yaml` is used to store the major modeling-relevant configuration parameters which values are used if they are not included into `config.yaml`;
 - `config` folder contains the detailed configuration settings.
 
-During each modeling run the configuration parameters which are actually used are outputted into the results folder for this run. Three types of files are being produced:
+During each modeling run the configuration parameters which are actually used are outputted into the results folder created for a particular run. Three types of files are being produced:
 - `run_config.yaml` contains modeling-relevant configuration parameters;
-- `full_run_config.yaml` provides all the parameters defined in a run being an output of an internal `config` variable of Snakemake;
-- `config_check.html` gives an overview of automatic quality assessment of the provided configuration file.
+- `full_run_config.yaml` provides all the parameters defined in a run being an output of an internal `config` variable of Snakemake.
 
 To delve into the specifics of the provided configurations and explore additional settings, please refer to the :ref:`config` page.
 There are many more configuration options beyond what is adapted for the tutorial!
