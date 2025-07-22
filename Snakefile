@@ -838,7 +838,7 @@ rule build_industrial_heating_costs:
         "scripts/build_industrial_heating_costs.py"
 
 
-rule build_district_heating_demands:
+rule build_district_heating_cooling_demands:
     params:
         enhanced_geothermal=config["renewable"]["enhanced_geothermal"],
     input:
@@ -863,7 +863,8 @@ rule build_district_heating_demands:
             for T in [100]
         },
         # Power and residual heat inputs for EGS and HS
-        demand_data="data/heating_30tj_min.geojson",
+        # demand_data="data/heating_30tj_min.geojson",
+        demand_data="data/1km_htg_clg_10TJ_cutoff.geojson",
         regions=(
             "resources/"
             + RDIR
@@ -877,8 +878,13 @@ rule build_district_heating_demands:
         district_heating_geothermal_supply_curves=(
             "resources/"
             + SECDIR
-            + "district_heating_geothermal_supply_curves_s{simpl}_{clusters}.csv"
-        )
+            + "district_heating_geothermal_supply_curves_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ),
+        district_cooling_geothermal_supply_curves=(
+            "resources/"
+            + SECDIR
+            + "district_cooling_geothermal_supply_curves_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ),
         # heat_exchanger_capacity=(
         #     "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
         # ),
@@ -890,7 +896,7 @@ rule build_district_heating_demands:
     resources:
         mem_mb=2000,
     script:
-        "scripts/prepare_district_heating.py"
+        "scripts/build_district_heating_cooling.py"
 
 
 rule build_industrial_heating_demands:
@@ -1476,8 +1482,13 @@ rule prepare_sector_network:
         district_heating_geothermal_supply_curves=(
             "resources/"
             + SECDIR
-            + "district_heating_geothermal_supply_curves_s{simpl}_{clusters}.csv"
-        )
+            + "district_heating_geothermal_supply_curves_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ),
+        district_cooling_geothermal_supply_curves=(
+            "resources/"
+            + SECDIR
+            + "district_cooling_geothermal_supply_curves_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ),
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",

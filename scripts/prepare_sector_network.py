@@ -2963,7 +2963,7 @@ def add_industry_demand(n, demand):
 def add_geothermal_industry_supply(n, supply_curve):
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
-    lifetimes = {"steam": 20, "power": 25, "pwr": 25, "directheat": 30}
+    lifetimes = {"steam": 30, "power": 30, "pwr": 30, "directheat": 30}
 
     # Create a mapping for temperature bands to bus suffixes
     temp_band_mapping = {
@@ -3457,7 +3457,7 @@ def attach_enhanced_geothermal(n, potential_fn, mode):
 
     # Calculate annuity factor for capital cost
     discount_rate = float(snakemake.wildcards.discountrate)
-    lifetime = 25  # years
+    lifetime = 30  # years
     annuity_factor = (
         discount_rate
         * (1 + discount_rate) ** lifetime
@@ -3589,7 +3589,7 @@ def add_geothermal_district_heating_supply(n, egs_potential):
 def add_geothermal_district_heating_supply(n, egs_potential):
 
     discount_rate = float(snakemake.wildcards.discountrate)
-    lifetime = 25  # years
+    lifetime = 30  # years
 
     annuity_factor = (
         discount_rate
@@ -3675,6 +3675,99 @@ def add_geothermal_district_heating_supply(n, egs_potential):
             capital_cost=capital_cost,
             marginal_cost=opex,
             p_nom_extendable=True,
+        )
+
+
+def add_geothermal_district_cooling_supply(n, egs_potential):
+
+    discount_rate = float(snakemake.wildcards.discountrate)
+    lifetime = 30  # years
+
+    annuity_factor = (
+        discount_rate
+        * (1 + discount_rate) ** lifetime
+        / ((1 + discount_rate) ** lifetime - 1)
+    )
+    # annuity_factor = 1 / lifetime # cost of capital are already accounted for in the capital cost
+
+    network_cost_factor = (
+        1.28  # maximally simple estimate of heat network cost, taken from
+    )
+    # https://vb.nweurope.eu/media/21149/2022_04_dge_rollout_dt123_socio_economic_potential_mapping_for_dge_urg.pdf
+
+    egs_potential["capex[USD/MW]"] = (
+        egs_potential["capex[USD/MW]"] * annuity_factor * network_cost_factor
+    )
+
+    if f"geothermal district cooling" not in n.buses.index:
+        n.add(
+            "Bus",
+            f"geothermal district cooling",
+            carrier="geothermal district cooling",
+            unit="MWh_th",
+        )
+
+        n.add(
+            "Generator",
+            f"geothermal district cooling",
+            bus=f"geothermal district cooling",
+            carrier="geothermal district cooling",
+            p_nom_extendable=True,
+        )
+
+    for (bus, supply_curve_step), row in egs_potential.iterrows():
+
+        supply_curve_step = supply_curve_step.split(" ")[1]
+
+        capacity = row["cooling_demand[MW]"]
+        capital_cost = row["capex[USD/MW]"]
+        opex = row["opex[USD/MWh]"]
+
+        identifier = f"{bus} geothermal district cooling {supply_curve_step}"
+
+        # Add reservoir bus if it doesn't exist
+        reservoir_bus = identifier + " reservoir"
+        if reservoir_bus not in n.buses.index:
+            n.add("Bus", reservoir_bus, carrier="geothermal district cooling")
+
+        # Add injector link
+        n.add(
+            "Link",
+            identifier + " injector",
+            bus0="geothermal district cooling",
+            bus1=reservoir_bus,
+            carrier="geothermal district cooling",
+            p_nom_extendable=True,
+            capital_cost=0.,
+            marginal_cost=0.,
+        )
+
+        # Add storage if gtflex in wildcards
+        if 'gtflex' in snakemake.wildcards.sopts:
+            n.add(
+                "StorageUnit",
+                name=identifier + " reservoir",
+                bus=reservoir_bus,
+                carrier="geothermal district cooling",
+                p_nom_extendable=True,
+                p_nom_max=capacity,
+                max_hours=120,
+                cyclic_state_of_charge=True,
+            )
+
+        # Add producer link
+        n.add(
+            "Link",
+            identifier + " producer",
+            bus0=reservoir_bus,
+            bus1=bus + " cooling overall cooling",
+            carrier="geothermal district cooling",
+            p_nom_max=capacity,
+            p_max_pu=1.25,  # generation boost after storing in reservoir
+            capital_cost=capital_cost,
+            marginal_cost=opex,
+            p_nom_extendable=True,
+            efficiency=0.72, # efficiency of absorption chillers, taken from https://www.energy.gov/sites/prod/files/2017/06/f35/CHP-Absorption%20Chiller-compliant.pdf
         )
 
 
@@ -3882,12 +3975,19 @@ if __name__ == "__main__":
         snakemake.params.costs["scenario"],
     )
 
-    district_heat_egs_supply = pd.read_csv(
+    district_heat_geothermal_supply = pd.read_csv(
         snakemake.input["district_heating_geothermal_supply_curves"], index_col=[0, 1]
     )
 
     logger.info("Adding geothermal supply for district heating.")
-    add_geothermal_district_heating_supply(n, district_heat_egs_supply)
+    add_geothermal_district_heating_supply(n, district_heat_geothermal_supply)
+
+    district_cooling_geothermal_supply = pd.read_csv(
+        snakemake.input["district_cooling_geothermal_supply_curves"], index_col=[0, 1]
+    )
+
+    logger.info("Adding geothermal supply for district cooling.")
+    add_geothermal_district_cooling_supply(n, district_cooling_geothermal_supply)
 
     """
     # industry_heating_costs = (

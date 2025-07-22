@@ -537,7 +537,11 @@ def find_heat_exchanger_capacity(data, distance_threshold=1.0):
     }
 
 
-def process_regional_supply_curves(data, supply_curve_step_number=3):
+def process_regional_supply_curves(
+        data,
+        supply_curve_step_number=3,
+        demand_column="heat_demand[MW]"
+        ):
     """
     Process regional geothermal data to create discretized supply curves.
 
@@ -588,15 +592,15 @@ def process_regional_supply_curves(data, supply_curve_step_number=3):
             # If more entries, discretize the supply curve
             else:
                 # Create supply curve from heat_demand and capex
-                subset["cumulative_demand"] = subset["heat_demand[MW]"].cumsum()
+                subset["cumulative_demand"] = subset[demand_column].cumsum()
 
                 # Calculate demand-weighted average capex for original data
                 original_weighted_capex = (
-                    subset["capex[USD/MW]"] * subset["heat_demand[MW]"]
-                ).sum() / subset["heat_demand[MW]"].sum()
+                    subset["capex[USD/MW]"] * subset[demand_column]
+                ).sum() / subset[demand_column].sum()
 
                 # Calculate total demand
-                total_demand = subset["heat_demand[MW]"].sum()
+                total_demand = subset[demand_column].sum()
 
                 # Create equal-sized bins based on cumulative demand
                 bin_size = total_demand / supply_curve_step_number
@@ -635,13 +639,11 @@ def process_regional_supply_curves(data, supply_curve_step_number=3):
                         # Calculate demand-weighted average capex for this step
                         new_row["capex[USD/MW]"] = (
                             step_subset["capex[USD/MW]"]
-                            * step_subset["heat_demand[MW]"]
-                        ).sum() / step_subset["heat_demand[MW]"].sum()
+                            * step_subset[demand_column]
+                        ).sum() / step_subset[demand_column].sum()
 
                         # Sum heat demand for this step
-                        new_row["heat_demand[MW]"] = step_subset[
-                            "heat_demand[MW]"
-                        ].sum()
+                        new_row[demand_column] = step_subset[demand_column].sum()
 
                         # Sum total output
                         new_row["total_output[MWh]"] = step_subset[
@@ -669,8 +671,8 @@ def process_regional_supply_curves(data, supply_curve_step_number=3):
                     # Calculate demand-weighted average capex for discretized data
                     discretized_weighted_capex = (
                         discretized_df["capex[USD/MW]"]
-                        * discretized_df["heat_demand[MW]"]
-                    ).sum() / discretized_df["heat_demand[MW]"].sum()
+                        * discretized_df[demand_column]
+                    ).sum() / discretized_df[demand_column].sum()
 
                     # Adjust capex values to ensure demand-weighted average matches original
                     if discretized_weighted_capex != 0:  # Avoid division by zero
