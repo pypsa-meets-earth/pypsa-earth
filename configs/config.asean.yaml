@@ -19,6 +19,22 @@ enable:
   build_natura_raster: false # If True, then an exclusion raster will be build
   build_cutout: false
 
+build_shape_options:
+  simplify_gadm: false
+
 electricity:
   base_network: osm-plus-prebuilt
   base_network_version: 0.1
+
+transmission_projects:
+  enable: true
+  include:
+    ID_SuperGrid: true
+    AIMS: true
+  skip : []
+  status:
+  - in_planning
+  - under_construction
+  - existing
+  - under_consideration
+  new_link_capacity: keep #keep or zero
