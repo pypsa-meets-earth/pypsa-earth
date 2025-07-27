@@ -74,7 +74,7 @@ if __name__ == "__main__":
         idx["oil-based storage unit", "investment"], "further description"
     ] = "This assumes the heat-transfer fluid of the solar field is also used for storage"
 
-    manual_costs.loc[idx["oil-based storage unit", "efficiency_store"], "source"] = np.sqrt(
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_store"], "value"] = np.sqrt(
         0.9
     )
     manual_costs.loc[idx["oil-based storage unit", "efficiency_store"], "unit"] = "per unit"
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         "https://docs.nrel.gov/docs/fy10osti/47605.pdf"
     )
 
-    manual_costs.loc[idx["oil-based storage unit", "efficiency_dispatch"], "source"] = np.sqrt(
+    manual_costs.loc[idx["oil-based storage unit", "efficiency_dispatch"], "value"] = np.sqrt(
         0.9
     )
     manual_costs.loc[idx["oil-based storage unit", "efficiency_dispatch"], "unit"] = "per unit"
@@ -184,13 +184,23 @@ if __name__ == "__main__":
         idx["steel or concrete water tank", "investment"], "further description"
     ] = "Investment is expressed as power-capacity, because it is implemented as a StorageUnit in PyPSA"
 
-    manual_costs.loc[idx["steel or concrete water tank", "efficiency"], "value"] = (
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency_store"], "value"] = (
         np.sqrt(0.9)
     )
-    manual_costs.loc[idx["steel or concrete water tank", "efficiency"], "unit"] = (
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency_store"], "unit"] = (
         "per unit"
     )
-    manual_costs.loc[idx["steel or concrete water tank", "efficiency"], "source"] = (
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency_store"], "source"] = (
+        "https://iea-es.org/wp-content/uploads/public/FactSheet_Thermal_Sensible_Water_2024-07-10.pdf"
+    )
+
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency_dispatch"], "value"] = (
+        np.sqrt(0.9)
+    )
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency_dispatch"], "unit"] = (
+        "per unit"
+    )
+    manual_costs.loc[idx["steel or concrete water tank", "efficiency_dispatch"], "source"] = (
         "https://iea-es.org/wp-content/uploads/public/FactSheet_Thermal_Sensible_Water_2024-07-10.pdf"
     )
 
