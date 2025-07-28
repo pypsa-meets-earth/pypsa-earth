@@ -138,21 +138,22 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     emissions.index = missing_carriers
     n.import_components_from_dataframe(emissions, "Carrier")
 
-
 def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     Set all asset costs and other parameters.
     """
-    costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
+    #costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"], error_bad_lines=False).sort_index()
+    costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"], sep=",").sort_index()
 
     # correct units to MW and EUR
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
+    #costs.loc[costs.unit.str.contains("/kW"), "value"] = pd.to_numeric(costs.loc[costs.unit.str.contains("/kW"), "value"]) * 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
     costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
-    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel", "max_hours"):
         overwrites = config.get(attr)
         if overwrites is not None:
             breakpoint()
@@ -161,7 +162,10 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
             logger.info(
                 f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
             )
-
+    """     costs["lifetime"] = pd.to_numeric(costs["lifetime"], errors='raise')  # or errors='coerce' if you want NaN for invalid
+        costs["discount rate"] = pd.to_numeric(costs["discount rate"], errors='raise')
+        costs["FOM"] = pd.to_numeric(costs["FOM"], errors='raise')
+    """
     costs["capital_cost"] = (
         (
             calculate_annuity(costs["lifetime"], costs["discount rate"])
@@ -175,7 +179,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs.at["CCGT", "fuel"] = costs.at["gas", "fuel"]
 
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
-
+    costs["max_hours"] = costs["max_hours"].fillna(1)  #if not defined in input, assumed equal to 1
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
@@ -196,6 +200,9 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         + (1 - config["rooftop_share"]) * costs.at["solar-utility", "capital_cost"]
     )
     costs.loc["csp"] = costs.loc["csp-tower"]
+    #costs.loc["H2_LT"] = costs.loc["PEM"]
+    #costs.loc["H2_HT"] = costs.loc["H2_SOFC"]
+
 
     def costs_for_storageunit(store, link1, link2=pd.DataFrame(), max_hours=1.0):
         """
@@ -209,7 +216,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         )
         """
 
-        capital_cost = float(link1["capital_cost"]) + max_hours * float(
+        capital_cost = float(link1["capital_cost"]) + float(store["max_hours"]) * float(
             store["capital_cost"]
         )
         # if link2 is not None:
@@ -218,37 +225,38 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         return pd.Series(
             dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
         )
-        """
-        if isinstance(link2["capital_cost"], pd.Series) and not link2["capital_cost"].empty:
-            capital_cost += float(link2["capital_cost"].iloc[0])  # Aggiungi il valore del primo elemento
-        else:
-            capital_cost += 0.0
- """
 
-        """
-        if not link2.empty and "capital_cost" in link2:
-            capital_cost += float(link2["capital_cost"].iloc[0]) if not link2["capital_cost"].empty else 0.0 # float(link2["capital_cost"])
-        return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
-        )
-        """
-
-    max_hours = elec_config["max_hours"]
+    max_hours_config = elec_config["max_hours"]
 
     costs.loc["battery"] = costs_for_storageunit(
         costs.loc["battery storage"],
         costs.loc["battery inverter"],
-        max_hours=max_hours["battery"],
+        max_hours=max_hours_config["battery"],
     )
     costs.loc["H2"] = costs_for_storageunit(
         costs.loc["hydrogen storage tank"],
         costs.loc["fuel cell"],
         costs.loc["electrolysis"],
-        max_hours=max_hours["H2"],
+        max_hours=max_hours_config["H2"],
     )
+
+    """ costs.loc["H2_LT"] = costs_for_storageunit(
+        costs.loc["hydrogen storage tank"],
+        costs.loc["PEM FC-discharger"],
+        costs.loc["PEM ELY-charger"],
+        max_hours=max_hours_config["H2"],
+    )
+
+    costs.loc["H2_HT"] = costs_for_storageunit(
+        costs.loc["hydrogen storage tank"],
+        costs.loc["SO FC-discharger"],
+        costs.loc["SOEC ELY-charger"],
+        max_hours=max_hours_config["H2"],
+    ) """
 
     storage_meta_dict, storage_techs = nested_storage_dict(tech_costs)
     costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
+    
 
     # add capital_cost to all storage_units indexed by carrier e.g. "lead" or "concrete"
     for c in (
@@ -286,9 +294,9 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
                     charger_or_bicharger_filter[charger_or_bicharger_filter].index
                 )
             ],  # costs.loc[charger_or_bicharger_filter],
-            discharger_filter,  # costs[costs.index.isin(discharger_filter[discharger_filter].index)], #costs.loc[discharger_filter],
-            max_hours=max_hours["battery"],
-            # TODO: max_hours data should be read as costs.loc[carrier==c,max_hours] (easy possible)
+            discharger_filter, #costs[costs.index.isin(discharger_filter[discharger_filter].index)] , #discharger_filter,  # costs[costs.index.isin(discharger_filter[discharger_filter].index)], #costs.loc[discharger_filter],
+            
+            max_hours = float(costs.loc[store_filter[store_filter].index, "max_hours"].iloc[0]) #max_hours= float(costs[costs.index.isin(store_filter[store_filter].index)]["max_hours"])
         )
 
     for attr in ("marginal_cost", "capital_cost"):
