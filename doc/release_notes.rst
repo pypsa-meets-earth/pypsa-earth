@@ -115,6 +115,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix an issue with the GEBCO file by limiting libgdal-core<3.10 `PR #1519 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1519>`__
 
+* Fix a naming issue with European cutout `PR #1530 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1530>`__
+
 PyPSA-Earth 0.6.0
 =================
 
