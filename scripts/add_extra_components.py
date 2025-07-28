@@ -252,74 +252,137 @@ def attach_stores(n, costs, config):
         ) & (  #
             (tech_type == "charger") | (tech_type == "bicharger")
         )
-        """
-        charger_or_bicharger_filter = (carrier == c) & (
-            (tech_type == "charger") | (tech_type == "bicharger")
-        )
-        """
+    
         # filters for pypsa discharger or bicharger
         discharger_or_bicharger_filter = (
             costs.carrier.str.contains(r"\b" + re.escape(c) + r"\b", case=False)
         ) & (  # (carrier.str.contains(c, na=False))
             (tech_type == "discharger") | (tech_type == "bicharger")
         )
-        """
-        discharger_or_bicharger_filter = (carrier == c) & (
-            (tech_type == "discharger") | (tech_type == "bicharger")
-        )
-        """
-        n.madd(
-            "Store",
-            carrier_buses_i,
-            bus=carrier_buses_i,
-            carrier=c,
-            e_nom_extendable=True,
-            e_cyclic=True,
-            capital_cost=float(costs.loc[store_filter, "capital_cost"]),
-            # capital_cost=float(costs.loc[store_filter, "capital_cost"]),
-        )
 
         n.madd(
-            "Link",
-            carrier_buses_i + " charger",
-            bus0=buses_i,
-            bus1=carrier_buses_i,
-            carrier=f"{c} charger",
-            p_nom_extendable=True,
-            efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
-            capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
-            marginal_cost=float(
-                costs.loc[charger_or_bicharger_filter, "marginal_cost"]
-            ),
-            # efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
-            # capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
-            # marginal_cost=float(costs.loc[charger_or_bicharger_filter, "marginal_cost"]
-        )
-
-        # capital cost of discharger is None if bicharger since already added in previous link
-        if (
-            costs.loc[discharger_or_bicharger_filter].technology_type.item()
-            == "bicharger"
-        ):
-            zero_or_value = 0
-        else:
-            zero_or_value = float(
-                costs.loc[discharger_or_bicharger_filter, "capital_cost"]
+                "Store",
+                carrier_buses_i,
+                bus=carrier_buses_i,
+                carrier=c,
+                e_nom_extendable=True,
+                e_cyclic=True,
+                capital_cost=float(costs.loc[store_filter, "capital_cost"]),
+                # capital_cost=float(costs.loc[store_filter, "capital_cost"]),
             )
 
         n.madd(
-            "Link",
-            carrier_buses_i + " discharger",
-            bus0=carrier_buses_i,
-            bus1=buses_i,
-            carrier=f"{c} discharger",
-            p_nom_extendable=True,
-            efficiency=float(costs.loc[discharger_or_bicharger_filter, "efficiency"]),
-            capital_cost=zero_or_value,
-            marginal_cost=float(
-                costs.loc[discharger_or_bicharger_filter, "marginal_cost"]
-            ),
-        )
+                "Link",
+                carrier_buses_i + " charger",
+                bus0=buses_i,
+                bus1=carrier_buses_i,
+                carrier=f"{c} charger",
+                p_nom_extendable=True,
+                efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+                capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
+                marginal_cost=float(
+                    costs.loc[charger_or_bicharger_filter, "marginal_cost"]
+                ),
+                # efficiency=float(costs.loc[charger_or_bicharger_filter, "efficiency"]),
+                # capital_cost=float(costs.loc[charger_or_bicharger_filter, "capital_cost"]),
+                # marginal_cost=float(costs.loc[charger_or_bicharger_filter, "marginal_cost"]
+            )
+
+            # capital cost of discharger is None if bicharger since already added in previous link
+        if (
+                costs.loc[discharger_or_bicharger_filter].technology_type.item()
+                == "bicharger"
+            ):
+                zero_or_value = 0
+        else:
+                zero_or_value = float(
+                    costs.loc[discharger_or_bicharger_filter, "capital_cost"]
+                )
+
+        n.madd(
+                "Link",
+                carrier_buses_i + " discharger",
+                bus0=carrier_buses_i,
+                bus1=buses_i,
+                carrier=f"{c} discharger",
+                p_nom_extendable=True,
+                efficiency=float(costs.loc[discharger_or_bicharger_filter, "efficiency"]),
+                capital_cost=zero_or_value,
+                marginal_cost=float(costs.loc[discharger_or_bicharger_filter, "marginal_cost"]),
+            )
+        
+    if "H2_LT" in carriers_database:
+            h2_buses_i = n.madd("Bus", buses_i + " H2_LT", carrier="H2_LT", **bus_sub_dict)
+ 
+            n.madd(
+                "Store",
+                h2_buses_i,
+                bus=h2_buses_i,
+                carrier="H2_LT",
+                e_nom_extendable=True,
+                e_cyclic=True,
+                capital_cost=costs.at["hydrogen storage tank", "capital_cost"],
+            )
+ 
+            n.madd(
+                "Link",
+                h2_buses_i + " Electrolysis_LT",
+                bus0=buses_i,
+                bus1=h2_buses_i,
+                carrier="H2_LT electrolysis",
+                p_nom_extendable=True,
+                efficiency=costs.at["PEM ELY-charger", "efficiency"],
+                capital_cost=costs.at["PEM ELY-charger", "capital_cost"],
+                marginal_cost=costs.at["PEM ELY-charger", "marginal_cost"],
+            )
+ 
+            n.madd(
+                "Link",
+                h2_buses_i + " Fuel Cell_LT",
+                bus0=h2_buses_i,
+                bus1=buses_i,
+                carrier="H2_LT fuel cell",
+                p_nom_extendable=True,
+                efficiency=costs.at["PEM FC-discharger", "efficiency"],
+                capital_cost=costs.at["PEM FC-discharger", "capital_cost"],
+                marginal_cost=costs.at["PEM FC-discharger", "marginal_cost"],
+            )
+    if "H2_HT" in carriers_database:
+            h2_buses_i = n.madd("Bus", buses_i + " H2_HT", carrier="H2_HT", **bus_sub_dict)
+ 
+            n.madd(
+                "Store",
+                h2_buses_i,
+                bus=h2_buses_i,
+                carrier="H2_HT",
+                e_nom_extendable=True,
+                e_cyclic=True,
+                capital_cost=costs.at["hydrogen storage tank", "capital_cost"],
+            )
+ 
+            n.madd(
+                "Link",
+                h2_buses_i + " Electrolysis_HT",
+                bus0=buses_i,
+                bus1=h2_buses_i,
+                carrier="H2_HT electrolysis",
+                p_nom_extendable=True,
+                efficiency=costs.at["SOEC ELY-charger", "efficiency"],
+                capital_cost=costs.at["SOEC ELY-charger", "capital_cost"],
+                marginal_cost=costs.at["SOEC ELY-charger", "marginal_cost"],
+            )
+ 
+            n.madd(
+                "Link",
+                h2_buses_i + " Fuel Cell_HT",
+                bus0=h2_buses_i,
+                bus1=buses_i,
+                carrier="H2_HT fuel cell",
+                p_nom_extendable=True,
+                efficiency=costs.at["SO FC-discharger", "efficiency"],
+                capital_cost=costs.at["SO FC-discharger", "capital_cost"],
+                marginal_cost=costs.at["SO FC-discharger", "marginal_cost"],
+            )
 
     if ("csp" in config["electricity"]["renewable_carriers"]) and (
         config["renewable"]["csp"]["csp_model"] == "advanced"
