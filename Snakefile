@@ -54,7 +54,7 @@ config["scenario"]["unc"] = [
 ]
 """
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", True) == True:
+if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
     config["scenario"]["unc"] = wildcard_creator(config)#, method)
 
 """
@@ -74,8 +74,13 @@ RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 load_data_paths = get_load_paths_gegis("data", config)
 
-if config["enable"].get("retrieve_cost_data", True):
+""" if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + f"costs_{config['costs']['year']}.csv"
+else:
+    COSTS = "data/costs.csv" """
+if config["enable"].get("retrieve_cost_data", True):
+    #COSTS = "resources/" + RDIR + "costs.csv"
+    COSTS = "resources/" + f"costs_{config['costs']['year']}.csv"
 else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
@@ -914,6 +919,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 network="networks/"
                 + RDIR
                 + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                tech_costs=COSTS,
             output:
                 "results/"
                 + RDIR
@@ -1121,6 +1127,96 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                     **config["scenario"],
                 ),
 
+    if config["monte_carlo"]["options"]["method"] == "SBAW":
+
+        rule monte_carlo:
+            params:
+                monte_carlo=config["monte_carlo"], #dal config prende info su monte carlo
+            input:
+                #"networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc", #si prende network generato
+                #tech_costs=COSTS,
+                #overrides=BASE_DIR + "/data/override_component_attrs",
+                #network="networks/"+ RDIR+ "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+                #tech_costs=COSTS,
+                "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+                tech_costs=COSTS,
+            output:
+                "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc", #genera network considerando {unc}
+            log:
+                "logs/"
+                + RDIR
+                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
+            benchmark:
+                (
+                    "benchmarks/"
+                    + RDIR
+                    + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+                )
+            threads: 1
+            resources:
+                mem_mb=4000,
+            script:
+                "scripts/monte_carlo.py"
+
+        rule solve_monte:
+            input:
+                expand(
+                    "networks/"
+                    + RDIR
+                    + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc", #risolve network {unc}
+                    **config["scenario"], #da config per set utili di constraints CO2 emission
+                ),
+
+        rule solve_network:
+            params:
+                solving=config["solving"],
+                augmented_line_connection=config["augmented_line_connection"],
+            input:
+                overrides=BASE_DIR + "/data/override_component_attrs",
+                network="networks/"
+                + RDIR
+                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                tech_costs=COSTS,
+            output:
+                "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            log:
+                solver=normpath(
+                    "logs/"
+                    + RDIR
+                    + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
+                ),
+                python="logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_python.log",
+                memory="logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_memory.log",
+            benchmark:
+                (
+                    "benchmarks/"
+                    + RDIR
+                    + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+                )
+            threads: 20
+            resources:
+                mem_mb=memory,
+            shadow:
+                "copy-minimal" if os.name == "nt" else "shallow"
+            script:
+                "scripts/solve_network.py"
+
+        rule solve_all_networks_monte:
+            input:
+                expand(
+                    "results/"
+                    + RDIR
+                    + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                    **config["scenario"],
+                ),
+
+        
 
 def input_make_summary(w):
     # It's mildly hacky to include the separate costs input as first entry
