@@ -77,17 +77,17 @@ import seaborn as sns
 from _helpers import configure_logging, create_logger
 from add_electricity import load_costs
 from pyDOE2 import lhs
-from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
+from scipy.stats import beta, gamma, lognorm, norm, qmc, triang, truncnorm
 from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
-logger = create_logger(__name__)
+#logger = create_logger(__name__)
 sns.set(style="whitegrid")
-
+logger = logging.getLogger(__name__)
 
 # CREAZIONE WILDCARD PER MONTE CARLO: SE GLOBAL SENSITIVITY FARA' NUMERO ITERAZIONI UGUALE AI SAMPLE DEFINITI NEL CONFIG
 # SE SINGLE BEST IN WORST FARA' NUMERO ITERAZIONI UGUALE AL NUMERO DI STORES DEFINITI NEL CONFIG
-def wildcard_creator(config):  # , method=None):
+def wildcard_creator(config): #, method=None):
 
     # Creates wildcard for monte-carlo simulations.
 
@@ -103,6 +103,12 @@ def wildcard_creator(config):  # , method=None):
         ]
     if method == "MC":
         return [f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])]
+    
+    if method == "SBAW":
+        return [
+            f"s{i}" for i in range(len(config["monte_carlo"]["distributions"][method]["uncertainties"]))
+            #for i in range(len(config["electricity"]["extendable_carriers"]["Store"]))
+        ]
 
 
 def monte_carlo_sampling_pydoe2(
@@ -169,7 +175,8 @@ def monte_carlo_sampling_chaospy(
     return lh
 
 
-#def monte_carlo_sampling_chaospy2(N_FEATURES, SAMPLES, SEED, rule="latin_hypercube"):
+
+def monte_carlo_sampling_chaospy2(N_FEATURES, SAMPLES, SEED, rule="latin_hypercube"):
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
 
@@ -181,7 +188,7 @@ def monte_carlo_sampling_chaospy(
     N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
     uniform_cube = eval(
         f"chaospy.J({N_FEATURES})"
-    )  # writes Nfeatures times the chaospy.uniform... command)
+    )  # writes N features times the chaospy.uniform... command)
     lh = uniform_cube.sample(SAMPLES, rule=rule, seed=SEED).T
     # discrepancy = qmc.discrepancy(lh)
     # logger.info("Hypercube discrepancy is:", discrepancy)
@@ -286,8 +293,68 @@ def single_best_in_worst_list(worst_list, best_list):
 
     return new_list
 
+import numpy as np
+import pandas as pd
+from scipy.stats import gamma, truncnorm, lognorm, uniform
 
-# QUI RISCALA I VALORI COMPRENDENDOLI DA  A 1 CONSIDERATO CHE ESTRAE DA UNA DISTRIBUZIONE DIFFERENTE DI VALORI DIFFERENTI CON MAX MIN DIVERSI
+
+def get_distribution_object(dist_type, params):
+    if dist_type == 'gamma':
+        shape = params[0]
+        loc = params[1] if len(params) > 1 else 0
+        scale = params[2] if len(params) > 2 else 1
+        return gamma(shape, loc=loc, scale=scale)
+
+    elif dist_type == 'truncnorm':
+        a = params[0]
+        b = params[1]
+        loc = params[2]
+        scale = params[3]
+        return truncnorm(a, b, loc=loc, scale=scale)
+
+    elif dist_type == 'lognorm':
+        s = params[0]
+        loc = params[1] if len(params) > 1 else 0
+        scale = params[2] if len(params) > 2 else 1
+        return lognorm(s, loc=loc, scale=scale)
+
+    elif dist_type == 'uniform':
+        loc = params[0]
+        scale = params[1]
+        return uniform(loc=loc, scale=scale)
+
+    else:
+        raise ValueError(f"Distribuzione non supportata: {dist_type}")
+
+def build_percentile_matrix_from_config(uncertainties_config):
+    tech_names = list(uncertainties_config.keys())
+    count = len(tech_names)
+    matrix = np.zeros((count, count))
+    
+    for i in range(count):
+        for j in range(count):
+            tech_j = tech_names[j]
+            dist_info = uncertainties_config[tech_j]
+            dist_type = dist_info['type']
+            params = dist_info['args']
+            
+            dist = get_distribution_object(dist_type, params)
+            mean = dist.mean()
+            
+            percentile = 0.05 if i == j else 0.95
+            ppf_value = dist.ppf(percentile)
+            
+            # Coefficiente moltiplicativo rispetto alla media
+            k = ppf_value / mean if mean != 0 else np.nan
+            matrix[i, j] = k
+            #carrier_names = [re.search(r'"(.*?)"', t).group(1) for t in tech_names]
+    
+    scenarios_k = pd.DataFrame(matrix, index=(tech_names), columns=tech_names)
+    scenarios_k = scenarios_k.values  
+    return scenarios_k
+
+# QUI RISCALA I VALORI COMPRENDENDOLI DA  A 1 CONSIDERATO CHE ESTRAE DA UNA DISTRIBUZIONE DIFFERENTE 
+# DI VALORI DIFFERENTI CON MAX MIN DIVERSI
 def rescale_distribution(
     latin_hypercube: np.ndarray, uncertainties_values: dict
 ) -> np.ndarray:
@@ -316,10 +383,11 @@ def rescale_distribution(
     - "triangle": Rescaled using the inverse of the triangular distribution function with mean calculated from given parameters.
     - "beta": Rescaled using the inverse of the beta distribution function with specified shape parameters.
     - "gamma": Rescaled using the inverse of the gamma distribution function with specified shape and scale parameters.
+    - "truncated_normal": Rescaled using the inverse of the truncated normal distribution function with specified mean, std, and bounds.
 
     **Note**:
 
-    - The function supports rescaling for uniform, normal, lognormal, triangle, beta, and gamma distributions.
+    - The function supports rescaling for uniform, normal, lognormal, triangle, beta, gamma, and truncated normal distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
     from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
@@ -333,9 +401,7 @@ def rescale_distribution(
             case "uniform":
                 l_bounds, u_bounds = params
                 latin_hypercube[:, idx] = minmax_scale(
-                    latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds)
-                )
-
+                    latin_hypercube[:, idx], feature_range=(l_bounds, u_bounds))
             case "normal":
                 mean, std = params
                 latin_hypercube[:, idx] = norm.ppf(latin_hypercube[:, idx], mean, std)
@@ -353,6 +419,9 @@ def rescale_distribution(
                 latin_hypercube[:, idx] = gamma.ppf(
                     latin_hypercube[:, idx], shape, scale
                 )
+            case "truncated_normal":
+                a, b, mean, std = params
+                latin_hypercube[:, idx] = truncnorm.ppf(latin_hypercube[:, idx], a, b, loc=mean, scale=std)
 
     report_discrepancy(latin_hypercube)
 
@@ -384,7 +453,7 @@ def validate_parameters(
     """
 
     valid_strategy = ["chaospy", "scipy", "pydoe2"]
-    valid_distribution = ["uniform", "normal", "lognormal", "triangle", "beta", "gamma"]
+    valid_distribution = ["uniform", "normal", "lognormal", "triangle", "beta", "gamma", "truncated_normal"]
 
     # verifying samples and distribution_params
     if samples is None:
@@ -431,6 +500,17 @@ def validate_parameters(
                 raise ValueError(
                     f"{dist_type} distribution cannot have values lower than zero in parameters"
                 )
+        # truncated_normal requires 4 params: [a, b, loc, scale], with scale > 0
+        if dist_type == "truncated_normal":
+            if len(param) != 4:
+                raise ValueError(
+                    f"{dist_type} distribution must have 4 parameters: [a, b, loc, scale]"
+                )
+            if param[3] <= 0:
+                raise ValueError(
+                    f"{dist_type}: scale (4th parameter) must be strictly positive"
+                )
+
 
     return None
 
@@ -447,15 +527,11 @@ if __name__ == "__main__":
             opts="Co2L-3H",
             unc="m0",
         )
+    
     configure_logging(snakemake)
-
-    monte_carlo_config = snakemake.params.monte_carlo
-
     config = snakemake.config
     n = pypsa.Network(snakemake.input[0])
-    unc_wildcards = snakemake.wildcards[-1]
-    i = int(unc_wildcards[1:])
-    j = 0
+    monte_carlo_config = snakemake.params.monte_carlo
 
     ### PREPARAZIONE VARIABLES PER MONTE CARLO GLOBAL SENSIIVITY
     method = monte_carlo_config["options"]["method"]
@@ -476,59 +552,19 @@ if __name__ == "__main__":
         # validates the parameters supplied from config file
         validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
 
-    elif method == "single_best_in_worst":
+    if method == "single_best_in_worst":
     # Sottocaso di MC → usa le bounds specifiche
         uncertainties_config = distributions.get("single_best_in_worst", {}).get("uncertainties", {})
         L_BOUNDS = [item[0] for item in uncertainties_config.values()]
         U_BOUNDS = [item[1] for item in uncertainties_config.values()]
-    else:
-        uncertainties_config = {}
-
+         
+    if method == "SBAW":
+        # Sottocaso di MC → usa le bounds specifiche
+        
+        uncertainties_config = distributions.get("SBAW", {}).get("uncertainties", {})
+        MONTE_CARLO_PYPSA_FEATURES = [k for k in uncertainties_config if k]
+   
     
-    """
-    if monte_carlo_config["options"]["method"] == "MC":
-
-        # SCENARIO INPUTS
-        ###
-        MONTE_CARLO_PYPSA_FEATURES = [
-            k for k in monte_carlo_config["uncertainties"].keys() if k
-        ]  # removes key value pairs with empty value e.g. []
-        MONTE_CARLO_OPTIONS = monte_carlo_config["options"]
-        N_FEATURES = len(
-            MONTE_CARLO_PYPSA_FEATURES
-        )  # only counts features when specified in config
-        SAMPLES = MONTE_CARLO_OPTIONS.get(
-            "samples"
-        )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
-        SAMPLING_STRATEGY = MONTE_CARLO_OPTIONS.get("sampling_strategy")
-        UNCERTAINTIES_VALUES = monte_carlo_config["uncertainties"].values()
-
-        SEED = MONTE_CARLO_OPTIONS.get("seed")
-        """
-
-        # PARAMETERS VALIDATION
-        # validates the parameters supplied from config file
-    #validate_parameters(SAMPLING_STRATEGY, SAMPLES, UNCERTAINTIES_VALUES)
-
-    """ if monte_carlo_config["options"]["method"] == "global_sensitivity":
-        PYPSA_FEATURES = monte_carlo_config["pypsa_standard"]
-        OPTIONS = monte_carlo_config["options"]
-        L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
-        U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
-        N_FEATURES = len(PYPSA_FEATURES)
-        SAMPLES = OPTIONS.get(
-            "samples"
-        )  # TODO: What is the optimal sampling? Fabian Neumann answered that in "Broad ranges" paper
-        SAMPLING_STRATEGY = OPTIONS.get("sampling_strategy")
-        SEED = OPTIONS.get("seed") """
-
-    """ if monte_carlo_config["options"]["method"] == "single_best_in_worst":
-        # PREPARAZIONE VARIABLES PER MONTE CARLO SINGLE BEST IN WORST
-        PYPSA_FEATURES = monte_carlo_config["pypsa_standard"]
-        OPTIONS = monte_carlo_config["options"]
-        L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
-        U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
-        N_FEATURES = len(PYPSA_FEATURES) """
 
     if monte_carlo_config["options"]["method"] == "MC":
         if SAMPLING_STRATEGY == "pydoe2":
@@ -558,7 +594,6 @@ if __name__ == "__main__":
                 seed=SEED,
                 rule="latin_hypercube",
             )
-
     if monte_carlo_config["options"]["method"] == "global_sensitivity":
         if SAMPLING_STRATEGY == "pydoe2":
             lh = monte_carlo_sampling_pydoe2(
@@ -588,115 +623,88 @@ if __name__ == "__main__":
             )
         scenarios = qmc.scale(lh, L_BOUNDS, U_BOUNDS)  # HERE RESCALING
 
-    elif monte_carlo_config["options"]["method"] == "single_best_in_worst":
-        carrier_no = len(n.stores.carrier.unique())
-        # L_BOUNDS = [item[0] for item in UNCERTAINTIES_VALUES]
-        # U_BOUNDS = [item[1] for item in UNCERTAINTIES_VALUES]
-        # L_BOUNDS = [item[0] for item in PYPSA_FEATURES.values()]
-        # U_BOUNDS = [item[1] for item in PYPSA_FEATURES.values()]
-        worst_list = U_BOUNDS * carrier_no
-        best_list = L_BOUNDS * carrier_no
-        scenarios = single_best_in_worst_list(
-            worst_list, best_list
-        )  # matrix of upper and lower bounds for each stores listed in config.yaml (fattori moltiplicativi)
+    if monte_carlo_config["options"]["method"] == "single_best_in_worst":
+            carrier_no = len(n.stores.carrier.unique())
+            worst_list = U_BOUNDS * carrier_no
+            best_list = L_BOUNDS * carrier_no
+            scenarios = single_best_in_worst_list(
+                worst_list, best_list
+            )  # matrix of upper and lower bounds for each stores listed in config.yaml (fattori moltiplicativi)
 
-    """
-    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        #snakemake.params.costs,
-        #snakemake.params.electricity,
-        config["costs"],
-        config["electricity"],
-        Nyears,
-    )
-    """
+    if monte_carlo_config["options"]["method"] == "SBAW":
+            matrix = build_percentile_matrix_from_config(uncertainties_config)
+ 
+    unc_wildcards = snakemake.wildcards[-1]
+    i = int(unc_wildcards[1:])
+    j = 0
 
     if monte_carlo_config["options"]["method"] == "MC":
-        # for k, v in enumerate(MONTE_CARLO_PYPSA_FEATURES): #.items():
-        for k in MONTE_CARLO_PYPSA_FEATURES:
-            # this loop sets in one scenario each "i" feature assumption
-            # k is the config input key "loads_t.p_set"
-            # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
-            # i, j interation number to pick values of experimental setup
-            # Example: n.loads_t.p_set = n.loads_t.p_set * lh_scaled[0,0]
-            # si muove per campionamento, quindi riscala tutta la riga per tutti i param affetti da uncertainty
-            exec(f"n.{k} = n.{k} * {lh[i,j]}")
-            logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
-            j = j + 1
-
-    """  
-    if monte_carlo_config["options"]["method"] == "global_sensitivity":
             # for k, v in enumerate(MONTE_CARLO_PYPSA_FEATURES): #.items():
-            for k, v in PYPSA_FEATURES.items():
+        for k in MONTE_CARLO_PYPSA_FEATURES:
                 # this loop sets in one scenario each "i" feature assumption
                 # k is the config input key "loads_t.p_set"
-                # v is the lower and upper bound [0.8,1.3], that was used for scenarios
+                # v is the lower and upper bound [0.8,1.3], that was used for lh_scaled
                 # i, j interation number to pick values of experimental setup
-                # Example: n.loads_t.p_set = n.loads_t.p_set * scenarios[0,0]
-                exec(f"n.{k} = n.{k} * {scenarios[i,j]}")
-                logger.info(f"Scaled n.{k} by factor {scenarios[i,j]} in the {i} scenario")
-                j = j + 1 
-                """
+                # Example: n.loads_t.p_set = n.loads_t.p_set * lh_scaled[0,0]
+                # si muove per campionamento, quindi riscala tutta la riga per tutti i param affetti da uncertainty
+                exec(f"n.{k} = n.{k} * {lh[i,j]}")
+                logger.info(f"Scaled n.{k} by factor {lh[i,j]} in the {i} scenario")
+                j = j + 1
 
     if monte_carlo_config["options"]["method"] == "single_best_in_worst":
-        for k, _ in uncertainties_config.items():
-            type = k.split(".")[0]  # "stores", "generators", ...
-            feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
+            for k, _ in uncertainties_config.items():
+                type = k.split(".")[0]  # "stores", "generators", ...
+                feature = k.split(".")[1]  # "capital_cost", "efficiency", ...
 
-        # TODO: Generalize for other features. Currently this scales the whole storage-chain
-        if type == "stores":
-            # scales the whole storage-chain
-            carrier_list = n.stores.carrier.unique()
-            for c in carrier_list:
-                n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j]
-                n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[
-                    i
-                ][j]
-                logger.info(
-                    f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario"
-                )
-                j += 1
-        """ for k, _ in PYPSA_FEATURES.items():
-            type = k.split(".")[0]  # "stores", "generators", ...
-            feature = k.split(".")[1]  # "capital_cost", "efficiency", ...-
-        if type == "stores":
-            carrier_list = n.stores.carrier.unique()
-            for c in carrier_list:
-                #seleziona righe di stores con carrier c (indicato in input)
-                #features è la caratteristica da modificare che viene selezionata
-                cost_value = costs.loc[costs.index == c, 'capital_cost'].values[0]
-                n.stores.loc[n.stores['carrier'] == c, 'capital_cost']  = cost_value
-                n.stores.loc[n.stores['carrier'] == c, 'capital_cost'] *= scenarios[i][j] # =
-                #(costs.loc[costs.index == c , feature]) *= scenarios[i][j] #float(costs.loc[costs.index == c , feature]) *= scenarios[i][j] #n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j]
-                n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[i][j]
-                logger.info(
-                    f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario"
-                )
-                j += 1 """
+            # TODO: Generalize for other features. Currently this scales the whole storage-chain
+            if type == "stores":
+                # scales the whole storage-chain
+                carrier_list = n.stores.carrier.unique()
+                for c in carrier_list:
+                    n.stores.loc[n.stores.carrier == c, feature] *= scenarios[i][j]
+                    n.links.loc[n.links.carrier.str.contains("H2"), feature] *= scenarios[
+                        i
+                    ][j]
+                    logger.info(
+                        f"Scaled {feature} for carrier={c} of store and links by factor {scenarios[i][j]} in the {i} scenario"
+                    )
+                    j += 1
+   
+    if monte_carlo_config["options"]["method"] == "SBAW":
+            for k in MONTE_CARLO_PYPSA_FEATURES:
+                exec(f"n.{k} = n.{k} * {matrix[i,j]}")
+                logger.info(f"Scaled n.{k} by factor {matrix[i,j]} in the {i} scenario")
+                j = j + 1
 
     ### EXPORT AND METADATA
-    """ 
+        
     if monte_carlo_config["options"]["method"] == "global_sensitivity":
-            scenario_dict = (
-                pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
-            ).to_dict()
-            n.meta.update(scenario_dict)
-            n.export_to_netcdf(snakemake.output[0]) 
-            """
+        scenario_dict = (
+                    pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
+                ).to_dict()
+        n.meta.update(scenario_dict)
+        n.export_to_netcdf(snakemake.output[0]) 
+            
 
     if monte_carlo_config["options"]["method"] == "MC":
         latin_hypercube_dict = (
-            pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
-        ).to_dict()
+                pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
+            ).to_dict()
         n.meta.update(latin_hypercube_dict)  # AGGIORNA I DATI DEL NETWORK
         n.export_to_netcdf(snakemake.output[0])
 
     if monte_carlo_config["options"]["method"] == "single_best_in_worst":
         scenario_dict = (
-            pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
-        ).to_dict()
+                pd.DataFrame(scenarios).rename_axis("iteration").add_suffix("_feature")
+            ).to_dict()
         n.meta.update(scenario_dict)
         n.export_to_netcdf(snakemake.output[0])
 
-        # configure_logging(snakemake)
+    if monte_carlo_config["options"]["method"] == "SBAW":
+        df = pd.DataFrame(matrix)
+        df.columns = [f"{i}_feature" for i in range(df.shape[1])]
+        df.index = range(len(df))  # opzionale se già fatto prima
+        scenario_dict = df.rename_axis("iteration").to_dict()
+
+        n.meta.update(scenario_dict)
+        n.export_to_netcdf(snakemake.output[0])
