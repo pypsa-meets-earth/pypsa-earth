@@ -908,6 +908,7 @@ def add_storage_col_to_costs(costs, storage_meta_dict, storage_techs):
         costs.loc[storage_techs[i], "type"] = "".join(
             costs.loc[storage_techs].type.iloc[i]
         )
+        
     return costs
 
 
