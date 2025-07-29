@@ -1051,7 +1051,7 @@ rule build_salt_cavern_potentials:
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",    
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
     output:
         h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
     params:

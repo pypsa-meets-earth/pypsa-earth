@@ -5,23 +5,21 @@ Build salt cavern potentials for hydrogen storage.
 https://doi.org/10.3133/sir20105090S
 """
 
+import functools
+import math
 import os
 import shutil
 import zipfile
 from pathlib import Path
-import geopandas as gpd
-import pandas as pd
-import requests
-import math
+
 import atlite
+import geopandas as gpd
 import numpy as np
-import functools
-
-import rioxarray
+import pandas as pd
 import rasterio.features
+import requests
+import rioxarray
 import shapely.geometry
-
-
 from _helpers import (
     mock_snakemake,
     to_csv_nafix,
@@ -69,6 +67,7 @@ def download_potash_data():
 
     return gpd.read_file(shp_path)
 
+
 def capsule_volume(diameter_m, height_m):
     """
     Calculate the volume of a cylindrical capsule-shaped cavern.
@@ -103,10 +102,13 @@ def capsule_volume(diameter_m, height_m):
     radius = diameter_m / 2
     h_cyl = height_m - diameter_m
     volume_cylinder = math.pi * radius**2 * h_cyl
-    volume_spheres = (4/3) * math.pi * radius**3
+    volume_spheres = (4 / 3) * math.pi * radius**3
     return volume_cylinder + volume_spheres
 
-def compute_physical_capacity(diameter_m, height_m, rho_min, rho_max, theta_safety, lhv_h2):
+
+def compute_physical_capacity(
+    diameter_m, height_m, rho_min, rho_max, theta_safety, lhv_h2
+):
     """
     Computes the physical hydrogen storage energy capacity of an underground cavern in GWh.
 
@@ -129,21 +131,22 @@ def compute_physical_capacity(diameter_m, height_m, rho_min, rho_max, theta_safe
     -------
     float
         Physical energy capacity of the cavern in GWh.
-    
+
     Notes
     -----
-    This function assumes a capsule-shaped cavern geometry and uses the LHV of hydrogen to 
+    This function assumes a capsule-shaped cavern geometry and uses the LHV of hydrogen to
     compute the usable energy content of the working gas volume.
     """
     v_cavern = capsule_volume(diameter_m, height_m)
     m_working = (rho_max - rho_min) * v_cavern * theta_safety
     return m_working * lhv_h2 / 1e6  # GWh
 
+
 def compute_gwh_per_km2(
     diameter_m,
     height_m,
     energy_density_MWh_per_m3=0.045,
-    surface_area_per_cavern_km2=13.0
+    surface_area_per_cavern_km2=13.0,
 ):
     """
     Compute the hydrogen storage potential in GWh per km² for a capsule-shaped salt cavern.
@@ -168,13 +171,14 @@ def compute_gwh_per_km2(
     caverns_per_km2 = 1 / surface_area_per_cavern_km2
     return (energy_per_cavern_MWh * caverns_per_km2) / 1000  # Convert to GWh
 
+
 def classify_salt_type(gdf):
     """
     Classify the type of salt deposit based on geological and deposit type information.
 
     This function adds a new column 'salt_type' to the input GeoDataFrame, classifying
     each entry into one of the following categories:
-    
+
     - "excluded_brine": if the 'Dep_type' column contains the word "brine"
     - "dome": if the 'Dep_type' or 'Geology' column contains the word "halokinetic"
     - "bedded": if the 'Dep_type' or 'Geology' column contains the word "stratabound" or "evaporite"
@@ -185,9 +189,10 @@ def classify_salt_type(gdf):
             'Dep_type' and 'Geology'.
 
     Returns:
-        GeoDataFrame: The input GeoDataFrame with an additional column 'salt_type' 
+        GeoDataFrame: The input GeoDataFrame with an additional column 'salt_type'
         indicating the classified salt deposit type.
     """
+
     def classify(row):
         dep = str(row["Dep_type"]).lower()
         geo = str(row["Geology"]).lower() if pd.notnull(row["Geology"]) else ""
@@ -196,11 +201,18 @@ def classify_salt_type(gdf):
             return "excluded_brine"
         if "halokinetic" in dep or "halokinetic" in geo:
             return "dome"
-        if "stratabound" in dep or "evaporite" in dep or "stratabound" in geo or "evaporite" in geo:
+        if (
+            "stratabound" in dep
+            or "evaporite" in dep
+            or "stratabound" in geo
+            or "evaporite" in geo
+        ):
             return "bedded"
         return "unknown"
+
     gdf["salt_type"] = gdf.apply(classify, axis=1)
     return gdf["salt_type"]
+
 
 def apply_landuse_exclusions(gdf, area_crs):
     """
@@ -208,7 +220,7 @@ def apply_landuse_exclusions(gdf, area_crs):
     by removing regions intersecting with specified Copernicus land use types.
 
     The function performs the following steps:
-    1. Applies a negative buffer to each salt storage geometry, with buffer size depending 
+    1. Applies a negative buffer to each salt storage geometry, with buffer size depending
        on whether the salt type is 'bedded' or 'dome'.
     2. Loads Copernicus land cover data and extracts raster cells matching specified grid codes.
     3. Converts matching raster regions into vector geometries and applies optional buffers.
@@ -217,7 +229,7 @@ def apply_landuse_exclusions(gdf, area_crs):
     Parameters
     ----------
     gdf : geopandas.GeoDataFrame
-        GeoDataFrame containing underground salt storage areas with a column 'salt_type' 
+        GeoDataFrame containing underground salt storage areas with a column 'salt_type'
         and geometries in any CRS.
     area_crs : str or pyproj.CRS
         Target coordinate reference system (CRS) in which geometries will be processed and returned.
@@ -225,14 +237,14 @@ def apply_landuse_exclusions(gdf, area_crs):
     Returns
     -------
     geopandas.GeoDataFrame
-        A filtered GeoDataFrame in the specified CRS, excluding areas that intersect with 
+        A filtered GeoDataFrame in the specified CRS, excluding areas that intersect with
         Copernicus land use exclusions.
 
     Notes
     -----
-    - Buffers for 'bedded' and 'dome' salt types, as well as Copernicus grid codes and 
+    - Buffers for 'bedded' and 'dome' salt types, as well as Copernicus grid codes and
       optional per-code buffer distances, are loaded from `snakemake.params.underground_storage`.
-    - This function assumes that `paths.copernicus` and `distance_crs` are defined elsewhere 
+    - This function assumes that `paths.copernicus` and `distance_crs` are defined elsewhere
       in the Snakemake workflow context.
     """
     cop = snakemake.params.underground_storage["copernicus"]
@@ -245,7 +257,7 @@ def apply_landuse_exclusions(gdf, area_crs):
         lambda row: row.geometry.buffer(
             -salt_buffer_m_bedded if row.salt_type == "bedded" else -salt_buffer_m_dome
         ),
-        axis=1
+        axis=1,
     )
     gdf = gdf[gdf.is_valid & ~gdf.is_empty]
 
@@ -258,7 +270,7 @@ def apply_landuse_exclusions(gdf, area_crs):
 
         for code in cop["grid_codes"]:
             # Build mask
-            mask = (clc.data == code)
+            mask = clc.data == code
             if not np.any(mask):
                 continue
 
@@ -267,7 +279,9 @@ def apply_landuse_exclusions(gdf, area_crs):
             )
 
             # Extract geometries where value == 1
-            code_shapes = [shapely.geometry.shape(s) for s, val in shapes_gen if val == 1]
+            code_shapes = [
+                shapely.geometry.shape(s) for s, val in shapes_gen if val == 1
+            ]
 
             if not code_shapes:
                 continue
@@ -288,15 +302,16 @@ def apply_landuse_exclusions(gdf, area_crs):
 
     # Merging all exclusion zones
     exclusion_union = gpd.GeoDataFrame(
-        geometry=[gpd.GeoSeries(pd.concat(exclusion_shapes, ignore_index=True)).unary_union],
-        crs=distance_crs
+        geometry=[
+            gpd.GeoSeries(pd.concat(exclusion_shapes, ignore_index=True)).unary_union
+        ],
+        crs=distance_crs,
     )
 
     # Removing intersecting salt regions
     gdf = gdf[~gdf.intersects(exclusion_union.geometry.iloc[0])]
 
     return gdf.to_crs(area_crs)
-
 
 
 def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
@@ -321,9 +336,7 @@ def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
 
     # filter for valid salt types and minimum area
     valid_types = ["bedded", "dome"]
-    filtered = gdf[
-        gdf["salt_type"].isin(valid_types)
-    ].copy()
+    filtered = gdf[gdf["salt_type"].isin(valid_types)].copy()
 
     filtered = apply_landuse_exclusions(gdf, area_crs)
 
@@ -332,12 +345,19 @@ def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
 
     method = snakemake.params.underground_storage["method"]
 
-
-    energy_density_MWh_per_m3 = snakemake.params.underground_storage["energy_density_MWh_per_m3"]
-    cavern_height_bedded_m = snakemake.params.underground_storage["cavern_height_bedded_m"]
-    cavern_diameter_bedded_m = snakemake.params.underground_storage["cavern_diameter_bedded_m"]
+    energy_density_MWh_per_m3 = snakemake.params.underground_storage[
+        "energy_density_MWh_per_m3"
+    ]
+    cavern_height_bedded_m = snakemake.params.underground_storage[
+        "cavern_height_bedded_m"
+    ]
+    cavern_diameter_bedded_m = snakemake.params.underground_storage[
+        "cavern_diameter_bedded_m"
+    ]
     cavern_height_dome_m = snakemake.params.underground_storage["cavern_height_dome_m"]
-    cavern_diameter_dome_m = snakemake.params.underground_storage["cavern_diameter_dome_m"]
+    cavern_diameter_dome_m = snakemake.params.underground_storage[
+        "cavern_diameter_dome_m"
+    ]
 
     rho_min = snakemake.params.underground_storage["rho_min"]
     rho_max = snakemake.params.underground_storage["rho_max"]
@@ -347,33 +367,60 @@ def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
     # Calculate GWh per km² for each cavern type
     if method == "surface":
         gwh_per_km2 = {
-        "bedded": compute_gwh_per_km2(diameter_m=cavern_diameter_bedded_m, height_m=cavern_height_bedded_m, energy_density_MWh_per_m3=energy_density_MWh_per_m3, surface_area_per_cavern_km2=min_area_km2),
-        "dome": compute_gwh_per_km2(diameter_m=cavern_height_dome_m, height_m=cavern_diameter_dome_m, energy_density_MWh_per_m3=energy_density_MWh_per_m3, surface_area_per_cavern_km2=min_area_km2),
+            "bedded": compute_gwh_per_km2(
+                diameter_m=cavern_diameter_bedded_m,
+                height_m=cavern_height_bedded_m,
+                energy_density_MWh_per_m3=energy_density_MWh_per_m3,
+                surface_area_per_cavern_km2=min_area_km2,
+            ),
+            "dome": compute_gwh_per_km2(
+                diameter_m=cavern_height_dome_m,
+                height_m=cavern_diameter_dome_m,
+                energy_density_MWh_per_m3=energy_density_MWh_per_m3,
+                surface_area_per_cavern_km2=min_area_km2,
+            ),
         }
         filtered["gwh_per_km2"] = filtered["salt_type"].map(gwh_per_km2)
         filtered["capacity_gwh"] = filtered["Area_km2"] * filtered["gwh_per_km2"]
 
     if method == "physics":
         capacity_per_cavern = {
-            "bedded": compute_physical_capacity(cavern_diameter_bedded_m, cavern_height_bedded_m, rho_min, rho_max, theta_safety, lhv_h2),
-            "dome": compute_physical_capacity(cavern_diameter_dome_m, cavern_height_dome_m, rho_min, rho_max, theta_safety, lhv_h2),
+            "bedded": compute_physical_capacity(
+                cavern_diameter_bedded_m,
+                cavern_height_bedded_m,
+                rho_min,
+                rho_max,
+                theta_safety,
+                lhv_h2,
+            ),
+            "dome": compute_physical_capacity(
+                cavern_diameter_dome_m,
+                cavern_height_dome_m,
+                rho_min,
+                rho_max,
+                theta_safety,
+                lhv_h2,
+            ),
         }
         separation_distance_m = {
             "bedded": 4 * cavern_diameter_bedded_m,
             "dome": 4 * cavern_diameter_dome_m,
         }
         caverns_per_km2 = {
-            salt_type: 1e6 / (sep ** 2)  # km² to m², then divide by area per cavern
+            salt_type: 1e6 / (sep**2)  # km² to m², then divide by area per cavern
             for salt_type, sep in separation_distance_m.items()
         }
         # Apply per row
         filtered["capacity_gwh"] = filtered.apply(
-            lambda row: row.Area_km2 * caverns_per_km2[row.salt_type] * capacity_per_cavern[row.salt_type],
-            axis=1
+            lambda row: row.Area_km2
+            * caverns_per_km2[row.salt_type]
+            * capacity_per_cavern[row.salt_type],
+            axis=1,
         )
 
     filtered["storage_type"] = "salt_cavern"
     return filtered
+
 
 def concat_gdf(gdf_list):
     """

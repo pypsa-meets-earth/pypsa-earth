@@ -566,14 +566,14 @@ sector:
           126: 2000
           80: 200 # protected areas / water bodies
           100: 200 # natural protected areas
-      # physics calculations not based on https://doi.org/10.1016/j.ijhydene.2019.12.161 
+      # physics calculations not based on https://doi.org/10.1016/j.ijhydene.2019.12.161
       rho_min: 5.0         # Minimum hydrogen density in kg/m³ (at low pressure, e.g. ~30 bar)
       rho_max: 42.0        # Maximum hydrogen density in kg/m³ (at high pressure, e.g. ~200–250 bar)
       theta_safety: 0.8    # Usable working gas fraction (portion of H₂ that can actually be withdrawn)
       lhv_h2: 120          # Lower Heating Value (LHV) of hydrogen in MJ/kg (energy content per kg H₂)
       locations:
-        - onshore
-        - offshore
+      - onshore
+      - offshore
     hydrogen_colors: false
     set_color_shares: false
     blue_share: 0.40

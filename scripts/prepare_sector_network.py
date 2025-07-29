@@ -347,7 +347,9 @@ def add_hydrogen(n, costs):
             )
 
         else:
-            cavern_types = snakemake.params.sector_options["hydrogen"]["underground_storage"]["locations"]
+            cavern_types = snakemake.params.sector_options["hydrogen"][
+                "underground_storage"
+            ]["locations"]
             h2_caverns = read_csv_nafix(snakemake.input.h2_cavern, index_col=0)
             if not h2_caverns.empty and set(cavern_types).intersection(
                 h2_caverns.columns
