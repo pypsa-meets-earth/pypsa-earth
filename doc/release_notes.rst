@@ -119,6 +119,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix a naming issue with European cutout `PR #1530 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1530>`__
 
+* Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
+
 PyPSA-Earth 0.6.0
 =================
 
