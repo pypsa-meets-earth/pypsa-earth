@@ -277,7 +277,7 @@ def add_hydrogen(n, costs):
         lifetime=costs.at["OCGT", "lifetime"],
     )
 
-    if snakemake.params.sector_options["hydrogen"]["underground_storage"]:
+    if snakemake.params.sector_options["hydrogen"]["underground_storage"]["enabled"]:
         if snakemake.params.h2_underground:
             cavern_nodes = pd.DataFrame()
             custom_cavern = read_csv_nafix(
@@ -347,9 +347,7 @@ def add_hydrogen(n, costs):
             )
 
         else:
-            cavern_types = snakemake.params.sector_options["hydrogen"][
-                "hydrogen_underground_storage_locations"
-            ]
+            cavern_types = snakemake.params.sector_options["hydrogen"]["underground_storage"]["locations"]
             h2_caverns = read_csv_nafix(snakemake.input.h2_cavern, index_col=0)
             if not h2_caverns.empty and set(cavern_types).intersection(
                 h2_caverns.columns

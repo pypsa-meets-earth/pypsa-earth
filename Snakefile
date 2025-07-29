@@ -1045,16 +1045,18 @@ rule prepare_transport_data_input:
 
 rule build_salt_cavern_potentials:
     input:
+        copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",    
     output:
         h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
     params:
         crs=config["crs"],
+        underground_storage=config["sector"]["hydrogen"]["underground_storage"],
     threads: 1
     resources:
         mem_mb=2000,
