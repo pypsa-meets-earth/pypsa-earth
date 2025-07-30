@@ -1,15 +1,15 @@
+# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: PyPSA-ASEAN, PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Add transmission projects to the network.
 """
 
 from pathlib import Path
-from shapely import wkt
+
 import pandas as pd
 import pypsa
-
 from _helpers import configure_logging, create_logger
 
 logger = create_logger(__name__)
@@ -29,9 +29,7 @@ def attach_transmission_projects(
         if "new_buses" in path.name:
             logger.info(f"Adding new buses from {path}")
 
-            missing_coords = df[
-                df["x"].isnull() | df["y"].isnull()
-            ]
+            missing_coords = df[df["x"].isnull() | df["y"].isnull()]
             if not missing_coords.empty:
                 logger.warning(
                     f"Dropping {len(missing_coords)} buses from {path} "
@@ -55,22 +53,16 @@ def attach_transmission_projects(
             logger.info(f"Adding new links from {path}")
 
             link_buses = pd.Series(
-                pd.concat([df["bus0"], df["bus1"]])
-                .unique(),
-                name="bus"
+                pd.concat([df["bus0"], df["bus1"]]).unique(), name="bus"
             )
-        
 
             # Find all buses required for these links
             link_buses = pd.Series(
-                pd.concat([df["bus0"], df["bus1"]])
-                .unique(),
-                name="bus"
+                pd.concat([df["bus0"], df["bus1"]]).unique(), name="bus"
             )
 
             # Finally add the links
             n.madd("Link", df.index, **df.to_dict(orient="list"))
-
 
         elif "adjust_lines" in path.name:
             logger.info(f"Adjusting lines from {path}")
@@ -104,7 +96,7 @@ if __name__ == "__main__":
         )
     else:
         logger.info("All buses have valid coordinates.")
-        
+
     if {"lon", "lat"}.issubset(n.buses.columns):
         mask_xy_missing = (
             n.buses["x"].isna()
@@ -121,7 +113,6 @@ if __name__ == "__main__":
         )
     else:
         logger.info("No lon/lat columns in buses table; skipping patch.")
-
 
     # Get current bus index as strings
     bus_index = n.buses.index.astype(str)
@@ -155,12 +146,7 @@ if __name__ == "__main__":
                         if df[col].dtype == object:
                             df[col] = df[col].replace(new_names)
 
-
-            
-
-        logger.info(
-            f"Renamed {len(new_names)} non-integer bus names:\n{new_names}"
-        )
+        logger.info(f"Renamed {len(new_names)} non-integer bus names:\n{new_names}")
     else:
         logger.info("No non-integer bus names detected.")
 

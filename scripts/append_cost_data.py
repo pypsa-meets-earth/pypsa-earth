@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: PyPSA-ASEAN, PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Append cost data by readjusting to the currency of the main cost data (EUR or USD)
 """

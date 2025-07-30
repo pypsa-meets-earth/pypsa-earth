@@ -1009,21 +1009,19 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
-    
+
     for col in ["project_status", "tags", "underground", "under_construction"]:
         if col in n.lines.columns:
             logger.info(f"Adjusting '{col}' column in lines.")
-            
+
             if col in ["project_status", "tags"]:
                 n.lines = n.lines.drop(columns=col)
-            
+
             elif col == "underground":
                 n.lines[col] = n.lines[col].replace(0, np.nan)
-            
+
             elif col == "under_construction":
                 n.lines[col] = n.lines[col].fillna(0).astype(bool)
-
-
 
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetype = snakemake.params.config_lines["ac_types"][base_voltage]
