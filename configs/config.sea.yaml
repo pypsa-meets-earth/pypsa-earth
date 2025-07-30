@@ -33,19 +33,13 @@ subregion: # remove 'false' if subregion are to be specified
     ID_Nusa-Tenggara: [ID.20_1, ID.21_1]
     ID_Papua: [ID.22_1, ID.23_1]
     ID_Sulawesi: [ID.6_1, ID.25_1, ID.26_1, ID.27_1, ID.28_1, ID.29_1]
-    ID_Sumatra: [ID.1_1, ID.3_1, ID.5_1, ID.8_1, ID.16_1, ID.17_1, ID.24_1, ID.30_1, ID.31_1, ID.32_1,]
+    ID_Sumatra: [ID.1_1, ID.3_1, ID.5_1, ID.8_1, ID.16_1, ID.17_1, ID.24_1, ID.30_1, ID.31_1, ID.32_1]
     MY_Peninsular: [MY.1_1, MY.2_1, MY.3_1, MY.4_1, MY.6_1, MY.7_1, MY.8_1, MY.9_1, MY.10_1, MY.11_1, MY.12_1, MY.15_1, MY.16_1]
     MY_Sabah: [MY.5_1, MY.13_1]
     MY_Sarawak: [MY.14_1]
-    PH_Luzon: [
-      PH.1_1, PH.5_1, PH.7_1, PH.8_1, PH.10_1, PH.11_1, PH.12_1, PH.13_1, PH.17_1, PH.18_1, PH.19_1, PH.20_1, PH.23_1, 
-      PH.24_1, PH.33_1, PH.34_1, PH.35_1, PH.37_1, H.38_1, PH.39_1, PH.40_1, PH.45_1, PH.46_1, PH.47_1, PH.50_1, PH.55_1, 
-      PH.56_1, PH.57_1, PH.58_1, PH.59_1, PH.60_1, PH.61_1, PH.62_1, PH.63_1, PH.64_1, PH.65_1, PH.69_1, PH.76_1, PH.78_1]
-    PH_Visayas: [
-      PH.4_1, PH.6_1, PH.14_1, PH.15_1, PH.22_1, PH.25_1, PH.31_1, PH.32_1, PH.36_1, PH.43_1, PH.51_1, PH.52_1, PH.54_1, PH.66_1, PH.68_1, PH.71_1]
-    PH_Mindanao: [
-      PH.2_1, PH.3_1, PH.9_1, PH.16_1, PH.21_1, PH.26_1, PH.27_1, PH.28_1, PH.29_1, PH.30_1, PH.41_1, PH.42_1, PH.44_1, 
-      PH.48_1, PH.49_1, PH.53_1, PH.67_1, PH.70_1, PH.72_1, PH.73_1, PH.74_1, PH.75_1, PH.77_1, PH.79_1, PH.80_1, PH.81_1]
+    PH_Luzon: [PH.1_1, PH.5_1, PH.7_1, PH.8_1, PH.10_1, PH.11_1, PH.12_1, PH.13_1, PH.17_1, PH.18_1, PH.19_1, PH.20_1, PH.23_1, PH.24_1, PH.33_1, PH.34_1, PH.35_1, PH.37_1, H.38_1, PH.39_1, PH.40_1, PH.45_1, PH.46_1, PH.47_1, PH.50_1, PH.55_1, PH.56_1, PH.57_1, PH.58_1, PH.59_1, PH.60_1, PH.61_1, PH.62_1, PH.63_1, PH.64_1, PH.65_1, PH.69_1, PH.76_1, PH.78_1]
+    PH_Visayas: [PH.4_1, PH.6_1, PH.14_1, PH.15_1, PH.22_1, PH.25_1, PH.31_1, PH.32_1, PH.36_1, PH.43_1, PH.51_1, PH.52_1, PH.54_1, PH.66_1, PH.68_1, PH.71_1]
+    PH_Mindanao: [PH.2_1, PH.3_1, PH.9_1, PH.16_1, PH.21_1, PH.26_1, PH.27_1, PH.28_1, PH.29_1, PH.30_1, PH.41_1, PH.42_1, PH.44_1, PH.48_1, PH.49_1, PH.53_1, PH.67_1, PH.70_1, PH.72_1, PH.73_1, PH.74_1, PH.75_1, PH.77_1, PH.79_1, PH.80_1, PH.81_1]
 
 # PyPSA-SEA NOTE: p_threshold_merge_isolated must be equivalent or lower than p_threshold_drop_isolated
 cluster_options:
@@ -56,7 +50,7 @@ cluster_options:
     p_threshold_merge_isolated: 0 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
     s_threshold_fetch_isolated: 0.1 # [-] a share of the national load for merging an isolated network into a backbone network
   #alternative_clustering: true
-  #fillea 
+  #fillea
 snapshots:
   start: "2018-01-01"
   end: "2018-02-01"
@@ -86,12 +80,10 @@ sector:
     network_routes: greenfield # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: false # If true -> ["sector"]["gas"]["network"] is automatically false
   #dynamic_transport: #-> need to research the values here!
-    #enable: True 
+    #enable: True
   shipping_hydrogen_share: #1.0
     NZ_2030: 0.10
     NZ_2050: 0.36
-
-
 
 load_options:
 #  prediction_year: 2050  # Load scenarios available with different prediction year (GDP, population)
@@ -119,16 +111,12 @@ costs:
 build_shape_options:
   simplify_gadm: false
 
-electricity:
-  base_network: osm-plus-prebuilt
-  base_network_version: 0.1
-
 transmission_projects:
   enable: true
   include:
     ID_SuperGrid: true
     AIMS: true
-  skip : []
+  skip: []
   status:
   - in_planning
   - under_construction

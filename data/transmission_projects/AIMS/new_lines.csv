@@ -1,26 +1,26 @@
-﻿,project_status,length,build_year,underground,v_nom,tags,x0,y0,x1,y1,num_parallel,type,
-Plentong - Woodlands,existing,2.1,1985,False,230,Plentong - Woodlands,103.8064678,1.4806426,103.810604,1.462236772,1,Al/St 240/40 2-bundle 220.0,
-Sadao – Chuping,existing,24.7,1980,False,132,Sadao – Chuping,100.4213368,6.6364252,100.2967,6.541527,1,94-AL1/15-ST1A 0.4,
-Mambong – Bengkayang,existing,128.2,2015,False,230,Mambong – Bengkayang,110.3457605,1.3616926,109.7080333,1.0157755,4,NAYY 4x50 SE,
-Tudan – Lumut,in_planning,61,2028,False,275,Tudan – Lumut,114.030177,4.473451,114.44212,4.660332,1,15-AL1/3-ST1A 0.4,
-Lawas – Mengalong,under_construction,30,2024,False,275,Lawas – Mengalong,115.419,4.866,115.536,5.009,1,15-AL1/3-ST1A 0.4,
-Nong Khai – Dongphosy,existing,13.25,2007,False,115,Nong Khai – Dongphosy,102.4649809,17.9301421,102.7162498,17.8882439,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV,
-Nong Khai – Thanaleng,existing,9.53,1968,False,115,Nong Khai – Thanaleng,102.4649809,17.9301421,102.7096702,17.9033866,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV,
-Bueng Kan – Pakxan,existing,9.91,2002,False,115,Bueng Kan – Pakxan,103.8267114,18.2329562,103.7301456,18.406456,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV,
-Nakhon Phanom – Thakhek,existing,9.93,2010,False,115,Nakhon Phanom – Thakhek,104.6089459,17.1990989,104.8064526,17.3946183,1,490-AL1/64-ST1A 220.0,
-Mudhakan 2 – Pakbo,existing,7.22,1996,False,115,Mudhakan 2 – Pakbo,104.3470293,16.6972385,101.8097806,19.109097,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV,
-Sirindhom 2 – Bangyo,existing,52.19,2020,False,115,Sirindhom 2 – Bangyo,100.4792271,13.7921452,105.8330218,15.0950561,2,243-AL1/39-ST1A 110.0,
-Tha Li – Ken Thao,existing,8.07,2020,False,115,Tha Li – Ken Thao,101.427742,17.6241124,101.3486078,17.8492777,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV,
-Mae Chan – Ton Pheung,in_planning,30.52,2030,False,230,Mae Chan – Ton Pheung,99.8531809,20.1471135,100.1018746,20.2915321,1,24-AL1/4-ST1A 0.4,
-Nam Ou – Dien Bien,in_planning,94.98,2030,False,220,Nam Ou – Dien Bien,102.3397493,21.401754,103.2168632,21.6546566,1,24-AL1/4-ST1A 0.4,
-Mae Sot – Myawaddy,in_planning,31,2030,False,230,Mae Sot – Myawaddy,98.5695528,16.714992,98.507114,16.6871674,1,490-AL1/64-ST1A 220.0,
-Chau Doc – Takeo,existing,26.5,2009,False,220,Chau Doc – Takeo,105.096672,10.6878576,104.789883,10.9353921,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV,
-Ban Hat – Stung Treng,existing,442.11,2019,False,230,Ban Hat – Stung Treng,104.636357,17.5745649,106.0889849,13.852468,1,305-AL1/39-ST1A 110.0,
-Ban Hat – Sesan,in_planning,473.86,2030,False,115,Ban Hat – Sesan,104.636357,17.5745649,106.093824,13.5508885,1,NA2XS2Y 1x95 RM/25 12/20 kV,"Note: Ban Hat is the end target, complete interconnection within LA is not known, KH have low quality grid data (Kampong Sralao)"
-Ban Hat – Tbeng Meanchey,in_planning,420.69,2030,False,500,Ban Hat – Tbeng Meanchey,104.636357,17.5745649,104.9809556,13.8057796,1,15-AL1/3-ST1A 0.4,"Note: Ban Hat is the end target, is the start. Complete interconnection within LA is not known, KH have low quality grid data (Preah Vihear)"
-Watthana Nakhon – Aranyaprathet,existing,27.85,2007,False,115,Watthana Nakhon – Aranyaprathet,102.3668514,13.8852557,102.5038168,13.690903,1,Al/St 240/40 2-bundle 220.0,
-Watthana Nakhon 2 – Battambang 2,in_planning,133.75,2030,False,230,Watthana Nakhon 2 – Battambang 2,102.323669,13.7418992,103.2317136,12.9256791,4,NA2XS2Y 1x240 RM/25 12/20 kV,
-Nunukan – Kalabakan,in_planning,27,2029,False,132,Nunukan – Kalabakan,117.679,3.981,117.937,4.272,1,243-AL1/39-ST1A 20.0,"Note: capacity, linetype TBC"
-Batam – Singapore,in_planning,30,2030,True,150,Batam – Singapore,104.021,1.114,103.782,1.297,1,243-AL1/39-ST1A 20.0,"Note: capacity, linetype TBC"
-Aranyaprathet – Poipet,existing,20.4,2007,False,115,Aranyaprathet – Poipet,102.5038168,13.690903,102.5708301,13.6593962,1,Al/St 240/40 2-bundle 220.0,
-Muang Long – Shan State,existing,297.67,2027,False,115,Muang Long – Shan State,100.8209453,20.9633104,98.0098362,21.5122404,1,NAYY 4x50 SE,
+﻿,project_status,length,build_year,underground,v_nom,tags,x0,y0,x1,y1,num_parallel,type
+Plentong - Woodlands,existing,2.1,1985,False,230,Plentong - Woodlands,103.8064678,1.4806426,103.810604,1.462236772,1,Al/St 240/40 2-bundle 220.0
+Sadao – Chuping,existing,24.7,1980,False,132,Sadao – Chuping,100.4213368,6.6364252,100.2967,6.541527,1,94-AL1/15-ST1A 0.4
+Mambong – Bengkayang,existing,128.2,2015,False,230,Mambong – Bengkayang,110.3457605,1.3616926,109.7080333,1.0157755,4,NAYY 4x50 SE
+Tudan – Lumut,in_planning,61,2028,False,275,Tudan – Lumut,114.030177,4.473451,114.44212,4.660332,1,15-AL1/3-ST1A 0.4
+Lawas – Mengalong,under_construction,30,2024,False,275,Lawas – Mengalong,115.419,4.866,115.536,5.009,1,15-AL1/3-ST1A 0.4
+Nong Khai – Dongphosy,existing,13.25,2007,False,115,Nong Khai – Dongphosy,102.4649809,17.9301421,102.7162498,17.8882439,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV
+Nong Khai – Thanaleng,existing,9.53,1968,False,115,Nong Khai – Thanaleng,102.4649809,17.9301421,102.7096702,17.9033866,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV
+Bueng Kan – Pakxan,existing,9.91,2002,False,115,Bueng Kan – Pakxan,103.8267114,18.2329562,103.7301456,18.406456,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV
+Nakhon Phanom – Thakhek,existing,9.93,2010,False,115,Nakhon Phanom – Thakhek,104.6089459,17.1990989,104.8064526,17.3946183,1,490-AL1/64-ST1A 220.0
+Mudhakan 2 – Pakbo,existing,7.22,1996,False,115,Mudhakan 2 – Pakbo,104.3470293,16.6972385,101.8097806,19.109097,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV
+Sirindhom 2 – Bangyo,existing,52.19,2020,False,115,Sirindhom 2 – Bangyo,100.4792271,13.7921452,105.8330218,15.0950561,2,243-AL1/39-ST1A 110.0
+Tha Li – Ken Thao,existing,8.07,2020,False,115,Tha Li – Ken Thao,101.427742,17.6241124,101.3486078,17.8492777,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV
+Mae Chan – Ton Pheung,in_planning,30.52,2030,False,230,Mae Chan – Ton Pheung,99.8531809,20.1471135,100.1018746,20.2915321,1,24-AL1/4-ST1A 0.4
+Nam Ou – Dien Bien,in_planning,94.98,2030,False,220,Nam Ou – Dien Bien,102.3397493,21.401754,103.2168632,21.6546566,1,24-AL1/4-ST1A 0.4
+Mae Sot – Myawaddy,in_planning,31,2030,False,230,Mae Sot – Myawaddy,98.5695528,16.714992,98.507114,16.6871674,1,490-AL1/64-ST1A 220.0
+Chau Doc – Takeo,existing,26.5,2009,False,220,Chau Doc – Takeo,105.096672,10.6878576,104.789883,10.9353921,1,N2XS(FL)2Y 1x240 RM/35 64/110 kV
+Ban Hat – Stung Treng,existing,442.11,2019,False,230,Ban Hat – Stung Treng,104.636357,17.5745649,106.0889849,13.852468,1,305-AL1/39-ST1A 110.0
+Ban Hat – Sesan,in_planning,473.86,2030,False,115,Ban Hat – Sesan,104.636357,17.5745649,106.093824,13.5508885,1,NA2XS2Y 1x95 RM/25 12/20 kV
+Ban Hat – Tbeng Meanchey,in_planning,420.69,2030,False,500,Ban Hat – Tbeng Meanchey,104.636357,17.5745649,104.9809556,13.8057796,1,15-AL1/3-ST1A 0.4
+Watthana Nakhon – Aranyaprathet,existing,27.85,2007,False,115,Watthana Nakhon – Aranyaprathet,102.3668514,13.8852557,102.5038168,13.690903,1,Al/St 240/40 2-bundle 220.0
+Watthana Nakhon 2 – Battambang 2,in_planning,133.75,2030,False,230,Watthana Nakhon 2 – Battambang 2,102.323669,13.7418992,103.2317136,12.9256791,4,NA2XS2Y 1x240 RM/25 12/20 kV
+Nunukan – Kalabakan,in_planning,27,2029,False,132,Nunukan – Kalabakan,117.679,3.981,117.937,4.272,1,243-AL1/39-ST1A 20.0
+Batam – Singapore,in_planning,30,2030,True,150,Batam – Singapore,104.021,1.114,103.782,1.297,1,243-AL1/39-ST1A 20.0
+Aranyaprathet – Poipet,existing,20.4,2007,False,115,Aranyaprathet – Poipet,102.5038168,13.690903,102.5708301,13.6593962,1,Al/St 240/40 2-bundle 220.0
+Muang Long – Shan State,existing,297.67,2027,False,115,Muang Long – Shan State,100.8209453,20.9633104,98.0098362,21.5122404,1,NAYY 4x50 SE

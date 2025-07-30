@@ -70,12 +70,13 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 if config["electricity"]["base_network"] in ["osm-prebuilt", "osm-plus-prebuilt"]:
     base_network_name = config["electricity"]["base_network"]
-    base_network_version = config["electricity"].get("base_network_version",0.1)
+    base_network_version = config["electricity"].get("base_network_version", 0.1)
     OSMDIR = f"data/{base_network_name}/{base_network_version}/"
-    osm_powerplants_fn=OSMDIR + "all_clean_generators.csv"
+    osm_powerplants_fn = OSMDIR + "all_clean_generators.csv"
 else:
     OSMDIR = "resources/" + RDIR + "base_network/"
-    osm_powerplants_fn="resources/" + RDIR + "osm/clean/all_clean_generators.csv"
+    osm_powerplants_fn = "resources/" + RDIR + "osm/clean/all_clean_generators.csv"
+
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -112,7 +113,7 @@ rule solve_all_networks:
         networks=expand(
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             **config["scenario"],
-        )
+        ),
 
 
 rule plot_all_p_nom:
@@ -300,7 +301,7 @@ rule base_network:
         "scripts/base_network.py"
 
 
-''' todo for realism
+""" todo for realism
 rule build_line_rating:
     params:
         snapshots=config["snapshots"],
@@ -324,7 +325,9 @@ rule build_line_rating:
     script:
         "scripts/build_line_rating.py"
 
-'''
+"""
+
+
 rule build_transmission_projects:
     params:
         transmission_projects=config["transmission_projects"],
@@ -346,11 +349,10 @@ rule build_transmission_projects:
         new_links="resources/" + RDIR + "transmission_projects/new_links.csv",
         adjust_lines="resources/" + RDIR + "transmission_projects/adjust_lines.csv",
         adjust_links="resources/" + RDIR + "transmission_projects/adjust_links.csv",
-
     log:
-        "logs/" + RDIR +"build_transmission_projects.log",
+        "logs/" + RDIR + "build_transmission_projects.log",
     benchmark:
-        "benchmarks/" + RDIR + "build_transmission_projects",
+        "benchmarks/" + RDIR + "build_transmission_projects"
     resources:
         mem_mb=4000,
     threads: 1
@@ -373,15 +375,16 @@ rule add_transmission_projects:
                 "resources/" + RDIR + "transmission_projects/new_links.csv",
                 "resources/" + RDIR + "transmission_projects/adjust_lines.csv",
                 "resources/" + RDIR + "transmission_projects/adjust_links.csv",
-
-            ] if config["transmission_projects"].get("enable", False) else []
+            ]
+            if config["transmission_projects"].get("enable", False)
+            else []
         ),
     output:
         network="networks/" + RDIR + "base_extended.nc",
     log:
-        "logs/" + RDIR +"add_transmission_projects.log",
+        "logs/" + RDIR + "add_transmission_projects.log",
     benchmark:
-        "benchmarks/" + RDIR + "add_transmission_projects",
+        "benchmarks/" + RDIR + "add_transmission_projects"
     threads: 1
     resources:
         mem_mb=4000,
@@ -389,8 +392,6 @@ rule add_transmission_projects:
         "envs/environment.yaml"
     script:
         "scripts/add_transmission_projects.py"
-
-
 
 
 rule build_bus_regions:
@@ -499,6 +500,7 @@ if not config["enable"].get("build_natura_raster", False):
 
 country_data = config["costs"].get("country_specific_data", "")
 countries = config.get("countries", [])
+append_cost_data = config["costs"].get("append_cost_data", "")
 
 if country_data and countries == [country_data]:
     cost_directory = f"{country_data}/"
@@ -510,6 +512,10 @@ elif country_data:
 else:
     cost_directory = ""
 
+if append_cost_data:
+    cost_prefix = "pre_"
+else:
+    cost_prefix = ""
 
 if config["enable"].get("retrieve_cost_data", True):
 
@@ -523,13 +529,31 @@ if config["enable"].get("retrieve_cost_data", True):
                 keep_local=True,
             ),
         output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            "resources/" + RDIR + cost_prefix + "costs_{year}.csv",
         log:
             "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:
             mem_mb=5000,
         run:
             move(input[0], output[0])
+
+    rule append_cost_data:
+        params:
+            discount_rate=config["costs"]["discountrate"],
+            regional_factor=config["costs"]["regional_factor"],
+        input:
+            costs="resources/" + RDIR + "pre_costs_{year}.csv",
+            app_costs="data/AEO8-input/AEO8_Table_D15_Cost_Summary.csv",
+            declining_factor="data/AEO8-input/AEO8_Table_D17_Declining_Factor.csv",
+            regional_factor="data/AEO8-input/AEO8_Table_D18_Regional_Factor.csv",
+        output:
+            "resources/" + RDIR + "costs_{year}.csv",
+        log:
+            "logs/" + RDIR + "append_cost_data_{year}.log",
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/append_cost_data.py"
 
 
 rule build_demand_profiles:
