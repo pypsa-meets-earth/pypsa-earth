@@ -47,6 +47,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix fallback logic for missing currency data by correctly applying the default exchange rate and build cache for storing commonly used exchange rates. `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
+
 * Update code to reflect the Wikipedia source page for `prepare_transport_data_input`. `PR #1486 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1486>`__
 
 * Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0. `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
@@ -114,6 +116,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Extending powerplant filter option to custom powerplants `PR #1465 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1465>`__
 
 * Fix an issue with the GEBCO file by limiting libgdal-core<3.10 `PR #1519 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1519>`__
+
+* Fix a naming issue with European cutout `PR #1530 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1530>`__
+
+* Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
 
 PyPSA-Earth 0.6.0
 =================
