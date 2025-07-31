@@ -556,8 +556,8 @@ sector:
       theta_safety: 0.8    # Usable working gas fraction (portion of H₂ that can actually be withdrawn)
       lhv_h2: 120          # Lower Heating Value (LHV) of hydrogen in MJ/kg (energy content per kg H₂)
       locations:
-        - onshore
-        - offshore
+      - onshore
+      - offshore
     hydrogen_colors: false
     set_color_shares: false
     blue_share: 0.40
