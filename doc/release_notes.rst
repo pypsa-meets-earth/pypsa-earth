@@ -13,7 +13,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Remove duplicates in environment file. `PR #1473 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
+**Minor Changes and bug-fixing**
+
+PyPSA-Earth 0.7.0
+=================
+
+**New Features and Major Changes**
+
 
 * Revised bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
 
@@ -48,6 +54,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
 
 **Minor Changes and bug-fixing**
+
+* Remove duplicates in environment file. `PR #1473 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
 
 * Fix fallback logic for missing currency data by correctly applying the default exchange rate and build cache for storing commonly used exchange rates. `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
 
