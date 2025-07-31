@@ -61,7 +61,7 @@ print(
 # -- Project information -----------------------------------------------------
 
 project = "PyPSA-Earth"
-author = "Max Parzen"
+author = "PyPSA-Earth developers"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
