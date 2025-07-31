@@ -213,7 +213,6 @@ cc = coco.CountryConverter()
 logger = create_logger(__name__)
 
 
-COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
@@ -502,6 +501,7 @@ if __name__ == "__main__":
     # crs
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
+    copernicus_crs = snakemake.params.crs["copernicus_crs"]
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -657,14 +657,14 @@ if __name__ == "__main__":
                 paths.copernicus,
                 codes=copernicus["grid_codes"],
                 invert=True,
-                crs=COPERNICUS_CRS,
+                crs=copernicus_crs,
             )
             if "distance" in copernicus and config["copernicus"]["distance"] > 0:
                 excluder.add_raster(
                     paths.copernicus,
                     codes=copernicus["distance_grid_codes"],
                     buffer=copernicus["distance"],
-                    crs=COPERNICUS_CRS,
+                    crs=copernicus_crs,
                 )
 
         if "max_depth" in config:
