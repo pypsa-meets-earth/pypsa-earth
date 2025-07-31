@@ -12,7 +12,6 @@ import shutil
 import zipfile
 from pathlib import Path
 
-import atlite
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -214,7 +213,7 @@ def classify_salt_type(gdf):
     return gdf["salt_type"]
 
 
-def apply_landuse_exclusions(gdf, area_crs):
+def apply_landuse_exclusions(gdf, regions):
     """
     Applies land use exclusion zones to a GeoDataFrame of underground salt storage areas
     by removing regions intersecting with specified Copernicus land use types.
@@ -251,8 +250,9 @@ def apply_landuse_exclusions(gdf, area_crs):
     salt_buffer_m_bedded = snakemake.params.underground_storage["salt_buffer_m_bedded"]
     salt_buffer_m_dome = snakemake.params.underground_storage["salt_buffer_m_dome"]
 
+    gdf = gdf.to_crs(distance_crs).copy()
+
     # Apply buffer by salt type before masking
-    gdf = gdf.to_crs(area_crs).copy()
     gdf["geometry"] = gdf.apply(
         lambda row: row.geometry.buffer(
             -salt_buffer_m_bedded if row.salt_type == "bedded" else -salt_buffer_m_dome
@@ -265,7 +265,9 @@ def apply_landuse_exclusions(gdf, area_crs):
 
     # Loading Copernicus raster
     with rioxarray.open_rasterio(paths.copernicus, masked=True) as rds:
-        clc = rds.squeeze().rio.reproject(distance_crs)
+        rds_clip = rds.squeeze().rio.clip_box(*regions.total_bounds)
+        rds_reproj = rds_clip.rio.reproject(distance_crs)
+        clc = rds_reproj.load()
         transform = clc.rio.transform()
 
         for code in cop["grid_codes"]:
@@ -289,7 +291,7 @@ def apply_landuse_exclusions(gdf, area_crs):
             gdf_mask = gpd.GeoDataFrame(geometry=code_shapes, crs=distance_crs)
 
             # Apply buffer if specified
-            buffer_dist = cop.get("distance_buffer_by_code", {}).get(str(code), 0)
+            buffer_dist = (cop.get("distance_buffer_by_code") or {}).get(str(code), 0)
             if buffer_dist > 0:
                 gdf_mask["geometry"] = gdf_mask.buffer(buffer_dist)
                 gdf_mask = gdf_mask[gdf_mask.is_valid & ~gdf_mask.is_empty]
@@ -298,23 +300,21 @@ def apply_landuse_exclusions(gdf, area_crs):
 
     if not exclusion_shapes:
         # No Copernicus exclusion zones found. Returning original GeoDataFrame.
-        return gdf.to_crs(area_crs)
+        return gdf.to_crs(geo_crs)
 
     # Merging all exclusion zones
-    exclusion_union = gpd.GeoDataFrame(
-        geometry=[
-            gpd.GeoSeries(pd.concat(exclusion_shapes, ignore_index=True)).unary_union
-        ],
-        crs=distance_crs,
-    )
+    all_exclusions = pd.concat(exclusion_shapes, ignore_index=True)
+    union_geom = all_exclusions.geometry.unary_union
+    exclusion_union = gpd.GeoDataFrame(geometry=[union_geom], crs=distance_crs)
 
-    # Removing intersecting salt regions
-    gdf = gdf[~gdf.intersects(exclusion_union.geometry.iloc[0])]
+    # Removing excluded regions
+    gdf["geometry"] = gdf.geometry.difference(exclusion_union.geometry.iloc[0])
+    gdf = gdf[gdf.is_valid & ~gdf.is_empty]
 
-    return gdf.to_crs(area_crs)
+    return gdf.to_crs(geo_crs)
 
 
-def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
+def estimate_h2_potential_from_potash(potash_gdf, regions, min_area_km2=13.0):
     """
     Estimate technical underground hydrogen storage potential from potash tracts,
     based on geological characteristics and cavern design assumptions.
@@ -338,7 +338,7 @@ def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
     valid_types = ["bedded", "dome"]
     filtered = gdf[gdf["salt_type"].isin(valid_types)].copy()
 
-    filtered = apply_landuse_exclusions(gdf, area_crs)
+    filtered = apply_landuse_exclusions(filtered, regions)
 
     # Filter after exclusions to remove tiny remnants
     filtered = filtered[filtered["Area_km2"] >= min_area_km2]
@@ -374,8 +374,8 @@ def estimate_h2_potential_from_potash(potash_gdf, min_area_km2=13.0):
                 surface_area_per_cavern_km2=min_area_km2,
             ),
             "dome": compute_gwh_per_km2(
-                diameter_m=cavern_height_dome_m,
-                height_m=cavern_diameter_dome_m,
+                diameter_m=cavern_diameter_dome_m,
+                height_m=cavern_height_dome_m,
                 energy_density_MWh_per_m3=energy_density_MWh_per_m3,
                 surface_area_per_cavern_km2=min_area_km2,
             ),
@@ -473,7 +473,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_salt_cavern_potentials", clusters="20", simpl=""
+            "build_salt_cavern_potentials", clusters="10", simpl=""
         )
 
     area_crs = snakemake.params.crs["area_crs"]
@@ -487,15 +487,16 @@ if __name__ == "__main__":
 
     min_area_km2 = snakemake.params.underground_storage["min_area_km2"]
 
-    cavern_potential = estimate_h2_potential_from_potash(
-        gdf,
-        min_area_km2,
-    )
-
     fn_onshore = snakemake.input.regions_onshore
     fn_offshore = snakemake.input.regions_offshore
 
     regions = load_bus_regions(fn_onshore, fn_offshore)
+
+    cavern_potential = estimate_h2_potential_from_potash(
+        gdf,
+        regions,
+        min_area_km2,
+    )
 
     # Compute potential
     cavern_regions = salt_cavern_potential_by_region(cavern_potential, regions)

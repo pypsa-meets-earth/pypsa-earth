@@ -372,50 +372,50 @@ def add_hydrogen(n, costs):
 
                 # n.add("Carrier", "H2 UHS")
 
-            n.madd(
-                "Bus",
-                nodes + " H2 UHS",
-                location=nodes,
-                carrier="H2 UHS",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
-            )
+                n.madd(
+                    "Bus",
+                    nodes + " H2 UHS",
+                    location=nodes,
+                    carrier="H2 UHS",
+                    x=n.buses.loc[list(nodes)].x.values,
+                    y=n.buses.loc[list(nodes)].y.values,
+                )
 
-            n.madd(
-                "Store",
-                h2_caverns.index + " H2 UHS",
-                bus=h2_caverns.index + " H2 UHS",
-                e_nom_extendable=True,
-                e_nom_max=h2_caverns.values,
-                e_cyclic=True,
-                carrier="H2 UHS",
-                capital_cost=h2_capital_cost,
-                lifetime=costs.at["hydrogen storage underground", "lifetime"],
-            )
+                n.madd(
+                    "Store",
+                    h2_caverns.index + " H2 UHS",
+                    bus=h2_caverns.index + " H2 UHS",
+                    e_nom_extendable=True,
+                    e_nom_max=h2_caverns.values,
+                    e_cyclic=True,
+                    carrier="H2 UHS",
+                    capital_cost=h2_capital_cost,
+                    lifetime=costs.at["hydrogen storage underground", "lifetime"],
+                )
 
-            n.madd(
-                "Link",
-                nodes + " H2 UHS charger",
-                bus0=nodes,
-                bus1=nodes + " H2 UHS",
-                carrier="H2 UHS charger",
-                # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-                capital_cost=0,
-                p_nom_extendable=True,
-                # lifetime=costs.at["battery inverter", "lifetime"],
-            )
+                n.madd(
+                    "Link",
+                    nodes + " H2 UHS charger",
+                    bus0=nodes,
+                    bus1=nodes + " H2 UHS",
+                    carrier="H2 UHS charger",
+                    # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
+                    capital_cost=0,
+                    p_nom_extendable=True,
+                    # lifetime=costs.at["battery inverter", "lifetime"],
+                )
 
-            n.madd(
-                "Link",
-                nodes + " H2 UHS discharger",
-                bus0=nodes,
-                bus1=nodes + " H2 UHS",
-                carrier="H2 UHS discharger",
-                efficiency=1,
-                capital_cost=0,
-                p_nom_extendable=True,
-                # lifetime=costs.at["battery inverter", "lifetime"],
-            )
+                n.madd(
+                    "Link",
+                    nodes + " H2 UHS discharger",
+                    bus0=nodes,
+                    bus1=nodes + " H2 UHS",
+                    carrier="H2 UHS discharger",
+                    efficiency=1,
+                    capital_cost=0,
+                    p_nom_extendable=True,
+                    # lifetime=costs.at["battery inverter", "lifetime"],
+                )
 
     # hydrogen stored overground (where not already underground)
     h2_capital_cost = costs.at[
