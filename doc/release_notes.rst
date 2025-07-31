@@ -45,6 +45,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Introduce US-specific cost configurations and update to `technology_data_version` v0.13.2 `PR #1448 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448>`__
 
+* Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
+
 **Minor Changes and bug-fixing**
 
 * Fix fallback logic for missing currency data by correctly applying the default exchange rate and build cache for storing commonly used exchange rates. `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
