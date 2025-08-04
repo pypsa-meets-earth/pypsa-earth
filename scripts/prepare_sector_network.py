@@ -187,6 +187,54 @@ def H2_liquid_fossil_conversions(n, costs):
     )
 
 
+def add_water_network(n, costs):
+    """
+    Add water network for hydrogen production via electrolysis.
+    """
+    logger.info("Adding water")
+
+    n.add("Carrier", "H2O")
+    n.madd(
+        "Bus",
+        spatial.nodes + " H2O",
+        location=spatial.nodes,
+        carrier="H2O",
+        x=n.buses.loc[list(spatial.nodes)].x.values,
+        y=n.buses.loc[list(spatial.nodes)].y.values,
+    )
+
+    # DEVELOPMENT STAGE 1
+
+    n.madd(
+        "Generator",
+        spatial.nodes
+        + " H20",  # Output unit of generator is in liters, this is defined by the electrolysis.
+        bus=spatial.nodes + " H2O",
+        carrier="H2O",
+        p_nom_extendable=True,
+        # capital_cost
+        # marginal_cost
+        # life
+        efficiency=1,
+        lifetime=costs.at["seawater desalination", "lifetime"],
+    )
+
+    # DEVELOPMENT STAGE 2
+
+    # n.madd(
+    #     "Link",
+    #     spatial.nodes + " desalination",
+    #     bus0=spatial.nodes,
+    #     bus1=spatial.nodes + " H20",
+    #     carrier="desalination",
+    #     p_nom_extendable=True,
+    #     efficiency=costs.at["seawater desalination", "electricity-input"],
+    #     capital_cost=costs.at["seawater desalination", "fixed"],
+    #     marginal_cost=costs.at["seawater desalination", "FOM"],
+    #     lifetime=costs.at["seawater desalination", "lifetime"],
+    # )
+
+
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
     logger.info("Adding hydrogen")
@@ -201,6 +249,7 @@ def add_hydrogen(n, costs):
         x=n.buses.loc[list(spatial.nodes)].x.values,
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
+
 
     # Read hydrogen production technologies
     h2_techs = options["hydrogen"].get("production_technologies", [])
@@ -388,6 +437,25 @@ def add_hydrogen(n, costs):
             "efficiency3": costs.at["oil", "CO2 intensity"],
         },
     }
+    
+    if snakemake.config["sector"]["hydrogen"]["water_network"]:
+      add_water_network(n, costs)
+      for tech in [
+          "H2 Electrolysis",
+          "Alkaline electrolyzer large",
+          "Alkaline electrolyzer medium",
+          "Alkaline electrolyzer small",
+          "PEM electrolyzer",
+          "SOEC",
+      ]:
+          if tech in tech_params:
+              tech_params[tech]["bus2"] = spatial.nodes + " H2O"
+              tech_params[tech]["efficiency2"] = (
+                  -costs.at["electrolysis", "efficiency"]
+                  * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
+                  / 33
+                  * 1000 # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh TODO: integrate ratio_water_elec in technology data
+              )
 
     if options["hydrogen"].get("hydrogen_colors", False):
         color_techs = {
@@ -448,6 +516,7 @@ def add_hydrogen(n, costs):
             else spatial.nodes + " H2"
         )
 
+
         n.madd(
             "Link",
             spatial.nodes + " " + h2_tech,
@@ -465,6 +534,7 @@ def add_hydrogen(n, costs):
             capital_cost=costs.at[params["cost_name"], "fixed"],
             lifetime=costs.at[params["cost_name"], "lifetime"],
         )
+
 
     n.madd(
         "Link",
@@ -707,24 +777,23 @@ def add_hydrogen(n, costs):
         h2_links = pd.read_csv(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
-        # buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
-
-        # Appending string for carrier specification '_AC'
-        # h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        # h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-        # Create index column
-        h2_links["buses_idx"] = (
-            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
-        )
-
-        # Aggregate pipelines applying mean on length and sum on capacities
-        h2_links = h2_links.groupby("buses_idx").agg(
-            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
-        )
-
+        buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
         if len(h2_links) > 0:
-            if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
+            # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
+            h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+
+            # Create index column
+            h2_links["buses_idx"] = (
+                "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+            )
+
+            # Aggregate pipelines applying mean on length and sum on capacities
+            h2_links = h2_links.groupby("buses_idx").agg(
+                {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+            )
+            
+            if snakemake.config["sector"]["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
             if (
                 snakemake.params.sector_options["hydrogen"]["network_routes"]
@@ -3008,9 +3077,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-3H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,

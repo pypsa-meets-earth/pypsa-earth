@@ -1059,6 +1059,78 @@ rule prepare_transport_data_input:
         "scripts/prepare_transport_data_input.py"
 
 
+if config["sector"]["hydrogen"]["water_network"]:
+    if not config["custom_data"]["h2_water_network"]:
+
+        rule prepare_water_network:
+            input:
+                regions_onshore="resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+                country_shapes="resources/"
+                + RDIR
+                + "shapes/country_shapes.geojson",
+                natura="data/natura/natura.tiff",
+            output:
+                shorelines="resources/"
+                + SECDIR
+                + "water_networks/shorelines_elec_s{simpl}_{clusters}.gpkg",
+                shorelines_natura="resources/"
+                + SECDIR
+                + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+                buffered_natura="resources/"
+                + SECDIR
+                + "water_networks/buffered_natura_elec_s{simpl}_{clusters}.gpkg",
+                regions_onshore_aqueduct="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct_desalination="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_desalination_elec_s{simpl}_{clusters}.geojson",
+                clustered_water_network="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+            script:
+                "scripts/prepare_water_network.py"
+    
+
+        rule plot_water_network:
+            input:
+                regions_onshore="resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct_desalination="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_desalination_elec_s{simpl}_{clusters}.geojson",
+                clustered_water_network="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+                shorelines_natura="resources/"
+                + SECDIR
+                + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+            output:
+                water_network="results/"
+                + RDIR
+                + "plots/water_network_elec_s{simpl}_{clusters}.{ext}",
+            script:
+                "scripts/plot_water_network.py"
+
+
+    else:
+        rule copy_water_network:
+            input:
+                source="data_custom/water_network_elec_s{simpl}_{clusters}.csv"
+            output:
+                destination="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.csv",
+            shell:
+                "cp {input.source} {output.destination}"
+
+
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
@@ -1160,6 +1232,9 @@ rule prepare_sector_network:
             + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv"
         ),
+        clustered_water_network="resources/"
+        + SECDIR
+        + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
