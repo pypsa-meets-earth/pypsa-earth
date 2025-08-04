@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || (github.repository_owner == 'pypsa-meets-earth' && github.ref == 'refs/heads/main')}}
     steps:
     - name: Contribute List
-      uses: akhilmhdh/contributors-readme-action@v2.3.10
+      uses: akhilmhdh/contributors-readme-action@v2.3.11
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
