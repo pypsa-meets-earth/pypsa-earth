@@ -90,6 +90,7 @@ cluster_options:
     feature: solar+onwind-time
     exclude_carriers: []
   alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
+  alternative_clustering_shapefile: resources/{RDIR}shapes/gadm_shapes.geojson  # Path of the GADM shapes file to be used for alternative clustering; {RDIR} is replaced by the scenario name [entry run->name of this config file]
   distribute_cluster: ["load"] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   out_logging: true # When "True", logging is printed to console
   aggregation_strategies:
