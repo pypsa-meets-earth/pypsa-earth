@@ -115,6 +115,8 @@ if __name__ == "__main__":
                     + country
                     + " using default data instead."
                 )
+            else:
+                cagr.loc[country] = cagr.loc[country].fillna(cagr.loc["DEFAULT"])
 
         cagr = cagr[cagr.index.isin(countries)]
 

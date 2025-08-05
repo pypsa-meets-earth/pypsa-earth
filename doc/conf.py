@@ -61,11 +61,11 @@ print(
 # -- Project information -----------------------------------------------------
 
 project = "PyPSA-Earth"
-author = "Max Parzen"
+author = "PyPSA-Earth developers"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
-release = "0.6.0"
+release = "0.7.0"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -186,6 +186,6 @@ man_pages = [(master_doc, "pypsa_earth", "pypsa_earth Documentation", [author], 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
-copybutton_prompt_text = r"\.{3}/[^$]*\$ "  # Matches the pattern .../something $
+copybutton_prompt_text = r"\$"  # Matches the pattern .../something $
 copybutton_prompt_is_regexp = True
 copybutton_only_copy_prompt_lines = True

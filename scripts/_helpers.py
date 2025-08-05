@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import calendar
 import io
 import logging
 import os
@@ -13,6 +14,7 @@ import subprocess
 import sys
 import time
 import zipfile
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import country_converter as coco
@@ -21,11 +23,16 @@ import numpy as np
 import pandas as pd
 import requests
 import yaml
+from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
 from pypsa.components import component_attrs, components
-from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
+
+currency_converter = CurrencyConverter(
+    fallback_on_missing_rate=True,
+    fallback_on_wrong_date=True,
+)
 
 # list of recognised nan values (NA and na excluded as may be confused with Namibia 2-letter country code)
 NA_VALUES = ["NULL", "", "N/A", "NAN", "NaN", "nan", "Nan", "n/a", "null"]
@@ -228,7 +235,11 @@ def load_network(import_name=None, custom_components=None):
     pypsa.Network
     """
     import pypsa
-    from pypsa.descriptors import Dict
+
+    try:
+        from pypsa.descriptors import Dict
+    except:
+        from pypsa.definitions.structures import Dict  # from pypsa version v0.31
 
     override_components = None
     override_component_attrs = None
@@ -551,7 +562,11 @@ def mock_snakemake(
     import os
 
     import snakemake as sm
-    from pypsa.descriptors import Dict
+
+    try:
+        from pypsa.descriptors import Dict
+    except:
+        from pypsa.definitions.structures import Dict  # from pypsa version v0.31
     from snakemake.script import Snakemake
 
     script_dir = Path(__file__).parent.resolve()
@@ -950,30 +965,269 @@ def annuity(n, r):
         return 1 / n
 
 
-def prepare_costs(
-    cost_file: str, USD_to_EUR: float, fill_values: dict, Nyears: float | int = 1
+# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
+_currency_conversion_cache = {}
+
+
+# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
+def get_yearly_currency_exchange_rate(
+    initial_currency: str,
+    output_currency: str,
+    year: int,
+    default_exchange_rate: float = None,
+    _currency_conversion_cache: dict = None,
+    future_exchange_rate_strategy: str = "latest",
+    custom_future_exchange_rate: float = None,
 ):
-    # set all asset costs and other parameters
+    """
+    Returns the average EUR-to-output currency exchange rate and the currency year.
+
+    Uses cached values if available; otherwise computes the average from daily rates.
+    Falls back to a default exchange rate if provided and no data is available.
+    """
+
+    if _currency_conversion_cache is None:
+        _currency_conversion_cache = {}  # Use empty cache if not provided
+
+    key = (initial_currency, output_currency, year)
+    if key in _currency_conversion_cache:
+        return _currency_conversion_cache[key]
+
+    successful_years = []
+    default_years = []
+
+    # Helper inner function to handle one year at a time
+    def _average_for_year(y):
+        if initial_currency == "EUR":
+            # EUR has no direct rates, use USD dates as reference
+            available_dates = sorted(currency_converter._rates["USD"].keys())
+        else:
+            if initial_currency not in currency_converter._rates:
+                if default_exchange_rate is not None:
+                    default_years.append(y)
+                    return default_exchange_rate
+                raise RuntimeError(
+                    f"No data for currency {initial_currency} and no default rate provided."
+                )
+            available_dates = sorted(currency_converter._rates[initial_currency].keys())
+
+        max_date = available_dates[-1]
+        # If year is beyond available data and strategy is "custom", return custom value
+        if y > max_date.year:
+            if future_exchange_rate_strategy == "custom":
+                if custom_future_exchange_rate is not None:
+                    logger.info(
+                        f"Using custom future exchange rate ({custom_future_exchange_rate}) for {initial_currency}->{output_currency} in {y}."
+                    )
+                    return custom_future_exchange_rate
+                else:
+                    raise RuntimeError(
+                        "Custom future exchange rate strategy selected, but no value was provided."
+                    )
+            # fallback to latest available year
+            effective_year = max_date.year
+            logger.info(
+                f"Using latest available year ({effective_year}) for future exchange rate of {initial_currency}->{output_currency} in {y}."
+            )
+        else:
+            effective_year = y
+        dates_to_use = [d for d in available_dates if d.year == effective_year]
+
+        rates = []
+        for date in dates_to_use:
+            try:
+                rate = currency_converter.convert(
+                    1, initial_currency, output_currency, date
+                )
+                rates.append(rate)
+            except Exception:
+                continue
+
+        if rates:
+            successful_years.append(effective_year)
+            return sum(rates) / len(rates)
+
+        if default_exchange_rate is not None:
+            default_years.append(effective_year)
+            return default_exchange_rate
+
+        raise RuntimeError(
+            f"No exchange rate data found for {initial_currency}->{output_currency} in {effective_year}, and no default rate provided."
+        )
+
+    avg_rate = _average_for_year(year)
+
+    # Log only once per call, avoiding multiple repeated messages
+    if successful_years:
+        logger.info(f"Currency conversion succeeded for years: {successful_years}")
+    if default_years:
+        logger.warning(f"Using default exchange rate for years: {default_years}")
+
+    # Save computed rate to cache
+    _currency_conversion_cache[key] = avg_rate
+    return avg_rate
+
+
+def build_currency_conversion_cache(
+    df,
+    output_currency,
+    default_exchange_rate=None,
+    future_exchange_rate_strategy: str = "latest",
+    custom_future_exchange_rate: float = None,
+):
+    """
+    Builds a cache of exchange rates for all unique (output_currency, year) pairs in the dataset.
+
+    Rates are computed once and stored for reuse to improve performance.
+    """
+    currency_list = currency_converter.currencies
+
+    unique_keys = {
+        (x["unit"][:3], output_currency, int(x["currency_year"]))
+        for _, x in df.iterrows()
+        if x["unit"][:3] in currency_list
+    }
+
+    _currency_conversion_cache = {}
+    for key in unique_keys:
+        initial_currency, _, year = key
+        try:
+            rate = get_yearly_currency_exchange_rate(
+                initial_currency,
+                output_currency,
+                year,
+                default_exchange_rate,
+                _currency_conversion_cache=_currency_conversion_cache,
+                future_exchange_rate_strategy=future_exchange_rate_strategy,
+                custom_future_exchange_rate=custom_future_exchange_rate,
+            )
+            _currency_conversion_cache[key] = rate
+        except Exception as e:
+            logger.warning(f"Failed to get rate for {key}: {e}")
+            continue
+
+    return _currency_conversion_cache
+
+
+def apply_currency_conversion(cost_dataframe, output_currency, cache):
+    """
+    Applies exchange rates from the cache to convert all cost values and units.
+
+    Converts only rows with monetary units that start with a known currency symbol and contain '/'.
+    """
+    currency_list = currency_converter.currencies
+
+    def convert_row(x):
+        unit = x["unit"]
+        value = x["value"]
+
+        if not isinstance(unit, str) or "/" not in unit:
+            return pd.Series([value, unit])
+
+        currency = unit[:3]
+        year = x.get("currency_year")
+
+        if currency not in currency_list:
+            return pd.Series([value, unit])
+
+        if pd.isnull(year):
+            logger.warning(
+                f"Missing currency_year for row with unit '{unit}' and value '{value}'. Skipping currency conversion."
+            )
+            return pd.Series([value, unit])
+
+        try:
+            key = (currency, output_currency, int(year))
+            rate = cache.get(key)
+            if rate is not None:
+                new_value = value * rate
+                new_unit = unit.replace(currency, output_currency)
+                return pd.Series([new_value, new_unit])
+            else:
+                logger.warning(f"Missing exchange rate for {key}. Skipping conversion.")
+        except Exception as e:
+            logger.warning(f"Failed to convert row {x.name}: {e}")
+
+        return pd.Series([value, unit])
+
+    cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
+    return cost_dataframe
+
+
+def prepare_costs(
+    cost_file: str,
+    config: dict,
+    output_currency: str,
+    fill_values: dict,
+    Nyears: float | int = 1,
+    default_exchange_rate: float = None,
+    future_exchange_rate_strategy: str = "latest",
+    custom_future_exchange_rate: float = None,
+):
+    """
+    Loads and processes cost data, converting units and currency to a common format.
+
+    Applies currency conversion, fills missing values, and computes fixed annualized costs.
+    """
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
-    # correct units to MW and EUR
+    # correct units to MW
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-    costs.loc[costs.unit.str.contains("USD"), "value"] *= USD_to_EUR
 
-    # min_count=1 is important to generate NaNs which are then filled by fillna
-    costs = (
-        costs.loc[:, "value"].unstack(level=1).groupby("technology").sum(min_count=1)
+    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
+    wished_cost_scenario = config["cost_scenario"]
+    wished_financial_case = config["financial_case"]
+    for col in ["scenario", "financial_case"]:
+        if col in costs.columns:
+            costs[col] = costs[col].replace("", pd.NA)
+
+    if "scenario" in costs.columns:
+        costs = costs[
+            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold())
+            | (costs["scenario"].isnull())
+        ]
+
+    if "financial_case" in costs.columns:
+        costs = costs[
+            (costs["financial_case"].str.casefold() == wished_financial_case.casefold())
+            | (costs["financial_case"].isnull())
+        ]
+
+    if costs["currency_year"].isnull().any():
+        logger.warning(
+            "Some rows are missing 'currency_year' and will be skipped in currency conversion."
+        )
+
+    # Create a shared cache for exchange rates
+    _currency_conversion_cache = build_currency_conversion_cache(
+        costs,
+        output_currency,
+        default_exchange_rate,
+        future_exchange_rate_strategy,
+        custom_future_exchange_rate,
     )
-    costs = costs.fillna(fill_values)
+
+    modified_costs = apply_currency_conversion(
+        costs, output_currency, _currency_conversion_cache
+    )
+
+    modified_costs = (
+        modified_costs.loc[:, "value"]
+        .unstack(level=1)
+        .groupby("technology")
+        .sum(min_count=1)
+    )
+    modified_costs = modified_costs.fillna(fill_values)
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
-    costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears for i, v in costs.iterrows()
+    modified_costs["fixed"] = [
+        annuity_factor(v) * v["investment"] * Nyears
+        for _, v in modified_costs.iterrows()
     ]
 
-    return costs
+    return modified_costs
 
 
 def create_network_topology(
@@ -1468,7 +1722,7 @@ def safe_divide(numerator, denominator, default_value=np.nan):
         logging.warning(
             f"Division by zero: {numerator} / {denominator}, returning NaN."
         )
-        return np.nan
+        return pd.DataFrame(np.nan, index=numerator.index, columns=numerator.columns)
 
 
 def lossy_bidirectional_links(n, carrier):
