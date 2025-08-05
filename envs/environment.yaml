@@ -34,7 +34,7 @@ dependencies:
 - xarray>=2023.11.0, <=2025.01.2
 - netcdf4
 - networkx
-- scipy
+- scipy<1.16
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
@@ -50,7 +50,6 @@ dependencies:
 - geopy
 - tqdm
 - pytz
-- country_converter
 
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
@@ -64,13 +63,14 @@ dependencies:
 - cartopy
 - rasterio
 - rioxarray
+- libgdal-hdf5  # to open gebco file
+- libgdal-core<3.10 # to fix a current gebco issue (https://github.com/pypsa-meets-earth/pypsa-earth/issues/1511)
 
 # Plotting
 - geoviews
 - hvplot
 - graphviz
 - contextily
-- graphviz
 
 # Default solver for tests (required for CI)
 - glpk
@@ -80,4 +80,5 @@ dependencies:
 - rich
 
 - pip:
+  - currencyconverter
   - googledrivedownloader>=1.1

@@ -13,7 +13,17 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Revised pinned to locked environments. `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
+**Minor Changes and bug-fixing**
+
+PyPSA-Earth 0.7.0
+=================
+
+**New Features and Major Changes**
+
+
+* Revise bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
+
+* Revise pinned to locked environments `PR #1458 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1458>`__
 
 * Update to `technology-data` version v0.12.0 `PR #1452 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1452>`__
 
@@ -27,9 +37,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Drop duplication of retrieve_data and COST_DIR, add params and update technology-data version `PR #1249 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1249>`__
 
-* In alternative clustering, generate hydro inflows by shape and avoid hydro inflows duplication for plants installed in the same node `PR #1120 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1120>`
+* In alternative clustering, generate hydro inflows by shape and avoid hydro inflows duplication for plants installed in the same node `PR #1120 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1120>`__
 
-* Add a function to calculate length-based efficiencies and apply it to the H2 pipelines. `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
+* Add a function to calculate length-based efficiencies and apply it to the H2 pipelines `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 * Support of Linopy for Power and Sector-Coupled Modelling and latest PyPSA version `PR #1172 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1172>`__
 
@@ -37,35 +47,49 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Index hydro units by their location and drop use of alternative clustering option for hydro `PR #1331 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1331>`__
 
+* Introduce universal currency conversion to allow use of currencies other than EUR in input data and results `PR #1319 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1319>`__
+
+* Introduce US-specific cost configurations and update to `technology_data_version` v0.13.2 `PR #1448 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448>`__
+
+* Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
+
 **Minor Changes and bug-fixing**
 
-* Fix missing nodes in prepare_sector_network. `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
+* Remove duplicates in environment file `PR #1473 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
 
-* Fix missing country attribute in cluster_network. `PR #1443 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1443>`__
+* Fix fallback logic for missing currency data by correctly applying the default exchange rate and build cache for storing commonly used exchange rates `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
 
-* Fix numpy TypeErrors. `PR #1430 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1430>`__
+* Update code to reflect the Wikipedia source page for `prepare_transport_data_input` `PR #1486 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1486>`__
 
-* Update description of the sector-coupled capabilities. `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
+* Add efficiency gain and growth rates for other energy consumption and fill missing NaNs with 0 `PR #1468 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1468>`__
 
-* Modified how_to_contribute documentation page. `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
+* Fix missing nodes in prepare_sector_network `PR #1432 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1432>`__
 
-* Redefine h2export wildcard_constraint to allow digits + optional dot followed by more digites (decimals). `PR #1434 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1434>`__
+* Fix missing country attribute in cluster_network `PR #1443 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1443>`__
 
-* Update the AL_production.csv data from another source with more countries. `PR #1428 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1428>`__
+* Fix numpy TypeErrors `PR #1430 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1430>`__
 
-* Fix params for prepare_sector_network script. `PR #1427 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1427>`__
+* Update description of the sector-coupled capabilities `PR #1449 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1449>`__
 
-* Add option to adjust load shedding costs. `PR #1403 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1403>`__
+* Modified how_to_contribute documentation page `PR #1439 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1439>`__
 
-* Fix: Use the mean value instead of the sum to remove duplicates in the urban percentage data per country and year. `PR #1420 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1420>`__
+* Redefine h2export wildcard_constraint to allow digits + optional dot followed by more digites (decimals) `PR #1434 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1434>`__
 
-* Fix prepare_ports script to generate both outputs if export ports with custom data is selected. `PR #1424 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1424>`__
+* Update the AL_production.csv data from another source with more countries `PR #1428 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1428>`__
 
-* Update the applications list for PyPSA-Earth model. `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
+* Fix params for prepare_sector_network script `PR #1427 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1427>`__
+
+* Add option to adjust load shedding costs `PR #1403 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1403>`__
+
+* Fix: Use the mean value instead of the sum to remove duplicates in the urban percentage data per country and year `PR #1420 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1420>`__
+
+* Fix prepare_ports script to generate both outputs if export ports with custom data is selected `PR #1424 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1424>`__
+
+* Update the applications list for PyPSA-Earth model `PR #1413 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1413>`__
 
 * Fix problem with a discontinued World Bank data source in prepare_transport_data_input `PR #1410 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1410>`__
 
-* Fix bug in myopic run. `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
+* Fix bug in myopic run `PR #1369 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1369>`__
 
 * Fix missing focus_weights on cluster_network params without augmented_line_connections, minimize warnings on subregions `PR #1348 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1348>`__
 
@@ -77,13 +101,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix readthedocs by explicitly specifying the location of the Sphinx config `PR #1292 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1292>`__
 
-* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it.  `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
+* Fix lossy bidirectional links, especially H2 pipelines, which would sometimes gain H2 instead of losing it `PR #1192 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1192>`__
 
 * Fix the need for administrative rights on Windows by changing all shadow directory settings for Windows in the Snakefile `PR #1295 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1295>`__ and  `PR #1301 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1301>`__
 
-* Add CITATION.cff to guide users on how cite PyPSA-Earth. Insert the DOI badge in the README linking to the very first PyPSA-Earth paper. `PR #1316 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1316>`__
+* Add CITATION.cff to guide users on how cite PyPSA-Earth. Insert the DOI badge in the README linking to the very first PyPSA-Earth paper `PR #1316 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1316>`__
 
-* Remove pyomo from cluster_network and introduce scip. `PR #1320 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1323>`__
+* Remove pyomo from cluster_network and introduce scip `PR #1320 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1323>`__
 
 * Fix mixup of plant locations for hydro inflow and inflow overestimation `PR #1322 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1322>`__
 
@@ -100,6 +124,12 @@ This part of documentation collects descriptive release notes to capture the mai
 * Monte Carlo: move qmc.discrepancy to logging only `PR #1418 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1418>`__
 
 * Extending powerplant filter option to custom powerplants `PR #1465 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1465>`__
+
+* Fix an issue with the GEBCO file by limiting libgdal-core<3.10 `PR #1519 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1519>`__
+
+* Fix a naming issue with European cutout `PR #1530 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1530>`__
+
+* Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
 
 PyPSA-Earth 0.6.0
 =================

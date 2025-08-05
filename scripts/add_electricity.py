@@ -15,10 +15,16 @@ Relevant Settings
 
     costs:
         year:
-        version:
+        technology_data_version:
+        discountrate:
+        output_currency:
+        country_specific_data:
+        cost_scenario:
+        financial_case:
+        default_exchange_rate:
+        future_exchange_rate_strategy:
+        custom_future_exchange_rate:
         rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
         emission_prices:
 
     electricity:
@@ -84,14 +90,19 @@ It further adds extendable ``generators`` with **zero** capacity for
 - additional open- and combined-cycle gas turbines (if ``OCGT`` and/or ``CCGT`` is listed in the config setting ``electricity: extendable_carriers``)
 """
 
-import os
-
 import numpy as np
 import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, update_p_nom_max
+from _helpers import (
+    apply_currency_conversion,
+    build_currency_conversion_cache,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+    update_p_nom_max,
+)
 from powerplantmatching.export import map_country_bus
 
 idx = pd.IndexSlice
@@ -138,17 +149,46 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
-    # correct units to MW and EUR
+    # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
-    costs.loc[costs.unit.str.contains("USD"), "value"] *= config["USD2013_to_EUR2013"]
+    _currency_conversion_cache = build_currency_conversion_cache(
+        costs,
+        config["output_currency"],
+        config["default_exchange_rate"],
+        future_exchange_rate_strategy=config.get(
+            "future_exchange_rate_strategy", "latest"
+        ),
+        custom_future_exchange_rate=config.get("custom_future_rate", None),
+    )
+    costs = apply_currency_conversion(
+        costs, config["output_currency"], _currency_conversion_cache
+    )
+
+    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
+    wished_cost_scenario = config["cost_scenario"]
+    wished_financial_case = config["financial_case"]
+    for col in ["scenario", "financial_case"]:
+        if col in costs.columns:
+            costs[col] = costs[col].replace("", pd.NA)
+
+    if "scenario" in costs.columns:
+        costs = costs[
+            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold())
+            | (costs["scenario"].isnull())
+        ]
+
+    if "financial_case" in costs.columns:
+        costs = costs[
+            (costs["financial_case"].str.casefold() == wished_financial_case.casefold())
+            | (costs["financial_case"].isnull())
+        ]
 
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
         overwrites = config.get(attr)
         if overwrites is not None:
-            breakpoint()
             overwrites = pd.Series(overwrites)
             costs.loc[overwrites.index, attr] = overwrites
             logger.info(
@@ -366,8 +406,11 @@ def attach_wind_and_solar(
                     + connection_cost
                 )
                 logger.info(
-                    "Added connection cost of {:0.0f}-{:0.0f} Eur/MW/a to {}".format(
-                        connection_cost.min(), connection_cost.max(), tech
+                    "Added connection cost of {:0.0f}-{:0.0f} {}/MW/a to {}".format(
+                        connection_cost.min(),
+                        connection_cost.max(),
+                        snakemake.params.costs["output_currency"],
+                        tech,
                     )
                 )
             else:
