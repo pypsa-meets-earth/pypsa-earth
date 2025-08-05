@@ -19,6 +19,7 @@ from _helpers import (
     check_config_version,
     copy_default_files,
     BASE_DIR,
+    branch,  # Remove if Snakemake >= 8.3.0
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
@@ -619,148 +620,89 @@ rule simplify_network:
         "scripts/simplify_network.py"
 
 
-if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
-
-    rule cluster_network:
-        params:
-            aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
-            build_shape_options=config["build_shape_options"],
-            electricity=config["electricity"],
-            costs=config["costs"],
-            length_factor=config["lines"]["length_factor"],
-            renewable=config["renewable"],
-            geo_crs=config["crs"]["geo_crs"],
-            countries=config["countries"],
-            cluster_options=config["cluster_options"],
-            focus_weights=config.get("focus_weights", None),
-            #custom_busmap=config["enable"].get("custom_busmap", False)
-        input:
-            network="networks/" + RDIR + "elec_s{simpl}.nc",
-            country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
-            regions_onshore="resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
-            regions_offshore="resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
-            #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-            #using this line instead of the following will test updated gadm shapes for MA.
-            #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-            #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-            gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-            # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
-            # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-            #                if config["enable"].get("custom_busmap", False) else []),
-            tech_costs=COSTS,
-        output:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
-            regions_onshore="resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-            regions_offshore="resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-            busmap="resources/"
-            + RDIR
-            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
-            linemap="resources/"
-            + RDIR
-            + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
-        log:
-            "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
-        benchmark:
-            "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
-        threads: 1
-        resources:
-            mem_mb=3000,
-        script:
-            "scripts/cluster_network.py"
-
-    rule augmented_line_connections:
-        params:
-            lines=config["lines"],
-            augmented_line_connection=config["augmented_line_connection"],
-            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-            electricity=config["electricity"],
-            costs=config["costs"],
-        input:
-            tech_costs=COSTS,
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
-            regions_onshore="resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-            regions_offshore="resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-        output:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        log:
-            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
-        benchmark:
-            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
-        threads: 1
-        resources:
-            mem_mb=3000,
-        script:
-            "scripts/augmented_line_connections.py"
+rule cluster_network:
+    params:
+        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
+        build_shape_options=config["build_shape_options"],
+        electricity=config["electricity"],
+        costs=config["costs"],
+        length_factor=config["lines"]["length_factor"],
+        renewable=config["renewable"],
+        geo_crs=config["crs"]["geo_crs"],
+        countries=config["countries"],
+        cluster_options=config["cluster_options"],
+        focus_weights=config.get("focus_weights", None),
+        #custom_busmap=config["enable"].get("custom_busmap", False)
+    input:
+        network="networks/" + RDIR + "elec_s{simpl}.nc",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        regions_onshore="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
+        regions_offshore="resources/"
+        + RDIR
+        + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
+        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
+        #using this line instead of the following will test updated gadm shapes for MA.
+        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
+        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
+        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
+        # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+        #                if config["enable"].get("custom_busmap", False) else []),
+        tech_costs=COSTS,
+    output:
+        network=branch(
+            config["augmented_line_connection"].get("add_to_snakefile", False) == True,
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+        ),
+        regions_onshore="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/"
+        + RDIR
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
+        linemap="resources/" + RDIR + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
+    log:
+        "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+    benchmark:
+        "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
+    threads: 1
+    resources:
+        mem_mb=3000,
+    script:
+        "scripts/cluster_network.py"
 
 
-if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
-
-    rule cluster_network:
-        params:
-            aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
-            build_shape_options=config["build_shape_options"],
-            electricity=config["electricity"],
-            costs=config["costs"],
-            length_factor=config["lines"]["length_factor"],
-            renewable=config["renewable"],
-            geo_crs=config["crs"]["geo_crs"],
-            countries=config["countries"],
-            gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
-            cluster_options=config["cluster_options"],
-            focus_weights=config.get("focus_weights", None),
-        input:
-            network="networks/" + RDIR + "elec_s{simpl}.nc",
-            country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
-            regions_onshore="resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
-            regions_offshore="resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
-            #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-            #using this line instead of the following will test updated gadm shapes for MA.
-            #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-            #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-            gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-            # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
-            # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-            #                if config["enable"].get("custom_busmap", False) else []),
-            tech_costs=COSTS,
-        output:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-            regions_onshore="resources/"
-            + RDIR
-            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-            regions_offshore="resources/"
-            + RDIR
-            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-            busmap="resources/"
-            + RDIR
-            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
-            linemap="resources/"
-            + RDIR
-            + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
-        log:
-            "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
-        benchmark:
-            "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
-        threads: 1
-        resources:
-            mem_mb=3000,
-        script:
-            "scripts/cluster_network.py"
+rule augmented_line_connections:
+    params:
+        lines=config["lines"],
+        augmented_line_connection=config["augmented_line_connection"],
+        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+        electricity=config["electricity"],
+        costs=config["costs"],
+    input:
+        tech_costs=COSTS,
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+        regions_onshore="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        regions_offshore="resources/"
+        + RDIR
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+    output:
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+    log:
+        "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+    benchmark:
+        "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+    threads: 1
+    resources:
+        mem_mb=3000,
+    script:
+        "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:

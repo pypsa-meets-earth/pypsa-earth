@@ -1811,3 +1811,14 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         """
         # set the required compression demand
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
+
+
+def branch(condition, then, otherwise):
+    """
+    This is a placeholder function that exists in Snakemake versions > 8.3.0.
+    It can be removed once Snakemake is updated to a compatible version.
+    """
+    if condition:
+        return then
+    else:
+        return otherwise
