@@ -304,17 +304,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/DeniseGiub">
-                    <img src="https://avatars.githubusercontent.com/u/113139589?v=4" width="100;" alt="DeniseGiub"/>
-                    <br />
-                    <sub><b>DeniseGiub</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/danielelerede-oet">
                     <img src="https://avatars.githubusercontent.com/u/175011591?v=4" width="100;" alt="danielelerede-oet"/>
                     <br />
                     <sub><b>danielelerede-oet</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/DeniseGiub">
+                    <img src="https://avatars.githubusercontent.com/u/113139589?v=4" width="100;" alt="DeniseGiub"/>
+                    <br />
+                    <sub><b>DeniseGiub</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -451,24 +451,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/asolavi">
-                    <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
+                <a href="https://github.com/gianvicolux">
+                    <img src="https://avatars.githubusercontent.com/u/123154558?v=4" width="100;" alt="gianvicolux"/>
                     <br />
-                    <sub><b>asolavi</b></sub>
+                    <sub><b>gianvicolux</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/rajesh-ieg">
-                    <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
+                <a href="https://github.com/choiHenry">
+                    <img src="https://avatars.githubusercontent.com/u/51810088?v=4" width="100;" alt="choiHenry"/>
                     <br />
-                    <sub><b>rajesh-ieg</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/carlosfv92">
-                    <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
-                    <br />
-                    <sub><b>carlosfv92</b></sub>
+                    <sub><b>choiHenry</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -478,20 +471,27 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>LucieRC</b></sub>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/carlosfv92">
+                    <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
+                    <br />
+                    <sub><b>carlosfv92</b></sub>
+                </a>
+            </td>
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/choiHenry">
-                    <img src="https://avatars.githubusercontent.com/u/51810088?v=4" width="100;" alt="choiHenry"/>
+                <a href="https://github.com/rajesh-ieg">
+                    <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
                     <br />
-                    <sub><b>choiHenry</b></sub>
+                    <sub><b>rajesh-ieg</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/gianvicolux">
-                    <img src="https://avatars.githubusercontent.com/u/123154558?v=4" width="100;" alt="gianvicolux"/>
+                <a href="https://github.com/asolavi">
+                    <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
                     <br />
-                    <sub><b>gianvicolux</b></sub>
+                    <sub><b>asolavi</b></sub>
                 </a>
             </td>
             <td align="center">
