@@ -6,7 +6,7 @@
 Append cost data by readjusting to the currency of the main cost data (EUR or USD)
 """
 import pandas as pd
-from _helpers import create_logger, get_yearly_currency_exchange_average, mock_snakemake
+from _helpers import create_logger, get_yearly_currency_exchange_rate, mock_snakemake
 
 logger = create_logger(__name__)
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     app_costs = pd.read_csv(snakemake.input.app_costs)
 
     # Readjust USD to EUR
-    app_costs[["capital_cost", "FOM", "VOM"]] *= get_yearly_currency_exchange_average(
+    app_costs[["capital_cost", "FOM", "VOM"]] *= get_yearly_currency_exchange_rate(
         "USD", "EUR", 2020
     )
 
