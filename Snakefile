@@ -633,7 +633,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             countries=config["countries"],
             cluster_options=config["cluster_options"],
             focus_weights=config.get("focus_weights", None),
-            custom_busmap=config["enable"].get("custom_busmap", False)
+            custom_busmap=config["enable"].get("custom_busmap", False),
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -649,8 +649,11 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
             gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
-            custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-                            if config["enable"].get("custom_busmap", False) else []),
+            custom_busmap=(
+                "data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+                if config["enable"].get("custom_busmap", False)
+                else []
+            ),
             tech_costs=COSTS,
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
@@ -720,7 +723,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
             cluster_options=config["cluster_options"],
             focus_weights=config.get("focus_weights", None),
-            custom_busmap=config["enable"].get("custom_busmap", False)
+            custom_busmap=config["enable"].get("custom_busmap", False),
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -736,8 +739,11 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
             gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
-            custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-                            if config["enable"].get("custom_busmap", False) else []),
+            custom_busmap=(
+                "data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+                if config["enable"].get("custom_busmap", False)
+                else []
+            ),
             tech_costs=COSTS,
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
