@@ -1031,6 +1031,42 @@ if not config["custom_data"]["gas_network"]:
             "scripts/prepare_gas_network.py"
 
 
+sector_enable = config["sector"]["enable"]
+
+TRANSPORT = {
+    "transport": "resources/"
+    + SECDIR
+    + "demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "avail_profile": "resources/"
+    + SECDIR
+    + "pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "dsm_profile": "resources/"
+    + SECDIR
+    + "pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "nodal_transport_data": "resources/"
+    + SECDIR
+    + "demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+}
+
+HEAT = {
+    "heat_demand": "resources/"
+    + SECDIR
+    + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "ashp_cop": "resources/"
+    + SECDIR
+    + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "gshp_cop": "resources/"
+    + SECDIR
+    + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "solar_thermal": "resources/"
+    + SECDIR
+    + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "district_heat_share": "resources/"
+    + SECDIR
+    + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+}
+
+
 rule prepare_sector_network:
     params:
         costs=config["costs"],
@@ -1045,52 +1081,44 @@ rule prepare_sector_network:
         foresight=config["foresight"],
         water_costs=config["custom_data"]["water_costs"],
     input:
+        **branch(
+            sector_enable["land_transport"],
+            TRANSPORT,
+            {"dummy_transport": []},
+        ),
+        **branch(
+            sector_enable["heat"],
+            HEAT,
+            {"dummy_heat": []},
+        ),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
-        nodal_energy_totals="resources/"
-        + SECDIR
-        + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        transport="resources/"
-        + SECDIR
-        + "demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        avail_profile="resources/"
-        + SECDIR
-        + "pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        dsm_profile="resources/"
-        + SECDIR
-        + "pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        nodal_transport_data="resources/"
-        + SECDIR
-        + "demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        nodal_energy_totals=branch(
+            sector_enable["rail_transport"] or sector_enable["agriculture"],
+            "resources/"
+            + SECDIR
+            + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        ),
         overrides="data/override_component_attrs",
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_demand="resources/"
-        + SECDIR
-        + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        industrial_demand=branch(
+            sector_enable["industry"],
+            "resources/"
+            + SECDIR
+            + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
+        ),
         energy_totals="resources/"
         + SECDIR
         + "energy_totals_{demand}_{planning_horizons}.csv",
-        airports="resources/" + SECDIR + "airports.csv",
-        ports="resources/" + SECDIR + "ports.csv",
-        heat_demand="resources/"
-        + SECDIR
-        + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        ashp_cop="resources/"
-        + SECDIR
-        + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        gshp_cop="resources/"
-        + SECDIR
-        + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        solar_thermal="resources/"
-        + SECDIR
-        + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-        district_heat_share="resources/"
-        + SECDIR
-        + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        airports=branch(
+            sector_enable["aviation"],
+            "resources/" + SECDIR + "airports.csv",
+        ),
+        ports=branch(sector_enable["shipping"], "resources/" + SECDIR + "ports.csv"),
         biomass_transport_costs="data/temp_hard_coded/biomass_transport_costs.csv",
         shapes_path="resources/"
         + RDIR
