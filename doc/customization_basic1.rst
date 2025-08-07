@@ -128,11 +128,11 @@ Please note that a temporal dimension of the cutout should be consistent with th
 Advanced configuration options
 ------------------------------
 
-Incremental update of the configuration files:
+The workflow is build to use the following configuration files:
 
 - `config.yaml` has the highest priority and is applied on top of all other configuration files;
-- `config.default.yaml` is used to store the major modeling-relevant configuration parameters which values are used if they are not included into `config.yaml`;
-- `config` folder contains the detailed configuration settings.
+- `config.default.yaml` is used to store the major modeling-relevant configuration parameters which values are used if they are not defined in `config.yaml`;
+- `config` folder contains all the configuration settings used in a modelling runs.
 
 During each modeling run the configuration parameters which are actually used are outputted into the results folder created for a particular run. Three types of files are being produced:
 - `run_config.yaml` contains modeling-relevant configuration parameters;
