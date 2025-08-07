@@ -8,7 +8,7 @@ tutorial: false
 foresight: overnight
 
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
-countries: ["KZ"]
+countries: ["NG", "BJ"]
 
 enable:
   retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
