@@ -65,6 +65,7 @@ dependencies:
 - rioxarray
 - libgdal-hdf5  # to open gebco file
 - libgdal-core<3.10 # to fix a current gebco issue (https://github.com/pypsa-meets-earth/pypsa-earth/issues/1511)
+- cfgrib # to deal with a missed driver for xarray
 
 # Plotting
 - geoviews
