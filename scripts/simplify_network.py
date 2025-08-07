@@ -96,6 +96,7 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
+    nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -979,34 +980,6 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     return clustering.network, busmap
 
 
-def nearest_shape(n, path_shapes, distance_crs):
-    """
-    The function nearest_shape reallocates buses to the closest "country" shape based on their geographical coordinates,
-    using the provided shapefile and distance CRS.
-
-    """
-
-    from shapely.geometry import Point
-
-    shapes = gpd.read_file(path_shapes, crs=distance_crs).set_index("name")["geometry"]
-
-    for i in n.buses.index:
-        point = Point(n.buses.loc[i, "x"], n.buses.loc[i, "y"])
-        contains = shapes.contains(point)
-        if contains.any():
-            n.buses.loc[i, "country"] = contains.idxmax()
-        else:
-            distance = shapes.distance(point).sort_values()
-            if distance.iloc[0] < 1:
-                n.buses.loc[i, "country"] = distance.index[0]
-            else:
-                logger.info(
-                    f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} "
-                )
-
-    return n
-
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -1164,19 +1137,25 @@ if __name__ == "__main__":
 
     update_p_nom_max(n)
 
+    # Option for subregion
     subregion_config = snakemake.params.subregion
-    if subregion_config["define_by_gadm"]:
-        logger.info("Activate subregion classificaition based on GADM")
-        subregion_shapes = snakemake.input.subregion_shapes
-    elif subregion_config["path_custom_shapes"]:
-        logger.info("Activate subregion classificaition based on custom shapes")
-        subregion_shapes = subregion_config["path_custom_shapes"]
+    if subregion_config["enable"]["simplify_network"]:
+        if subregion_config["define_by_gadm"]:
+            logger.info("Activate subregion classificaition based on GADM")
+            subregion_shapes = snakemake.input.subregion_shapes
+        elif subregion_config["path_custom_shapes"]:
+            logger.info("Activate subregion classificaition based on custom shapes")
+            subregion_shapes = subregion_config["path_custom_shapes"]
+        else:
+            logger.warning("Although enabled, no subregion classificaition is selected")
+            subregion_shapes = False
+
+        if subregion_shapes:
+            crs = snakemake.params.crs
+            tolerance = subregion_config["tolerance"]
+            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
     else:
         subregion_shapes = False
-
-    if subregion_shapes:
-        distance_crs = snakemake.params.crs["distance_crs"]
-        n = nearest_shape(n, subregion_shapes, distance_crs)
 
     p_threshold_drop_isolated = max(
         0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
@@ -1205,7 +1184,7 @@ if __name__ == "__main__":
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
         country_shapes = snakemake.input.country_shapes
-        n = nearest_shape(n, country_shapes, distance_crs)
+        n = nearest_shape(n, country_shapes, crs, tolerance=tolerance)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

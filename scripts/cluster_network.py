@@ -135,6 +135,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     locate_bus,
+    nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -635,7 +636,7 @@ if __name__ == "__main__":
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     focus_weights = snakemake.params.get("focus_weights", None)
     country_list = snakemake.params.countries
-    geo_crs = snakemake.params.geo_crs
+    geo_crs = snakemake.params.crs["geo_crs"]
 
     renewable_carriers = pd.Index(
         [
@@ -649,6 +650,26 @@ if __name__ == "__main__":
         "exclude_carriers", []
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
+
+    # Option for subregion
+    subregion_config = snakemake.params.subregion
+    if subregion_config["enable"]["cluster_network"]:
+        if subregion_config["define_by_gadm"]:
+            logger.info("Activate subregion classificaition based on GADM")
+            subregion_shapes = snakemake.input.subregion_shapes
+        elif subregion_config["path_custom_shapes"]:
+            logger.info("Activate subregion classificaition based on custom shapes")
+            subregion_shapes = subregion_config["path_custom_shapes"]
+        else:
+            logger.warning("Although enabled, no subregion classificaition is selected")
+            subregion_shapes = False
+
+        if subregion_shapes:
+            crs = snakemake.params.crs
+            tolerance = subregion_config["tolerance"]
+            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
+    else:
+        subregion_shapes = False
 
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
@@ -742,6 +763,14 @@ if __name__ == "__main__":
         )
 
     update_p_nom_max(clustering.network)
+
+    if subregion_shapes:
+        logger.info("Deactivate subregion classificaition")
+        country_shapes = snakemake.input.country_shapes
+        clustering.network = nearest_shape(
+            clustering.network, country_shapes, crs, tolerance=tolerance
+        )
+
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
     )
