@@ -682,9 +682,9 @@ def cluster(
     return clustering.network, clustering.busmap
 
 
-def drop_isolated_nodes(n, threshold):
+def drop_isolated_networks(n, threshold):
     """
-    Find isolated nodes in the network and drop those of them which don't have
+    Find isolated subnetworks in the network and drop those of them which don't have
     load or have a load value lower than a threshold.
 
     Parameters
@@ -706,10 +706,15 @@ def drop_isolated_nodes(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
+    l_by_node = n.loads_t.p_set.sum().reindex(n.buses.index, fill_value=0.0)
+    l_by_sub = l_by_node.groupby(l_by_node.index.map(n.buses.sub_network)).sum()
+
+    small_subs = l_by_sub[l_by_sub / 8760 < threshold].index
+
     off_buses = n.buses[
-        (~n.buses.duplicated(subset=["sub_network"], keep=False))
-        & (n.buses.carrier == "AC")
+        (n.buses.carrier == "AC") & n.buses.sub_network.isin(small_subs)
     ]
+
     i_islands = off_buses.index
 
     if off_buses.empty:
@@ -723,27 +728,20 @@ def drop_isolated_nodes(n, threshold):
         if n_bus_off == n_bus:
             i_islands = i_islands[i_islands != off_buses[isc_offbus].index[0]]
 
-    i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
+    i_loads_drop = n.loads[n.loads.bus.isin(i_islands)].index
+    i_generators_drop = n.generators[n.generators.bus.isin(i_islands)].index
+    i_links_drop = n.links[
+        n.links.bus0.isin(i_islands) | n.links.bus1.isin(i_islands)
+    ].index
+    i_lines_drop = n.lines[
+        n.lines.bus0.isin(i_islands) | n.lines.bus1.isin(i_islands)
+    ].index
 
-    # isolated buses without load should be discarded
-    isl_no_load = i_islands.difference(i_load_islands)
-
-    # isolated buses with load lower than a specified threshold should be discarded as well
-    i_small_load = i_load_islands[
-        n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
-    ]
-
-    if (i_islands.empty) | (len(i_small_load) == 0):
-        return n
-
-    i_to_drop = isl_no_load.to_list() + i_small_load.to_list()
-
-    i_loads_drop = n.loads[n.loads.bus.isin(i_to_drop)].index
-    i_generators_drop = n.generators[n.generators.bus.isin(i_to_drop)].index
-
-    n.mremove("Bus", i_to_drop)
+    n.mremove("Bus", i_islands)
     n.mremove("Load", i_loads_drop)
     n.mremove("Generator", i_generators_drop)
+    n.mremove("Link", i_links_drop)
+    n.mremove("Line", i_lines_drop)
 
     n.determine_network_topology()
 
@@ -751,7 +749,7 @@ def drop_isolated_nodes(n, threshold):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Dropped {len(i_to_drop)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectively"
+        f"Dropped {len(i_islands)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectively"
     )
 
     return n
@@ -890,9 +888,9 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     return clustering.network, busmap
 
 
-def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
+def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
     """
-    Find isolated nodes in the network and merge those of them which have load
+    Find isolated subnetworks in the network and merge those of them which have load
     value below than a specified threshold into a single isolated node which
     represents all the remote generation.
 
@@ -916,17 +914,16 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    # duplicated sub-networks mean that there is at least one interconnection between buses
-    i_islands = n.buses[
-        (~n.buses.duplicated(subset=["sub_network"], keep=False))
-        & (n.buses.carrier == "AC")
-    ].index
+    l_by_node = n.loads_t.p_set.sum().reindex(n.buses.index, fill_value=0.0)
+    l_by_sub = l_by_node.groupby(l_by_node.index.map(n.buses.sub_network)).sum()
 
-    # isolated buses with load below than a specified threshold should be merged
-    i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
-    i_islands_merge = i_load_islands[
-        n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
+    small_subs = l_by_sub[l_by_sub / 8760 < threshold].index
+
+    off_buses = n.buses[
+        (n.buses.carrier == "AC") & n.buses.sub_network.isin(small_subs)
     ]
+
+    i_islands_merge = off_buses.index
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
@@ -1184,10 +1181,10 @@ if __name__ == "__main__":
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
     s_threshold_fetch_isolated = cluster_config.get("s_threshold_fetch_isolated", False)
 
-    n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
+    n = drop_isolated_networks(n, threshold=p_threshold_drop_isolated)
 
     if p_threshold_merge_isolated:
-        n, merged_nodes_map = merge_isolated_nodes(
+        n, merged_nodes_map = merge_isolated_networks(
             n,
             threshold=p_threshold_merge_isolated,
             aggregation_strategies=aggregation_strategies,
