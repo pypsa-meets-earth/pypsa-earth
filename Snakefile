@@ -1742,16 +1742,6 @@ if config["foresight"] == "overnight":
             "scripts/solve_network.py"
 
 
-rule make_conf_check:
-    output:
-        pretty_config="results/" + RDIR + "config_scenarios.html",
-    threads: 1
-    resources:
-        mem_mb=10000,
-    script:
-        "scripts/make_conf_check.py"
-
-
 rule make_sector_summary:
     params:
         planning_horizons=config["scenario"]["planning_horizons"],
