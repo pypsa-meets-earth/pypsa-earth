@@ -629,10 +629,11 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             costs=config["costs"],
             length_factor=config["lines"]["length_factor"],
             renewable=config["renewable"],
-            geo_crs=config["crs"]["geo_crs"],
+            crs=config["crs"],
             countries=config["countries"],
             cluster_options=config["cluster_options"],
             focus_weights=config.get("focus_weights", None),
+            subregion=config["subregion"],
             #custom_busmap=config["enable"].get("custom_busmap", False)
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
@@ -652,6 +653,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
             tech_costs=COSTS,
+            subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
             regions_onshore="resources/"
@@ -715,11 +717,12 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             costs=config["costs"],
             length_factor=config["lines"]["length_factor"],
             renewable=config["renewable"],
-            geo_crs=config["crs"]["geo_crs"],
+            crs=config["crs"],
             countries=config["countries"],
             gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
             cluster_options=config["cluster_options"],
             focus_weights=config.get("focus_weights", None),
+            subregion=config["subregion"],
         input:
             network="networks/" + RDIR + "elec_s{simpl}.nc",
             country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -738,6 +741,7 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
             tech_costs=COSTS,
+            subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
             regions_onshore="resources/"

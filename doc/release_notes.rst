@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__
+
 **Minor Changes and bug-fixing**
 
 PyPSA-Earth 0.7.0
