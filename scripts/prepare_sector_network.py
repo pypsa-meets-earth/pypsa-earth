@@ -3233,7 +3233,7 @@ if __name__ == "__main__":
             transport_fn=snakemake.input.transport,
             avail_profile_fn=snakemake.input.avail_profile,
             dsm_profile_fn=snakemake.input.dsm_profile,
-            nodal_transport_data=snakemake.input.nodal_transport_data,
+            nodal_transport_data_fn=snakemake.input.nodal_transport_data,
         )
 
     if enable["rail_transport"]:
