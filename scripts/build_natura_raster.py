@@ -53,12 +53,43 @@ import rasterio as rio
 from _helpers import configure_logging, create_logger
 from rasterio.features import geometry_mask
 from rasterio.warp import transform_bounds
+from shapely.ops import unary_union
 
 logger = create_logger(__name__)
 
 
 CUTOUT_CRS = "EPSG:4326"
 
+
+def get_relevant_regions(country_shapes, offshore_shapes, natura_crs):
+    """
+    Merge the country_shapes and the offshore_shapes into one GeoDataFrame.
+    Additionally add a buffer to ensure all relevant regions are included.
+
+    Returns
+    -------
+    regions : GeoDataFrame with a unified "multipolygon"
+    """
+
+    # unify the country_shapes and offshore_shapes to select the regions of interest
+    # load country shapes
+    countries_gdf = gpd.read_file(country_shapes).to_crs(natura_crs)
+    countries = countries_gdf.geometry.union_all()
+
+    # load offshore shapes
+    offshore_gdf = gpd.read_file(offshore_shapes).to_crs(natura_crs)
+    offshore = offshore_gdf.geometry.union_all()
+
+    # combine countries and offshore regions into one merged geometry
+    buffer = 1e5 # 100 km, adjust should important regions be missed
+    merged_regions = unary_union([countries.buffer(buffer), offshore.buffer(buffer)])
+
+    regions = gpd.GeoDataFrame(
+        geometry=[merged_regions],
+        crs=natura_crs
+    )
+
+    return regions
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     "Function to parse the list of paths to include shapes included in folders, if any"
@@ -80,12 +111,12 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     return list_fileshapes
 
 
-def determine_cutout_xXyY(cutout_name, out_logging):
+def determine_region_xXyY(cutout_name, regions, out_logging):
     if out_logging:
         logger.info("Stage 1/5: Determine cutout boundaries")
     cutout = atlite.Cutout(cutout_name)
     assert cutout.crs == CUTOUT_CRS
-    x, X, y, Y = cutout.extent
+    x, y, X, Y = regions.to_crs(CUTOUT_CRS).total_bounds
     dx, dy = cutout.dx, cutout.dy
     cutout_xXyY = [
         np.clip(x - dx / 2.0, -180, 180),
@@ -107,7 +138,7 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
-def unify_protected_shape_areas(inputs, natura_crs, out_logging):
+def unify_protected_shape_areas(inputs, natura_crs, regions, out_logging):
     """
     Iterates through all snakemake rule inputs and unifies shapefiles (.shp)
     only.
@@ -120,7 +151,6 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
     unified_shape : GeoDataFrame with a unified "multishape"
     """
     import pandas as pd
-    from shapely.ops import unary_union
     from shapely.validation import make_valid
 
     if out_logging:
@@ -135,6 +165,10 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
             "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
         )
 
+    # identify region bounding box
+    minx, miny, maxx, maxy = regions.total_bounds
+
+    region_geometry = regions.union_all()
     # initialize counted files
     total_files = 0
     read_files = 0
@@ -144,6 +178,14 @@ def unify_protected_shape_areas(inputs, natura_crs, out_logging):
         total_files += 1
         try:
             shp.geometry = shp.geometry.make_valid()
+
+            # preselect only geometries within the regions bounding box
+            shp = shp.cx[minx:maxx, miny:maxy]
+            
+            # select only geometries within the regions themself
+            if not shp.empty:
+                shp = shp[shp.intersects(region_geometry)]
+
             list_shapes.append(shp)
             read_files += 1
         except:
@@ -190,8 +232,13 @@ if __name__ == "__main__":
     inputs = snakemake.input
     cutouts = inputs.cutouts
     shapefiles = get_fileshapes(inputs)
+    country_shapes = inputs.country_shapes
+    offshore_shapes = inputs.offshore_shapes
+
+    regions = get_relevant_regions(country_shapes, offshore_shapes, natura_crs)
+
     xs, Xs, ys, Ys = zip(
-        *(determine_cutout_xXyY(cutout, out_logging=out_logging) for cutout in cutouts)
+        *(determine_region_xXyY(cutout, regions, out_logging=out_logging) for cutout in cutouts)
     )
     bounds = transform_bounds(
         CUTOUT_CRS, natura_crs, min(xs), min(ys), max(Xs), max(Ys)
@@ -201,12 +248,13 @@ if __name__ == "__main__":
     )
     # adjusted boundaries
     shapes = unify_protected_shape_areas(
-        shapefiles, natura_crs, out_logging=out_logging
+        shapefiles, natura_crs, regions, out_logging=out_logging
     )
 
     if out_logging:
         logger.info("Stage 4/5: Mask geometry")
-    raster = ~geometry_mask(shapes.geometry, out_shape, transform)
+
+    raster = geometry_mask(shapes.geometry, out_shape, transform, invert=True)
     raster = raster.astype(rio.uint8)
 
     if out_logging:

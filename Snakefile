@@ -376,6 +376,8 @@ if config["enable"].get("build_natura_raster", False):
                 "cutouts/" + CDIR + "{cutout}.nc",
                 cutout=[c["cutout"] for _, c in config["renewable"].items()],
             ),
+            country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+            offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         output:
             "resources/" + RDIR + "natura.tiff",
         log:

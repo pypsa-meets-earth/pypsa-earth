@@ -15,6 +15,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Change build_natura_raster to only consider the countries of interest instead of the whole cutout `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1544>`__
+
 PyPSA-Earth 0.7.0
 =================
 
