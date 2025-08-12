@@ -1175,13 +1175,12 @@ if __name__ == "__main__":
         distance_crs = snakemake.params.crs["distance_crs"]
         n = nearest_shape(n, subregion_shapes, distance_crs)
 
-    p_threshold_drop_isolated = max(
-        0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
-    )
+    p_threshold_drop_isolated = cluster_config.get("p_threshold_drop_isolated", False)
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
     s_threshold_fetch_isolated = cluster_config.get("s_threshold_fetch_isolated", False)
 
-    n = drop_isolated_networks(n, threshold=p_threshold_drop_isolated)
+    if p_threshold_drop_isolated:
+        n = drop_isolated_networks(n, threshold=p_threshold_drop_isolated)
 
     if p_threshold_merge_isolated:
         n, merged_nodes_map = merge_isolated_networks(
