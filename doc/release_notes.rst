@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Implemented modular configuration structure v0.13.2 `PR #1174 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1174>`__
+
 **Minor Changes and bug-fixing**
 
 PyPSA-Earth 0.7.0

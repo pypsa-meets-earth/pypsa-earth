@@ -125,5 +125,18 @@ Atlite configurations can be adjusted in ``config.yaml``:
 
 Please note that a temporal dimension of the cutout should be consistent with the values set for `snapshots` parameter. A time range of the cutout is determined by the parameters set when building this cutout while the time resolution corresponds to those of the used climate archives. In case of ERA5 dataset used in PyPSA-Earth by default, hourly resolution is implied.
 
+Advanced configuration options
+------------------------------
+
+The workflow is build to use the following configuration files:
+
+- `config.yaml` has the highest priority and is applied on top of all other configuration files;
+- `config.default.yaml` is used to store the major modeling-relevant configuration parameters which values are used if they are not defined in `config.yaml`;
+- `config` folder contains all the configuration settings used in a modelling runs.
+
+During each modeling run the configuration parameters which are actually used are outputted into the results folder created for a particular run. Three types of files are being produced:
+- `run_config.yaml` contains modeling-relevant configuration parameters;
+- `full_run_config.yaml` provides all the parameters defined in a run being an output of an internal `config` variable of Snakemake.
+
 To delve into the specifics of the provided configurations and explore additional settings, please refer to the :ref:`config` page.
 There are many more configuration options beyond what is adapted for the tutorial!

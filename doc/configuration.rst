@@ -8,21 +8,19 @@
 Configuration
 ##########################################
 
-PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
-The options here described are collected in a ``config.yaml`` file located in the root directory.
-Users should copy the provided default configuration (``config.default.yaml``) and amend
-their own modifications and assumptions in the user-specific configuration file (``config.yaml``);
-confer installation instructions at :ref:`installation`.
+PyPSA-Earth is currently using configuration files as the main interface to define parameters of a regional model to be built by the workflow. The configuration files as stores as text files in `yaml` format. The default custom configuration file is ``config.yaml`` file located in the root directory.
+
+To start with modeling, the most straightforward way is to copy the provided default configuration file (``config.tutorial.yaml``) into the user-specific configuration file (``config.yaml``) as explained in :ref:`tutorial_electricity`. To build a full-scale custom model, (``config.default.yaml``) can be used following the same process of copying followed by adding modifications and assumptions relevant for building a model of a region of interest.
 
 .. note::
-  Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
+  Credits to PyPSA-meets-Earth community for the feedback and contributions which has been precious to build and refine the current approach for configuration management.
 
 .. _toplevel_cf:
 
 Top-level configuration
 =======================
 
-.. literalinclude:: ../config.default.yaml
+.. literalinclude:: ../configs/config.main.yaml
    :language: yaml
    :start-at: version:
    :end-at:  build_cutout:
@@ -44,10 +42,10 @@ investment changes as more ambitious greenhouse-gas emission reduction targets a
 
 The ``run`` section is used for running and storing scenarios with different configurations which are not covered by :ref:`wildcards`. It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set ``shared_cutouts`` to `true`.
 
-.. literalinclude:: ../config.default.yaml
+.. literalinclude:: ../configs/config.main.yaml
    :language: yaml
    :start-at: run:
-   :end-at: shared_cutouts:
+   :end-at: allow_scenario_failure:
 
 .. csv-table::
    :header-rows: 1
@@ -73,10 +71,10 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 .. image:: img/scenarios.png
 
-.. literalinclude:: ../config.default.yaml
+.. literalinclude:: ../configs/config.main.yaml
    :language: yaml
    :start-at: scenario:
-   :end-at: opts:
+   :end-at: snapshots:
 
 .. csv-table::
    :header-rows: 1

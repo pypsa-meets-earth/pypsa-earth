@@ -14,10 +14,12 @@ from shutil import copyfile, move
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 from _helpers import (
+    compare_configs,
     create_country_list,
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    write_config,
     BASE_DIR,
 )
 from build_demand_profiles import get_load_paths_gegis
@@ -33,14 +35,60 @@ HTTP = HTTPRemoteProvider()
 copy_default_files()
 
 
-configfile: "config.default.yaml"
+# Implementation of Snakemake config update is a recursive dictionaty update
+# More details: https://github.com/snakemake/snakemake/blob/main/snakemake/utils.py#L565-L591
+# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+# An important implication: if one of the config dictionary keys is string
+# the different values will be not overwritten but concatenated
+# from all the configs which can be unintended. An example: `atlite:cutouts`
 configfile: "configs/bundle_config.yaml"
-configfile: "configs/powerplantmatching_config.yaml"
+configfile: "configs/gp/powerplantmatching_config.yaml"
+
+
+config_technical = config.copy()
+
+
+configfile: "configs/config.main.yaml"
+configfile: "configs/config.spatial.yaml"
+configfile: "configs/config.weather.yaml"
+configfile: "configs/config.elec.yaml"
+configfile: "configs/config.sector.yaml"
+configfile: "configs/config.costs.yaml"
+configfile: "configs/config.solve.yaml"
+configfile: "configs/config.plot.yaml"
+configfile: "config.default.yaml"
 configfile: "config.yaml"
 
 
+# Define filders ----------------------------------------------------------
+run = config.get("run", {})
+RDIR = run["name"] + "/" if run.get("name") else ""
+CDIR = RDIR if not run.get("shared_cutouts") else ""
+SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
+SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
+RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
+
+# Check configs ---------------------------------------------------------------
+# provide a modeling-relevant summary of the config variable
+# filtering is used to exclude technical keys which a
+write_config(
+    config,
+    fl_name="run_config.yaml",
+    output_dir=RESDIR,
+    config_exclude=config_technical,
+)
+
+# provide the full list of config dictionary used by Snakemake
+write_config(
+    config,
+    fl_name="full_run_config.yaml",
+    output_dir=RESDIR,
+    config_exclude=None,
+)
+
 check_config_version(config=config)
 
+# Prepare variable for the workflow -------------------------------------------
 config.update({"git_commit": get_last_commit_message(".")})
 
 # convert country list according to the desired region
@@ -51,14 +99,6 @@ config["countries"] = create_country_list(config["countries"])
 config["scenario"]["unc"] = [
     f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
 ]
-
-
-run = config.get("run", {})
-RDIR = run["name"] + "/" if run.get("name") else ""
-CDIR = RDIR if not run.get("shared_cutouts") else ""
-SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
-SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
-RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 load_data_paths = get_load_paths_gegis("data", config)
 
@@ -88,6 +128,7 @@ if config["custom_rules"] is not []:
         include: rule
 
 
+# Define rules to run the workflow --------------------------------------------
 rule clean:
     run:
         try:
@@ -96,6 +137,15 @@ rule clean:
             shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
             pass
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
+
+
+rule check_default_config:
+    input:
+        config_folder="configs",
+    log:
+        "logs/check_default_config.log",
+    script:
+        "test/check_default_config.py"
 
 
 rule solve_all_networks:
@@ -507,7 +557,7 @@ rule build_powerplants:
         powerplants_filter=config["electricity"]["powerplants_filter"],
     input:
         base_network="networks/" + RDIR + "base.nc",
-        pm_config="configs/powerplantmatching_config.yaml",
+        pm_config="configs/gp/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
