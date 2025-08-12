@@ -193,6 +193,7 @@ costs:
   # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
   cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
   financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
+
 monte_carlo:
   options:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
