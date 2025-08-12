@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Extend functionality of isolated nodes to networks `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
+
 **Minor Changes and bug-fixing**
 
 PyPSA-Earth 0.7.0
