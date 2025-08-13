@@ -24,6 +24,8 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import locate_bus, override_component_attrs, prepare_costs
+from shapely.geometry import Point
+
 
 logger = logging.getLogger(__name__)
 
@@ -62,15 +64,15 @@ def select_ports(n):
 
 
 def add_export(n, hydrogen_buses_ports, export_profile):
-    country_shape = gpd.read_file(snakemake.input["shapes_path"])
-    # Find most northwestern point in country shape and get x and y coordinates
-    country_shape = country_shape.to_crs(
-        "EPSG:3395"
-    )  # Project to Mercator projection (Projected)
+    # Project to Mercator to find offset point
+    country_shape_merc = gpd.read_file(snakemake.input["shapes_path"]).to_crs("EPSG:3395")
+    x = country_shape_merc.geometry.centroid.x.min() - 2e5  # 200 km west
+    y = country_shape_merc.geometry.centroid.y.max() + 2e5  # 200 km north
 
-    # Get coordinates of the most western and northern point of the country and add a buffer of 2 degrees (equiv. to approx 220 km)
-    x_export = country_shape.geometry.centroid.x.min() - 2
-    y_export = country_shape.geometry.centroid.y.max() + 2
+    # Convert back to EPSG:4326 (lat/lon)
+    export_point = gpd.GeoSeries([Point(x, y)], crs="EPSG:3395").to_crs("EPSG:4326")
+    x_export = export_point.geometry.x.iloc[0]
+    y_export = export_point.geometry.y.iloc[0]
 
     # add export bus
     n.add(
