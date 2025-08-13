@@ -1081,16 +1081,8 @@ rule prepare_sector_network:
         foresight=config["foresight"],
         water_costs=config["custom_data"]["water_costs"],
     input:
-        **branch(
-            sector_enable["land_transport"],
-            TRANSPORT,
-            {"dummy_transport": []},
-        ),
-        **branch(
-            sector_enable["heat"],
-            HEAT,
-            {"dummy_heat": []},
-        ),
+        **branch(sector_enable["land_transport"], TRANSPORT),
+        **branch(sector_enable["heat"], HEAT),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
@@ -1123,12 +1115,16 @@ rule prepare_sector_network:
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        pipelines=(
-            "data/custom/pipelines.csv"
-            if config["custom_data"]["gas_network"]
-            else "resources/"
-            + SECDIR
-            + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv"
+        pipelines=branch(
+            "H2" in config["electricity"]["extendable_carriers"]["Store"]
+            and config["sector"]["hydrogen"]["network"],
+            branch(
+                config["custom_data"]["gas_network"],
+                "data/custom/pipelines.csv",
+                "resources/"
+                + SECDIR
+                + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
+            ),
         ),
     output:
         RESDIR
@@ -1974,6 +1970,18 @@ rule build_existing_heating_distribution:
 
 if config["foresight"] == "myopic":
 
+    HEAT_BASEYEAR = {
+        "cop_soil_total": "resources/"
+        + SECDIR
+        + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        "cop_air_total": "resources/"
+        + SECDIR
+        + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        "existing_heating_distribution": "resources/"
+        + SECDIR
+        + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    }
+
     rule add_existing_baseyear:
         params:
             baseyear=config["scenario"]["planning_horizons"][0],
@@ -1981,6 +1989,7 @@ if config["foresight"] == "myopic":
             existing_capacities=config["existing_capacities"],
             costs=config["costs"],
         input:
+            **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
@@ -1988,19 +1997,10 @@ if config["foresight"] == "myopic":
             busmap="resources/"
             + RDIR
             + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
-            clustered_pop_layout="resources/"
-            + SECDIR
-            + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+            # clustered_pop_layout="resources/"
+            # + SECDIR
+            # + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
-            cop_soil_total="resources/"
-            + SECDIR
-            + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-            cop_air_total="resources/"
-            + SECDIR
-            + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-            existing_heating_distribution="resources/"
-            + SECDIR
-            + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",

@@ -703,7 +703,6 @@ sector:
 
   h2_cavern: true
   marginal_cost_storage: 0
-  fischer_tropsch: true
   methanation: true
   helmeth: true
   dac: true
@@ -712,6 +711,7 @@ sector:
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
   airport_sizing_factor: 3
 
+  fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
 
   conventional_generation: # generator : carrier
