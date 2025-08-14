@@ -3172,13 +3172,11 @@ if __name__ == "__main__":
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
     # remove H2 and battery technologies added in elec-only model
-    remove_carrier_related_components(n, carriers_to_drop=extendable_storage)
+    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
-    if "H2" in extendable_storage:
-        add_hydrogen(n, costs)  # TODO add costs
+    add_hydrogen(n, costs)  # TODO add costs
 
-    if "battery" in extendable_storage:
-        add_storage(n, costs)
+    add_storage(n, costs)
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)
