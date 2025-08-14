@@ -177,7 +177,7 @@ Specifies the options to build the shapes in which the region of interest (``cou
 =============================
 
 If enabled, this option allows a region of interest (``countries``) to be redefined into subregions,
-which can be activated at various stages of the workflow. Currently, it is only used in the ``simplify_network`` rule.
+which can be activated at various stages of the workflow. Currently, it is used in ``simplify_network`` and ``cluster_network`` rule.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
@@ -198,7 +198,7 @@ For example, consider the Central District of Botswana, which has a GADM ID of `
 .. literalinclude:: ../test/config.landlock.yaml
    :language: yaml
    :start-at: subregion:
-   :end-at: Central:
+   :end-at: Central: 0.3
 
 There are several formats for GADM IDs depending on the version, so before using this feature, please review the ``resources/shapes/gadm_shape.geojson`` file which can be created using the command:
 
@@ -208,6 +208,8 @@ There are several formats for GADM IDs depending on the version, so before using
 
 .. note::
    The rule ``build_shapes`` currently use `Version 4.1  <https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/>`_ for their GADM data. This may change in the future.
+
+   When ``cluster_network`` is enabled, the ``focus_weights`` is also disaggregated by subregions.
 
 .. _clean_osm_data_options_cf:
 

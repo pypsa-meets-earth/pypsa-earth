@@ -1,4 +1,8 @@
 ,Unit,Values,Description
+enable,,,
+-- simplify_network,bool,"{True, False}",Activate subregion in simplify_network
+-- cluster_network,bool,"{True, False}",Activate subregion in cluster_network
 define_by_gadm,,,
 -- {subregion_name},-,Str: list  ,Specifies the names of subregions and its GADM IDs as a list
 path_custom_shapes,-,path,(optional) Specifies the subregion based on a custom shapes
+tolerance,meter,int,Buffer distance for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
