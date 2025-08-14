@@ -541,11 +541,11 @@ def fill_circuits(df):
     def _get_circuits_status(df):
         len_f = df["tag_frequency"].map(len)
         len_c = df["circuits"].map(
-            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
+            lambda x: x.count(";") + 1 if isinstance(x, str) else 1 if isinstance(x, float) and not pd.isna(x) else np.nan
         )
         isna_c = df["circuits"].isna()
         len_cab = df["cables"].map(
-            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
+            lambda x: x.count(";") + 1 if isinstance(x, str) else 1 if isinstance(x, float) and not pd.isna(x) else np.nan
         )
         isna_cab = df["cables"].isna()
         return len_f, len_c, isna_c, len_cab, isna_cab
@@ -562,6 +562,7 @@ def fill_circuits(df):
         "60": 3,
         "16.7": 2,
         "0": 2,
+        "50.0" : 3
     }
 
     def _basic_cables(f_val, cables_req=cables_req, def_circ=2):
