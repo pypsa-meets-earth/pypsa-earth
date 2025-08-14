@@ -533,9 +533,9 @@ def load_bus_region(onshore_path, pipelines):
     bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
     bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1)
-    keep_cols = ["gadm_id", "geometry"]                  
-    if "country" in bus_regions_onshore.columns:         
-        keep_cols.insert(1, "country")                   
+    keep_cols = ["gadm_id", "geometry"]
+    if "country" in bus_regions_onshore.columns:
+        keep_cols.insert(1, "country")
     bus_regions_onshore = bus_regions_onshore.loc[:, keep_cols]
 
     if snakemake.params.alternative_clustering:
@@ -941,11 +941,7 @@ if not snakemake.params.custom_gas_network:
         # Use 'country' if present; otherwise derive from 'gadm_id' prefix (e.g., 'EG' from 'EG0 0').
         if "country" in bus_regions_onshore.columns:
             countries = (
-                bus_regions_onshore["country"]
-                .dropna()
-                .astype(str)
-                .unique()
-                .tolist()
+                bus_regions_onshore["country"].dropna().astype(str).unique().tolist()
             )
         elif "gadm_id" in bus_regions_onshore.columns:
             countries = (
@@ -961,7 +957,11 @@ if not snakemake.params.custom_gas_network:
 
         logger.warning(
             "The following countries have no existing Natural Gas network between the chosen bus regions:\n%s",
-            ", ".join(sorted(map(str, countries))) if countries else "(no country identifiers found)",
+            (
+                ", ".join(sorted(map(str, countries)))
+                if countries
+                else "(no country identifiers found)"
+            ),
         )
 
         # Create an empty DataFrame with the specified column names
