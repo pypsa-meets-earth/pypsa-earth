@@ -3090,7 +3090,6 @@ if __name__ == "__main__":
     # Load all sector wildcards
     options = snakemake.params.sector_options
     enable = options["enable"]
-    extendable_storage = snakemake.params.electricity["extendable_carriers"]["Store"]
 
     # Load input network
     overrides = override_component_attrs(snakemake.input.overrides)
