@@ -1116,8 +1116,7 @@ rule prepare_sector_network:
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         pipelines=branch(
-            "H2" in config["electricity"]["extendable_carriers"]["Store"]
-            and config["sector"]["hydrogen"]["network"],
+            config["sector"]["hydrogen"]["network"],
             branch(
                 config["custom_data"]["gas_network"],
                 "data/custom/pipelines.csv",
