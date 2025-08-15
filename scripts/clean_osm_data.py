@@ -342,6 +342,7 @@ def clean_frequency(df, default_frequency="50"):
         "16.67": "16.7",
         "50;50;16.716.7": "50;50;16.7;16.7",
         "50;16.7?": "50;16.7",
+        "50.0": "50",
         # "24 kHz": "24000",
     }
 
@@ -561,8 +562,7 @@ def fill_circuits(df):
         "50": 3,
         "60": 3,
         "16.7": 2,
-        "0": 2,
-        "50.0" : 3
+        "0": 2
     }
 
     def _basic_cables(f_val, cables_req=cables_req, def_circ=2):
