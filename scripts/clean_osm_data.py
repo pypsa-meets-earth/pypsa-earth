@@ -567,7 +567,6 @@ def fill_circuits(df):
 
     # cables requirement for circuits calculation
     cables_req = {"50": 3, "60": 3, "16.7": 2, "0": 2}
-    cables_req = {"50": 3, "60": 3, "16.7": 2, "0": 2, "50.0": 3}
 
     def _basic_cables(f_val, cables_req=cables_req, def_circ=2):
         return cables_req[f_val] if f_val in cables_req.keys() else def_circ
