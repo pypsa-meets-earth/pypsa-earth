@@ -83,15 +83,13 @@ def get_relevant_regions(country_shapes, offshore_shapes, natura_crs):
     offshore = offshore_gdf.geometry.union_all()
 
     # combine countries and offshore regions into one merged geometry
-    buffer = 1e5 # 100 km, adjust should important regions be missed
+    buffer = 1e5  # 100 km, adjust should important regions be missed
     merged_regions = unary_union([countries.buffer(buffer), offshore.buffer(buffer)])
 
-    regions = gpd.GeoDataFrame(
-        geometry=[merged_regions],
-        crs=natura_crs
-    )
+    regions = gpd.GeoDataFrame(geometry=[merged_regions], crs=natura_crs)
 
     return regions
+
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     "Function to parse the list of paths to include shapes included in folders, if any"
@@ -186,7 +184,10 @@ if __name__ == "__main__":
     regions = get_relevant_regions(country_shapes, offshore_shapes, natura_crs)
 
     xs, Xs, ys, Ys = zip(
-        *(determine_region_xXyY(cutout, regions, natura_size, out_logging=out_logging) for cutout in cutouts)
+        *(
+            determine_region_xXyY(cutout, regions, natura_size, out_logging=out_logging)
+            for cutout in cutouts
+        )
     )
 
     bounds = transform_bounds(
