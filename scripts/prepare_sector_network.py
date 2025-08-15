@@ -2943,8 +2943,8 @@ def add_co2_budget(n, co2_budget, investment_year, elec_opts):
         annual_emissions = year_emission * elec_opts["co2base"]
     elif compare == "absolute":
         annual_emissions = year_emission
-    elif isinstance(compare, float):
-        annual_emissions = compare
+    elif isinstance(compare, (int, float)) and compare > 0:
+        annual_emissions = year_emission * compare
     else:
         raise ValueError(f"{compare} is not a valid option for co2_budget: compare")
 
