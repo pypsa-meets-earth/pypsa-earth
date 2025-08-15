@@ -2949,7 +2949,9 @@ def add_co2_budget(n, co2_budget, investment_year, elec_opts):
         raise ValueError(f"{compare} is not a valid option for co2_budget: compare")
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    logger.info(f"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year")
+    logger.info(
+        f"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year"
+    )
 
     add_co2limit(n, annual_emissions, Nyears)
 
