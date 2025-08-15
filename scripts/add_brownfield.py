@@ -14,6 +14,8 @@ import pypsa
 import xarray as xr
 from add_existing_baseyear import add_build_year_to_new_assets
 
+from _helpers import sanitize_carriers, sanitize_locations
+
 # from pypsa.clustering.spatial import normed_or_uniform
 
 logger = logging.getLogger(__name__)
@@ -258,6 +260,9 @@ if __name__ == "__main__":
     add_brownfield(n, n_p, year)
 
     disable_grid_expansion_if_limit_hit(n)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

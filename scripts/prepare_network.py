@@ -65,7 +65,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import (
+    BASE_DIR, 
+    configure_logging, 
+    create_logger, 
+    sanitize_carriers,
+    sanitize_locations,
+)
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -437,6 +443,9 @@ if __name__ == "__main__":
         enforce_autarky(n)
     elif "ATKc" in opts:
         enforce_autarky(n, only_crossborder=True)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

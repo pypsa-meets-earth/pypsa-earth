@@ -27,6 +27,8 @@ from _helpers import (
     safe_divide,
     three_2_two_digits_country,
     two_2_three_digits_country,
+    sanitize_carriers,
+    sanitize_locations,
 )
 from prepare_transport_data import prepare_transport_data
 
@@ -3278,6 +3280,9 @@ if __name__ == "__main__":
 
     if snakemake.params.water_costs:
         add_custom_water_cost(n)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.export_to_netcdf(snakemake.output[0])
 
