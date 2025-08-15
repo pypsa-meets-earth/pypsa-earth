@@ -628,7 +628,7 @@ if __name__ == "__main__":
     )
 
     # TODO: not implemented in -sec yet
-    # if options["heating"]:
+    # if options["enable"]["heat"]:
     #     time_dep_hp_cop = options["time_dep_hp_cop"]
     #     ashp_cop = (
     #         xr.open_dataarray(snakemake.input.cop_air_total)
