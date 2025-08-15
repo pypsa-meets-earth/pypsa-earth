@@ -64,7 +64,7 @@ dependencies:
 - brotlicffi=1.1.0.0=py311hfdbb021_2
 - bzip2=1.0.8=h4bc722e_7
 - c-ares=1.34.5=hb9d3cd8_0
-- c-blosc2=2.19.1=h4cfbee9_0
+- c-blosc2=2.20.0=h4cfbee9_0
 - ca-certificates=2025.8.3=hbd8a1cb_0
 - cached-property=1.5.2=hd8ed1ab_1
 - cached_property=1.5.2=pyha770c72_1
@@ -86,7 +86,7 @@ dependencies:
 - coin-or-cgl=0.60.9=hc46dffc_6
 - coin-or-clp=1.17.10=hc03379b_3
 - coin-or-osi=0.108.11=hf4fecb4_7
-- coin-or-utils=2.11.12=h93d2bc8_5
+- coin-or-utils=2.11.12=hc93afbd_6
 - coincbc=2.10.12=4_metapackage
 - colorama=0.4.6=pyhd8ed1ab_1
 - colorcet=3.1.0=pyhd8ed1ab_1
@@ -160,7 +160,7 @@ dependencies:
 - glog=0.7.1=hbabe93e_0
 - glpk=5.0=h445213a_0
 - gmp=6.3.0=hac33072_2
-- graphite2=1.3.14=hecca717_1
+- graphite2=1.3.14=hecca717_2
 - graphviz=13.1.2=h87b6fe6_0
 - gtk3=3.24.43=h0c6a113_5
 - gts=0.7.6=h977cf35_4
@@ -169,7 +169,7 @@ dependencies:
 - h2=4.2.0=pyhd8ed1ab_0
 - h5netcdf=1.6.4=pyhd8ed1ab_0
 - h5py=3.14.0=nompi_py311h7f87ba5_100
-- harfbuzz=11.3.3=hbb57e21_0
+- harfbuzz=11.4.1=h15599e2_0
 - hdf4=4.2.15=h2a13503_7
 - hdf5=1.14.6=nompi_h6e4c0c1_103
 - hicolor-icon-theme=0.17=ha770c72_2
@@ -198,7 +198,7 @@ dependencies:
 - jinja2=3.1.6=pyhd8ed1ab_0
 - joblib=1.5.1=pyhd8ed1ab_0
 - json-c=0.18=h6688a6e_0
-- json5=0.12.0=pyhd8ed1ab_0
+- json5=0.12.1=pyhd8ed1ab_0
 - jsonpointer=3.0.0=py311h38be061_1
 - jsonschema=4.25.0=pyhe01879c_0
 - jsonschema-specifications=2025.4.1=pyh29332c3_0
@@ -300,7 +300,7 @@ dependencies:
 - libstdcxx=15.1.0=h8f9b012_4
 - libstdcxx-ng=15.1.0=h4852527_4
 - libthrift=0.22.0=h454ac66_1
-- libtiff=4.7.0=hf01ce69_5
+- libtiff=4.7.0=h8261f1e_6
 - libutf8proc=2.10.0=h202a827_0
 - libuuid=2.38.1=h0b41bf4_0
 - libwebp-base=1.6.0=hd42ef1d_0
@@ -341,7 +341,7 @@ dependencies:
 - mumps-include=5.7.3=h82cca05_10
 - mumps-seq=5.7.3=h27a6a8b_0
 - munkres=1.1.4=pyhd8ed1ab_1
-- narwhals=2.1.0=pyhe01879c_0
+- narwhals=2.1.1=pyhe01879c_0
 - nbclient=0.10.2=pyhd8ed1ab_0
 - nbconvert-core=7.16.6=pyh29332c3_0
 - nbformat=5.10.4=pyhd8ed1ab_1
@@ -418,7 +418,7 @@ dependencies:
 - pyshp=3.0.0=pyhd8ed1ab_0
 - pyside6=6.9.1=py311h846acb3_0
 - pysocks=1.7.1=pyha55dd90_7
-- pytables=3.10.2=py311h96e8354_6
+- pytables=3.10.2=py311h144bb87_7
 - pytest=8.4.1=pyhd8ed1ab_0
 - python=3.11.13=h9e4cc4f_0_cpython
 - python-dateutil=2.9.0.post0=pyhe01879c_2
@@ -502,14 +502,14 @@ dependencies:
 - uriparser=0.9.8=hac33072_0
 - urllib3=2.5.0=pyhd8ed1ab_0
 - validators=0.35.0=pyhd8ed1ab_0
-- virtualenv=20.33.1=pyhd8ed1ab_0
+- virtualenv=20.34.0=pyhd8ed1ab_0
 - wayland=1.24.0=h3e06ad9_0
 - wcwidth=0.2.13=pyhd8ed1ab_1
 - webcolors=24.11.1=pyhd8ed1ab_0
 - webencodings=0.5.1=pyhd8ed1ab_3
 - websocket-client=1.8.0=pyhd8ed1ab_1
 - wheel=0.45.1=pyhd8ed1ab_1
-- wrapt=1.17.2=py311h9ecbd09_0
+- wrapt=1.17.3=py311h49ec1c0_0
 - xarray=2025.1.2=pyhd8ed1ab_0
 - xcb-util=0.4.1=h4f16b4b_2
 - xcb-util-cursor=0.1.5=hb9d3cd8_0
