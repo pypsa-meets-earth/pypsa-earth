@@ -370,6 +370,7 @@ if config["enable"].get("build_natura_raster", False):
     rule build_natura_raster:
         params:
             area_crs=config["crs"]["area_crs"],
+            natura=config["natura"]
         input:
             shapefiles_land="data/landcover",
             cutouts=expand(
