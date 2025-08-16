@@ -342,6 +342,7 @@ def clean_frequency(df, default_frequency="50"):
         "16.67": "16.7",
         "50;50;16.716.7": "50;50;16.7;16.7",
         "50;16.7?": "50;16.7",
+        "50.0": "50",
         # "24 kHz": "24000",
     }
 
@@ -541,11 +542,19 @@ def fill_circuits(df):
     def _get_circuits_status(df):
         len_f = df["tag_frequency"].map(len)
         len_c = df["circuits"].map(
-            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
+            lambda x: (
+                x.count(";") + 1
+                if isinstance(x, str)
+                else 1 if isinstance(x, float) and not pd.isna(x) else np.nan
+            )
         )
         isna_c = df["circuits"].isna()
         len_cab = df["cables"].map(
-            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
+            lambda x: (
+                x.count(";") + 1
+                if isinstance(x, str)
+                else 1 if isinstance(x, float) and not pd.isna(x) else np.nan
+            )
         )
         isna_cab = df["cables"].isna()
         return len_f, len_c, isna_c, len_cab, isna_cab
@@ -557,12 +566,7 @@ def fill_circuits(df):
             return ret_def
 
     # cables requirement for circuits calculation
-    cables_req = {
-        "50": 3,
-        "60": 3,
-        "16.7": 2,
-        "0": 2,
-    }
+    cables_req = {"50": 3, "60": 3, "16.7": 2, "0": 2}
 
     def _basic_cables(f_val, cables_req=cables_req, def_circ=2):
         return cables_req[f_val] if f_val in cables_req.keys() else def_circ
