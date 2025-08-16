@@ -161,16 +161,15 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
-
 def decide_bigtiff_flag(out_shape, dtype="uint8", safety_factor=1.1):
-    '''
+    """
     Decide whether BIGTIFF should be "YES" or "NO" based on raster shape.
     BIGTIFF is required for filesizes larger than 4 GB.
 
     Returns
     -------
     str: "YES" if the estimated size is larger than 4 GB, else "NO".
-    '''
+    """
 
     tiff_size = 4_000_000_000
 
