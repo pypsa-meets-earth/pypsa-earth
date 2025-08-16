@@ -276,7 +276,13 @@ def build_demand_profiles(
             # (refer to vresutils.load._upsampling_weights)
             # TODO: require adjustment for Africa
             factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
-            factors = factors / factors.sum()  # ensure that the factors sum to 1
+            if factors.sum() == 0:
+                logger.warning(
+                    f"Upsampling factors for {cntry} are all zero, returning uniform distribution across {len(factors)} shapes."
+                )
+                factors = pd.Series(
+                    np.ones(len(factors)) / len(factors), index=factors.index
+                )
             return pd.DataFrame(
                 factors.values * l.values[:, np.newaxis],
                 index=l.index,
