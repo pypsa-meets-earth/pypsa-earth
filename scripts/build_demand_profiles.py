@@ -64,6 +64,8 @@ logger = create_logger(__name__)
 
 
 def normed(s):
+    if s.sum() == 0:
+        return s
     return s / s.sum()
 
 
