@@ -19,6 +19,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Disable distribute_cluster only for one subnetwork and country `PR #1539 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539>`__
+
 PyPSA-Earth 0.7.0
 =================
 
