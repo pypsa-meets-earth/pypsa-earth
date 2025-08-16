@@ -104,7 +104,7 @@ dependencies:
 - exceptiongroup=1.3.0=pyhd8ed1ab_0
 - executing=2.2.0=pyhd8ed1ab_0
 - fake-useragent=2.2.0=py311h1ea47a8_0
-- filelock=3.18.0=pyhd8ed1ab_0
+- filelock=3.19.1=pyhd8ed1ab_0
 - findlibs=0.1.2=pyhd8ed1ab_0
 - fiona=1.10.1=py311haedb144_3
 - folium=0.20.0=pyhd8ed1ab_0
@@ -115,7 +115,7 @@ dependencies:
 - fontconfig=2.15.0=h765892d_1
 - fonts-conda-ecosystem=1=0
 - fonts-conda-forge=1=0
-- fonttools=4.59.0=py311h3f79411_0
+- fonttools=4.59.1=py311h3f79411_0
 - fqdn=1.5.1=pyhd8ed1ab_1
 - freeglut=3.2.2=he0c23c2_3
 - freetype=2.13.3=h57928b3_1
@@ -129,8 +129,8 @@ dependencies:
 - geopy=2.4.1=pyhd8ed1ab_2
 - geos=3.13.1=h9ea8674_0
 - geotiff=1.7.4=h86c3423_2
-- geoviews=1.14.0=hd8ed1ab_0
-- geoviews-core=1.14.0=pyha770c72_0
+- geoviews=1.14.1=hd8ed1ab_0
+- geoviews-core=1.14.1=pyha770c72_0
 - getopt-win32=0.1=h6a83c73_3
 - gitdb=4.0.12=pyhd8ed1ab_0
 - gitpython=3.1.45=pyhff2d567_0
@@ -182,7 +182,7 @@ dependencies:
 - jupyter_events=0.12.0=pyh29332c3_0
 - jupyter_server=2.16.0=pyhe01879c_0
 - jupyter_server_terminals=0.5.3=pyhd8ed1ab_1
-- jupyterlab=4.4.5=pyhd8ed1ab_0
+- jupyterlab=4.4.6=pyhd8ed1ab_0
 - jupyterlab_pygments=0.3.0=pyhd8ed1ab_2
 - jupyterlab_server=2.27.3=pyhd8ed1ab_1
 - kiwisolver=1.4.9=py311h275cad7_0
@@ -281,7 +281,7 @@ dependencies:
 - multivolumefile=0.2.3=pyhd8ed1ab_1
 - mumps-seq=5.7.3=hbaa6519_10
 - munkres=1.1.4=pyhd8ed1ab_1
-- narwhals=2.1.1=pyhe01879c_0
+- narwhals=2.1.2=pyhe01879c_0
 - nbclient=0.10.2=pyhd8ed1ab_0
 - nbconvert-core=7.16.6=pyh29332c3_0
 - nbformat=5.10.4=pyhd8ed1ab_1
@@ -317,8 +317,8 @@ dependencies:
 - platformdirs=4.3.8=pyhe01879c_0
 - pluggy=1.6.0=pyhd8ed1ab_0
 - ply=3.11=pyhd8ed1ab_3
-- polars=1.32.2=default_hdbf31e6_0
-- polars-default=1.32.2=py39he906d20_0
+- polars=1.32.3=default_h34cc8bc_0
+- polars-default=1.32.3=py39he906d20_0
 - powerplantmatching=0.7.1=pyhd8ed1ab_0
 - pre-commit=4.3.0=pyha770c72_0
 - progressbar2=4.5.0=pyhd8ed1ab_1
@@ -345,7 +345,7 @@ dependencies:
 - pyomo=6.9.3=py311h3e6a449_0
 - pyparsing=3.2.3=pyhe01879c_2
 - pyppmd=1.1.0=py311hda3d55a_1
-- pyproj=3.7.1=py311h91919fb_1
+- pyproj=3.7.2=py311hc1402cc_0
 - pypsa=0.30.3=pyhd8ed1ab_0
 - pyreadline3=3.5.4=py311h1ea47a8_1
 - pyscipopt=5.5.0=py311hda3d55a_0
@@ -357,7 +357,7 @@ dependencies:
 - python=3.11.13=h3f84c4b_0_cpython
 - python-dateutil=2.9.0.post0=pyhe01879c_2
 - python-eccodes=2.37.0=py311h0a17f05_0
-- python-fastjsonschema=2.21.1=pyhd8ed1ab_0
+- python-fastjsonschema=2.21.2=pyhe01879c_0
 - python-gil=3.11.13=hd8ed1ab_0
 - python-json-logger=2.0.7=pyhd8ed1ab_0
 - python-tzdata=2025.2=pyhd8ed1ab_0

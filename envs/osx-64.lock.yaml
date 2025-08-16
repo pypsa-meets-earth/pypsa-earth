@@ -117,7 +117,7 @@ dependencies:
 - exceptiongroup=1.3.0=pyhd8ed1ab_0
 - executing=2.2.0=pyhd8ed1ab_0
 - fake-useragent=2.2.0=py311h6eed73b_0
-- filelock=3.18.0=pyhd8ed1ab_0
+- filelock=3.19.1=pyhd8ed1ab_0
 - findlibs=0.1.2=pyhd8ed1ab_0
 - fiona=1.10.1=py311hecf0d82_3
 - folium=0.20.0=pyhd8ed1ab_0
@@ -128,7 +128,7 @@ dependencies:
 - fontconfig=2.15.0=h37eeddb_1
 - fonts-conda-ecosystem=1=0
 - fonts-conda-forge=1=0
-- fonttools=4.59.0=py311hfbe4617_0
+- fonttools=4.59.1=py311hfbe4617_0
 - fqdn=1.5.1=pyhd8ed1ab_1
 - freetype=2.13.3=h694c41f_1
 - freexl=2.0.0=h3183152_2
@@ -142,8 +142,8 @@ dependencies:
 - geopy=2.4.1=pyhd8ed1ab_2
 - geos=3.13.1=h502464c_0
 - geotiff=1.7.4=h88234f0_2
-- geoviews=1.14.0=hd8ed1ab_0
-- geoviews-core=1.14.0=pyha770c72_0
+- geoviews=1.14.1=hd8ed1ab_0
+- geoviews-core=1.14.1=pyha770c72_0
 - gflags=2.2.2=hac325c4_1005
 - giflib=5.2.2=h10d778d_0
 - gitdb=4.0.12=pyhd8ed1ab_0
@@ -201,7 +201,7 @@ dependencies:
 - jupyter_events=0.12.0=pyh29332c3_0
 - jupyter_server=2.16.0=pyhe01879c_0
 - jupyter_server_terminals=0.5.3=pyhd8ed1ab_1
-- jupyterlab=4.4.5=pyhd8ed1ab_0
+- jupyterlab=4.4.6=pyhd8ed1ab_0
 - jupyterlab_pygments=0.3.0=pyhd8ed1ab_2
 - jupyterlab_server=2.27.3=pyhd8ed1ab_1
 - kiwisolver=1.4.9=py311ha94bed4_0
@@ -308,7 +308,7 @@ dependencies:
 - mumps-include=5.7.3=h991c767_9
 - mumps-seq=5.7.3=heb77934_9
 - munkres=1.1.4=pyhd8ed1ab_1
-- narwhals=2.1.1=pyhe01879c_0
+- narwhals=2.1.2=pyhe01879c_0
 - nbclient=0.10.2=pyhd8ed1ab_0
 - nbconvert-core=7.16.6=pyh29332c3_0
 - nbformat=5.10.4=pyhd8ed1ab_1
@@ -347,8 +347,8 @@ dependencies:
 - platformdirs=4.3.8=pyhe01879c_0
 - pluggy=1.6.0=pyhd8ed1ab_0
 - ply=3.11=pyhd8ed1ab_3
-- polars=1.32.2=default_hc55c1fa_0
-- polars-default=1.32.2=py39hbd2d40b_0
+- polars=1.32.3=default_h11ec952_0
+- polars-default=1.32.3=py39hbd2d40b_0
 - powerplantmatching=0.7.1=pyhd8ed1ab_0
 - pre-commit=4.3.0=pyha770c72_0
 - progressbar2=4.5.0=pyhd8ed1ab_1
@@ -379,7 +379,7 @@ dependencies:
 - pyomo=6.9.3=py311h7b20566_0
 - pyparsing=3.2.3=pyhe01879c_2
 - pyppmd=1.1.0=py311hd89902b_1
-- pyproj=3.7.1=py311hc3aeb6d_1
+- pyproj=3.7.2=py311hb90fb10_0
 - pypsa=0.30.3=pyhd8ed1ab_0
 - pyscipopt=5.5.0=py311hc356e98_0
 - pyshp=3.0.0=pyhd8ed1ab_0
@@ -389,7 +389,7 @@ dependencies:
 - python=3.11.13=h9ccd52b_0_cpython
 - python-dateutil=2.9.0.post0=pyhe01879c_2
 - python-eccodes=2.37.0=py311h0034819_0
-- python-fastjsonschema=2.21.1=pyhd8ed1ab_0
+- python-fastjsonschema=2.21.2=pyhe01879c_0
 - python-gil=3.11.13=hd8ed1ab_0
 - python-json-logger=2.0.7=pyhd8ed1ab_0
 - python-tzdata=2025.2=pyhd8ed1ab_0
