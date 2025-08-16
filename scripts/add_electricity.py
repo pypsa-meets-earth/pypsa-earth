@@ -101,9 +101,9 @@ from _helpers import (
     configure_logging,
     create_logger,
     read_csv_nafix,
-    update_p_nom_max,
     sanitize_carriers,
     sanitize_locations,
+    update_p_nom_max,
 )
 from powerplantmatching.export import map_country_bus
 

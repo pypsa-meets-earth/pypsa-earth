@@ -12,9 +12,8 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from add_existing_baseyear import add_build_year_to_new_assets
-
 from _helpers import sanitize_carriers, sanitize_locations
+from add_existing_baseyear import add_build_year_to_new_assets
 
 # from pypsa.clustering.spatial import normed_or_uniform
 

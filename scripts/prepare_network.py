@@ -66,9 +66,9 @@ import pandas as pd
 import pypsa
 import requests
 from _helpers import (
-    BASE_DIR, 
-    configure_logging, 
-    create_logger, 
+    BASE_DIR,
+    configure_logging,
+    create_logger,
     sanitize_carriers,
     sanitize_locations,
 )

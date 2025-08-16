@@ -57,6 +57,8 @@ PyPSA-Earth 0.7.0
 
 **Minor Changes and bug-fixing**
 
+* Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
+
 * Remove duplicates in environment file `PR #1473 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
 
 * Fix fallback logic for missing currency data by correctly applying the default exchange rate and build cache for storing commonly used exchange rates `PR #1492 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1492>`__
