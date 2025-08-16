@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add pseudo `branch()` to streamline snakemake workflow. Replace this with Snakemake implementation if Snakemake >= 8.3.0. Added an option to configure which sector components to include which when disabled, irrelevant rules are skipped automatically `PR #1538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1538>`__
+
 * Extend functionality of isolated nodes to networks `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
 
 **Minor Changes and bug-fixing**

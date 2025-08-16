@@ -518,6 +518,18 @@ existing_capacities:
   - uranium
 
 sector:
+  enable:
+    heat: true
+    biomass: true
+    industry: true
+    shipping: true
+    aviation: true
+    land_transport: true
+    rail_transport: true
+    agriculture: true
+    residential: true
+    services: true
+
   gas:
     spatial_gas: true # ALWAYS TRUE
     network: false # ALWAYS FALSE for now (NOT USED)
@@ -699,6 +711,7 @@ sector:
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
   airport_sizing_factor: 3
 
+  fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
 
   conventional_generation: # generator : carrier
