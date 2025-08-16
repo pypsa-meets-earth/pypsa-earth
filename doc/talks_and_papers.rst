@@ -27,7 +27,7 @@ Video
 Publications:
 -------------
 
-Parzen et al., "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.12109.
+Parzen et al., "PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa", 2023, https://doi.org/10.1016/j.apenergy.2023.121096.
 Please use the following BibTeX: ::
 
   @article{PyPSAEarth2023,
@@ -56,7 +56,7 @@ PyPSA, PyPSA-Eur, PyPSA-Eur-Sec
 Publications:
 -------------
 
-`Click here to see the full list of publications in the PyPSA ecosystem. <https://www.pypsa.org/publications/index.html>`_
+`Click here to see the full list of publications in the PyPSA ecosystem. <https://pypsa.org/#research>`_
 
 Selected list:
 
