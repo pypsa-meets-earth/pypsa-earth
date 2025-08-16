@@ -159,6 +159,25 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
+
+def decide_bigtiff_flag(out_shape, dtype="uint8", safety_factor=1.1):
+    '''
+    Decide whether BIGTIFF should be "YES" or "NO" based on raster shape.
+    BIGTIFF is required for filesizes larger than 4 GB.
+
+    Returns
+    -------
+    str: "YES" if the estimated size is larger than 4 GB, else "NO".
+    '''
+
+    tiff_size = 4_000_000_000
+
+    bytes_per_pixel = np.dtype(dtype).itemsize
+    estimated_size = out_shape[0] * out_shape[1] * bytes_per_pixel * safety_factor
+
+    return "YES" if estimated_size > tiff_size else "NO"
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -206,6 +225,9 @@ if __name__ == "__main__":
     shp_files = [string for string in shapefiles if ".shp" in string]
     assert len(shp_files) != 0, "no input shapefiles given"
 
+    # identify if BIGTIFF is require (filesize > 4 GB)
+    bigtiff_flag = decide_bigtiff_flag(out_shape)
+
     # create a 0 filled file
     with rio.open(
         snakemake.output[0],
@@ -219,6 +241,7 @@ if __name__ == "__main__":
         width=out_shape[1],
         height=out_shape[0],
         nodata=0,
+        BIGTIFF=bigtiff_flag,
     ) as dst:
         pass
 
@@ -239,18 +262,18 @@ if __name__ == "__main__":
                 logger.warning(f"Error reading file {file}: {e}")
                 continue
 
-            max_row = out_shape[0] - 1  # height (number of rows)
-            max_col = out_shape[1] - 1  # width (number of columns)
+            max_row = out_shape[0] - 1  # height in pixels
+            max_col = out_shape[1] - 1  # width in pixels
 
-            for row0 in range(0, max_row, window_size):
+            for row0 in range(0, max_row, window_size):  # rows = y direction
                 row1 = min(row0 + window_size, max_row)
-                xmin = left + row0 * res
-                xmax = left + row1 * res
-                for col0 in range(0, max_col, window_size):
-                    col1 = min(col0 + window_size, max_col)
+                ymin = top - row1 * res
+                ymax = top - row0 * res
 
-                    ymax = top - col0 * res
-                    ymin = top - col1 * res
+                for col0 in range(0, max_col, window_size):  # cols = x direction
+                    col1 = min(col0 + window_size, max_col)
+                    xmin = left + col0 * res
+                    xmax = left + col1 * res
 
                     window = from_bounds(xmin, ymin, xmax, ymax, transform=transform)
 
