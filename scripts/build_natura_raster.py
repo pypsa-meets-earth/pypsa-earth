@@ -48,8 +48,8 @@ import os
 
 import atlite
 import geopandas as gpd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import rasterio as rio
 from _helpers import configure_logging, create_logger
 from rasterio.features import geometry_mask, rasterize
@@ -112,7 +112,7 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
 
 
 def determine_region_xXyY(cutout_name, regions, natura_size, out_logging):
-    '''
+    """
     Determine the bounds of the analyzed regions depending on the natura_size parameter.
     "global" includes the entire world, "cutout" the extend of the cutout, and
     "countries" only includes the bounds of the requested countries and their offshore regions.
@@ -120,7 +120,7 @@ def determine_region_xXyY(cutout_name, regions, natura_size, out_logging):
     Returns
     -------
     cutout_xXyY : List including the bounds
-    '''
+    """
 
     if out_logging:
         logger.info("Stage 1/5: Determine cutout boundaries")
@@ -137,7 +137,9 @@ def determine_region_xXyY(cutout_name, regions, natura_size, out_logging):
         case "countries":
             x, y, X, Y = regions.to_crs(CUTOUT_CRS).total_bounds
         case _:
-            raise ValueError(f"Provided an unknown value for the parameter 'natura_size': {natura_size}")
+            raise ValueError(
+                f"Provided an unknown value for the parameter 'natura_size': {natura_size}"
+            )
 
     cutout_xXyY = [
         np.clip(x - dx / 2.0, -180, 180),
@@ -245,7 +247,6 @@ if __name__ == "__main__":
     ) as dst:
         pass
 
-
     with rio.open(snakemake.output[0], "r+") as dst:
 
         total_files = 0
@@ -291,7 +292,7 @@ if __name__ == "__main__":
                         out_shape=data.shape,
                         transform=dst.window_transform(window),
                         fill=0,
-                        dtype="uint8"
+                        dtype="uint8",
                     )
 
                     data[mask == 1] = 1
