@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -487,7 +486,7 @@ def add_hydrogen(n, costs):
             custom_cavern = pd.read_csv(
                 os.path.join(
                     BASE_DIR,
-                    "data/custom/h2_underground_{0}_{1}.csv".format(
+                    "data/custom/h2_underground_{}_{}.csv".format(
                         demand_sc, investment_year
                     ),
                 )
@@ -1023,7 +1022,7 @@ def add_biomass(n, costs):
         countries_not_in_index = set(countries) - set(biomass_transport.index)
         if countries_not_in_index:
             logger.info(
-                "No transport values found for {0}, using default value of {1}".format(
+                "No transport values found for {}, using default value of {}".format(
                     ", ".join(countries_not_in_index),
                     snakemake.params.sector_options["biomass_transport_default_cost"],
                 )

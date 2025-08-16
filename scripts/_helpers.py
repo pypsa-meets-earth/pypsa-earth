@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -56,7 +55,7 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
 
     # using snakemake capabilities to deal with yanl configs
-    with open(fp_config, "r") as f:
+    with open(fp_config) as f:
         actual_config = yaml.safe_load(f)
     actual_config_version = actual_config.get("version")
 
@@ -155,7 +154,7 @@ def read_osm_config(*args):
     else:
         base_folder = os.getcwd()
     osm_config_path = os.path.join(base_folder, "configs", REGIONS_CONFIG)
-    with open(osm_config_path, "r") as f:
+    with open(osm_config_path) as f:
         osm_config = yaml.safe_load(f)
     if len(args) == 0:
         return osm_config
@@ -593,7 +592,7 @@ def mock_snakemake(
                 break
 
         if isinstance(configfile, str):
-            with open(configfile, "r") as file:
+            with open(configfile) as file:
                 configfile = yaml.safe_load(file)
 
         workflow = sm.Workflow(

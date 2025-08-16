@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -99,8 +98,8 @@ def determine_cutout_xXyY(cutout_name, out_logging):
 def get_transform_and_shape(bounds, res, out_logging):
     if out_logging:
         logger.info("Stage 2/5: Get transform and shape")
-    left, bottom = [(b // res) * res for b in bounds[:2]]
-    right, top = [(b // res + 1) * res for b in bounds[2:]]
+    left, bottom = ((b // res) * res for b in bounds[:2])
+    right, top = ((b // res + 1) * res for b in bounds[2:])
     # "latitude, longitude" coordinates order
     shape = int((top - bottom) // res), int((right - left) // res)
     transform = rio.Affine(res, 0, left, 0, -res, top)

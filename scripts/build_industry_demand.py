@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -63,7 +62,7 @@ if __name__ == "__main__":
 
     if snakemake.params.industry_demand:
         _logger.info(
-            "Fetching custom industry demand data.. expecting file at 'data/custom/industry_demand_{0}_{1}.csv'".format(
+            "Fetching custom industry demand data.. expecting file at 'data/custom/industry_demand_{}_{}.csv'".format(
                 snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
             )
         )
@@ -71,7 +70,7 @@ if __name__ == "__main__":
         industry_demand = pd.read_csv(
             os.path.join(
                 BASE_DIR,
-                "data/custom/industry_demand_{0}_{1}.csv".format(
+                "data/custom/industry_demand_{}_{}.csv".format(
                     snakemake.wildcards["demand"],
                     snakemake.wildcards["planning_horizons"],
                 ),

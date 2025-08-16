@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -421,7 +420,7 @@ def busmap_for_n_clusters(
                 if not disconn_bus_line.empty:
                     neighbor_bus = disconn_bus_line.iloc[0][["bus0", "bus1"]]
                     new_country = list(
-                        set(n.buses.loc[neighbor_bus].country) - set([country])
+                        set(n.buses.loc[neighbor_bus].country) - {country}
                     )[0]
 
                     logger.info(

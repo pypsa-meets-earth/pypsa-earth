@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -484,7 +483,7 @@ def energy_pie(carrier, node_id, sign):
     )
     ax1.axis("equal")
     plt.title(
-        "Yearly aggregate {0} of {1} at {2} node(s)\n".format(
+        "Yearly aggregate {} of {} at {} node(s)\n".format(
             sign_dict[sign], carrier, node_id
         )
         + "Value = {} GWh".format(round(agg.value.sum(), 1)),
@@ -492,7 +491,7 @@ def energy_pie(carrier, node_id, sign):
     )
     plt.show()
     fig1.savefig(
-        "Yearly_aggregate_{0}_of_{1}_at_{2}_node(s).png".format(
+        "Yearly_aggregate_{}_of_{}_at_{}_node(s).png".format(
             sign_dict[sign], carrier, node_id
         ),
         dpi=100,
