@@ -17,6 +17,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
+
 PyPSA-Earth 0.7.0
 =================
 
@@ -56,8 +58,6 @@ PyPSA-Earth 0.7.0
 * Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
 
 **Minor Changes and bug-fixing**
-
-* Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
 
 * Remove duplicates in environment file `PR #1473 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1473>`__
 
