@@ -140,7 +140,10 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
         costs.columns.to_series().loc[lambda s: s.str.endswith("_emissions")].values
     )
     suptechs = missing_carriers.str.split("-").str[0]
-    emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)
+    emissions = (
+        costs.loc[costs.index.intersection(suptechs), emissions_cols]
+        .reindex(suptechs, fill_value=0.0)
+    )
     emissions.index = missing_carriers
     n.import_components_from_dataframe(emissions, "Carrier")
 
@@ -214,7 +217,6 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs.at["CCGT", "fuel"] = costs.at["gas", "fuel"]
 
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
-    costs["max_hours"] = costs["max_hours"].fillna(1)  #if not defined in input, assumed equal to 1
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
@@ -240,8 +242,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
 
     def costs_for_storageunit(store, link1, link2=pd.DataFrame(), max_hours=1.0):
-        """
-        capital_cost = link1["capital_cost"]+ (max_hours) * (
+        capital_cost = link1["capital_cost"] + (max_hours) * (
             store["capital_cost"]
         )
         if not link2.empty:
@@ -249,17 +250,12 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         return pd.Series(
             dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
         )
-        """
 
-        capital_cost = float(link1["capital_cost"]) + float(store["max_hours"]) * float(
-            store["capital_cost"]
-        )
-        # if link2 is not None:
-        if not link2.empty and "capital_cost" in link2:
-            capital_cost += float(link2["capital_cost"])
-        return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
-        )
+    # TODO: to generalize way better
+    if "max_hours" not in costs.columns:
+        costs["max_hours"] = 1.0
+    else:
+        costs["max_hours"] = costs["max_hours"].fillna(1.0)
 
     max_hours_config = elec_config["max_hours"]
 
@@ -291,7 +287,6 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
     storage_meta_dict, storage_techs = nested_storage_dict(tech_costs)
     costs = add_storage_col_to_costs(costs, storage_meta_dict, storage_techs)
-    
 
     # add capital_cost to all storage_units indexed by carrier e.g. "lead" or "concrete"
     for c in (
