@@ -298,8 +298,6 @@ def _aggregate_and_move_components(
         busmap,
         "Generator",
         carriers=carriers,
-        buses=None,
-        with_time=False,
         custom_strategies=generator_strategies,
     )
 
