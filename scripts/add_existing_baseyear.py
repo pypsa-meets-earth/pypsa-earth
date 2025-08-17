@@ -17,6 +17,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
+from _helpers import sanitize_carriers, sanitize_locations
 
 # from _helpers import (
 #     configure_logging,
@@ -659,6 +660,7 @@ if __name__ == "__main__":
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
 
-    # sanitize_carriers(n, snakemake.config)
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.export_to_netcdf(snakemake.output[0])
