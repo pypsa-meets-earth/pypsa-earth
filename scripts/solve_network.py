@@ -88,12 +88,11 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, override_component_attrs
 from linopy import merge
-from pypsa.linopf import define_constraints
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
 from add_electricity import load_costs
-from pypsa.linopt import get_var, define_constraints, linexpr
+import re
 
 
 logger = create_logger(__name__)
@@ -453,7 +452,7 @@ def add_operational_reserve_margin(n, sns, config):
     update_capacity_constraint(n)
 
 
-def add_battery_constraints(n):
+def add_battery_constraints(n, costs):
     """
     Add constraint ensuring that charger = discharger, i.e.
     1 * charger_size - efficiency * discharger_size = 0
@@ -461,8 +460,16 @@ def add_battery_constraints(n):
     if not n.links.p_nom_extendable.any():
         return
 
-    discharger_bool = n.links.index.str.contains("battery discharger")
-    charger_bool = n.links.index.str.contains("battery charger")
+    bicharger_techs = costs.technology_type == "bicharger"
+    bicharger_carriers = ["battery"]
+    bicharger_carriers += list(costs.loc[bicharger_techs, "carrier"].unique())
+
+    pattern = "|".join(re.escape(c) for c in bicharger_carriers)
+    if len(bicharger_carriers) > 1:
+        pattern = f"({pattern})"
+
+    discharger_bool = n.links.index.str.contains(f"{pattern} discharger")
+    charger_bool = n.links.index.str.contains(f"{pattern} charger")
 
     dischargers_ext = n.links[discharger_bool].query("p_nom_extendable").index
     chargers_ext = n.links[charger_bool].query("p_nom_extendable").index
@@ -973,26 +980,6 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     # add the constraint to the PySPA model
     n.model.add_constraints(lhs == 0, name="Link-bidirectional_sync")
 
-def add_bicharger_constraints(n, costs):
-    tech_type = costs.technology_type
-    carriers_bicharger = list(costs.loc[(tech_type == "bicharger"), "carrier"].unique())
-    carriers_config = n.config["electricity"]["extendable_carriers"]["Store"]
-    carriers_intersect = list(set(carriers_bicharger) & set(carriers_config))
-    for c in carriers_intersect:
-        nodes = n.buses.index[n.buses.carrier == c]
-        if nodes.empty or ("Link", "p_nom") not in n.variables.index:
-            return
-        link_p_nom = get_var(n, "Link", "p_nom")
-        lhs = linexpr(
-            (1, link_p_nom[nodes + " charger"]),
-            (
-                -n.links.loc[nodes + " discharger", "efficiency"].values,
-                link_p_nom[nodes + " discharger"].values,
-            ),
-        )
-        contraint_name = f"charger_ratio_{c}"
-        define_constraints(n, lhs, "=", 0, "Link", contraint_name)
-
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -1029,9 +1016,8 @@ def extra_functionality(n, snapshots):
         if "EQ" in o:
             add_EQ_constraints(n, o)
 
-    add_battery_constraints(n)
+    add_battery_constraints(n, costs)
     add_lossy_bidirectional_link_constraints(n)
-    #add_bicharger_constraints(n, costs)
 
     if snakemake.config["sector"]["chp"]:
         logger.info("setting CHP constraints")
