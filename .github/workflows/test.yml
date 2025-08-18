@@ -133,3 +133,32 @@ jobs:
         echo "The objective extracted successfully"
 
 
+        # Write to the table
+        TABLE="| Folder | File | Objective Value |"
+        TABLE+="\n|:--------|:-----|------------------:|"
+
+        while IFS= read -r line; do
+          FILE=$(echo "$line" | cut -d: -f1)
+          VALUE=$(echo "$line" | cut -d: -f2-)
+          BASENAME=$(basename "$FILE")
+
+          # An enclosing folder contains a name of the run
+          FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
+
+          if [[ "$FILE" == ./logs/solve_network/* ]]; then
+            FOLDER="tutorial pure"
+          fi
+
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` |"
+        done <<< "$OBJ_FOUND"
+
+        # Print to terminal
+        echo -e "$TABLE"
+
+        echo "The output table is formed"
+
+        echo "### Objective Results of CI Run" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "GITHUB_STEP_SUMMARY successfully supplemented with a header"
+
+        printf "%b\n" "$TABLE" >> "$GITHUB_STEP_SUMMARY"
