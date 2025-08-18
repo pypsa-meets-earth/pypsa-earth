@@ -577,6 +577,25 @@ def add_heating_capacities_installed_before_baseyear(
             )
 
 
+def filter_transmission_project_build_year(n, year):
+    """
+    Remove transmission with build year later than the planning horizon
+    """
+    links = n.links[
+        (~n.links.project_status.isin(["", np.nan])) & (n.links.build_year > int(year))
+    ][["bus0", "bus1", "build_year", "project_status", "p_nom"]]
+    lines = n.lines[(n.lines.build_year > int(year))][
+        ["bus0", "bus1", "build_year", "s_nom"]
+    ]
+
+    logger.info(
+        f"Remove transmission with build year later than {year}: \n{links}\n{lines}"
+    )
+
+    n.mremove("Link", links.index)
+    n.mremove("Line", lines.index)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -608,6 +627,9 @@ if __name__ == "__main__":
     # define spatial resolution of carriers
     spatial = define_spatial(n.buses[n.buses.carrier == "AC"].index, options)
     add_build_year_to_new_assets(n, baseyear)
+
+    if snakemake.params.tp_build_year:
+        filter_transmission_project_build_year(n, baseyear)
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
     costs = prepare_costs(

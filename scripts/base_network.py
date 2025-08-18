@@ -484,8 +484,8 @@ def base_network(
     transformers_config,
     voltages_config,
 ):
-    buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
-    lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
+    buses = _load_buses_from_osm(inputs.osm_buses)  # .reset_index(drop=True)
+    lines = _load_lines_from_osm(inputs.osm_lines)  # .reset_index(drop=True)
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 

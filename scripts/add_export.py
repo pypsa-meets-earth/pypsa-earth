@@ -26,7 +26,6 @@ import pypsa
 from _helpers import locate_bus, override_component_attrs, prepare_costs
 from shapely.geometry import Point
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -65,7 +64,9 @@ def select_ports(n):
 
 def add_export(n, hydrogen_buses_ports, export_profile):
     # Project to Mercator to find offset point
-    country_shape_merc = gpd.read_file(snakemake.input["shapes_path"]).to_crs("EPSG:3395")
+    country_shape_merc = gpd.read_file(snakemake.input["shapes_path"]).to_crs(
+        "EPSG:3395"
+    )
     x = country_shape_merc.geometry.centroid.x.min() - 2e5  # 200 km west
     y = country_shape_merc.geometry.centroid.y.max() + 2e5  # 200 km north
 

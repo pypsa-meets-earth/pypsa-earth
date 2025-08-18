@@ -1,0 +1,87 @@
+To get the best clustering:
+
+```yaml
+cluster_options:
+  simplify_network:
+    remove_stubs_across_borders: false
+    p_threshold_drop_isolated: 50
+```
+
+The following components are removed in version 0.1 for 0.1.1
+
+# Indonesia
+Buses:
+* 1461
+* 1462
+* 1620
+* 1621
+* 1718
+* 1767 – Pulau Nias
+* 1818 – Pulau Nias
+* 2385
+* 2429
+* 2507
+
+Lines:
+* 1363724772-1_0
+* 536969981-1_0
+* 736942580-1_0 – Pulau Nias
+* 100000049-1_0
+* 100000050-1_0
+
+#Laos
+Buses:
+* 1227
+
+# Malaysia
+Buses:
+* 2094
+
+# Philippines
+Buses:
+* 1271
+* 1279
+* 1280
+* 2346
+* 2353
+* 2367
+* 2368
+* 2375
+
+Transformers:
+* transf_811_0
+* transf_825_0
+* transf_827_0
+* transf_827_1
+
+# Thailand
+Buses:
+* 766
+* 772
+
+#Vietnam
+Buses:
+* 1091
+* 1092
+* 1125
+* 1126
+* 2176
+* 2207
+* 2216
+* 2217
+* 2221
+* 2225
+* 2226
+* 2250
+* 2254
+* 2507
+
+Lines:
+* 1264571596-1_0
+
+Transformers:
+* transf_742_0
+
+Moved:
+* 730 Before: (103.668, 18.375) After: (103.6408, 18.395)
+* 729 Before: (103.6358, 18.374) After: (103.698, 18.394)

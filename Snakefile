@@ -2112,6 +2112,7 @@ if config["foresight"] == "myopic":
             sector=config["sector"],
             existing_capacities=config["existing_capacities"],
             costs=config["costs"],
+            tp_build_year=config["transmission_projects"]["set_by_build_year"],
         input:
             **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR
@@ -2176,6 +2177,7 @@ if config["foresight"] == "myopic":
             snapshots=config["snapshots"],
             # drop_leap_day=config["enable"]["drop_leap_day"],
             carriers=config["electricity"]["renewable_carriers"],
+            tp_build_year=config["transmission_projects"]["set_by_build_year"],
         input:
             # unpack(input_profile_tech_brownfield),
             simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",

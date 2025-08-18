@@ -157,6 +157,8 @@ load_options:
 
 electricity:
   base_voltage: 380.
+  base_network: false # ["osm-prebuilt", "osm-plus-prebuilt"]
+  base_network_version: 0.1.1 # see in data/
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
@@ -222,6 +224,20 @@ transformers:
   x: 0.1
   s_nom: 2000.
   type: ""
+
+transmission_projects:
+  enable: true
+  include:
+    ID_SuperGrid: true
+    AIMS: true
+  skip: []
+  status:
+  - in_planning
+  - under_construction
+  - existing
+  - under_consideration
+  new_link_capacity: keep #keep or zero
+  set_by_build_year: true
 
 atlite:
   nprocesses: 4
