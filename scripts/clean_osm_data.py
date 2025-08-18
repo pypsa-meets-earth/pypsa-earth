@@ -419,7 +419,7 @@ def clean_circuits(df):
 
     # Convert numbers in different dtypes to string while preserving NaN or other strings.
     is_numeric = ~pd.to_numeric(df["circuits"], errors="coerce").isna()
-    df["circuits"] = df["circuits"].where(~is_numeric, df["circuits"].astype(str))
+    df["circuits"] = df["circuits"].mask(is_numeric, df["circuits"].astype(str))
 
     # Report non-numeric and non-NaN values, which should be added to repl_circuits.
     if df.loc[~is_numeric, "circuits"].notna().any():
@@ -465,7 +465,7 @@ def clean_cables(df):
 
     # Convert numbers in different dtypes to string while preserving NaN or other strings.
     is_numeric = ~pd.to_numeric(df["cables"], errors="coerce").isna()
-    df["cables"] = df["cables"].where(~is_numeric, df["cables"].astype(str))
+    df["cables"] = df["cables"].mask(is_numeric, df["cables"].astype(str))
 
     # Report non-numeric and non-NaN values, which should be added to repl_cables.
     if df.loc[~is_numeric, "cables"].notna().any():
