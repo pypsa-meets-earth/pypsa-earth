@@ -421,7 +421,7 @@ def clean_circuits(df):
     is_numeric = ~pd.to_numeric(df["circuits"], errors="coerce").isna()
     df["circuits"] = df["circuits"].where(~is_numeric, df["circuits"].astype(str))
 
-        # Report non-numeric and non-NaN values, which should be added to repl_circuits.
+    # Report non-numeric and non-NaN values, which should be added to repl_circuits.
     if df.loc[~is_numeric, "circuits"].notna().any():
         logger.warning(
             "Non-numeric and non-NaN values found in circuits column, consider replacement: "
