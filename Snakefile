@@ -1000,7 +1000,11 @@ rule prepare_transport_data_input:
     script:
         "scripts/prepare_transport_data_input.py"
 
-if not config["custom_data"]["h2_underground"] and config["sector"]["hydrogen"]["underground_storage"]["enabled"]:
+
+if (
+    not config["custom_data"]["h2_underground"]
+    and config["sector"]["hydrogen"]["underground_storage"]["enabled"]
+):
 
     rule build_salt_cavern_potentials:
         input:
@@ -1012,7 +1016,9 @@ if not config["custom_data"]["h2_underground"] and config["sector"]["hydrogen"][
             + RDIR
             + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
         output:
-            h2_cavern="resources/" + RDIR + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
+            h2_cavern="resources/"
+            + RDIR
+            + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
         params:
             crs=config["crs"],
             underground_storage=config["sector"]["hydrogen"]["underground_storage"],
@@ -1105,16 +1111,23 @@ rule prepare_sector_network:
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
+        **(
+            {
+                "h2_cavern": (
+                    "data/hydrogen_salt_cavern_potentials.csv"
+                    if config["custom_data"]["h2_underground"]
+                    else "resources/"
+                    + RDIR
+                    + f"salt_cavern_potentials_s{{simpl}}_{{clusters}}.csv"
+                )
+            }
+            if config["custom_data"]["h2_underground"]
+            or config["sector"]["hydrogen"]["underground_storage"]["enabled"]
+            else {}
+        ),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
-        **({
-            "h2_cavern": (
-                "data/hydrogen_salt_cavern_potentials.csv"
-                if config["custom_data"]["h2_underground"]
-                else "resources/" + RDIR + f"salt_cavern_potentials_s{{simpl}}_{{clusters}}.csv"
-            )
-        } if config["custom_data"]["h2_underground"] or config["sector"]["hydrogen"]["underground_storage"]["enabled"] else {}),
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
             "resources/"
