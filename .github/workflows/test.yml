@@ -98,3 +98,17 @@ jobs:
         #     snakemake --cores all plot_all_summaries
         #     snakemake --cores all make_all_summaries
         #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
+
+    # Download artifacts
+    - name: Download feature logs
+      uses: actions/download-artifact@v4
+      with:
+        name: results-${{ matrix.os }}
+        # path: ./artifacts  # All artifacts go here, each in their own subfolder
+
+    # TODO Remove after debugging
+    - name: Show downloaded structure
+      run: |
+        echo "Current working directory: $(pwd)"
+        echo "All files and folders after artifact download:"
+        find . -type f -o -type d | sort
