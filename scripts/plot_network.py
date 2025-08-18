@@ -32,6 +32,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     load_network_for_plots,
+    rename_techs,
 )
 from matplotlib.legend_handler import HandlerPatch
 from matplotlib.patches import Circle, Ellipse
@@ -778,70 +779,6 @@ preferred_order = pd.Index(
         "CO2 sequestration",
     ]
 )
-
-
-def rename_techs(label):
-    prefix_to_remove = [
-        "residential ",
-        "services ",
-        "urban ",
-        "rural ",
-        "central ",
-        "decentral ",
-    ]
-
-    rename_if_contains = [
-        "CHP",
-        "gas boiler",
-        "biogas",
-        "solar thermal",
-        "air heat pump",
-        "ground heat pump",
-        "resistive heater",
-        "Fischer-Tropsch",
-    ]
-
-    rename_if_contains_dict = {
-        "water tanks": "hot water storage",
-        "retrofitting": "building retrofitting",
-        "H2": "hydrogen storage",
-        "battery": "battery storage",
-        "CCS": "CCS",
-    }
-
-    rename = {
-        "solar": "solar PV",
-        "Sabatier": "methanation",
-        "offwind": "offshore wind",
-        "offwind-ac": "offshore wind (AC)",
-        "offwind-dc": "offshore wind (DC)",
-        "onwind": "onshore wind",
-        "ror": "hydroelectricity",
-        "hydro": "hydroelectricity",
-        "PHS": "hydroelectricity",
-        "co2 Store": "DAC",
-        "co2 stored": "CO2 sequestration",
-        "AC": "transmission lines",
-        "DC": "transmission lines",
-        "B2B": "transmission lines",
-    }
-
-    for ptr in prefix_to_remove:
-        if label[: len(ptr)] == ptr:
-            label = label[len(ptr) :]
-
-    for rif in rename_if_contains:
-        if rif in label:
-            label = rif
-
-    for old, new in rename_if_contains_dict.items():
-        if old in label:
-            label = new
-
-    for old, new in rename.items():
-        if old == label:
-            label = new
-    return label
 
 
 def rename_techs_tyndp(tech):
