@@ -202,7 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import BASE_DIR, configure_logging, create_logger, COPERNICUS_CRS
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
@@ -501,7 +501,7 @@ if __name__ == "__main__":
     # crs
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
-    copernicus_crs = snakemake.params.crs["copernicus_crs"]
+    copernicus_crs = COPERNICUS_CRS
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}

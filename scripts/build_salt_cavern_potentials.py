@@ -22,9 +22,10 @@ import shapely.geometry
 from _helpers import (
     mock_snakemake,
     to_csv_nafix,
+    COPERNICUS_CRS
 )
 
-
+# TODO: consider externalizing this download in a retrieve_* rule or helper function
 def download_potash_data():
     # URL of the Potash GIS data
     url = "https://pubs.usgs.gov/sir/2010/5090/s/PotashGIS.zip"
@@ -478,7 +479,7 @@ if __name__ == "__main__":
 
     area_crs = snakemake.params.crs["area_crs"]
     geo_crs = snakemake.params.crs["geo_crs"]
-    copernicus_crs = snakemake.params.crs["copernicus_crs"]
+    copernicus_crs = COPERNICUS_CRS
     distance_crs = snakemake.params.crs["distance_crs"]
     paths = snakemake.input
 
