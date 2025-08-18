@@ -424,8 +424,8 @@ def clean_circuits(df):
         # Report non-numeric and non-NaN values, which should be added to repl_circuits.
     if df.loc[~is_numeric, "circuits"].notna().any():
         logger.warning(
-            "Non-numeric and non-NaN values found in circuits column, consider replacement:",
-            df.loc[~is_numeric, "circuits"].unique())
+            "Non-numeric and non-NaN values found in circuits column, consider replacement: "
+            + str(df.loc[~is_numeric, "circuits"].unique()))
 
     return df
 
@@ -470,8 +470,8 @@ def clean_cables(df):
     # Report non-numeric and non-NaN values, which should be added to repl_cables.
     if df.loc[~is_numeric, "cables"].notna().any():
         logger.warning(
-            "Non-numeric and non-NaN values found in cables column, consider replacement:",
-            df.loc[~is_numeric, "cables"].unique())
+            "Non-numeric and non-NaN values found in cables column, consider replacement: "
+            + str(df.loc[~is_numeric, "cables"].unique()))
 
     return df
 
