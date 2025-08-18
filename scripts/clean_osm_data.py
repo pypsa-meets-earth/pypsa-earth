@@ -348,7 +348,10 @@ def clean_frequency(df, default_frequency="50"):
 
     # TODO: default frequency may be by country
     df["tag_frequency"] = (
-        df["tag_frequency"].fillna(default_frequency).astype(str).replace(repl_freq)
+        df["tag_frequency"]
+        .fillna(default_frequency)
+        .astype(str)
+        .replace(repl_freq)
     )
 
     return df
@@ -407,12 +410,22 @@ def clean_circuits(df):
         "1.": "1",
     }
 
-    # note: no string conversion here! it is performed later on
+    # note: no string conversion for all entries in clean_circuits! it is performed later on
     df["circuits"] = (
         df["circuits"]
         .replace(repl_circuits)
         .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
     )
+
+    # Convert numbers in different dtypes to string while preserving NaN or other strings.
+    is_numeric = ~pd.to_numeric(df["circuits"], errors="coerce").isna()
+    df["circuits"] = df["circuits"].where(~is_numeric, df["circuits"].astype(str))
+
+        # Report non-numeric and non-NaN values, which should be added to repl_circuits.
+    if df.loc[~is_numeric, "circuits"].notna().any():
+        logger.warning(
+            "Non-numeric and non-NaN values found in circuits column, consider replacement:",
+            df.loc[~is_numeric, "circuits"].unique())
 
     return df
 
@@ -444,9 +457,21 @@ def clean_cables(df):
         "line": "1",
     }
 
-    df["cables"] = df["cables"].map(
-        lambda x: x.replace(" ", "") if isinstance(x, str) else x
-    )
+    df["cables"] = (  
+        df["cables"]  
+        .replace(repl_cables)  
+        .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)  
+    )  
+
+    # Convert numbers in different dtypes to string while preserving NaN or other strings.
+    is_numeric = ~pd.to_numeric(df["cables"], errors="coerce").isna()
+    df["cables"] = df["cables"].where(~is_numeric, df["cables"].astype(str))
+
+    # Report non-numeric and non-NaN values, which should be added to repl_cables.
+    if df.loc[~is_numeric, "cables"].notna().any():
+        logger.warning(
+            "Non-numeric and non-NaN values found in cables column, consider replacement:",
+            df.loc[~is_numeric, "cables"].unique())
 
     return df
 
@@ -542,19 +567,11 @@ def fill_circuits(df):
     def _get_circuits_status(df):
         len_f = df["tag_frequency"].map(len)
         len_c = df["circuits"].map(
-            lambda x: (
-                x.count(";") + 1
-                if isinstance(x, str)
-                else 1 if isinstance(x, float) and not pd.isna(x) else np.nan
-            )
+            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
         )
         isna_c = df["circuits"].isna()
         len_cab = df["cables"].map(
-            lambda x: (
-                x.count(";") + 1
-                if isinstance(x, str)
-                else 1 if isinstance(x, float) and not pd.isna(x) else np.nan
-            )
+            lambda x: x.count(";") + 1 if isinstance(x, str) else np.nan
         )
         isna_cab = df["cables"].isna()
         return len_f, len_c, isna_c, len_cab, isna_cab
