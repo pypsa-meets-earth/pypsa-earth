@@ -217,28 +217,29 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     countries = list(n.buses.country.unique())
 
-    # Create export profile
-    export_profile = create_export_profile()
+    if snakemake.params.enable:
+        # Create export profile
+        export_profile = create_export_profile()
 
-    # Prepare the costs dataframe
-    Nyears = n.snapshot_weightings.generators.sum() / 8760
+        # Prepare the costs dataframe
+        Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+        costs = prepare_costs(
+            snakemake.input.costs,
+            snakemake.config["costs"],
+            snakemake.params.costs["output_currency"],
+            snakemake.params.costs["fill_values"],
+            Nyears,
+            snakemake.params.costs["default_exchange_rate"],
+            snakemake.params.costs["future_exchange_rate_strategy"],
+            snakemake.params.costs["custom_future_exchange_rate"],
+        )
 
-    # get hydrogen export buses/ports
-    hydrogen_buses_ports = select_ports(n)
+        # get hydrogen export buses/ports
+        hydrogen_buses_ports = select_ports(n)
 
-    # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_profile)
+        # add export value and components to network
+        add_export(n, hydrogen_buses_ports, export_profile)
 
     n.export_to_netcdf(snakemake.output[0])
 

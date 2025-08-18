@@ -474,6 +474,7 @@ fossil_reserves:
   oil: 100 #TWh Maybe redundant
 
 export:
+  enable: true
   endogenous: false # If true, the export demand is endogenously determined by the model
   endogenous_price: 400 # EUR/MWh # Market price, for wich the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
