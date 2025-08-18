@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     # solar thermal (parabolic trough delivering heat at 150C-250C):
     manual_costs.loc[idx["solar thermal parabolic trough", "investment"], "value"] = (
-        400_000
+        800_000
     )
     manual_costs.loc[idx["solar thermal parabolic trough", "investment"], "unit"] = (
         "$/MWth"
@@ -56,9 +56,9 @@ if __name__ == "__main__":
         "https://proceedings.ises.org/conference/eurosun2024/papers/eurosun2024-0042-Akar.pdf"
     )
 
-    manual_costs.loc[idx["solar thermal parabolic trough", "FOM"], "value"] = 0.012
-    manual_costs.loc[idx["solar thermal parabolic trough", "FOM"], "unit"] = "$/MWth"
-    manual_costs.loc[idx["solar thermal parabolic trough", "FOM"], "source"] = (
+    manual_costs.loc[idx["solar thermal parabolic trough", "VOM"], "value"] = 0.012
+    manual_costs.loc[idx["solar thermal parabolic trough", "VOM"], "unit"] = "$/MWth"
+    manual_costs.loc[idx["solar thermal parabolic trough", "VOM"], "source"] = (
         "https://proceedings.ises.org/conference/eurosun2024/papers/eurosun2024-0042-Akar.pdf"
     )
 
@@ -120,11 +120,18 @@ if __name__ == "__main__":
         ]
     )
 
+    # adjusting COP based on NREL data
+    manual_costs.loc[idx["industrial heat pump high temperature", "efficiency"], "value"] = 2.5
+    manual_costs.loc[idx["industrial heat pump high temperature", "efficiency"], "unit"] = "per unit"
+    manual_costs.loc[idx["industrial heat pump high temperature", "efficiency"], "source"] = (
+        "https://docs.nrel.gov/docs/fy23osti/84560.pdf"
+    )
+
     # solar thermal for 80-150C temperature band: Linear Fresnel Reflectors
-    manual_costs.loc[idx["linear fresnel reflector", "investment"], "value"] = 250_000
+    manual_costs.loc[idx["linear fresnel reflector", "investment"], "value"] = 700_000
     manual_costs.loc[idx["linear fresnel reflector", "investment"], "unit"] = "$/MWth"
     manual_costs.loc[idx["linear fresnel reflector", "investment"], "source"] = (
-        "https://task64.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
+        "https://docs.nrel.gov/docs/fy22osti/81147.pdf#page=1.00&gsr=0"
     )
 
     manual_costs.loc[idx["linear fresnel reflector", "lifetime"], "value"] = 25
@@ -133,7 +140,7 @@ if __name__ == "__main__":
         "https://task64.iea-shc.org/Data/Sites/1/publications/IEA-SHC-Task64-SubtaskE-D.E2-D.E3.pdf"
     )
 
-    manual_costs.loc[idx["linear fresnel reflector", "VOM"], "value"] = 0.005
+    manual_costs.loc[idx["linear fresnel reflector", "VOM"], "value"] = 0.015
     manual_costs.loc[idx["linear fresnel reflector", "VOM"], "unit"] = "$/MWthh"
     manual_costs.loc[idx["linear fresnel reflector", "VOM"], "source"] = (
         "https://docs.nrel.gov/docs/fy25osti/93381.pdf"
@@ -221,7 +228,7 @@ if __name__ == "__main__":
     )
 
     # add respective steam boiler costs
-    investemt_costs = {
+    investment_costs = {
         2020: 60_000,  # EUR/MW
         2030: 50_000,  # EUR/MW
         2035: 50_000,  # EUR/MW
@@ -229,7 +236,7 @@ if __name__ == "__main__":
         2050: 50_000,  # EUR/MW
     }
     manual_costs.loc[idx["steam boiler gas cond", "investment"], "value"] = (
-        investemt_costs[cost_year]
+        investment_costs[cost_year]
     )
     manual_costs.loc[idx["steam boiler gas cond", "investment"], "unit"] = "EUR/MWth"
     manual_costs.loc[idx["steam boiler gas cond", "investment"], "source"] = (
@@ -275,7 +282,7 @@ if __name__ == "__main__":
     manual_costs.loc[idx["steam boiler gas cond", "lifetime"], "currency_year"] = 2019.0
 
     # add respective steam boiler costs
-    investemt_costs = {
+    investment_costs = {
         2020: 50_000,  # EUR/MW
         2030: 40_000,  # EUR/MW
         2035: 40_000,  # EUR/MW
@@ -283,7 +290,7 @@ if __name__ == "__main__":
         2050: 40_000,  # EUR/MW
     }
     manual_costs.loc[idx["hot water boiler gas cond", "investment"], "value"] = (
-        investemt_costs[cost_year]
+        investment_costs[cost_year]
     )
     manual_costs.loc[idx["hot water boiler gas cond", "investment"], "unit"] = (
         "EUR/MWth"

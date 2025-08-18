@@ -3158,14 +3158,15 @@ def add_industry_heating(n, costs):
     # ... we scale the concentrated_solar_power capacity factors to the avg capacity factors of each tech
 
     capacity_factors = {
-        "glazed flat plate collector": 0.3,
-        "linear fresnel reflector": 0.51,
-        "solar thermal parabolic trough": 0.45,
+        "glazed flat plate collector": 0.11, # https://www.iea-shc.org/data/sites/1/documents/statistics/technical_note-new_solar_thermal_statistics_Conversion.pdf
+        "linear fresnel reflector": 0.17, # https://www.sciencedirect.com/science/article/pii/S1364032124002740
+        "solar thermal parabolic trough": 0.18, # https://www.sciencedirect.com/science/article/pii/S1364032124002740
     }
 
     # solar thermal for each temperature band
-    for nod, solar_tech, storage_tech_name, storage_tech_carrier_name in zip(
+    for nod, locs, solar_tech, storage_tech_name, storage_tech_carrier_name in zip(
         [low_temp_buses, medium_temp_buses, high_temp_buses],
+        [nodes_low, nodes_medium, nodes_high],
         [
             "glazed flat plate collector",
             "linear fresnel reflector",
@@ -3184,18 +3185,18 @@ def add_industry_heating(n, costs):
     ):
 
         p_max_pu = solar_thermal_p_max_pu.rename(
-            columns={name + " csp": name + " " + solar_tech for name in nod},
+            columns={name + " csp": name + " " + solar_tech for name in locs},
         )
 
         cf_scaling = capacity_factors[solar_tech] / p_max_pu.mean().mean()
 
         n.madd(
             "Generator",
-            nod + " " + solar_tech,
+            locs + " " + solar_tech,
             bus=nod,
             carrier=solar_tech,
             p_nom_extendable=True,
-            capital_cost=costs.at[solar_tech, "investment"],
+            capital_cost=costs.at[solar_tech, "fixed"],
             efficiency=costs.at[solar_tech, "efficiency"],
             marginal_cost=costs.at[solar_tech, "VOM"],
             p_max_pu=p_max_pu * cf_scaling,
@@ -3203,11 +3204,11 @@ def add_industry_heating(n, costs):
 
         n.madd(
             "StorageUnit",
-            nod + " " + storage_tech_name,
+            locs + " " + storage_tech_name,
             bus=nod,
             carrier=storage_tech_carrier_name,
             p_nom_extendable=True,
-            capital_cost=costs.at[storage_tech_name, "investment"],
+            capital_cost=costs.at[storage_tech_name, "fixed"],
             efficiency_store=costs.at[storage_tech_name, "efficiency_store"],
             efficiency_dispatch=costs.at[storage_tech_name, "efficiency_dispatch"],
             max_hours=costs.at[storage_tech_name, "max_hours"],
@@ -3273,7 +3274,7 @@ def add_industry_heating(n, costs):
                 bus1=nod,
                 carrier=boiler_tech_carrier_name + " " + fuel + "-powered",
                 p_nom_extendable=True,
-                capital_cost=costs.at[boiler_tech_name, "investment"],
+                capital_cost=costs.at[boiler_tech_name, "fixed"],
                 efficiency=costs.at[boiler_tech_name, "efficiency"] * 0.01,
                 **kwargs
             )
@@ -3292,9 +3293,8 @@ def add_industry_heating(n, costs):
         bus1=nodes_low,
         carrier="industrial heat pump low temperature",
         p_nom_extendable=True,
-        capital_cost=costs.at["industrial heat pump medium temperature", "fixed"]
-        * 1000,
-        lifetime=costs.at["industrial heat pump medium temperature", "lifetime"],
+        capital_cost=costs.at["industrial heat pump medium temperature", "fixed"],
+        lifetime=costs.at["industrial heat pump medium temperature", "lifetime"] * 1000, # $/kW -> $/MW
         efficiency=costs.at["industrial heat pump medium temperature", "efficiency"],
         marginal_cost=costs.at["industrial heat pump medium temperature", "VOM"],
     )
@@ -3311,7 +3311,7 @@ def add_industry_heating(n, costs):
         bus1=nodes_medium,
         carrier="industrial heat pump medium temperature",
         p_nom_extendable=True,
-        capital_cost=costs.at["industrial heat pump high temperature", "fixed"] * 1000,
+        capital_cost=costs.at["industrial heat pump high temperature", "fixed"] * 1000, # $/kW -> $/MW
         lifetime=costs.at["industrial heat pump high temperature", "lifetime"],
         efficiency=costs.at["industrial heat pump high temperature", "efficiency"],
         marginal_cost=costs.at["industrial heat pump high temperature", "VOM"],
