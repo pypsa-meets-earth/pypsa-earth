@@ -4025,6 +4025,45 @@ if __name__ == "__main__":
         snakemake.params.costs["scenario"],
     )
 
+    if 'BBB' in snakemake.wildcards.sopts:
+
+        geothermal_techs = [
+            "directheat100degC",
+            "directheat200degC", 
+            "pwr_residheat80degC_egs",
+            "pwr_residheat80degC_hs",
+            "steam150degC_egs",
+            "steam150degC_hs",
+            "steam175degC_power_residheat80degC_egs",
+            "steam175degC_power_residheat80degC_hs", 
+            "steam200degC_power_residheat80degC_egs",
+            "steam200degC_power_residheat80degC_hs",
+            "steam225degC_power_residheat80degC_egs",
+            "steam225degC_power_residheat80degC_hs"
+        ]
+
+        # Find the BBB sequence and extract year
+        for opt in snakemake.wildcards.sopts.split('-'):
+            if not opt.startswith('BBB'):
+                continue
+
+            year = int(opt[3:])
+            if year < 2033:
+                reduction = 0.5
+            if year in [2033, 2034]:
+                reduction = 0.25
+            if year > 2034:
+                reduction = 0.0
+
+            logger.info(f"Reducing geothermal cost through IRA/BBB cost reduction by {int(reduction*100)}% assuming project start in {year}.")
+            # see https://www.hklaw.com/en/insights/publications/2025/05/irs-releases-2025-section-45-production-tax-credit-amounts
+
+            gt_techs = n.links.index[n.links.carrier.isin(geothermal_techs)]
+            n.links.loc[gt_techs, ['capital_cost', 'marginal_cost']] *= (1 - reduction)
+
+            break
+                
+
     ##########################################################################
     ############## Functions adding different carriers and sectors ###########
     ##########################################################################
