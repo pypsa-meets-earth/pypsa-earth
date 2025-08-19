@@ -100,6 +100,8 @@ from _helpers import (
     configure_logging,
     create_logger,
     read_csv_nafix,
+    sanitize_carriers,
+    sanitize_locations,
     update_p_nom_max,
 )
 from powerplantmatching.export import map_country_bus
@@ -918,6 +920,10 @@ if __name__ == "__main__":
             "Unexpected missing 'weight' column, which has been manually added. It may be due to missing generators."
         )
         n.generators["weight"] = pd.Series()
+
+    sanitize_carriers(n, snakemake.config)
+    if "location" in n.buses:
+        sanitize_locations(n)
 
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])
