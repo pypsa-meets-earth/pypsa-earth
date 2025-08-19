@@ -348,10 +348,7 @@ def clean_frequency(df, default_frequency="50"):
 
     # TODO: default frequency may be by country
     df["tag_frequency"] = (
-        df["tag_frequency"]
-        .fillna(default_frequency)
-        .astype(str)
-        .replace(repl_freq)
+        df["tag_frequency"].fillna(default_frequency).astype(str).replace(repl_freq)
     )
 
     return df
@@ -425,7 +422,8 @@ def clean_circuits(df):
     if df.loc[~is_numeric, "circuits"].notna().any():
         logger.warning(
             "Non-numeric and non-NaN values found in circuits column, consider replacement: "
-            + str(df.loc[~is_numeric, "circuits"].unique()))
+            + str(df.loc[~is_numeric, "circuits"].unique())
+        )
 
     return df
 
@@ -457,11 +455,11 @@ def clean_cables(df):
         "line": "1",
     }
 
-    df["cables"] = (  
-        df["cables"]  
-        .replace(repl_cables)  
-        .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)  
-    )  
+    df["cables"] = (
+        df["cables"]
+        .replace(repl_cables)
+        .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
+    )
 
     # Convert numbers in different dtypes to string while preserving NaN or other strings.
     is_numeric = ~pd.to_numeric(df["cables"], errors="coerce").isna()
@@ -471,7 +469,8 @@ def clean_cables(df):
     if df.loc[~is_numeric, "cables"].notna().any():
         logger.warning(
             "Non-numeric and non-NaN values found in cables column, consider replacement: "
-            + str(df.loc[~is_numeric, "cables"].unique()))
+            + str(df.loc[~is_numeric, "cables"].unique())
+        )
 
     return df
 
