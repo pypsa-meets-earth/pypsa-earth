@@ -2,9 +2,9 @@
 Optimization Models in Energy Systems
 =====================================
 
-The aim of this section is to provide an overview of the most common optimization approaches used in energy system models. 
-In particular, it covers capacity expansion models and economic dispatch models, and it distinguishes between deterministic and stochastic formulations. 
-Before addressing these categories, we introduce some general definitions. 
+The aim of this section is to provide an overview of the most common optimization approaches used in energy system models.
+In particular, it covers capacity expansion models and economic dispatch models, and it distinguishes between deterministic and stochastic formulations.
+Before addressing these categories, we introduce some general definitions.
 In general, an optimization problem can be expressed as:
 
 
@@ -83,7 +83,7 @@ The optimization problem can be formulated as:
 .. math::
 
    \begin{aligned}
-       \min_{\substack{P_{\text{PV}},\, P_{\text{gas}}, \\ p_{\text{PV}}(t),\, p_{\text{gas}}(t)}} 
+       \min_{\substack{P_{\text{PV}},\, P_{\text{gas}}, \\ p_{\text{PV}}(t),\, p_{\text{gas}}(t)}}
        & C_{\text{PV}}^{\text{cap}} \cdot P_{\text{PV}} + C_{\text{gas}}^{\text{cap}} \cdot P_{\text{gas}} \nonumber \\
        & + \sum_{t=1}^T c_{\text{gas}} \cdot p_{\text{gas}}(t) \cdot \Delta t \label{eq:obj_energy}\end{aligned}
 
@@ -202,14 +202,14 @@ Assume three equally likely scenarios (probability :math:`1/3` each):
 
 .. math::
 
-   \mathbb{E}[C(x)] = \tfrac13(10x) + \tfrac13(10x + 16(5-x)) + \tfrac13(10x + 16(20-x)) 
+   \mathbb{E}[C(x)] = \tfrac13(10x) + \tfrac13(10x + 16(5-x)) + \tfrac13(10x + 16(20-x))
    = 126.67 - 2x.
 
 For :math:`5 < x \le 20`:
 
 .. math::
 
-   \mathbb{E}[C(x)] = \tfrac13(10x) + \tfrac13(10x) + \tfrac13(10x + 16(20-x)) 
+   \mathbb{E}[C(x)] = \tfrac13(10x) + \tfrac13(10x) + \tfrac13(10x + 16(20-x))
    = 106.67 + 4x.
 
 **Result:**
@@ -305,7 +305,7 @@ representing, for example, *low*, *medium*, and *high* price conditions.
 .. math::
 
    \begin{aligned}
-       \min_{P_{\text{PV}},\, P_{\text{gas}}} \quad 
+       \min_{P_{\text{PV}},\, P_{\text{gas}}} \quad
        & C_{\text{PV}}^{\text{cap}} \cdot P_{\text{PV}} + C_{\text{gas}}^{\text{cap}} \cdot P_{\text{gas}} \nonumber \\
        & + \sum_{\omega=1}^3 p_\omega \; Q(P_{\text{PV}},P_{\text{gas}},\omega) \label{eq:stoc_obj_energy}\end{aligned}
 
@@ -314,7 +314,7 @@ where the second-stage operational cost for scenario :math:`\omega` is:
 .. math::
 
    \begin{aligned}
-       Q(P_{\text{PV}},P_{\text{gas}},\omega) \;=\; 
+       Q(P_{\text{PV}},P_{\text{gas}},\omega) \;=\;
        & \sum_{t=1}^T c_{\text{gas}}^{(\omega)} \cdot p_{\text{gas}}(t,\omega) \cdot \Delta t\end{aligned}
 
 subject to, for each scenario :math:`\omega`:
@@ -322,11 +322,11 @@ subject to, for each scenario :math:`\omega`:
 .. math::
 
    \begin{aligned}
-       & p_{\text{PV}}(t,\omega) + p_{\text{gas}}(t,\omega) = D(t) 
+       & p_{\text{PV}}(t,\omega) + p_{\text{gas}}(t,\omega) = D(t)
          && \forall t \quad \text{(demand balance)} \label{eq:stoc_bal} \\
-       & 0 \le p_{\text{PV}}(t,\omega) \le \min\{ G(t) \cdot \eta_{\text{PV}},\; P_{\text{PV}}\} 
+       & 0 \le p_{\text{PV}}(t,\omega) \le \min\{ G(t) \cdot \eta_{\text{PV}},\; P_{\text{PV}}\}
          && \forall t \quad \text{(PV limit)} \label{eq:stoc_pv_lim} \\
-       & 0 \le p_{\text{gas}}(t,\omega) \le P_{\text{gas}} 
+       & 0 \le p_{\text{gas}}(t,\omega) \le P_{\text{gas}}
          && \forall t \quad \text{(gas capacity)} \label{eq:stoc_gas_lim}\end{aligned}
 
 **Interpretation:**
@@ -417,11 +417,11 @@ References
    URL https://digital.library.unt.edu/ark:/67531/metadc1114558/
 
 -  Application of stochastic programming to design/operation optimization problems + theory explanation
-   G. Mavromatidis, K. Orehounig, J. Carmeliet, Design of distributed energy systems under uncertainty: A two-stage stochastic programming approach, Applied Energy 222 (2018) 932–950. 
+   G. Mavromatidis, K. Orehounig, J. Carmeliet, Design of distributed energy systems under uncertainty: A two-stage stochastic programming approach, Applied Energy 222 (2018) 932–950.
    doi:https://doi.org/10.1016/j.apenergy.2018.04.019. URL https://www.sciencedirect.com/science/article/pii/S0306261918305580
    H. Teichgraeber, A. R. Brandt, Optimal design of an electricity-intensive industrial facility subject to electricity price uncertainty: Stochastic optimization and scenario reduction, Chemical Engineering Research and
    Design 163 (2020) 204–216. doi:https://doi.org/10.1016/j.cherd.2020.08.022. URL https://www.sciencedirect.com/science/article/pii/S026387622030441X
-   
+
 -  Game theory for energy systems, with focus on electricity markets
    J. Kazempour, Advanced optimization and game theory for energy systems - youtube. URL https://www.youtube.com/
 
