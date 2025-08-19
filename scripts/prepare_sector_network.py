@@ -4034,6 +4034,10 @@ if __name__ == "__main__":
             "pwr_residheat80degC_hs",
             "steam150degC_egs",
             "steam150degC_hs",
+            "geothermal hs",
+            "geothermal egs",
+            "geothermal district cooling",
+            "geothermal district heat",
             "steam175degC_power_residheat80degC_egs",
             "steam175degC_power_residheat80degC_hs", 
             "steam200degC_power_residheat80degC_egs",
@@ -4055,7 +4059,7 @@ if __name__ == "__main__":
             if year > 2034:
                 reduction = 0.0
 
-            logger.info(f"Reducing geothermal cost through IRA/BBB cost reduction by {int(reduction*100)}% assuming project start in {year}.")
+            logger.info(f"Reducing geothermal cost through IRA/BBB subsidies by {int(reduction*100)}% assuming project start in {year}.")
             # see https://www.hklaw.com/en/insights/publications/2025/05/irs-releases-2025-section-45-production-tax-credit-amounts
 
             gt_techs = n.links.index[n.links.carrier.isin(geothermal_techs)]

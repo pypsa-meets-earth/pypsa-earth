@@ -564,6 +564,8 @@ def process_regional_supply_curves(
     """
     import numpy as np
 
+    data = data.loc[data['lcoe[USD/MWh]'] < 1000.] # can occur at the edge of suitable regions and can distort the supply curve
+
     # Identify share columns
     share_cols = [col for col in data.columns if "share" in col]
 
@@ -730,12 +732,8 @@ def process_techno_economic_data(df):
 
     # Mapper for output types and their temperature bands
     tech_output_mapping = {
-        "directheat100degC": {"heat": "80-150C", "heat": "50-80C"},
-        "directheat200degC": {
-            "heat": "150-250C",
-            "heat": "80-150C",
-            "heat": "50-80C",
-        },
+        "directheat100degC": {"heat": "80-150C"},
+        "directheat200degC": {"heat": "150-250C"},
         "pwr_residheat80degC_egs": {"heat": "50-80C", "power": "AC"},
         "pwr_residheat80degC_hs": {"heat": "50-80C", "power": "AC"},
         "steam150degC_egs": {"steam": "80-150C", "heat": "50-80C"},
@@ -1349,6 +1347,7 @@ if __name__ == "__main__":
     # Create a mapping from temperature bands to applicable technologies
     demand_to_tech_mapping = {
         "50-80C": [
+            "directheat100degC",
             "pwr_residheat80degC_egs",
             "pwr_residheat80degC_hs",
         ],
@@ -1380,7 +1379,6 @@ if __name__ == "__main__":
 
         gdf["geometry"] = gdf["geometry"].apply(lambda x: wkt.loads(x))
     gdf = gpd.GeoDataFrame(gdf, geometry="geometry", crs="EPSG:4326")
-    print(gdf.head())
 
     regional_supply_shapes = pd.Series(index=regions.index)
 
@@ -1559,20 +1557,48 @@ if __name__ == "__main__":
                     .replace(np.nan, 0)
                 )
 
+                if cluster_supply.empty:
+                    logger.info(f'Temperature band {band} cannot be met in {region}')
+                    continue
+            
+                # The current method only clusters heat demands of the same temperature band,
+                # and therefore it can not be assumed that heat outputs on different bands can be used at the same site.
+                # The following code therefore either assumes that heat output of higher temperature could also be used for a lower temperature, or removes that share of output and adjusts the LCOE accordingly.
+                for other in ['80-150C', '150-250C']:
+                    if band == '50-80C' and f'{other}_share' in cluster_supply.columns:
+                        for idx in cluster_supply.index:
+                            if '50-80C_share' in cluster_supply.columns:
+                                cluster_supply.at[idx, '50-80C_share'] += cluster_supply.at[idx, f'{other}_share']
+                                cluster_supply.at[idx, f'{other}_share'] = 0.
+                            else:
+                                cluster_supply.at[idx, '50-80C_share'] = cluster_supply.at[idx, f'{other}_share']
+                                cluster_supply.at[idx, f'{other}_share'] = 0.
+
                 if (
                     cluster_supply.empty
                     or f"{band}_share" not in cluster_supply.columns
-                ):
+                    ):
+                    logger.info(f'Temperature band {band} cannot be met in {region}')
                     continue
 
-                cluster_supply["band_lcoe"] = cluster_supply["lcoe[USD/MWh]"].mul(
-                    1 - cluster_supply[f"{band}_share"]
-                )
+                heat_bands = ['50-80C', '80-150C', '150-250C']
+                others = [b for b in heat_bands if b != band]
+
+                for rowname in cluster_supply.index:
+                    removed_share = 0
+                    for o in others:
+                        if f'{o}_share' in cluster_supply.columns:
+                            removed_share += cluster_supply.loc[rowname, f'{o}_share']
+                            cluster_supply.loc[rowname, f'{o}_share'] = 0.
+                    
+                    if removed_share > 0:
+                        cluster_supply.loc[rowname, 'lcoe[USD/MWh]'] *= 1 / (1 - removed_share)
+                
+                logger.info(cluster_supply)
 
                 cluster_supply = cluster_supply.sort_values(
-                    by=["band_lcoe", "lcoe[USD/MWh]"]
+                    by=["lcoe[USD/MWh]"]
                 ).iloc[[0]]
-                cluster_supply.drop(columns=["band_lcoe"], inplace=True)
 
                 cluster_supply.loc[cluster_supply.index[0], ["heat_demand[MW]"]] = (
                     cluster_size
@@ -1622,8 +1648,8 @@ if __name__ == "__main__":
     ### discretizes supply curves
     total_results = process_regional_supply_curves(total_results).replace(np.nan, 0)
 
-    df = pd.DataFrame((total_clusters))
-    df.to_csv("clusters.csv")
+    # df = pd.DataFrame((total_clusters))
+    # df.to_csv("clusters.csv")
 
     total_results.to_csv(snakemake.output["industrial_heating_egs_supply_curves"])
     final_demands.to_csv(snakemake.output["industrial_heating_demands"])
