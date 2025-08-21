@@ -1047,6 +1047,9 @@ if config["sector"]["hydrogen"]["water_network"]:
     if not config["custom_data"]["h2_water_network"]:
 
         rule prepare_water_network:
+            params:
+                costs=config["costs"],
+                water_stress=config['sector']['hydrogen']['aqueduct_water_stress_classification'],
             input:
                 regions_onshore="resources/"
                 + RDIR
@@ -1074,6 +1077,9 @@ if config["sector"]["hydrogen"]["water_network"]:
                 clustered_water_network="resources/"
                 + SECDIR
                 + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+                water_pipes_profiles="resources/"
+                + SECDIR
+                + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
             script:
                 "scripts/prepare_water_network.py"
     
@@ -1095,10 +1101,11 @@ if config["sector"]["hydrogen"]["water_network"]:
                 shorelines_natura="resources/"
                 + SECDIR
                 + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+                water_pipes_profiles="resources/"
+                + SECDIR
+                + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
             output:
-                water_network="results/"
-                + RDIR
-                + "plots/water_network_elec_s{simpl}_{clusters}.{ext}",
+                water_network="results/plots/desalination/water_network_elec_s{simpl}_{clusters}.{ext}",
             script:
                 "scripts/plot_water_network.py"
 
@@ -1162,6 +1169,7 @@ rule prepare_sector_network:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        costs_desal="data/costs_desal.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals="resources/"
         + SECDIR
