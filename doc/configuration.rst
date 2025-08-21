@@ -285,7 +285,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 ``co2_budget``
 =============================
 
-If enabled, this option allows setting different CO₂ targets for each planning horizons. Only supports foresights with planning horizon such as myopic.
+If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
