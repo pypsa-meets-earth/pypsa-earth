@@ -46,7 +46,7 @@ repos:
 #     types: [python]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.3.9
+  rev: v0.4.1
   hooks:
   - id: blackdoc
 
@@ -70,7 +70,7 @@ repos:
 
 # Do YAML formatting (before the linter checks it for misses)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.14.0
+  rev: v2.15.0
   hooks:
   - id: pretty-format-yaml
     exclude: pinned\.yaml$
@@ -78,7 +78,7 @@ repos:
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.37.0
+  rev: v1.37.1
   hooks:
   - id: yamllint
     exclude: pinned\.yaml$
