@@ -927,7 +927,7 @@ def add_pipeline_hydraulics(row):
     # Pump investment in millions Eur
     invest_pumping_station = pump_station_cost_kw(
         power_kw=power_kW,
-        usd_to_eur=snakemake.params.costs["USD2013_to_EUR2013"],
+        usd_to_eur=snakemake.params.costs["default_exchange_rate"],
         a=35768, # 15570 # 35768 with inflation 2% 1981 till 2023
         b=0.558,
     )
