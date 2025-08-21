@@ -153,8 +153,8 @@ load_options:
 
 co2_budget:
   enable: false
-  overwrite: true
-  compare: co2limit # choose from: [co2limit, co2base, absolute, {float}]
+  override_co2opt: true
+  co2base_value: co2limit # choose from: [co2limit, co2base, absolute, {float}]
   year:
     2020: 1.0
     2025: 0.85

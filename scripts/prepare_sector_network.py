@@ -2920,37 +2920,37 @@ def add_electricity_distribution_grid(n, costs):
 
 def add_co2_budget(n, co2_budget, investment_year, elec_opts):
     # Check if CO2Limit already exists
-    if "CO2Limit" in n.global_constraints.index:
-        if co2_budget["overwrite"]:
-            logger.info("CO2Limit already exists, value will be overwritten.")
-            n.global_constraints.drop(index="CO2Limit", inplace=True)
-        else:
-            logger.warning("CO2Limit already exists, value will not be overwritten.")
-            return
+    if "CO2Limit" in n.global_constraints.index and co2_budget["override_co2opt"]:
+        logger.warning("CO2Limit already exists, value will be overwritten.")
+        n.global_constraints.drop(index="CO2Limit", inplace=True)
+    else:
+        logger.info("CO2Limit already exists, value will not be overwritten.")
+        return
 
     # Get base year emission factor
-    try:
-        year_emission = co2_budget["year"][investment_year]
-    except KeyError:
-        raise KeyError(
-            f"Investment year '{investment_year}' not found in co2_budget: year"
-        )
+    factor = (
+        co2_budget["year"][investment_year]
+        if investment_year in co2_budget["year"]
+        else 1.0
+    )
 
-    compare = co2_budget["compare"]
-    if compare == "co2limit":
-        annual_emissions = year_emission * elec_opts["co2limit"]
-    elif compare == "co2base":
-        annual_emissions = year_emission * elec_opts["co2base"]
-    elif compare == "absolute":
-        annual_emissions = year_emission
-    elif isinstance(compare, (int, float)) and compare > 0:
-        annual_emissions = year_emission * compare
+    co2base_value = co2_budget["co2base_value"]
+    if co2base_value == "co2limit":
+        annual_emissions = factor * elec_opts["co2limit"]
+    elif co2base_value == "co2base":
+        annual_emissions = factor * elec_opts["co2base"]
+    elif co2base_value == "absolute":
+        annual_emissions = factor
+    elif isinstance(co2base_value, float):
+        annual_emissions = factor * co2base_value
     else:
-        raise ValueError(f"{compare} is not a valid option for co2_budget: compare")
+        raise ValueError(
+            f"co2base_value: {co2base_value} is not an option for co2_budget"
+        )
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     logger.info(
-        f"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year"
+        f"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year."
     )
 
     add_co2limit(n, annual_emissions, Nyears)
