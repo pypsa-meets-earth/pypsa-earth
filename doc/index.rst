@@ -116,6 +116,7 @@ Documentation
    tutorial_electricity
    tutorial_sector
    model_customization
+   optimization
    data_workflow
    notebooks
 
