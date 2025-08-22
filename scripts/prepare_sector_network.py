@@ -29,6 +29,7 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
+from prepare_network import add_co2limit
 from prepare_transport_data import prepare_transport_data
 
 logger = logging.getLogger(__name__)
@@ -2918,27 +2919,42 @@ def add_electricity_distribution_grid(n, costs):
         )
 
 
-# def add_co2limit(n, Nyears=1.0, limit=0.0):
-#     print("Adding CO2 budget limit as per unit of 1990 levels of", limit)
+def add_co2_budget(n, co2_budget, investment_year, elec_opts):
+    # Check if CO2Limit already exists
+    if "CO2Limit" in n.global_constraints.index and co2_budget["override_co2opt"]:
+        logger.warning("CO2Limit already exists, value will be overwritten.")
+        n.global_constraints.drop(index="CO2Limit", inplace=True)
+    else:
+        logger.info("CO2Limit already exists, value will not be overwritten.")
+        return
 
-#     countries = n.buses.country.dropna().unique()
+    # Get base year emission factor
+    factor = (
+        co2_budget["year"][investment_year]
+        if investment_year in co2_budget["year"]
+        else 1.0
+    )
 
-#     sectors = emission_sectors_from_opts(opts)
+    co2base_value = co2_budget["co2base_value"]
+    if co2base_value == "co2limit":
+        annual_emissions = factor * elec_opts["co2limit"]
+    elif co2base_value == "co2base":
+        annual_emissions = factor * elec_opts["co2base"]
+    elif co2base_value == "absolute":
+        annual_emissions = factor
+    elif isinstance(co2base_value, float):
+        annual_emissions = factor * co2base_value
+    else:
+        raise ValueError(
+            f"co2base_value: {co2base_value} is not an option for co2_budget"
+        )
 
-#     # convert Mt to tCO2
-#     co2_totals = 1e6 * pd.read_csv(snakemake.input.co2_totals_name, index_col=0)
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    logger.info(
+        f"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year."
+    )
 
-#     co2_limit = co2_totals.loc[countries, sectors].sum().sum()
-
-#     co2_limit *= limit * Nyears
-
-#     n.add(
-#         "GlobalConstraint",
-#         "CO2Limit",
-#         carrier_attribute="co2_emissions",
-#         sense="<=",
-#         constant=co2_limit,
-#     )
+    add_co2limit(n, annual_emissions, Nyears)
 
 
 def add_custom_water_cost(n):
@@ -3261,18 +3277,14 @@ if __name__ == "__main__":
             n = average_every_nhours(n, m.group(0))
             break
 
-    # TODO add co2 limit here, if necessary
-    # co2_limit_pu = eval(sopts[0][5:])
-    # co2_limit = co2_limit_pu *
-    # # Add co2 limit
-    # co2_limit = 1e9
-    # n.add(
-    #     "GlobalConstraint",
-    #     "CO2Limit",
-    #     carrier_attribute="co2_emissions",
-    #     sense="<=",
-    #     constant=co2_limit,
-    # )
+    co2_budget = snakemake.params.co2_budget
+    if co2_budget["enable"]:
+        add_co2_budget(
+            n,
+            co2_budget,
+            investment_year,
+            snakemake.params.electricity,
+        )
 
     if options["dac"]:
         add_dac(n, costs)
