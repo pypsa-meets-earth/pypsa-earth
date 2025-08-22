@@ -1073,7 +1073,7 @@ if config["sector"]["hydrogen"]["water_network"]:
                 country_shapes="resources/"
                 + RDIR
                 + "shapes/country_shapes.geojson",
-                natura="data/natura/natura.tiff",
+                natura="resources/" + RDIR + "natura.tiff",
             output:
                 shorelines="resources/"
                 + SECDIR
