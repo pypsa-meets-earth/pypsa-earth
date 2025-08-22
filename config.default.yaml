@@ -151,6 +151,19 @@ load_options:
   prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
+co2_budget:
+  enable: false
+  override_co2opt: true
+  co2base_value: co2limit # choose from: [co2limit, co2base, absolute, {float}]
+  year:
+    2020: 1.0
+    2025: 0.85
+    2030: 0.70
+    2035: 0.55
+    2040: 0.40
+    2045: 0.25
+    2050: 0.1
+
 electricity:
   base_voltage: 380.
   voltages: [132., 220., 300., 380., 500., 750.]

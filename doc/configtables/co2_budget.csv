@@ -1,0 +1,5 @@
+,Unit,Values,Description
+enable,,"{True, False}",Switch to select whether to activate this feature.
+override_co2opts,,"{True, False}",Switch to select whether to the new co2 limits can override existing previous co2 options.
+co2base_value,:math:`t_{CO_2-eq}/a`,"{""co2limit"", ""co2base"", ""absolute"", float}","The total system annual carbon dioxide equivalent emissions. The value can be provided as is, refer to existing CO₂ values, or  if 'absolute' is selected, be defined for each planning horizon"
+year,,Dictionary with planning horizons as keys,"CO₂ budget as a fraction of `co2base_value`. If `absolute` is selected, then the total emission is set per planning horizons year"
