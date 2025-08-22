@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #

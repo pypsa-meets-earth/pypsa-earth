@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -17,14 +16,14 @@ from _helpers import mock_snakemake, override_component_attrs
 
 def override_values(tech, year, dr):
     custom_res_t = pd.read_csv(
-        snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)],
+        snakemake.input["custom_res_pot_{}_{}_{}".format(tech, year, dr)],
         index_col=0,
         parse_dates=True,
     ).filter(buses, axis=1)
 
     custom_res = (
         pd.read_csv(
-            snakemake.input["custom_res_ins_{0}_{1}_{2}".format(tech, year, dr)],
+            snakemake.input["custom_res_ins_{}_{}_{}".format(tech, year, dr)],
             index_col=0,
         )
         .filter(buses, axis=0)

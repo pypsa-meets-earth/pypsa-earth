@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -158,7 +157,7 @@ def create_steel_db():
     df_steel = df_steel.drop(unknown_ind)
     if len(unknown_ind) > 0:
         print(
-            "dropped {0} steel/iron plants with unknown production technology of total {1} plants".format(
+            "dropped {} steel/iron plants with unknown production technology of total {} plants".format(
                 len(unknown_ind), len(df_steel)
             )
         )

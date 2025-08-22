@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -173,7 +172,7 @@ def add_CCL_constraints(n, config):
 
     try:
         agg_p_nom_minmax = pd.read_csv(agg_p_nom_limits, index_col=list(range(2)))
-    except IOError:
+    except OSError:
         logger.exception(
             "Need to specify the path to a .csv file containing "
             "aggregate capacity limits per country in "
@@ -235,7 +234,7 @@ def add_EQ_constraints(n, o, scaling=1e-1):
     to produce on average at least 70% of its consumption; EQ0.7 demands
     each node to produce on average at least 70% of its consumption.
     """
-    float_regex = "[0-9]*\.?[0-9]+"
+    float_regex = r"[0-9]*\.?[0-9]+"
     level = float(re.findall(float_regex, o)[0])
     if o[-1] == "c":
         ggrouper = n.generators.bus.map(n.buses.country)
@@ -586,12 +585,7 @@ def _add_land_use_constraint_m(n):
     for carrier in ["solar", "onwind", "offwind-ac", "offwind-dc"]:
         existing = n.generators.loc[n.generators.carrier == carrier, "p_nom"]
         ind = list(
-            set(
-                [
-                    i.split(sep=" ")[0] + " " + i.split(sep=" ")[1]
-                    for i in existing.index
-                ]
-            )
+            {i.split(sep=" ")[0] + " " + i.split(sep=" ")[1] for i in existing.index}
         )
 
         previous_years = [
@@ -991,7 +985,7 @@ def extra_functionality(n, snapshots):
         add_operational_reserve_margin(n, snapshots, config)
     for o in opts:
         if "RES" in o:
-            res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
+            res_share = float(re.findall(r"[0-9]*\.?[0-9]+$", o)[0])
             add_RES_constraints(n, res_share, config)
     for o in opts:
         if "EQ" in o:

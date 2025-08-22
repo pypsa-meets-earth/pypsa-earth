@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -1042,7 +1041,7 @@ def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
     with rasterio.open(WorldPop_inputfile) as src:
         worldpop_y_dim, worldpop_x_dim = src.shape
         transform = src.meta["transform"]
-        block_y_dim, block_x_dim = [int(i) for i in src.block_shapes[0]]
+        block_y_dim, block_x_dim = (int(i) for i in src.block_shapes[0])
 
     # Rasterio doesn't support lower than float32 readout
     # Hence reading the file will take up: nbytes = 4 * y_dim * x_dim

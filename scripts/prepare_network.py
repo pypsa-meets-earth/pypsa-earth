@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -365,7 +364,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Co2L" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if snakemake.params.electricity["automatic_emission"]:
                 country_names = n.buses.country.unique()
                 emission_year = snakemake.params.electricity[
@@ -389,7 +388,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "CH4L" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 limit = float(m[0]) * 1e6
                 add_gaslimit(n, limit, Nyears)
@@ -421,7 +420,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Ep" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 logger.info("Setting emission prices according to wildcard value.")
                 add_emission_prices(n, dict(co2=float(m[0])))

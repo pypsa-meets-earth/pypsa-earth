@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019-2020 Fabian Hofmann (FIAS)
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
@@ -736,9 +735,7 @@ def get_best_bundles(
     """
 
     # categories of data to download
-    categories = list(
-        set([config_bundles[conf]["category"] for conf in config_bundles])
-    )
+    categories = list({config_bundles[conf]["category"] for conf in config_bundles})
     if include_categories:
         categories = [
             category for category in categories if category in exclude_categories
@@ -804,15 +801,13 @@ def datafiles_retrivedatabundle(config, bundles_to_download):
     """
 
     listoutputs = list(
-        set(
-            [
-                inneroutput
-                for bundlename in bundles_to_download
-                for inneroutput in config["databundles"][bundlename]["output"]
-                if "*" not in inneroutput
-                or inneroutput.endswith("/")  # exclude directories
-            ]
-        )
+        {
+            inneroutput
+            for bundlename in bundles_to_download
+            for inneroutput in config["databundles"][bundlename]["output"]
+            if "*" not in inneroutput
+            or inneroutput.endswith("/")  # exclude directories
+        }
     )
 
     return listoutputs
@@ -823,7 +818,7 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
     output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 
     files_to_merge = [
-        "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)
+        "hybas_{:s}_lev{:02d}_v1c.shp".format(suffix, hydrobasins_level)
         for suffix in config_hydrobasin["urls"]["hydrobasins"]["suffixes"]
     ]
     gpdf_list = [None] * len(files_to_merge)
