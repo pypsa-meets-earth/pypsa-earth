@@ -153,7 +153,7 @@ jobs:
           FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
 
           if [[ "$FILE" == ./logs/solve_network/* ]]; then
-            FOLDER="tutorial pure"
+            FOLDER="default"
           fi
 
           TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` |"
