@@ -139,8 +139,6 @@ jobs:
 
         echo "The objective extracted successfully"
 
-
-        # Write to the table
         TABLE="| Folder | File | Objective Value |"
         TABLE+="\n|:--------|:-----|------------------:|"
 
@@ -159,7 +157,6 @@ jobs:
           TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` |"
         done <<< "$OBJ_FOUND"
 
-        # Print to terminal
         echo -e "$TABLE"
 
         echo "The output table is formed"
