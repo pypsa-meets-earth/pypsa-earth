@@ -58,6 +58,22 @@ Data availability for many parts of the world is still quite limited. Usually th
 
 * `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy
 
+How to tailor the inputs
+^^^^^^^^^^^^^^^^^^^^^^^^
+1. Adjust configuration parameters
+2. Use custom data
+3. Improve data quality in the source
+
+Contribution guide
+
+Powerplantmatching
+
+GEM
+
+atlite
+
+ERA5
+
 Advanced validation examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
