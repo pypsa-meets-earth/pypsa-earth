@@ -36,8 +36,8 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/145504/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
-      gdrive: https://drive.google.com/file/d/12K03Epx3O9o-IQLh9afzCQyT-nMKWM3P/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/318639/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1XnTP6bZoVl5kFjZQlAcmjNXgazOHtFqX/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -53,8 +53,8 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/145504/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
-      gdrive: https://drive.google.com/file/d/1YbbYGs1NsSsZYqNX1g1Jo-iJzt5m-81c/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/318639/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1AEmlgBO-6uY_MA4rzmaRJcQ-xE1Z4uHx/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
@@ -68,8 +68,8 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/1VGzE8ZJHAvAQ9X44QNSX4rH3QF7Yi37D/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/318639/files/bundle_tutorial_MA.zip?download=1
+      gdrive: https://drive.google.com/file/d/1cUei9vH3LzIYfqltaGTaRWCX6J24f1c0/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2021_TID.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
