@@ -46,16 +46,17 @@ Where to look for reference data
 
 Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exhaustive list of helpful sources:
 
-* `World Bank <https://energydata.info/>`_;
+* `Ember <https://ember-climate.org/data/data-explorer/>`_ Data Explorer
 
-* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/>`_;
+* `World Bank <https://energydata.info/>`_
 
-* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
+* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/>`_
 
-* `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy;
+* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_
 
-* `Ember <https://ember-climate.org/data/data-explorer/>`_ Data Explorer.
+* A global collection of power grid charts `Awesome Electrical Grid Mapping <https://github.com/open-energy-transition/Awesome-Electrical-Grid-Mapping>`_
 
+* `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy
 
 Advanced validation examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
