@@ -10,24 +10,36 @@
 
 To validate the data obtained with PyPSA-Earth, we recommend to go through the procedure here detailed. An exampled of the validation procedure is available in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook. Public information on the power system of Nigeria are compared to those obtained from the PyPSA-Earth model.
 
-Simulation procedure
-^^^^^^^^^^^^^^^^^^^^
+Data workflow
+^^^^^^^^^^^^^^
 
-It may be recommended to check the following quantities in the validation:
+PyPSA-Earth is designed to provide an optimisation model workflow with all necessary data for every country of the world. An architecture of the data workflow looks like follows.
 
-#. Inputs used by the model:
+#. Inputs used by the workflow:
 
-    #. Network characteristics
+    #. Aggregated power and energy demand by sectors
 
-    #. Substations
+    #. Installed generation capacity including it's spatial distribution
 
-    #. Installed generation by type
+    #. Energy-relevant weather parameters, land usage and orthography parameters
 
-#. Outputs of the simulation:
+#. Workflow outputs fed into the optimisation model:
 
-    #. Demand
+    #. Network topology and transmission capacity
 
-    #. Energy mix
+    #. Spatially distributed power and energy demands
+
+    #. Available renewable potential
+
+#. Outputs of the optimisation run:
+
+    #. Power and energy mix
+
+    #. Dispatch time-series
+
+    #. Capital and operational costs
+
+It may be recommended to check the major quantities in a validation procedure both for the workflow and the optimisation.
 
 Where to look for reference data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
