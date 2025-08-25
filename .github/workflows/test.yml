@@ -98,3 +98,67 @@ jobs:
         #     snakemake --cores all plot_all_summaries
         #     snakemake --cores all make_all_summaries
         #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
+
+    # Download artifacts
+    - name: Download feature logs
+      uses: actions/download-artifact@v4
+      with:
+        name: results-${{ matrix.os }}
+        # path: ./artifacts  # All artifacts go here, each in their own subfolder
+
+    # TODO Remove after debugging
+    - name: Show downloaded structure
+      run: |
+        echo "Current working directory: $(pwd)"
+        echo "All files and folders after artifact download:"
+        find . -type f -o -type d | sort
+
+    - name: Extract objective
+      id: extract_obj
+      run: |
+        OBJ_STRING="(?<=INFO:__main__:Objective function: ).*"
+        LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
+        echo "Extracting the objective values from the logs"
+        OBJ_FOUND=$(grep -rHPo "$OBJ_STRING" "${LOG_FILES[@]}" || true)
+        # The objective can be also empty (in case some tests failed)
+        if [ -z "$OBJ_FOUND" ]; then
+          echo "Objective not found."
+          exit 1
+        else
+          echo "Objective value found: $OBJ_FOUND"
+          echo "Writing to GitHub output"
+          echo "obj_match=$OBJ_FOUND" >> "$GITHUB_OUTPUT"
+        fi
+
+        echo "The objective extracted successfully"
+
+
+        # Write to the table
+        TABLE="| Folder | File | Objective Value |"
+        TABLE+="\n|:--------|:-----|------------------:|"
+
+        while IFS= read -r line; do
+          FILE=$(echo "$line" | cut -d: -f1)
+          VALUE=$(echo "$line" | cut -d: -f2-)
+          BASENAME=$(basename "$FILE")
+
+          # An enclosing folder contains a name of the run
+          FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
+
+          if [[ "$FILE" == ./logs/solve_network/* ]]; then
+            FOLDER="tutorial pure"
+          fi
+
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` |"
+        done <<< "$OBJ_FOUND"
+
+        # Print to terminal
+        echo -e "$TABLE"
+
+        echo "The output table is formed"
+
+        echo "### Objective Results of CI Run" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "GITHUB_STEP_SUMMARY successfully supplemented with a header"
+
+        printf "%b\n" "$TABLE" >> "$GITHUB_STEP_SUMMARY"
