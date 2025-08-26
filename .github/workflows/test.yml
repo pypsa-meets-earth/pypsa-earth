@@ -119,7 +119,13 @@ jobs:
         OBJ_STRING="(?<=INFO:__main__:Objective function: ).*"
         LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
         echo "Extracting the objective values from the logs"
-        OBJ_FOUND=$(grep -rHPo "$OBJ_STRING" "${LOG_FILES[@]}" | sed 's/\r$//' || true)
+        OBJ_FOUND=$(
+          awk '/INFO:__main__:Objective function: /{
+                 sub(/\r$/, "");
+                 sub(/.*INFO:__main__:Objective function: /, "");
+                 print FILENAME ":" $0
+               }' "${LOG_FILES[@]}" || true
+        )
 
         # The objective can be also empty (in case some tests failed)
         if [ -z "$OBJ_FOUND" ]; then
