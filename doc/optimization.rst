@@ -2,18 +2,27 @@
 Optimization Models in Energy Systems
 =====================================
 
-The aim of this section is to provide an overview of the most common optimization approaches used in energy system models. 
-In particular, it covers capacity expansion models and economic dispatch models, and it distinguishes between deterministic and stochastic formulations. 
-Before addressing these categories, we introduce some general definitions. 
+The aim of this section is to provide an overview of the most common optimization approaches used in energy system models.
+In particular, it covers capacity expansion models and economic dispatch models, and it distinguishes between deterministic and stochastic formulations.
+Before addressing these categories, we introduce some general definitions.
 In general, an optimization problem can be expressed as:
 
 
 .. math::
 
    \begin{aligned}
-       \min_{\mathbf{x}} \; & f(\mathbf{x}) \quad \text{(objective function)} \\
-       \text{s.t.} \quad & g_i(\mathbf{x}) \leq 0 \quad \forall i \quad \text{(inequality constraints)} \\
-                          & h_j(\mathbf{x}) = 0 \quad \forall j \quad \text{(equality constraints)}\end{aligned}
+       \min_{\mathbf{x}} \quad & f(\mathbf{x}) \quad \text{(objective function)}
+   \end{aligned}
+
+subject to:
+
+.. math::
+
+   \begin{aligned}
+       & g_i(\mathbf{x}) \le 0 \quad \forall i \quad \text{(inequality constraints)} \\
+       & h_j(\mathbf{x}) = 0 \quad \forall j \quad \text{(equality constraints)}
+   \end{aligned}
+
 
 where:
 
@@ -26,6 +35,7 @@ where:
 -  :math:`g_i` and :math:`h_j` represent the set of inequality and
    equality constraints.
 
+.. _sec-simple-linear-optimization-model:
 Example: Simple linear optimization problem
 -------------------------------------------
 
@@ -34,10 +44,18 @@ Consider the following problem:
 .. math::
 
    \begin{aligned}
-       \min_{x_1, x_2} \quad & x_1 + x_2 \label{eq:obj_simple} \\
-       \text{s.t.} \quad & x_1 \geq 0 \quad \label{eq:const1} \\
-                          & x_2 \geq 0 \quad  \label{eq:const2} \\
-                          & x_1 + 2x_2 = 4 \quad  \label{eq:const3}\end{aligned}
+       \min_{x_1, x_2} \quad & x_1 + x_2 \label{eq:obj_simple}
+   \end{aligned}
+
+subject to:
+
+.. math::
+
+   \begin{aligned}
+       & x_1 \geq 0 \quad \label{eq:const1} \\
+       & x_2 \geq 0 \quad \label{eq:const2} \\
+       & x_1 + 2x_2 = 4 \quad \label{eq:const3}
+   \end{aligned}
 
 **Explanation:**
 
@@ -49,7 +67,7 @@ Consider the following problem:
 -  Constraints impose that both variables must be
    non-negative.
 
--  Constraint `x_1 + 2x_2 = 4` requires that the combination
+-  Constraint :math:`x_1 + 2x_2 = 4` requires that the combination
    of :math:`x_1` and :math:`x_2` must satisfy a given requirement
    (e.g., total production must meet demand).
 
@@ -63,10 +81,11 @@ total while :math:`x_2` counts 2), the optimal choice is to use as much
 
 gives an objective value :math:`0 + 2 = 2`.
 
+.. _sec-capacity-expansion-problem:
 Capacity expansion problem
 ==========================
 
-Let us assume to work on a single year, with the aim of minimizing the
+Let us assume a single-year timeframe, with the aim of minimizing the
 *total cost* of the system under technical and policy constraints.
 
 We consider a system composed of:
@@ -83,7 +102,7 @@ The optimization problem can be formulated as:
 .. math::
 
    \begin{aligned}
-       \min_{\substack{P_{\text{PV}},\, P_{\text{gas}}, \\ p_{\text{PV}}(t),\, p_{\text{gas}}(t)}} 
+       \min_{\substack{P_{\text{PV}},\, P_{\text{gas}}, \\ p_{\text{PV}}(t),\, p_{\text{gas}}(t)}}
        & C_{\text{PV}}^{\text{cap}} \cdot P_{\text{PV}} + C_{\text{gas}}^{\text{cap}} \cdot P_{\text{gas}} \nonumber \\
        & + \sum_{t=1}^T c_{\text{gas}} \cdot p_{\text{gas}}(t) \cdot \Delta t \label{eq:obj_energy}\end{aligned}
 
@@ -92,7 +111,7 @@ subject to:
 .. math::
 
    \begin{aligned}
-       & p_{\text{PV}}(t) + p_{\text{gas}}(t) = D(t) \quad \forall t \quad \text{(demand balance)} \label{eq:bal} \\
+       & p_{\text{PV}}(t) + p_{\text{gas}}(t) = D(t) \quad \forall t \label{eq:bal} \\
        & 0 \leq p_{\text{PV}}(t) \leq \min\{G(t) \cdot \eta_{\text{PV}},\; P_{\text{PV}}\} \quad \forall t \label{eq:pv_lim} \\
        & 0 \leq p_{\text{gas}}(t) \leq P_{\text{gas}} \quad \forall t \label{eq:gas_lim} \\
        & P_{\text{PV}} \geq 0, \quad P_{\text{gas}} \geq 0 \label{eq:cap_nonneg}\end{aligned}
@@ -104,15 +123,22 @@ subject to:
    capacities.
 
 -  The second line of the objective function represents
-   the *operational cost* (fuel cost for the gas turbine).
+   the *operational cost* (fuel cost for the gas generator).
 
--  Constraints enforce energy balance and technical limits.
+-  The equality constraint enforces the energy balance, i.e. the sum of generation must
+   match the demand.
 
-Since capacities are part of the decision variables, this is a *capacity
-expansion model*: it optimizes both design and operation. A realistic
-example could be the evolution of the European power system in 2050
-under specific technical, economic, or environmental assumptions.
+- The inequality constraints enforce the technical limits. The gas production is bounded by the
+  gas generator size, while the PV production is bounded by the PV size and irradiance availability.
+  Both productions must be positive (generators cannot act like loads).
 
+Since capacities are part of the decision variables, this is a capacity expansion model:
+it optimizes both design and operation. Here, design refers to the sizing phase, i.e.
+the choice of the optimal installed capacities for the system components,
+while operation determines their temporal dispatch. A realistic example could be the evolution
+of the European power system in 2050 under specific technical, economic, or environmental assumptions.
+
+.. _sec-economic-dispatch-problem:
 Economic dispatch problem
 =========================
 
@@ -171,10 +197,11 @@ A realistic example could be the validation of a given model with
 historical data, where capacities are set (historical ones) and only
 operation is optimized.
 
+.. _sec-stochastic-optimization:
 Stochastic Optimization
 =======================
 
-So far we assumed *deterministic* optimization: all input time series
+So far, we have assumed *deterministic* optimization: all input time series
 (demand, solar irradiance) and parameters (natural gas price) are
 perfectly known. However, in real life we often face uncertainty.
 
@@ -195,33 +222,71 @@ you spend :math:`10x` plus :math:`16(y-x)` for the extra pizzas. The
 challenge: :math:`x` must be chosen **today** — before knowing
 :math:`y`.
 
-Assume three equally likely scenarios (probability :math:`1/3` each):
-:math:`y \in \{0, 5, 20\}` guests.
+Assume three equally likely scenarios:
 
-**Expected cost:** For :math:`0 \le x \le 5`:
+- 0 guest, nobody is coming
+- 5 guests, only your best friends are coming
+- 20 guests, everyone is coming
+
+Therefore, :math:`y \in \{0, 5, 20\}` guests. These scenarios have the same
+probability of occurring.
+
+
+**Scenario-by-scenario explanation and expected cost**
+
+- **Case A — \(0 \le x \le 5\)** - under-ordering can already happen at y=5:
+
+  - Scenario y=0: no guests → you only pay the pre-ordered pizzas
+    \(C(x,0)=10x\).
+
+  - Scenario y=5: if x<5, you are short of \(5-x\) pizzas → last-minute at 16€ each
+    \(C(x,5)=10x+16(5-x)\). If x=5, the extra term is 0.
+
+  - Scenario y=20: you are short of \(20-x\) pizzas → last-minute at 16€ each
+    \(C(x,20)=10x+16(20-x)\).
+
+
+  **Expected cost**
+  Each scenario has the same probability, so its contribution is weighted 1/3:
+
+  .. math::
+
+     \mathbb{E}[C(x)]
+     = \tfrac13\big(10x\big)
+     + \tfrac13\big(10x+16(5-x)\big)
+     + \tfrac13\big(10x+16(20-x)\big)
+     = \frac{400 - 2x}{3}
+     = 133.33 - \tfrac{2}{3}x.
+
+- **Case B — \(5 < x \le 20\)** - no shortage at y=5, only at y=20:
+
+  - Scenario y=0: no guests → you only pay the pre-ordered pizzas
+    \(C(x,0)=10x\).
+
+  - Scenario y=5: enough pizzas \(x>5\) → no last-minute purchase
+    \(C(x,5)=10x\).
+
+  - Scenario y=20: you are short of \(20-x\) pizzas → last-minute at 16€ each
+    \(C(x,20)=10x+16(20-x)=320-6x\).
+
+  **Expected cost**
+
+  .. math::
+
+     \mathbb{E}[C(x)]
+     = \tfrac13\big(10x\big)
+     + \tfrac13\big(10x\big)
+     + \tfrac13\big(10x+16(20-x)\big)
+     = \frac{320 + 14x}{3}
+     = 106.67 + \tfrac{14}{3}x.
+
+**Minimizer.** Since :math:`mathbb{E}[C(x)]` is decreasing on [0,5] and increasing on [5,20],
+the minimum is attained at the boundary :math:`x^\star=5`, with
 
 .. math::
 
-   \mathbb{E}[C(x)] = \tfrac13(10x) + \tfrac13(10x + 16(5-x)) + \tfrac13(10x + 16(20-x)) 
-   = 126.67 - 2x.
+   \mathbb{E}[C(5)] = \frac{390}{3} = 130.
 
-For :math:`5 < x \le 20`:
-
-.. math::
-
-   \mathbb{E}[C(x)] = \tfrac13(10x) + \tfrac13(10x) + \tfrac13(10x + 16(20-x)) 
-   = 106.67 + 4x.
-
-**Result:**
-
--  The expected cost decreases for :math:`0 \le x \le 5` and increases
-   for :math:`x > 5`.
-
--  The unique risk-neutral optimum is :math:`\mathbf{x^\star = 5}`
-   pizzas.
-
--  Expected cost at optimum:
-   :math:`\mathbb{E}[C(5)]` = 116.67 [€].
 
 **Interpretation:** Ordering 5 pizzas perfectly covers the medium
 scenario, avoids over-ordering in the low scenario, and limits the
@@ -230,6 +295,7 @@ a *here-and-now* decision taken under uncertainty, while the number of
 extra pizzas (if needed) is a *wait-and-see* decision made after the
 actual scenario is revealed.
 
+.. _sec-two-stage-formulation:
 Two-stage stochastic formulation.
 ---------------------------------
 
@@ -305,7 +371,7 @@ representing, for example, *low*, *medium*, and *high* price conditions.
 .. math::
 
    \begin{aligned}
-       \min_{P_{\text{PV}},\, P_{\text{gas}}} \quad 
+       \min_{P_{\text{PV}},\, P_{\text{gas}}} \quad
        & C_{\text{PV}}^{\text{cap}} \cdot P_{\text{PV}} + C_{\text{gas}}^{\text{cap}} \cdot P_{\text{gas}} \nonumber \\
        & + \sum_{\omega=1}^3 p_\omega \; Q(P_{\text{PV}},P_{\text{gas}},\omega) \label{eq:stoc_obj_energy}\end{aligned}
 
@@ -314,7 +380,7 @@ where the second-stage operational cost for scenario :math:`\omega` is:
 .. math::
 
    \begin{aligned}
-       Q(P_{\text{PV}},P_{\text{gas}},\omega) \;=\; 
+       Q(P_{\text{PV}},P_{\text{gas}},\omega) \;=\;
        & \sum_{t=1}^T c_{\text{gas}}^{(\omega)} \cdot p_{\text{gas}}(t,\omega) \cdot \Delta t\end{aligned}
 
 subject to, for each scenario :math:`\omega`:
@@ -322,11 +388,11 @@ subject to, for each scenario :math:`\omega`:
 .. math::
 
    \begin{aligned}
-       & p_{\text{PV}}(t,\omega) + p_{\text{gas}}(t,\omega) = D(t) 
+       & p_{\text{PV}}(t,\omega) + p_{\text{gas}}(t,\omega) = D(t)
          && \forall t \quad \text{(demand balance)} \label{eq:stoc_bal} \\
-       & 0 \le p_{\text{PV}}(t,\omega) \le \min\{ G(t) \cdot \eta_{\text{PV}},\; P_{\text{PV}}\} 
+       & 0 \le p_{\text{PV}}(t,\omega) \le \min\{ G(t) \cdot \eta_{\text{PV}},\; P_{\text{PV}}\}
          && \forall t \quad \text{(PV limit)} \label{eq:stoc_pv_lim} \\
-       & 0 \le p_{\text{gas}}(t,\omega) \le P_{\text{gas}} 
+       & 0 \le p_{\text{gas}}(t,\omega) \le P_{\text{gas}}
          && \forall t \quad \text{(gas capacity)} \label{eq:stoc_gas_lim}\end{aligned}
 
 **Interpretation:**
@@ -355,20 +421,18 @@ Sensitivity Analysis
 problem, by varying one or more parameters to see how the optimal
 solution changes.
 
-Example:
---------
+.. admonition:: Example
 
-Solve a deterministic CE model, then vary the fuel cost
-:math:`c_{\text{gas}}` from 50 to 100 €/MWh to see how the optimal
-capacities change.
+   Solve a deterministic CE model, then vary the fuel cost
+   :math:`c_{\text{gas}}` from 50 to 100 €/MWh to see how the optimal
+   capacities change.
 
-Difference with stochastic optimization:
-----------------------------------------
+.. admonition:: Difference with stochastic optimization
 
--  Sensitivity analysis: changes are explored *post-optimization*.
+   - **Sensitivity analysis**: changes are explored *post-optimization*.
+   - **Stochastic optimization**: uncertainty is included *within* the
+     optimization process.
 
--  Stochastic optimization: uncertainty is included *within the
-   optimization* process.
 
 Representative days.
 ====================
@@ -409,22 +473,24 @@ The structure is similar to the stochastic formulation, but:
 References
 ==========
 
--  Theory of convex optimization
-   S. P. Boyd, L. Vandenberghe, Convex Optimization, version 29 Edition, Cambridge University Press.
+-  :ref:`Theory of convex optimization <sec-simple-linear-optimization-model>` – book with everything about convex optimization
 
--  Theory of stochastic programming
-   G. Infanger, Planning under uncertainty: solving large-scale stochastic linear programs, UNT Digital Library, California, 1992, report accessed on December 9, 2024.
-   URL https://digital.library.unt.edu/ark:/67531/metadc1114558/
+   | S. P. Boyd, L. Vandenberghe, Convex Optimization, version 29 Edition, Cambridge University Press.
 
--  Application of stochastic programming to design/operation optimization problems + theory explanation
-   G. Mavromatidis, K. Orehounig, J. Carmeliet, Design of distributed energy systems under uncertainty: A two-stage stochastic programming approach, Applied Energy 222 (2018) 932–950. 
-   doi:https://doi.org/10.1016/j.apenergy.2018.04.019. URL https://www.sciencedirect.com/science/article/pii/S0306261918305580
-   H. Teichgraeber, A. R. Brandt, Optimal design of an electricity-intensive industrial facility subject to electricity price uncertainty: Stochastic optimization and scenario reduction, Chemical Engineering Research and
-   Design 163 (2020) 204–216. doi:https://doi.org/10.1016/j.cherd.2020.08.022. URL https://www.sciencedirect.com/science/article/pii/S026387622030441X
-   
--  Game theory for energy systems, with focus on electricity markets
-   J. Kazempour, Advanced optimization and game theory for energy systems - youtube. URL https://www.youtube.com/
+-  :ref:`Theory of stochastic programming <sec-stochastic-optimizationl>` - book with focus on stochastic programming
 
--  Applications on PyPSA
-   C. Gallego-Castillo, M. Victoria, PyPSA-Spain: An extension of PyPSA-Eur to model the Spanish energy system 60 101764. doi:10.1016/j.esr.2025.101764. URL https://www.sciencedirect.com/science/article/pii/S2211467X25001270
-   K. Kwak, W. Son, Y. Yang, J. Woo, PyPSA-Korea: An open-source energy system model for planning Korea’s sustainable energy transition 13 5677–5691. doi:10.1016/j.egyr.2025.05.018. URL https://www.sciencedirect.com/science/article/pii/S2352484725002963
+   | G. Infanger, Planning under uncertainty: solving large-scale stochastic linear programs, UNT Digital Library, California, 1992, report accessed on December 9, 2024. URL https://digital.library.unt.edu/ark:/67531/metadc1114558/
+
+-  :ref:`Application of stochastic programming to design/operation optimization problems + theory explanation <sec-two-stage-formulation>`
+
+   | G. Mavromatidis, K. Orehounig, J. Carmeliet, Design of distributed energy systems under uncertainty: A two-stage stochastic programming approach, Applied Energy 222 (2018) 932–950.   doi:https://doi.org/10.1016/j.apenergy.2018.04.019. URL https://www.sciencedirect.com/science/article/pii/S0306261918305580
+   | H. Teichgraeber, A. R. Brandt, Optimal design of an electricity-intensive industrial facility subject to electricity price uncertainty: Stochastic optimization and scenario reduction, Chemical Engineering Research and Design 163 (2020) 204–216. doi:https://doi.org/10.1016/j.cherd.2020.08.022. URL https://www.sciencedirect.com/science/article/pii/S026387622030441X
+
+-  :ref:`Game theory for energy systems <sec-two-stage-formulation>` - course explaining stochastic programming in energy systems, with focus on electricity markets
+
+   | J. Kazempour, Advanced optimization and game theory for energy systems - youtube. URL https://www.youtube.com/
+
+-  :ref:`Applications on PyPSA <sec-capacity-expansion-problem>` - capacity expansion and economic dispatch models
+
+   | C. Gallego-Castillo, M. Victoria, PyPSA-Spain: An extension of PyPSA-Eur to model the Spanish energy system 60 101764. doi:10.1016/j.esr.2025.101764. URL https://www.sciencedirect.com/science/article/pii/S2211467X25001270
+   | K. Kwak, W. Son, Y. Yang, J. Woo, PyPSA-Korea: An open-source energy system model for planning Korea’s sustainable energy transition 13 5677–5691. doi:10.1016/j.egyr.2025.05.018. URL https://www.sciencedirect.com/science/article/pii/S2352484725002963
