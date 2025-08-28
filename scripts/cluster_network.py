@@ -306,7 +306,6 @@ def distribute_clusters(
             n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
         )
 
-    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_network"]
     N = n.buses.groupby(["country", "sub_network"]).size()
 
     assert (
@@ -445,7 +444,7 @@ def busmap_for_n_clusters(
     n.determine_network_topology()
     # n.lines.loc[:, "sub_network"] = "0"  # current fix
 
-    if n.buses.country.nunique() > 1:
+    if n.buses.groupby(["country", "sub_network"]).ngroups > 1:
         n_clusters = distribute_clusters(
             inputs,
             build_shape_options,
@@ -456,18 +455,6 @@ def busmap_for_n_clusters(
             focus_weights=focus_weights,
             solver_name=solver_name,
         )
-
-    # TODO Check if `reduce_network()` is used
-    def reduce_network(n, buses):
-        nr = pypsa.Network()
-        nr.import_components_from_dataframe(buses, "Bus")
-        nr.import_components_from_dataframe(
-            n.lines.loc[
-                n.lines.bus0.isin(buses.index) & n.lines.bus1.isin(buses.index)
-            ],
-            "Line",
-        )
-        return nr
 
     def busmap_for_country(x):
         # A number of the countries in the clustering can be > 1
@@ -514,8 +501,7 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            # ["country"],
-            ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
+            ["country", "sub_network"],
             group_keys=False,
         )
         .apply(busmap_for_country, include_groups=False)
@@ -622,7 +608,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="4"
+            "cluster_network", network="elec", simpl="", clusters="20flex"
         )
     configure_logging(snakemake)
 
@@ -659,7 +645,7 @@ if __name__ == "__main__":
     elif snakemake.wildcards.clusters == "all":
         n_clusters = len(n.buses)
     elif snakemake.wildcards.clusters == "min":
-        n_clusters = n.buses.groupby(["country", "sub_network"]).size().count()
+        n_clusters = n.buses.groupby(["country", "sub_network"]).ngroups
     else:
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None

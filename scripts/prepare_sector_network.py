@@ -27,9 +27,12 @@ from _helpers import (
     override_component_attrs,
     prepare_costs,
     safe_divide,
+    sanitize_carriers,
+    sanitize_locations,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
+from prepare_network import add_co2limit
 from prepare_transport_data import prepare_transport_data
 
 logger = logging.getLogger(__name__)
@@ -1447,14 +1450,17 @@ def add_co2(n, costs, co2_network):
         )
 
 
-def add_aviation(n, cost):
+def add_aviation(n, cost, energy_totals, airports_fn):
+    # Load data required for aviation and navigation
+    # TODO follow the same structure as land transport and heat
+
     all_aviation = ["total international aviation", "total domestic aviation"]
 
     aviation_demand = (
         energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
     )
 
-    airports = pd.read_csv(snakemake.input.airports, keep_default_na=False)
+    airports = pd.read_csv(airports_fn, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
     gadm_layer_id = snakemake.params.gadm_layer_id
@@ -1602,10 +1608,8 @@ def h2_hc_conversions(n, costs):
         )
 
 
-def add_shipping(n, costs):
-    ports = pd.read_csv(
-        snakemake.input.ports, index_col=None, keep_default_na=False
-    ).squeeze()
+def add_shipping(n, costs, energy_totals, ports_fn):
+    ports = pd.read_csv(ports_fn, index_col=None, keep_default_na=False).squeeze()
     ports = ports[ports.country.isin(countries)]
 
     gadm_layer_id = snakemake.params.gadm_layer_id
@@ -1752,8 +1756,18 @@ def add_shipping(n, costs):
         )
 
 
-def add_industry(n, costs):
+def add_industry(
+    n,
+    costs,
+    industrial_demand_fn,
+):
     logger.info("adding industrial demand")
+
+    # Load industry demand data
+    industrial_demand = pd.read_csv(
+        industrial_demand_fn, index_col=0, header=0
+    )  # * 1e6
+
     # 1e6 to convert TWh to MWh
 
     # industrial_demand.reset_index(inplace=True)
@@ -2065,10 +2079,27 @@ Missing data:
 """
 
 
-def add_land_transport(n, costs):
+def add_land_transport(
+    n,
+    costs,
+    transport_fn,
+    avail_profile_fn,
+    dsm_profile_fn,
+    nodal_transport_data_fn,
+):
     """
     Function to add land transport to network.
     """
+    # Get the data required for land transport
+    # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
+    transport = pd.read_csv(transport_fn, index_col=0, parse_dates=True).reindex(
+        columns=spatial.nodes, fill_value=0.0
+    )
+
+    avail_profile = pd.read_csv(avail_profile_fn, index_col=0, parse_dates=True)
+    dsm_profile = pd.read_csv(dsm_profile_fn, index_col=0, parse_dates=True)
+    nodal_transport_data = pd.read_csv(nodal_transport_data_fn, index_col=0)
+    # TODO nodal_transport_data only includes no. of cars, change name to something descriptive?
     # TODO options?
 
     logger.info("adding land transport")
@@ -2238,7 +2269,7 @@ def add_land_transport(n, costs):
         )
 
 
-def create_nodes_for_heat_sector():
+def create_nodes_for_heat_sector(district_heat_share):
     # TODO pop_layout
 
     # rural are areas with low heating density and individual heating
@@ -2283,7 +2314,31 @@ def create_nodes_for_heat_sector():
     return h_nodes, dist_fraction_node, urban_fraction
 
 
-def add_heat(n, costs):
+def add_heat(
+    n,
+    costs,
+    heat_demand_fn,
+    solar_thermal_fn,
+    gshp_cop_fn,
+    ashp_cop_fn,
+    district_heat_share_fn,
+):
+    # Load data required for heat sector
+    heat_demand = pd.read_csv(
+        heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
+    ).fillna(0)
+    # Solar thermal availability profiles
+    solar_thermal = pd.read_csv(solar_thermal_fn, index_col=0, parse_dates=True)
+    # Ground-sourced heatpump coefficient of performance
+    gshp_cop = pd.read_csv(gshp_cop_fn, index_col=0, parse_dates=True)
+    # Air-sourced heatpump coefficient of performance
+    ashp_cop = pd.read_csv(
+        ashp_cop_fn, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+    # TODO add option heat_dep_hp_cop to the config
+
+    # Share of district heating at each node
+    district_heat_share = pd.read_csv(district_heat_share_fn, index_col=0)
     # TODO options?
     # TODO pop_layout?
 
@@ -2291,7 +2346,9 @@ def add_heat(n, costs):
 
     sectors = ["residential", "services"]
 
-    h_nodes, dist_fraction, urban_fraction = create_nodes_for_heat_sector()
+    h_nodes, dist_fraction, urban_fraction = create_nodes_for_heat_sector(
+        district_heat_share
+    )
 
     # NB: must add costs of central heating afterwards (EUR 400 / kWpeak, 50a, 1% FOM from Fraunhofer ISE)
 
@@ -2623,7 +2680,7 @@ def add_dac(n, costs):
     )
 
 
-def add_services(n, costs):
+def add_services(n, costs, energy_totals):
     temporal_resolution = n.snapshot_weightings.generators
     buses = spatial.nodes.intersection(n.loads_t.p_set.columns)
 
@@ -2716,7 +2773,14 @@ def add_services(n, costs):
     )
 
 
-def add_agriculture(n, costs):
+def add_agriculture(n, costs, nodal_energy_totals_fn):
+    nodal_energy_totals = pd.read_csv(
+        nodal_energy_totals_fn,
+        index_col=0,
+        keep_default_na=False,
+        na_values=[""],
+    )
+
     n.madd(
         "Load",
         spatial.nodes,
@@ -2796,7 +2860,7 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     )
 
 
-def add_residential(n, costs):
+def add_residential(n, costs, energy_totals):
     # need to adapt for many countries #TODO
 
     # if snakemake.config["custom_data"]["heat_demand"]:
@@ -3081,27 +3145,42 @@ def add_electricity_distribution_grid(n, costs):
         )
 
 
-# def add_co2limit(n, Nyears=1.0, limit=0.0):
-#     print("Adding CO2 budget limit as per unit of 1990 levels of", limit)
+def add_co2_budget(n, co2_budget, investment_year, elec_opts):
+    # Check if CO2Limit already exists
+    if "CO2Limit" in n.global_constraints.index and co2_budget["override_co2opt"]:
+        logger.warning("CO2Limit already exists, value will be overwritten.")
+        n.global_constraints.drop(index="CO2Limit", inplace=True)
+    else:
+        logger.info("CO2Limit already exists, value will not be overwritten.")
+        return
 
-#     countries = n.buses.country.dropna().unique()
+    # Get base year emission factor
+    factor = (
+        co2_budget["year"][investment_year]
+        if investment_year in co2_budget["year"]
+        else 1.0
+    )
 
-#     sectors = emission_sectors_from_opts(opts)
+    co2base_value = co2_budget["co2base_value"]
+    if co2base_value == "co2limit":
+        annual_emissions = factor * elec_opts["co2limit"]
+    elif co2base_value == "co2base":
+        annual_emissions = factor * elec_opts["co2base"]
+    elif co2base_value == "absolute":
+        annual_emissions = factor
+    elif isinstance(co2base_value, float):
+        annual_emissions = factor * co2base_value
+    else:
+        raise ValueError(
+            f"co2base_value: {co2base_value} is not an option for co2_budget"
+        )
 
-#     # convert Mt to tCO2
-#     co2_totals = 1e6 * pd.read_csv(snakemake.input.co2_totals_name, index_col=0)
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    logger.info(
+        f"Annual emissions for {investment_year} set to {annual_emissions / 1e6:.2f} MtCO₂-eq/year."
+    )
 
-#     co2_limit = co2_totals.loc[countries, sectors].sum().sum()
-
-#     co2_limit *= limit * Nyears
-
-#     n.add(
-#         "GlobalConstraint",
-#         "CO2Limit",
-#         carrier_attribute="co2_emissions",
-#         sense="<=",
-#         constant=co2_limit,
-#     )
+    add_co2limit(n, annual_emissions, Nyears)
 
 
 def add_custom_water_cost(n):
@@ -3129,7 +3208,13 @@ def add_custom_water_cost(n):
         # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
 
-def add_rail_transport(n, costs):
+def add_rail_transport(n, costs, nodal_energy_totals_fn):
+    nodal_energy_totals = pd.read_csv(
+        nodal_energy_totals_fn,
+        index_col=0,
+        keep_default_na=False,
+        na_values=[""],
+    )
     p_set_elec = nodal_energy_totals.loc[spatial.nodes, "electricity rail"]
     p_set_oil = (nodal_energy_totals.loc[spatial.nodes, "total rail"]) - p_set_elec
 
@@ -3247,6 +3332,7 @@ if __name__ == "__main__":
 
     # Load all sector wildcards
     options = snakemake.params.sector_options
+    enable = options["enable"]
 
     # Load input network
     overrides = override_component_attrs(snakemake.input.overrides)
@@ -3322,65 +3408,12 @@ if __name__ == "__main__":
 
     # TODO logging
 
-    nodal_energy_totals = pd.read_csv(
-        snakemake.input.nodal_energy_totals,
-        index_col=0,
-        keep_default_na=False,
-        na_values=[""],
-    )
     energy_totals = pd.read_csv(
         snakemake.input.energy_totals,
         index_col=0,
         keep_default_na=False,
         na_values=[""],
     )
-    # Get the data required for land transport
-    # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    transport = pd.read_csv(
-        snakemake.input.transport, index_col=0, parse_dates=True
-    ).reindex(columns=spatial.nodes, fill_value=0.0)
-
-    avail_profile = pd.read_csv(
-        snakemake.input.avail_profile, index_col=0, parse_dates=True
-    )
-    dsm_profile = pd.read_csv(
-        snakemake.input.dsm_profile, index_col=0, parse_dates=True
-    )
-    nodal_transport_data = pd.read_csv(  # TODO This only includes no. of cars, change name to something descriptive?
-        snakemake.input.nodal_transport_data, index_col=0
-    )
-
-    # Load data required for the heat sector
-    heat_demand = pd.read_csv(
-        snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    ).fillna(0)
-    # Ground-sourced heatpump coefficient of performance
-    gshp_cop = pd.read_csv(
-        snakemake.input.gshp_cop, index_col=0, parse_dates=True
-    )  # only needed with heat dep. hp cop allowed from config
-    # TODO add option heat_dep_hp_cop to the config
-
-    # Air-sourced heatpump coefficient of performance
-    ashp_cop = pd.read_csv(
-        snakemake.input.ashp_cop, index_col=0, parse_dates=True
-    )  # only needed with heat dep. hp cop allowed from config
-
-    # Solar thermal availability profiles
-    solar_thermal = pd.read_csv(
-        snakemake.input.solar_thermal, index_col=0, parse_dates=True
-    )
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
-
-    # Share of district heating at each node
-    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
-
-    # Load data required for aviation and navigation
-    # TODO follow the same structure as land transport and heat
-
-    # Load industry demand data
-    industrial_demand = pd.read_csv(
-        snakemake.input.industrial_demand, index_col=0, header=0
-    )  # * 1e6
 
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
@@ -3412,30 +3445,76 @@ if __name__ == "__main__":
 
     add_storage(n, costs)
 
-    H2_liquid_fossil_conversions(n, costs)
+    if options["fischer_tropsch"]:
+        H2_liquid_fossil_conversions(n, costs)
 
     h2_hc_conversions(n, costs)
-    add_heat(n, costs)
-    add_biomass(n, costs)
 
-    add_industry(n, costs)
+    if enable["heat"]:
+        add_heat(
+            n,
+            costs,
+            heat_demand_fn=snakemake.input.heat_demand,
+            solar_thermal_fn=snakemake.input.solar_thermal,
+            gshp_cop_fn=snakemake.input.gshp_cop,
+            ashp_cop_fn=snakemake.input.ashp_cop,
+            district_heat_share_fn=snakemake.input.district_heat_share,
+        )
 
-    add_shipping(n, costs)
+    if enable["biomass"]:
+        add_biomass(n, costs)
 
-    # Add_aviation runs with dummy data
-    add_aviation(n, costs)
+    if enable["industry"]:
+        add_industry(
+            n,
+            costs,
+            industrial_demand_fn=snakemake.input.industrial_demand,
+        )
 
-    # prepare_transport_data(n)
+    if enable["shipping"]:
+        add_shipping(
+            n,
+            costs,
+            energy_totals,
+            ports_fn=snakemake.input.ports,
+        )
 
-    add_land_transport(n, costs)
+    if enable["aviation"]:
+        # aviation runs with dummy data
+        add_aviation(
+            n,
+            costs,
+            energy_totals,
+            airports_fn=snakemake.input.airports,
+        )
 
-    # if snakemake.config["custom_data"]["transport_demand"]:
-    add_rail_transport(n, costs)
+    if enable["land_transport"]:
+        # prepare_transport_data(n)
 
-    # if snakemake.config["custom_data"]["custom_sectors"]:
-    add_agriculture(n, costs)
-    add_residential(n, costs)
-    add_services(n, costs)
+        add_land_transport(
+            n,
+            costs,
+            transport_fn=snakemake.input.transport,
+            avail_profile_fn=snakemake.input.avail_profile,
+            dsm_profile_fn=snakemake.input.dsm_profile,
+            nodal_transport_data_fn=snakemake.input.nodal_transport_data,
+        )
+
+    if enable["rail_transport"]:
+        add_rail_transport(
+            n, costs, nodal_energy_totals_fn=snakemake.input.nodal_energy_totals
+        )
+
+    if enable["agriculture"]:
+        add_agriculture(
+            n, costs, nodal_energy_totals_fn=snakemake.input.nodal_energy_totals
+        )
+
+    if enable["residential"]:
+        add_residential(n, costs, energy_totals)
+
+    if enable["services"]:
+        add_services(n, costs, energy_totals)
 
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)
@@ -3448,24 +3527,23 @@ if __name__ == "__main__":
             n = average_every_nhours(n, m.group(0))
             break
 
-    # TODO add co2 limit here, if necessary
-    # co2_limit_pu = eval(sopts[0][5:])
-    # co2_limit = co2_limit_pu *
-    # # Add co2 limit
-    # co2_limit = 1e9
-    # n.add(
-    #     "GlobalConstraint",
-    #     "CO2Limit",
-    #     carrier_attribute="co2_emissions",
-    #     sense="<=",
-    #     constant=co2_limit,
-    # )
+    co2_budget = snakemake.params.co2_budget
+    if co2_budget["enable"]:
+        add_co2_budget(
+            n,
+            co2_budget,
+            investment_year,
+            snakemake.params.electricity,
+        )
 
     if options["dac"]:
         add_dac(n, costs)
 
     if snakemake.params.water_costs:
         add_custom_water_cost(n)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.export_to_netcdf(snakemake.output[0])
 
