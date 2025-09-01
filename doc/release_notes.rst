@@ -12,12 +12,19 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+=======
 
 * Added Section covering Optimization for Energy Systems Models `PR #1558 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558>`__
 
+* Add the configuration ``co2_budget`` to set CO₂ emission targets in multiple planning horizon years `PR #1553 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1553>`__
+
 * Add pseudo `branch()` to streamline snakemake workflow. Replace this with Snakemake implementation if Snakemake >= 8.3.0. Added an option to configure which sector components to include which when disabled, irrelevant rules are skipped automatically `PR #1538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1538>`__
 
+* Extend functionality of isolated nodes to networks and fix to demand scaling when gdp or pop is empty `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
+
 **Minor Changes and bug-fixing**
+
+* Disable distribute_cluster only for one subnetwork and country `PR #1539 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539>`__
 
 * Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
 
