@@ -12,7 +12,6 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
-=======
 
 * Added Section covering Optimization for Energy Systems Models `PR #1558 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558>`__
 
