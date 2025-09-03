@@ -619,7 +619,10 @@ if __name__ == "__main__":
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
-    focus_weights = snakemake.params.get("focus_weights", None)
+    focus_weights = (
+        snakemake.params.focus_weights
+        or snakemake.params.cluster_options["focus_weights"]
+    )
     country_list = snakemake.params.countries
     geo_crs = snakemake.params.geo_crs
 
