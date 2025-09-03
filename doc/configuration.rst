@@ -282,6 +282,23 @@ Specifies the options to estimate future electricity demand (load). Different ye
 .. warning::
     The snapshots date range (``snapshots\start`` - ``snapshots\end``) must be in the ``weather_year``.
 
+.. _co2_budget_cf:
+
+``co2_budget``
+=============================
+
+If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: co2_budget:
+   :end-at: 2050:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/co2_budget.csv
+
 .. _electricity_cf:
 
 ``electricity``
