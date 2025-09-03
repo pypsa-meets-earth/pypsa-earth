@@ -209,8 +209,6 @@ There are several formats for GADM IDs depending on the version, so before using
 .. note::
    The rule ``build_shapes`` currently use `Version 4.1  <https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/>`_ for their GADM data. This may change in the future.
 
-   When ``cluster_network`` is enabled, the ``focus_weights`` is also disaggregated by subregions.
-
 .. _clean_osm_data_options_cf:
 
 ``clean_osm_data_options``
