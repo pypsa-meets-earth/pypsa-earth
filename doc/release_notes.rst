@@ -21,7 +21,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained.
+* The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
 
 * Disable distribute_cluster only for one subnetwork and country `PR #1539 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539>`__
 
