@@ -36,7 +36,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/318639/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
       gdrive: https://drive.google.com/file/d/1XnTP6bZoVl5kFjZQlAcmjNXgazOHtFqX/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2025_sub_ice.nc
@@ -53,7 +53,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/318639/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
       gdrive: https://drive.google.com/file/d/1AEmlgBO-6uY_MA4rzmaRJcQ-xE1Z4uHx/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2025_sub_ice.nc
@@ -68,7 +68,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/318639/files/bundle_tutorial_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1cUei9vH3LzIYfqltaGTaRWCX6J24f1c0/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2025_sub_ice.nc
