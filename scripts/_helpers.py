@@ -1219,6 +1219,15 @@ def prepare_costs(
     )
     modified_costs = modified_costs.fillna(fill_values)
 
+    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+        overwrites = config.get(attr)
+        if overwrites is not None:
+            overwrites = pd.Series(overwrites)
+            modified_costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
+
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
