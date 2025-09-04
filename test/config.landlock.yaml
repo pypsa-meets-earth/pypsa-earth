@@ -7,6 +7,9 @@ version: 0.7.0
 
 countries: ["BW"]
 
+run:
+  name: "landlock"
+
 subregion:
   define_by_gadm:
     Central: [BW.3]

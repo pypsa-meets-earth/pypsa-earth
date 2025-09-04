@@ -11,6 +11,7 @@ enable:
 
 run:
   name: sector
+  sector_name: "sector_sec" # use this to keep track of sector scenario runs
   shared_cutouts: true
 
 scenario:
