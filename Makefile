@@ -7,7 +7,7 @@
 test:
 	set -e
 	# this runs the tutorial config applying a run name on top
-	snakemake solve_all_networks -call --configfile config.tutorial.yaml config.tutorial.test.yaml
+	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.tutorial.test.yaml
 	# add custom config to tutorial config
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.custom.yaml
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml configs/scenarios/config.NG.yaml
