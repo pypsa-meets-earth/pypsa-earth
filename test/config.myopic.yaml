@@ -31,6 +31,13 @@ scenario:
   sopts: ["144h"]
   demand: ["DF"]
 
+co2_budget:
+  enable: true
+  override_co2opt: true
+  co2base_value: co2limit
+  year:
+    2030: 1.0
+
 cluster_options:
   alternative_clustering: false
 
