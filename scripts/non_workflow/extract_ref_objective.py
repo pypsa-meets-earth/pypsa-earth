@@ -7,12 +7,50 @@ import pandas as pd
 
 REF_OBJ_DF = pd.DataFrame(
     {
-        "folder": ["custom", "tutorial"],
+        "folder": [
+            "NG",
+            "custom",
+            "landlock monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "monte-carlo",
+            "tutorial",
+        ],
         "file": [
+            "elec_s_5_ec_lcopt_Co2L-4H_python.log",
             "elec_s_6_ec_lcopt_Co2L-4H_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m0_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m1_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m2_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m3_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m4_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m5_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m6_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m7_python.log",
+            "elec_s_6_ec_lcopt_Co2L-4H_m8_python.log",
             "elec_s_6_ec_lcopt_Co2L-4H_python.log",
         ],
-        "objective": [2548130080.0, 2823517462.0],
+        "objective": [
+            2665231623.0,
+            2548087889.0,
+            1098081954.0,
+            1825115005.0,
+            10076445520.0,
+            873800591.8,
+            1848771010.0,
+            45024568060.0,
+            2756737870.0,
+            6436852411.0,
+            1447523254.0,
+            406621644.0,
+            2823517462.0,
+        ],
     }
 )
 
