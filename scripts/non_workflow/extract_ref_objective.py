@@ -54,6 +54,8 @@ REF_OBJ_DF = pd.DataFrame(
     }
 )
 
+SCALE = 1_000_000
+
 
 def extract_obj_for_path(dir, fl, ref_df=REF_OBJ_DF):
     mask = (ref_df["folder"] == dir) & (ref_df["file"] == fl)
@@ -63,7 +65,7 @@ def extract_obj_for_path(dir, fl, ref_df=REF_OBJ_DF):
     if obj_value.empty:
         obj_value = "NA"
     else:
-        obj_value = obj_value.values[0]
+        obj_value = round(obj_value.values[0] / SCALE, 2)
 
     return obj_value
 
