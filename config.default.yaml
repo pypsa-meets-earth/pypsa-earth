@@ -29,7 +29,7 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   progress_bar: true # show progress bar during downloading routines and other long-running tasks
-
+  custom_busmap: false # If 'true', custom busmap located in 'data/custom_busmap_elec_s{simpl}_{clusters}.csv' is used for clustering
 
 
 custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
