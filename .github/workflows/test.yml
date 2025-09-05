@@ -180,7 +180,7 @@ jobs:
 
           REF_VALUE=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
 
-          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` | \`$REF_VALUE\` |"
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE_SCALED\` | \`$REF_VALUE\` |"
         done <<< "$OBJ_FOUND"
 
         echo -e "$TABLE"
