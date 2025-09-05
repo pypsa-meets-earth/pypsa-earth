@@ -66,6 +66,8 @@ How to tailor the inputs
 
 Contribution guide
 
+`Visualization toolkit <https://github.com/ben10dynartio/osm-power-grid-map-analysis>`__ to quickly get insights into OSM-extracted power grid datausing maps and graph analysis
+
 Powerplantmatching
 
 GEM
