@@ -10,7 +10,8 @@ REF_OBJ_DF = pd.DataFrame(
         "folder": [
             "NG",
             "custom",
-            "landlock monte-carlo",
+            "landlock",
+            "monte-carlo",
             "monte-carlo",
             "monte-carlo",
             "monte-carlo",
