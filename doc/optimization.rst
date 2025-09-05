@@ -41,7 +41,7 @@ where:
 
 .. _sec-simple-linear-optimization-model:
 Example: Simple linear optimization problem
--------------------------------------------
+===========================================
 
 Consider the following problem:
 
@@ -87,7 +87,7 @@ gives an objective value :math:`0 + 2 = 2`.
 
 .. _sec-capacity-expansion-problem:
 Capacity expansion problem
-==========================
+===========================
 
 Let us assume a single-year timeframe, with the aim of minimizing the
 *total cost* of the system under technical and policy constraints.
@@ -144,7 +144,7 @@ of the European power system in 2050 under specific technical, economic, or envi
 
 .. _sec-economic-dispatch-problem:
 Economic dispatch problem
-=========================
+==========================
 
 If capacities are given and fixed, the problem becomes a special case of
 capacity expansion known as *economic dispatch* (ED).
@@ -238,7 +238,7 @@ probability of occurring.
 
 **Scenario-by-scenario explanation and expected cost**
 
-- **Case A — \(0 \le x \le 5\)** - under-ordering can already happen at y=5:
+- **Case A — \(0 <= x <= 5\)** - under-ordering can already happen at y=5:
 
   - Scenario y=0: no guests → you only pay the pre-ordered pizzas
     \(C(x,0)=10x\).
@@ -262,7 +262,7 @@ probability of occurring.
      = \frac{400 - 2x}{3}
      = 133.33 - \tfrac{2}{3}x.
 
-- **Case B — \(5 < x \le 20\)** - no shortage at y=5, only at y=20:
+- **Case B — \(5 < x <= 20\)** - no shortage at y=5, only at y=20:
 
   - Scenario y=0: no guests → you only pay the pre-ordered pizzas
     \(C(x,0)=10x\).
@@ -284,7 +284,7 @@ probability of occurring.
      = \frac{320 + 14x}{3}
      = 106.67 + \tfrac{14}{3}x.
 
-**Minimizer.** Since :math:`mathbb{E}[C(x)]` is decreasing on [0,5] and increasing on [5,20],
+**Minimizer.** Since :math:`\mathbb{E}[C(x)]` is decreasing on [0,5] and increasing on [5,20],
 the minimum is attained at the boundary :math:`x^\star=5`, with
 
 .. math::
@@ -340,6 +340,7 @@ The same structure applies to energy systems: first-stage = investment
 decisions (capacities), second-stage = operational decisions (dispatch)
 under different scenarios of demand, renewable generation, or fuel
 prices.
+
 
 Capacity expansion under uncertainty (three gas price scenarios).
 -----------------------------------------------------------------
@@ -418,6 +419,7 @@ capacity now and more in 10 years), the formulation extends to a
 here-and-now decisions, followed by scenario-dependent operational
 decisions.
 
+.. _sec-sensitivity_analysis:
 Sensitivity Analysis
 ====================
 
@@ -438,6 +440,7 @@ solution changes.
      optimization process.
 
 
+.. _sec-representative_days:
 Representative days.
 ====================
 
@@ -474,27 +477,30 @@ The structure is similar to the stochastic formulation, but:
 -  There is no uncertainty: :math:`d` indexes clusters of days, not
    future scenarios.
 
+.. _sec-references:
 References
-==========
+===========
 
 -  :ref:`Theory of convex optimization <sec-simple-linear-optimization-model>` – book with everything about convex optimization
 
    | S. P. Boyd, L. Vandenberghe, Convex Optimization, version 29 Edition, Cambridge University Press.
 
--  :ref:`Theory of stochastic programming <sec-stochastic-optimizationl>` - book with focus on stochastic programming
+-  :ref:`Theory of stochastic programming <sec-stochastic-optimization>` - book with focus on stochastic programming
 
    | G. Infanger, Planning under uncertainty: solving large-scale stochastic linear programs, UNT Digital Library, California, 1992, report accessed on December 9, 2024. URL https://digital.library.unt.edu/ark:/67531/metadc1114558/
 
 -  :ref:`Application of stochastic programming to design/operation optimization problems + theory explanation <sec-two-stage-formulation>`
 
    | G. Mavromatidis, K. Orehounig, J. Carmeliet, Design of distributed energy systems under uncertainty: A two-stage stochastic programming approach, Applied Energy 222 (2018) 932–950.   doi:https://doi.org/10.1016/j.apenergy.2018.04.019. URL https://www.sciencedirect.com/science/article/pii/S0306261918305580
+
    | H. Teichgraeber, A. R. Brandt, Optimal design of an electricity-intensive industrial facility subject to electricity price uncertainty: Stochastic optimization and scenario reduction, Chemical Engineering Research and Design 163 (2020) 204–216. doi:https://doi.org/10.1016/j.cherd.2020.08.022. URL https://www.sciencedirect.com/science/article/pii/S026387622030441X
 
 -  :ref:`Game theory for energy systems <sec-two-stage-formulation>` - course explaining stochastic programming in energy systems, with focus on electricity markets
 
-   | J. Kazempour, Advanced optimization and game theory for energy systems - youtube. URL https://www.youtube.com/
+   | J. Kazempour, Advanced optimization and game theory for energy systems - youtube. URL https://www.youtube.com/playlist?list=PLe7H9pun_r8YHoGv0TnYxUsgbj0xAJmMR
 
 -  :ref:`Applications on PyPSA <sec-capacity-expansion-problem>` - capacity expansion and economic dispatch models
 
    | C. Gallego-Castillo, M. Victoria, PyPSA-Spain: An extension of PyPSA-Eur to model the Spanish energy system 60 101764. doi:10.1016/j.esr.2025.101764. URL https://www.sciencedirect.com/science/article/pii/S2211467X25001270
+
    | K. Kwak, W. Son, Y. Yang, J. Woo, PyPSA-Korea: An open-source energy system model for planning Korea’s sustainable energy transition 13 5677–5691. doi:10.1016/j.egyr.2025.05.018. URL https://www.sciencedirect.com/science/article/pii/S2352484725002963
