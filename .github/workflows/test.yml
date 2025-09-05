@@ -150,8 +150,8 @@ jobs:
 
         echo "The objective extracted successfully"
 
-        TABLE="| Folder | File | Objective Value |"
-        TABLE+="\n|:--------|:-----|------------------:|"
+        TABLE="| Folder | File | Current Objective | Reference Objective |"
+        TABLE+="\n|:----|:-----|------------------:|--------------------:|"
 
         while IFS= read -r line; do
           FILE=$(echo "$line" | cut -d: -f1)
