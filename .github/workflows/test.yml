@@ -175,9 +175,12 @@ jobs:
             FOLDER="default"
           fi
 
-          VALUE2=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
+          OBJ_SCALE=1000000
+          VALUE_SCALED=$(awk -v v="$VALUE" -v s="$OBJ_SCALE" 'BEGIN { if (s==0) { print "NaN"; exit 1 } printf "%.2f\n", v/s }')
 
-          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` | \`$VALUE2\` |"
+          REF_VALUE=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
+
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` | \`$REF_VALUE\` |"
         done <<< "$OBJ_FOUND"
 
         echo -e "$TABLE"
