@@ -150,6 +150,16 @@ jobs:
 
         echo "The objective extracted successfully"
 
+        # Add Python import
+        extract_obj_for_path_py() {
+          python - "$1" "$2" <<'PY'
+        import sys
+        from scripts.non_workflow.extract_ref_objective import extract_obj_for_path
+        dir, fl = sys.argv[1], sys.argv[2]
+        print(extract_obj_for_path(dir, fl))
+        PY
+        }
+
         TABLE="| Folder | File | Current Objective | Reference Objective |"
         TABLE+="\n|:----|:-----|------------------:|--------------------:|"
 
@@ -165,7 +175,9 @@ jobs:
             FOLDER="default"
           fi
 
-          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` |"
+          VALUE2=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
+
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE\` | \`$VALUE2\` |"
         done <<< "$OBJ_FOUND"
 
         echo -e "$TABLE"
