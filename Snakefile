@@ -632,7 +632,7 @@ rule cluster_network:
         countries=config["countries"],
         cluster_options=config["cluster_options"],
         focus_weights=config.get("focus_weights", None),
-        #custom_busmap=config["enable"].get("custom_busmap", False)
+        custom_busmap=config["enable"].get("custom_busmap", False),
     input:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
