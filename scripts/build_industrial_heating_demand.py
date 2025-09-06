@@ -562,9 +562,12 @@ def process_regional_supply_curves(
     pandas.DataFrame
         Processed data with discretized supply curves
     """
-    import numpy as np
 
-    data = data.loc[data['lcoe[USD/MWh]'] < 1000.] # can occur at the edge of suitable regions and can distort the supply curve
+    if 'lcoe[USD/MWh]' in data.columns:
+        data = data.loc[data['lcoe[USD/MWh]'] < 1000.] # can occur at the edge of suitable regions and can distort the supply curve
+        if data.empty:
+            logger.warning(f"LCOE filter removed all data in process_regional_supply_curves")
+            return pd.DataFrame()
 
     # Identify share columns
     share_cols = [col for col in data.columns if "share" in col]
@@ -654,7 +657,8 @@ def process_regional_supply_curves(
 
                         # Average for opex and share columns
                         new_row["opex[USD/MWh]"] = step_subset["opex[USD/MWh]"].mean()
-                        new_row["lcoe[USD/MWh]"] = step_subset["lcoe[USD/MWh]"].mean()
+                        if 'lcoe[USD/MWh]' in step_subset.columns:
+                            new_row["lcoe[USD/MWh]"] = step_subset["lcoe[USD/MWh]"].mean()
 
                         for col in share_cols:
                             if col in step_subset.columns:

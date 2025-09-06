@@ -154,35 +154,55 @@ if __name__ == "__main__":
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
     district_gdf = gpd.read_file(snakemake.input.demand_data)
 
-    # district_gdf["heating_demand_mwh"] = district_gdf["heating_by_pop"] * 2.93071e-7
-    # district_gdf["avg_heat_mw"] = district_gdf["heating_demand_mwh"] / 8760
-
-    # district_gdf["avg_heat_mw"] = district_gdf["mwh"] / 8760
     district_gdf["avg_heat_mw"] = district_gdf["frac_htg"] / 8760
     district_gdf["avg_cooling_mw"] = district_gdf["frac_clg"] / 8760
 
-    # this relates to the piping-cost incured in each region
-    district_gdf["heating_boreholes_per_sqkm"] = district_gdf["avg_heat_mw"] / 10
-    district_gdf["cooling_boreholes_per_sqkm"] = district_gdf["avg_cooling_mw"] / 10
+    # remove regions with less than 2 MW of heat or 1.5 MW of cooling demand, as these are too small to be viable
+    # these are small numbers because the model can decide against installing geothermal DH/DC itself
+    district_gdf = district_gdf[(district_gdf["avg_heat_mw"] > 2) | (district_gdf["avg_cooling_mw"] > 1.5)]
 
-    # we assume that a typical square kilometer of residential area that
-    # can be supplied by district heating needs around 20km or piping
-    # https://ojs.library.queensu.ca/index.php/cpp/article/download/13406/9382/31196
-    # [ validated against Google Maps for DH-eligible area in Chicago ]
+    # References for heat-density classification and conversions used below:
+    # - Heat Roadmap Europe / STRATEGO (WP2 Country Heat Roadmaps): DH suitability classes
+    #   0–30, 30–100, 100–300, >300 TJ/km²·yr. See Connolly et al., *Energy* (2014) and
+    #   Paardekooper et al., Heat Roadmap Europe 4 reports (2016–2018).
+    # - Unit conversion: 1 MW·yr = 31.536 TJ  ⇒  MW/sqkm = (TJ/sqkm·yr) / 31.536.
+    # - Linear heat-density viability rule-of-thumb /leq 1.5 MWh/(m·yr) for DH networks:
+    #   Persson & Werner, *Applied Energy* 88 (2011); Danish Energy Agency,
+    #   *Technology Data for District Heating* (latest edition).
 
-    # piping-cost [USD/m] * 20km / boreholes_per_sqkm = network-cost per borehole (i.e. network-cost per 10MW of borehole heat)
+    # --- Research-based heat-density tiers (HRE/STRATEGO -> MW/km²)
+    # Original classes: 0–30, 30–100, 100–300, >300 TJ/km²·yr
+    # Convert TJ/yr -> MW using 1 MW·yr = 31.536 TJ
+    bounds_mw = [0.0, 30/31.536, 100/31.536, 300/31.536, np.inf]
+    labels = ["low", "med", "high", "very_high"]
+
+    district_gdf["density_tier"] = pd.cut(
+    district_gdf["avg_heat_mw"],
+    bins=bounds_mw, labels=labels, right=True, include_lowest=True
+    )
 
     # for piping-cost, we go with numbers from https://www.npro.energy/main/en/help/technology-costs
-    # assuming Urban / Paved Surfaces
-    # should be around 3250 Euro/m for a 0.30m diameter pipe
-    # 1.15 is the conversion factor from Euro to USD
-    piping_cost_per_m = 3250 * 1.15  # USD/m
+    # and assume a mixture of pipe diameters (with branches subject to smaller pipe diameters)
+    # --- Installed $/m: cheaper outside cores, higher in dense urban ROWs
+    USD_PER_M = {
+        "very_high": 2200.0,  # dense downtown cores
+        "high":      1400.0,  # mixed mid-rise
+        "med":       900.0,  # urban fringe/smaller towns
+        "low":       600.0,  # single-family/greenfield-like installs
+    }
+    district_gdf["piping_cost_per_m"] = (
+        district_gdf["density_tier"].map(USD_PER_M).astype(float)
+    )
+
+    TRENCH_M_PER_KM2 = {"low": 8_000, "med": 12_000, "high": 15_000, "very_high": 20_000}
+    district_gdf["trench_m_per_km2"] = district_gdf["density_tier"].map(TRENCH_M_PER_KM2).astype(float)
 
     district_gdf["heating_network_cost_per_mw"] = (
-        piping_cost_per_m * 20_000 / district_gdf["heating_boreholes_per_sqkm"] / 10
+        district_gdf["piping_cost_per_m"] * district_gdf["trench_m_per_km2"] / district_gdf["avg_heat_mw"]
     )
+
     district_gdf["cooling_network_cost_per_mw"] = (
-        piping_cost_per_m * 20_000 / district_gdf["cooling_boreholes_per_sqkm"] / 10
+        district_gdf["piping_cost_per_m"] * district_gdf["trench_m_per_km2"] / district_gdf["avg_cooling_mw"]
     )
 
     tif_files = {
@@ -373,7 +393,7 @@ if __name__ == "__main__":
         heating_regional_supply = pd.concat(heating_regional_supply, axis=1).T
         heating_regional_supply["region"] = region
         heating_regional_supply["tech"] = "directheat100degC"
-        heating_regional_supply[["lcoe[USD/MWh]", "total_output[MWh]"]] = np.nan
+        heating_regional_supply[["total_output[MWh]"]] = np.nan
 
         heating_regional_supply = process_regional_supply_curves(
             heating_regional_supply,
@@ -382,11 +402,10 @@ if __name__ == "__main__":
 
         heating_total_results.append(heating_regional_supply)
 
-
         cooling_regional_supply = pd.concat(cooling_regional_supply, axis=1).T
         cooling_regional_supply["region"] = region
         cooling_regional_supply["tech"] = "directcooling100degC"
-        cooling_regional_supply[["lcoe[USD/MWh]", "total_output[MWh]"]] = np.nan
+        cooling_regional_supply[["total_output[MWh]"]] = np.nan
 
         cooling_regional_supply = process_regional_supply_curves(
             cooling_regional_supply,
@@ -402,7 +421,7 @@ if __name__ == "__main__":
         total_results_heating = pd.DataFrame(
             columns=["heat_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
         )
-    
+
     try:
         total_results_cooling = pd.concat(cooling_total_results)[
             ["cooling_demand[MW]", "capex[USD/MW]", "opex[USD/MWh]"]
@@ -422,7 +441,7 @@ if __name__ == "__main__":
 
     total_results_cooling["capex[USD/MW]"] = (total_results_cooling["capex[USD/MW]"] + capex) / cop
     total_results_cooling["opex[USD/MWh]"] = total_results_cooling["opex[USD/MWh]"] + opex
-    
+
     # expressed as the MW that can be provided in terms of heat
     total_results_cooling["cooling_demand[MW]"] = total_results_cooling["cooling_demand[MW]"] / cop
 
