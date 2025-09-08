@@ -13,7 +13,7 @@ import xarray as xr
 from _helpers import locate_bus, mock_snakemake
 
 # TODO Add to Snakemake
-CALIBR_DIR = snakemake.input.calib_dir
+CALIBR_DIR = "data/custom"
 CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
 CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
 
