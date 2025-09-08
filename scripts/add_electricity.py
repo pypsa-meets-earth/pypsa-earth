@@ -15,10 +15,16 @@ Relevant Settings
 
     costs:
         year:
-        version:
-        rooftop_share:
+        technology_data_version:
+        discountrate:
         output_currency:
-        dicountrate:
+        country_specific_data:
+        cost_scenario:
+        financial_case:
+        default_exchange_rate:
+        future_exchange_rate_strategy:
+        custom_future_exchange_rate:
+        rooftop_share:
         emission_prices:
 
     electricity:
@@ -90,10 +96,13 @@ import powerplantmatching as pm
 import pypsa
 import xarray as xr
 from _helpers import (
+    apply_currency_conversion,
+    build_currency_conversion_cache,
     configure_logging,
-    convert_currency_and_unit,
     create_logger,
     read_csv_nafix,
+    sanitize_carriers,
+    sanitize_locations,
     update_p_nom_max,
 )
 from powerplantmatching.export import map_country_bus
@@ -145,7 +154,38 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
-    costs = convert_currency_and_unit(costs, config["output_currency"])
+    _currency_conversion_cache = build_currency_conversion_cache(
+        costs,
+        config["output_currency"],
+        config["default_exchange_rate"],
+        future_exchange_rate_strategy=config.get(
+            "future_exchange_rate_strategy", "latest"
+        ),
+        custom_future_exchange_rate=config.get("custom_future_rate", None),
+    )
+    costs = apply_currency_conversion(
+        costs, config["output_currency"], _currency_conversion_cache
+    )
+
+    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
+    wished_cost_scenario = config["cost_scenario"]
+    wished_financial_case = config["financial_case"]
+    for col in ["scenario", "financial_case"]:
+        if col in costs.columns:
+            costs[col] = costs[col].replace("", pd.NA)
+
+    if "scenario" in costs.columns:
+        costs = costs[
+            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold())
+            | (costs["scenario"].isnull())
+        ]
+
+    if "financial_case" in costs.columns:
+        costs = costs[
+            (costs["financial_case"].str.casefold() == wished_financial_case.casefold())
+            | (costs["financial_case"].isnull())
+        ]
+
     costs = costs.value.unstack().fillna(config["fill_values"])
 
     for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
@@ -881,6 +921,10 @@ if __name__ == "__main__":
             "Unexpected missing 'weight' column, which has been manually added. It may be due to missing generators."
         )
         n.generators["weight"] = pd.Series()
+
+    sanitize_carriers(n, snakemake.config)
+    if "location" in n.buses:
+        sanitize_locations(n)
 
     n.meta = snakemake.config
     n.export_to_netcdf(snakemake.output[0])
