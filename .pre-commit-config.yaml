@@ -9,7 +9,7 @@ exclude: ^(LICENSES)
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
@@ -86,12 +86,12 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.11.0
+  rev: v0.11.2
   hooks:
   - id: snakefmt
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v5.0.2
+  rev: v5.1.1
   hooks:
   - id: reuse
