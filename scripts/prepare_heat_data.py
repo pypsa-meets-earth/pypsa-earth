@@ -36,7 +36,7 @@ SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
 SHARE_DISTRICT_HEAT = 0.1
 
 CALIBRATE_LOAD = False
-CALIBRATION_LEVEL = CALIBRATION_LEVEL
+CALIBRATION_LEVEL = 1
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
