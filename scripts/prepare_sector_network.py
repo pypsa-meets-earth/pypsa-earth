@@ -3275,10 +3275,13 @@ if __name__ == "__main__":
     # TODO Replace a temporary solution with a more stable one
     cooling_costs = prepare_costs(
         snakemake.input.cooling_costs,
-        snakemake.params.costs["USD2013_to_EUR2013"],
+        snakemake.config["costs"],
+        snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
-        snakemake.params.costs["default_USD_to_EUR"],
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
 
     # Define spatial for biomass and co2. They require the same spatial definition
