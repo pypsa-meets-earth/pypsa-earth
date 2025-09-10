@@ -144,6 +144,8 @@ PyPSA-Earth 0.7.0
 
 * Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
 
+* Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
+
 PyPSA-Earth 0.6.0
 =================
 
