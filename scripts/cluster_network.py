@@ -312,7 +312,7 @@ def distribute_clusters(
         n_clusters >= len(N) and n_clusters <= N.sum()
     ), f"Number of clusters must be {len(N)} <= n_clusters <= {N.sum()} for this selection of countries."
 
-    if focus_weights is not None:
+    if focus_weights:
         total_focus = sum(list(focus_weights.values()))
 
         assert (
