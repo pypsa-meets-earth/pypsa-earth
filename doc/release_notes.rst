@@ -27,6 +27,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
 
+* Fix the offwind depth calculation by providing the proper GEBCO file `PR #1559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1559>`__
+
 PyPSA-Earth 0.7.0
 =================
 
