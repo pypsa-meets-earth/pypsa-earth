@@ -104,7 +104,7 @@ cluster_options:
       ramp_limit_up: max
       ramp_limit_down: max
       efficiency: mean
-  focus_weights: false # When a value specified, set the share of nodes allocated to each country
+  focus_weights: null # When a value specified, set the share of nodes allocated to each country
     # country: share
 
 build_shape_options:
