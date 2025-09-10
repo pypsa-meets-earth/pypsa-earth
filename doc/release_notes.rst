@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Added Section covering Optimization for Energy Systems Models `PR #1558 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558>`__
+
 * Add the configuration ``co2_budget`` to set CO₂ emission targets in multiple planning horizon years `PR #1553 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1553>`__
 
 * Add pseudo `branch()` to streamline snakemake workflow. Replace this with Snakemake implementation if Snakemake >= 8.3.0. Added an option to configure which sector components to include which when disabled, irrelevant rules are skipped automatically `PR #1538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1538>`__
@@ -31,7 +33,6 @@ PyPSA-Earth 0.7.0
 =================
 
 **New Features and Major Changes**
-
 
 * Revise bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
 
