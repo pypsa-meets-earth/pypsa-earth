@@ -18,6 +18,13 @@ repos:
 #   - id: check-added-large-files
 #     args: ['--maxkb=2000']
 
+# Automatically upgrade syntax for newer versions of Python
+# this may introduce changes to code that may not be backward compatible
+# - repo: https://github.com/asottile/pyupgrade
+#   rev: v3.20.0
+#   hooks:
+#   - id: pyupgrade
+
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
   rev: 6.0.1
