@@ -313,7 +313,7 @@ def distribute_clusters(
         n_clusters >= len(N) and n_clusters <= N.sum()
     ), f"Number of clusters must be {len(N)} <= n_clusters <= {N.sum()} for this selection of countries."
 
-    if focus_weights is not None:
+    if focus_weights:
         total_focus = sum(list(focus_weights.values()))
 
         assert (
@@ -620,7 +620,10 @@ if __name__ == "__main__":
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
-    focus_weights = snakemake.params.get("focus_weights", None)
+    focus_weights = (
+        snakemake.params.focus_weights
+        or snakemake.params.cluster_options["focus_weights"]
+    )
     country_list = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
 

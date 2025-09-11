@@ -1096,7 +1096,10 @@ if __name__ == "__main__":
         build_shape_options = snakemake.params.build_shape_options
         country_list = snakemake.params.countries
         distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
-        focus_weights = snakemake.params.focus_weights
+        focus_weights = (
+            snakemake.params.focus_weights
+            or snakemake.params.cluster_options["focus_weights"]
+        )
         gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
         geo_crs = snakemake.params.crs["geo_crs"]
         renewable_config = snakemake.params.renewable
