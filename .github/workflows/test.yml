@@ -98,3 +98,97 @@ jobs:
         #     snakemake --cores all plot_all_summaries
         #     snakemake --cores all make_all_summaries
         #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
+
+    # Download artifacts
+    - name: Download feature logs
+      uses: actions/download-artifact@v4
+      with:
+        name: results-${{ matrix.os }}
+        # path: ./artifacts  # All artifacts go here, each in their own subfolder
+
+    # TODO Remove after debugging
+    - name: Show downloaded structure
+      run: |
+        echo "Current working directory: $(pwd)"
+        echo "All files and folders after artifact download:"
+        find . -type f -o -type d | sort
+
+    - name: Extract objective
+      id: extract_obj
+      run: |2
+
+        shopt -s nullglob
+
+        OBJ_STRING="(?<=INFO:__main__:Objective function: ).*"
+        LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
+        echo "Extracting the objective values from the logs"
+        OBJ_FOUND=$(
+          awk '/INFO:__main__:Objective function: /{
+                 sub(/\r$/, "");
+                 sub(/.*INFO:__main__:Objective function: /, "");
+                 print FILENAME ":" $0
+               }' "${LOG_FILES[@]}" || true
+        )
+
+        shopt -u nullglob
+
+        # The objective can be also empty (in case some tests failed)
+        if [ -z "$OBJ_FOUND" ]; then
+          echo "Objective not found."
+          exit 1
+        else
+          echo "Objective value found: $OBJ_FOUND"
+          echo "Writing to GitHub output"
+          #printf "%s\n" "obj_match=$OBJ_FOUND" >> "$GITHUB_OUTPUT"
+          delim="OBJ_EOF_$(date +%s%N)"
+          {
+            echo "obj_match<<$delim"
+            printf '%s\n' "$OBJ_FOUND"
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+        fi
+
+        echo "The objective extracted successfully"
+
+        # Add Python import
+        extract_obj_for_path_py() {
+          python - "$1" "$2" <<'PY'
+        import sys
+        from scripts.non_workflow.extract_ref_objective import extract_obj_for_path
+        dir, fl = sys.argv[1], sys.argv[2]
+        print(extract_obj_for_path(dir, fl))
+        PY
+        }
+
+        TABLE="| Folder | File | Current Objective | Reference Objective |"
+        TABLE+="\n|:----|:-----|------------------:|--------------------:|"
+
+        while IFS= read -r line; do
+          FILE=$(echo "$line" | cut -d: -f1)
+          VALUE=$(echo "$line" | cut -d: -f2-)
+          BASENAME=$(basename "$FILE")
+
+          # An enclosing folder contains a name of the run
+          FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
+
+          if [[ "$FILE" == ./logs/solve_network/* ]]; then
+            FOLDER="default"
+          fi
+
+          OBJ_SCALE=1000000
+          VALUE_SCALED=$(awk -v v="$VALUE" -v s="$OBJ_SCALE" 'BEGIN { if (s==0) { print "NaN"; exit 1 } printf "%.2f\n", v/s }')
+
+          REF_VALUE=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
+
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE_SCALED\` | \`$REF_VALUE\` |"
+        done <<< "$OBJ_FOUND"
+
+        echo -e "$TABLE"
+
+        echo "The output table is formed"
+
+        echo "### Objective Results of CI Run" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "GITHUB_STEP_SUMMARY successfully supplemented with a header"
+
+        printf "%b\n" "$TABLE" >> "$GITHUB_STEP_SUMMARY"
