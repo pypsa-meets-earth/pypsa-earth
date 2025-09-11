@@ -180,13 +180,14 @@ def create_export_profile():
             )
 
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
-    sopts = snakemake.wildcards.sopts.split("-")
-    export_profile = export_profile.resample(sopts[0].casefold()).mean()
+    sel_export = export_profile[n.snapshots]
+    pu_profile_export = sel_export / (1e-6 + sel_export.sum())
+    export_profile = pu_profile_export * export_profile.sum() * len(n.snapshots) / 8760
 
     # revise logger msg
     export_type = snakemake.params.export_profile
     logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {sopts[0]}"
+        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {len(n.snapshots)} snapshots."
     )
 
     return export_profile
