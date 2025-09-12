@@ -635,13 +635,10 @@ def add_h2_network_cap(n, cap):
 def hydrogen_temporal_constraint(n, n_ref, time_period):
     res_techs = [
         "csp",
-        "rooftop-solar",
         "solar",
         "onwind",
-        "onwind2",
-        "onwind3",
-        "offwind",
-        "offwind2",
+        "offwind-ac",
+        "offwind-dc",
         "ror",
     ]
 
@@ -680,7 +677,8 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    electrolysis_index = n.links.index[n.links.index.str.contains("H2 Electrolysis")]
+    electrolysis_carriers = ["H2 Electrolysis", "Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC"]
+    electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
 
     link_p = n.model["Link-p"]
     electrolysis = link_p.loc[:, electrolysis_index]
