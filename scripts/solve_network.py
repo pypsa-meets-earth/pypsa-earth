@@ -684,7 +684,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         "Alkaline electrolyzer medium",
         "Alkaline electrolyzer small",
         "PEM electrolyzer",
-        "SOEC"
+        "SOEC",
     ]
     electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
 
