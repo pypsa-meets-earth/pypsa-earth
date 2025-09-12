@@ -677,7 +677,14 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    electrolysis_carriers = ["H2 Electrolysis", "Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC"]
+    electrolysis_carriers = [
+        "H2 Electrolysis",
+        "Alkaline electrolyzer large",
+        "Alkaline electrolyzer medium",
+        "Alkaline electrolyzer small",
+        "PEM electrolyzer",
+        "SOEC"
+    ]
     electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
 
     link_p = n.model["Link-p"]
