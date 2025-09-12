@@ -65,7 +65,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    sanitize_carriers,
+    sanitize_locations,
+)
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -392,37 +398,37 @@ if __name__ == "__main__":
                 add_gaslimit(n, snakemake.params.electricity.get("gaslimit"), Nyears)
                 logger.info("Setting gas usage limit according to config value.")
 
-        for o in opts:
-            oo = o.split("+")
-            suptechs = map(lambda c: c.split("-", 2)[0], n.carriers.index)
-            if oo[0].startswith(tuple(suptechs)):
-                carrier = oo[0]
-                # handles only p_nom_max as stores and lines have no potentials
-                attr_lookup = {
-                    "p": "p_nom_max",
-                    "c": "capital_cost",
-                    "m": "marginal_cost",
-                }
-                attr = attr_lookup[oo[1][0]]
-                factor = float(oo[1][1:])
-                if carrier == "AC":  # lines do not have carrier
-                    n.lines[attr] *= factor
-                else:
-                    comps = {"Generator", "Link", "StorageUnit", "Store"}
-                    for c in n.iterate_components(comps):
-                        sel = c.df.carrier.str.contains(carrier)
-                        c.df.loc[sel, attr] *= factor
+    for o in opts:
+        oo = o.split("+")
+        suptechs = map(lambda c: c.split("-", 2)[0], n.carriers.index)
+        if oo[0].startswith(tuple(suptechs)):
+            carrier = oo[0]
+            # handles only p_nom_max as stores and lines have no potentials
+            attr_lookup = {
+                "p": "p_nom_max",
+                "c": "capital_cost",
+                "m": "marginal_cost",
+            }
+            attr = attr_lookup[oo[1][0]]
+            factor = float(oo[1][1:])
+            if carrier == "AC":  # lines do not have carrier
+                n.lines[attr] *= factor
+            else:
+                comps = {"Generator", "Link", "StorageUnit", "Store"}
+                for c in n.iterate_components(comps):
+                    sel = c.df.carrier.str.contains(carrier)
+                    c.df.loc[sel, attr] *= factor
 
-        for o in opts:
-            if "Ep" in o:
-                m = re.findall("[0-9]*\.?[0-9]+$", o)
-                if len(m) > 0:
-                    logger.info("Setting emission prices according to wildcard value.")
-                    add_emission_prices(n, dict(co2=float(m[0])))
-                else:
-                    logger.info("Setting emission prices according to config value.")
-                    add_emission_prices(n, snakemake.params.costs["emission_prices"])
-                break
+    for o in opts:
+        if "Ep" in o:
+            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            if len(m) > 0:
+                logger.info("Setting emission prices according to wildcard value.")
+                add_emission_prices(n, dict(co2=float(m[0])))
+            else:
+                logger.info("Setting emission prices according to config value.")
+                add_emission_prices(n, snakemake.params.costs["emission_prices"])
+            break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
     set_transmission_limit(n, ll_type, factor, costs, Nyears)
@@ -437,6 +443,9 @@ if __name__ == "__main__":
         enforce_autarky(n)
     elif "ATKc" in opts:
         enforce_autarky(n, only_crossborder=True)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
