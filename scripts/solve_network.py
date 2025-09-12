@@ -633,6 +633,7 @@ def add_h2_network_cap(n, cap):
 
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
+
     res_techs = [
         "csp",
         "solar",
@@ -1145,7 +1146,7 @@ if __name__ == "__main__":
         snakemake.config["policy_config"]["hydrogen"]["additionality"]
         and not snakemake.config["policy_config"]["hydrogen"]["is_reference"]
         and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-        != "no_res_matching"
+        != "no_temporal_matching"
         and is_sector_coupled
     ):
         n_ref_path = snakemake.config["policy_config"]["hydrogen"]["path_to_ref"]
