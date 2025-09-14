@@ -17,6 +17,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
+from _helpers import sanitize_carriers, sanitize_locations
 
 # from _helpers import (
 #     configure_logging,
@@ -616,7 +617,9 @@ if __name__ == "__main__":
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
-        snakemake.params.costs["default_USD_to_EUR"],
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
 
     grouping_years_power = snakemake.params.existing_capacities["grouping_years_power"]
@@ -626,7 +629,7 @@ if __name__ == "__main__":
     )
 
     # TODO: not implemented in -sec yet
-    # if options["heating"]:
+    # if options["enable"]["heat"]:
     #     time_dep_hp_cop = options["time_dep_hp_cop"]
     #     ashp_cop = (
     #         xr.open_dataarray(snakemake.input.cop_air_total)
@@ -657,6 +660,7 @@ if __name__ == "__main__":
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
 
-    # sanitize_carriers(n, snakemake.config)
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.export_to_netcdf(snakemake.output[0])

@@ -36,10 +36,10 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/145504/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
-      gdrive: https://drive.google.com/file/d/12K03Epx3O9o-IQLh9afzCQyT-nMKWM3P/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1XnTP6bZoVl5kFjZQlAcmjNXgazOHtFqX/view?usp=drive_link
     output:
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/gadm/gadm41_NGA/gadm41_NGA.gpkg  # needed in build_shapes
     - data/gadm/gadm41_BEN/gadm41_BEN.gpkg  # needed in build_shapes
@@ -53,10 +53,10 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/145504/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
-      gdrive: https://drive.google.com/file/d/1YbbYGs1NsSsZYqNX1g1Jo-iJzt5m-81c/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1AEmlgBO-6uY_MA4rzmaRJcQ-xE1Z4uHx/view?usp=drive_link
     output:
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/gadm/gadm41_BWA/gadm41_BWA.gpkg  # needed in build_shapes
     - data/gadm/gadm36_BWA/gadm36_BWA.gpkg  # needed in sector-coupled model
@@ -68,10 +68,10 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/1VGzE8ZJHAvAQ9X44QNSX4rH3QF7Yi37D/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_MA.zip?download=1
+      gdrive: https://drive.google.com/file/d/1cUei9vH3LzIYfqltaGTaRWCX6J24f1c0/view?usp=drive_link
     output:
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
 
   # load tutorial hydrobasins bundle for Africa only
@@ -95,7 +95,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -108,7 +108,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_BW.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_cutouts_tutorial_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -121,7 +121,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_cutouts_tutorial_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -145,7 +145,7 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/tutorial_data_general.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323571/files/tutorial_data_general.zip?download=1
       gdrive: https://drive.google.com/file/d/1nRLrs_kP0qVl-IHC4BFLjpoKa3HLk2Py/view
     output:
     - data/eez/eez_v11.gpkg
@@ -177,11 +177,11 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_data_earth.zip?download=1
-      gdrive: https://drive.google.com/file/d/1zU4VRRBDVIVqoykhK9lnOAr60unVm_x2/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/313836/files/bundle_data_earth.zip?download=1
+      gdrive: https://drive.google.com/file/d/1P4uMY464lgcp--8fAEYIJbKeNmHdg1Re/view?usp=drive_link
     output:
     - data/eez/eez_v11.gpkg
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/ssp2-2.6/2030/era5_2013/Asia.nc
@@ -196,7 +196,7 @@ databundles:
     category: natura
     destination: "data/natura/"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/natura_wpda_CC0.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323567/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
     - data/natura/natura.tiff
@@ -242,7 +242,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_cutouts_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323567/files/bundle_cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -282,7 +282,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/17QS7qkuCiyj95Pr-ZQRl3qgp5CQE6HTy/view?usp=drive_link
+      gdrive: https://drive.google.com/file/d/1c2-8pChoxv4CDJW01vkPpggBSWHs9Mqi/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]

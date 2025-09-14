@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: 0.6.0
+version: 0.7.0
 logging_level: INFO
 tutorial: true
 
@@ -30,6 +30,13 @@ scenario:
   opts: ["Co2L-24H"]
   sopts: ["144h"]
   demand: ["DF"]
+
+co2_budget:
+  enable: true
+  override_co2opt: true
+  co2base_value: co2limit
+  year:
+    2030: 1.0
 
 cluster_options:
   alternative_clustering: false
