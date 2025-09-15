@@ -924,6 +924,23 @@ def clean_data(
         df_cables = prepare_lines_df(df_cables)
         df_cables = finalize_lines_type(df_cables)
 
+        # --- DEBUG: controlla line_id prima del concat ---
+        print("=== DF LINES ===")
+        print(df_lines[["line_id"]].head(20))
+        print("Duplicati lines:", df_lines["line_id"].duplicated().sum())
+
+        print("=== DF CABLES ===")
+        print(df_cables[["line_id"]].head(20))
+        print("Duplicati cables:", df_cables["line_id"].duplicated().sum())
+        
+        print("Colonne df_lines:", df_lines.columns.tolist())
+        print("Colonne df_cables:", df_cables.columns.tolist())
+        print("Duplicati colonne df_lines:", df_lines.columns[df_lines.columns.duplicated()])
+        print("Duplicati colonne df_cables:", df_cables.columns[df_cables.columns.duplicated()])
+        # Rimuove colonne duplicate mantenendo la prima
+        df_lines = df_lines.loc[:, ~df_lines.columns.duplicated()].copy()
+        df_cables = df_cables.loc[:, ~df_cables.columns.duplicated()].copy()
+
         # concatenate lines and cables in a single dataframe
         df_all_lines = pd.concat([df_lines, df_cables], ignore_index=True)
     else:

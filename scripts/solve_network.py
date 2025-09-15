@@ -82,6 +82,7 @@ import os
 import re
 from pathlib import Path
 
+from kiwisolver import Constraint
 import numpy as np
 import pandas as pd
 import pypsa
@@ -93,6 +94,8 @@ from pypsa.optimization.abstract import optimize_transmission_expansion_iterativ
 from pypsa.optimization.optimize import optimize
 from add_electricity import load_costs
 import re
+#from pypsa.linopf import get_var, linexpr, define_constraints
+
 
 
 logger = create_logger(__name__)
@@ -980,6 +983,55 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     # add the constraint to the PySPA model
     n.model.add_constraints(lhs == 0, name="Link-bidirectional_sync")
 
+def add_bicharger_constraints(n, costs):
+    print("Entrato in add_bicharger_constraints") 
+    tech_type = costs.technology_type
+    carriers_bicharger = [c.split(',')[1] for c in costs.loc[tech_type == "bicharger", "carrier"].unique()]
+    carriers_config = n.config["electricity"]["extendable_carriers"]["Store"]
+    carriers_intersect = set(carriers_bicharger) & set(carriers_config)
+
+    print(f"Carriers bicharger: {carriers_bicharger}")
+    print(f"Carriers config: {carriers_config}")
+    print(f"Carriers intersect: {carriers_intersect}")
+
+    p_nom = n.model["Link-p_nom"]  # variabile Pyomo
+    print(p_nom)
+    
+    for c in carriers_intersect:
+        # seleziona link del carrier c
+        links_c = [link for link in n.links.index if c in link]
+
+        for charger in links_c:
+            if "charger" not in charger:
+                continue
+
+            discharger = charger.replace("charger", "discharger")
+
+            print(f"Controllo link: charger={charger}, discharger={discharger}")
+
+            # Controllo esistenza nel modello
+            if not n.links.p_nom.index.str.contains(charger).any() or \
+                not n.links.p_nom.index.str.contains(discharger).any():
+                print(f"WARNING: Variabili {charger} o {discharger} non trovate in n.links.p_nom")
+                continue
+            
+            # Determina il tipo di link per il nome del vincolo
+            if "bicharger" in charger:
+                link_type = "bicharger"
+            else:
+                link_type = "charger"
+
+            # Usa il nome completo del link + tipo per evitare duplicati
+            vincolo_name = f"{link_type}_{charger.replace(' ', '_')}"
+            print(vincolo_name)
+            # Aggiungi vincolo usando add_constraint di Linopy
+            #vincolo_name = f"bicharger_{c}_{charger.split()[0]}"
+            n.model.add_constraints(
+                p_nom[charger] - p_nom[discharger] == 0,
+                name=vincolo_name
+            )
+            print(f"Vincolo aggiunto per {charger} e {discharger}")
+
 def extra_functionality(n, snapshots):
     """
     Collects supplementary constraints which will be passed to
@@ -1018,6 +1070,8 @@ def extra_functionality(n, snapshots):
 
     add_battery_constraints(n, costs)
     add_lossy_bidirectional_link_constraints(n)
+    add_bicharger_constraints(n, costs)
+
 
     if snakemake.config["sector"]["chp"]:
         logger.info("setting CHP constraints")
@@ -1171,6 +1225,7 @@ if __name__ == "__main__":
         config=snakemake.config,
         solving=snakemake.params.solving,
         log_fn=snakemake.log.solver,
+        extra_functionality=extra_functionality,
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
