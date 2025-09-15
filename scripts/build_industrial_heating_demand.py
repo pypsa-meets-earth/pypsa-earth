@@ -48,7 +48,6 @@ def prepare_demand_data(fn):
     )
 
     df_melted = df_melted[df_melted["Heating Demand (BBtu)"] != 0]
-
     df_melted["Temperature Range"] = df_melted["Temperature Range"].str.replace(
         "Heating (BBtu), ", "", regex=False
     )
@@ -1113,6 +1112,8 @@ if __name__ == "__main__":
     #############     OVERLAYS DIFFERENT GEOTHERMAL TECHS TO HAVE FOR EACH REGION THE
     #############     COST-OPTIMAL TECH FOR EACH TEMPERATURE BAND OF DEMAND
 
+    demand_gdf = prepare_demand_data(snakemake.input["demand_data"])
+
     # these are the geothermal input files, as passed in the data transfer pypsa_inputs_draft_20250403
     tif_files = {
         name: fn for name, fn in snakemake.input.items() if fn.endswith(".tif")
@@ -1312,15 +1313,6 @@ if __name__ == "__main__":
                 )
 
     print("-" * 80)
-
-    print(gdf.columns.get_level_values(0).unique())
-
-    demand_gdf = prepare_demand_data(snakemake.input["demand_data"])
-    logger.warning(
-        "Inconsistency between temperature ranges in the data and this scripts."
-        "This script has 50-80, 80-150, 150-250."
-        "The data has 0-49, 50-99, 100-149, 150-199, 200-249, 250-299, 300-349, 350-399, 400-449, >450."
-    )
 
     regions = gpd.read_file(snakemake.input["regions"]).set_index("name")
 
@@ -1632,10 +1624,6 @@ if __name__ == "__main__":
         regional_supply = pd.concat(regional_supply).replace(np.nan, 0)
 
         regional_supply_shapes.loc[region] = len(regional_supply)
-
-        os.makedirs("hold", exist_ok=True)
-
-        regional_supply.to_csv(f"hold/regional_supply_{region}.csv")
 
         regional_supply.loc[:, "region"] = region
         total_results.append(regional_supply)

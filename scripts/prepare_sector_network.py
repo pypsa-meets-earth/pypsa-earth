@@ -3061,7 +3061,7 @@ def add_geothermal_industry_supply(n, supply_curve):
                 )
 
 
-def add_industry_heating(n, costs):
+def add_industry_heating(n, costs, market, scenario):
 
     idx = pd.IndexSlice
 
@@ -3279,8 +3279,8 @@ def add_industry_heating(n, costs):
     n.madd(
         "Link",
         nodes_low + " industrial heat pump low temperature",
-        bus0=nodes,
-        bus1=nodes_low,
+        bus0=nodes_low,
+        bus1=low_temp_buses,
         carrier="industrial heat pump low temperature",
         p_nom_extendable=True,
         capital_cost=costs.at["industrial heat pump medium temperature", "fixed"],
@@ -3297,8 +3297,8 @@ def add_industry_heating(n, costs):
     n.madd(
         "Link",
         nodes_medium + " industrial heat pump medium temperature",
-        bus0=nodes,
-        bus1=nodes_medium,
+        bus0=nodes_medium,
+        bus1=medium_temp_buses,
         carrier="industrial heat pump medium temperature",
         p_nom_extendable=True,
         capital_cost=costs.at["industrial heat pump high temperature", "fixed"] * 1000, # $/kW -> $/MW
@@ -3539,41 +3539,6 @@ def attach_enhanced_geothermal(n, potential_fn, mode):
                 marginal_cost=opex,
                 p_nom_extendable=True,
             )
-
-def add_geothermal_district_heating_supply(n, egs_potential):
-
-    discount_rate = float(snakemake.wildcards.discountrate)
-    lifetime = 25  # years
-    annuity_factor = (
-        discount_rate
-        * (1 + discount_rate) ** lifetime
-        / ((1 + discount_rate) ** lifetime - 1)
-    )
-
-    network_cost_factor = 1.28 # maximally simple estimate of heat network cost, taken from
-    # https://vb.nweurope.eu/media/21149/2022_04_dge_rollout_dt123_socio_economic_potential_mapping_for_dge_urg.pdf
-
-    egs_potential['capex[USD/MW]'] = egs_potential['capex[USD/MW]'] * annuity_factor * network_cost_factor
-
-    for (bus, supply_curve_step), row in egs_potential.iterrows():
-
-        supply_curve_step = supply_curve_step.split(' ')[1]
-
-        capacity = row['heat_demand[MW]']
-        capital_cost = row['capex[USD/MW]']
-        opex = row['opex[USD/MWh]']
-
-        identifier = f"{bus} geothermal district heating {supply_curve_step}"
-
-        n.add(
-            "Generator",
-            name=identifier,
-            bus=bus + " residential urban decentral heat",
-            carrier=f"geothermal district heat",
-            p_nom_max=capacity,
-            capital_cost=capital_cost,
-            marginal_cost=opex,
-        )
 
 
 def add_geothermal_district_heating_supply(n, egs_potential):
@@ -4099,21 +4064,21 @@ if __name__ == "__main__":
 
     h2_hc_conversions(n, costs)
 
-    # add_heat(n, costs)
-    # add_cooling(n, costs)
+    add_heat(n, costs)
+    add_cooling(n, costs)
 
-    # add_biomass(n, costs)
+    add_biomass(n, costs)
 
     # add_industry(n, costs)
 
-    # add_shipping(n, costs)
+    add_shipping(n, costs)
 
     # Add_aviation runs with dummy data
-    # add_aviation(n, costs)
+    add_aviation(n, costs)
 
     # prepare_transport_data(n)
 
-    # add_land_transport(n, costs)
+    add_land_transport(n, costs)
 
     # if snakemake.config["custom_data"]["transport_demand"]:
     add_rail_transport(n, costs)

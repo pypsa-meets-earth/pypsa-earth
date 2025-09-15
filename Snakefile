@@ -62,9 +62,6 @@ else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
-# Define the geothermal data path with raw string to avoid escape sequence warnings
-gt_path = r"data/pypsa_inputs_draft_20250403"
-
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -535,7 +532,7 @@ rule build_egs_potentials:
     output:
         egs_potentials="resources/"
         + SECDIR
-        + "geothermal_data/potential_{mode}_s{simpl}_{clusters}.csv",
+        + "geothermal_data/potential_{mode}_s{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 2
     resources:
         mem_mb=10000,
@@ -543,7 +540,7 @@ rule build_egs_potentials:
         (
             "benchmarks/"
             + RDIR
-            + "build_egs_potentials/potential_{mode}_s{simpl}_{clusters}"
+            + "build_egs_potentials/potential_{mode}_s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
         "scripts/build_egs_potentials.py"
@@ -583,7 +580,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
-        egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
+        # egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:
@@ -872,9 +869,6 @@ rule build_district_heating_cooling_demands:
         ),
         # Direct heat inputs for 100C and 200C
     output:
-        district_heating_demands=(
-            "resources/" + SECDIR + "district_heating_s{simpl}_{clusters}.csv"
-        ),
         district_heating_geothermal_supply_curves=(
             "resources/"
             + SECDIR
@@ -1068,12 +1062,12 @@ rule build_industrial_heating_demands:
         industrial_heating_egs_supply_curves=(
             "resources/"
             + SECDIR
-            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
+            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}_{planning_horizons}.csv"
         ),
         industrial_heating_demands=(
             "resources/"
             + SECDIR
-            + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+            + "industrial_heating_demands_s{simpl}_{clusters}_{planning_horizons}.csv"
         ),
         # heat_exchanger_capacity=(
         #     "resources/" + SECDIR + "heat_exchanger_capacity_s{simpl}_{clusters}.csv"
@@ -1463,22 +1457,22 @@ rule prepare_sector_network:
         industrial_heating_egs_supply_curves=(
             "resources/"
             + SECDIR
-            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}.csv"
+            + "industrial_heating_egs_supply_curves_s{simpl}_{clusters}_{planning_horizons}.csv"
         ),
         industrial_heating_demands=(
             "resources/"
             + SECDIR
-            + "industrial_heating_demands_s{simpl}_{clusters}.csv"
+            + "industrial_heating_demands_s{simpl}_{clusters}_{planning_horizons}.csv"
         ),
         industrial_heating_costs=(
             "resources/" + SECDIR + "industrial_heating_costs.csv"
         ),
         egs_potentials_egs="resources/"
         + SECDIR
-        + "geothermal_data/potential_egs_s{simpl}_{clusters}.csv",
+        + "geothermal_data/potential_egs_s{simpl}_{clusters}_{planning_horizons}.csv",
         egs_potentials_hs="resources/"
         + SECDIR
-        + "geothermal_data/potential_hs_s{simpl}_{clusters}.csv",
+        + "geothermal_data/potential_hs_s{simpl}_{clusters}_{planning_horizons}.csv",
         district_heating_geothermal_supply_curves=(
             "resources/"
             + SECDIR

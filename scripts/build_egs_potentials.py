@@ -115,8 +115,7 @@ if __name__ == "__main__":
         name: fn for name, fn in snakemake.input.items() if fn.endswith(".tif")
     }
 
-    gdf = capex_gdf[["capex", "geometry"]].join(gen_gdf[["gen"]], how="inner")
-    gdf = gdf.join(opex_gdf[["opex"]], how="inner")
+    gdf = tif_to_gdf(tif_files.values())
 
     with rasterio.open(list(tif_files.values())[0]) as src:
         transform = src.transform
@@ -170,15 +169,15 @@ if __name__ == "__main__":
     nodal_egs_potentials = pd.DataFrame(
         np.nan,
         index=regions.index,
-        columns=["capex[$/kW]", "opex[$/kWh]", "p_nom_max[MW]"],
+        columns=["capex[USD/MWe]", "opex[USD/MWhe]", "p_nom_max[MWe]"],
     )
 
     config = snakemake.params["enhanced_geothermal"]
 
     regional_potentials = []
 
-    for name, geom in tqdm(
-        regions.geometry.items(),
+    for i, (name, geom) in tqdm(
+        enumerate(regions.geometry.items()),
         desc="Matching EGS potentials to network regions",
         ascii=True,
     ):
@@ -189,10 +188,11 @@ if __name__ == "__main__":
         if ss.empty:
             continue
 
+        # Sort by capex first
         ss = (
-            ss[["capex[$/kW]", "opex[$/kWh]", "available_capacity[MW]"]]
+            ss[["capex[USD/MWe]", "opex[USD/MWhe]", "p_nom_max[MWe]"]]
             .reset_index(drop=True)
-            .sort_values(by="capex[$/kW]")
+            .sort_values(by="capex[USD/MWe]")
         )
 
         ss["agg_available_capacity[MWe]"] = ss["p_nom_max[MWe]"].cumsum()
@@ -205,6 +205,7 @@ if __name__ == "__main__":
         if ss.empty:
             continue
 
+        # Instead of equal capex ranges, create bins with equal capacity
         if len(ss) > 1:
             total_capacity = ss["p_nom_max[MWe]"].sum()
             capacity_per_bin = total_capacity / config["supply_curve_steps"]
@@ -262,7 +263,7 @@ if __name__ == "__main__":
             # Convert to DataFrame
             ss = pd.DataFrame(bin_data)
         else:
-            ss["level"] = ss["capex[$/kW]"].iloc[0]
+            ss["level"] = ss["capex[USD/MWe]"].iloc[0]
 
         ss = ss.dropna()
 
@@ -276,7 +277,7 @@ if __name__ == "__main__":
             )
 
         ss.index = pd.MultiIndex.from_product(
-            [[name], ss.index], names=["network_region", "capex[$/kW]"]
+            [[name], ss.index], names=["network_region", "capex[USD/MWe]"]
         )
 
         ss.loc[:, "p_nom_max[MWe]"] = ss.loc[:, "p_nom_max[MWe]"].iloc[0]
