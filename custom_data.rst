@@ -1,15 +1,15 @@
 Custom Data in PyPSA-Meets-Earth
 ================================
 
-PyPSA-Meets-Earth allows users to extend the model with **custom data** 
-to better reflect local or specialized scenarios. This document guides 
-users on how to extend PyPSA-Meets-Earth with custom datasets, ensuring 
+PyPSA-Meets-Earth allows users to extend the model with **custom data**
+to better reflect local or specialized scenarios. This document guides
+users on how to extend PyPSA-Meets-Earth with custom datasets, ensuring
 smooth integration and reproducibility.
 
 Overview
 --------
 
-Custom data can be used to **replace or supplement the default datasets** 
+Custom data can be used to **replace or supplement the default datasets**
 provided by the model. Supported types include:
 
 - Power grids and lines
@@ -26,20 +26,20 @@ provided by the model. Supported types include:
 - Renewable energy sources (e.g., CSP, rooftop solar, solar PV)
 
 .. note::
-   All custom data can remain private if desired. 
+   All custom data can remain private if desired.
    Users are not required to share their data publicly.
 
 Configuration
 -------------
 
-The ``config.default.yaml`` file controls which custom data options are enabled. 
-Each option can be set to ``true`` or ``false``. When enabled, the model will 
+The ``config.default.yaml`` file controls which custom data options are enabled.
+Each option can be set to ``true`` or ``false``. When enabled, the model will
 expect corresponding files in the specified directories.
 
 Example Configuration::
 
    custom_data:
-     renewables: []        
+     renewables: []
      elec_demand: false
      heat_demand: false
      industry_demand: false
@@ -49,9 +49,9 @@ Example Configuration::
      h2_underground: false
      add_existing: false
      custom_sectors: false
-     gas_network: false      
-     export_ports: false     
-     airports: false    
+     gas_network: false
+     export_ports: false
+     airports: false
 
 Required File Locations and Formats
 -----------------------------------
@@ -88,8 +88,8 @@ Currently, linkers support:
 - Renewable production time series
 
 .. note::
-   Additional custom data can be added using **linkers**, which provide 
-   simple interfaces for integrating new datasets without modifying core 
+   Additional custom data can be added using **linkers**, which provide
+   simple interfaces for integrating new datasets without modifying core
    model files.
 
 Reference Data Sources
@@ -108,7 +108,7 @@ For guidance on sourcing data, refer to the following table:
 +------+----------------------------------------+--------+--------+---------+-----+
 
 .. note::
-   This table is continuously updated to include new global and 
+   This table is continuously updated to include new global and
    country-level datasets.
 
 Best Practices
@@ -122,11 +122,11 @@ Best Practices
 Additional Notes
 ----------------
 
-- If using **GADM clustering**, ensure at least one bus per administrative region. 
-  Missing buses can be added using a custom CSV created with centroids matching 
+- If using **GADM clustering**, ensure at least one bus per administrative region.
+  Missing buses can be added using a custom CSV created with centroids matching
   the substation GeoJSON format.
 - Private datasets do not need to be shared publicly.
-- Users are encouraged to contribute improvements back to the repository 
+- Users are encouraged to contribute improvements back to the repository
   following contribution guidelines.
 
 Usage Instructions
