@@ -490,7 +490,7 @@ rule build_renewable_profiles:
     input:
         natura="resources/" + RDIR + "natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
-        gebco="data/gebco/GEBCO_2021_TID.nc",
+        gebco="data/gebco/GEBCO_2025_sub_ice.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
@@ -647,11 +647,12 @@ rule cluster_network:
         costs=config["costs"],
         length_factor=config["lines"]["length_factor"],
         renewable=config["renewable"],
-        geo_crs=config["crs"]["geo_crs"],
+        crs=config["crs"],
         countries=config["countries"],
         cluster_options=config["cluster_options"],
         focus_weights=config.get("focus_weights", None),
         #custom_busmap=config["enable"].get("custom_busmap", False)
+        subregion=config["subregion"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -670,6 +671,7 @@ rule cluster_network:
         # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
         #                if config["enable"].get("custom_busmap", False) else []),
         tech_costs=COSTS,
+        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
         network=branch(
             config["augmented_line_connection"].get("add_to_snakefile", False) == True,
@@ -1102,6 +1104,7 @@ rule prepare_sector_network:
         sector_options=config["sector"],
         foresight=config["foresight"],
         water_costs=config["custom_data"]["water_costs"],
+        co2_budget=config["co2_budget"],
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),

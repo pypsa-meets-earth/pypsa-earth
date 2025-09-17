@@ -104,6 +104,7 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
+    nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -690,9 +691,9 @@ def cluster(
     return clustering.network, clustering.busmap
 
 
-def drop_isolated_nodes(n, threshold):
+def drop_isolated_networks(n, threshold):
     """
-    Find isolated nodes in the network and drop those of them which don't have
+    Find isolated subnetworks in the network and drop those of them which don't have
     load or have a load value lower than a threshold.
 
     Parameters
@@ -714,10 +715,15 @@ def drop_isolated_nodes(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
+    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
+
+    small_subs = p_by_sub[p_by_sub < threshold].index
+
     off_buses = n.buses[
-        (~n.buses.duplicated(subset=["sub_network"], keep=False))
-        & (n.buses.carrier == "AC")
+        (n.buses.carrier == "AC") & n.buses.sub_network.isin(small_subs)
     ]
+
     i_islands = off_buses.index
 
     if off_buses.empty:
@@ -731,27 +737,20 @@ def drop_isolated_nodes(n, threshold):
         if n_bus_off == n_bus:
             i_islands = i_islands[i_islands != off_buses[isc_offbus].index[0]]
 
-    i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
+    i_loads_drop = n.loads[n.loads.bus.isin(i_islands)].index
+    i_generators_drop = n.generators[n.generators.bus.isin(i_islands)].index
+    i_links_drop = n.links[
+        n.links.bus0.isin(i_islands) | n.links.bus1.isin(i_islands)
+    ].index
+    i_lines_drop = n.lines[
+        n.lines.bus0.isin(i_islands) | n.lines.bus1.isin(i_islands)
+    ].index
 
-    # isolated buses without load should be discarded
-    isl_no_load = i_islands.difference(i_load_islands)
-
-    # isolated buses with load lower than a specified threshold should be discarded as well
-    i_small_load = i_load_islands[
-        n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
-    ]
-
-    if (i_islands.empty) | (len(i_small_load) == 0):
-        return n
-
-    i_to_drop = isl_no_load.to_list() + i_small_load.to_list()
-
-    i_loads_drop = n.loads[n.loads.bus.isin(i_to_drop)].index
-    i_generators_drop = n.generators[n.generators.bus.isin(i_to_drop)].index
-
-    n.mremove("Bus", i_to_drop)
+    n.mremove("Bus", i_islands)
     n.mremove("Load", i_loads_drop)
     n.mremove("Generator", i_generators_drop)
+    n.mremove("Link", i_links_drop)
+    n.mremove("Line", i_lines_drop)
 
     n.determine_network_topology()
 
@@ -759,7 +758,7 @@ def drop_isolated_nodes(n, threshold):
     generators_mean_final = n.generators.p_nom.mean()
 
     logger.info(
-        f"Dropped {len(i_to_drop)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectively"
+        f"Dropped {len(i_islands)} buses. A resulted load discrepancy is {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1}% for average load and generation capacity, respectively"
     )
 
     return n
@@ -898,9 +897,9 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     return clustering.network, busmap
 
 
-def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
+def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
     """
-    Find isolated nodes in the network and merge those of them which have load
+    Find isolated subnetworks in the network and merge those of them which have load
     value below than a specified threshold into a single isolated node which
     represents all the remote generation.
 
@@ -924,17 +923,16 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    # duplicated sub-networks mean that there is at least one interconnection between buses
-    i_islands = n.buses[
-        (~n.buses.duplicated(subset=["sub_network"], keep=False))
-        & (n.buses.carrier == "AC")
-    ].index
+    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
-    # isolated buses with load below than a specified threshold should be merged
-    i_load_islands = n.loads_t.p_set.columns.intersection(i_islands)
-    i_islands_merge = i_load_islands[
-        n.loads_t.p_set[i_load_islands].mean(axis=0) <= threshold
+    small_subs = p_by_sub[p_by_sub < threshold].index
+
+    off_buses = n.buses[
+        (n.buses.carrier == "AC") & n.buses.sub_network.isin(small_subs)
     ]
+
+    i_islands_merge = off_buses.index
 
     # all the nodes to be merged should be mapped into a single node
     map_isolated_node_by_country = (
@@ -985,34 +983,6 @@ def merge_isolated_nodes(n, threshold, aggregation_strategies=dict()):
     )
 
     return clustering.network, busmap
-
-
-def nearest_shape(n, path_shapes, distance_crs):
-    """
-    The function nearest_shape reallocates buses to the closest "country" shape based on their geographical coordinates,
-    using the provided shapefile and distance CRS.
-
-    """
-
-    from shapely.geometry import Point
-
-    shapes = gpd.read_file(path_shapes, crs=distance_crs).set_index("name")["geometry"]
-
-    for i in n.buses.index:
-        point = Point(n.buses.loc[i, "x"], n.buses.loc[i, "y"])
-        contains = shapes.contains(point)
-        if contains.any():
-            n.buses.loc[i, "country"] = contains.idxmax()
-        else:
-            distance = shapes.distance(point).sort_values()
-            if distance.iloc[0] < 1:
-                n.buses.loc[i, "country"] = distance.index[0]
-            else:
-                logger.info(
-                    f"The bus {i} is {distance.iloc[0]} km away from {distance.index[0]} "
-                )
-
-    return n
 
 
 if __name__ == "__main__":
@@ -1134,7 +1104,10 @@ if __name__ == "__main__":
         build_shape_options = snakemake.params.build_shape_options
         country_list = snakemake.params.countries
         distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
-        focus_weights = snakemake.params.focus_weights
+        focus_weights = (
+            snakemake.params.focus_weights
+            or snakemake.params.cluster_options["focus_weights"]
+        )
         gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
         geo_crs = snakemake.params.crs["geo_crs"]
         renewable_config = snakemake.params.renewable
@@ -1172,30 +1145,35 @@ if __name__ == "__main__":
 
     update_p_nom_max(n)
 
+    # Option for subregion
     subregion_config = snakemake.params.subregion
-    if subregion_config["define_by_gadm"]:
-        logger.info("Activate subregion classificaition based on GADM")
-        subregion_shapes = snakemake.input.subregion_shapes
-    elif subregion_config["path_custom_shapes"]:
-        logger.info("Activate subregion classificaition based on custom shapes")
-        subregion_shapes = subregion_config["path_custom_shapes"]
+    if subregion_config["enable"]["simplify_network"]:
+        if subregion_config["define_by_gadm"]:
+            logger.info("Activate subregion classificaition based on GADM")
+            subregion_shapes = snakemake.input.subregion_shapes
+        elif subregion_config["path_custom_shapes"]:
+            logger.info("Activate subregion classificaition based on custom shapes")
+            subregion_shapes = subregion_config["path_custom_shapes"]
+        else:
+            logger.warning("Although enabled, no subregion classificaition is selected")
+            subregion_shapes = False
+
+        if subregion_shapes:
+            crs = snakemake.params.crs
+            tolerance = subregion_config["tolerance"]
+            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
     else:
         subregion_shapes = False
 
-    if subregion_shapes:
-        distance_crs = snakemake.params.crs["distance_crs"]
-        n = nearest_shape(n, subregion_shapes, distance_crs)
-
-    p_threshold_drop_isolated = max(
-        0.0, cluster_config.get("p_threshold_drop_isolated", 0.0)
-    )
+    p_threshold_drop_isolated = cluster_config.get("p_threshold_drop_isolated", False)
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
     s_threshold_fetch_isolated = cluster_config.get("s_threshold_fetch_isolated", False)
 
-    n = drop_isolated_nodes(n, threshold=p_threshold_drop_isolated)
+    if p_threshold_drop_isolated:
+        n = drop_isolated_networks(n, threshold=p_threshold_drop_isolated)
 
     if p_threshold_merge_isolated:
-        n, merged_nodes_map = merge_isolated_nodes(
+        n, merged_nodes_map = merge_isolated_networks(
             n,
             threshold=p_threshold_merge_isolated,
             aggregation_strategies=aggregation_strategies,
@@ -1213,7 +1191,7 @@ if __name__ == "__main__":
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
         country_shapes = snakemake.input.country_shapes
-        n = nearest_shape(n, country_shapes, distance_crs)
+        n = nearest_shape(n, country_shapes, crs, tolerance=tolerance)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
