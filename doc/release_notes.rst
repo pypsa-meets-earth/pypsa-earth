@@ -26,6 +26,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Merges the ``load_costs`` and ``prepare_costs`` functions into a single ``load_costs`` function within the `_helper.py` script. Renames ``fixed`` to ``capital_cost`` to better reflect annualized investment costs `PR #1572 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1572>`__
+
 * The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
 
 * Disable distribute_cluster only for one subnetwork and country `PR #1539 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539>`__
