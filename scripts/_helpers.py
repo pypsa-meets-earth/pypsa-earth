@@ -274,7 +274,7 @@ def load_network_for_plots(
     fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
     import pypsa
-    from add_electricity import load_costs, update_transmission_costs
+    from add_electricity import update_transmission_costs
 
     n = pypsa.Network(fn)
 
@@ -300,7 +300,17 @@ def load_network_for_plots(
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
+    costs = load_costs(
+        tech_costs,
+        cost_config,
+        cost_config["output_currency"],
+        cost_config["fill_values"],
+        elec_config["max_hours"],
+        Nyears,
+        cost_config["default_exchange_rate"],
+        cost_config["future_exchange_rate_strategy"],
+        cost_config["custom_future_exchange_rate"],
+    )
     update_transmission_costs(n, costs)
 
     return n
@@ -1154,11 +1164,12 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     return cost_dataframe
 
 
-def prepare_costs(
+def load_costs(
     cost_file: str,
     config: dict,
     output_currency: str,
     fill_values: dict,
+    max_hours: dict,
     Nyears: float | int = 1,
     default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "latest",
@@ -1169,7 +1180,7 @@ def prepare_costs(
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     """
-    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
+    costs = pd.read_csv(cost_file, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
@@ -1231,10 +1242,66 @@ def prepare_costs(
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
-    modified_costs["fixed"] = [
+    modified_costs["capital_cost"] = [
         annuity_factor(v) * v["investment"] * Nyears
         for _, v in modified_costs.iterrows()
     ]
+
+
+    modified_costs.at["OCGT", "fuel"] = modified_costs.at["gas", "fuel"]
+    modified_costs.at["CCGT", "fuel"] = modified_costs.at["gas", "fuel"]
+
+    modified_costs["marginal_cost"] = modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
+
+    # modified_costs = modified_costs.rename(columns={"CO2 intensity": "co2_emissions"})
+    # rename because technology data & pypsa earth costs.csv use different names
+    # TODO: rename the technologies in hosted tutorial data to match technology data
+    modified_costs = modified_costs.rename(
+        {
+            "hydrogen storage": "hydrogen storage tank",
+            "hydrogen storage tank": "hydrogen storage tank",
+            "hydrogen storage tank type 1": "hydrogen storage tank",
+            "hydrogen underground storage": "hydrogen storage underground",
+        },
+    )
+
+    modified_costs.at["OCGT", "CO2 intensity"] = modified_costs.at["gas", "CO2 intensity"]
+    modified_costs.at["CCGT", "CO2 intensity"] = modified_costs.at["gas", "CO2 intensity"]
+
+    modified_costs.at["solar", "capital_cost"] = (
+        config["rooftop_share"] * modified_costs.at["solar-rooftop", "capital_cost"]
+        + (1 - config["rooftop_share"]) * modified_costs.at["solar-utility", "capital_cost"]
+    )
+    modified_costs.loc["csp"] = modified_costs.loc["csp-tower"]
+
+    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
+        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+        if link2 is not None:
+            capital_cost += link2["capital_cost"]
+        return pd.Series(
+            {"capital_cost": capital_cost, "marginal_cost": 0.0, "CO2 intensity": 0.0}
+        )
+
+    modified_costs.loc["battery"] = costs_for_storage(
+        modified_costs.loc["battery storage"],
+        modified_costs.loc["battery inverter"],
+        max_hours=max_hours["battery"],
+    )
+    modified_costs.loc["H2"] = costs_for_storage(
+        modified_costs.loc["hydrogen storage tank"],
+        modified_costs.loc["fuel cell"],
+        modified_costs.loc["electrolysis"],
+        max_hours=max_hours["H2"],
+    )
+
+    for attr in ("marginal_cost", "capital_cost"):
+        overwrites = config.get(attr)
+        if overwrites is not None:
+            overwrites = pd.Series(overwrites)
+            modified_costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
 
     return modified_costs
 

@@ -63,11 +63,11 @@ from _helpers import (
     lossy_bidirectional_links,
     override_component_attrs,
     set_length_based_efficiency,
+    load_costs,
 )
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
-    load_costs,
 )
 
 idx = pd.IndexSlice
@@ -294,8 +294,13 @@ if __name__ == "__main__":
     costs = load_costs(
         snakemake.input.tech_costs,
         config["costs"],
-        config["electricity"],
+        config["costs"]["output_currency"],
+        config["costs"]["fill_values"],
+        config["electricity"]["max_hours"],
         Nyears,
+        config["costs"]["default_exchange_rate"],
+        config["costs"]["future_exchange_rate_strategy"],
+        config["costs"]["custom_future_exchange_rate"],
     )
 
     attach_storageunits(n, costs, config)

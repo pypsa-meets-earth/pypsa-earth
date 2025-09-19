@@ -71,8 +71,9 @@ from _helpers import (
     create_logger,
     sanitize_carriers,
     sanitize_locations,
+    load_costs,
 )
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -343,8 +344,13 @@ if __name__ == "__main__":
     costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.electricity,
+        snakemake.params.costs["output_currency"],
+        snakemake.params.costs["fill_values"],
+        snakemake.params.electricity["max_hours"],
         Nyears,
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
     s_max_pu = snakemake.params.lines["s_max_pu"]
 

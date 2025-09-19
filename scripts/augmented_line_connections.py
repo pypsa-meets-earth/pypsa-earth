@@ -34,8 +34,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
-from add_electricity import load_costs
+from _helpers import configure_logging, create_logger, load_costs
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
@@ -65,8 +64,13 @@ if __name__ == "__main__":
     costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.electricity,
+        snakemake.params.costs["output_currency"],
+        snakemake.params.costs["fill_values"],
+        snakemake.params.max_hours,
         Nyears,
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
     # TODO: Implement below comment in future. Requires transformer consideration.
     # component_type = {"False": "Line", "True":  "Link"}.get(snakemake.params.hvdc_as_lines)

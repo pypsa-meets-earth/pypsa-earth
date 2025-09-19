@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, override_component_attrs, prepare_costs
+from _helpers import locate_bus, override_component_attrs, load_costs
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             capital_cost = 0
         elif snakemake.params.store_capital_costs == "standard_costs":
             capital_cost = costs.at[
-                "hydrogen storage tank type 1 including compressor", "fixed"
+                "hydrogen storage tank type 1 including compressor", "capital_cost"
             ]
         else:
             logger.error(
@@ -221,11 +221,12 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = prepare_costs(
+    costs = load_costs(
         snakemake.input.costs,
         snakemake.config["costs"],
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
+        snakemake.params.max_hours,
         Nyears,
         snakemake.params.costs["default_exchange_rate"],
         snakemake.params.costs["future_exchange_rate_strategy"],

@@ -17,7 +17,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import sanitize_carriers, sanitize_locations
+from _helpers import sanitize_carriers, sanitize_locations, load_costs
 
 # from _helpers import (
 #     configure_logging,
@@ -25,7 +25,7 @@ from _helpers import sanitize_carriers, sanitize_locations
 #     update_config_from_wildcards,
 # )
 # from add_electricity import sanitize_carriers
-from prepare_sector_network import define_spatial, prepare_costs  # , cluster_heat_buses
+from prepare_sector_network import define_spatial  # , cluster_heat_buses
 
 logger = logging.getLogger(__name__)
 cc = coco.CountryConverter()
@@ -375,7 +375,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
                         marginal_cost=costs.at[generator, "efficiency"]
                         * costs.at[generator, "VOM"],  # NB: VOM is per MWel
                         capital_cost=costs.at[generator, "efficiency"]
-                        * costs.at[generator, "fixed"],  # NB: fixed cost is per MWel
+                        * costs.at[generator, "capital_cost"],  # NB: fixed cost is per MWel
                         p_nom=new_capacity / costs.at[generator, "efficiency"],
                         efficiency=costs.at[generator, "efficiency"],
                         efficiency2=costs.at[carrier[generator], "CO2 intensity"],
@@ -393,7 +393,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
                         bus2=new_capacity.index + " urban central heat",
                         carrier=generator,
                         p_nom=new_capacity / costs.at[key, "efficiency"],
-                        capital_cost=costs.at[key, "fixed"]
+                        capital_cost=costs.at[key, "capital_cost"]
                         * costs.at[key, "efficiency"],
                         marginal_cost=costs.at[key, "VOM"],
                         efficiency=costs.at[key, "efficiency"],
@@ -482,7 +482,7 @@ def add_heating_capacities_installed_before_baseyear(
                 carrier=f"{name} {heat_pump_type} heat pump",
                 efficiency=efficiency,
                 capital_cost=costs.at[costs_name, "efficiency"]
-                * costs.at[costs_name, "fixed"],
+                * costs.at[costs_name, "capital_cost"],
                 p_nom=existing_heating.loc[nodes, (name, f"{heat_pump_type} heat pump")]
                 * ratio
                 / costs.at[costs_name, "efficiency"],
@@ -501,7 +501,7 @@ def add_heating_capacities_installed_before_baseyear(
                 efficiency=costs.at[f"{name_type} resistive heater", "efficiency"],
                 capital_cost=(
                     costs.at[f"{name_type} resistive heater", "efficiency"]
-                    * costs.at[f"{name_type} resistive heater", "fixed"]
+                    * costs.at[f"{name_type} resistive heater", "capital_cost"]
                 ),
                 p_nom=(
                     existing_heating.loc[nodes, (name, "resistive heater")]
@@ -524,7 +524,7 @@ def add_heating_capacities_installed_before_baseyear(
                 efficiency2=costs.at["gas", "CO2 intensity"],
                 capital_cost=(
                     costs.at[f"{name_type} gas boiler", "efficiency"]
-                    * costs.at[f"{name_type} gas boiler", "fixed"]
+                    * costs.at[f"{name_type} gas boiler", "capital_cost"]
                 ),
                 p_nom=(
                     existing_heating.loc[nodes, (name, "gas boiler")]
@@ -546,7 +546,7 @@ def add_heating_capacities_installed_before_baseyear(
                 efficiency=costs.at["decentral oil boiler", "efficiency"],
                 efficiency2=costs.at["oil", "CO2 intensity"],
                 capital_cost=costs.at["decentral oil boiler", "efficiency"]
-                * costs.at["decentral oil boiler", "fixed"],
+                * costs.at["decentral oil boiler", "capital_cost"],
                 p_nom=(
                     existing_heating.loc[nodes, (name, "oil boiler")]
                     * ratio
@@ -611,11 +611,12 @@ if __name__ == "__main__":
     add_build_year_to_new_assets(n, baseyear)
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
-    costs = prepare_costs(
+    costs = load_costs(
         snakemake.input.costs,
         snakemake.config["costs"],
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
+        snakemake.params.max_hours,
         Nyears,
         snakemake.params.costs["default_exchange_rate"],
         snakemake.params.costs["future_exchange_rate_strategy"],

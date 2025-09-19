@@ -99,8 +99,8 @@ from _helpers import (
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
+    load_costs,
 )
-from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregateoneport,
@@ -1019,8 +1019,13 @@ if __name__ == "__main__":
     technology_costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.electricity,
+        snakemake.params.costs["output_currency"],
+        snakemake.params.costs["fill_values"],
+        snakemake.params.electricity["max_hours"],
         Nyears,
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
 
     n, simplify_links_map = simplify_links(
