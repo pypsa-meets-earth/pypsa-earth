@@ -69,9 +69,9 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
+    load_costs,
     sanitize_carriers,
     sanitize_locations,
-    load_costs,
 )
 from add_electricity import update_transmission_costs
 

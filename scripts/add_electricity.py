@@ -98,11 +98,11 @@ import xarray as xr
 from _helpers import (
     configure_logging,
     create_logger,
+    load_costs,
     read_csv_nafix,
     sanitize_carriers,
     sanitize_locations,
     update_p_nom_max,
-    load_costs,
 )
 from powerplantmatching.export import map_country_bus
 

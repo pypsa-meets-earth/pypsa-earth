@@ -1247,11 +1247,12 @@ def load_costs(
         for _, v in modified_costs.iterrows()
     ]
 
-
     modified_costs.at["OCGT", "fuel"] = modified_costs.at["gas", "fuel"]
     modified_costs.at["CCGT", "fuel"] = modified_costs.at["gas", "fuel"]
 
-    modified_costs["marginal_cost"] = modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
+    modified_costs["marginal_cost"] = (
+        modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
+    )
 
     # modified_costs = modified_costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
@@ -1265,12 +1266,17 @@ def load_costs(
         },
     )
 
-    modified_costs.at["OCGT", "CO2 intensity"] = modified_costs.at["gas", "CO2 intensity"]
-    modified_costs.at["CCGT", "CO2 intensity"] = modified_costs.at["gas", "CO2 intensity"]
+    modified_costs.at["OCGT", "CO2 intensity"] = modified_costs.at[
+        "gas", "CO2 intensity"
+    ]
+    modified_costs.at["CCGT", "CO2 intensity"] = modified_costs.at[
+        "gas", "CO2 intensity"
+    ]
 
     modified_costs.at["solar", "capital_cost"] = (
         config["rooftop_share"] * modified_costs.at["solar-rooftop", "capital_cost"]
-        + (1 - config["rooftop_share"]) * modified_costs.at["solar-utility", "capital_cost"]
+        + (1 - config["rooftop_share"])
+        * modified_costs.at["solar-utility", "capital_cost"]
     )
     modified_costs.loc["csp"] = modified_costs.loc["csp-tower"]
 

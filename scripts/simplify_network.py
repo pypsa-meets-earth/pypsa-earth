@@ -96,10 +96,10 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
+    load_costs,
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
-    load_costs,
 )
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (

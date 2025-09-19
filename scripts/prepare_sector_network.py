@@ -20,10 +20,10 @@ from _helpers import (
     create_dummy_data,
     create_network_topology,
     cycling_shift,
+    load_costs,
     locate_bus,
     mock_snakemake,
     override_component_attrs,
-    load_costs,
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
@@ -664,7 +664,8 @@ def add_hydrogen(n, costs):
             p_min_pu=-1,
             p_nom_extendable=True,
             length=h2_links.length.values,
-            capital_cost=costs.at["H2 (g) pipeline", "capital_cost"] * h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "capital_cost"]
+            * h2_links.length.values,
             carrier="H2 pipeline",
             lifetime=costs.at["H2 (g) pipeline", "lifetime"],
         )
@@ -700,7 +701,8 @@ def add_hydrogen(n, costs):
             p_min_pu=-1,
             p_nom_extendable=True,
             length=h2_links.length.values,
-            capital_cost=costs.at["H2 (g) pipeline", "capital_cost"] * h2_links.length.values,
+            capital_cost=costs.at["H2 (g) pipeline", "capital_cost"]
+            * h2_links.length.values,
             carrier="H2 pipeline",
             lifetime=costs.at["H2 (g) pipeline", "lifetime"],
         )
@@ -2262,7 +2264,9 @@ def add_heat(
 
             # conversion from EUR/m^3 to EUR/MWh for 40 K diff and 1.17 kWh/m^3/K
             capital_cost = (
-                costs.at[name_type + " water tank storage", "capital_cost"] / 0.00117 / 40
+                costs.at[name_type + " water tank storage", "capital_cost"]
+                / 0.00117
+                / 40
             )
 
             n.madd(
@@ -2287,7 +2291,8 @@ def add_heat(
                 bus1=h_nodes[name] + f" {name} heat",
                 carrier=name + " resistive heater",
                 efficiency=costs.at[key, "efficiency"],
-                capital_cost=costs.at[key, "efficiency"] * costs.at[key, "capital_cost"],
+                capital_cost=costs.at[key, "efficiency"]
+                * costs.at[key, "capital_cost"],
                 p_nom_extendable=True,
                 lifetime=costs.at[key, "lifetime"],
             )
@@ -2304,7 +2309,8 @@ def add_heat(
                 carrier=name + " gas boiler",
                 efficiency=costs.at[key, "efficiency"],
                 efficiency2=costs.at["gas", "CO2 intensity"],
-                capital_cost=costs.at[key, "efficiency"] * costs.at[key, "capital_cost"],
+                capital_cost=costs.at[key, "efficiency"]
+                * costs.at[key, "capital_cost"],
                 lifetime=costs.at[key, "lifetime"],
             )
 
@@ -2849,7 +2855,9 @@ def add_electricity_distribution_grid(n, costs):
         logger.info("Adding solar rooftop technology")
         # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
         solar = n.generators.index[n.generators.carrier == "solar"]
-        n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "capital_cost"]
+        n.generators.loc[solar, "capital_cost"] = costs.at[
+            "solar-utility", "capital_cost"
+        ]
         pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
 
         # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,

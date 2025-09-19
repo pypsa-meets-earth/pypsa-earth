@@ -60,10 +60,10 @@ import pypsa
 from _helpers import (
     configure_logging,
     create_logger,
+    load_costs,
     lossy_bidirectional_links,
     override_component_attrs,
     set_length_based_efficiency,
-    load_costs,
 )
 from add_electricity import (
     _add_missing_carriers_from_costs,

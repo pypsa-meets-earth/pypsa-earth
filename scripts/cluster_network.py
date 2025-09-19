@@ -134,11 +134,11 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
+    load_costs,
     locate_bus,
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
-    load_costs,
 )
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
