@@ -1219,6 +1219,15 @@ def prepare_costs(
     )
     modified_costs = modified_costs.fillna(fill_values)
 
+    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+        overwrites = config.get(attr)
+        if overwrites is not None:
+            overwrites = pd.Series(overwrites)
+            modified_costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
+
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
@@ -1813,7 +1822,11 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
 
 
+<<<<<<< HEAD
 def nearest_shape(n, path_shapes, crs, tolerance=100000):
+=======
+def nearest_shape(n, path_shapes, crs, tolerance=100):
+>>>>>>> main
     """
     Reassigns buses in the network `n` to the nearest country shape based on coordinates.
 
@@ -1825,7 +1838,11 @@ def nearest_shape(n, path_shapes, crs, tolerance=100000):
     crs: str
         dict with keys 'geo_crs' and 'distance_crs' (e.g., EPSG codes or proj strings)
     tolerance: int, optional
+<<<<<<< HEAD
         distance (in meters) for assigning a shape to a bus (The default tolerance is 100 km)
+=======
+        distance (in km) for assigning a shape to a bus (The default tolerance is 100 km)
+>>>>>>> main
 
     Returns
     -------
@@ -1859,7 +1876,11 @@ def nearest_shape(n, path_shapes, crs, tolerance=100000):
             n.buses.loc[i, "country"] = contains[contains].index[0]
         else:
             distances = shapes.distance(point_proj).sort_values()
+<<<<<<< HEAD
             if distances.iloc[0] < tolerance:
+=======
+            if distances.iloc[0] < tolerance * 1e3:
+>>>>>>> main
                 n.buses.loc[i, "country"] = distances.index[0]
             else:
                 logger.warning(
