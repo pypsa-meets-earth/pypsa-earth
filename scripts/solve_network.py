@@ -962,9 +962,7 @@ def extra_functionality(n, snapshots):
         add_chp_constraints(n)
 
     additionality = snakemake.params.policy_config["hydrogen"]["additionality"]
-    ref_for_additionality = snakemake.params.policy_config["hydrogen"][
-        "is_reference"
-    ]
+    ref_for_additionality = snakemake.params.policy_config["hydrogen"]["is_reference"]
     temportal_matching_period = snakemake.params.policy_config["hydrogen"][
         "temporal_matching"
     ]
