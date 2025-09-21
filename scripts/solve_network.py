@@ -645,7 +645,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
     res_stor_techs = ["hydro"]
 
-    allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
+    allowed_excess = snakemake.params.policy_config["hydrogen"]["allowed_excess"]
 
     # Generation
     res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
@@ -961,11 +961,11 @@ def extra_functionality(n, snapshots):
         logger.info("setting CHP constraints")
         add_chp_constraints(n)
 
-    additionality = snakemake.config["policy_config"]["hydrogen"]["additionality"]
-    ref_for_additionality = snakemake.config["policy_config"]["hydrogen"][
+    additionality = snakemake.params.policy_config["hydrogen"]["additionality"]
+    ref_for_additionality = snakemake.params.policy_config["hydrogen"][
         "is_reference"
     ]
-    temportal_matching_period = snakemake.config["policy_config"]["hydrogen"][
+    temportal_matching_period = snakemake.params.policy_config["hydrogen"][
         "temporal_matching"
     ]
 
@@ -1091,13 +1091,13 @@ if __name__ == "__main__":
         add_existing(n)
 
     if (
-        snakemake.config["policy_config"]["hydrogen"]["additionality"]
-        and not snakemake.config["policy_config"]["hydrogen"]["is_reference"]
-        and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
+        snakemake.params.policy_config["hydrogen"]["additionality"]
+        and not snakemake.params.policy_config["hydrogen"]["is_reference"]
+        and snakemake.params.policy_config["hydrogen"]["temporal_matching"]
         != "no_temporal_matching"
         and is_sector_coupled
     ):
-        n_ref_path = snakemake.config["policy_config"]["hydrogen"]["path_to_ref"]
+        n_ref_path = snakemake.params.policy_config["hydrogen"]["path_to_ref"]
         n_ref = pypsa.Network(n_ref_path)
     else:
         n_ref = None
