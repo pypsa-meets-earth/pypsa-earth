@@ -168,6 +168,9 @@ if config["enable"].get("download_osm_data", True):
     rule download_osm_data:
         params:
             countries=config["countries"],
+            store_path_resources="resources/" + RDIR + "osm/raw",
+            store_path_data="data/osm",
+            custom_data_path="data/custom/osm",
         output:
             cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
             generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",

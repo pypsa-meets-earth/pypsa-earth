@@ -509,6 +509,7 @@ custom_data:
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
   export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
   airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.
+  osm_data: true # if "True" then custom file for osm (pbf and power files) must be placed in "data/custom/osm" folder. 
 
 industry:
   reference_year: 2015
