@@ -36,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * bug-fix in ``clean_osm_data.py`` so that cleaned data has the same number of circuits as in the raw data and assumptions are correctly applied `PR #1552 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1552>`__
 
+* Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
+
 PyPSA-Earth 0.7.0
 =================
 
