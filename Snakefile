@@ -650,10 +650,10 @@ rule cluster_network:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
         custom_busmap=(
-                "data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-                if config["enable"].get("custom_busmap", False)
-                else []
-            ),
+            "data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+            if config["enable"].get("custom_busmap", False)
+            else []
+        ),
         tech_costs=COSTS,
         subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
