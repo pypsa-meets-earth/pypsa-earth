@@ -2101,6 +2101,7 @@ if config["foresight"] == "myopic":
                 "co2_sequestration_potential", 200
             ),
             augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
