@@ -48,6 +48,58 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
+# Storage techs lookup
+STORE_LOOKUP = {
+    "battery": {
+        "store":"battery storage",
+        "bicharger":"battery inverter",
+    },
+    "home battery": {
+        "store":"home battery storage",
+        "bicharger":"home battery inverter",
+    },
+    "li-ion": {
+        "store":"battery storage",
+        "bicharger":"battery inverter",
+    },
+    "lfp": {
+        "store":"Lithium-Ion-LFP-store",
+        "bicharger":"Lithium-Ion-LFP-bicharger",
+    },        
+    "vanadium":{
+        "store":"Vanadium-Redox-Flow-store",
+        "bicharger":"Vanadium-Redox-Flow-bicharger",
+    },
+    "lair":{
+        "store":"Liquid-Air-store",
+        "charger":"Liquid-Air-charger",
+        "discharger":"Liquid-Air-discharger",
+    },
+    "pair":{
+        "store":"Compressed-Air-Adiabatic-store",
+        "bicharger":"Compressed-Air-Adiabatic-bicharger",
+    },
+    "iron-air":{
+        "store":"iron-air battery",
+        "charger":"iron-air battery charge",
+        "discharger":"iron-air battery discharge",      
+    },
+    "H2":{
+        "store":"hydrogen storage tank",
+        "charger":"fuel cell",
+        "discharger":"electrolysis",
+    },
+    "H2 underground":{
+        "store":"hydrogen storage underground",
+        "charger":"fuel cell",
+        "discharger":"electrolysis",
+    },
+    "H2 tank":{
+        "store":"hydrogen storage tank type 1 including compressor",
+        "charger":"fuel cell",
+        "discharger":"electrolysis",
+    },        
+}
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
@@ -1254,7 +1306,6 @@ def load_costs(
         modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
     )
 
-    # modified_costs = modified_costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
     modified_costs = modified_costs.rename(
@@ -1280,25 +1331,43 @@ def load_costs(
     )
     modified_costs.loc["csp"] = modified_costs.loc["csp-tower"]
 
-    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+    def costs_for_storage(store, link1=None, link2=None, max_hours=1.0):
+        capital_cost = max_hours * store["capital_cost"]
+        if link1 is not None:
+            capital_cost += link1["capital_cost"]
         if link2 is not None:
             capital_cost += link2["capital_cost"]
         return pd.Series(
             {"capital_cost": capital_cost, "marginal_cost": 0.0, "CO2 intensity": 0.0}
         )
 
-    modified_costs.loc["battery"] = costs_for_storage(
-        modified_costs.loc["battery storage"],
-        modified_costs.loc["battery inverter"],
-        max_hours=max_hours["battery"],
-    )
-    modified_costs.loc["H2"] = costs_for_storage(
-        modified_costs.loc["hydrogen storage tank"],
-        modified_costs.loc["fuel cell"],
-        modified_costs.loc["electrolysis"],
-        max_hours=max_hours["H2"],
-    )
+    mod_costs_i = modified_costs.index
+    missing_store = []
+    for k, v in max_hours.items():
+        tech = STORE_LOOKUP[k]
+        store = tech.get("store") if tech.get("store") in mod_costs_i else None
+        bicharger = tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
+        charger = tech.get("charger") if tech.get("charger") in mod_costs_i else None
+        discharger = tech.get("discharger") if tech.get("discharger") in mod_costs_i else None
+        if bicharger:
+            modified_costs.loc[k] = costs_for_storage(
+                modified_costs.loc[store],
+                modified_costs.loc[bicharger],
+                max_hours=v,
+            )
+        elif store:
+            modified_costs.loc[k] = costs_for_storage(
+                modified_costs.loc[store],
+                modified_costs.loc[charger] if charger else None,
+                modified_costs.loc[discharger] if discharger else None,
+                max_hours=v,
+            )
+        else:
+            missing_store += [k]
+
+    if missing_store:
+        logger.warning(f"No cost data on:\n - " + "\n - ".join(missing_store) 
+                       + "\nPlease enable retrieve_cost_data if this storage technology is used")
 
     for attr in ("marginal_cost", "capital_cost"):
         overwrites = config.get(attr)

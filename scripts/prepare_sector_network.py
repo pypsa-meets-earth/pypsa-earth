@@ -32,6 +32,7 @@ from _helpers import (
 )
 from prepare_network import add_co2limit
 from prepare_transport_data import prepare_transport_data
+from add_extra_components import attach_stores, attach_storageunits
 
 logger = logging.getLogger(__name__)
 
@@ -1292,57 +1293,6 @@ def add_aviation(n, cost, energy_totals, airports_fn):
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
-    )
-
-
-def add_storage(n, costs):
-    "function to add the different types of storage systems"
-    logger.info("Add battery storage")
-
-    n.add("Carrier", "battery")
-
-    n.madd(
-        "Bus",
-        spatial.nodes + " battery",
-        location=spatial.nodes,
-        carrier="battery",
-        x=n.buses.loc[list(spatial.nodes)].x.values,
-        y=n.buses.loc[list(spatial.nodes)].y.values,
-    )
-
-    n.madd(
-        "Store",
-        spatial.nodes + " battery",
-        bus=spatial.nodes + " battery",
-        e_cyclic=True,
-        e_nom_extendable=True,
-        carrier="battery",
-        capital_cost=costs.at["battery storage", "capital_cost"],
-        lifetime=costs.at["battery storage", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery charger",
-        bus0=spatial.nodes,
-        bus1=spatial.nodes + " battery",
-        carrier="battery charger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        capital_cost=costs.at["battery inverter", "capital_cost"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery discharger",
-        bus0=spatial.nodes + " battery",
-        bus1=spatial.nodes,
-        carrier="battery discharger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        marginal_cost=options["marginal_cost_storage"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
     )
 
 
@@ -3198,12 +3148,32 @@ if __name__ == "__main__":
 
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
-    # remove H2 and battery technologies added in elec-only model
-    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
+    # remove H2 and storage technologies added in elec-only model
+    extendable_carriers = snakemake.params.electricity["extendable_carriers"]
+    carriers_to_drop = extendable_carriers["Store"] + extendable_carriers["StorageUnit"]
+    remove_carrier_related_components(n, carriers_to_drop=carriers_to_drop)
+
+    # reinclude storage technologies (excl. H2 related technologies)
+    attach_stores(
+        n, 
+        costs,
+        spatial.nodes,
+        extendable_carriers["Store"],
+        include_H2=False,
+        marginal_cost_storage=options["marginal_cost_storage"],
+    )
+
+    attach_storageunits(
+        n, 
+        costs,
+        spatial.nodes,
+        extendable_carriers["StorageUnit"], 
+        snakemake.params.electricity["max_hours"],
+        include_H2=False,
+        marginal_cost_storage=options["marginal_cost_storage"],   
+    )
 
     add_hydrogen(n, costs)  # TODO add costs
-
-    add_storage(n, costs)
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)

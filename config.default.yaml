@@ -187,12 +187,17 @@ electricity:
     contingency: 0 # fixed capacity in MW
 
   max_hours:
-    battery: 6
+    battery: 6 # equivalent to li-ion
     H2: 168
+    lfp: 6
+    vanadium: 10
+    lair: 12
+    pair: 24
+    iron-air: 100
 
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
-    StorageUnit: [] # battery, H2
+    StorageUnit: [] # battery, H2, li-ion, vanadium, lfp, lair, pair, iron-air
     Store: [battery, H2]
     Link: [] # H2 pipeline
 
