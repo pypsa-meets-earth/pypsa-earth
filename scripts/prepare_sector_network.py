@@ -2787,21 +2787,20 @@ def add_residential(n, costs, energy_totals):
 
 def add_electricity_distribution_grid(n, costs):
     logger.info("Adding electricity distribution network")
-    nodes = spatial.nodes
 
     n.madd(
         "Bus",
-        nodes + " low voltage",
-        location=nodes,
+        spatial.nodes + " low voltage",
+        location=spatial.nodes,
         carrier="low voltage",
         unit="MWh_el",
     )
 
     n.madd(
         "Link",
-        nodes + " electricity distribution grid",
-        bus0=nodes,
-        bus1=nodes + " low voltage",
+        spatial.nodes + " electricity distribution grid",
+        bus0=spatial.nodes,
+        bus1=spatial.nodes + " low voltage",
         p_nom_extendable=True,
         p_min_pu=-1,
         carrier="electricity distribution grid",
@@ -2877,17 +2876,17 @@ def add_electricity_distribution_grid(n, costs):
 
         n.madd(
             "Bus",
-            nodes + " home battery",
-            location=nodes,
+            spatial.nodes + " home battery",
+            location=spatial.nodes,
             carrier="home battery",
             unit="MWh_el",
         )
 
         n.madd(
             "Store",
-            nodes + " home battery",
-            bus=nodes + " home battery",
-            location=nodes,
+            spatial.nodes + " home battery",
+            bus=spatial.nodes + " home battery",
+            location=spatial.nodes,
             e_cyclic=True,
             e_nom_extendable=True,
             carrier="home battery",
@@ -2897,9 +2896,9 @@ def add_electricity_distribution_grid(n, costs):
 
         n.madd(
             "Link",
-            nodes + " home battery charger",
-            bus0=nodes + " low voltage",
-            bus1=nodes + " home battery",
+            spatial.nodes + " home battery charger",
+            bus0=spatial.nodes + " low voltage",
+            bus1=spatial.nodes + " home battery",
             carrier="home battery charger",
             efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             capital_cost=costs.at["home battery inverter", "fixed"],
@@ -2909,9 +2908,9 @@ def add_electricity_distribution_grid(n, costs):
 
         n.madd(
             "Link",
-            nodes + " home battery discharger",
-            bus0=nodes + " home battery",
-            bus1=nodes + " low voltage",
+            spatial.nodes + " home battery discharger",
+            bus0=spatial.nodes + " home battery",
+            bus1=spatial.nodes + " low voltage",
             carrier="home battery discharger",
             efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             marginal_cost=options["marginal_cost_storage"],
@@ -3129,7 +3128,7 @@ if __name__ == "__main__":
     existing_nodes = [node for node in acnodes if node in n.loads.index]
     if len(existing_nodes) < len(acnodes):
         print(
-            "fWarning: For {len(nodes) - len(existing_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
+            f"Warning: For {len(acnodes) - len(existing_nodes)} of {len(acnodes)} nodes there were no load nodes found in network and were skipped."
         )
     n.loads.loc[existing_nodes, "carrier"] = "AC"
 
