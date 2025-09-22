@@ -631,11 +631,12 @@ rule cluster_network:
         costs=config["costs"],
         length_factor=config["lines"]["length_factor"],
         renewable=config["renewable"],
-        geo_crs=config["crs"]["geo_crs"],
+        crs=config["crs"],
         countries=config["countries"],
         cluster_options=config["cluster_options"],
         focus_weights=config.get("focus_weights", None),
         #custom_busmap=config["enable"].get("custom_busmap", False)
+        subregion=config["subregion"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -654,6 +655,7 @@ rule cluster_network:
         # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
         #                if config["enable"].get("custom_busmap", False) else []),
         tech_costs=COSTS,
+        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
         network=branch(
             config["augmented_line_connection"].get("add_to_snakefile", False) == True,

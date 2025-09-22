@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__
+
 * Added Section covering Optimization for Energy Systems Models `PR #1558 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558>`__
 
 * Add the configuration ``co2_budget`` to set CO₂ emission targets in multiple planning horizon years `PR #1553 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1553>`__
@@ -21,13 +23,18 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Extend functionality of isolated nodes to networks and fix to demand scaling when gdp or pop is empty `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
 
+
 **Minor Changes and bug-fixing**
+
+* The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
 
 * Disable distribute_cluster only for one subnetwork and country `PR #1539 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539>`__
 
 * Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
 
 * Fix the offwind depth calculation by providing the proper GEBCO file `PR #1559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1559>`__
+
+* bug-fix in ``clean_osm_data.py`` so that cleaned data has the same number of circuits as in the raw data and assumptions are correctly applied `PR #1552 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1552>`__
 
 PyPSA-Earth 0.7.0
 =================
