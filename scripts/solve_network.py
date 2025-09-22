@@ -715,7 +715,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     # Defining the constraints
     for label in res.coords[time_period].values:
         lhs = res.loc[label] + elec_input.loc[label]
-        n.model.add_constraints(lhs == 0.0, name=f"RESconstraints_{label}")
+        n.model.add_constraints(lhs >= 0.0, name=f"RESconstraints_{label}")
 
 
 def add_chp_constraints(n):
