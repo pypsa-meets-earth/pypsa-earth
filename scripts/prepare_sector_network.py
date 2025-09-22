@@ -3117,7 +3117,7 @@ if __name__ == "__main__":
     # countries = list(n.buses.country.unique())
     countries = snakemake.params.countries
     # Locate all the AC buses
-    nodes = n.buses[
+    acnodes = n.buses[
         n.buses.carrier == "AC"
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
@@ -3126,8 +3126,8 @@ if __name__ == "__main__":
     n.buses.location = n.buses.index
 
     # Set carrier of AC loads
-    existing_nodes = [node for node in nodes if node in n.loads.index]
-    if len(existing_nodes) < len(nodes):
+    existing_nodes = [node for node in acnodes if node in n.loads.index]
+    if len(existing_nodes) < len(acnodes):
         print(
             "fWarning: For {len(nodes) - len(existing_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
         )
