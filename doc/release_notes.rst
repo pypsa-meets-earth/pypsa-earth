@@ -23,6 +23,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Extend functionality of isolated nodes to networks and fix to demand scaling when gdp or pop is empty `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
 
+* Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
+
 
 **Minor Changes and bug-fixing**
 
