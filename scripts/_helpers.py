@@ -1342,9 +1342,13 @@ def load_costs(
     for k, v in max_hours.items():
         tech = STORE_LOOKUP[k]
         store = tech.get("store") if tech.get("store") in mod_costs_i else None
-        bicharger = tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
+        bicharger = (
+            tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
+        )
         charger = tech.get("charger") if tech.get("charger") in mod_costs_i else None
-        discharger = tech.get("discharger") if tech.get("discharger") in mod_costs_i else None
+        discharger = (
+            tech.get("discharger") if tech.get("discharger") in mod_costs_i else None
+        )
         if bicharger:
             modified_costs.loc[k] = costs_for_storage(
                 modified_costs.loc[store],
@@ -1362,8 +1366,11 @@ def load_costs(
             missing_store += [k]
 
     if missing_store:
-        logger.warning(f"No cost data on:\n - " + "\n - ".join(missing_store) 
-                       + "\nPlease enable retrieve_cost_data if this storage technology is used")
+        logger.warning(
+            f"No cost data on:\n - "
+            + "\n - ".join(missing_store)
+            + "\nPlease enable retrieve_cost_data if this storage technology is used"
+        )
 
     for attr in ("marginal_cost", "capital_cost"):
         overwrites = config.get(attr)

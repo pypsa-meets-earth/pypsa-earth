@@ -155,7 +155,6 @@ def attach_stores(n, costs, buses_i, carriers, include_H2=False):
             "Fuel Cell" if lookup_discharge == "fuel cell" else "discharger"
         )
 
-
         n.madd(
             "Bus",
             bus_names,
