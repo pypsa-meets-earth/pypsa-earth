@@ -51,55 +51,51 @@ CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 # Storage techs lookup
 STORE_LOOKUP = {
     "battery": {
-        "store":"battery storage",
-        "bicharger":"battery inverter",
+        "store": "battery storage",
+        "bicharger": "battery inverter",
     },
     "home battery": {
-        "store":"home battery storage",
-        "bicharger":"home battery inverter",
+        "store": "home battery storage",
+        "bicharger": "home battery inverter",
     },
     "li-ion": {
-        "store":"battery storage",
-        "bicharger":"battery inverter",
+        "store": "battery storage",
+        "bicharger": "battery inverter",
     },
     "lfp": {
-        "store":"Lithium-Ion-LFP-store",
-        "bicharger":"Lithium-Ion-LFP-bicharger",
-    },        
-    "vanadium":{
-        "store":"Vanadium-Redox-Flow-store",
-        "bicharger":"Vanadium-Redox-Flow-bicharger",
+        "store": "Lithium-Ion-LFP-store",
+        "bicharger": "Lithium-Ion-LFP-bicharger",
     },
-    "lair":{
-        "store":"Liquid-Air-store",
-        "charger":"Liquid-Air-charger",
-        "discharger":"Liquid-Air-discharger",
+    "vanadium": {
+        "store": "Vanadium-Redox-Flow-store",
+        "bicharger": "Vanadium-Redox-Flow-bicharger",
     },
-    "pair":{
-        "store":"Compressed-Air-Adiabatic-store",
-        "bicharger":"Compressed-Air-Adiabatic-bicharger",
+    "lair": {
+        "store": "Liquid-Air-store",
+        "charger": "Liquid-Air-charger",
+        "discharger": "Liquid-Air-discharger",
     },
-    "iron-air":{
-        "store":"iron-air battery",
-        "charger":"iron-air battery charge",
-        "discharger":"iron-air battery discharge",      
+    "pair": {
+        "store": "Compressed-Air-Adiabatic-store",
+        "bicharger": "Compressed-Air-Adiabatic-bicharger",
     },
-    "H2":{
-        "store":"hydrogen storage tank",
-        "charger":"fuel cell",
-        "discharger":"electrolysis",
+    "iron-air": {
+        "store": "iron-air battery",
+        "charger": "iron-air battery charge",
+        "discharger": "iron-air battery discharge",
     },
-    "H2 underground":{
-        "store":"hydrogen storage underground",
-        "charger":"fuel cell",
-        "discharger":"electrolysis",
+    "H2": {
+        "store": "hydrogen storage tank type 1 including compressor",
+        "charger": "electrolysis",
+        "discharger": "fuel cell",
     },
-    "H2 tank":{
-        "store":"hydrogen storage tank type 1 including compressor",
-        "charger":"fuel cell",
-        "discharger":"electrolysis",
-    },        
+    "H2 underground": {
+        "store": "hydrogen storage underground",
+        "charger": "electrolysis",
+        "discharger": "fuel cell",
+    },
 }
+
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """

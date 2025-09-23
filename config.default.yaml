@@ -954,6 +954,24 @@ plotting:
     battery storage: "slategray"
     home battery: "#614700"
     home battery storage: "#614700"
+    li-ion: '#ace37f'
+    li-ion charger: '#ace37f'
+    li-ion discharger: '#ace37f'
+    lfp: '#ace37f'
+    lfp charger: '#ace37f'
+    lfp discharger: '#ace37f'
+    vanadium: '#9B111E'
+    vanadium charger: '#9B111E'
+    vanadium discharger: '#9B111E'
+    lair: '#87CEEB'
+    lair charger: '#87CEEB'
+    lair discharger: '#87CEEB'
+    pair: '#003366'
+    pair charger: '#003366'
+    pair discharger: '#003366'
+    iron-air: '#edba1c'
+    iron-air charger: '#edba1c'
+    iron-air discharger: '#edba1c'
     lines: "#70af1d"
     transmission lines: "#70af1d"
     AC: "#70af1d"

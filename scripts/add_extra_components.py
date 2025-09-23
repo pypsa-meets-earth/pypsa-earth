@@ -109,7 +109,7 @@ def get_available_storage_carriers(n, carriers, include_H2=False):
 
     # Define carriers to exclude (e.g. handled differently elsewhere)
 
-    excluded = set() if include_H2 else {"H2", "H2 tank", "H2 underground"}
+    excluded = set() if include_H2 else {"H2", "H2 underground"}
     available_carriers = sorted((input_carriers & implemented) - excluded)
 
     # Add any missing carriers to the network
@@ -120,25 +120,26 @@ def get_available_storage_carriers(n, carriers, include_H2=False):
     return available_carriers
 
 
-def attach_stores(n, costs, buses_i, carriers, include_H2=False, marginal_cost_storage=0):
+def attach_stores(n, costs, buses_i, carriers, include_H2=False):
     """
-    Add storage technologies to a PyPSA network in the form of stores and links.
+    Attach stores to the network.
 
     Parameters
     ----------
     n : pypsa.Network
-        The PyPSA network to which the storage components will be added.
-
-    costs : pandas.DataFrame
-        A DataFrame containing cost and technical parameters for each storage components.
-
-    carriers : list of str
-        A list of storage carrier names to be added to the network.
-        Only those defined in `STORE_LOOKUP` and available in the network are used.
+        The PyPSA network to attach the stores to.
+    costs : pd.DataFrame
+        DataFrame containing the cost data.
+    buses_i : list
+        List of high voltage electricity buses.
+    carriers : dict
+        Dictionary of extendable energy carriers.
+    include_H2 : bool
+        select if hydrogen technologies is included or not.
     """
     available_carriers = get_available_storage_carriers(n, carriers, include_H2)
     for carrier in available_carriers:
-        roundtrip_correction = 0.5 if carrier in ["battery","li-ion"] else 1
+        roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
 
         lookup = STORE_LOOKUP[carrier]
         lookup_store = lookup["store"]
@@ -149,6 +150,11 @@ def attach_stores(n, costs, buses_i, carriers, include_H2=False, marginal_cost_s
             lookup_discharge = lookup["discharger"]
 
         bus_names = buses_i + f" {carrier}"
+        charge_name = "Electrolysis" if lookup_charge == "electrolysis" else "charger"
+        discharge_name = (
+            "Fuel Cell" if lookup_discharge == "fuel cell" else "discharger"
+        )
+
 
         n.madd(
             "Bus",
@@ -167,18 +173,18 @@ def attach_stores(n, costs, buses_i, carriers, include_H2=False, marginal_cost_s
             e_nom_extendable=True,
             carrier=carrier,
             capital_cost=costs.at[lookup_store, "capital_cost"],
+            marginal_cost=costs.at[lookup_store, "marginal_cost"],
             lifetime=costs.at[lookup_store, "lifetime"],
         )
 
         n.madd(
             "Link",
             bus_names,
-            suffix=" charger",
+            suffix=f" {charge_name}",
             bus0=buses_i,
             bus1=bus_names,
-            carrier=f"{carrier} charger",
-            efficiency=costs.at[lookup_charge, "efficiency"] 
-            ** roundtrip_correction,
+            carrier=f"{carrier} {charge_name.lower()}",
+            efficiency=costs.at[lookup_charge, "efficiency"] ** roundtrip_correction,
             capital_cost=costs.at[lookup_charge, "capital_cost"],
             p_nom_extendable=True,
             lifetime=costs.at[lookup_charge, "lifetime"],
@@ -187,38 +193,39 @@ def attach_stores(n, costs, buses_i, carriers, include_H2=False, marginal_cost_s
         n.madd(
             "Link",
             bus_names,
-            suffix=" discharger",
+            suffix=f" {discharge_name}",
             bus0=bus_names,
             bus1=buses_i,
-            carrier=f"{carrier} discharger",
-            efficiency=costs.at[lookup_discharge, "efficiency"] 
-            ** roundtrip_correction,
-            marginal_cost=marginal_cost_storage,
+            carrier=f"{carrier} {discharge_name.lower()}",
+            efficiency=costs.at[lookup_discharge, "efficiency"] ** roundtrip_correction,
             p_nom_extendable=True,
             lifetime=costs.at[lookup_discharge, "lifetime"],
         )
 
-    logger.info("Add the following technologies as stores and links:\n - " + "\n - ".join(available_carriers))
+    logger.info(
+        "Add the following technologies as stores and links:\n - "
+        + "\n - ".join(available_carriers)
+    )
 
 
-def attach_storageunits(n, costs, buses_i, carriers, max_hours, include_H2=False, marginal_cost_storage=0):
+def attach_storageunits(n, costs, buses_i, carriers, max_hours, include_H2=False):
     """
-    Add storage technologies to a PyPSA network in the form of storage units.
+    Attach storage units to the network.
 
     Parameters
     ----------
     n : pypsa.Network
-        The PyPSA network to which the storage components will be added.
-
-    costs : pandas.DataFrame
-        A DataFrame containing cost and technical parameters for each storage components.
-
-    carriers : list of str
-        A list of storage carrier names to be added to the network.
-        Only those defined in `STORE_LOOKUP` and available in the network are used.
-
+        The PyPSA network to attach the storage units to.
+    costs : pd.DataFrame
+        DataFrame containing the cost data.
+    buses_i : list
+        List of high voltage electricity buses.
+    carriers : dict
+        Dictionary of extendable energy carriers.
     max_hours : dict
-        Dictionary mapping each carrier to its maximum storage duration in hours.
+        Dictionary of maximum hours for storage units.
+    include_H2 : bool
+        select if hydrogen technologies is included or not.
     """
     available_carriers = get_available_storage_carriers(n, carriers, include_H2)
     for carrier in available_carriers:
@@ -227,7 +234,7 @@ def attach_storageunits(n, costs, buses_i, carriers, max_hours, include_H2=False
             logger.warning(f"No max_hours defined for carrier '{carrier}'. Skipping.")
             continue
 
-        roundtrip_correction = 0.5 if carrier in ["battery","li-ion"] else 1
+        roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
 
         lookup = STORE_LOOKUP[carrier]
         if "bicharger" in lookup:
@@ -243,7 +250,7 @@ def attach_storageunits(n, costs, buses_i, carriers, max_hours, include_H2=False
             carrier=carrier,
             p_nom_extendable=True,
             capital_cost=costs.at[carrier, "capital_cost"],
-            marginal_cost=marginal_cost_storage,
+            marginal_cost=costs.at[carrier, "marginal_cost"],
             efficiency_store=costs.at[lookup_charge, "efficiency"]
             ** roundtrip_correction,
             efficiency_dispatch=costs.at[lookup_discharge, "efficiency"]
@@ -253,7 +260,10 @@ def attach_storageunits(n, costs, buses_i, carriers, max_hours, include_H2=False
             lifetime=costs.at[carrier, "lifetime"],
         )
 
-    logger.info("Add the following technologies as storage units:\n - " + "\n - ".join(available_carriers))
+    logger.info(
+        "Add the following technologies as storage units:\n - "
+        + "\n - ".join(available_carriers)
+    )
 
 
 def attach_advance_csp(n, costs):
@@ -369,22 +379,20 @@ if __name__ == "__main__":
 
     buses_i = n.buses.index
     attach_stores(
-        n, 
-        costs, 
+        n,
+        costs,
         buses_i,
         config["electricity"]["extendable_carriers"]["Store"],
         include_H2=True,
-        marginal_cost_storage=config["sector"]["marginal_cost_storage"],
     )
 
     attach_storageunits(
-        n, 
+        n,
         costs,
         buses_i,
-        config["electricity"]["extendable_carriers"]["StorageUnit"], 
+        config["electricity"]["extendable_carriers"]["StorageUnit"],
         config["electricity"]["max_hours"],
         include_H2=True,
-        marginal_cost_storage=config["sector"]["marginal_cost_storage"],
     )
 
     if ("csp" in config["electricity"]["renewable_carriers"]) and (

@@ -30,9 +30,9 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
+from add_extra_components import attach_storageunits, attach_stores
 from prepare_network import add_co2limit
 from prepare_transport_data import prepare_transport_data
-from add_extra_components import attach_stores, attach_storageunits
 
 logger = logging.getLogger(__name__)
 
@@ -3155,22 +3155,20 @@ if __name__ == "__main__":
 
     # reinclude storage technologies (excl. H2 related technologies)
     attach_stores(
-        n, 
+        n,
         costs,
         spatial.nodes,
         extendable_carriers["Store"],
         include_H2=False,
-        marginal_cost_storage=options["marginal_cost_storage"],
     )
 
     attach_storageunits(
-        n, 
+        n,
         costs,
         spatial.nodes,
-        extendable_carriers["StorageUnit"], 
+        extendable_carriers["StorageUnit"],
         snakemake.params.electricity["max_hours"],
         include_H2=False,
-        marginal_cost_storage=options["marginal_cost_storage"],   
     )
 
     add_hydrogen(n, costs)  # TODO add costs
