@@ -36,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * bug-fix in ``clean_osm_data.py`` so that cleaned data has the same number of circuits as in the raw data and assumptions are correctly applied `PR #1552 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1552>`__
 
+* Avoid using variable "nodes" in prepare_sector_network unless explicitly in the arguments `PR #1575 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1575>`__
+
 PyPSA-Earth 0.7.0
 =================
 
