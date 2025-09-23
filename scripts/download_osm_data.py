@@ -99,12 +99,20 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = Path.joinpath(
-        Path(BASE_DIR), "resources", RDIR, "osm", "raw"
-    )
-    store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm")
+    store_path_resources = Path(snakemake.params.store_path_resources)
+    store_path_data = Path(snakemake.params.store_path_data)
     country_list = country_list_to_geofk(snakemake.params.countries)
+    custom_data = snakemake.config.get("custom_data", {}).get("osm_data")
+    custom_data_path = Path(snakemake.params.get("custom_data_path", "data/custom/osm"))
 
+    # allow for custom data usage
+    if custom_data:
+        logger.info(
+            "Custom OSM data usage is activated. Skipping the download of OSM data."
+        )
+        os.makedirs(store_path_data, exist_ok=True)
+        shutil.copytree(custom_data_path, store_path_data, dirs_exist_ok=True)
+   
     eo.save_osm_data(
         primary_name="power",
         region_list=country_list,
