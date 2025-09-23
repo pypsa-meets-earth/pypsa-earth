@@ -51,6 +51,8 @@ renewable:
       method: hydro
       hydrobasins: data/hydrobasins_hydroshare/africa-geoglows-atlite.shp
 
+custom_data:
+    osm_data: false # if "True" then custom file for osm (pbf and power files) must be placed in "data/custom/osm" folder. 
 
 solving:
   solver:
