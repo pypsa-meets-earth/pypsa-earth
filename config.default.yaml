@@ -88,8 +88,8 @@ cluster_options:
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: false
-    p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
+    p_threshold_drop_isolated: 20 # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
     s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
   cluster_network:
     algorithm: kmeans
@@ -110,6 +110,8 @@ cluster_options:
       ramp_limit_up: max
       ramp_limit_down: max
       efficiency: mean
+  focus_weights: false # When a value specified, set the share of nodes allocated to each country
+    # country: share
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
@@ -124,8 +126,12 @@ build_shape_options:
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
 subregion:
+  enable:
+    simplify_network: true # activate subregion in simplify_network
+    cluster_network: false # activate subregion in cluster_network
   define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
   path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
 
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
@@ -156,6 +162,19 @@ load_options:
   weather_year: 2013 # Load scenarios available with different weather year (different renewable potentials)
   prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
+
+co2_budget:
+  enable: false
+  override_co2opt: true
+  co2base_value: co2limit # choose from: [co2limit, co2base, absolute, {float}]
+  year:
+    2020: 1.0
+    2025: 0.85
+    2030: 0.70
+    2035: 0.55
+    2040: 0.40
+    2045: 0.25
+    2050: 0.1
 
 electricity:
   base_voltage: 380.
@@ -454,7 +473,7 @@ monte_carlo:
 
 policy_config:
   hydrogen:
-    temporal_matching: "no_res_matching" # either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
+    temporal_matching: "no_temporal_matching" #either "hour", "month", "year", "no_temporal_matching"
     spatial_matching: false
     additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
     allowed_excess: 1.0
@@ -524,6 +543,18 @@ existing_capacities:
   - uranium
 
 sector:
+  enable:
+    heat: true
+    biomass: true
+    industry: true
+    shipping: true
+    aviation: true
+    land_transport: true
+    rail_transport: true
+    agriculture: true
+    residential: true
+    services: true
+
   gas:
     spatial_gas: true # ALWAYS TRUE
     network: false # ALWAYS FALSE for now (NOT USED)
@@ -705,6 +736,7 @@ sector:
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
   airport_sizing_factor: 3
 
+  fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
 
   conventional_generation: # generator : carrier

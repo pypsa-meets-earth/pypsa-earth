@@ -13,15 +13,36 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__
+
+* Added Section covering Optimization for Energy Systems Models `PR #1558 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558>`__
+
+* Add the configuration ``co2_budget`` to set CO₂ emission targets in multiple planning horizon years `PR #1553 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1553>`__
+
+* Add pseudo `branch()` to streamline snakemake workflow. Replace this with Snakemake implementation if Snakemake >= 8.3.0. Added an option to configure which sector components to include which when disabled, irrelevant rules are skipped automatically `PR #1538 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1538>`__
+
+* Extend functionality of isolated nodes to networks and fix to demand scaling when gdp or pop is empty `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
+
+* Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
+
 * Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
 
 **Minor Changes and bug-fixing**
+
+* The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
+
+* Disable distribute_cluster only for one subnetwork and country `PR #1539 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539>`__
+
+* Reintroduce sanitize_carriers and sanitize_location to reduce the number of warnings related to components with undefined carriers `PR #1555 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1555>`__
+
+* Fix the offwind depth calculation by providing the proper GEBCO file `PR #1559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1559>`__
+
+* bug-fix in ``clean_osm_data.py`` so that cleaned data has the same number of circuits as in the raw data and assumptions are correctly applied `PR #1552 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1552>`__
 
 PyPSA-Earth 0.7.0
 =================
 
 **New Features and Major Changes**
-
 
 * Revise bundle_cutouts_northamerica `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1479>`__
 
@@ -132,6 +153,8 @@ PyPSA-Earth 0.7.0
 * Fix a naming issue with European cutout `PR #1530 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1530>`__
 
 * Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
+
+* Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
 
 PyPSA-Earth 0.6.0
 =================
