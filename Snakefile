@@ -371,6 +371,7 @@ if config["enable"].get("build_natura_raster", False):
         params:
             area_crs=config["crs"]["area_crs"],
             natura=config["natura"],
+            disable_progress=not config["enable"]["progress_bar"],
         input:
             shapefiles_land="data/landcover",
             cutouts=expand(

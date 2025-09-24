@@ -66,8 +66,9 @@ crs:
 
 natura: # only relevant when using build_natura_raster: true
   natura_size: countries # countries, cutout, or global. Select which regions to include in the natura raster.
-  natura_resolution: 100 # [m] Grid resolution of the natura data
+  natura_resolution: 100 # [m] Grid resolution of the natura data.
   window_size: 10000 # [bytes] Size of the shifting rasterization window. The required RAM scales with window_size^2.
+  buffer_size: 10000 # [unit of area_crs, default: m] Buffer around the regions of interest to include every required value. A buffer of around 100 km will be sufficient for most cases.
 
 # download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 

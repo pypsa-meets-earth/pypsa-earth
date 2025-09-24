@@ -56,6 +56,7 @@ from rasterio.features import geometry_mask, rasterize
 from rasterio.warp import transform_bounds
 from rasterio.windows import from_bounds
 from shapely.ops import unary_union
+from tqdm import tqdm
 
 logger = create_logger(__name__)
 
@@ -63,7 +64,7 @@ logger = create_logger(__name__)
 CUTOUT_CRS = "EPSG:4326"
 
 
-def get_relevant_regions(country_shapes, offshore_shapes, natura_crs):
+def get_relevant_regions(country_shapes, offshore_shapes, natura_crs, buffer):
     """
     Merge the country_shapes and the offshore_shapes into one GeoDataFrame.
     Additionally add a buffer to ensure all relevant regions are included.
@@ -83,7 +84,6 @@ def get_relevant_regions(country_shapes, offshore_shapes, natura_crs):
     offshore = offshore_gdf.geometry.union_all()
 
     # combine countries and offshore regions into one merged geometry
-    buffer = 1e5  # 100 km, adjust should important regions be missed
     merged_regions = unary_union([countries.buffer(buffer), offshore.buffer(buffer)])
 
     regions = gpd.GeoDataFrame(geometry=[merged_regions], crs=natura_crs)
@@ -161,16 +161,15 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
-
 def decide_bigtiff_flag(out_shape, dtype="uint8", safety_factor=1.1):
-    '''
+    """
     Decide whether BIGTIFF should be "YES" or "NO" based on raster shape.
     BIGTIFF is required for filesizes larger than 4 GB.
 
     Returns
     -------
     str: "YES" if the estimated size is larger than 4 GB, else "NO".
-    '''
+    """
 
     tiff_size = 4_000_000_000
 
@@ -201,8 +200,12 @@ if __name__ == "__main__":
     natura_size = snakemake.params.natura["natura_size"]
     natura_resolution = snakemake.params.natura["natura_resolution"]
     window_size = snakemake.params.natura["window_size"]
+    buffer_size = snakemake.params.natura["buffer_size"]
+    disable_progress = snakemake.params.disable_progress
 
-    regions = get_relevant_regions(country_shapes, offshore_shapes, natura_crs)
+    regions = get_relevant_regions(
+        country_shapes, offshore_shapes, natura_crs, buffer_size
+    )
 
     xs, Xs, ys, Ys = zip(
         *(
@@ -252,53 +255,70 @@ if __name__ == "__main__":
         total_files = 0
         read_files = 0
 
-        for file in shp_files:
+        # read the shapefiles
+        for file in tqdm(
+            shp_files,
+            desc="Processing shapefiles",
+            unit="file",
+            position=0,
+            disable=disable_progress,
+        ):
             shp = gpd.read_file(file).to_crs(natura_crs)
             total_files += 1
             try:
                 shp.geometry = shp.geometry.make_valid()
                 read_files += 1
-                logger.info(f"Successfully read file {file}")
+                logger.info(f"\nSuccessfully read file {file}")
             except Exception as e:
-                logger.warning(f"Error reading file {file}: {e}")
+                logger.warning(f"\nError reading file {file}: {e}")
                 continue
 
             max_row = out_shape[0] - 1  # height in pixels
             max_col = out_shape[1] - 1  # width in pixels
 
-            for row0 in range(0, max_row, window_size):  # rows = y direction
-                row1 = min(row0 + window_size, max_row)
-                ymin = top - row1 * res
-                ymax = top - row0 * res
+            with tqdm(
+                total=(max_row // window_size + 1) * (max_col // window_size + 1),
+                desc="Rasterizing windows",
+                unit="window",
+                position=1,
+                disable=disable_progress,
+            ) as rasterize_pbar:
 
-                for col0 in range(0, max_col, window_size):  # cols = x direction
-                    col1 = min(col0 + window_size, max_col)
-                    xmin = left + col0 * res
-                    xmax = left + col1 * res
+                # write the raster with a shifting window
+                for row0 in range(0, max_row, window_size):  # rows = y direction
+                    row1 = min(row0 + window_size, max_row)
+                    ymin = top - row1 * res
+                    ymax = top - row0 * res
 
-                    window = from_bounds(xmin, ymin, xmax, ymax, transform=transform)
+                    for col0 in range(0, max_col, window_size):  # cols = x direction
+                        col1 = min(col0 + window_size, max_col)
+                        xmin = left + col0 * res
+                        xmax = left + col1 * res
 
-                    window_shp = shp.cx[xmin:xmax, ymin:ymax]
+                        window = from_bounds(
+                            xmin, ymin, xmax, ymax, transform=transform
+                        )
 
-                    if window_shp.empty:
-                        continue
+                        window_shp = shp.cx[xmin:xmax, ymin:ymax]
 
-                    geom = unary_union(window_shp.geometry)
+                        if window_shp.empty:
+                            rasterize_pbar.update(1)
+                            continue
 
-                    data = dst.read(1, window=window)
+                        geom = unary_union(window_shp.geometry)
 
-                    mask = rasterize(
-                        [(geom, 1)],
-                        out_shape=data.shape,
-                        transform=dst.window_transform(window),
-                        fill=0,
-                        dtype="uint8",
-                    )
+                        data = dst.read(1, window=window)
 
-                    data[mask == 1] = 1
+                        mask = rasterize(
+                            [(geom, 1)],
+                            out_shape=data.shape,
+                            transform=dst.window_transform(window),
+                            fill=0,
+                            dtype="uint8",
+                        )
 
-                    dst.write(data, 1, window=window)
+                        data[mask == 1] = 1
 
-                logger.info(f"Done writing rows {row0}-{row1} out of {max_row}")
+                        dst.write(data, 1, window=window)
 
-            logger.info(f"Done writing file {file}")
+                        rasterize_pbar.update(1)

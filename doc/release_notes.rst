@@ -13,9 +13,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-**Minor Changes and bug-fixing**
+* Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
 
-* Change build_natura_raster to only consider the countries of interest instead of the whole cutout `PR #1479 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1544>`__
+**Minor Changes and bug-fixing**
 
 PyPSA-Earth 0.7.0
 =================
