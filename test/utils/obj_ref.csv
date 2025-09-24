@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC-BY-4.0
+folder,file,objective
+"NG","elec_s_5_ec_lcopt_Co2L-4H_python.log",2665231623.0
+"custom","elec_s_6_ec_lcopt_Co2L-4H_python.log",2548087889.0
+"landlock","elec_s_6_ec_lcopt_Co2L-4H_python.log",1098081954.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m0_python.log",1825115005.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m1_python.log",10076445520.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m2_python.log",873800591.8
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m3_python.log",1848771010.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m4_python.log",45024568060.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m5_python.log",2756737870.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m6_python.log",6436852411.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m7_python.log",1447523254.0
+"monte-carlo","elec_s_6_ec_lcopt_Co2L-4H_m8_python.log",406621644.0
+"tutorial","elec_s_6_ec_lcopt_Co2L-4H_python.log",2823517462.0
