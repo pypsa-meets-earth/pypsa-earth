@@ -656,10 +656,10 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     ValueError
         If an unsupported `time_period` is provided.
     """
-    temporal_matching_carriers = snakemake.config["policy_config"]["hydrogen"][
+    temporal_matching_carriers = snakemake.params.policy_config["hydrogen"][
         "temporal_matching_carriers"
     ]
-    allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
+    allowed_excess = snakemake.params.policy_config["hydrogen"]["allowed_excess"]
 
     # Generation
     res_gen_index = n.generators.loc[
@@ -669,8 +669,6 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         n.storage_units.carrier.isin(temporal_matching_carriers)
     ].index
 
-    weightings_gen = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_gen_index)),
     weightings_gen = pd.DataFrame(
         np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_gen_index)),
         index=n.snapshots,
@@ -696,7 +694,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    matching_technologies = snakemake.config["policy_config"]["hydrogen"][
+    matching_technologies = snakemake.params.policy_config["hydrogen"][
         "matching_technologies"
     ]
     electrolysis_index = n.links.index[n.links.carrier.isin(matching_technologies)]
@@ -1068,15 +1066,15 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_sector_network",
             simpl="",
-            clusters="10",
-            ll="copt",
-            opts="Co2L-3H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             discountrate="0.071",
             demand="AB",
             sopts="25H",
-            h2export="10",
-            configfile="config.yaml",
+            h2export="120",
+            configfile="config.tutorial.yaml",
         )
 
     configure_logging(snakemake)
