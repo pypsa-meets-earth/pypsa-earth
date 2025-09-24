@@ -203,9 +203,12 @@ if __name__ == "__main__":
     buffer_size = snakemake.params.natura["buffer_size"]
     disable_progress = snakemake.params.disable_progress
 
-    regions = get_relevant_regions(
-        country_shapes, offshore_shapes, natura_crs, buffer_size
-    )
+    if natura_size == "countries":
+        regions = get_relevant_regions(
+            country_shapes, offshore_shapes, natura_crs, buffer_size
+        )
+    else:
+        regions = None
 
     xs, Xs, ys, Ys = zip(
         *(
