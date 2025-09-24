@@ -223,10 +223,13 @@ if __name__ == "__main__":
 
     costs = prepare_costs(
         snakemake.input.costs,
+        snakemake.config["costs"],
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
-        snakemake.params.costs["default_USD_to_EUR"],
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
 
     # get hydrogen export buses/ports

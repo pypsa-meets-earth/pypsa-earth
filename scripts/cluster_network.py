@@ -135,6 +135,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     locate_bus,
+    nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -306,14 +307,13 @@ def distribute_clusters(
             n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
         )
 
-    # TODO: 1. Check if sub_networks can be added here i.e. ["country", "sub_network"]
     N = n.buses.groupby(["country", "sub_network"]).size()
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
     ), f"Number of clusters must be {len(N)} <= n_clusters <= {N.sum()} for this selection of countries."
 
-    if focus_weights is not None:
+    if focus_weights:
         total_focus = sum(list(focus_weights.values()))
 
         assert (
@@ -445,7 +445,7 @@ def busmap_for_n_clusters(
     n.determine_network_topology()
     # n.lines.loc[:, "sub_network"] = "0"  # current fix
 
-    if n.buses.country.nunique() > 1:
+    if n.buses.groupby(["country", "sub_network"]).ngroups > 1:
         n_clusters = distribute_clusters(
             inputs,
             build_shape_options,
@@ -456,18 +456,6 @@ def busmap_for_n_clusters(
             focus_weights=focus_weights,
             solver_name=solver_name,
         )
-
-    # TODO Check if `reduce_network()` is used
-    def reduce_network(n, buses):
-        nr = pypsa.Network()
-        nr.import_components_from_dataframe(buses, "Bus")
-        nr.import_components_from_dataframe(
-            n.lines.loc[
-                n.lines.bus0.isin(buses.index) & n.lines.bus1.isin(buses.index)
-            ],
-            "Line",
-        )
-        return nr
 
     def busmap_for_country(x):
         # A number of the countries in the clustering can be > 1
@@ -514,8 +502,7 @@ def busmap_for_n_clusters(
 
     return (
         n.buses.groupby(
-            # ["country"],
-            ["country", "sub_network"],  # TODO: 2. Add sub_networks (see previous TODO)
+            ["country", "sub_network"],
             group_keys=False,
         )
         .apply(busmap_for_country, include_groups=False)
@@ -622,7 +609,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="4"
+            "cluster_network", network="elec", simpl="", clusters="20flex"
         )
     configure_logging(snakemake)
 
@@ -633,9 +620,12 @@ if __name__ == "__main__":
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
-    focus_weights = snakemake.params.get("focus_weights", None)
+    focus_weights = (
+        snakemake.params.focus_weights
+        or snakemake.params.cluster_options["focus_weights"]
+    )
     country_list = snakemake.params.countries
-    geo_crs = snakemake.params.geo_crs
+    geo_crs = snakemake.params.crs["geo_crs"]
 
     renewable_carriers = pd.Index(
         [
@@ -650,6 +640,26 @@ if __name__ == "__main__":
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
 
+    # Option for subregion
+    subregion_config = snakemake.params.subregion
+    if subregion_config["enable"]["cluster_network"]:
+        if subregion_config["define_by_gadm"]:
+            logger.info("Activate subregion classificaition based on GADM")
+            subregion_shapes = snakemake.input.subregion_shapes
+        elif subregion_config["path_custom_shapes"]:
+            logger.info("Activate subregion classificaition based on custom shapes")
+            subregion_shapes = subregion_config["path_custom_shapes"]
+        else:
+            logger.warning("Although enabled, no subregion classificaition is selected")
+            subregion_shapes = False
+
+        if subregion_shapes:
+            crs = snakemake.params.crs
+            tolerance = subregion_config["tolerance"]
+            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
+    else:
+        subregion_shapes = False
+
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
@@ -659,7 +669,7 @@ if __name__ == "__main__":
     elif snakemake.wildcards.clusters == "all":
         n_clusters = len(n.buses)
     elif snakemake.wildcards.clusters == "min":
-        n_clusters = n.buses.groupby(["country", "sub_network"]).size().count()
+        n_clusters = n.buses.groupby(["country", "sub_network"]).ngroups
     else:
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
@@ -742,6 +752,14 @@ if __name__ == "__main__":
         )
 
     update_p_nom_max(clustering.network)
+
+    if subregion_shapes:
+        logger.info("Deactivate subregion classificaition")
+        country_shapes = snakemake.input.country_shapes
+        clustering.network = nearest_shape(
+            clustering.network, country_shapes, crs, tolerance=tolerance
+        )
+
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
     )

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.6.0
+version: 0.7.0
 tutorial: false
 
 logging:
@@ -82,8 +82,8 @@ cluster_options:
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: false
-    p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
+    p_threshold_drop_isolated: 20 # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
     s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
   cluster_network:
     algorithm: kmeans
@@ -104,6 +104,8 @@ cluster_options:
       ramp_limit_up: max
       ramp_limit_down: max
       efficiency: mean
+  focus_weights: false # When a value specified, set the share of nodes allocated to each country
+    # country: share
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
@@ -118,8 +120,12 @@ build_shape_options:
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
 subregion:
+  enable:
+    simplify_network: true # activate subregion in simplify_network
+    cluster_network: false # activate subregion in cluster_network
   define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
   path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
 
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
@@ -150,6 +156,19 @@ load_options:
   weather_year: 2013 # Load scenarios available with different weather year (different renewable potentials)
   prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
+
+co2_budget:
+  enable: false
+  override_co2opt: true
+  co2base_value: co2limit # choose from: [co2limit, co2base, absolute, {float}]
+  year:
+    2020: 1.0
+    2025: 0.85
+    2030: 0.70
+    2035: 0.55
+    2040: 0.40
+    2045: 0.25
+    2050: 0.1
 
 electricity:
   base_voltage: 380.
@@ -362,11 +381,19 @@ renewable:
 # Costs Configuration
 costs:
   year: 2030
-  version: v0.12.0
+  technology_data_version: v0.13.2
   discountrate: [0.071] #, 0.086, 0.111]
-  output_currency: "EUR"
-  default_USD_to_EUR: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
-  rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
+  country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
+  # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
+  cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
+  financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
+  # Management of output currencies and exchange rates
+  output_currency: "EUR" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
+  default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  # Only needed if customized exchange rates are needed for future years
+  future_exchange_rate_strategy: "latest" # "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
+  rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
   fill_values:
     FOM: 0
     VOM: 0
@@ -440,7 +467,7 @@ monte_carlo:
 
 policy_config:
   hydrogen:
-    temporal_matching: "no_temporal_matching" # either "hourly", "monthly", "yearly", "no_temporal_matching"
+    temporal_matching: "no_temporal_matching" #either "hour", "month", "year", "no_temporal_matching"
     spatial_matching: false
     temporal_matching_carriers: [csp, solar, onwind, offwind-ac, offwind-dc, ror, hydro]
     matching_technologies: ["H2 Electrolysis", "Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC"]
@@ -512,6 +539,18 @@ existing_capacities:
   - uranium
 
 sector:
+  enable:
+    heat: true
+    biomass: true
+    industry: true
+    shipping: true
+    aviation: true
+    land_transport: true
+    rail_transport: true
+    agriculture: true
+    residential: true
+    services: true
+
   gas:
     spatial_gas: true # ALWAYS TRUE
     network: false # ALWAYS FALSE for now (NOT USED)
@@ -528,6 +567,8 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
+    production_technologies: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"] a list of H2 production technologies that can be added
+
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
@@ -686,13 +727,12 @@ sector:
   methanation: true
   helmeth: true
   dac: true
-  SMR: true
-  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
   airport_sizing_factor: 3
 
+  fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
 
   conventional_generation: # generator : carrier
