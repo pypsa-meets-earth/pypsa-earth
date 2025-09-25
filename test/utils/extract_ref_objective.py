@@ -5,7 +5,7 @@
 
 import pandas as pd
 
-REF_OBJ_DF = pd.read_csv("test/utils/obj_ref.csv")
+REF_OBJ_DF = pd.read_csv("test/utils/obj_ref.csv", comment="#")
 
 SCALE = 1_000_000
 
