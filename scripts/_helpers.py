@@ -303,13 +303,7 @@ def load_network_for_plots(
     costs = load_costs(
         tech_costs,
         cost_config,
-        cost_config["output_currency"],
-        cost_config["fill_values"],
-        elec_config["max_hours"],
-        Nyears,
-        cost_config["default_exchange_rate"],
-        cost_config["future_exchange_rate_strategy"],
-        cost_config["custom_future_exchange_rate"],
+        Nyears=Nyears,
     )
     update_transmission_costs(n, costs)
 
@@ -1164,22 +1158,27 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     return cost_dataframe
 
 
-def load_costs(
+def load_costs(  # previously named prepare_costs()
     cost_file: str,
     config: dict,
-    output_currency: str,
-    fill_values: dict,
-    max_hours: dict,
+    max_hours: dict = None,
     Nyears: float | int = 1,
-    default_exchange_rate: float = None,
-    future_exchange_rate_strategy: str = "latest",
-    custom_future_exchange_rate: float = None,
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     """
+
+    # configuration for currency conversion
+    output_currency = config.get("output_currency", "EUR")
+    fill_values = config.get("fill_values", {})
+    default_exchange_rate = config.get("default_exchange_rate")
+    future_exchange_rate_strategy = config.get(
+        "future_exchange_rate_strategy", "latest"
+    )
+    custom_future_exchange_rate = config.get("custom_future_exchange_rate")
+
     costs = pd.read_csv(cost_file, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW
@@ -1230,14 +1229,30 @@ def load_costs(
     )
     modified_costs = modified_costs.fillna(fill_values)
 
-    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            modified_costs.loc[overwrites.index, attr] = overwrites
-            logger.info(
-                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
-            )
+    def overwrite_costs(costs, config, attr_list):
+        for attr in attr_list:
+            overwrites = config.get(attr)
+            if overwrites is not None:
+                overwrites = pd.Series(overwrites)
+
+                new_idx = overwrites.index.difference(costs.index)
+                if not new_idx.empty:
+                    new_rows = pd.DataFrame(index=new_idx, columns=costs.columns)
+                    new_rows = new_rows.fillna(np.nan)
+                    costs = pd.concat([costs, new_rows])
+
+                costs.loc[overwrites.index, attr] = overwrites
+                logger.info(
+                    f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+                )
+
+        return costs
+
+    modified_costs = overwrite_costs(
+        modified_costs,
+        config,
+        ["investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"],
+    )
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
@@ -1280,34 +1295,35 @@ def load_costs(
     )
     modified_costs.loc["csp"] = modified_costs.loc["csp-tower"]
 
-    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
-        if link2 is not None:
-            capital_cost += link2["capital_cost"]
-        return pd.Series(
-            {"capital_cost": capital_cost, "marginal_cost": 0.0, "CO2 intensity": 0.0}
+    if max_hours:
+
+        def costs_for_storage(store, link1, link2=None, max_hours=1.0):
+            capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
+            if link2 is not None:
+                capital_cost += link2["capital_cost"]
+            return pd.Series(
+                {
+                    "capital_cost": capital_cost,
+                    "marginal_cost": 0.0,
+                    "CO2 intensity": 0.0,
+                }
+            )
+
+        modified_costs.loc["battery"] = costs_for_storage(
+            modified_costs.loc["battery storage"],
+            modified_costs.loc["battery inverter"],
+            max_hours=max_hours["battery"],
+        )
+        modified_costs.loc["H2"] = costs_for_storage(
+            modified_costs.loc["hydrogen storage tank"],
+            modified_costs.loc["fuel cell"],
+            modified_costs.loc["electrolysis"],
+            max_hours=max_hours["H2"],
         )
 
-    modified_costs.loc["battery"] = costs_for_storage(
-        modified_costs.loc["battery storage"],
-        modified_costs.loc["battery inverter"],
-        max_hours=max_hours["battery"],
+    modified_costs = overwrite_costs(
+        modified_costs, config, ["marginal_cost", "capital_cost"]
     )
-    modified_costs.loc["H2"] = costs_for_storage(
-        modified_costs.loc["hydrogen storage tank"],
-        modified_costs.loc["fuel cell"],
-        modified_costs.loc["electrolysis"],
-        max_hours=max_hours["H2"],
-    )
-
-    for attr in ("marginal_cost", "capital_cost"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            modified_costs.loc[overwrites.index, attr] = overwrites
-            logger.info(
-                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
-            )
 
     return modified_costs
 

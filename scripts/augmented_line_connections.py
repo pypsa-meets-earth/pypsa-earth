@@ -64,13 +64,7 @@ if __name__ == "__main__":
     costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        snakemake.params.max_hours,
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
+        Nyears=Nyears,
     )
     # TODO: Implement below comment in future. Requires transformer consideration.
     # component_type = {"False": "Line", "True":  "Link"}.get(snakemake.params.hvdc_as_lines)
