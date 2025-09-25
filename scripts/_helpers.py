@@ -1219,6 +1219,15 @@ def prepare_costs(
     )
     modified_costs = modified_costs.fillna(fill_values)
 
+    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+        overwrites = config.get(attr)
+        if overwrites is not None:
+            overwrites = pd.Series(overwrites)
+            modified_costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
+
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
@@ -1811,6 +1820,62 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         """
         # set the required compression demand
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
+
+
+def nearest_shape(n, path_shapes, crs, tolerance=100):
+    """
+    Reassigns buses in the network `n` to the nearest country shape based on coordinates.
+
+    Parameters
+    ----------
+    n: pypsa network
+    path_shapes: str
+        path to shapefile with geometries and 'name' column
+    crs: str
+        dict with keys 'geo_crs' and 'distance_crs' (e.g., EPSG codes or proj strings)
+    tolerance: int, optional
+        distance (in km) for assigning a shape to a bus (The default tolerance is 100 km)
+
+    Returns
+    -------
+    pypsa network with modified 'country' column in n.buses
+
+    """
+
+    from pyproj import Transformer
+    from shapely.geometry import Point
+
+    # Load and reproject country shapes
+    shapes = gpd.read_file(path_shapes).set_index("name")["geometry"]
+    shapes = shapes.to_crs(crs["distance_crs"])
+
+    # Create transformer once (from geo_crs to distance_crs)
+    transformer = Transformer.from_crs(
+        crs["geo_crs"], crs["distance_crs"], always_xy=True
+    )
+
+    for i in n.buses.index:
+        # Original coordinates
+        x, y = n.buses.loc[i, "x"], n.buses.loc[i, "y"]
+
+        # Transform point directly
+        x_proj, y_proj = transformer.transform(x, y)
+        point_proj = Point(x_proj, y_proj)
+
+        # Check containment
+        contains = shapes.contains(point_proj)
+        if contains.any():
+            n.buses.loc[i, "country"] = contains[contains].index[0]
+        else:
+            distances = shapes.distance(point_proj).sort_values()
+            if distances.iloc[0] < tolerance * 1e3:
+                n.buses.loc[i, "country"] = distances.index[0]
+            else:
+                logger.warning(
+                    f"The bus {i} is {distances.iloc[0]:.2f} meters away from {distances.index[0]} — unassigned."
+                )
+
+    return n
 
 
 def branch(condition, then, otherwise=None):
