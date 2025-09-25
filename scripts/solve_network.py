@@ -95,18 +95,19 @@ from pypsa.optimization.optimize import optimize
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
 
+
 def get_load_shedding_capacity(n, safety_margin=1.2):
     """
     Calculate required load shedding p_nom per bus based on the
     maximum aggregated load observed in any snapshot.
-    
+
     Parameters
     ----------
     n : pypsa.Network
         The PyPSA network
     safety_margin : float, default 1.2
         Safety factor to apply to the maximum load
-    
+
     Returns
     -------
     pd.Series
@@ -114,24 +115,25 @@ def get_load_shedding_capacity(n, safety_margin=1.2):
     """
 
     load_shedding_p_nom = pd.Series(0.0, index=n.buses.index)
-    
-    for bus_name, bus_loads in n.loads.groupby('bus'):
-        
+
+    for bus_name, bus_loads in n.loads.groupby("bus"):
+
         if not n.loads_t.p_set.empty:
-            bus_load_timeseries = (
-                n.loads_t.p_set[bus_loads.index.intersection(n.loads_t.p_set.columns)]
-            )
+            bus_load_timeseries = n.loads_t.p_set[
+                bus_loads.index.intersection(n.loads_t.p_set.columns)
+            ]
             # Sum loads across all components at this bus for each snapshot
             total_load_per_snapshot = bus_load_timeseries.sum(axis=1)
             max_total_load = total_load_per_snapshot.max()
         else:
-            max_total_load = bus_loads['p_set'].sum()
-        
+            max_total_load = bus_loads["p_set"].sum()
+
         required_p_nom = max_total_load * safety_margin
-        
+
         load_shedding_p_nom[bus_name] = required_p_nom
-    
+
     return load_shedding_p_nom
+
 
 def prepare_network(n, solve_opts, config):
     if "clip_p_max_pu" in solve_opts:
@@ -146,7 +148,7 @@ def prepare_network(n, solve_opts, config):
         n.line_volume_limit = n.global_constraints.at["lv_limit", "constant"]
         n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
 
-    if solve_opts.get("load_shedding"):    
+    if solve_opts.get("load_shedding"):
         required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
         n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
         n.madd(
