@@ -160,9 +160,11 @@ jobs:
         PY
         }
 
+        # Table is used as a visual part in Actions Summary
         TABLE="| Folder | File | Current Objective | Reference Objective |"
         TABLE+="\n|:----|:-----|------------------:|--------------------:|"
 
+        # Generation of csv files facilitates objective update
         CSV_FILE="ref_objectives-${{ matrix.os }}.csv"
         CSV_CONTENT="folder,file,objective"
 
