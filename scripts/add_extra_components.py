@@ -367,13 +367,8 @@ if __name__ == "__main__":
     costs = load_costs(
         snakemake.input.tech_costs,
         config["costs"],
-        config["costs"]["output_currency"],
-        config["costs"]["fill_values"],
-        config["electricity"]["max_hours"],
-        Nyears,
-        config["costs"]["default_exchange_rate"],
-        config["costs"]["future_exchange_rate_strategy"],
-        config["costs"]["custom_future_exchange_rate"],
+        max_hours=config["electricity"]["max_hours"],
+        Nyears=Nyears,
     )
 
     buses_i = n.buses.index

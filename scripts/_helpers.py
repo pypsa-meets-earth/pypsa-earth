@@ -351,13 +351,7 @@ def load_network_for_plots(
     costs = load_costs(
         tech_costs,
         cost_config,
-        cost_config["output_currency"],
-        cost_config["fill_values"],
-        elec_config["max_hours"],
-        Nyears,
-        cost_config["default_exchange_rate"],
-        cost_config["future_exchange_rate_strategy"],
-        cost_config["custom_future_exchange_rate"],
+        Nyears=Nyears,
     )
     update_transmission_costs(n, costs)
 
@@ -1215,19 +1209,24 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
 def load_costs(
     cost_file: str,
     config: dict,
-    output_currency: str,
-    fill_values: dict,
-    max_hours: dict,
+    max_hours: dict = None,
     Nyears: float | int = 1,
-    default_exchange_rate: float = None,
-    future_exchange_rate_strategy: str = "latest",
-    custom_future_exchange_rate: float = None,
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     """
+
+    # configuration for currency conversion
+    output_currency = config.get("output_currency", "EUR")
+    fill_values = config.get("fill_values", {})
+    default_exchange_rate = config.get("default_exchange_rate")
+    future_exchange_rate_strategy = config.get(
+        "future_exchange_rate_strategy", "latest"
+    )
+    custom_future_exchange_rate = config.get("custom_future_exchange_rate")
+
     costs = pd.read_csv(cost_file, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW
@@ -1278,14 +1277,30 @@ def load_costs(
     )
     modified_costs = modified_costs.fillna(fill_values)
 
-    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            modified_costs.loc[overwrites.index, attr] = overwrites
-            logger.info(
-                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
-            )
+    def overwrite_costs(costs, config, attr_list):
+        for attr in attr_list:
+            overwrites = config.get(attr)
+            if overwrites is not None:
+                overwrites = pd.Series(overwrites)
+
+                new_idx = overwrites.index.difference(costs.index)
+                if not new_idx.empty:
+                    new_rows = pd.DataFrame(index=new_idx, columns=costs.columns)
+                    new_rows = new_rows.fillna(np.nan)
+                    costs = pd.concat([costs, new_rows])
+
+                costs.loc[overwrites.index, attr] = overwrites
+                logger.info(
+                    f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+                )
+
+        return costs
+
+    modified_costs = overwrite_costs(
+        modified_costs,
+        config,
+        ["investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"],
+    )
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
@@ -1303,15 +1318,6 @@ def load_costs(
     )
 
     # rename because technology data & pypsa earth costs.csv use different names
-    # TODO: rename the technologies in hosted tutorial data to match technology data
-    modified_costs = modified_costs.rename(
-        {
-            "hydrogen storage": "hydrogen storage tank",
-            "hydrogen storage tank": "hydrogen storage tank",
-            "hydrogen storage tank type 1": "hydrogen storage tank",
-            "hydrogen underground storage": "hydrogen storage underground",
-        },
-    )
 
     modified_costs.at["OCGT", "CO2 intensity"] = modified_costs.at[
         "gas", "CO2 intensity"
@@ -1327,59 +1333,64 @@ def load_costs(
     )
     modified_costs.loc["csp"] = modified_costs.loc["csp-tower"]
 
-    def costs_for_storage(store, link1=None, link2=None, max_hours=1.0):
-        capital_cost = max_hours * store["capital_cost"]
-        if link1 is not None:
-            capital_cost += link1["capital_cost"]
-        if link2 is not None:
-            capital_cost += link2["capital_cost"]
-        return pd.Series(
-            {"capital_cost": capital_cost, "marginal_cost": 0.0, "CO2 intensity": 0.0}
-        )
+    if max_hours:
 
-    mod_costs_i = modified_costs.index
-    missing_store = []
-    for k, v in max_hours.items():
-        tech = STORE_LOOKUP[k]
-        store = tech.get("store") if tech.get("store") in mod_costs_i else None
-        bicharger = (
-            tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
-        )
-        charger = tech.get("charger") if tech.get("charger") in mod_costs_i else None
-        discharger = (
-            tech.get("discharger") if tech.get("discharger") in mod_costs_i else None
-        )
-        if bicharger:
-            modified_costs.loc[k] = costs_for_storage(
-                modified_costs.loc[store],
-                modified_costs.loc[bicharger],
-                max_hours=v,
+        def costs_for_storage(store, link1=None, link2=None, max_hours=1.0):
+            capital_cost = max_hours * store["capital_cost"]
+            if link1 is not None:
+                capital_cost += link1["capital_cost"]
+            if link2 is not None:
+                capital_cost += link2["capital_cost"]
+            return pd.Series(
+                {
+                    "capital_cost": capital_cost,
+                    "marginal_cost": 0.0,
+                    "CO2 intensity": 0.0,
+                }
             )
-        elif store:
-            modified_costs.loc[k] = costs_for_storage(
-                modified_costs.loc[store],
-                modified_costs.loc[charger] if charger else None,
-                modified_costs.loc[discharger] if discharger else None,
-                max_hours=v,
-            )
-        else:
-            missing_store += [k]
 
-    if missing_store:
-        logger.warning(
-            f"No cost data on:\n - "
-            + "\n - ".join(missing_store)
-            + "\nPlease enable retrieve_cost_data if this storage technology is used"
-        )
-
-    for attr in ("marginal_cost", "capital_cost"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            modified_costs.loc[overwrites.index, attr] = overwrites
-            logger.info(
-                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+        mod_costs_i = modified_costs.index
+        missing_store = []
+        for k, v in max_hours.items():
+            tech = STORE_LOOKUP[k]
+            store = tech.get("store") if tech.get("store") in mod_costs_i else None
+            bicharger = (
+                tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
             )
+            charger = (
+                tech.get("charger") if tech.get("charger") in mod_costs_i else None
+            )
+            discharger = (
+                tech.get("discharger")
+                if tech.get("discharger") in mod_costs_i
+                else None
+            )
+            if bicharger:
+                modified_costs.loc[k] = costs_for_storage(
+                    modified_costs.loc[store],
+                    modified_costs.loc[bicharger],
+                    max_hours=v,
+                )
+            elif store:
+                modified_costs.loc[k] = costs_for_storage(
+                    modified_costs.loc[store],
+                    modified_costs.loc[charger] if charger else None,
+                    modified_costs.loc[discharger] if discharger else None,
+                    max_hours=v,
+                )
+            else:
+                missing_store += [k]
+
+        if missing_store:
+            logger.warning(
+                f"No cost data on:\n - "
+                + "\n - ".join(missing_store)
+                + "\nPlease enable retrieve_cost_data if this storage technology is used"
+            )
+
+    modified_costs = overwrite_costs(
+        modified_costs, config, ["marginal_cost", "capital_cost"]
+    )
 
     return modified_costs
 

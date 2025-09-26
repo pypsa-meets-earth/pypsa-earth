@@ -1019,13 +1019,8 @@ if __name__ == "__main__":
     technology_costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        snakemake.params.electricity["max_hours"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
+        max_hours=snakemake.params.electricity["max_hours"],
+        Nyears=Nyears,
     )
 
     n, simplify_links_map = simplify_links(

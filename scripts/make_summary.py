@@ -513,13 +513,8 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
         costs = load_costs(
             inputs.tech_costs,
             cost_config,
-            cost_config["output_currency"],
-            cost_config["fill_values"],
-            elec_config["max_hours"],
-            Nyears,
-            cost_config["default_exchange_rate"],
-            cost_config["future_exchange_rate_strategy"],
-            cost_config["custom_future_exchange_rate"],
+            max_hours=elec_config["max_hours"],
+            Nyears=Nyears,
         )
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
 

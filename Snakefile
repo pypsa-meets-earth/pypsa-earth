@@ -683,7 +683,6 @@ rule augmented_line_connections:
         lines=config["lines"],
         augmented_line_connection=config["augmented_line_connection"],
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        max_hours=config["electricity"]["max_hours"],
         costs=config["costs"],
     input:
         tech_costs=COSTS,
@@ -1164,7 +1163,6 @@ rule add_export:
         endogenous_price=config["export"]["endogenous_price"],
         snapshots=config["snapshots"],
         costs=config["costs"],
-        max_hours=config["electricity"]["max_hours"],
     input:
         overrides="data/override_component_attrs",
         export_ports="resources/" + SECDIR + "export_ports.csv",
@@ -1991,7 +1989,6 @@ if config["foresight"] == "myopic":
             sector=config["sector"],
             existing_capacities=config["existing_capacities"],
             costs=config["costs"],
-            max_hours=config["electricity"]["max_hours"],
         input:
             **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR

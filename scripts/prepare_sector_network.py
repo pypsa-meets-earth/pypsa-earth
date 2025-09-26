@@ -3100,14 +3100,9 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     costs = load_costs(
         snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        snakemake.params.electricity["max_hours"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
+        snakemake.params.costs,
+        max_hours=snakemake.params.electricity["max_hours"],
+        Nyears=Nyears,
     )
 
     # Define spatial for biomass and co2. They require the same spatial definition
