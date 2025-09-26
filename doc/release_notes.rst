@@ -23,6 +23,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Extend functionality of isolated nodes to networks and fix to demand scaling when gdp or pop is empty `PR #1540 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1540>`__
 
+* Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
+
 
 **Minor Changes and bug-fixing**
 
@@ -35,6 +37,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix the offwind depth calculation by providing the proper GEBCO file `PR #1559 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1559>`__
 
 * bug-fix in ``clean_osm_data.py`` so that cleaned data has the same number of circuits as in the raw data and assumptions are correctly applied `PR #1552 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1552>`__
+
+* Avoid using variable "nodes" in prepare_sector_network unless explicitly in the arguments `PR #1575 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1575>`__
 
 * Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
 

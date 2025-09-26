@@ -787,6 +787,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         params:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -854,6 +855,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         params:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/"
@@ -1631,6 +1633,7 @@ if config["foresight"] == "overnight":
         params:
             solving=config["solving"],
             augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             # network=RESDIR
@@ -2101,6 +2104,7 @@ if config["foresight"] == "myopic":
                 "co2_sequestration_potential", 200
             ),
             augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
