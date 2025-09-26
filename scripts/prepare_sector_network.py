@@ -511,11 +511,11 @@ def add_hydrogen(n, costs):
 
             n.madd(
                 "Bus",
-                nodes + " H2 UHS",
-                location=nodes,
+                spatial.nodes + " H2 UHS",
+                location=spatial.nodes,
                 carrier="H2 UHS",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
+                x=n.buses.loc[list(spatial.nodes)].x.values,
+                y=n.buses.loc[list(spatial.nodes)].y.values,
             )
 
             n.madd(
@@ -531,9 +531,9 @@ def add_hydrogen(n, costs):
 
             n.madd(
                 "Link",
-                nodes + " H2 UHS charger",
-                bus0=nodes + " H2",
-                bus1=nodes + " H2 UHS",
+                spatial.nodes + " H2 UHS charger",
+                bus0=spatial.nodes + " H2",
+                bus1=spatial.nodes + " H2 UHS",
                 carrier="H2 UHS charger",
                 # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
                 # capital_cost=costs.at["battery inverter", "capital_cost"],
@@ -543,9 +543,9 @@ def add_hydrogen(n, costs):
 
             n.madd(
                 "Link",
-                nodes + " H2 UHS discharger",
-                bus0=nodes + " H2 UHS",
-                bus1=nodes + " H2",
+                spatial.nodes + " H2 UHS discharger",
+                bus0=spatial.nodes + " H2 UHS",
+                bus1=spatial.nodes + " H2",
                 carrier="H2 UHS discharger",
                 efficiency=1,
                 # capital_cost=costs.at["battery inverter", "capital_cost"],
@@ -579,11 +579,11 @@ def add_hydrogen(n, costs):
 
             n.madd(
                 "Bus",
-                nodes + " H2 UHS",
-                location=nodes,
+                spatial.nodes + " H2 UHS",
+                location=spatial.nodes,
                 carrier="H2 UHS",
-                x=n.buses.loc[list(nodes)].x.values,
-                y=n.buses.loc[list(nodes)].y.values,
+                x=n.buses.loc[list(spatial.nodes)].x.values,
+                y=n.buses.loc[list(spatial.nodes)].y.values,
             )
 
             n.madd(
@@ -599,9 +599,9 @@ def add_hydrogen(n, costs):
 
             n.madd(
                 "Link",
-                nodes + " H2 UHS charger",
-                bus0=nodes,
-                bus1=nodes + " H2 UHS",
+                spatial.nodes + " H2 UHS charger",
+                bus0=spatial.nodes,
+                bus1=spatial.nodes + " H2 UHS",
                 carrier="H2 UHS charger",
                 # efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
                 capital_cost=0,
@@ -611,9 +611,9 @@ def add_hydrogen(n, costs):
 
             n.madd(
                 "Link",
-                nodes + " H2 UHS discharger",
-                bus0=nodes,
-                bus1=nodes + " H2 UHS",
+                spatial.nodes + " H2 UHS discharger",
+                bus0=spatial.nodes,
+                bus1=spatial.nodes + " H2 UHS",
                 carrier="H2 UHS discharger",
                 efficiency=1,
                 capital_cost=0,
@@ -625,7 +625,7 @@ def add_hydrogen(n, costs):
     h2_capital_cost = costs.at[
         "hydrogen storage tank type 1 including compressor", "capital_cost"
     ]
-    nodes_overground = nodes
+    nodes_overground = spatial.nodes
     n.madd(
         "Store",
         nodes_overground + " H2 Store Tank",
@@ -1680,9 +1680,9 @@ def add_industry(
     ):
         n.madd(
             "Load",
-            nodes,
+            spatial.nodes,
             suffix=" H2 for industry",
-            bus=nodes + " H2",
+            bus=spatial.nodes + " H2",
             carrier="H2 for industry",
             p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
         )
@@ -2004,13 +2004,13 @@ def add_land_transport(
         ):
             n.madd(
                 "Load",
-                nodes,
+                spatial.nodes,
                 suffix=" land transport fuel cell",
-                bus=nodes + " H2",
+                bus=spatial.nodes + " H2",
                 carrier="land transport fuel cell",
                 p_set=fuel_cell_share
                 / options["transport_fuel_cell_efficiency"]
-                * transport[nodes],
+                * transport[spatial.nodes],
             )
 
     if ice_share > 0:
@@ -2793,21 +2793,20 @@ def add_residential(n, costs, energy_totals):
 
 def add_electricity_distribution_grid(n, costs):
     logger.info("Adding electricity distribution network")
-    nodes = pop_layout.index
 
     n.madd(
         "Bus",
-        nodes + " low voltage",
-        location=nodes,
+        spatial.nodes + " low voltage",
+        location=spatial.nodes,
         carrier="low voltage",
         unit="MWh_el",
     )
 
     n.madd(
         "Link",
-        nodes + " electricity distribution grid",
-        bus0=nodes,
-        bus1=nodes + " low voltage",
+        spatial.nodes + " electricity distribution grid",
+        bus0=spatial.nodes,
+        bus1=spatial.nodes + " low voltage",
         p_nom_extendable=True,
         p_min_pu=-1,
         carrier="electricity distribution grid",
@@ -2885,17 +2884,17 @@ def add_electricity_distribution_grid(n, costs):
 
         n.madd(
             "Bus",
-            nodes + " home battery",
-            location=nodes,
+            spatial.nodes + " home battery",
+            location=spatial.nodes,
             carrier="home battery",
             unit="MWh_el",
         )
 
         n.madd(
             "Store",
-            nodes + " home battery",
-            bus=nodes + " home battery",
-            location=nodes,
+            spatial.nodes + " home battery",
+            bus=spatial.nodes + " home battery",
+            location=spatial.nodes,
             e_cyclic=True,
             e_nom_extendable=True,
             carrier="home battery",
@@ -2905,9 +2904,9 @@ def add_electricity_distribution_grid(n, costs):
 
         n.madd(
             "Link",
-            nodes + " home battery charger",
-            bus0=nodes + " low voltage",
-            bus1=nodes + " home battery",
+            spatial.nodes + " home battery charger",
+            bus0=spatial.nodes + " low voltage",
+            bus1=spatial.nodes + " home battery",
             carrier="home battery charger",
             efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             capital_cost=costs.at["home battery inverter", "capital_cost"],
@@ -2917,9 +2916,9 @@ def add_electricity_distribution_grid(n, costs):
 
         n.madd(
             "Link",
-            nodes + " home battery discharger",
-            bus0=nodes + " home battery",
-            bus1=nodes + " low voltage",
+            spatial.nodes + " home battery discharger",
+            bus0=spatial.nodes + " home battery",
+            bus1=spatial.nodes + " low voltage",
             carrier="home battery discharger",
             efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
             marginal_cost=options["marginal_cost_storage"],
@@ -3125,7 +3124,7 @@ if __name__ == "__main__":
     # countries = list(n.buses.country.unique())
     countries = snakemake.params.countries
     # Locate all the AC buses
-    nodes = n.buses[
+    acnodes = n.buses[
         n.buses.carrier == "AC"
     ].index  # TODO if you take nodes from the index of buses of n it's more than pop_layout
     # clustering of regions must be double checked.. refer to regions onshore
@@ -3134,10 +3133,10 @@ if __name__ == "__main__":
     n.buses.location = n.buses.index
 
     # Set carrier of AC loads
-    existing_nodes = [node for node in nodes if node in n.loads.index]
-    if len(existing_nodes) < len(nodes):
+    existing_nodes = [node for node in acnodes if node in n.loads.index]
+    if len(existing_nodes) < len(acnodes):
         print(
-            "fWarning: For {len(nodes) - len(existing_nodes)} of {len(nodes)} nodes there were no load nodes found in network and were skipped."
+            f"Warning: For {len(acnodes) - len(existing_nodes)} of {len(acnodes)} nodes there were no load nodes found in network and were skipped."
         )
     n.loads.loc[existing_nodes, "carrier"] = "AC"
 
