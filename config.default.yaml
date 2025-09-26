@@ -194,6 +194,8 @@ electricity:
     lair: 12
     pair: 24
     iron-air: 100
+    # For details on the maximum storage durations of different technologies,
+    # see: https://www.pnnl.gov/sites/default/files/media/file/ESGC%20Cost%20Performance%20Report%202022%20PNNL-33283.pdf
 
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]

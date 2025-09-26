@@ -94,6 +94,71 @@ STORE_LOOKUP = {
         "charger": "electrolysis",
         "discharger": "fuel cell",
     },
+    "concrete": {
+        "store": "Concrete-store",
+        "charger": "Concrete-charger",
+        "discharger": "Concrete-discharger",
+    },
+    "gravity": {
+        "store": "Gravity-Brick-store",
+        "bicharger": "Gravity-Brick-bicharger",
+    },
+    "gravitywa": {
+        "store": "Gravity-Water-Aboveground-store",
+        "bicharger": "Gravity-Water-Aboveground-bicharger",
+    },
+    "gravitywu": {
+        "store": "Gravity-Water-Underground-store",
+        "bicharger": "Gravity-Water-Underground-bicharger",
+    },
+    "salthight": {
+        "store": "HighT-Molten-Salt-store",
+        "charger": "HighT-Molten-Salt-charger",
+        "discharger": "HighT-Molten-Salt-discharger",
+    },
+    "lead": {
+        "store": "Lead-Acid-store",
+        "bicharger": "Lead-Acid-bicharger",
+    },
+    "nmc": {
+        "store": "Lithium-Ion-NMC-store",
+        "bicharger": "Lithium-Ion-NMC-bicharger",
+    },
+    "saltlowt": {
+        "store": "LowT-Molten-Salt-store",
+        "charger": "LowT-Molten-Salt-charger",
+        "discharger": "LowT-Molten-Salt-discharger",
+    },
+    "nizn": {
+        "store": "Ni-Zn-store",
+        "bicharger": "Ni-Zn-bicharger",
+    },
+    "phes": {
+        "store": "Pumped-Heat-store",
+        "charger": "Pumped-Heat-charger",
+        "discharger": "Pumped-Heat-discharger",
+    },
+    "phs": { # Current PHS data only has MW cost, not it's storage cost
+        "store": "Pumped-Storage-Hydro-store",
+        "bicharger": "Pumped-Storage-Hydro-bicharger",
+    },
+    "sand": {
+        "store": "Sand-store",
+        "charger": "Sand-charger",
+        "discharger": "Sand-discharger",
+    },
+    "znair": {
+        "store": "Zn-Air-store",
+        "bicharger": "Zn-Air-bicharger",
+    },
+    "znbrflow": {
+        "store": "Zn-Br-Flow-store",
+        "bicharger": "Zn-Br-Flow-bicharger",
+    },
+    "znbr": {
+        "store": "Zn-Br-Nonflow-store",
+        "bicharger": "Zn-Br-Nonflow-bicharger",
+    },
 }
 
 
