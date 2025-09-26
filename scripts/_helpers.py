@@ -138,7 +138,7 @@ STORE_LOOKUP = {
         "charger": "Pumped-Heat-charger",
         "discharger": "Pumped-Heat-discharger",
     },
-    "phs": { # Current PHS data only has MW cost, not it's storage cost
+    "phs": {  # Current PHS data only has MW cost, not it's storage cost
         "store": "Pumped-Storage-Hydro-store",
         "bicharger": "Pumped-Storage-Hydro-bicharger",
     },
