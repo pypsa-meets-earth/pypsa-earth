@@ -199,3 +199,9 @@ jobs:
         echo "GITHUB_STEP_SUMMARY successfully supplemented with a header"
 
         printf "%b\n" "$TABLE" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload csv artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ref_objectives-${{ matrix.os }}
+        path: ref_objectives-${{ matrix.os }}.csv
