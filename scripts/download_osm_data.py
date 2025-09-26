@@ -112,7 +112,7 @@ if __name__ == "__main__":
         )
         os.makedirs(store_path_data, exist_ok=True)
         shutil.copytree(custom_data_path, store_path_data, dirs_exist_ok=True)
-   
+
     eo.save_osm_data(
         primary_name="power",
         region_list=country_list,
