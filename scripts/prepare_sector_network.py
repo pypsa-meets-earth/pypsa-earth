@@ -1251,10 +1251,7 @@ def add_aviation(n, cost, energy_totals, airports_fn):
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
     airports["p_set"] = (
-        airports["fraction"]
-        * airports["country"].map(aviation_demand)
-        * 1e6
-        / 8760
+        airports["fraction"] * airports["country"].map(aviation_demand) * 1e6 / 8760
     )
 
     airports = pd.concat([airports, ind])
