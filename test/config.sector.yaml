@@ -52,6 +52,10 @@ existing_capacities:
   - oil
   - uranium
 
+policy_config:
+  hydrogen:
+    temporal_matching: "hour"
+
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
 snapshots:
