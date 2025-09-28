@@ -1468,8 +1468,12 @@ def add_shipping(n, costs, energy_totals, ports_fn):
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
 
-        ports["p_set"] = ports["fraction"].apply(
-            lambda frac: shipping_oil_share * frac * navigation_demand * 1e6 / 8760
+        ports["p_set"] = (
+            shipping_oil_share
+            * ports["fraction"]
+            * ports["country"].map(navigation_demand)
+            * 1e6
+            / 8760
         )
 
         n.madd(
