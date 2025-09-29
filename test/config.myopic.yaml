@@ -14,7 +14,8 @@ enable:
   retrieve_databundle_sector: true
 
 run:
-  name: "test_myopic" # use this to keep track of runs with different settings
+  name: "myopic" # use this to keep track of runs with different settings
+  sector_name: "myopic_sec" # use this to keep track of sector scenario runs
   name_subworkflow: "tutorial"  # scenario name of the pypsa-earth subworkflow
   shared_cutouts: true  # set to true to share the default cutout(s) across runs; Note: value false requires build_cutout to be enabled
 foresight: myopic
