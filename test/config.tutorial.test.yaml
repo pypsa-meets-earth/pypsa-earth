@@ -6,4 +6,4 @@ version: 0.7.0
 
 run:
   name: tutorial
-  sector_name: "tutorial_sec"
+  sector_name: "tutorial"
