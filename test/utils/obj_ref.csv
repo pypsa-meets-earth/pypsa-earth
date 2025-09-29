@@ -16,3 +16,5 @@ monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m6_python.log,6436852411.0
 monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m7_python.log,1447523254.0
 monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m8_python.log,406621644.0
 landlock,elec_s_6_ec_lcopt_Co2L-4H_python.log,1098081954.0
+sector_sec,elec_s_4_ec_lcopt_Co2L-24h_144h_2030_0.071_AB_120export.log,1289553265000.0
+myopic_sec,elec_s_4_ec_lc1_Co2L-24H_144h_2030_0.071_DF_120export.log,665825850500.0
