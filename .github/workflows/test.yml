@@ -122,6 +122,7 @@ jobs:
         OBJ_STRING="(?<=INFO:__main__:Objective function: ).*"
         LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
         echo "Extracting the objective values from the logs"
+        echo "Solver log files: $LOG_FILES"
         OBJ_FOUND=$(
           awk '/INFO:__main__:Objective function: /{
                  sub(/\r$/, "");
