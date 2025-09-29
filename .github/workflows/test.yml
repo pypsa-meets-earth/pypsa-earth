@@ -213,6 +213,10 @@ jobs:
 
         printf "%b\n" "$TABLE" >> "$GITHUB_STEP_SUMMARY"
 
+        printf "%b" "$CSV_CONTENT" > "$CSV_FILE"
+
+        echo "Objective values uploaded to csv"
+
     - name: Upload csv artifacts
       uses: actions/upload-artifact@v4
       with:
