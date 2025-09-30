@@ -55,8 +55,8 @@ import os
 
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
-from add_electricity import create_logger, load_costs, update_transmission_costs
+from _helpers import configure_logging, load_costs
+from add_electricity import create_logger, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -513,8 +513,8 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
         costs = load_costs(
             inputs.tech_costs,
             cost_config,
-            elec_config,
-            Nyears,
+            max_hours=elec_config["max_hours"],
+            Nyears=Nyears,
         )
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
 
