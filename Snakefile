@@ -632,7 +632,7 @@ rule cluster_network:
         countries=config["countries"],
         cluster_options=config["cluster_options"],
         focus_weights=config.get("focus_weights", None),
-        #custom_busmap=config["enable"].get("custom_busmap", False)
+        custom_busmap=config["enable"].get("custom_busmap", False),
         subregion=config["subregion"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
@@ -649,8 +649,11 @@ rule cluster_network:
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
-        # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
-        #                if config["enable"].get("custom_busmap", False) else []),
+        custom_busmap=(
+            "data/custom_busmap_elec_s{simpl}_{clusters}.csv"
+            if config["enable"].get("custom_busmap", False)
+            else []
+        ),
         tech_costs=COSTS,
         subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
