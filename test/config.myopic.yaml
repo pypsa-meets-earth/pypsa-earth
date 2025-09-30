@@ -43,6 +43,10 @@ cluster_options:
 
 countries: ['NG', 'BJ']
 
+electricity:
+  extendable_carriers:
+    StorageUnit: [vanadium, lfp, lair, pair, iron-air]
+
 export:
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   h2export: [120] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false

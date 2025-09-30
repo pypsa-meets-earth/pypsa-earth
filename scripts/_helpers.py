@@ -48,6 +48,119 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
+# Storage techs lookup
+STORE_LOOKUP = {
+    "battery": {
+        "store": "battery storage",
+        "bicharger": "battery inverter",
+    },
+    "home battery": {
+        "store": "home battery storage",
+        "bicharger": "home battery inverter",
+    },
+    "li-ion": {
+        "store": "battery storage",
+        "bicharger": "battery inverter",
+    },
+    "lfp": {
+        "store": "Lithium-Ion-LFP-store",
+        "bicharger": "Lithium-Ion-LFP-bicharger",
+    },
+    "vanadium": {
+        "store": "Vanadium-Redox-Flow-store",
+        "bicharger": "Vanadium-Redox-Flow-bicharger",
+    },
+    "lair": {
+        "store": "Liquid-Air-store",
+        "charger": "Liquid-Air-charger",
+        "discharger": "Liquid-Air-discharger",
+    },
+    "pair": {
+        "store": "Compressed-Air-Adiabatic-store",
+        "bicharger": "Compressed-Air-Adiabatic-bicharger",
+    },
+    "iron-air": {
+        "store": "iron-air battery",
+        "charger": "iron-air battery charge",
+        "discharger": "iron-air battery discharge",
+    },
+    "H2": {
+        "store": "hydrogen storage tank type 1 including compressor",
+        "charger": "electrolysis",
+        "discharger": "fuel cell",
+    },
+    "H2 underground": {
+        "store": "hydrogen storage underground",
+        "charger": "electrolysis",
+        "discharger": "fuel cell",
+    },
+    "concrete": {
+        "store": "Concrete-store",
+        "charger": "Concrete-charger",
+        "discharger": "Concrete-discharger",
+    },
+    "gravity": {
+        "store": "Gravity-Brick-store",
+        "bicharger": "Gravity-Brick-bicharger",
+    },
+    "gravitywa": {
+        "store": "Gravity-Water-Aboveground-store",
+        "bicharger": "Gravity-Water-Aboveground-bicharger",
+    },
+    "gravitywu": {
+        "store": "Gravity-Water-Underground-store",
+        "bicharger": "Gravity-Water-Underground-bicharger",
+    },
+    "salthight": {
+        "store": "HighT-Molten-Salt-store",
+        "charger": "HighT-Molten-Salt-charger",
+        "discharger": "HighT-Molten-Salt-discharger",
+    },
+    "lead": {
+        "store": "Lead-Acid-store",
+        "bicharger": "Lead-Acid-bicharger",
+    },
+    "nmc": {
+        "store": "Lithium-Ion-NMC-store",
+        "bicharger": "Lithium-Ion-NMC-bicharger",
+    },
+    "saltlowt": {
+        "store": "LowT-Molten-Salt-store",
+        "charger": "LowT-Molten-Salt-charger",
+        "discharger": "LowT-Molten-Salt-discharger",
+    },
+    "nizn": {
+        "store": "Ni-Zn-store",
+        "bicharger": "Ni-Zn-bicharger",
+    },
+    "phes": {
+        "store": "Pumped-Heat-store",
+        "charger": "Pumped-Heat-charger",
+        "discharger": "Pumped-Heat-discharger",
+    },
+    "phs": {  # Current PHS data only has MW cost, not it's storage cost
+        "store": "Pumped-Storage-Hydro-store",
+        "bicharger": "Pumped-Storage-Hydro-bicharger",
+    },
+    "sand": {
+        "store": "Sand-store",
+        "charger": "Sand-charger",
+        "discharger": "Sand-discharger",
+    },
+    "znair": {
+        "store": "Zn-Air-store",
+        "bicharger": "Zn-Air-bicharger",
+    },
+    "znbrflow": {
+        "store": "Zn-Br-Flow-store",
+        "bicharger": "Zn-Br-Flow-bicharger",
+    },
+    "znbr": {
+        "store": "Zn-Br-Nonflow-store",
+        "bicharger": "Zn-Br-Nonflow-bicharger",
+    },
+}
+
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
@@ -274,7 +387,7 @@ def load_network_for_plots(
     fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
 ):
     import pypsa
-    from add_electricity import load_costs, update_transmission_costs
+    from add_electricity import update_transmission_costs
 
     n = pypsa.Network(fn)
 
@@ -300,7 +413,11 @@ def load_network_for_plots(
     # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
+    costs = load_costs(
+        tech_costs,
+        cost_config,
+        Nyears=Nyears,
+    )
     update_transmission_costs(n, costs)
 
     return n
@@ -1154,22 +1271,28 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     return cost_dataframe
 
 
-def prepare_costs(
+def load_costs(
     cost_file: str,
     config: dict,
-    output_currency: str,
-    fill_values: dict,
+    max_hours: dict = None,
     Nyears: float | int = 1,
-    default_exchange_rate: float = None,
-    future_exchange_rate_strategy: str = "latest",
-    custom_future_exchange_rate: float = None,
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     """
-    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
+
+    # configuration for currency conversion
+    output_currency = config.get("output_currency", "EUR")
+    fill_values = config.get("fill_values", {})
+    default_exchange_rate = config.get("default_exchange_rate")
+    future_exchange_rate_strategy = config.get(
+        "future_exchange_rate_strategy", "latest"
+    )
+    custom_future_exchange_rate = config.get("custom_future_exchange_rate")
+
+    costs = pd.read_csv(cost_file, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
@@ -1219,22 +1342,120 @@ def prepare_costs(
     )
     modified_costs = modified_costs.fillna(fill_values)
 
-    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            modified_costs.loc[overwrites.index, attr] = overwrites
-            logger.info(
-                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
-            )
+    def overwrite_costs(costs, config, attr_list):
+        for attr in attr_list:
+            overwrites = config.get(attr)
+            if overwrites is not None:
+                overwrites = pd.Series(overwrites)
+
+                new_idx = overwrites.index.difference(costs.index)
+                if not new_idx.empty:
+                    new_rows = pd.DataFrame(index=new_idx, columns=costs.columns)
+                    new_rows = new_rows.fillna(np.nan)
+                    costs = pd.concat([costs, new_rows])
+
+                costs.loc[overwrites.index, attr] = overwrites
+                logger.info(
+                    f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+                )
+
+        return costs
+
+    modified_costs = overwrite_costs(
+        modified_costs,
+        config,
+        ["investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"],
+    )
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
 
-    modified_costs["fixed"] = [
+    modified_costs["capital_cost"] = [
         annuity_factor(v) * v["investment"] * Nyears
         for _, v in modified_costs.iterrows()
     ]
+
+    modified_costs.at["OCGT", "fuel"] = modified_costs.at["gas", "fuel"]
+    modified_costs.at["CCGT", "fuel"] = modified_costs.at["gas", "fuel"]
+
+    modified_costs["marginal_cost"] = (
+        modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
+    )
+
+    # rename because technology data & pypsa earth costs.csv use different names
+
+    modified_costs.at["OCGT", "CO2 intensity"] = modified_costs.at[
+        "gas", "CO2 intensity"
+    ]
+    modified_costs.at["CCGT", "CO2 intensity"] = modified_costs.at[
+        "gas", "CO2 intensity"
+    ]
+
+    modified_costs.at["solar", "capital_cost"] = (
+        config["rooftop_share"] * modified_costs.at["solar-rooftop", "capital_cost"]
+        + (1 - config["rooftop_share"])
+        * modified_costs.at["solar-utility", "capital_cost"]
+    )
+    modified_costs.loc["csp"] = modified_costs.loc["csp-tower"]
+
+    if max_hours:
+
+        def costs_for_storage(store, link1=None, link2=None, max_hours=1.0):
+            capital_cost = max_hours * store["capital_cost"]
+            if link1 is not None:
+                capital_cost += link1["capital_cost"]
+            if link2 is not None:
+                capital_cost += link2["capital_cost"]
+            return pd.Series(
+                {
+                    "capital_cost": capital_cost,
+                    "marginal_cost": 0.0,
+                    "CO2 intensity": 0.0,
+                }
+            )
+
+        mod_costs_i = modified_costs.index
+        missing_store = []
+        for k, v in max_hours.items():
+            tech = STORE_LOOKUP[k]
+            store = tech.get("store") if tech.get("store") in mod_costs_i else None
+            bicharger = (
+                tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
+            )
+            charger = (
+                tech.get("charger") if tech.get("charger") in mod_costs_i else None
+            )
+            discharger = (
+                tech.get("discharger")
+                if tech.get("discharger") in mod_costs_i
+                else None
+            )
+            if bicharger:
+                modified_costs.loc[k] = costs_for_storage(
+                    modified_costs.loc[store],
+                    modified_costs.loc[bicharger],
+                    max_hours=v,
+                )
+            elif store:
+                modified_costs.loc[k] = costs_for_storage(
+                    modified_costs.loc[store],
+                    modified_costs.loc[charger] if charger else None,
+                    modified_costs.loc[discharger] if discharger else None,
+                    max_hours=v,
+                )
+            else:
+                missing_store += [k]
+
+        if missing_store:
+            logger.warning(
+                f"No cost data on:\n - "
+                + "\n - ".join(missing_store)
+                + "\nPlease enable retrieve_cost_data if this storage technology is used"
+            )
+
+    modified_costs = overwrite_costs(
+        modified_costs, config, ["marginal_cost", "capital_cost"]
+    )
 
     return modified_costs
 

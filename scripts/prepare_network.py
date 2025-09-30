@@ -69,10 +69,11 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
+    load_costs,
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -343,8 +344,8 @@ if __name__ == "__main__":
     costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
+        max_hours=snakemake.params.electricity["max_hours"],
+        Nyears=Nyears,
     )
     s_max_pu = snakemake.params.lines["s_max_pu"]
 

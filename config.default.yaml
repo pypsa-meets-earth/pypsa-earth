@@ -188,12 +188,19 @@ electricity:
     contingency: 0 # fixed capacity in MW
 
   max_hours:
-    battery: 6
+    battery: 6 # equivalent to li-ion
     H2: 168
+    lfp: 6
+    vanadium: 10
+    lair: 12
+    pair: 24
+    iron-air: 100
+    # For details on the maximum storage durations of different technologies,
+    # see: https://www.pnnl.gov/sites/default/files/media/file/ESGC%20Cost%20Performance%20Report%202022%20PNNL-33283.pdf
 
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
-    StorageUnit: [] # battery, H2
+    StorageUnit: [] # battery, H2, li-ion, vanadium, lfp, lair, pair, iron-air
     Store: [battery, H2]
     Link: [] # H2 pipeline
 
@@ -950,6 +957,24 @@ plotting:
     battery storage: "slategray"
     home battery: "#614700"
     home battery storage: "#614700"
+    li-ion: '#ace37f'
+    li-ion charger: '#ace37f'
+    li-ion discharger: '#ace37f'
+    lfp: '#ace37f'
+    lfp charger: '#ace37f'
+    lfp discharger: '#ace37f'
+    vanadium: '#9B111E'
+    vanadium charger: '#9B111E'
+    vanadium discharger: '#9B111E'
+    lair: '#87CEEB'
+    lair charger: '#87CEEB'
+    lair discharger: '#87CEEB'
+    pair: '#003366'
+    pair charger: '#003366'
+    pair discharger: '#003366'
+    iron-air: '#edba1c'
+    iron-air charger: '#edba1c'
+    iron-air discharger: '#edba1c'
     lines: "#70af1d"
     transmission lines: "#70af1d"
     AC: "#70af1d"
