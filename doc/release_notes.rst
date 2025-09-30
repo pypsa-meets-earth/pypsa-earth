@@ -41,6 +41,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Avoid using variable "nodes" in prepare_sector_network unless explicitly in the arguments `PR #1575 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1575>`__
 
+* Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
+
 PyPSA-Earth 0.7.0
 =================
 
