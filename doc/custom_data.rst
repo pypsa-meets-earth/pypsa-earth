@@ -39,7 +39,7 @@ The ``config.default.yaml`` file controls which custom data options are enabled.
 .. code:: yaml
 
     custom_data:
-      renewables: []        
+      renewables: []
       elec_demand: false
       heat_demand: false
       industry_demand: false
@@ -49,9 +49,9 @@ The ``config.default.yaml`` file controls which custom data options are enabled.
       h2_underground: false
       add_existing: false
       custom_sectors: false
-      gas_network: false      
-      export_ports: false     
-      airports: false         
+      gas_network: false
+      export_ports: false
+      airports: false
 
 Required File Locations and Formats
 ----------------------------------
