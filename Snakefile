@@ -293,11 +293,9 @@ rule build_bus_regions:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         base_network="networks/" + RDIR + "base.nc",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        gadm_shapes=config["cluster_options"][
+            "alternative_clustering_shapefile"
+        ].replace("{RDIR}", RDIR),
     output:
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
@@ -418,11 +416,9 @@ rule build_demand_profiles:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         load=load_data_paths,
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        gadm_shapes=config["cluster_options"][
+            "alternative_clustering_shapefile"
+        ].replace("{RDIR}", RDIR),
     output:
         "resources/" + RDIR + "demand_profiles.csv",
     log:
@@ -485,11 +481,9 @@ rule build_powerplants:
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        gadm_shapes=config["cluster_options"][
+            "alternative_clustering_shapefile"
+        ].replace("{RDIR}", RDIR),
     output:
         powerplants="resources/" + RDIR + "powerplants.csv",
         powerplants_osm2pm="resources/" + RDIR + "powerplants_osm2pm.csv",
@@ -573,11 +567,9 @@ rule add_electricity:
         base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
         powerplants="resources/" + RDIR + "powerplants.csv",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        gadm_shapes=config["cluster_options"][
+            "alternative_clustering_shapefile"
+        ].replace("{RDIR}", RDIR),
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
         # egs_potentials="resources/" + SECDIR + "egs_potential_p100_h0.csv",
@@ -657,11 +649,9 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == True:
             regions_offshore="resources/"
             + RDIR
             + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
-            #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-            #using this line instead of the following will test updated gadm shapes for MA.
-            #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-            #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-            gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+            gadm_shapes=config["cluster_options"][
+                "alternative_clustering_shapefile"
+            ].replace("{RDIR}", RDIR),
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
@@ -741,11 +731,9 @@ if config["augmented_line_connection"].get("add_to_snakefile", False) == False:
             regions_offshore="resources/"
             + RDIR
             + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
-            #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-            #using this line instead of the following will test updated gadm shapes for MA.
-            #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-            #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-            gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+            gadm_shapes=config["cluster_options"][
+                "alternative_clustering_shapefile"
+            ].replace("{RDIR}", RDIR),
             # busmap=ancient('resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv'),
             # custom_busmap=("data/custom_busmap_elec_s{simpl}_{clusters}.csv"
             #                if config["enable"].get("custom_busmap", False) else []),
@@ -799,9 +787,11 @@ rule prepare_network:
         s_max_pu=config["lines"]["s_max_pu"],
         electricity=config["electricity"],
         costs=config["costs"],
+        custom_network_capacities=config["cluster_options"]["custom_network_capacities"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs=COSTS,
+        fp_network_capacities="data/custom/network_capacities.csv",
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
@@ -1828,7 +1818,7 @@ rule build_population_layouts:
     params:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
-        nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+        gadm_shapes=config["cluster_options"]["alternative_clustering_shapefile"].replace("{RDIR}",RDIR),
         urban_percent="resources/" + RDIR + "urban_percent.csv",
         cutout="cutouts/"
         + CDIR

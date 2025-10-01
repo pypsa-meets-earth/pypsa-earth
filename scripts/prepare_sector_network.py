@@ -192,7 +192,7 @@ def H2_liquid_fossil_conversions(n, costs):
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
     logger.info("Adding hydrogen")
-
+    nodes=spatial.nodes
     n.add("Carrier", "H2")
 
     n.madd(
@@ -1863,13 +1863,13 @@ def add_land_transport(n, costs):
         ):
             n.madd(
                 "Load",
-                nodes,
+                spatial.nodes,
                 suffix=" land transport fuel cell",
-                bus=nodes + " H2",
+                bus=spatial.nodes + " H2",
                 carrier="land transport fuel cell",
                 p_set=fuel_cell_share
                 / options["transport_fuel_cell_efficiency"]
-                * transport[nodes],
+                * transport[spatial.nodes],
             )
 
     if ice_share > 0:
@@ -2756,6 +2756,19 @@ def add_residential(n, costs):
     n.loads_t.p_set.loc[:, buses] -= static_load
     n.loads_t.p_set.loc[:, buses] = n.loads_t.p_set.loc[:, buses].clip(lower=0)
 
+    # Assuming that all cooling load is supplied by air conditioners
+    links_aircon = n.links.query("carrier.str.contains('air condit')")
+    cop_aircon = n.links_t.efficiency[links_aircon.index]
+    cool_load = (
+        n.loads_t.p_set[links_aircon.bus1].rename(
+            dict(zip(links_aircon.bus1, links_aircon.bus0)), axis="columns"
+        )
+        / cop_aircon.rename(
+            dict(zip(links_aircon.index, links_aircon.bus0)), axis="columns"
+        )
+    ).rename(dict(zip(links_aircon.bus1, links_aircon.bus0)), axis="columns")
+    n.loads_t.p_set.loc[:, buses] -= cool_load
+
     profile_pu = normalize_by_country(n.loads_t.p_set[buses]).fillna(0)
     n.loads_t.p_set.loc[:, buses] = p_set_from_scaling(
         "electricity residential", profile_pu, energy_totals, temporal_resolution
@@ -3231,15 +3244,17 @@ def add_industry_heating(n, costs, market, scenario):
         ],
     ):
 
-        #for fuel in ["biogas", "gas"]:
-        for fuel in ["gas"]:
+        for fuel in ["biogas", "gas"]:
 
             if fuel == "biogas":
-                bus0 = [
-                    bus
-                    for bus in spatial.biomass.nodes
-                    if " ".join(bus.split(" ")[:2]) in locs
-                ]
+                if len(spatial.biomass.nodes) == 1:
+                    bus0 = spatial.biomass.nodes[0]
+                else:
+                    bus0 = [
+                        bus
+                        for bus in spatial.biomass.nodes
+                        if " ".join(bus.split(" ")[:2]) in locs
+                    ]
                 kwargs = dict()
             else:
                 bus0 = [
@@ -3727,12 +3742,12 @@ if __name__ == "__main__":
         # from helper import mock_snakemake #TODO remove func from here to helper script
         snakemake = mock_snakemake(
             "prepare_sector_network",
-            simpl="",
+        simpl="",
             clusters="10",
             ll="copt",
             opts="Co2L-24H",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="120h",
             discountrate=0.071,
             demand="AB",
         )
@@ -3852,6 +3867,8 @@ if __name__ == "__main__":
     cooling_demand = pd.read_csv(
         snakemake.input.cooling_demand, index_col=0, header=[0, 1], parse_dates=True
     ).fillna(0)
+    # Hard-coding cooling demand to 0, this needs to be properly implemented if cooling demand needs to be by-passed in the upstream
+    cooling_demand.loc[:,:] = 0
 
     # Heatpump coefficient of performance when in cooling mode
     hp_cooling_cop = pd.read_csv(

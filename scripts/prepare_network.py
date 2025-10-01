@@ -65,8 +65,17 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import BASE_DIR, configure_logging, create_logger
-from add_electricity import load_costs, update_transmission_costs
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+)
+from add_electricity import (
+    calculate_annuity,
+    load_costs,
+    update_transmission_costs,
+)
 
 idx = pd.IndexSlice
 
@@ -184,7 +193,94 @@ def set_line_s_max_pu(n, s_max_pu):
     logger.info(f"N-1 security margin of lines set to {s_max_pu}")
 
 
-def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
+def set_flows_to_data(n, fp_custom_flows, config, costs, drop_others):
+    """
+    Set network layout to match the data in df.
+    drop_others: if True, drop lines not in df by index (name column)
+
+    df must have columns:
+    - name: name of the line and index of the dataframe
+    - bus0
+    - bus1
+    - carrier: (AC for AC lines, DC for DC lines)
+    - s_nom: (capacity in MW)
+    - length: (in km)
+    - investment_cost: cost per unit length
+    - underwater_fraction: only for DC lines, fraction of line length that is underwater
+    """
+    df = read_csv_nafix(fp_custom_flows, index_col="name", dtype={"name": str})
+    if df.empty:
+        return n
+    # drop lines contained in the dataframe
+    i_ac_drop = n.lines.index.copy()
+    i_dc_drop = n.links.query("carrier in ['B2B', 'DC']").index.copy()
+    if not drop_others:
+        i_ac_drop = i_ac_drop.intersection(df.query("carrier == 'AC'").index)
+        i_dc_drop = i_dc_drop.intersection(df.query("carrier == 'DC'").index)
+    n.mremove("Line", i_ac_drop)
+    n.mremove("Link", i_dc_drop)
+
+    annuity_ac = calculate_annuity(
+        costs.at["HVAC overhead", "lifetime"],
+        costs.at["HVAC overhead", "discount rate"],
+    )
+    base_voltage = config["electricity"]["base_voltage"]
+    linetype_ac = config["lines"]["ac_types"][base_voltage]
+
+    annuity_dc = calculate_annuity(
+        costs.at["HVDC overhead", "lifetime"],
+        costs.at["HVDC overhead", "discount rate"],
+    )
+
+    df_ac = df.query("carrier == 'AC'")
+    df_dc = df.query("carrier == 'DC'")
+
+    num_parallel = (
+        df_ac["s_nom"]
+        / np.sqrt(3)
+        / n.line_types.loc[linetype_ac, "i_nom"]
+        / base_voltage
+    )
+
+    n.madd(
+        "Line",
+        df_ac.index,
+        bus0=df_ac["bus0"],
+        bus1=df_ac["bus1"],
+        length=df_ac["length"],
+        s_nom=df_ac["s_nom"],
+        s_max_pu=config["lines"]["s_max_pu"],
+        capital_cost=df_ac["investment_cost"] * annuity_ac,
+        carrier="AC",
+        type=linetype_ac,
+        num_parallel=num_parallel,
+    )
+
+    dc_inv_cost = costs.at["HVDC inverter pair", "capital_cost"]
+
+    n.madd(
+        "Link",
+        df_dc.index,
+        bus0=df_dc["bus0"],
+        bus1=df_dc["bus1"],
+        p_nom=df_dc["s_nom"],
+        capital_cost=df_dc["investment_cost"] * annuity_dc + dc_inv_cost,
+        carrier="DC",
+        efficiency=1,
+        type="DC",
+        p_min_pu=-1,
+        p_max_pu=1,
+        underwater_fraction=df_dc["underwater_fraction"].fillna(0.0),
+    )
+    return n
+
+
+def set_transmission_limit(
+    n, ll_type, factor, costs, overrides_network, fp_custom_flows, config, Nyears=1
+):
+    if overrides_network:
+        set_flows_to_data(n, fp_custom_flows, config, costs, drop_others=True)
+
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
 
     _lines_s_nom = (
@@ -201,7 +297,8 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
         + n.links.loc[links_dc_b, "p_nom"] @ n.links.loc[links_dc_b, col]
     )
 
-    update_transmission_costs(n, costs)
+    if not overrides_network:
+        update_transmission_costs(n, costs)
 
     if factor == "opt" or float(factor) > 1.0:
         n.lines["s_nom_min"] = lines_s_nom
@@ -340,9 +437,6 @@ if __name__ == "__main__":
         snakemake.params.electricity,
         Nyears,
     )
-    s_max_pu = snakemake.params.lines["s_max_pu"]
-
-    set_line_s_max_pu(n, s_max_pu)
 
     for o in opts:
         m = re.match(r"^\d+h$", o, re.IGNORECASE)
@@ -425,7 +519,21 @@ if __name__ == "__main__":
                 break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
-    set_transmission_limit(n, ll_type, factor, costs, Nyears)
+    fp_custom_capacities = snakemake.input.fp_network_capacities
+    custom_network_capacities = snakemake.params["custom_network_capacities"]
+    set_transmission_limit(
+        n,
+        ll_type,
+        factor,
+        costs,
+        custom_network_capacities,
+        fp_custom_capacities,
+        snakemake.config,
+        Nyears,
+    )
+
+    s_max_pu = snakemake.params.lines["s_max_pu"]
+    set_line_s_max_pu(n, s_max_pu)
 
     set_line_nom_max(
         n,

@@ -33,7 +33,7 @@ if __name__ == "__main__":
     grid_cells = cutout.grid.geometry
 
     # nuts3 has columns country, gdp, pop, geometry
-    nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index("GADM_ID")
+    nuts3 = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")
 
     # Set value of population to same dimension as in PyPSA-Eur-Sec, where the value is given in 1e3
     nuts3["pop"] = nuts3["pop"] / 1000
