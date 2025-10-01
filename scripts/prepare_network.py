@@ -276,7 +276,7 @@ def set_flows_to_data(n, fp_custom_flows, config, costs, drop_others):
 
 
 def set_transmission_limit(
-    n, ll_type, factor, costs, overrides_network, fp_custom_flows, config, Nyears=1
+    n, ll_type, factor, costs, overrides_network, fp_custom_flows, config, lines, links
 ):
     if overrides_network:
         set_flows_to_data(n, fp_custom_flows, config, costs, drop_others=True)
@@ -307,7 +307,7 @@ def set_transmission_limit(
         n.links.loc[links_dc_b, "p_nom_min"] = n.links.loc[links_dc_b, "p_nom"]
         n.links.loc[links_dc_b, "p_nom_extendable"] = True
 
-    if factor != "opt":
+    if (factor != "opt") and (ll_type != "l"):
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -318,6 +318,14 @@ def set_transmission_limit(
             constant=rhs,
             carrier_attribute="AC, DC",
         )
+    elif ll_type == "l":
+        n.lines["s_nom_max"] = n.lines["s_nom"] * float(factor)
+        n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
+            factor
+        )
+
+    set_line_nom_max(n, lines, links)
+
     return n
 
 
@@ -407,9 +415,11 @@ def enforce_autarky(n, only_crossborder=False):
     n.mremove("Link", links_rm)
 
 
-def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-    n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
-    n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
+def set_line_nom_max(n, lines, links):
+    s_max, s_min = lines.get("s_nom_max"), lines.get("s_nom_max_min")
+    p_max, p_min = links.get("p_nom_max"), links.get("p_nom_max_min")
+    n.lines.s_nom_max = n.lines.s_nom_max.clip(lower=s_min, upper=s_max)
+    n.links.p_nom_max = n.links.p_nom_max.clip(lower=p_min, upper=p_max)
 
 
 if __name__ == "__main__":
@@ -419,10 +429,10 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
-            configfile="test/config.sector.yaml",
+            clusters="2",
+            ll="copt",
+            opts="1H",
+            # configfile="test/config.sector.yaml",
         )
 
     configure_logging(snakemake)
@@ -521,6 +531,8 @@ if __name__ == "__main__":
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
     fp_custom_capacities = snakemake.input.fp_network_capacities
     custom_network_capacities = snakemake.params["custom_network_capacities"]
+    lines = snakemake.params.lines
+    links = snakemake.params.links
     set_transmission_limit(
         n,
         ll_type,
@@ -529,17 +541,12 @@ if __name__ == "__main__":
         custom_network_capacities,
         fp_custom_capacities,
         snakemake.config,
-        Nyears,
+        lines, 
+        links,
     )
 
     s_max_pu = snakemake.params.lines["s_max_pu"]
     set_line_s_max_pu(n, s_max_pu)
-
-    set_line_nom_max(
-        n,
-        s_nom_max_set=snakemake.params.lines.get("s_nom_max,", np.inf),
-        p_nom_max_set=snakemake.params.links.get("p_nom_max,", np.inf),
-    )
 
     if "ATK" in opts:
         enforce_autarky(n)
