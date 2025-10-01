@@ -97,6 +97,27 @@ def myround(x):
         return int(x + 10 - x % 10)
 
 
+def cell_areas(lat, lon, x_stepsize, y_stepsize):
+    """
+    Approximate grid cell areas for lon/lat grid in sqkm.
+    
+    lat, lon: arrays of cell center coordinates (in degrees)
+    x_stepsize, y_stepsize: grid resolution (in degrees)
+    """
+    R = 6371.0  # Earth radius in km
+
+    # convert to radians
+    lat_rad = np.radians(lat)
+    dlon = np.radians(x_stepsize)
+    dlat = np.radians(y_stepsize)
+
+    # area formula on sphere: A = R^2 * dlon * (sin(lat+Δ/2) - sin(lat-Δ/2))
+    area = (R**2) * dlon * (
+        np.sin(lat_rad + dlat/2) - np.sin(lat_rad - dlat/2)
+    )
+    return area  # in sqkm
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -108,6 +129,7 @@ if __name__ == "__main__":
         )
 
     configure_logging(snakemake)
+    mode = snakemake.wildcards.mode
 
     regions = gpd.read_file(snakemake.input.shapes).set_index("name")
 
@@ -129,10 +151,17 @@ if __name__ == "__main__":
 
         assert x_stepsize == y_stepsize
 
-    size = 12_756 * np.pi / (360 / x_stepsize)
-    area = size**2
+    lats = np.arange(25, 50, y_stepsize) # US extent
+    lons = np.arange(-125, -65, x_stepsize)
 
-    capacity_per_datapoint = area * 6 * 100 # assuming a 6MW/ha footprint; 100 converts ha to km2
+    area = np.mean(cell_areas(lats, lons, x_stepsize, y_stepsize))
+
+    if mode == "egs":
+        capacity_per_datapoint = area * 0.45 # assuming a 0.45MW/km2 footprint
+    elif mode == "hs":
+        capacity_per_datapoint = area * 0.024 # assuming a 0.024MW/km2 footprint
+    else:
+        raise ValueError(f"Invalid mode: {mode}")
 
     gdf = gdf.rename(
         columns={
