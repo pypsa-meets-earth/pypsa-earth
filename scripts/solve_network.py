@@ -96,6 +96,45 @@ logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
 
 
+def get_load_shedding_capacity(n, safety_margin=1.2):
+    """
+    Calculate required load shedding p_nom per bus based on the
+    maximum aggregated load observed in any snapshot.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network
+    safety_margin : float, default 1.2
+        Safety factor to apply to the maximum load
+
+    Returns
+    -------
+    pd.Series
+        Required p_nom per bus for load shedding.
+    """
+
+    load_shedding_p_nom = pd.Series(0.0, index=n.buses.index)
+
+    for bus_name, bus_loads in n.loads.groupby("bus"):
+
+        if not n.loads_t.p_set.empty:
+            bus_load_timeseries = n.loads_t.p_set[
+                bus_loads.index.intersection(n.loads_t.p_set.columns)
+            ]
+            # Sum loads across all components at this bus for each snapshot
+            total_load_per_snapshot = bus_load_timeseries.sum(axis=1)
+            max_total_load = total_load_per_snapshot.max()
+        else:
+            max_total_load = bus_loads["p_set"].sum()
+
+        required_p_nom = max_total_load * safety_margin
+
+        load_shedding_p_nom[bus_name] = required_p_nom
+
+    return load_shedding_p_nom
+
+
 def prepare_network(n, solve_opts, config):
     if "clip_p_max_pu" in solve_opts:
         for df in (
@@ -110,16 +149,17 @@ def prepare_network(n, solve_opts, config):
         n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
 
     if solve_opts.get("load_shedding"):
-        n.add("Carrier", "Load")
+        required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
+        n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
         n.madd(
             "Generator",
             n.buses.index,
-            " load",
+            " load shedding",
             bus=n.buses.index,
-            carrier="load",
+            carrier="load shedding",
             sign=1,
             marginal_cost=solve_opts.get("load_shedding") * 1000,  # convert to Eur/MWh
-            p_nom=1e12,
+            p_nom=required_p_nom.reindex(n.buses.index, fill_value=0.5e6),
         )
 
     if solve_opts.get("noisy_costs"):
