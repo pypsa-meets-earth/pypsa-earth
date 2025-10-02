@@ -25,6 +25,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
 
+* Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
 
 **Minor Changes and bug-fixing**
 

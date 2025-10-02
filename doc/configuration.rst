@@ -117,6 +117,23 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
+   .. _natura_cf:
+
+``natura``
+===============
+
+If enabled, ``build_natura_raster`` creates an updated raster of the wold protected areas instead of using the provided default raster in ``data/natura/natura.tiff``.
+The options below select which regions to include in the raster and configure the rasterization process itself.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: natura:
+   :end-at: buffer_size:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/natura.csv
 
 .. _augmented_line_connection_cf:
 
