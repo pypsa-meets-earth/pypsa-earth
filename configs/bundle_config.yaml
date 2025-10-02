@@ -177,7 +177,7 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/313836/files/bundle_data_earth.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1
       gdrive: https://drive.google.com/file/d/1P4uMY464lgcp--8fAEYIJbKeNmHdg1Re/view?usp=drive_link
     output:
     - data/eez/eez_v11.gpkg
