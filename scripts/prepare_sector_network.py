@@ -3298,8 +3298,8 @@ def add_industry_heating(n, costs, market, scenario):
         bus1=low_temp_buses,
         carrier="industrial heat pump low temperature",
         p_nom_extendable=True,
-        capital_cost=costs.at["industrial heat pump medium temperature", "fixed"],
-        lifetime=costs.at["industrial heat pump medium temperature", "lifetime"] * 1000, # $/kW -> $/MW
+        capital_cost=costs.at["industrial heat pump medium temperature", "fixed"]* 1000, # $/kW -> $/MW
+        lifetime=costs.at["industrial heat pump medium temperature", "lifetime"],
         efficiency=costs.at["industrial heat pump medium temperature", "efficiency"],
         marginal_cost=costs.at["industrial heat pump medium temperature", "VOM"],
     )
