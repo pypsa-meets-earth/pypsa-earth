@@ -134,11 +134,11 @@ clean_osm_data_options: # osm = OpenStreetMap
   tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
-  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
-  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_substations: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
-  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
 build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMap

@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
 
+* Add option to ignore loading network data in clean_osm_data `PR #1580 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1580>`__
+
 
 **Minor Changes and bug-fixing**
 
