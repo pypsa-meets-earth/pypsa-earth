@@ -216,7 +216,13 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
         n.links.loc[links_dc_b, "p_nom_min"] = n.links.loc[links_dc_b, "p_nom"]
         n.links.loc[links_dc_b, "p_nom_extendable"] = True
 
-    if (factor != "opt") and (ll_type != "l"):
+    
+    if ll_type == "l":
+        n.lines["s_nom_max"] = n.lines["s_nom"] * float(factor)
+        n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
+            factor
+        )
+    elif factor != "opt":  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -226,11 +232,6 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
             sense="<=",
             constant=rhs,
             carrier_attribute="AC, DC",
-        )
-    elif ll_type == "l":
-        n.lines["s_nom_max"] = n.lines["s_nom"] * float(factor)
-        n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
-            factor
         )
 
     set_line_nom_max(n, lines, links)
@@ -338,9 +339,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="2",
-            ll="copt",
-            opts="1H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             # configfile="test/config.sector.yaml",
         )
 

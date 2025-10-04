@@ -83,7 +83,7 @@ The wildcard, in general, consists of two parts:
            costs no more than 25 % more than the current system.
 
        (d) ``l1.25`` will allow to build a transmission network where
-           each line is no more than 25 % its actual capacity.
+           each line is expanded to no more than 25% of its capacity.
 
 .. _opts:
 
