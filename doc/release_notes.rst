@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
 
+* Enable config options to customize hydrogen and renewable carriers for temporal matching `PR #1489 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489>`__
+
 
 **Minor Changes and bug-fixing**
 
