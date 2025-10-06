@@ -7,6 +7,9 @@ version: 0.7.0
 
 countries: ["BW"]
 
+run:
+  name: "landlock"
+
 subregion:
   enable:
     simplify_network: true # activate subregion in simplify_network
