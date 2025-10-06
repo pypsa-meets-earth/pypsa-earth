@@ -226,11 +226,6 @@ if __name__ == "__main__":
 
         ss["agg_available_capacity[MWe]"] = ss["p_nom_max[MWe]"].cumsum()
 
-        # TODO: Anchor this in the config.
-        ss = ss.loc[
-            ss["agg_available_capacity[MWe]"] < 0.1 * ss["p_nom_max[MWe]"].sum()
-        ]
-
         if ss.empty:
             continue
 
