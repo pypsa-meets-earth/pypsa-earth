@@ -25,7 +25,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
 
-* Add functionality to customise transmission expansion line-wise `PR #1592 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592>`__
+* Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds `PR #1592 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592>`__
 
 
 **Minor Changes and bug-fixing**
