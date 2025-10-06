@@ -1005,7 +1005,12 @@ def get_yearly_currency_exchange_rate(
     if _currency_conversion_cache is None:
         _currency_conversion_cache = {}
 
-    key = (initial_currency, output_currency, reference_year, future_exchange_rate_strategy)
+    key = (
+        initial_currency,
+        output_currency,
+        reference_year,
+        future_exchange_rate_strategy,
+    )
     if key in _currency_conversion_cache:
         return _currency_conversion_cache[key]
 
@@ -1065,7 +1070,9 @@ def build_currency_conversion_cache(
     always using the same reference_year.
     """
     currency_list = currency_converter.currencies
-    unique_currencies = {x["unit"][:3] for _, x in df.iterrows() if x["unit"][:3] in currency_list}
+    unique_currencies = {
+        x["unit"][:3] for _, x in df.iterrows() if x["unit"][:3] in currency_list
+    }
 
     _currency_conversion_cache = {}
     for initial_currency in unique_currencies:
@@ -1079,15 +1086,21 @@ def build_currency_conversion_cache(
                 future_exchange_rate_strategy=future_exchange_rate_strategy,
                 custom_future_exchange_rate=custom_future_exchange_rate,
             )
-            _currency_conversion_cache[(initial_currency, output_currency, reference_year)] = rate
+            _currency_conversion_cache[
+                (initial_currency, output_currency, reference_year)
+            ] = rate
         except Exception as e:
-            logger.warning(f"Failed to get rate for {initial_currency}->{output_currency}: {e}")
+            logger.warning(
+                f"Failed to get rate for {initial_currency}->{output_currency}: {e}"
+            )
             continue
 
     return _currency_conversion_cache
 
 
-def apply_currency_conversion(cost_dataframe, output_currency, cache, reference_year: int):
+def apply_currency_conversion(
+    cost_dataframe, output_currency, cache, reference_year: int
+):
     """
     Applies exchange rates from the cache to convert all cost values and units.
 
