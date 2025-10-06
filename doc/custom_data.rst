@@ -73,7 +73,7 @@ Required File Locations and Formats
 
 .. note::
 
-   Custom datasets should follow the filename conventions specified by PyPSA-Earth to ensure proper integration.
+   Custom datasets should follow the filename conventions specified by PyPSA-Earth to ensure proper integration. See the `demand section <https://pypsa-earth.readthedocs.io/en/latest/customization_basic1.html#use-custom-demand-data>`_ for details.
 
 Reference Data Sources
 ---------------------
@@ -107,12 +107,13 @@ Additional Notes
 
 - If using **GADM clustering**, ensure at least one bus per administrative region. Missing buses can be added using a custom CSV created with centroids matching the substation GeoJSON format.
 - Private datasets do not need to be shared publicly.
-- Users are encouraged to contribute improvements back to the repository following contribution guidelines.
+- Users are encouraged to contribute improvements back to the repository following contribution guidelines. See the `how to contribute guide <https://pypsa-earth.readthedocs.io/en/latest/how_to_contribute.html>`_ for details.
+
 
 Usage Instructions
 ------------------
 
 1. Enable the desired options in ``config.default.yaml``.
 2. Place required custom CSV/NetCDF files in the specified directories.
-3. Integrate demand/renewable time series following documentation instructions.
+3. Integrate demand/renewable time series following the instructions.
 4. Run PyPSA-Meets-Earth; the model will automatically use the custom datasets.
