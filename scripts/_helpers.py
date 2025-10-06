@@ -1143,6 +1143,7 @@ def prepare_costs(
     default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "latest",
     custom_future_exchange_rate: float = None,
+    reference_year: int | None = None,
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
