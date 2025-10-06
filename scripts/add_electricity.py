@@ -167,7 +167,10 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
         custom_future_exchange_rate=config.get("custom_future_rate", None),
     )
     costs = apply_currency_conversion(
-        costs, config["output_currency"], _currency_conversion_cache, config["reference_year"],
+        costs,
+        config["output_currency"],
+        _currency_conversion_cache,
+        config["reference_year"],
     )
 
     # apply filter on financial_case and scenario, if they are contained in the cost dataframe
