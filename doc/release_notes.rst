@@ -44,6 +44,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
 
+* Create a section in the documentation to include information about custom data in the model `PR #1571 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1571>`__
+
 PyPSA-Earth 0.7.0
 =================
 
