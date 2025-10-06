@@ -1231,9 +1231,7 @@ def add_aviation(n, cost, energy_totals, airports_fn):
 
     all_aviation = ["total international aviation", "total domestic aviation"]
 
-    aviation_demand = (
-        energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
-    )
+    aviation_demand = energy_totals.loc[countries, all_aviation].sum(axis=1)
 
     airports = pd.read_csv(airports_fn, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
@@ -1252,8 +1250,8 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-    airports["p_set"] = airports["fraction"].apply(
-        lambda frac: frac * aviation_demand * 1e6 / 8760
+    airports["p_set"] = (
+        airports["fraction"] * airports["country"].map(aviation_demand) * 1e6 / 8760
     )
 
     airports = pd.concat([airports, ind])
@@ -1391,9 +1389,7 @@ def add_shipping(n, costs, energy_totals, ports_fn):
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
-    navigation_demand = (
-        energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
-    )
+    navigation_demand = energy_totals.loc[countries, all_navigation].sum(axis=1)
 
     efficiency = (
         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
@@ -1415,10 +1411,10 @@ def add_shipping(n, costs, energy_totals, ports_fn):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
 
-    ports["p_set"] = ports["fraction"].apply(
-        lambda frac: shipping_hydrogen_share
-        * frac
-        * navigation_demand
+    ports["p_set"] = (
+        shipping_hydrogen_share
+        * ports["fraction"]
+        * ports["country"].map(navigation_demand)
         * efficiency
         * 1e6
         / 8760
@@ -1472,8 +1468,12 @@ def add_shipping(n, costs, energy_totals, ports_fn):
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
 
-        ports["p_set"] = ports["fraction"].apply(
-            lambda frac: shipping_oil_share * frac * navigation_demand * 1e6 / 8760
+        ports["p_set"] = (
+            shipping_oil_share
+            * ports["fraction"]
+            * ports["country"].map(navigation_demand)
+            * 1e6
+            / 8760
         )
 
         n.madd(
@@ -2921,12 +2921,13 @@ def add_electricity_distribution_grid(n, costs):
 
 def add_co2_budget(n, co2_budget, investment_year, elec_opts):
     # Check if CO2Limit already exists
-    if "CO2Limit" in n.global_constraints.index and co2_budget["override_co2opt"]:
-        logger.warning("CO2Limit already exists, value will be overwritten.")
-        n.global_constraints.drop(index="CO2Limit", inplace=True)
-    else:
-        logger.info("CO2Limit already exists, value will not be overwritten.")
-        return
+    if "CO2Limit" in n.global_constraints.index:
+        if co2_budget["override_co2opt"]:
+            logger.warning("CO2Limit already exists, value will be overwritten.")
+            n.global_constraints.drop(index="CO2Limit", inplace=True)
+        else:
+            logger.info("CO2Limit already exists, value will not be overwritten.")
+            return
 
     # Get base year emission factor
     factor = (
