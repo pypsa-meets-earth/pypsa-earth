@@ -29,6 +29,7 @@ enable:
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   progress_bar: true # show progress bar during downloading routines and other long-running tasks
+  custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
 
 
 
@@ -133,11 +134,11 @@ clean_osm_data_options: # osm = OpenStreetMap
   tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
-  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
-  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_substations: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
-  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
 build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMap
@@ -227,12 +228,14 @@ lines:
     500.: "HVDC XLPE 1000"
   s_max_pu: 0.7
   s_nom_max: .inf
+  s_nom_max_min: -.inf
   length_factor: 1.25
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 links:
   p_max_pu: 1.0
   p_nom_max: .inf
+  p_nom_max_min: -.inf
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 transformers:
@@ -484,7 +487,7 @@ monte_carlo:
 
 policy_config:
   hydrogen:
-    temporal_matching: "no_res_matching" # either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
+    temporal_matching: "no_temporal_matching" #either "hour", "month", "year", "no_temporal_matching"
     spatial_matching: false
     additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
     allowed_excess: 1.0

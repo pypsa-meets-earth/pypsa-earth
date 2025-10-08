@@ -27,7 +27,7 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 6.0.1
+  rev: 6.1.0
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
@@ -52,13 +52,13 @@ repos:
 #     types: [python]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.4.1
+  rev: v0.4.3
   hooks:
   - id: blackdoc
 
 # Formatting with "black" coding style
-- repo: https://github.com/psf/black
-  rev: 25.1.0
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: 25.9.0
   hooks:
   # Format Python files
   - id: black
@@ -98,6 +98,6 @@ repos:
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v5.1.1
+  rev: v6.0.0
   hooks:
   - id: reuse
