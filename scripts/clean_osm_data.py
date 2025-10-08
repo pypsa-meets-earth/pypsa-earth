@@ -891,6 +891,10 @@ def load_network_data(network_asset, data_options):
         loaded_df1 = gpd.read_file(input_files[network_asset])
         loaded_df2 = gpd.read_file(custom_path)
         loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
+    
+    elif cleaning_data_options == "ignore":
+        loaded_df1 = gpd.read_file(input_files[network_asset])
+        loaded_df = gpd.GeoDataFrame(columns=loaded_df1.columns)
 
     else:
         if cleaning_data_options != "OSM_only":

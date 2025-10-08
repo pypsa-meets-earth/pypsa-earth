@@ -165,6 +165,7 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
 
     n.mremove("Transformer", n.transformers.index)
     n.mremove("Bus", n.buses.index.difference(trafo_map))
+    n.export_to_netcdf("test.nc")
 
     return n, trafo_map
 
@@ -839,8 +840,8 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     if len(gdf_islands) == 0:
         return n, n.buses.index.to_series()
 
-    gdf_backbone_buses = n_buses_gdf.query("is_backbone_sbntw").query("carrier=='AC'")
-
+    #gdf_backbone_buses = n_buses_gdf.query("is_backbone_sbntw").query("carrier=='AC'")
+    gdf_backbone_buses = n_buses_gdf.loc[n_buses_gdf.index.difference(gdf_islands.index)]
     # find the closest buses of the backbone networks for each isolated network and each country
     islands_bcountry = {k: d for k, d in gdf_islands.groupby("country")}
     gdf_map = (
@@ -878,7 +879,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         busmap,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
-        aggregate_one_ports=["Load", "StorageUnit"],
+        #aggregate_one_ports=["Load", "StorageUnit"],
         line_length_factor=1.0,
         line_strategies=line_strategies,
         bus_strategies=bus_strategies,
