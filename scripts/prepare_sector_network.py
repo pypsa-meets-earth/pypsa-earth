@@ -3146,6 +3146,7 @@ if __name__ == "__main__":
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
+        snakemake.params.costs["reference_year"],
         snakemake.params.costs["default_exchange_rate"],
         snakemake.params.costs["future_exchange_rate_strategy"],
         snakemake.params.costs["custom_future_exchange_rate"],

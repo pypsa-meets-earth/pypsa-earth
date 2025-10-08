@@ -6,8 +6,9 @@ cost_scenario,,"""{""moderate"",""advanced"",""conservative""}""","Only used if 
 financial_case,,"""{""market"",""r&d""}""","Only used if `country_specific_data: ""US""` to select the desired NREL financial case",
 output_currency,,"""{""EUR"",""USD"",""JPY"",""CAD"",""CNY""}""","Reference currency for all costs (EUR is the base unit for the conversion, and the full list of supported currencies is available at [currencyconverter](https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv) ",,,,,,,,,,,,,,,,,,,,,
 default_exchange_rate,,float,"default ""US Dollar-Euro exchange rate. Source: `ECB <ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html>`_.""",,,
-future_exchange_rate_strategy,,"""{""latest"", ""custom""}""","""latest"" uses the yearly average of the latest available exchange rates for the selected `output_currency`",,,,,,
-custom_future_exchange_rate,,"""{None, float}""","customized exchange rate value if `future_exchange_rate_strategy: ""custom""`",,
+reference_year,,int,"Year to which all costs are normalized; ensures that all cost values are expressed in output_currency at this reference year (e.g., 2020)."
+future_exchange_rate_strategy,,"""{""reference"",""latest"",""custom""}""","Strategy for currency conversion: 'reference' uses exchange rate from reference_year for all costs; 'latest' uses the yearly average of the latest available exchange rates; 'custom' uses the value in custom_future_exchange_rate."
+custom_future_exchange_rate,,"""{None, float}""","Customized exchange rate if `future_exchange_rate_strategy: ""custom""` is selected"
 rooftop_share,,float,"Share of rooftop PV when calculating capital cost of solar (joint rooftop and utility-scale PV)."
 fill_values,,float,"Default values if not specified for a technology in ``resources/costs.csv``."
 marginal_cost,EUR/MWh,"Keys should be in the 'technology' column of ``resources/costs.csv``. Values can be any float.","For the given technologies, assumptions about their marginal operating costs are set to the corresponding value. Optional; overwrites cost assumptions from ``resources/costs.csv``."
