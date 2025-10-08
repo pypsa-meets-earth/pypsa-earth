@@ -879,7 +879,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         busmap,
         aggregate_generators_weighted=True,
         aggregate_generators_carriers=None,
-        #aggregate_one_ports=["Load", "StorageUnit"],
+        # aggregate_one_ports=["Load", "StorageUnit"],  # TODO: restore when PyPSA version is updated
         line_length_factor=1.0,
         line_strategies=line_strategies,
         bus_strategies=bus_strategies,

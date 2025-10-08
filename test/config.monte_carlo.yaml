@@ -5,5 +5,8 @@
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
 version: 0.7.0
 
+run:
+  name: "monte-carlo"
+
 monte_carlo:
   add_to_snakefile: true

@@ -284,8 +284,6 @@ def get_transformers(buses, lines):
                         f"transf_{g_name}_{id}",  # "line_id"
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
-                        g_value.voltage.iloc[id],  # "voltage_bus0"
-                        g_value.voltage.iloc[id + 1],  # "voltage_bus0"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
                     ]
@@ -296,8 +294,6 @@ def get_transformers(buses, lines):
         "line_id",
         "bus0",
         "bus1",
-        "voltage_bus0",
-        "voltage_bus1",
         "country",
         "geometry",
     ]
@@ -306,8 +302,6 @@ def get_transformers(buses, lines):
     if not df_transformers.empty:
         init_index = 0 if lines.empty else lines.index[-1] + 1
         df_transformers.set_index(init_index + df_transformers.index, inplace=True)
-    # update line endings
-    df_transformers = line_endings_to_bus_conversion(df_transformers)
 
     return df_transformers
 
@@ -732,7 +726,7 @@ def built_network(
     countries_config,
     geo_crs,
     distance_crs,
-    lines_cols_standard,
+    lines_cols_standard=LINES_COLUMNS,
     force_ac=False,
 ):
     logger.info("Stage 1/5: Read input data")
@@ -834,6 +828,5 @@ if __name__ == "__main__":
         countries,
         geo_crs,
         distance_crs,
-        lines_cols_standard=LINES_COLUMNS,
         force_ac=force_ac,
     )

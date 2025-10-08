@@ -896,6 +896,10 @@ def load_network_data(network_asset, data_options):
         loaded_df1 = gpd.read_file(input_files[network_asset])
         loaded_df = gpd.GeoDataFrame(columns=loaded_df1.columns)
 
+    elif cleaning_data_options == "none":
+        loaded_df1 = gpd.read_file(input_files[network_asset])
+        loaded_df = gpd.GeoDataFrame(columns=loaded_df1.columns, crs=loaded_df1.crs)
+
     else:
         if cleaning_data_options != "OSM_only":
             logger.warning(

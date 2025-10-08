@@ -1,4 +1,5 @@
 ,Unit,Values,Description
 p_max_pu,--,"Value in [0.,1.]",Correction factor for link capacities ``p_nom``.
 p_nom_max,MW,float,Global upper limit for the maximum capacity of each extendable DC link.
+p_nom_max_min,MW,float,Global lower limit for the maximum capacity of each extendable DC link.
 under_construction,--,"One of {'zero', 'remove', 'keep'}", "Specifies how to handle lines which are currently under construction. 'zero': set capacity to zero; 'remove': remove completely, 'keep': keep with full capacity."
