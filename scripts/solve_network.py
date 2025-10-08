@@ -1029,40 +1029,6 @@ def extra_functionality(n, snapshots):
         logger.info("setting CHP constraints")
         add_chp_constraints(n)
 
-<<<<<<< HEAD
-    if snakemake.config["export"]["enable"]:
-        if (
-            snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-            == "h2_yearly_matching"
-        ):
-            if snakemake.config["policy_config"]["hydrogen"]["additionality"] == True:
-                logger.info(
-                    "additionality is currently not supported for yearly constraints, proceeding without additionality"
-                )
-            logger.info("setting h2 export to yearly greenness constraint")
-            H2_export_yearly_constraint(n)
-
-        elif (
-            snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-            == "h2_monthly_matching"
-        ):
-            if not snakemake.config["policy_config"]["hydrogen"]["is_reference"]:
-                logger.info("setting h2 export to monthly greenness constraint")
-                monthly_constraints(n, n_ref)
-            else:
-                logger.info("preparing reference case for additionality constraint")
-
-        elif (
-            snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-            == "no_res_matching"
-        ):
-            logger.info("no h2 export constraint set")
-
-        else:
-            raise ValueError(
-                'H2 export constraint is invalid, check config["policy_config"]'
-            )
-=======
     additionality = snakemake.params.policy_config["hydrogen"]["additionality"]
     ref_for_additionality = snakemake.params.policy_config["hydrogen"]["is_reference"]
     temportal_matching_period = snakemake.params.policy_config["hydrogen"][
@@ -1094,7 +1060,6 @@ def extra_functionality(n, snapshots):
         raise ValueError(
             'H2 export constraint is invalid, check config["policy_config"]'
         )
->>>>>>> main
 
     if snakemake.config["sector"]["hydrogen"]["network"]:
         if snakemake.config["sector"]["hydrogen"]["network_limit"]:
