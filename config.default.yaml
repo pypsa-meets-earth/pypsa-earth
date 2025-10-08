@@ -253,6 +253,7 @@ transmission_projects:
   - under_consideration
   new_link_capacity: keep #keep or zero
   set_by_build_year: true
+  delay_construction: 0
 
 atlite:
   nprocesses: 4

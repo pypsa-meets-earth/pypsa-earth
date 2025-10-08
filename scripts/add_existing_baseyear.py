@@ -578,23 +578,34 @@ def add_heating_capacities_installed_before_baseyear(
             )
 
 
-def filter_transmission_project_build_year(n, year):
+def filter_transmission_project_build_year(n, params, year):
     """
     Remove transmission with build year later than the planning horizon
     """
-    links = n.links[
-        (~n.links.project_status.isin(["", np.nan])) & (n.links.build_year > int(year))
-    ][["bus0", "bus1", "build_year", "project_status", "p_nom"]]
-    lines = n.lines[(n.lines.build_year > int(year))][
-        ["bus0", "bus1", "build_year", "s_nom"]
-    ]
+    if params["set_by_build_year"]:
 
-    logger.info(
-        f"Remove transmission with build year later than {year}: \n{links}\n{lines}"
-    )
+        delay_construction = params["delay_construction"]
 
-    n.mremove("Link", links.index)
-    n.mremove("Line", lines.index)
+        filter_year = max(int(year) - delay_construction, 2024)
+
+        links = n.links[(n.links.carrier == "DC") & (n.links.build_year > filter_year)][
+            ["bus0", "bus1", "build_year", "p_nom"]
+        ]
+        lines = n.lines[(n.lines.build_year > filter_year)][
+            ["bus0", "bus1", "build_year", "s_nom"]
+        ]
+
+        logger.info(
+            f"Remove transmission with build year later than {year}: \n{links}\n{lines}"
+        )
+
+        n.mremove("Link", links.index)
+        n.mremove("Line", lines.index)
+
+        if delay_construction:
+            logger_text += (
+                f"\nThis is due to delayed construction by {delay_construction} years."
+            )
 
 
 if __name__ == "__main__":
@@ -629,8 +640,11 @@ if __name__ == "__main__":
     spatial = define_spatial(n.buses[n.buses.carrier == "AC"].index, options)
     add_build_year_to_new_assets(n, baseyear)
 
-    if snakemake.params.tp_build_year:
-        filter_transmission_project_build_year(n, baseyear)
+    filter_transmission_project_build_year(
+        n, 
+        snakemake.params.transmission_projects,
+        baseyear,
+    )
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
     costs = prepare_costs(

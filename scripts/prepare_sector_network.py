@@ -2922,12 +2922,13 @@ def add_electricity_distribution_grid(n, costs):
 
 def add_co2_budget(n, co2_budget, investment_year, elec_opts):
     # Check if CO2Limit already exists
-    if "CO2Limit" in n.global_constraints.index and co2_budget["override_co2opt"]:
-        logger.warning("CO2Limit already exists, value will be overwritten.")
-        n.global_constraints.drop(index="CO2Limit", inplace=True)
-    else:
-        logger.info("CO2Limit already exists, value will not be overwritten.")
-        return
+    if "CO2Limit" in n.global_constraints.index:
+        if co2_budget["override_co2opt"]:
+            logger.warning("CO2Limit already exists, value will be overwritten.")
+            n.global_constraints.drop(index="CO2Limit", inplace=True)
+        else:
+            logger.info("CO2Limit already exists, value will not be overwritten.")
+            return
 
     # Get base year emission factor
     factor = (

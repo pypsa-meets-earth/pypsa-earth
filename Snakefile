@@ -501,7 +501,6 @@ if not config["enable"].get("build_natura_raster", False):
 
 country_data = config["costs"].get("country_specific_data", "")
 countries = config.get("countries", [])
-append_cost_data = config["costs"].get("append_cost_data", "")
 
 if country_data and countries == [country_data]:
     cost_directory = f"{country_data}/"
@@ -512,11 +511,6 @@ elif country_data:
     )
 else:
     cost_directory = ""
-
-if append_cost_data:
-    cost_prefix = "pre_"
-else:
-    cost_prefix = ""
 
 if config["enable"].get("retrieve_cost_data", True):
 
@@ -530,7 +524,11 @@ if config["enable"].get("retrieve_cost_data", True):
                 keep_local=True,
             ),
         output:
-            "resources/" + RDIR + cost_prefix + "costs_{year}.csv",
+            branch(
+                config["costs"].get("append_cost_data"),
+                "resources/" + RDIR + "pre_costs_{year}.csv",
+                "resources/" + RDIR + "costs_{year}.csv"
+            )
         log:
             "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:
@@ -541,7 +539,7 @@ if config["enable"].get("retrieve_cost_data", True):
     rule append_cost_data:
         params:
             discount_rate=config["costs"]["discountrate"],
-            regional_factor=config["costs"]["regional_factor"],
+            regional_factor=config["costs"].get("regional_factor"),
         input:
             costs="resources/" + RDIR + "pre_costs_{year}.csv",
             app_costs="data/AEO8-input/AEO8_Table_D15_Cost_Summary.csv",
@@ -1298,10 +1296,29 @@ rule add_export:
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
+        branch(
+            config.get("final_adjustment"),
+            RESDIR
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}.nc",
+            RESDIR
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        ),
+    script:
+        "scripts/add_export.py"
+
+
+rule final_asean_adjustment:
+    params:
+        electricity=config["electricity"],
+        final_adjustment=config.get("final_adjustment"),
+    input:
+        network=RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}.nc",
+    output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     script:
-        "scripts/add_export.py"
+        "scripts/final_asean_adjustment.py"
 
 
 rule override_respot:
@@ -2113,7 +2130,7 @@ if config["foresight"] == "myopic":
             sector=config["sector"],
             existing_capacities=config["existing_capacities"],
             costs=config["costs"],
-            tp_build_year=config["transmission_projects"]["set_by_build_year"],
+            transmission_projects=config["transmission_projects"],
         input:
             **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR
@@ -2178,7 +2195,7 @@ if config["foresight"] == "myopic":
             snapshots=config["snapshots"],
             # drop_leap_day=config["enable"]["drop_leap_day"],
             carriers=config["electricity"]["renewable_carriers"],
-            tp_build_year=config["transmission_projects"]["set_by_build_year"],
+            transmission_projects=config["transmission_projects"],
         input:
             # unpack(input_profile_tech_brownfield),
             simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",

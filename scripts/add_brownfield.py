@@ -261,8 +261,11 @@ if __name__ == "__main__":
 
     add_brownfield(n, n_p, year)
 
-    if snakemake.params.tp_build_year:
-        filter_transmission_project_build_year(n, year)
+    filter_transmission_project_build_year(
+        n,
+        snakemake.params.transmission_projects,
+        year,
+        )
 
     disable_grid_expansion_if_limit_hit(n)
 

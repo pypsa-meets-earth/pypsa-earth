@@ -679,43 +679,43 @@ if __name__ == "__main__":
             adjust_lines_df["underground"].astype("bool").fillna(False)
         )
     # Patch upgraded lines with s_nom still zero
-    mask_upgraded_lines = new_lines_df.index.str.contains("_upgraded")
-
-    if mask_upgraded_lines.any():
-        # Identify upgraded lines where s_nom is missing or zero
-        missing_capacity = new_lines_df.loc[mask_upgraded_lines, "s_nom"].fillna(0) == 0
-        affected = new_lines_df.loc[mask_upgraded_lines][missing_capacity]
-
-        for idx, row in affected.iterrows():
-            original_idx = idx.replace("_upgraded", "")
-            fallback_type = row.get("type", "N2XS(FL)2Y 1x240 RM/35 64/110 kV")
-            fallback_v_nom = row.get("v_nom", 115)
-            fallback_parallel = row.get("num_parallel", 1)
-
-            # If type is missing or unknown, fallback
-            if pd.isna(fallback_type) or fallback_type not in n.line_types.index:
-                logger.warning(
-                    f"Upgraded line {idx} has missing or unknown type. "
-                    f"Falling back to default type N2XS(FL)2Y 1x240 RM/35 64/110 kV"
-                )
-                fallback_type = "N2XS(FL)2Y 1x240 RM/35 64/110 kV"
-
-            # Use fallback current rating
-            i_nom = n.line_types.at[fallback_type, "i_nom"]
-
-            # Calculate fallback capacity
-            fallback_s_nom = np.sqrt(3) * i_nom * fallback_v_nom * fallback_parallel
-            fallback_s_nom = round(fallback_s_nom, 2)
-
-            new_lines_df.at[idx, "s_nom"] = fallback_s_nom
-
-            logger.warning(
-                f"Fallback s_nom for upgraded line {idx}: "
-                f"type={fallback_type}, v_nom={fallback_v_nom}, "
-                f"num_parallel={fallback_parallel} → s_nom={fallback_s_nom}"
-            )
-
     if not new_lines_df.empty:
+        mask_upgraded_lines = new_lines_df.index.str.contains("_upgraded")
+
+        if mask_upgraded_lines.any():
+            # Identify upgraded lines where s_nom is missing or zero
+            missing_capacity = new_lines_df.loc[mask_upgraded_lines, "s_nom"].fillna(0) == 0
+            affected = new_lines_df.loc[mask_upgraded_lines][missing_capacity]
+
+            for idx, row in affected.iterrows():
+                original_idx = idx.replace("_upgraded", "")
+                fallback_type = row.get("type", "N2XS(FL)2Y 1x240 RM/35 64/110 kV")
+                fallback_v_nom = row.get("v_nom", 115)
+                fallback_parallel = row.get("num_parallel", 1)
+
+                # If type is missing or unknown, fallback
+                if pd.isna(fallback_type) or fallback_type not in n.line_types.index:
+                    logger.warning(
+                        f"Upgraded line {idx} has missing or unknown type. "
+                        f"Falling back to default type N2XS(FL)2Y 1x240 RM/35 64/110 kV"
+                    )
+                    fallback_type = "N2XS(FL)2Y 1x240 RM/35 64/110 kV"
+
+                # Use fallback current rating
+                i_nom = n.line_types.at[fallback_type, "i_nom"]
+
+                # Calculate fallback capacity
+                fallback_s_nom = np.sqrt(3) * i_nom * fallback_v_nom * fallback_parallel
+                fallback_s_nom = round(fallback_s_nom, 2)
+
+                new_lines_df.at[idx, "s_nom"] = fallback_s_nom
+
+                logger.warning(
+                    f"Fallback s_nom for upgraded line {idx}: "
+                    f"type={fallback_type}, v_nom={fallback_v_nom}, "
+                    f"num_parallel={fallback_parallel} → s_nom={fallback_s_nom}"
+                )
+
         line_type = "Al/St 240/40 4-bundle 380.0"
 
         # Add new line type for new lines

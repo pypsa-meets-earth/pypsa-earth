@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: PyPSA-ASEAN, PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# ==== Baseline Scenarios ====
+# ============================
+
+baseline-3H:
+
+baseline-no-AIMS-3H:
+  transmission_projects:
+    include:
+      AIMS: false
+
+baseline-no-projects-3H:
+  transmission_projects:
+    include:
+      AIMS: false
+      ID_SuperGrid: false
+
+# ==== Decarbonization Scenarios ====
+# ===================================
+
+decarbonize-3H:
+  co2_budget:
+    enable: true
+
+decarbonize-no-projects-3H:
+  co2_budget:
+    enable: true
+
+  transmission_projects:
+    include:
+      AIMS: false
+      ID_SuperGrid: false
+
+decarbonize-no-AIMS-3H:
+  co2_budget:
+    enable: true
+
+  transmission_projects:
+    include:
+      AIMS: false
