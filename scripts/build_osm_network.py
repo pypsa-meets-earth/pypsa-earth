@@ -19,7 +19,7 @@ from _helpers import (
 )
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.ops import linemerge, nearest_points, split
+from shapely.ops import linemerge, nearest_points, split, snap
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
 
@@ -600,7 +600,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         for point in nearest_points_list:
             # Split the line at the current point
             # The split function returns a GeometryCollection, so we need to convert it to a list
-            split_lines = split(split_line[-1], point)
+            split_lines = split(snap(split_line[-1], point, 1e-9), point)
             split_line = split_line[:-1] + list(split_lines.geoms)
 
         # convert the split line to a multilinestring
