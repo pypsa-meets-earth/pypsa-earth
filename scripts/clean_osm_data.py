@@ -11,7 +11,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import reverse_geocode as rg
-from shapely.ops import linemerge
 from _helpers import (
     REGION_COLS,
     configure_logging,
@@ -19,6 +18,7 @@ from _helpers import (
     save_to_geojson,
     to_csv_nafix,
 )
+from shapely.ops import linemerge
 
 logger = create_logger(__name__)
 

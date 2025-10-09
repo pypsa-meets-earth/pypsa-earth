@@ -19,7 +19,7 @@ from _helpers import (
 )
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.ops import linemerge, nearest_points, split, snap
+from shapely.ops import linemerge, nearest_points, snap, split
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
 
