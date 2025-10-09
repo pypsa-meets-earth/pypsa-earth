@@ -1057,7 +1057,7 @@ def extra_functionality(n, snapshots):
         if "EQ" in o:
             add_EQ_constraints(n, o)
 
-    add_battery_constraints(n, costs)
+    add_battery_constraints(n)
     add_lossy_bidirectional_link_constraints(n)
     add_bicharger_constraints(n, costs)
 
