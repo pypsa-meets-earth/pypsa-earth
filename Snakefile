@@ -73,7 +73,7 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+(m|flex)?|all|min",
-    ll="(v|c)([0-9\.]+|opt|all)|all",
+    ll="(v|c|l)([0-9\.]+|opt|all)|all",
     opts="[-+a-zA-Z0-9\.]*",
     unc="[-+a-zA-Z0-9\.]*",
     sopts="[-+a-zA-Z0-9\.\s]*",
