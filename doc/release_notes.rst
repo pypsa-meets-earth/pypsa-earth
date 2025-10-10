@@ -25,8 +25,14 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Redesign temporal matching including yearly, monthly and hourly matching `PR #1463 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1463>`__
 
+* Add option to ignore loading network data in clean_osm_data `PR #1580 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1580>`__
+
+* Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds `PR #1592 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592>`__
+
 
 **Minor Changes and bug-fixing**
+
+* Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
 
 * The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
 
@@ -39,6 +45,12 @@ This part of documentation collects descriptive release notes to capture the mai
 * bug-fix in ``clean_osm_data.py`` so that cleaned data has the same number of circuits as in the raw data and assumptions are correctly applied `PR #1552 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1552>`__
 
 * Avoid using variable "nodes" in prepare_sector_network unless explicitly in the arguments `PR #1575 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1575>`__
+
+* Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
+
+* Bug-fixing override co2opt in add_co2_budget `PR #1597 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1597>`__
+
+* Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
 
 PyPSA-Earth 0.7.0
 =================

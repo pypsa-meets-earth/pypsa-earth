@@ -62,8 +62,9 @@ It is handled in the rule :mod:`prepare_network`.
 The wildcard, in general, consists of two parts:
 
     1. The first part can be
-       ``v`` (for setting a limit on line volume) or
-       ``c`` (for setting a limit on line cost)
+       ``v`` (for setting a limit on line volume), or
+       ``c`` (for setting a limit on line cost), or
+       ``l`` (for a line-specific limit on line expansion).
 
     2. The second part can be
        ``opt`` or a float bigger than one (e.g. 1.25).
@@ -80,6 +81,9 @@ The wildcard, in general, consists of two parts:
 
        (c) ``c1.25`` will allow to build a transmission network that
            costs no more than 25 % more than the current system.
+
+       (d) ``l1.25`` will allow to build a transmission network where
+           each line is expanded to no more than 25% of its capacity.
 
 .. _opts:
 
