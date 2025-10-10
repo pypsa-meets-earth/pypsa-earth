@@ -7,16 +7,16 @@
 import logging
 import os
 import re
+from pathlib import Path
 from types import SimpleNamespace
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
 import pytz
 import ruamel.yaml
 import xarray as xr
-import geopandas as gpd
-from pathlib import Path
 from _helpers import (
     BASE_DIR,
     create_dummy_data,
@@ -206,11 +206,10 @@ def add_water_network(n, costs):
         spatial.nodes + " H2O",
         location=spatial.nodes,
         carrier="H2O",
-        unit= "m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
         x=n.buses.loc[list(spatial.nodes)].x.values,
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
-
 
     # DEVELOPMENT STAGE 1
 
@@ -243,20 +242,23 @@ def add_water_network(n, costs):
     #     lifetime=costs.at["seawater desalination", "lifetime"],
     # )
 
-
     n.add("Carrier", "seawater")
 
     water_network = gpd.read_file(snakemake.input.clustered_water_network)
 
     seawater_nodes = n.buses[n.buses.index.isin(water_network.nearest_point_bus)].index
-    H20_nodes_desal_connceted = n.buses[n.buses.index.isin(water_network.centroid_bus)].index
+    H20_nodes_desal_connceted = n.buses[
+        n.buses.index.isin(water_network.centroid_bus)
+    ].index
     H20_nodes_none_desal_connceted = spatial.nodes.difference(H20_nodes_desal_connceted)
 
     # Create index column
     water_network["buses_idx"] = (
-        "H2O pipeline " + water_network["centroid_bus"] + " -> " + water_network["nearest_point_bus"]
+        "H2O pipeline "
+        + water_network["centroid_bus"]
+        + " -> "
+        + water_network["nearest_point_bus"]
     )
-
 
     # Add seawater nodes to the network
     n.madd(
@@ -264,7 +266,7 @@ def add_water_network(n, costs):
         seawater_nodes + " seawater",
         location=seawater_nodes,
         carrier="seawater",
-        unit= "m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
         x=n.buses.loc[list(seawater_nodes)].x.values,
         y=n.buses.loc[list(seawater_nodes)].y.values,
     )
@@ -272,8 +274,7 @@ def add_water_network(n, costs):
     # Add fictive sewater generator as a source for seawater
     n.madd(
         "Generator",
-        seawater_nodes
-        + " seawater",  
+        seawater_nodes + " seawater",
         bus=seawater_nodes + " seawater",
         carrier="seawater",
         p_nom_extendable=True,
@@ -283,7 +284,6 @@ def add_water_network(n, costs):
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
 
-
     n.add("Carrier", "H2O_desalinated")
 
     n.madd(
@@ -291,7 +291,7 @@ def add_water_network(n, costs):
         seawater_nodes + " H2O_desalinated",
         location=seawater_nodes,
         carrier="H2O_desalinated",
-        unit= "m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
         x=n.buses.loc[list(seawater_nodes)].x.values,
         y=n.buses.loc[list(seawater_nodes)].y.values,
     )
@@ -305,20 +305,29 @@ def add_water_network(n, costs):
         carrier="desalination",
         p_nom_extendable=True,
         efficiency=costs.at["seawater desalination", "efficiency"],
-        efficiency2= -(costs.at["seawater desalination", "electricity-input"]/1000), # Electricity-input is in kWh/m3 -> convert to MWh/m3 
+        efficiency2=-(
+            costs.at["seawater desalination", "electricity-input"] / 1000
+        ),  # Electricity-input is in kWh/m3 -> convert to MWh/m3
         capital_cost=costs.at["seawater desalination", "fixed"],
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
 
+    CAPEX_pipline = (
+        costs.at["HDPE water pipeline", "fixed"]
+        * water_network.adjusted_distance_km.values
+    )  # not complete yet
 
-
-    CAPEX_pipline = costs.at["HDPE water pipeline", "fixed"] * water_network.adjusted_distance_km.values # not complete yet
-    
     power_kw = water_network.power_kW.values
     n_pumping_stations = water_network.n_pumping_stations.values
     mass_flow_rate_m3h = water_network.mass_flow_rate_m3h.values
 
-    CAPEX_pumps = costs.at["water booster pump", "fixed"]  * power_kw / 1e3 * n_pumping_stations / mass_flow_rate_m3h
+    CAPEX_pumps = (
+        costs.at["water booster pump", "fixed"]
+        * power_kw
+        / 1e3
+        * n_pumping_stations
+        / mass_flow_rate_m3h
+    )
 
     n.madd(
         "Link",
@@ -332,8 +341,8 @@ def add_water_network(n, costs):
         capital_cost=CAPEX_pipline + CAPEX_pumps,
         carrier="H2O pipeline",
         lifetime=costs.at["HDPE water pipeline", "lifetime"],
-        efficiency= 1,  # No losses in the pipeline
-        efficiency2=water_network.efficiency2.values, # Efficieny of both pipeline and pumps calculated in prepare_water_netowrk.py.  MW consumed per m³/h transferred
+        efficiency=1,  # No losses in the pipeline
+        efficiency2=water_network.efficiency2.values,  # Efficieny of both pipeline and pumps calculated in prepare_water_netowrk.py.  MW consumed per m³/h transferred
     )
 
     n.madd(
@@ -341,7 +350,7 @@ def add_water_network(n, costs):
         H20_nodes_desal_connceted + " H2O store",
         location=H20_nodes_desal_connceted,
         carrier="H2O store",
-        unit= "m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
         x=n.buses.loc[list(H20_nodes_desal_connceted)].x.values,
         y=n.buses.loc[list(H20_nodes_desal_connceted)].y.values,
     )
@@ -381,19 +390,19 @@ def add_water_network(n, costs):
         lifetime=costs.at["clean water tank storage", "lifetime"],
     )
 
-    # Add generator for H2O 
+    # Add generator for H2O
     n.madd(
         "Generator",
-        H20_nodes_none_desal_connceted + " H2O",  # Output unit of generator is in m3, this is defined by the electrolysis.
+        H20_nodes_none_desal_connceted
+        + " H2O",  # Output unit of generator is in m3, this is defined by the electrolysis.
         bus=H20_nodes_none_desal_connceted + " H2O",
         carrier="H2O generator",
         p_nom_extendable=True,
         # capital_cost=20000,
-        marginal_cost=0.019159507, # Added costs for hydrogen [EUR/MWh] TODO PUT in config
+        marginal_cost=0.019159507,  # Added costs for hydrogen [EUR/MWh] TODO PUT in config
         efficiency=1,
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
-
 
 
 def add_hydrogen(n, costs):
@@ -410,7 +419,6 @@ def add_hydrogen(n, costs):
         x=n.buses.loc[list(spatial.nodes)].x.values,
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
-
 
     # Read hydrogen production technologies
     h2_techs = options["hydrogen"].get("production_technologies", [])
@@ -598,24 +606,24 @@ def add_hydrogen(n, costs):
             "efficiency3": costs.at["oil", "CO2 intensity"],
         },
     }
-    
+
     if snakemake.config["sector"]["hydrogen"]["water_network"]:
-      add_water_network(n, costs)
-      for tech in [
-          "H2 Electrolysis",
-          "Alkaline electrolyzer large",
-          "Alkaline electrolyzer medium",
-          "Alkaline electrolyzer small",
-          "PEM electrolyzer",
-          "SOEC",
-      ]:
-          if tech in tech_params:
-              tech_params[tech]["bus2"] = spatial.nodes + " H2O"
-              tech_params[tech]["efficiency2"] = (
-                  -costs.at["electrolysis", "efficiency"]
-                  * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-                  / 33 # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion TODO: integrate ratio_water_elec in technology data
-              )
+        add_water_network(n, costs)
+        for tech in [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC",
+        ]:
+            if tech in tech_params:
+                tech_params[tech]["bus2"] = spatial.nodes + " H2O"
+                tech_params[tech]["efficiency2"] = (
+                    -costs.at["electrolysis", "efficiency"]
+                    * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
+                    / 33  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion TODO: integrate ratio_water_elec in technology data
+                )
 
     if options["hydrogen"].get("hydrogen_colors", False):
         color_techs = {
@@ -676,7 +684,6 @@ def add_hydrogen(n, costs):
             else spatial.nodes + " H2"
         )
 
-
         n.madd(
             "Link",
             spatial.nodes + " " + h2_tech,
@@ -694,7 +701,6 @@ def add_hydrogen(n, costs):
             capital_cost=costs.at[params["cost_name"], "fixed"],
             lifetime=costs.at[params["cost_name"], "lifetime"],
         )
-
 
     n.madd(
         "Link",
@@ -968,7 +974,7 @@ def add_hydrogen(n, costs):
             h2_links = h2_links.groupby("buses_idx").agg(
                 {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
             )
-            
+
             if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
             if (
@@ -3382,7 +3388,7 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
-    #------
+    # ------
     ##### TO BE REMOVED AGAIN AFTER MERGING desalination data to technologydata
     costs1 = pd.read_csv(snakemake.input.costs)
     costs2 = pd.read_csv(snakemake.input.costs_desal)
@@ -3403,7 +3409,7 @@ if __name__ == "__main__":
         snakemake.params.costs["future_exchange_rate_strategy"],
         snakemake.params.costs["custom_future_exchange_rate"],
     )
-    #------
+    # ------
 
     ##### TO BE USED AGAIN AFTER MERGING desalination data to technologydata
     # # Prepare the costs dataframe

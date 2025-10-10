@@ -54,8 +54,8 @@ def select_ports(n):
     gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
-     # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
-    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]       
+    # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
+    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
