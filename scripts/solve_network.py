@@ -96,6 +96,45 @@ logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
 
 
+def get_load_shedding_capacity(n, safety_margin=1.2):
+    """
+    Calculate required load shedding p_nom per bus based on the
+    maximum aggregated load observed in any snapshot.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network
+    safety_margin : float, default 1.2
+        Safety factor to apply to the maximum load
+
+    Returns
+    -------
+    pd.Series
+        Required p_nom per bus for load shedding.
+    """
+
+    load_shedding_p_nom = pd.Series(0.0, index=n.buses.index)
+
+    for bus_name, bus_loads in n.loads.groupby("bus"):
+
+        if not n.loads_t.p_set.empty:
+            bus_load_timeseries = n.loads_t.p_set[
+                bus_loads.index.intersection(n.loads_t.p_set.columns)
+            ]
+            # Sum loads across all components at this bus for each snapshot
+            total_load_per_snapshot = bus_load_timeseries.sum(axis=1)
+            max_total_load = total_load_per_snapshot.max()
+        else:
+            max_total_load = bus_loads["p_set"].sum()
+
+        required_p_nom = max_total_load * safety_margin
+
+        load_shedding_p_nom[bus_name] = required_p_nom
+
+    return load_shedding_p_nom
+
+
 def prepare_network(n, solve_opts, config):
     if "clip_p_max_pu" in solve_opts:
         for df in (
@@ -110,16 +149,17 @@ def prepare_network(n, solve_opts, config):
         n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
 
     if solve_opts.get("load_shedding"):
-        n.add("Carrier", "Load")
+        required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
+        n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
         n.madd(
             "Generator",
             n.buses.index,
-            " load",
+            " load shedding",
             bus=n.buses.index,
-            carrier="load",
+            carrier="load shedding",
             sign=1,
             marginal_cost=solve_opts.get("load_shedding") * 1000,  # convert to Eur/MWh
-            p_nom=1e12,
+            p_nom=required_p_nom.reindex(n.buses.index, fill_value=0.5e6),
         )
 
     if solve_opts.get("noisy_costs"):
@@ -632,133 +672,90 @@ def add_h2_network_cap(n, cap):
     n.model.add_constraints(lhs <= rhs, name="h2_network_cap")
 
 
-def H2_export_yearly_constraint(n):
-    res = [
-        "csp",
-        "rooftop-solar",
-        "solar",
-        "onwind",
-        "onwind2",
-        "offwind",
-        "offwind2",
-        "ror",
-    ]
-    res_index = n.generators.loc[n.generators.carrier.isin(res)].index
+def hydrogen_temporal_constraint(n, n_ref, time_period):
 
-    weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
-        index=n.snapshots,
-        columns=res_index,
-    )
-    capacity_variable = n.model["Generator-p"]
-
-    # single line sum
-    res = (weightings * capacity_variable.loc[res_index]).sum()
-
-    load_ind = n.loads[n.loads.carrier == "AC"].index.intersection(
-        n.loads_t.p_set.columns
-    )
-
-    load = (
-        n.loads_t.p_set[load_ind].sum(axis=1) * n.snapshot_weightings["generators"]
-    ).sum()
-
-    h2_export = n.loads.loc["H2 export load"].p_set * 8760
-
-    lhs = res
-
-    include_country_load = snakemake.config["policy_config"]["yearly"][
-        "re_country_load"
-    ]
-
-    if include_country_load:
-        elec_efficiency = (
-            n.links.filter(like="Electrolysis", axis=0).loc[:, "efficiency"].mean()
-        )
-        rhs = (
-            h2_export * (1 / elec_efficiency) + load
-        )  # 0.7 is approximation of electrloyzer efficiency # TODO obtain value from network
-    else:
-        rhs = h2_export * (1 / 0.7)
-
-    n.model.add_constraints(lhs >= rhs, name="H2ExportConstraint-RESproduction")
-
-
-def monthly_constraints(n, n_ref):
     res_techs = [
         "csp",
-        "rooftop-solar",
         "solar",
         "onwind",
-        "onwind2",
-        "offwind",
-        "offwind2",
+        "offwind-ac",
+        "offwind-dc",
         "ror",
     ]
-    allowed_excess = snakemake.config["policy_config"]["hydrogen"]["allowed_excess"]
 
-    res_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_stor_techs = ["hydro"]
 
-    weightings = pd.DataFrame(
-        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_index)),
+    allowed_excess = snakemake.params.policy_config["hydrogen"]["allowed_excess"]
+
+    # Generation
+    res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_stor_index = n.storage_units.loc[
+        n.storage_units.carrier.isin(res_stor_techs)
+    ].index
+
+    weightings_gen = pd.DataFrame(
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_gen_index)),
         index=n.snapshots,
-        columns=res_index,
+        columns=res_gen_index,
     )
-    capacity_variable = n.model["Generator-p"]
 
-    # single line sum
-    res = (weightings * capacity_variable[res_index]).sum(axis=1)
-    res = res.groupby(res.index.month).sum()
+    p_gen_var = n.model["Generator-p"].loc[:, res_gen_index]
+
+    res = (weightings_gen * p_gen_var).sum(dim="Generator")
+
+    # Store
+    if not res_stor_index.empty:
+        weightings_stor = pd.DataFrame(
+            np.outer(n.snapshot_weightings["generators"], [1.0] * len(res_stor_index)),
+            index=n.snapshots,
+            columns=res_stor_index,
+        )
+
+        p_dispatch_var = n.model["StorageUnit-p_dispatch"].loc[:, res_stor_index]
+
+        store = (weightings_stor * p_dispatch_var).sum(dim="StorageUnit")
+
+        res = res + store
+
+    # Electrolysis
+    electrolysis_carriers = [
+        "H2 Electrolysis",
+        "Alkaline electrolyzer large",
+        "Alkaline electrolyzer medium",
+        "Alkaline electrolyzer small",
+        "PEM electrolyzer",
+        "SOEC",
+    ]
+    electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
 
     link_p = n.model["Link-p"]
-    electrolysis = link_p.loc[
-        n.links.index[n.links.index.str.contains("H2 Electrolysis")]
-    ]
+    electrolysis = link_p.loc[:, electrolysis_index]
 
     weightings_electrolysis = pd.DataFrame(
-        np.outer(
-            n.snapshot_weightings["generators"], [1.0] * len(electrolysis.columns)
-        ),
+        np.outer(n.snapshot_weightings["generators"], [1.0] * len(electrolysis_index)),
         index=n.snapshots,
-        columns=electrolysis.columns,
+        columns=electrolysis_index,
     )
 
-    elec_input = ((-allowed_excess * weightings_electrolysis) * electrolysis).sum(
-        axis=1
+    elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(
+        dim="Link"
     )
 
-    elec_input = elec_input.groupby(elec_input.index.month).sum()
+    # Grouping
+    if time_period == "hour":
+        res = res.groupby("snapshot").sum().rename({"snapshot": "hour"})
+        elec_input = elec_input.groupby("snapshot").sum().rename({"snapshot": "hour"})
+    elif time_period == "month":
+        res = res.groupby("snapshot.month").sum()
+        elec_input = elec_input.groupby("snapshot.month").sum()
+    elif time_period == "year":
+        res = res.groupby("snapshot.year").sum()
+        elec_input = elec_input.groupby("snapshot.year").sum()
 
-    if snakemake.config["policy_config"]["hydrogen"]["additionality"]:
-        res_ref = n_ref.generators_t.p[res_index] * weightings
-        res_ref = res_ref.groupby(n_ref.generators_t.p.index.month).sum().sum(axis=1)
-
-        elec_input_ref = (
-            n_ref.links_t.p0.loc[
-                :, n_ref.links_t.p0.columns.str.contains("H2 Electrolysis")
-            ]
-            * weightings_electrolysis
-        )
-        elec_input_ref = (
-            -elec_input_ref.groupby(elec_input_ref.index.month).sum().sum(axis=1)
-        )
-
-        for i in range(len(res.index)):
-            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
-            rhs = res_ref.iloc[i] + elec_input_ref.iloc[i]
-            n.model.add_constraints(
-                lhs >= rhs, name=f"RESconstraints_{i}-REStarget_{i}"
-            )
-
-    else:
-        for i in range(len(res.index)):
-            lhs = res.iloc[i] + "\n" + elec_input.iloc[i]
-
-            n.model.add_constraints(
-                lhs >= 0.0, name=f"RESconstraints_{i}-REStarget_{i}"
-            )
-    # else:
-    #     logger.info("ignoring H2 export constraint as wildcard is set to 0")
+    # Defining the constraints
+    for label in res.coords[time_period].values:
+        lhs = res.loc[label] + elec_input.loc[label]
+        n.model.add_constraints(lhs >= 0.0, name=f"RESconstraints_{label}")
 
 
 def add_chp_constraints(n):
@@ -1004,32 +1001,32 @@ def extra_functionality(n, snapshots):
         logger.info("setting CHP constraints")
         add_chp_constraints(n)
 
-    if (
-        snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-        == "h2_yearly_matching"
-    ):
-        if snakemake.config["policy_config"]["hydrogen"]["additionality"] == True:
-            logger.info(
-                "additionality is currently not supported for yearly constraints, proceeding without additionality"
-            )
-        logger.info("setting h2 export to yearly greenness constraint")
-        H2_export_yearly_constraint(n)
+    additionality = snakemake.params.policy_config["hydrogen"]["additionality"]
+    ref_for_additionality = snakemake.params.policy_config["hydrogen"]["is_reference"]
+    temportal_matching_period = snakemake.params.policy_config["hydrogen"][
+        "temporal_matching"
+    ]
 
-    elif (
-        snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-        == "h2_monthly_matching"
-    ):
-        if not snakemake.config["policy_config"]["hydrogen"]["is_reference"]:
-            logger.info("setting h2 export to monthly greenness constraint")
-            monthly_constraints(n, n_ref)
-        else:
+    if temportal_matching_period == "no_temporal_matching":
+        logger.info("no h2 temporal constraint set")
+
+    elif additionality:
+        if ref_for_additionality:
             logger.info("preparing reference case for additionality constraint")
-
-    elif (
-        snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-        == "no_res_matching"
-    ):
-        logger.info("no h2 export constraint set")
+        else:
+            logger.info(
+                "setting h2 export to {}ly matching constraint with additionality".format(
+                    temportal_matching_period
+                )
+            )
+            hydrogen_temporal_constraint(n, n_ref, temportal_matching_period)
+    elif not additionality:
+        logger.info(
+            "setting h2 export to {}ly matching constraint without additionality".format(
+                temportal_matching_period
+            )
+        )
+        hydrogen_temporal_constraint(n, n_ref, temportal_matching_period)
 
     else:
         raise ValueError(
@@ -1132,13 +1129,13 @@ if __name__ == "__main__":
         add_existing(n)
 
     if (
-        snakemake.config["policy_config"]["hydrogen"]["additionality"]
-        and not snakemake.config["policy_config"]["hydrogen"]["is_reference"]
-        and snakemake.config["policy_config"]["hydrogen"]["temporal_matching"]
-        != "no_res_matching"
+        snakemake.params.policy_config["hydrogen"]["additionality"]
+        and not snakemake.params.policy_config["hydrogen"]["is_reference"]
+        and snakemake.params.policy_config["hydrogen"]["temporal_matching"]
+        != "no_temporal_matching"
         and is_sector_coupled
     ):
-        n_ref_path = snakemake.config["policy_config"]["hydrogen"]["path_to_ref"]
+        n_ref_path = snakemake.params.policy_config["hydrogen"]["path_to_ref"]
         n_ref = pypsa.Network(n_ref_path)
     else:
         n_ref = None
