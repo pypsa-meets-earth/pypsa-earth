@@ -71,7 +71,7 @@ def add_carrier_buses(n, carrier, nodes=None):
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
     ## Do not execute this if the carrier is biomass
-    
+
     if carrier != "biomass":
         # initial fossil reserves
         e_initial = (snakemake.params.fossil_reserves).get(carrier, 0) * 1e6
