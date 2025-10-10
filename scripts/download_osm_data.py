@@ -26,8 +26,10 @@ Outputs
 - ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
+import inspect
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from _helpers import BASE_DIR, configure_logging, create_logger, read_osm_config
@@ -105,6 +107,27 @@ if __name__ == "__main__":
     custom_data = snakemake.config.get("custom_data", {}).get("osm_data")
     custom_data_path = Path(snakemake.params.get("custom_data_path", "data/custom/osm"))
 
+    # Check for historical date configuration
+    historical_config = snakemake.config.get("historical_data", {})
+    target_date = historical_config.get("osm_date", None)
+
+    # Parse target_date if provided as string
+    if target_date and isinstance(target_date, str):
+        try:
+            target_date = datetime.strptime(target_date, "%Y-%m-%d")
+            logger.info(
+                f"Using historical OSM data for date: {target_date.strftime('%Y-%m-%d')}"
+            )
+        except ValueError:
+            logger.warning(
+                f"Invalid date format '{target_date}', expected YYYY-MM-DD. Using latest data."
+            )
+            target_date = None
+    elif target_date:
+        logger.info(
+            f"Using historical OSM data for date: {target_date.strftime('%Y-%m-%d')}"
+        )
+
     # allow for custom data usage
     if custom_data:
         logger.info(
@@ -112,19 +135,34 @@ if __name__ == "__main__":
         )
         os.makedirs(store_path_data, exist_ok=True)
         shutil.copytree(custom_data_path, store_path_data, dirs_exist_ok=True)
-   
-    eo.save_osm_data(
-        primary_name="power",
-        region_list=country_list,
-        feature_list=["substation", "line", "cable", "generator"],
-        update=False,
-        mp=True,
-        data_dir=store_path_data,
-        out_dir=store_path_resources,
-        out_format=["csv", "geojson"],
-        out_aggregate=True,
-        progress_bar=snakemake.config["enable"]["progress_bar"],
-    )
+    else:
+        # Prepare save_osm_data arguments
+        save_args = {
+            "primary_name": "power",
+            "region_list": country_list,
+            "feature_list": ["substation", "line", "cable", "generator"],
+            "update": False,
+            "mp": True,
+            "data_dir": store_path_data,
+            "out_dir": store_path_resources,
+            "out_format": ["csv", "geojson"],
+            "out_aggregate": True,
+            "progress_bar": snakemake.config["enable"]["progress_bar"],
+        }
+
+        # Add historical date support if available and target_date is provided
+        if (
+            target_date
+            and "target_date" in inspect.signature(eo.save_osm_data).parameters
+        ):
+            save_args["target_date"] = target_date
+            logger.info("Historical data download enabled")
+        elif target_date:
+            logger.warning(
+                "Historical date requested but earth-osm version doesn't support target_date parameter"
+            )
+
+        eo.save_osm_data(**save_args)
 
     out_path = Path.joinpath(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]
