@@ -15,7 +15,7 @@ dependencies:
 - atlite=0.4.1 # in versions >0.4.1 the computation of availability matrix in `build_renewable_profiles` fails due to https://github.com/PyPSA/atlite/issues/301 https://github.com/PyPSA/atlite/issues/514 for countries whose cutouts span over geometries crossing the antimeridian
 - dask
 - powerplantmatching>=0.8
-- earth-osm>=2.3.post1
+# - earth-osm>=2.3.post1  # Temporarily commented out for historical data development
 
 # Dependencies of the workflow itself
 - xlrd
@@ -81,3 +81,5 @@ dependencies:
 - pip:
   - currencyconverter
   - googledrivedownloader>=1.1
+  # Historical OSM data support - development version until PR is merged
+  - git+https://github.com/GbotemiB/earth-osm.git@feat/historical-data-download
