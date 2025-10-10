@@ -1008,6 +1008,112 @@ rule prepare_transport_data_input:
         "scripts/prepare_transport_data_input.py"
 
 
+if config["sector"]["hydrogen"]["water_network"]:
+    if not config["custom_data"]["h2_water_network"]:
+
+        rule prepare_water_network:
+            params:
+                costs=config["costs"],
+                water_stress=config["sector"]["hydrogen"][
+                    "aqueduct_water_stress_classification"
+                ],
+            input:
+                regions_onshore="resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+                country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+                natura="resources/" + RDIR + "natura.tiff",
+            output:
+                shorelines="resources/"
+                + SECDIR
+                + "water_networks/shorelines_elec_s{simpl}_{clusters}.gpkg",
+                shorelines_natura="resources/"
+                + SECDIR
+                + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+                buffered_natura="resources/"
+                + SECDIR
+                + "water_networks/buffered_natura_elec_s{simpl}_{clusters}.gpkg",
+                regions_onshore_aqueduct="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct_desalination="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_desalination_elec_s{simpl}_{clusters}.geojson",
+                clustered_water_network="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+                water_pipes_profiles="resources/"
+                + SECDIR
+                + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
+            script:
+                "scripts/prepare_water_network.py"
+
+        rule plot_water_network:
+            input:
+                regions_onshore="resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct_desalination="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_desalination_elec_s{simpl}_{clusters}.geojson",
+                clustered_water_network="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+                shorelines_natura="resources/"
+                + SECDIR
+                + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+                water_pipes_profiles="resources/"
+                + SECDIR
+                + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
+            output:
+                water_network="results/plots/desalination/water_network_elec_s{simpl}_{clusters}.{ext}",
+            script:
+                "scripts/plot_water_network.py"
+
+    else:
+
+        rule copy_water_network:
+            input:
+                source="data_custom/water_network_elec_s{simpl}_{clusters}.csv",
+            output:
+                destination="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.csv",
+            shell:
+                "cp {input.source} {output.destination}"
+
+
+if (
+    not config["custom_data"]["h2_underground"]
+    and config["sector"]["hydrogen"]["underground_storage"]["enabled"]
+):
+
+    rule build_salt_cavern_potentials:
+        input:
+            copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+            regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            h2_cavern="resources/"
+            + RDIR
+            + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
+        params:
+            crs=config["crs"],
+            underground_storage=config["sector"]["hydrogen"]["underground_storage"],
+        threads: 1
+        resources:
+            mem_mb=2000,
+        script:
+            "scripts/build_salt_cavern_potentials.py"
+
+
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
@@ -1091,16 +1197,42 @@ rule prepare_sector_network:
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
+        **(
+            {
+                "h2_cavern": (
+                    "data/hydrogen_salt_cavern_potentials.csv"
+                    if config["custom_data"]["h2_underground"]
+                    else "resources/"
+                    + RDIR
+                    + f"salt_cavern_potentials_s{{simpl}}_{{clusters}}.csv"
+                )
+            }
+            if config["custom_data"]["h2_underground"]
+            or config["sector"]["hydrogen"]["underground_storage"]["enabled"]
+            else {}
+        ),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
-        h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
+        costs_desal="data/costs_desal.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
             "resources/"
             + SECDIR
             + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ),
+        transport="resources/"
+        + SECDIR
+        + "demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        avail_profile="resources/"
+        + SECDIR
+        + "pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        dsm_profile="resources/"
+        + SECDIR
+        + "pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        nodal_transport_data="resources/"
+        + SECDIR
+        + "demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         overrides="data/override_component_attrs",
         clustered_pop_layout="resources/"
         + SECDIR
@@ -1133,6 +1265,9 @@ rule prepare_sector_network:
                 + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             ),
         ),
+        clustered_water_network="resources/"
+        + SECDIR
+        + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
