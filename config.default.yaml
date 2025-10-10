@@ -62,6 +62,7 @@ snapshots:
 # definition of the Coordinate Reference Systems
 crs:
   geo_crs: EPSG:4326 # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
+  copernicus_crs: EPSG:4326 # projection for Copernicus data, used by atlite. "EPSG:4326" is the standard used by OSM and google maps
   distance_crs: EPSG:3857 # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
   area_crs: ESRI:54009 # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
@@ -564,8 +565,43 @@ sector:
     network_limit: 2000 #GWkm
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
-    underground_storage: false
     aqueduct_water_stress_classification: # ["above_40"] # If "True" then the water stress classification is used to determine the water availability for desalination
+    underground_storage:
+      enabled: true
+      # calculations based on https://doi.org/10.1016/j.ijhydene.2019.12.161
+      min_area_km2: 13 # minimum area for kaverns in km2
+      method: "surface" # surface or physics
+      energy_density_MWh_per_m3: 0.336 # energy density varies in europe between 0.214 and 0.0458 MWh/m3
+      cavern_height_bedded_m: 120
+      cavern_diameter_bedded_m: 84
+      cavern_height_dome_m: 300
+      cavern_diameter_dome_m: 58
+      salt_buffer_m_bedded: 2000
+      salt_buffer_m_dome: 500
+      copernicus:
+        # CLC grid codes:
+        # 11X/12X - Various forest types
+        # 20  - Shrubs
+        # 30  - Herbaceus vegetation
+        # 40  - Cropland
+        # 50  - Urban
+        # 60  - Bare / Sparse vegetation
+        # 80  - Permanent water bodies
+        # 100 - Moss and lichen
+        # 200 - Open sea
+        grid_codes: [50, 80, 100]
+        distance_buffer_by_code:
+          50: 2500 # urban
+          80: 200 # protected areas / water bodies
+          100: 200 # natural protected areas
+      # physics calculations not based on https://doi.org/10.1016/j.ijhydene.2019.12.161
+      rho_min: 5.0         # Minimum hydrogen density in kg/m³ (at low pressure, e.g. ~30 bar)
+      rho_max: 42.0        # Maximum hydrogen density in kg/m³ (at high pressure, e.g. ~200–250 bar)
+      theta_safety: 0.8    # Usable working gas fraction (portion of H₂ that can actually be withdrawn)
+      lhv_h2: 120          # Lower Heating Value (LHV) of hydrogen in MJ/kg (energy content per kg H₂)
+      locations:
+      - onshore
+      - offshore
     hydrogen_colors: false
     water_network: true
     custom_water_network: false
