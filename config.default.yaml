@@ -23,7 +23,7 @@ enable:
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false # If True, then an exclusion raster will be build
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
@@ -64,6 +64,12 @@ crs:
   geo_crs: EPSG:4326 # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
   distance_crs: EPSG:3857 # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
   area_crs: ESRI:54009 # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+
+natura: # only relevant when using build_natura_raster: true
+  natura_size: countries # countries, cutout, or global. Select which regions to include in the natura raster.
+  natura_resolution: 100 # [m] Grid resolution of the natura data.
+  window_size: 10000 # [bytes] Size of the shifting rasterization window. The required RAM scales with window_size^2.
+  buffer_size: 10000 # [unit of area_crs, default: m] Buffer around the regions of interest to include every required value. A buffer of around 100 km will be sufficient for most cases.
 
 # download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 
