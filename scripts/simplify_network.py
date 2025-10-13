@@ -96,11 +96,11 @@ import scipy as sp
 from _helpers import (
     configure_logging,
     create_logger,
+    load_costs,
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregateoneport,
@@ -1019,8 +1019,8 @@ if __name__ == "__main__":
     technology_costs = load_costs(
         snakemake.input.tech_costs,
         snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
+        max_hours=snakemake.params.electricity["max_hours"],
+        Nyears=Nyears,
     )
 
     n, simplify_links_map = simplify_links(

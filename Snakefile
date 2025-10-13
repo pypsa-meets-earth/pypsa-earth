@@ -690,7 +690,6 @@ rule augmented_line_connections:
         lines=config["lines"],
         augmented_line_connection=config["augmented_line_connection"],
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        electricity=config["electricity"],
         costs=config["costs"],
     input:
         tech_costs=COSTS,
