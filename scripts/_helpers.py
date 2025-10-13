@@ -965,22 +965,24 @@ def annuity(n, r):
         return 1 / n
 
 
+# Single source for the currency reference year (aligned with `technology-data` output files / PyPSA-Earth input cost files).
+# Change this value to update the reference year everywhere.
+reference_year = 2020
+
 # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 _currency_conversion_cache = {}
 
 
-# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 def get_yearly_currency_exchange_rate(
     initial_currency: str,
     output_currency: str,
-    reference_year: int,
     default_exchange_rate: float = None,
     _currency_conversion_cache: dict = None,
     future_exchange_rate_strategy: str = "reference",  # "reference", "latest", "custom"
     custom_future_exchange_rate: float = None,
 ):
     """
-    Returns the average currency exchange rate for a given reference year.
+    Returns the average currency exchange rate for the global reference_year.
 
     Parameters
     ----------
@@ -988,8 +990,6 @@ def get_yearly_currency_exchange_rate(
         Input currency (e.g. "EUR", "USD").
     output_currency : str
         Desired output currency (e.g. "USD").
-    reference_year : int
-        Year to use for conversion (e.g. 2020).
     default_exchange_rate : float, optional
         Fallback value if no rate data is found.
     _currency_conversion_cache : dict, optional
@@ -1001,7 +1001,6 @@ def get_yearly_currency_exchange_rate(
     custom_future_exchange_rate : float, optional
         Custom exchange rate if strategy is "custom".
     """
-
     if _currency_conversion_cache is None:
         _currency_conversion_cache = {}
 
@@ -1025,6 +1024,7 @@ def get_yearly_currency_exchange_rate(
         available_dates = sorted(currency_converter._rates[initial_currency].keys())
 
     max_date = available_dates[-1]
+
     # Decide which year to use
     if future_exchange_rate_strategy == "custom":
         if custom_future_exchange_rate is None:
@@ -1040,8 +1040,8 @@ def get_yearly_currency_exchange_rate(
             currency_converter.convert(1, initial_currency, output_currency, d)
             for d in dates_to_use
         ]
-        avg_rate = sum(rates) / len(rates)
-    else:  # "reference"
+        avg_rate = sum(rates) / len(rates) if rates else default_exchange_rate
+    else:  # "reference": use module-level reference_year
         effective_year = reference_year
         dates_to_use = [d for d in available_dates if d.year == effective_year]
         if not dates_to_use and default_exchange_rate is not None:
@@ -1060,18 +1060,17 @@ def get_yearly_currency_exchange_rate(
 def build_currency_conversion_cache(
     df,
     output_currency,
-    reference_year: int,
     default_exchange_rate=None,
     future_exchange_rate_strategy: str = "reference",
     custom_future_exchange_rate: float = None,
 ):
     """
     Builds a cache of exchange rates for all unique (currency, output_currency) pairs,
-    always using the same reference_year.
+    always using the module-level reference_year.
     """
     currency_list = currency_converter.currencies
     unique_currencies = {
-        x["unit"][:3] for _, x in df.iterrows() if x["unit"][:3] in currency_list
+        x["unit"][0:3] for _, x in df.iterrows() if isinstance(x["unit"], str) and x["unit"][0:3] in currency_list
     }
 
     _currency_conversion_cache = {}
@@ -1080,8 +1079,7 @@ def build_currency_conversion_cache(
             rate = get_yearly_currency_exchange_rate(
                 initial_currency,
                 output_currency,
-                reference_year,
-                default_exchange_rate,
+                default_exchange_rate=default_exchange_rate,
                 _currency_conversion_cache=_currency_conversion_cache,
                 future_exchange_rate_strategy=future_exchange_rate_strategy,
                 custom_future_exchange_rate=custom_future_exchange_rate,
@@ -1098,9 +1096,7 @@ def build_currency_conversion_cache(
     return _currency_conversion_cache
 
 
-def apply_currency_conversion(
-    cost_dataframe, output_currency, cache, reference_year: int
-):
+def apply_currency_conversion(cost_dataframe, output_currency, cache):
     """
     Applies exchange rates from the cache to convert all cost values and units.
 
@@ -1124,7 +1120,7 @@ def apply_currency_conversion(
         rate = cache.get(key)
         if rate is not None:
             new_value = value * rate
-            new_unit = unit.replace(currency, output_currency)
+            new_unit = unit.replace(currency, output_currency, 1)
             return pd.Series([new_value, new_unit])
         else:
             logger.warning(f"Missing exchange rate for {key}. Skipping conversion.")
@@ -1143,12 +1139,12 @@ def prepare_costs(
     default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "latest",
     custom_future_exchange_rate: float = None,
-    reference_year: int | None = None,
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
+    Always uses the module-level reference_year.
     """
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
@@ -1179,20 +1175,17 @@ def prepare_costs(
             "Some rows are missing 'currency_year' and will be skipped in currency conversion."
         )
 
-    # Create a shared cache for exchange rates
-    reference_year = config.get("reference_year", 2020)
-
+    # Build a shared cache for exchange rates using the global reference_year
     _currency_conversion_cache = build_currency_conversion_cache(
         costs,
         output_currency,
-        reference_year=reference_year,
         default_exchange_rate=default_exchange_rate,
         future_exchange_rate_strategy=future_exchange_rate_strategy,
         custom_future_exchange_rate=custom_future_exchange_rate,
     )
 
     modified_costs = apply_currency_conversion(
-        costs, output_currency, _currency_conversion_cache, reference_year
+        costs, output_currency, _currency_conversion_cache
     )
 
     modified_costs = (
