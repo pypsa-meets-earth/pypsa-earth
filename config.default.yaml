@@ -478,6 +478,8 @@ policy_config:
   hydrogen:
     temporal_matching: "no_temporal_matching" #either "hour", "month", "year", "no_temporal_matching"
     spatial_matching: false
+    temporal_matching_carriers: [csp, solar, onwind, offwind-ac, offwind-dc, ror, hydro]
+    matching_technologies: ["H2 Electrolysis", "Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC"]
     additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
     allowed_excess: 1.0
     is_reference: false # Whether or not this network is a reference case network, relevant only if additionality is _true_
