@@ -1070,7 +1070,9 @@ def build_currency_conversion_cache(
     """
     currency_list = currency_converter.currencies
     unique_currencies = {
-        x["unit"][0:3] for _, x in df.iterrows() if isinstance(x["unit"], str) and x["unit"][0:3] in currency_list
+        x["unit"][0:3]
+        for _, x in df.iterrows()
+        if isinstance(x["unit"], str) and x["unit"][0:3] in currency_list
     }
 
     _currency_conversion_cache = {}
