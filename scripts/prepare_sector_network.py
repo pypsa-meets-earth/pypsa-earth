@@ -2965,7 +2965,7 @@ def add_industry_demand(n, demand):
 def add_geothermal_industry_supply(n, supply_curve):
 
     dr = snakemake.params.costs["fill_values"]["discount rate"]
-    lifetimes = {"steam": 30, "power": 30, "pwr": 30, "directheat": 30}
+    lifetimes = {"steam": 20, "power": 25, "pwr": 25, "directheat": 30}
 
     # Create a mapping for temperature bands to bus suffixes
     temp_band_mapping = {
@@ -3462,7 +3462,11 @@ def attach_enhanced_geothermal(n, potential_fn, mode):
 
     # Calculate annuity factor for capital cost
     discount_rate = float(snakemake.wildcards.discountrate)
-    lifetime = 30  # years
+    if mode == "egs":
+        lifetime = 25
+    elif mode == "hs":
+        lifetime = 30
+
     annuity_factor = (
         discount_rate
         * (1 + discount_rate) ** lifetime

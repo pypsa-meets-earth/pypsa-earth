@@ -141,25 +141,17 @@ if __name__ == "__main__":
 
     with rasterio.open(list(tif_files.values())[0]) as src:
         transform = src.transform
-        x_stepsize = transform[0]  # Width of a pixel in map units
+        x_stepsize = transform[0]
         y_stepsize = abs(
             transform[4]
-        )  # Height of a pixel in map units (absolute value since it's negative)
-        logger.info(
-            f"Longitude stepsize: {x_stepsize}, Latitude stepsize: {y_stepsize}"
         )
 
         assert x_stepsize == y_stepsize
 
-    lats = np.arange(25, 50, y_stepsize) # US extent
-    lons = np.arange(-125, -65, x_stepsize)
-
-    area = np.mean(cell_areas(lats, lons, x_stepsize, y_stepsize))
-
     if mode == "egs":
-        capacity_per_datapoint = area * 0.45 # assuming a 0.45MW/km2 footprint
+        capacity_density = 0.45 # assuming a 0.45MW/km2 footprint
     elif mode == "hs":
-        capacity_per_datapoint = area * 0.024 # assuming a 0.024MW/km2 footprint
+        capacity_density = 0.024 # assuming a 0.024MW/km2 footprint
     else:
         raise ValueError(f"Invalid mode: {mode}")
 
@@ -190,18 +182,8 @@ if __name__ == "__main__":
         .mul(1e6)
     )
 
-    gdf["heat_share"] = gdf["sales_heat"].div(gdf["sales_power"])
-
-    # gdf["p_nom_max[MWe]"] = gdf["sales_power"] * plants_per_datapoint
-    gdf["p_nom_max[MWe]"] = capacity_per_datapoint
-
-    nodal_egs_potentials = pd.DataFrame(
-        np.nan,
-        index=regions.index,
-        columns=["capex[USD/MWe]", "opex[USD/MWhe]", "p_nom_max[MWe]"],
-    )
-
     config = snakemake.params["enhanced_geothermal"]
+    n_steps = config["supply_curve_steps"]
 
     regional_potentials = []
 
@@ -210,118 +192,42 @@ if __name__ == "__main__":
         desc="Matching EGS potentials to network regions",
         ascii=True,
     ):
-        # For polygon geometries, we need to check which regions overlap with the polygon
+
         ss = gdf[
             gdf.geometry.intersects(geom)
-        ]  # could be improved for partial overlaps
+        ]
+
         if ss.empty:
             continue
 
-        # Sort by capex first
         ss = (
-            ss[["capex[USD/MWe]", "opex[USD/MWhe]", "p_nom_max[MWe]"]]
+            ss[["capex[USD/MWe]", "opex[USD/MWhe]"]]
             .reset_index(drop=True)
             .sort_values(by="capex[USD/MWe]")
         )
 
-        ss["agg_available_capacity[MWe]"] = ss["p_nom_max[MWe]"].cumsum()
+        centroid = geom.centroid
+        area = cell_areas(centroid.y, centroid.x, x_stepsize, y_stepsize)
+        ss["p_nom_max[MWe]"] = capacity_density * area
 
-        if ss.empty:
-            continue
-
-        # Instead of equal capex ranges, create bins with equal capacity
-        if len(ss) > 1:
-            total_capacity = ss["p_nom_max[MWe]"].sum()
-            capacity_per_bin = total_capacity / config["supply_curve_steps"]
-
-            # Create bins based on equal capacity distribution
-            bin_edges = []
-            current_capacity = 0
-            target_capacity = capacity_per_bin
-
-            # Create a dictionary to store data for each bin
-            bin_data = []
-            current_bin = {"capacity": 0, "capex_weighted_sum": 0}
-
-            for _, row in ss.iterrows():
-                current_bin["capacity"] += row["p_nom_max[MWe]"]
-                current_bin["capex_weighted_sum"] += (
-                    row["capex[USD/MWe]"] * row["p_nom_max[MWe]"]
-                )
-
-                # If we've reached or exceeded the target capacity for this bin
-                if current_bin["capacity"] >= target_capacity:
-                    # Calculate weighted average capex for the bin
-                    weighted_capex = (
-                        current_bin["capex_weighted_sum"] / current_bin["capacity"]
-                    )
-                    bin_data.append(
-                        {
-                            "level": myround(weighted_capex),
-                            "p_nom_max[MWe]": current_bin["capacity"],
-                            "opex[USD/MWhe]": row[
-                                "opex[USD/MWhe]"
-                            ],  # For simplicity, using the last opex
-                        }
-                    )
-
-                    # Start a new bin
-                    current_bin = {"capacity": 0, "capex_weighted_sum": 0}
-                    target_capacity += capacity_per_bin
-
-            # Add any remaining capacity to the last bin
-            if current_bin["capacity"] > 0:
-                weighted_capex = (
-                    current_bin["capex_weighted_sum"] / current_bin["capacity"]
-                )
-                bin_data.append(
-                    {
-                        "level": myround(weighted_capex),
-                        "p_nom_max[MWe]": current_bin["capacity"],
-                        "opex[USD/MWhe]": ss["opex[USD/MWhe]"].iloc[
-                            -1
-                        ],  # Using the last opex
-                    }
-                )
-
-            # Convert to DataFrame
-            ss = pd.DataFrame(bin_data)
-        else:
-            ss["level"] = ss["capex[USD/MWe]"].iloc[0]
-
-        ss = ss.dropna()
-
-        # Convert to the desired format
-        if len(ss) > 1:
-            ss = ss.set_index("level")
-        else:
-            # Handle the single row case
-            ss = ss.groupby("level")[["p_nom_max[MWe]", "opex[USD/MWhe]"]].agg(
-                {"p_nom_max[MWe]": "sum", "opex[USD/MWhe]": "mean"}
-            )
-
-        ss.index = pd.MultiIndex.from_product(
-            [[name], ss.index], names=["network_region", "capex[USD/MWe]"]
+        binned = ss.groupby(np.arange(len(ss)) // (len(ss) / n_steps)).agg({
+            "capex[USD/MWe]": "mean",
+            "opex[USD/MWhe]": "mean",
+            "p_nom_max[MWe]": "sum",
+        })
+        binned.index = pd.MultiIndex.from_product(
+            [[name], range(len(binned))], names=["network_region", "supply_curve_step"]
         )
 
-        ss.loc[:, "p_nom_max[MWe]"] = ss.loc[:, "p_nom_max[MWe]"].iloc[0]
+        regional_potentials.append(binned)
 
-        regional_potentials.append(ss)
-
-    regional_potentials = pd.concat(regional_potentials).dropna()
-
-    regional_potentials = regional_potentials.reset_index(level="capex[USD/MWe]")
-
-    regional_potentials["supply_curve_step"] = (
-        regional_potentials.groupby("network_region").cumcount() + 1
-    )
-
-    regional_potentials = regional_potentials.set_index(
-        "supply_curve_step", append=True
-    )
+    regional_potentials = pd.concat(regional_potentials)
+    assert regional_potentials.notna().all().all(), "There are NaNs in the regional potentials"
 
     regional_potentials = regional_potentials.rename(
         columns={"capex[USD/MWe]": "capital_cost[USD/MWe]"}
     )
 
+    total_capacity = regional_potentials['p_nom_max[MWe]'].sum() * 1e-6
+    logger.info(f"Found {total_capacity:.3f} TWel {mode} potential. Saving to {snakemake.output.egs_potentials}.")
     regional_potentials.to_csv(snakemake.output.egs_potentials)
