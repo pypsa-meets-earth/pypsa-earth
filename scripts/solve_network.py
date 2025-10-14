@@ -701,24 +701,40 @@ def add_h2_network_cap(n, cap):
 
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
-
-    res_techs = [
-        "csp",
-        "solar",
-        "onwind",
-        "offwind-ac",
-        "offwind-dc",
-        "ror",
+    """
+    Applies temporal constraints for hydrogen production based on renewable energy sources (RES)
+    and electrolysis within a specified time period. The function ensures that the hydrogen production
+    adheres to policy configurations such as temporal matching and allowed excess.
+    Parameters:
+    -----------
+    n : pypsa.Network
+        The PyPSA network object containing the current state of the energy system model.
+    n_ref : pypsa.Network
+        A reference PyPSA network object used for additionality constraints (if enabled).
+    time_period : str
+        The time period for grouping constraints. Can be one of "hour", "month", or "year".
+    Returns:
+    --------
+    None
+        Adds constraints directly to the PyPSA network model.
+    Raises:
+    -------
+    KeyError
+        If required configuration keys are missing in `snakemake.config`.
+    ValueError
+        If an unsupported `time_period` is provided.
+    """
+    temporal_matching_carriers = snakemake.params.policy_config["hydrogen"][
+        "temporal_matching_carriers"
     ]
-
-    res_stor_techs = ["hydro"]
-
     allowed_excess = snakemake.params.policy_config["hydrogen"]["allowed_excess"]
 
     # Generation
-    res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_gen_index = n.generators.loc[
+        n.generators.carrier.isin(temporal_matching_carriers)
+    ].index
     res_stor_index = n.storage_units.loc[
-        n.storage_units.carrier.isin(res_stor_techs)
+        n.storage_units.carrier.isin(temporal_matching_carriers)
     ].index
 
     weightings_gen = pd.DataFrame(
@@ -746,15 +762,10 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    electrolysis_carriers = [
-        "H2 Electrolysis",
-        "Alkaline electrolyzer large",
-        "Alkaline electrolyzer medium",
-        "Alkaline electrolyzer small",
-        "PEM electrolyzer",
-        "SOEC",
+    matching_technologies = snakemake.params.policy_config["hydrogen"][
+        "matching_technologies"
     ]
-    electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
+    electrolysis_index = n.links.index[n.links.carrier.isin(matching_technologies)]
 
     link_p = n.model["Link-p"]
     electrolysis = link_p.loc[:, electrolysis_index]

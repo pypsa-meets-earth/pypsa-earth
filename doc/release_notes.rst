@@ -29,6 +29,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds `PR #1592 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592>`__
 
+* Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
+
+* Enable config options to customize hydrogen and renewable carriers for temporal matching `PR #1489 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489>`__
 
 **Minor Changes and bug-fixing**
 
