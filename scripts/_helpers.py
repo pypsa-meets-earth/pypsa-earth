@@ -967,7 +967,7 @@ def annuity(n, r):
 
 # Single source for the currency reference year (aligned with `technology-data` output files / PyPSA-Earth input cost files).
 # Change this value to update the reference year everywhere.
-reference_year = 2020
+TECH_DATA_REFERENCE_YEAR = 2020
 
 # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 _currency_conversion_cache = {}
