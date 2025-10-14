@@ -980,7 +980,6 @@ def get_yearly_currency_exchange_rate(
     _currency_conversion_cache: dict = None,
     future_exchange_rate_strategy: str = "reference",  # "reference", "latest", "custom"
     custom_future_exchange_rate: float = None,
-    reference_year: int = TECH_DATA_REFERENCE_YEAR,
 ):
     """
     Returns the average currency exchange rate for the global reference_year.
@@ -996,7 +995,7 @@ def get_yearly_currency_exchange_rate(
     _currency_conversion_cache : dict, optional
         Cache for repeated calls.
     future_exchange_rate_strategy : str
-        "reference" (use reference_year),
+        "reference" (use TECH_DATA_REFERENCE_YEAR),
         "latest" (use most recent available year),
         "custom" (use custom_future_exchange_rate).
     custom_future_exchange_rate : float, optional
@@ -1008,7 +1007,7 @@ def get_yearly_currency_exchange_rate(
     key = (
         initial_currency,
         output_currency,
-        reference_year,
+        TECH_DATA_REFERENCE_YEAR,
         future_exchange_rate_strategy,
     )
     if key in _currency_conversion_cache:
@@ -1043,7 +1042,7 @@ def get_yearly_currency_exchange_rate(
         ]
         avg_rate = sum(rates) / len(rates) if rates else default_exchange_rate
     else:  # "reference": use module-level reference_year
-        effective_year = reference_year
+        effective_year = TECH_DATA_REFERENCE_YEAR
         dates_to_use = [d for d in available_dates if d.year == effective_year]
         if not dates_to_use and default_exchange_rate is not None:
             avg_rate = default_exchange_rate
@@ -1088,7 +1087,7 @@ def build_currency_conversion_cache(
                 custom_future_exchange_rate=custom_future_exchange_rate,
             )
             _currency_conversion_cache[
-                (initial_currency, output_currency, reference_year)
+                (initial_currency, output_currency, TECH_DATA_REFERENCE_YEAR)
             ] = rate
         except Exception as e:
             logger.warning(
@@ -1119,7 +1118,7 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
         if currency not in currency_list:
             return pd.Series([value, unit])
 
-        key = (currency, output_currency, reference_year)
+        key = (currency, output_currency, TECH_DATA_REFERENCE_YEAR)
         rate = cache.get(key)
         if rate is not None:
             new_value = value * rate
