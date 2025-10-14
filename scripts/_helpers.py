@@ -980,6 +980,7 @@ def get_yearly_currency_exchange_rate(
     _currency_conversion_cache: dict = None,
     future_exchange_rate_strategy: str = "reference",  # "reference", "latest", "custom"
     custom_future_exchange_rate: float = None,
+    reference_year: int = TECH_DATA_REFERENCE_YEAR,
 ):
     """
     Returns the average currency exchange rate for the global reference_year.
