@@ -1,19 +1,19 @@
 <!--
-SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+SPDX-FileCopyrightText:  PyPSA-ASEAN, PyPSA-Earth and PyPSA-Eur Authors
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# PyPSA-Earth. A Flexible Python-based Open Optimisation Model to Study Energy System Futures around the World.
+# PyPSA-ASEAN: A flexible Python-based open optimisation model to study energy system futures in the ASEAN region.
 
 <p align="left">
-by
+Made using PyPSA-Earth by
 <a href="https://pypsa-meets-earth.github.io">
     <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" width="150">
 <a/>
 </p>
 
-## Development Status: **Stable and Active**
+## Development Status: **Ongoing Validation**
 
 [![Test workflows](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
@@ -26,6 +26,22 @@ by
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/13Z8Y9zgsh5IZaDNkkRyo1wkoMgbdUxT5?usp=sharing)
 [![DOI](https://img.shields.io/badge/DOI-10.1016%2Fj.apenergy.2023.121096-blue)](https://doi.org/10.1016/j.apenergy.2023.121096)
 
+**PyPSA-ASEAN: An ASEAN-Focused Sector-Coupled Open-Source Multi-Energy System Model**
+
+PyPSA-ASEAN is the first open-source ASEAN-wide cross-sectoral energy system model with high spatial and temporal resolution. It builds on the existing PyPSA-Earth framework and integrates region-specific data tailored to the context of the Southeast Asia region. It aims to leverage the ongoing improvements in PyPSA-Earth using the soft-fork strategy while making it as easy as possible for users to create validated models of individual ASEAN countries or the entire region at once.
+
+Countries available to use in this model:
+- 🇧🇳 **Brunei**
+- 🇰🇭 **Cambodia**
+- 🇮🇩 **Indonesia**
+- 🇱🇦 **Laos**
+- 🇲🇾 **Malaysia**
+- 🇲🇲 **Myanmar**
+- 🇵🇭 **Philippines**
+- 🇸🇬 **Singapore**
+- 🇹🇭 **Thailand**
+- 🇹🇱 **Timor-Leste**
+- 🇻🇳 **Vietnam**
 
 **PyPSA-Earth: A Global Sector-Coupled Open-Source Multi-Energy System Model**
 
