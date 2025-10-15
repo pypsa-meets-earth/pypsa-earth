@@ -33,6 +33,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
 
+* Enable config options to customize hydrogen and renewable carriers for temporal matching `PR #1489 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489>`__
+
 **Minor Changes and bug-fixing**
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
