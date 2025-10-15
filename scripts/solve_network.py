@@ -214,7 +214,7 @@ def add_CCL_constraints(n, config):
     try:
         agg_p_nom_minmax = pd.read_csv(
             agg_p_nom_limits, index_col=list(range(2)), header=[0, 1]
-        )[snakemake.wildcards.planning_horizons]
+        )[snakemake.wildcards.planning_horizons].unstack('carrier')
     except IOError:
         logger.exception(
             "Need to specify the path to a .csv file containing "
@@ -225,50 +225,57 @@ def add_CCL_constraints(n, config):
         "Adding per carrier generation capacity constraints for " "individual countries"
     )
 
-    gen_country = n.generators.bus.map(n.buses.country)
     capacity_variable = n.model["Generator-p_nom"]
 
     lhs = []
     existing_capacities = []
+
+    # get carriers to which CCL constraints apply
+    ccl_carriers = agg_p_nom_minmax.columns.get_level_values(1).unique()
     ext_carriers = n.generators.query("p_nom_extendable").carrier.unique()
-    for c in ext_carriers:
+    ccl_carriers = ccl_carriers[ccl_carriers.isin(ext_carriers)]
+
+    # If no CCL carriers found, return early
+    if not ccl_carriers.any():
+        logger.info("No CCL carriers found that are extendable. Skipping CCL constraints.")
+        return
+
+    for c in ccl_carriers:
         # Handle extendable capacities
-        ext_carrier = n.generators.query("p_nom_extendable and carrier == @c")
+        ccl_carrier = n.generators[n.generators.carrier == c]
         country_grouper = (
-            ext_carrier.bus.map(n.buses.country)
+            ccl_carrier.bus.map(n.buses.country)
             .rename_axis("Generator-ext")
             .rename("country")
         )
-        ext_carrier_per_country = capacity_variable.loc[
+        lhs = capacity_variable.loc[
             country_grouper.index
         ].groupby(country_grouper).sum()
-        lhs.append(ext_carrier_per_country)
         
-        # Handle existing capacities
-        existing_carrier = n.generators.query("not p_nom_extendable and carrier == @c")
-        if not existing_carrier.empty:
-            existing_country_grouper = existing_carrier.bus.map(n.buses.country)
-            existing_per_country = existing_carrier.p_nom.groupby(existing_country_grouper).sum()
-        else:
-            existing_per_country = pd.Series(dtype=float)
-        existing_capacities.append(existing_per_country)
-    lhs = merge(lhs, dim=pd.Index(ext_carriers, name="carrier"))
-    
-    existing_matrix = pd.concat(existing_capacities, keys=ext_carriers, names=['carrier', 'country']).reindex_like(lhs.to_pandas()).fillna(0)
+        # Obtain existing capacities
+        existing_capacities_per_country = ccl_carrier.p_nom.groupby(country_grouper).sum()
 
-    min_matrix = agg_p_nom_minmax["min"].to_xarray().unstack().reindex_like(lhs)
-    max_matrix = agg_p_nom_minmax["max"].to_xarray().unstack().reindex_like(lhs)
+        # Obtain minimum and maximum constraint limits
+        min_values = agg_p_nom_minmax["min"][c]
+        max_values = agg_p_nom_minmax["max"][c]
 
-    # Adjust constraints to account for existing capacities
-    adjusted_min_matrix = (min_matrix - existing_matrix).clip(lower=0)
-    adjusted_max_matrix = (max_matrix - existing_matrix).clip(lower=0)
+        # Adjust limits based on existing capacities
+        adjusted_min_values = (min_values - existing_capacities_per_country).clip(lower=0)
+        adjusted_max_values = (max_values - existing_capacities_per_country).clip(lower=0)
 
-    n.model.add_constraints(
-        lhs >= adjusted_min_matrix, name="agg_p_nom_min", mask=adjusted_min_matrix.notnull()
-    )
-    n.model.add_constraints(
-        lhs <= adjusted_max_matrix, name="agg_p_nom_max", mask=adjusted_max_matrix.notnull()
-    )
+        # Valid constraints
+        valid_min = adjusted_min_values.notnull() & (adjusted_min_values > 0)
+        valid_max = adjusted_max_values.notnull() & (adjusted_max_values < np.inf)
+
+        if valid_min.any():
+            n.model.add_constraints(
+                lhs >= adjusted_min_values, name="agg_p_nom_min", mask=valid_min
+            )
+
+        if valid_max.any():
+            n.model.add_constraints(
+                lhs <= adjusted_max_values, name="agg_p_nom_max", mask=valid_max
+            )
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
