@@ -269,12 +269,12 @@ def add_CCL_constraints(n, config):
 
         if valid_min.any():
             n.model.add_constraints(
-                lhs >= adjusted_min_values, name="agg_p_nom_min", mask=valid_min
+                lhs >= adjusted_min_values, name=f"agg_p_nom_min_{c}", mask=valid_min
             )
 
         if valid_max.any():
             n.model.add_constraints(
-                lhs <= adjusted_max_values, name="agg_p_nom_max", mask=valid_max
+                lhs <= adjusted_max_values, name=f"agg_p_nom_max_{c}", mask=valid_max
             )
 
 
