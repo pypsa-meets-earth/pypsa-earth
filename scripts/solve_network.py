@@ -214,7 +214,7 @@ def add_CCL_constraints(n, config):
     try:
         agg_p_nom_minmax = pd.read_csv(
             agg_p_nom_limits, index_col=list(range(2)), header=[0, 1]
-        )[snakemake.wildcards.planning_horizons].unstack('carrier')
+        )[snakemake.wildcards.planning_horizons].unstack("carrier")
     except IOError:
         logger.exception(
             "Need to specify the path to a .csv file containing "
@@ -237,7 +237,9 @@ def add_CCL_constraints(n, config):
 
     # If no CCL carriers found, return early
     if not ccl_carriers.any():
-        logger.info("No CCL carriers found that are extendable. Skipping CCL constraints.")
+        logger.info(
+            "No CCL carriers found that are extendable. Skipping CCL constraints."
+        )
         return
 
     for c in ccl_carriers:
@@ -248,20 +250,26 @@ def add_CCL_constraints(n, config):
             .rename_axis("Generator-ext")
             .rename("country")
         )
-        lhs = capacity_variable.loc[
-            country_grouper.index
-        ].groupby(country_grouper).sum()
-        
+        lhs = (
+            capacity_variable.loc[country_grouper.index].groupby(country_grouper).sum()
+        )
+
         # Obtain existing capacities
-        existing_capacities_per_country = ccl_carrier.p_nom.groupby(country_grouper).sum()
+        existing_capacities_per_country = ccl_carrier.p_nom.groupby(
+            country_grouper
+        ).sum()
 
         # Obtain minimum and maximum constraint limits
         min_values = agg_p_nom_minmax["min"][c]
         max_values = agg_p_nom_minmax["max"][c]
 
         # Adjust limits based on existing capacities
-        adjusted_min_values = (min_values - existing_capacities_per_country).clip(lower=0)
-        adjusted_max_values = (max_values - existing_capacities_per_country).clip(lower=0)
+        adjusted_min_values = (min_values - existing_capacities_per_country).clip(
+            lower=0
+        )
+        adjusted_max_values = (max_values - existing_capacities_per_country).clip(
+            lower=0
+        )
 
         # Valid constraints
         valid_min = adjusted_min_values.notnull() & (adjusted_min_values > 0)
