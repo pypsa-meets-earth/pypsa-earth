@@ -39,7 +39,6 @@ LINES_COLUMNS = [
     "length",
     "dc",
     "geometry",
-    "bounds",
 ]
 CONVERTERS_COLUMNS = [
     "converter_id",
