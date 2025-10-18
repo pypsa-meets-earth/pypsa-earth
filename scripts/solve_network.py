@@ -196,6 +196,8 @@ def add_CCL_constraints(n, config):
     Add minimum and maximum levels of generator nominal capacity per carrier
     for individual countries. Opts and path for agg_p_nom_minmax.csv must be defined
     in config.yaml. Default file is available at data/agg_p_nom_minmax.csv.
+    Parameter include_existing in config.yaml decides whether existing capacities
+    are considered in the CCL constraints. Default is false.
 
     Parameters
     ----------
@@ -207,12 +209,16 @@ def add_CCL_constraints(n, config):
     scenario:
         opts: [Co2L-CCL-24H]
     electricity:
-        agg_p_nom_limits: data/agg_p_nom_minmax.csv
+        agg_p_nom_limits:
+            file: data/agg_p_nom_minmax.csv
+            include_existing: false
     """
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
-        agg_p_nom_minmax = pd.read_csv(agg_p_nom_limits, index_col=list(range(2)))
+        agg_p_nom_minmax = pd.read_csv(
+            agg_p_nom_limits["file"], index_col=list(range(2)), header=[0, 1]
+        )[snakemake.wildcards.planning_horizons].unstack("carrier")
     except IOError:
         logger.exception(
             "Need to specify the path to a .csv file containing "
@@ -223,33 +229,62 @@ def add_CCL_constraints(n, config):
         "Adding per carrier generation capacity constraints for " "individual countries"
     )
 
-    gen_country = n.generators.bus.map(n.buses.country)
     capacity_variable = n.model["Generator-p_nom"]
 
-    lhs = []
+    # get carriers to which CCL constraints apply
+    ccl_carriers = agg_p_nom_minmax.columns.get_level_values(1).unique()
     ext_carriers = n.generators.query("p_nom_extendable").carrier.unique()
-    for c in ext_carriers:
-        ext_carrier = n.generators.query("p_nom_extendable and carrier == @c")
+    ccl_carriers = ccl_carriers[ccl_carriers.isin(ext_carriers)]
+
+    # If no CCL carriers found, return early
+    if not ccl_carriers.any():
+        logger.info(
+            "No CCL carriers found that are extendable. Skipping CCL constraints."
+        )
+        return
+
+    for c in ccl_carriers:
+        # Handle extendable capacities
+        ccl_carrier = n.generators[n.generators.carrier == c]
         country_grouper = (
-            ext_carrier.bus.map(n.buses.country)
+            ccl_carrier.bus.map(n.buses.country)
             .rename_axis("Generator-ext")
             .rename("country")
         )
-        ext_carrier_per_country = capacity_variable.loc[
-            country_grouper.index
-        ].groupby_sum(country_grouper)
-        lhs.append(ext_carrier_per_country)
-    lhs = merge(lhs, dim=pd.Index(ext_carriers, name="carrier"))
+        lhs = (
+            capacity_variable.loc[country_grouper.index].groupby(country_grouper).sum()
+        )
 
-    min_matrix = agg_p_nom_minmax["min"].to_xarray().unstack().reindex_like(lhs)
-    max_matrix = agg_p_nom_minmax["max"].to_xarray().unstack().reindex_like(lhs)
+        # Obtain existing capacities
+        existing_capacities_per_country = ccl_carrier.p_nom.groupby(
+            country_grouper
+        ).sum()
 
-    n.model.add_constraints(
-        lhs >= min_matrix, name="agg_p_nom_min", mask=min_matrix.notnull()
-    )
-    n.model.add_constraints(
-        lhs <= max_matrix, name="agg_p_nom_max", mask=max_matrix.notnull()
-    )
+        # Obtain minimum and maximum constraint limits
+        min_values = agg_p_nom_minmax["min"][c]
+        max_values = agg_p_nom_minmax["max"][c]
+
+        if agg_p_nom_limits.get("include_existing", False):
+            # Adjust limits based on existing capacities
+            min_values = (min_values - existing_capacities_per_country).clip(lower=0)
+            max_values = (max_values - existing_capacities_per_country).clip(lower=0)
+            logger.info(
+                f"Considered existing capacities in CCL constraints for carrier {c}."
+            )
+
+        # Valid constraints
+        valid_min = min_values.notnull() & (min_values > 0)
+        valid_max = max_values.notnull() & (max_values < np.inf)
+
+        if valid_min.any():
+            n.model.add_constraints(
+                lhs >= min_values, name=f"agg_p_nom_min_{c}", mask=valid_min
+            )
+
+        if valid_max.any():
+            n.model.add_constraints(
+                lhs <= max_values, name=f"agg_p_nom_max_{c}", mask=valid_max
+            )
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
