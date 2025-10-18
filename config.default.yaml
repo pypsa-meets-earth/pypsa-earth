@@ -182,7 +182,9 @@ electricity:
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
-  agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  agg_p_nom_limits:
+    file: data/agg_p_nom_minmax.csv
+    include_existing: true
   hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
