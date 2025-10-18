@@ -151,7 +151,7 @@ if __name__ == "__main__":
     if mode == "egs":
         capacity_density = 0.45 # assuming a 0.45MW/km2 footprint
     elif mode == "hs":
-        capacity_density = 0.024 # assuming a 0.024MW/km2 footprint
+        capacity_density = 0.3 # assuming a 0.3MW/km2 footprint
     else:
         raise ValueError(f"Invalid mode: {mode}")
 
