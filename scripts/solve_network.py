@@ -262,12 +262,8 @@ def add_CCL_constraints(n, config):
 
         if agg_p_nom_limits.get("include_existing", False):
             # Adjust limits based on existing capacities
-            min_values = (min_values - existing_capacities_per_country).clip(
-                lower=0
-            )
-            max_values = (max_values - existing_capacities_per_country).clip(
-                lower=0
-            )
+            min_values = (min_values - existing_capacities_per_country).clip(lower=0)
+            max_values = (max_values - existing_capacities_per_country).clip(lower=0)
             logger.info(
                 f"Considered existing capacities in CCL constraints for carrier {c}."
             )
