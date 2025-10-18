@@ -35,6 +35,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Enable config options to customize hydrogen and renewable carriers for temporal matching `PR #1489 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489>`__
 
+* Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
+
 **Minor Changes and bug-fixing**
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
