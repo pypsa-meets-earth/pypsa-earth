@@ -196,6 +196,8 @@ def add_CCL_constraints(n, config):
     Add minimum and maximum levels of generator nominal capacity per carrier
     for individual countries. Opts and path for agg_p_nom_minmax.csv must be defined
     in config.yaml. Default file is available at data/agg_p_nom_minmax.csv.
+    Parameter include_existing in config.yaml decides whether existing capacities
+    are considered in the CCL constraints. Default is false.
 
     Parameters
     ----------
@@ -207,7 +209,9 @@ def add_CCL_constraints(n, config):
     scenario:
         opts: [Co2L-CCL-24H]
     electricity:
-        agg_p_nom_limits: data/agg_p_nom_minmax.csv
+        agg_p_nom_limits:
+            file: data/agg_p_nom_minmax.csv
+            include_existing: false
     """
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
