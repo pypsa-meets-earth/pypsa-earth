@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
+
 * Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__
 
 * Added Section covering Optimization for Energy Systems Models `PR #1558 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558>`__
@@ -29,6 +31,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds `PR #1592 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592>`__
 
+* Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
+
+* Enable config options to customize hydrogen and renewable carriers for temporal matching `PR #1489 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489>`__
 
 **Minor Changes and bug-fixing**
 
@@ -47,6 +52,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Avoid using variable "nodes" in prepare_sector_network unless explicitly in the arguments `PR #1575 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1575>`__
 
 * Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
+
+* Create a section in the documentation to include information about custom data in the model `PR #1571 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1571>`__
 
 * Bug-fixing override co2opt in add_co2_budget `PR #1597 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1597>`__
 
