@@ -109,11 +109,9 @@ if __name__ == "__main__":
     custom_data = snakemake.config.get("custom_data", {}).get("osm_data", {})
     set_custom_data = custom_data.get("set", False)
     custom_data_path = custom_data.get("custom_path", "data/custom/osm")
-
-    
     
     # Check for historical date configuration
-    historical_config = snakemake.config.get("historical_data", {})
+    historical_config = snakemake.config.get("historical_osm_data", {})
     target_date = historical_config.get("osm_date", None)
 
     # Parse target_date if provided as string
