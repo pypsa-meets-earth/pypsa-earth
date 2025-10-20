@@ -227,6 +227,16 @@ rule build_osm_network:
         + RDIR
         + "base_network/all_transformers_build_network.csv",
         substations="resources/" + RDIR + "base_network/all_buses_build_network.csv",
+        lines_geo="resources/" + RDIR + "base_network/all_lines_build_network.geojson",
+        converters_geo="resources/"
+        + RDIR
+        + "base_network/all_converters_build_network.geojson",
+        transformers_geo="resources/"
+        + RDIR
+        + "base_network/all_transformers_build_network.geojson",
+        substations_geo="resources/"
+        + RDIR
+        + "base_network/all_buses_build_network.geojson",
     log:
         "logs/" + RDIR + "build_osm_network.log",
     benchmark:
@@ -374,12 +384,16 @@ if config["enable"].get("build_natura_raster", False):
     rule build_natura_raster:
         params:
             area_crs=config["crs"]["area_crs"],
+            natura=config["natura"],
+            disable_progress=not config["enable"]["progress_bar"],
         input:
             shapefiles_land="data/landcover",
             cutouts=expand(
                 "cutouts/" + CDIR + "{cutout}.nc",
                 cutout=[c["cutout"] for _, c in config["renewable"].items()],
             ),
+            country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+            offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         output:
             "resources/" + RDIR + "natura.tiff",
         log:
