@@ -101,14 +101,17 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = Path(snakemake.params.store_path_resources)
-    store_path_data = Path(snakemake.params.store_path_data)
+    store_path_resources = Path.joinpath(
+        Path(BASE_DIR), "resources", RDIR, "osm", "raw"
+    )
+    store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm")
     country_list = country_list_to_geofk(snakemake.params.countries)
-    custom_data = snakemake.config.get("custom_data", {}).get("osm_data")
-    custom_data_path = Path(snakemake.params.get("custom_data_path", "data/custom/osm"))
+    custom_data = snakemake.config.get("custom_data", {}).get("osm_data", {})
+    set_custom_data = custom_data.get("set", False)
+    custom_data_path = custom_data.get("custom_path", "data/custom/osm")
 
     # Check for historical date configuration
-    historical_config = snakemake.config.get("historical_data", {})
+    historical_config = snakemake.config.get("historical_osm_data", {})
     target_date = historical_config.get("osm_date", None)
 
     # Parse target_date if provided as string
@@ -129,7 +132,11 @@ if __name__ == "__main__":
         )
 
     # allow for custom data usage
-    if custom_data:
+    if set_custom_data and not os.path.exists(custom_data_path):
+        raise FileNotFoundError(
+            f"Custom OSM data path {custom_data_path} does not exist. Please provide a valid path."
+        )
+    elif set_custom_data and os.path.exists(custom_data_path):
         logger.info(
             "Custom OSM data usage is activated. Skipping the download of OSM data."
         )
@@ -159,7 +166,7 @@ if __name__ == "__main__":
             logger.info("Historical data download enabled")
         elif target_date:
             logger.warning(
-                "Historical date requested but earth-osm version doesn't support target_date parameter"
+                "Historical date requested but earth-osm version doesn't support target_date parameter. Downloading the latest OSM data."
             )
 
         eo.save_osm_data(**save_args)
