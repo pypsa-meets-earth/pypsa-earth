@@ -135,6 +135,7 @@ from _helpers import (
     configure_logging,
     create_logger,
     locate_bus,
+    nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -312,7 +313,7 @@ def distribute_clusters(
         n_clusters >= len(N) and n_clusters <= N.sum()
     ), f"Number of clusters must be {len(N)} <= n_clusters <= {N.sum()} for this selection of countries."
 
-    if focus_weights is not None:
+    if focus_weights:
         total_focus = sum(list(focus_weights.values()))
 
         assert (
@@ -619,9 +620,12 @@ if __name__ == "__main__":
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
-    focus_weights = snakemake.params.get("focus_weights", None)
+    focus_weights = (
+        snakemake.params.focus_weights
+        or snakemake.params.cluster_options["focus_weights"]
+    )
     country_list = snakemake.params.countries
-    geo_crs = snakemake.params.geo_crs
+    geo_crs = snakemake.params.crs["geo_crs"]
 
     renewable_carriers = pd.Index(
         [
@@ -635,6 +639,26 @@ if __name__ == "__main__":
         "exclude_carriers", []
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
+
+    # Option for subregion
+    subregion_config = snakemake.params.subregion
+    if subregion_config["enable"]["cluster_network"]:
+        if subregion_config["define_by_gadm"]:
+            logger.info("Activate subregion classificaition based on GADM")
+            subregion_shapes = snakemake.input.subregion_shapes
+        elif subregion_config["path_custom_shapes"]:
+            logger.info("Activate subregion classificaition based on custom shapes")
+            subregion_shapes = subregion_config["path_custom_shapes"]
+        else:
+            logger.warning("Although enabled, no subregion classificaition is selected")
+            subregion_shapes = False
+
+        if subregion_shapes:
+            crs = snakemake.params.crs
+            tolerance = subregion_config["tolerance"]
+            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
+    else:
+        subregion_shapes = False
 
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
@@ -695,13 +719,13 @@ if __name__ == "__main__":
             },
         )
 
-        custom_busmap = False  # snakemake.params.custom_busmap custom busmap is depreciated https://github.com/pypsa-meets-earth/pypsa-earth/pull/694
+        custom_busmap = snakemake.params.custom_busmap
         if custom_busmap:
-            busmap = pd.read_csv(
-                snakemake.input.custom_busmap, index_col=0, squeeze=True
-            )
+            busmap = pd.read_csv(snakemake.input.custom_busmap, index_col=0).squeeze()
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
+            custom_busmap = busmap
+
         cluster_config = snakemake.config.get("cluster_options", {}).get(
             "cluster_network", {}
         )
@@ -728,6 +752,14 @@ if __name__ == "__main__":
         )
 
     update_p_nom_max(clustering.network)
+
+    if subregion_shapes:
+        logger.info("Deactivate subregion classificaition")
+        country_shapes = snakemake.input.country_shapes
+        clustering.network = nearest_shape(
+            clustering.network, country_shapes, crs, tolerance=tolerance
+        )
+
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
     )

@@ -117,6 +117,23 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
+   .. _natura_cf:
+
+``natura``
+===============
+
+If enabled, ``build_natura_raster`` creates an updated raster of the wold protected areas instead of using the provided default raster in ``data/natura/natura.tiff``.
+The options below select which regions to include in the raster and configure the rasterization process itself.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: natura:
+   :end-at: buffer_size:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/natura.csv
 
 .. _augmented_line_connection_cf:
 
@@ -177,7 +194,7 @@ Specifies the options to build the shapes in which the region of interest (``cou
 =============================
 
 If enabled, this option allows a region of interest (``countries``) to be redefined into subregions,
-which can be activated at various stages of the workflow. Currently, it is only used in the ``simplify_network`` rule.
+which can be activated at various stages of the workflow. Currently, it is used in ``simplify_network`` and ``cluster_network`` rule.
 
 .. literalinclude:: ../config.default.yaml
    :language: yaml
@@ -198,7 +215,7 @@ For example, consider the Central District of Botswana, which has a GADM ID of `
 .. literalinclude:: ../test/config.landlock.yaml
    :language: yaml
    :start-at: subregion:
-   :end-at: Central:
+   :end-at: Central: 0.3
 
 There are several formats for GADM IDs depending on the version, so before using this feature, please review the ``resources/shapes/gadm_shape.geojson`` file which can be created using the command:
 

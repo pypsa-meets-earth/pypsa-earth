@@ -49,15 +49,46 @@ import os
 import atlite
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import rasterio as rio
 from _helpers import configure_logging, create_logger
-from rasterio.features import geometry_mask
+from rasterio.features import geometry_mask, rasterize
 from rasterio.warp import transform_bounds
+from rasterio.windows import from_bounds
+from shapely.ops import unary_union
+from tqdm import tqdm
 
 logger = create_logger(__name__)
 
 
 CUTOUT_CRS = "EPSG:4326"
+
+
+def get_relevant_regions(country_shapes, offshore_shapes, natura_crs, buffer):
+    """
+    Merge the country_shapes and the offshore_shapes into one GeoDataFrame.
+    Additionally add a buffer to ensure all relevant regions are included.
+
+    Returns
+    -------
+    regions : GeoDataFrame with a unified "multipolygon"
+    """
+
+    # unify the country_shapes and offshore_shapes to select the regions of interest
+    # load country shapes
+    countries_gdf = gpd.read_file(country_shapes).to_crs(natura_crs)
+    countries = countries_gdf.geometry.union_all()
+
+    # load offshore shapes
+    offshore_gdf = gpd.read_file(offshore_shapes).to_crs(natura_crs)
+    offshore = offshore_gdf.geometry.union_all()
+
+    # combine countries and offshore regions into one merged geometry
+    merged_regions = unary_union([countries.buffer(buffer), offshore.buffer(buffer)])
+
+    regions = gpd.GeoDataFrame(geometry=[merged_regions], crs=natura_crs)
+
+    return regions
 
 
 def get_fileshapes(list_paths, accepted_formats=(".shp",)):
@@ -80,13 +111,36 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     return list_fileshapes
 
 
-def determine_cutout_xXyY(cutout_name, out_logging):
+def determine_region_xXyY(cutout_name, regions, natura_size, out_logging):
+    """
+    Determine the bounds of the analyzed regions depending on the natura_size parameter.
+    "global" includes the entire world, "cutout" the extend of the cutout, and
+    "countries" only includes the bounds of the requested countries and their offshore regions.
+
+    Returns
+    -------
+    cutout_xXyY : List including the bounds
+    """
+
     if out_logging:
         logger.info("Stage 1/5: Determine cutout boundaries")
+
     cutout = atlite.Cutout(cutout_name)
     assert cutout.crs == CUTOUT_CRS
-    x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
+
+    match natura_size:
+        case "global":
+            return [-180, 180, -90, 90]
+        case "cutout":
+            x, X, y, Y = cutout.extent
+        case "countries":
+            x, y, X, Y = regions.to_crs(CUTOUT_CRS).total_bounds
+        case _:
+            raise ValueError(
+                f"Provided an unknown value for the parameter 'natura_size': {natura_size}"
+            )
+
     cutout_xXyY = [
         np.clip(x - dx / 2.0, -180, 180),
         np.clip(X + dx / 2.0, -180, 180),
@@ -107,71 +161,22 @@ def get_transform_and_shape(bounds, res, out_logging):
     return transform, shape
 
 
-def unify_protected_shape_areas(inputs, natura_crs, out_logging):
+def decide_bigtiff_flag(out_shape, dtype="uint8", safety_factor=1.1):
     """
-    Iterates through all snakemake rule inputs and unifies shapefiles (.shp)
-    only.
-
-    The input is given in the Snakefile and shapefiles are given by .shp
-
+    Decide whether BIGTIFF should be "YES" or "NO" based on raster shape.
+    BIGTIFF is required for filesizes larger than 4 GB.
 
     Returns
     -------
-    unified_shape : GeoDataFrame with a unified "multishape"
+    str: "YES" if the estimated size is larger than 4 GB, else "NO".
     """
-    import pandas as pd
-    from shapely.ops import unary_union
-    from shapely.validation import make_valid
 
-    if out_logging:
-        logger.info("Stage 3/5: Unify protected shape area.")
+    tiff_size = 4_000_000_000
 
-    # Read only .shp snakemake inputs
-    shp_files = [string for string in inputs if ".shp" in string]
-    assert len(shp_files) != 0, "no input shapefiles given"
-    # Create one geodataframe with all geometries, of all .shp files
-    if out_logging:
-        logger.info(
-            "Stage 3/5: Unify protected shape area. Step 1: Create one geodataframe with all shapes"
-        )
+    bytes_per_pixel = np.dtype(dtype).itemsize
+    estimated_size = out_shape[0] * out_shape[1] * bytes_per_pixel * safety_factor
 
-    # initialize counted files
-    total_files = 0
-    read_files = 0
-    list_shapes = []
-    for i in shp_files:
-        shp = gpd.read_file(i).to_crs(natura_crs)
-        total_files += 1
-        try:
-            shp.geometry = shp.geometry.make_valid()
-            list_shapes.append(shp)
-            read_files += 1
-        except:
-            logger.warning(f"Error reading file {i}")
-
-    # merge dataframes
-    shape = gpd.GeoDataFrame(pd.concat(list_shapes)).to_crs(natura_crs)
-
-    logger.info(f"Read {read_files} out of {total_files} landcover files")
-
-    # Removes shapely geometry with null values. Returns geoseries.
-    shape = shape["geometry"][shape["geometry"].is_valid]
-
-    # Create Geodataframe with crs
-    shape = gpd.GeoDataFrame(shape, crs=natura_crs)
-    shape = shape.rename(columns={0: "geometry"}).set_geometry("geometry")
-
-    # Unary_union makes out of i.e. 1000 shapes -> 1 unified shape
-    if out_logging:
-        logger.info("Stage 3/5: Unify protected shape area. Step 2: Unify all shapes")
-    unified_shape_file = unary_union(shape["geometry"])
-    if out_logging:
-        logger.info(
-            "Stage 3/5: Unify protected shape area. Step 3: Set geometry of unified shape"
-        )
-    unified_shape = gpd.GeoDataFrame(geometry=[unified_shape_file], crs=natura_crs)
-
-    return unified_shape
+    return "YES" if estimated_size > tiff_size else "NO"
 
 
 if __name__ == "__main__":
@@ -190,27 +195,48 @@ if __name__ == "__main__":
     inputs = snakemake.input
     cutouts = inputs.cutouts
     shapefiles = get_fileshapes(inputs)
+    country_shapes = inputs.country_shapes
+    offshore_shapes = inputs.offshore_shapes
+    natura_size = snakemake.params.natura["natura_size"]
+    natura_resolution = snakemake.params.natura["natura_resolution"]
+    window_size = snakemake.params.natura["window_size"]
+    buffer_size = snakemake.params.natura["buffer_size"]
+    disable_progress = snakemake.params.disable_progress
+
+    if natura_size == "countries":
+        regions = get_relevant_regions(
+            country_shapes, offshore_shapes, natura_crs, buffer_size
+        )
+    else:
+        regions = None
+
     xs, Xs, ys, Ys = zip(
-        *(determine_cutout_xXyY(cutout, out_logging=out_logging) for cutout in cutouts)
+        *(
+            determine_region_xXyY(cutout, regions, natura_size, out_logging=out_logging)
+            for cutout in cutouts
+        )
     )
+
     bounds = transform_bounds(
         CUTOUT_CRS, natura_crs, min(xs), min(ys), max(Xs), max(Ys)
     )
+
     transform, out_shape = get_transform_and_shape(
-        bounds, res=100, out_logging=out_logging
-    )
-    # adjusted boundaries
-    shapes = unify_protected_shape_areas(
-        shapefiles, natura_crs, out_logging=out_logging
+        bounds, res=natura_resolution, out_logging=out_logging
     )
 
-    if out_logging:
-        logger.info("Stage 4/5: Mask geometry")
-    raster = ~geometry_mask(shapes.geometry, out_shape, transform)
-    raster = raster.astype(rio.uint8)
+    res = transform.a
+    left = transform.c
+    top = transform.f
 
-    if out_logging:
-        logger.info("Stage 5/5: Export as .tiff")
+    # read only .shp snakemake inputs
+    shp_files = [string for string in shapefiles if ".shp" in string]
+    assert len(shp_files) != 0, "no input shapefiles given"
+
+    # identify if BIGTIFF is require (filesize > 4 GB)
+    bigtiff_flag = decide_bigtiff_flag(out_shape)
+
+    # create a 0 filled file
     with rio.open(
         snakemake.output[0],
         "w",
@@ -220,7 +246,82 @@ if __name__ == "__main__":
         transform=transform,
         crs=natura_crs,
         compress="lzw",
-        width=raster.shape[1],
-        height=raster.shape[0],
+        width=out_shape[1],
+        height=out_shape[0],
+        nodata=0,
+        BIGTIFF=bigtiff_flag,
     ) as dst:
-        dst.write(raster, indexes=1)
+        pass
+
+    with rio.open(snakemake.output[0], "r+") as dst:
+
+        total_files = 0
+        read_files = 0
+
+        # read the shapefiles
+        for file in tqdm(
+            shp_files,
+            desc="Processing shapefiles",
+            unit="file",
+            position=0,
+            disable=disable_progress,
+        ):
+            shp = gpd.read_file(file).to_crs(natura_crs)
+            total_files += 1
+            try:
+                shp.geometry = shp.geometry.make_valid()
+                read_files += 1
+                logger.info(f"\nSuccessfully read file {file}")
+            except Exception as e:
+                logger.warning(f"\nError reading file {file}: {e}")
+                continue
+
+            max_row = out_shape[0] - 1  # height in pixels
+            max_col = out_shape[1] - 1  # width in pixels
+
+            with tqdm(
+                total=(max_row // window_size + 1) * (max_col // window_size + 1),
+                desc="Rasterizing windows",
+                unit="window",
+                position=1,
+                disable=disable_progress,
+            ) as rasterize_pbar:
+
+                # write the raster with a shifting window
+                for row0 in range(0, max_row, window_size):  # rows = y direction
+                    row1 = min(row0 + window_size, max_row)
+                    ymin = top - row1 * res
+                    ymax = top - row0 * res
+
+                    for col0 in range(0, max_col, window_size):  # cols = x direction
+                        col1 = min(col0 + window_size, max_col)
+                        xmin = left + col0 * res
+                        xmax = left + col1 * res
+
+                        window = from_bounds(
+                            xmin, ymin, xmax, ymax, transform=transform
+                        )
+
+                        window_shp = shp.cx[xmin:xmax, ymin:ymax]
+
+                        if window_shp.empty:
+                            rasterize_pbar.update(1)
+                            continue
+
+                        geom = unary_union(window_shp.geometry)
+
+                        data = dst.read(1, window=window)
+
+                        mask = rasterize(
+                            [(geom, 1)],
+                            out_shape=data.shape,
+                            transform=dst.window_transform(window),
+                            fill=0,
+                            dtype="uint8",
+                        )
+
+                        data[mask == 1] = 1
+
+                        dst.write(data, 1, window=window)
+
+                        rasterize_pbar.update(1)

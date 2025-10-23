@@ -9,19 +9,25 @@ exclude: ^(LICENSES)
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
-  - id: fix-encoding-pragma
   - id: mixed-line-ending
   - id: trailing-whitespace
 #   - id: check-added-large-files
 #     args: ['--maxkb=2000']
 
+# Automatically upgrade syntax for newer versions of Python
+# this may introduce changes to code that may not be backward compatible
+# - repo: https://github.com/asottile/pyupgrade
+#   rev: v3.20.0
+#   hooks:
+#   - id: pyupgrade
+
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 6.0.1
+  rev: 7.0.0
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
@@ -46,13 +52,13 @@ repos:
 #     types: [python]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.4.1
+  rev: v0.4.3
   hooks:
   - id: blackdoc
 
 # Formatting with "black" coding style
-- repo: https://github.com/psf/black
-  rev: 25.1.0
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: 25.9.0
   hooks:
   # Format Python files
   - id: black
@@ -86,12 +92,12 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.11.0
+  rev: v0.11.2
   hooks:
   - id: snakefmt
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v5.0.2
+  rev: v6.1.2
   hooks:
   - id: reuse
