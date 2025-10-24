@@ -52,7 +52,7 @@ repos:
 #     types: [python]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.4.3
+  rev: v0.4.4
   hooks:
   - id: blackdoc
 
