@@ -207,7 +207,7 @@ def add_CCL_constraints(n, config):
     Example
     -------
     scenario:
-        opts: [Co2L-CCL-24H]
+        opts: [CCL-Co2L-24H]
     electricity:
         agg_p_nom_limits:
             file: data/agg_p_nom_minmax.csv
