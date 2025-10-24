@@ -5,7 +5,7 @@ co2limit,:math:`t_{CO_2-eq}/a`, float, "Cap on system total annual carbon dioxid
 co2base,:math:`t_{CO_2-eq}/a`, float, "Reference value of system total annual carbon dioxide equivalent emissions. Used only if relative emission reduction target is specified in ``{opts}`` wildcard."
 automatic_emission, bool, "{True, False}", "True: Emissions are obtained from automatic emission extraction procedure. False: Emissions are obtained manually"
 automatic_emission_base_year,, integer, "CO2 emissions of year 1990 from EDGAR category 1A1a (Public electricity and heat production)."
-agg_p_nom_limits,,, "Configure per carrier generator nominal capacity constraints for individual countries if ``'CCL'`` is in ``{opts}`` wildcard."
+agg_p_nom_limits,,, "Configure per carrier generator capacity constraints limiting minimum and maximum values of the expanded capacity `p_nom_opt` for individual countries. Is enabled if ``'CCL'`` is present in ``{opts}`` wildcard."
 -- file, file, path, "Reference to ``.csv`` file that specifies per carrier generator nominal capacity constraints for individual countries. Default is ``data/agg_p_nom_minmax.csv``."
 -- include_existing, bool, "{True, False}", "True: Existing capacities are considered in the CCL constraints. False: Existing capacities are not considered in the CCL constraints. Default is false."
 hvdc_as_lines, bool, "{True, False}", "True: HVDC cables are modelled as PyPSA Line components. False: HVDC cables are modeled as PyPSA Link components."
