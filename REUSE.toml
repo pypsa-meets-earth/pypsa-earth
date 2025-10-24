@@ -25,6 +25,11 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
 SPDX-License-Identifier = "CC-BY-4.0"
 
+[[annotations]]
+path = "test/utils/agg_p_nom_minmax.csv"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
 path = ".github/**"
