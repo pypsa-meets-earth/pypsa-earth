@@ -30,6 +30,9 @@ countries: ["NG", "BJ"]
 
 
 electricity:
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: test/utils/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false
   extendable_carriers:
     Store: [H2]
     Link: [H2 pipeline]
