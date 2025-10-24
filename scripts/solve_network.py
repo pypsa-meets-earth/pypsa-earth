@@ -248,7 +248,9 @@ def add_CCL_constraints(n, config):
     gens = gens.rename_axis(index="Generator-ext")
 
     # Prepare country and carrier grouper
-    grouper = pd.concat([gens.bus.map(n.buses.country).rename("country"), gens.carrier], axis=1)
+    grouper = pd.concat(
+        [gens.bus.map(n.buses.country).rename("country"), gens.carrier], axis=1
+    )
 
     # Prepare LHS
     lhs = capacity_variable.groupby(grouper).sum()
@@ -280,12 +282,14 @@ def add_CCL_constraints(n, config):
 
     if not valid_min_index.empty:
         n.model.add_constraints(
-            lhs.sel(group=valid_min_index) >= min_values.loc[valid_min_index], name="agg_p_nom_min"
+            lhs.sel(group=valid_min_index) >= min_values.loc[valid_min_index],
+            name="agg_p_nom_min",
         )
 
     if not valid_max_index.empty:
         n.model.add_constraints(
-            lhs.sel(group=valid_max_index) <= max_values.loc[valid_max_index], name="agg_p_nom_max"
+            lhs.sel(group=valid_max_index) <= max_values.loc[valid_max_index],
+            name="agg_p_nom_max",
         )
 
 
