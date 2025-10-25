@@ -598,7 +598,7 @@ sector:
     # 2040: 0.6
     # 2050: 1.0
     district_heating_loss: 0.15
-  reduce_space_heat_exogenously: true # reduces space heat demand by a given factor (applied before losses in DH)
+  reduce_space_heat_exogenously: false # reduces space heat demand by a given factor (applied before losses in DH)
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
