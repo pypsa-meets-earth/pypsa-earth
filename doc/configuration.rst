@@ -8,14 +8,10 @@
 Configuration
 ##########################################
 
-PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
-The options here described are collected in a ``config.yaml`` file located in the root directory.
+PyPSA-Earth is using configuration files as an interface which allows to customise a data preparation and modelling workflow. The options here described are collected in a ``config.yaml`` file located in the root directory.
 Users should copy the provided default configuration (``config.default.yaml``) and amend
 their own modifications and assumptions in the user-specific configuration file (``config.yaml``);
 confer installation instructions at :ref:`installation`.
-
-.. note::
-  Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
 
 .. _toplevel_cf:
 

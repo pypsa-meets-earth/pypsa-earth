@@ -61,6 +61,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
+* Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
+
 PyPSA-Earth 0.7.0
 =================
 

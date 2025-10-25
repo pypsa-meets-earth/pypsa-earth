@@ -31,17 +31,18 @@ The list is by no means exhaustive and is growing continuously. Feel free to exp
 Track leaders
 ==============
 
-- Director (`Max Parzen <https://www.linkedin.com/in/maximilian-parzen-b047a1126/>`_)
-- `Co-Director <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EfjniQIxmfZIp8ih_WQuy-0BfCiOCLPKEvDZUuylp9xOhA?e=s7KRQy>`_ (`Davide Fioriti <https://www.linkedin.com/in/davide-fioriti-745693a5/>`_)
-- `PyPSA-Earth leaders <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (Davide, Katia, Hazem, Max)
-- Sector-coupling leaders (`Hazem Abdel-Khalek <https://www.linkedin.com/in/hazemakhalek/>`_ , `Leon Schumm <https://www.linkedin.com/in/leon-schumm-253b22201/>`_ and `Eddy Jalbout <https://www.linkedin.com/in/eddyjalbout/>`_ )
-- Climate modeling leader (Katia)
-- Coordinators of Regional Studies
-- `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
-- Western Asia Coordinators (Emre Yorat and `Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
-- Africa Coordinator (Emmanuel Bolarinwa)
-- South America Coordinator (Carlos Fernandez)
-- `AI and demand leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
+- Founder (`Max Parzen <https://www.linkedin.com/in/maximilian-parzen-b047a1126/>`_)
+- Co-Founder (`Davide Fioriti <https://www.linkedin.com/in/davide-fioriti-745693a5/>`_)
+- PyPSA-Earth Steering Committee: Davide, Hazem, Katia, Leon
+- Outreach Team: Charlotte, Hazem, Tosin, Arizeo Salac
+- PyPSA-Earth-Lab Leaders: Daniele, Arizeo
+- PyPSA-Earth Documentation Coordinator: Emmanuel Bolarinwa
+- Climate modeling leader: Ekaterina Fedotova
+- Coordinators of Regional Studies:
+   - Western Asia: Emre Yorat
+   - Africa: Emmanuel Bolarinwa
+   - South America: Carlos Fernandez
+   - South-East Asia:  Virio Andreyana, Arizeo Salac
 
 .. _credits:
 
@@ -57,33 +58,42 @@ Contributors Team
 -----------------
 
 - Davide Fioriti (University of Pisa, Italy)
-- Yerbol Akhmetov
+- Yerbol Akhmetov (Open Energy Transition, Germany/Kazakhstan)
+- Emmanuel Bolarinwa (Open Energy Transition, Germany/Nigeria)
 - Eddy Jalbout (Fraunhofer IEG, Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
-- Hazem Abdel-Khalek (Fraunhofer IEG, Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
-- Emre Yorat
-- Matin Mahmood (University of Edinburgh, United Kingdom)
-- Daniele Lerede
+- Margherita Capitani (University of Pisa, Italy)
+- Hazem Abdel-Khalek (Open Energy Transition, Germany)
+- Max Parzen (Open Energy Transition, Germany)
+- Emre Yorat (Adana Science and Technology University, Türkiye)
+- Matin Mahmood
+- Erik Nitschke (Technische Universität Hamburg, Germany)
+- Daniele Lerede (Open Energy Transition, Germany/Italy)
+- Alessandro Pampado (University of Pisa, Italy)
 - Alexander Meisinger (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Emmanuel Bolarinwa
+- Tosin George (Open Energy Transition, Germany/Nigeria)
 - Lukas Trippe (Technical University of Berlin, Germany)
 - Leon Schumm (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Sermisha Narayana
+- Sermisha Narayana (Open Energy Transition, Germany, India)
 - Fabian Neumann (Technical University of Berlin, Germany)
-- Carlos Fernandez
-- Anton Achhammer
-- Arizeo Salac
-- Johannes Hampp (Justus Liebig University Giessen, Germany)
-- Ekaterina Fedotova
-- Muhammad Ilyas
+- Lukas Jansen (Fraunhofer IEE, Fraunhofer-Institut für Energiewirtschaft und Energiesystemtechnik, Germany)
+- Caspar Schauß (Technical University of Berlin, Germany)
+- Jonas Meier (DEA, CPH)
+- Carlos Fernandez Vazquez (University of Liège)
+- Anton Achhammer (Ostbayerische Technische Hochschule Regensburg, Germany)
+- Arizeo Salac (University of Pisa, Italy)
+- Choi Henry (Ostbayerische Technische Hochschule Regensburg, Germany)
+- Fillea Fakhira (Technical University of Berlin, Germany)
+- Johannes Hampp (Open Energy Transition, Germany)
+- Ekaterina Fedotova (Open Energy Transition, Germany)
+- Muhammad Ilyas (ICDI, CMU, Thailand)
 - Lukas Franken (University of Edinburgh, United Kingdom)
 - Jess Ryan
 - Stephen Lee (Massachusetts Institute of Technology, United States)
 - Albert Solà Vilalta
-- Martha Frysztacki
+- Martha Frysztacki (Open Energy Transition, Germany)
 - Denise Giubilato
 - Anas Algarei
-- Siddharth Krishna
+- Siddharth Krishna (Open Energy Transition, Germany/Malavi)
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants aka. EMRC, Nigeria)
 - Nse-Abasi Ayara (University of Abuja, Nigeria)
 - Jarrad Wright (Council for Scientific Research and Industry CSIR, South Africa)
