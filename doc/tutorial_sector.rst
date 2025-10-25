@@ -14,8 +14,7 @@ Tutorial: Sector-Coupled
 
 In this tutorial, we will show you how to run the sector-coupled model. The sector-coupled model
 is a model that considers the energy system as a whole, including the electricity, heat, transport,
-and industry sectors. The model has been insipred and partially based on the PyPSA-Eur model, which is a model of the European
-energy system. The sector-coupled model is a global model that can be used to model any region
+and industry sectors. The sector-coupled model is a global model that can be used to model any region
 of the Earth. This section explains how to run and analyze the tutorial model.
 
 
