@@ -21,9 +21,12 @@ Inputs
 Outputs
 -------
 
-- ``data/osm/pbf``: Raw OpenStreetMap data as .pbf files per country
-- ``data/osm/power``: Filtered power data as .json files per country
-- ``data/osm/out``:  Prepared power data as .geojson and .csv files per country
+- ``data/osm/<date>/pbf``: Raw OpenStreetMap data as .pbf files per country
+  - ``<date>`` is formatted as YYYYMM/ for historical data or "latest/" for current data
+- ``data/osm/<date>/power``: Filtered power data as .json files per country
+  - ``<date>`` is formatted as YYYYMM/ for historical data or "latest/" for current data
+- ``data/osm/<date>/out``:  Prepared power data as .geojson and .csv files per country
+  - ``<date>`` is formatted as YYYYMM/ for historical data or "latest/" for current data
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
 import inspect
@@ -57,7 +60,8 @@ def country_list_to_geofk(country_list):
     full_codes_list : list
         Example ["NG","ZA"]
     """
-    full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
+    full_codes_list = [convert_iso_to_geofk(
+        c_code) for c_code in set(country_list)]
 
     return full_codes_list
 
@@ -101,20 +105,32 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
-    store_path_resources = Path.joinpath(
-        Path(BASE_DIR), "resources", RDIR, "osm", "raw"
-    )
-    store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm")
-    country_list = country_list_to_geofk(snakemake.params.countries)
-    custom_data = snakemake.config.get("custom_data", {}).get("osm_data", {})
-    set_custom_data = custom_data.get("set", False)
-    custom_data_path = custom_data.get("custom_path", "data/custom/osm")
 
     # Check for historical date configuration
     historical_config = snakemake.config.get("historical_osm_data", {})
     target_date = historical_config.get("osm_date", None)
 
-    # Parse target_date if provided as string
+    # Create date-specific subdirectory for OSM data if historical date is provided
+    osm_subdir = ""
+    if target_date:
+        if isinstance(target_date, str):
+            osm_subdir = target_date.replace(
+                "-", "")[:6] + "/"  # Format: YYYYMM/
+        else:
+            osm_subdir = target_date.strftime("%Y%m") + "/"
+    else:
+        osm_subdir = "latest/"
+
+    store_path_resources = Path.joinpath(
+        Path(BASE_DIR), "resources", RDIR, "osm", "raw"
+    )
+    store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm", osm_subdir)
+    country_list = country_list_to_geofk(snakemake.params.countries)
+    custom_data = snakemake.config.get("custom_data", {}).get("osm_data", {})
+    set_custom_data = custom_data.get("set", False)
+    custom_data_path = custom_data.get("custom_path", "data/custom/osm")
+
+    # Parse and validate target_date if provided as string
     if target_date and isinstance(target_date, str):
         try:
             target_date = datetime.strptime(target_date, "%Y-%m-%d")
@@ -143,6 +159,10 @@ if __name__ == "__main__":
         os.makedirs(store_path_data, exist_ok=True)
         shutil.copytree(custom_data_path, store_path_data, dirs_exist_ok=True)
     else:
+        # Create the data directory with date-specific subdirectory
+        os.makedirs(store_path_data, exist_ok=True)
+        logger.info(f"OSM data will be stored in: {store_path_data}")
+
         # Prepare save_osm_data arguments
         save_args = {
             "primary_name": "power",
@@ -183,7 +203,8 @@ if __name__ == "__main__":
     # Rename and move osm files to the resources folder output
     for name in names:
         for f in out_formats:
-            new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
+            new_file_name = Path.joinpath(
+                store_path_resources, f"all_raw_{name}s.{f}")
             old_files = list(Path(out_path).glob(f"*{name}.{f}"))
             # if file is missing, create empty file, otherwise rename it an move it
             if not old_files:
