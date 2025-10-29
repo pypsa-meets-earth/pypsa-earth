@@ -217,7 +217,7 @@ def add_CCL_constraints(n, config):
 
     try:
         agg_p_nom_minmax = pd.read_csv(
-            agg_p_nom_limits["file"], index_col=list(range(2)), header=[0, 1]
+            snakemake.input.agg_p_nom_minmax, index_col=list(range(2)), header=[0, 1]
         )[snakemake.wildcards.planning_horizons]
     except IOError:
         logger.exception(
