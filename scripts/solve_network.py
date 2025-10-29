@@ -82,7 +82,6 @@ import os
 import re
 from pathlib import Path
 
-from kiwisolver import Constraint
 import numpy as np
 import pandas as pd
 import pypsa
@@ -92,11 +91,6 @@ from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
-from add_electricity import load_costs
-import re
-#from pypsa.linopf import get_var, linexpr, define_constraints
-
-
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
@@ -679,24 +673,40 @@ def add_h2_network_cap(n, cap):
 
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
-
-    res_techs = [
-        "csp",
-        "solar",
-        "onwind",
-        "offwind-ac",
-        "offwind-dc",
-        "ror",
+    """
+    Applies temporal constraints for hydrogen production based on renewable energy sources (RES)
+    and electrolysis within a specified time period. The function ensures that the hydrogen production
+    adheres to policy configurations such as temporal matching and allowed excess.
+    Parameters:
+    -----------
+    n : pypsa.Network
+        The PyPSA network object containing the current state of the energy system model.
+    n_ref : pypsa.Network
+        A reference PyPSA network object used for additionality constraints (if enabled).
+    time_period : str
+        The time period for grouping constraints. Can be one of "hour", "month", or "year".
+    Returns:
+    --------
+    None
+        Adds constraints directly to the PyPSA network model.
+    Raises:
+    -------
+    KeyError
+        If required configuration keys are missing in `snakemake.config`.
+    ValueError
+        If an unsupported `time_period` is provided.
+    """
+    temporal_matching_carriers = snakemake.params.policy_config["hydrogen"][
+        "temporal_matching_carriers"
     ]
-
-    res_stor_techs = ["hydro"]
-
     allowed_excess = snakemake.params.policy_config["hydrogen"]["allowed_excess"]
 
     # Generation
-    res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_gen_index = n.generators.loc[
+        n.generators.carrier.isin(temporal_matching_carriers)
+    ].index
     res_stor_index = n.storage_units.loc[
-        n.storage_units.carrier.isin(res_stor_techs)
+        n.storage_units.carrier.isin(temporal_matching_carriers)
     ].index
 
     weightings_gen = pd.DataFrame(
@@ -724,15 +734,10 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    electrolysis_carriers = [
-        "H2 Electrolysis",
-        "Alkaline electrolyzer large",
-        "Alkaline electrolyzer medium",
-        "Alkaline electrolyzer small",
-        "PEM electrolyzer",
-        "SOEC",
+    matching_technologies = snakemake.params.policy_config["hydrogen"][
+        "matching_technologies"
     ]
-    electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
+    electrolysis_index = n.links.index[n.links.carrier.isin(matching_technologies)]
 
     link_p = n.model["Link-p"]
     electrolysis = link_p.loc[:, electrolysis_index]
@@ -972,54 +977,6 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     # add the constraint to the PySPA model
     n.model.add_constraints(lhs == 0, name="Link-bidirectional_sync")
 
-def add_bicharger_constraints(n, costs):
-    print("Entrato in add_bicharger_constraints") 
-    tech_type = costs.technology_type
-    carriers_bicharger = [c.split(',')[1] for c in costs.loc[tech_type == "bicharger", "carrier"].unique()]
-    carriers_config = n.config["electricity"]["extendable_carriers"]["Store"]
-    carriers_intersect = set(carriers_bicharger) & set(carriers_config)
-
-    print(f"Carriers bicharger: {carriers_bicharger}")
-    print(f"Carriers config: {carriers_config}")
-    print(f"Carriers intersect: {carriers_intersect}")
-
-    p_nom = n.model["Link-p_nom"]  # variabile Pyomo
-    print(p_nom)
-    
-    for c in carriers_intersect:
-        # seleziona link del carrier c
-        links_c = [link for link in n.links.index if c in link]
-
-        for charger in links_c:
-            if "charger" not in charger:
-                continue
-
-            discharger = charger.replace("charger", "discharger")
-
-            print(f"Controllo link: charger={charger}, discharger={discharger}")
-
-            # Controllo esistenza nel modello
-            if not n.links.p_nom.index.str.contains(charger).any() or \
-                not n.links.p_nom.index.str.contains(discharger).any():
-                print(f"WARNING: Variabili {charger} o {discharger} non trovate in n.links.p_nom")
-                continue
-            
-            # Determina il tipo di link per il nome del vincolo
-            if "bicharger" in charger:
-                link_type = "bicharger"
-            else:
-                link_type = "charger"
-
-            # Usa il nome completo del link + tipo per evitare duplicati
-            vincolo_name = f"{link_type}_{charger.replace(' ', '_')}"
-            print(vincolo_name)
-            # Aggiungi vincolo usando add_constraint di Linopy
-            #vincolo_name = f"bicharger_{c}_{charger.split()[0]}"
-            n.model.add_constraints(
-                p_nom[charger] - p_nom[discharger] == 0,
-                name=vincolo_name
-            )
-            print(f"Vincolo aggiunto per {charger} e {discharger}")
 
 def extra_functionality(n, snapshots):
     """
@@ -1031,15 +988,6 @@ def extra_functionality(n, snapshots):
     """
     opts = n.opts
     config = n.config
-
-    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        config["costs"],
-        config["electricity"],
-        Nyears,
-    )
-
     if "BAU" in opts and n.generators.p_nom_extendable.any():
         add_BAU_constraints(n, config)
     if "SAFE" in opts and n.generators.p_nom_extendable.any():
@@ -1059,8 +1007,6 @@ def extra_functionality(n, snapshots):
 
     add_battery_constraints(n)
     add_lossy_bidirectional_link_constraints(n)
-    add_bicharger_constraints(n, costs)
-
 
     if snakemake.config["sector"]["chp"]:
         logger.info("setting CHP constraints")
@@ -1120,7 +1066,6 @@ def solve_network(n, config, solving, **kwargs):
     )
     kwargs["solver_name"] = solving["solver"]["name"]
     kwargs["extra_functionality"] = extra_functionality
-    #extra_functionality=extra_functionality
 
     skip_iterations = cf_solving.get("skip_iterations", False)
     if not n.lines.s_nom_extendable.any():
@@ -1137,7 +1082,6 @@ def solve_network(n, config, solving, **kwargs):
         kwargs["track_iterations"] = (cf_solving.get("track_iterations", False),)
         kwargs["min_iterations"] = (cf_solving.get("min_iterations", 4),)
         kwargs["max_iterations"] = (cf_solving.get("max_iterations", 6),)
-        kwargs["extra_functionality"] = extra_functionality
         status, condition = n.optimize.optimize_transmission_expansion_iteratively(
             **kwargs
         )
@@ -1214,7 +1158,6 @@ if __name__ == "__main__":
         config=snakemake.config,
         solving=snakemake.params.solving,
         log_fn=snakemake.log.solver,
-        extra_functionality=extra_functionality,
     )
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

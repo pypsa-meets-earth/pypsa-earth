@@ -21,6 +21,7 @@ Relevant Settings
         country_specific_data:
         cost_scenario:
         financial_case:
+        output_currency:
         default_exchange_rate:
         future_exchange_rate_strategy:
         custom_future_exchange_rate:
@@ -162,15 +163,15 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     costs.unit = costs.unit.str.replace("/kW", "/MW")
     _currency_conversion_cache = build_currency_conversion_cache(
         costs,
-        config["output_currency"],
-        config["default_exchange_rate"],
-        future_exchange_rate_strategy=config.get(
-            "future_exchange_rate_strategy", "latest"
-        ),
+        output_currency=config["output_currency"],
+        default_exchange_rate=config["default_exchange_rate"],
+        future_exchange_rate_strategy=config.get("future_exchange_rate_strategy"),
         custom_future_exchange_rate=config.get("custom_future_rate", None),
     )
     costs = apply_currency_conversion(
-        costs, config["output_currency"], _currency_conversion_cache
+        costs,
+        config["output_currency"],
+        _currency_conversion_cache,
     )
 
     # apply filter on financial_case and scenario, if they are contained in the cost dataframe
