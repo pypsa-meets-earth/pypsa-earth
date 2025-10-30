@@ -666,6 +666,43 @@ def attach_hydro(n, costs, ppl):
         )
 
 
+def attach_existing_batteries(n, costs, ppl):
+    """
+    Add existing battery storage units from powerplants.csv to the network.
+    """
+    # Filter entries where the carrier is 'battery'
+    batteries = ppl.query('carrier == "battery"')
+    if batteries.empty:
+        logger.info("No existing batteries found in powerplants.csv.")
+        return
+
+    # Ensure carrier 'battery' exists in the network
+    _add_missing_carriers_from_costs(n, costs, ["battery"])
+
+    # Read max_hours value from config
+    max_hours = snakemake.params.electricity["max_hours"]["battery"]
+
+    # Add batteries as StorageUnits with parameters from the cost table
+    n.madd(
+        "StorageUnit",
+        batteries.index,
+        bus=batteries["bus"],
+        carrier="battery",
+        p_nom=batteries["p_nom"],
+        capital_cost=costs.at["battery", "capital_cost"],
+        max_hours=max_hours,
+        efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
+        efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
+        cyclic_state_of_charge=True,
+        marginal_cost=costs.at["battery", "marginal_cost"],
+    )
+
+    logger.info(
+        f"Added {len(batteries)} existing batteries with total capacity "
+        f"{batteries.p_nom.sum()/1e3:.2f} GW (max_hours={max_hours})."
+    )
+
+
 def attach_extendable_generators(n, costs, ppl):
     logger.warning("The function is deprecated with the next release")
     elec_opts = snakemake.params.electricity
@@ -906,6 +943,7 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(n, costs, ppl)
+    attach_existing_batteries(n, costs, ppl)
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
@@ -928,4 +966,22 @@ if __name__ == "__main__":
         sanitize_locations(n)
 
     n.meta = snakemake.config
+
+    # Log a summary of installed capacities by carrier type (GW)
+    summary = []
+
+    if not n.generators.empty:
+        gen_caps = n.generators.groupby("carrier").p_nom.sum().div(1e3).round(2)
+        summary.append(pd.DataFrame(gen_caps, columns=["Generators (GW)"]))
+
+    if not n.storage_units.empty:
+        su_caps = n.storage_units.groupby("carrier").p_nom.sum().div(1e3).round(2)
+        summary.append(pd.DataFrame(su_caps, columns=["StorageUnits (GW)"]))
+
+    if summary:
+        total_summary = pd.concat(summary, axis=1).fillna(0)
+        logger.info("\nInstalled capacities summary\n%s", total_summary)
+    else:
+        logger.info("No generation or storage units found in the network.")
+
     n.export_to_netcdf(snakemake.output[0])
