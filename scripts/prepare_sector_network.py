@@ -4133,6 +4133,10 @@ if __name__ == "__main__":
     #     constant=co2_limit,
     # )
 
+    heat_scale = options.get("scale_heat_load", 1)
+    heat_cols = n.loads_t.p_set.columns[n.loads_t.p_set.columns.str.contains("heat")]
+    n.loads_t.p_set[heat_cols] *= heat_scale
+
     if snakemake.config["custom_data"]["water_costs"]:
         add_custom_water_cost(n)
 
