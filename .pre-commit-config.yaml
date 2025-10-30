@@ -52,7 +52,7 @@ repos:
 #     types: [python]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.4.4
+  rev: v0.4.5
   hooks:
   - id: blackdoc
 
@@ -98,6 +98,6 @@ repos:
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v6.1.2
+  rev: v6.2.0
   hooks:
   - id: reuse
