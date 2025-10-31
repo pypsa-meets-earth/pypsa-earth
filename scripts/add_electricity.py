@@ -113,6 +113,7 @@ idx = pd.IndexSlice
 logger = create_logger(__name__)
 logger.propagate = False
 
+
 def normed(s):
     return s / s.sum()
 
@@ -678,9 +679,7 @@ def attach_existing_batteries(n, costs, ppl):
     _add_missing_carriers_from_costs(n, costs, ["battery"])
 
     # Remove duplicates and reset index like in attach_hydro
-    batteries = batteries.reset_index(drop=True).rename(
-        index=lambda s: f"{s} battery"
-    )
+    batteries = batteries.reset_index(drop=True).rename(index=lambda s: f"{s} battery")
 
     max_hours = snakemake.params.electricity["max_hours"]["battery"]
 
