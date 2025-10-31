@@ -111,7 +111,7 @@ from powerplantmatching.export import map_country_bus
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-
+logger.propagate = False
 
 def normed(s):
     return s / s.sum()
@@ -682,10 +682,10 @@ def attach_existing_batteries(n, costs, ppl):
     # Read max_hours value from config
     max_hours = snakemake.params.electricity["max_hours"]["battery"]
 
-    # Add batteries as StorageUnits with parameters from the cost table
+    # Add batteries as StorageUnits
     n.madd(
         "StorageUnit",
-        batteries.index,
+        batteries.index.astype(str) + " battery",
         bus=batteries["bus"],
         carrier="battery",
         p_nom=batteries["p_nom"],
@@ -967,21 +967,25 @@ if __name__ == "__main__":
 
     n.meta = snakemake.config
 
-    # Log a summary of installed capacities by carrier type (GW)
-    summary = []
+    # Log total installed capacities by carrier (GW)
+    gen_caps = (
+        n.generators.groupby(n.generators.carrier.str.strip().str.lower())
+        .p_nom.sum()
+        .div(1e3)
+        .rename("Generators [GW]")
+    )
+    sto_caps = (
+        n.storage_units.groupby(n.storage_units.carrier.str.strip().str.lower())
+        .p_nom.sum()
+        .div(1e3)
+        .rename("StorageUnits [GW]")
+    )
 
-    if not n.generators.empty:
-        gen_caps = n.generators.groupby("carrier").p_nom.sum().div(1e3).round(2)
-        summary.append(pd.DataFrame(gen_caps, columns=["Generators (GW)"]))
+    summary = pd.concat([gen_caps, sto_caps], axis=1).fillna(0).sort_index()
 
-    if not n.storage_units.empty:
-        su_caps = n.storage_units.groupby("carrier").p_nom.sum().div(1e3).round(2)
-        summary.append(pd.DataFrame(su_caps, columns=["StorageUnits (GW)"]))
-
-    if summary:
-        total_summary = pd.concat(summary, axis=1).fillna(0)
-        logger.info("\nInstalled capacities summary\n%s", total_summary)
+    if not summary.empty:
+        logger.info("\nInstalled capacities summary\n%s", summary.round(2))
     else:
-        logger.info("No generation or storage units found in the network.")
+        logger.info("No generators or storage units found.")
 
     n.export_to_netcdf(snakemake.output[0])
