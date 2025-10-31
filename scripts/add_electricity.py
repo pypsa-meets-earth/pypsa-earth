@@ -369,7 +369,8 @@ def attach_wind_and_solar(
     extendable_carriers,
     line_length_factor,
 ):
-    # TODO: rename tech -> carrier, technologies -> carriers
+    """Attach wind and solar generators using real positions from powerplants.csv.
+    Plants without a matching bus are reassigned to the nearest one."""
     _add_missing_carriers_from_costs(n, costs, technologies)
 
     df = ppl.rename(columns={"country": "Country"})
@@ -379,12 +380,11 @@ def attach_wind_and_solar(
             continue
 
         if tech == "offwind-ac":
-            # add all offwind wind power plants by default as offwind-ac
-            df["carrier"] = df["carrier"].mask(
-                df.technology == "Offshore", "offwind-ac"
-            )
-
-        df["carrier"] = df["carrier"].mask(df.technology == "Onshore", "onwind")
+            df["carrier"] = df["carrier"].mask(df.technology == "Offshore", "offwind-ac")
+        elif tech == "offwind-dc":
+            df["carrier"] = df["carrier"].mask(df.technology == "Offshore", "offwind-dc")
+        else:
+            df["carrier"] = df["carrier"].mask(df.technology == "Onshore", "onwind")
 
         with xr.open_dataset(getattr(input_files, "profile_" + tech)) as ds:
             if ds.indexes["bus"].empty:
@@ -409,23 +409,38 @@ def attach_wind_and_solar(
                     + connection_cost
                 )
                 logger.info(
-                    "Added connection cost of {:0.0f}-{:0.0f} {}/MW/a to {}".format(
-                        connection_cost.min(),
-                        connection_cost.max(),
-                        snakemake.params.costs["output_currency"],
-                        tech,
-                    )
+                    f"Added connection cost of {connection_cost.min():.0f}-"
+                    f"{connection_cost.max():.0f} {snakemake.params.costs['output_currency']}/MW/a to {tech}"
                 )
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
+            # Directly assign capacity from powerplants.csv
             if not df.query("carrier == @tech").empty:
-                buses = n.buses.loc[ds.indexes["bus"]]
-                caps = map_country_bus(df.query("carrier == @tech"), buses)
-                caps = caps.groupby(["bus"]).p_nom.sum()
-                caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
+                tech_ppl = df.query("carrier == @tech").copy()
+                valid_mask = tech_ppl["bus"].isin(n.buses.index)
+                valid = tech_ppl[valid_mask]
+                missing = tech_ppl[~valid_mask]
+
+                # Reassign plants with missing bus to the nearest valid one
+                reassigned = 0
+                if not missing.empty:
+                    bus_coords = n.buses[["x", "y"]]
+                    for i, row in missing.iterrows():
+                        dist = ((bus_coords.x - row.lon) ** 2 + (bus_coords.y - row.lat) ** 2)
+                        nearest_bus = dist.idxmin()
+                        row.bus = nearest_bus
+                        valid = pd.concat([valid, pd.DataFrame([row])], ignore_index=True)
+                        reassigned += 1
+
+                    logger.info(
+                        f"{tech}: reassigned {reassigned} plants without valid bus to nearest network node."
+                    )
+
+                caps = valid.groupby("bus")["p_nom"].sum()
+                caps = caps.reindex(ds.indexes["bus"], fill_value=0)
             else:
-                caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
+                caps = pd.Series(index=ds.indexes["bus"], data=0)
 
             n.madd(
                 "Generator",
@@ -444,6 +459,11 @@ def attach_wind_and_solar(
                 efficiency=costs.at[suptech, "efficiency"],
             )
 
+            if not caps.empty and caps.sum() > 0:
+                logger.info(
+                    f"Added {tech} from powerplants.csv with total installed capacity "
+                    f"{caps.sum() / 1e3:.2f} GW across {len(caps[caps > 0])} buses."
+                )
 
 def attach_conventional_generators(
     n,
