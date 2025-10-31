@@ -380,9 +380,13 @@ def attach_wind_and_solar(
             continue
 
         if tech == "offwind-ac":
-            df["carrier"] = df["carrier"].mask(df.technology == "Offshore", "offwind-ac")
+            df["carrier"] = df["carrier"].mask(
+                df.technology == "Offshore", "offwind-ac"
+            )
         elif tech == "offwind-dc":
-            df["carrier"] = df["carrier"].mask(df.technology == "Offshore", "offwind-dc")
+            df["carrier"] = df["carrier"].mask(
+                df.technology == "Offshore", "offwind-dc"
+            )
         else:
             df["carrier"] = df["carrier"].mask(df.technology == "Onshore", "onwind")
 
@@ -427,10 +431,14 @@ def attach_wind_and_solar(
                 if not missing.empty:
                     bus_coords = n.buses[["x", "y"]]
                     for i, row in missing.iterrows():
-                        dist = ((bus_coords.x - row.lon) ** 2 + (bus_coords.y - row.lat) ** 2)
+                        dist = (bus_coords.x - row.lon) ** 2 + (
+                            bus_coords.y - row.lat
+                        ) ** 2
                         nearest_bus = dist.idxmin()
                         row.bus = nearest_bus
-                        valid = pd.concat([valid, pd.DataFrame([row])], ignore_index=True)
+                        valid = pd.concat(
+                            [valid, pd.DataFrame([row])], ignore_index=True
+                        )
                         reassigned += 1
 
                     logger.info(
@@ -464,6 +472,7 @@ def attach_wind_and_solar(
                     f"Added {tech} from powerplants.csv with total installed capacity "
                     f"{caps.sum() / 1e3:.2f} GW across {len(caps[caps > 0])} buses."
                 )
+
 
 def attach_conventional_generators(
     n,
