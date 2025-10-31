@@ -670,22 +670,23 @@ def attach_existing_batteries(n, costs, ppl):
     """
     Add existing battery storage units from powerplants.csv to the network.
     """
-    # Filter entries where the carrier is 'battery'
     batteries = ppl.query('carrier == "battery"')
     if batteries.empty:
         logger.info("No existing batteries found in powerplants.csv.")
         return
 
-    # Ensure carrier 'battery' exists in the network
     _add_missing_carriers_from_costs(n, costs, ["battery"])
 
-    # Read max_hours value from config
+    # Remove duplicates and reset index like in attach_hydro
+    batteries = batteries.reset_index(drop=True).rename(
+        index=lambda s: f"{s} battery"
+    )
+
     max_hours = snakemake.params.electricity["max_hours"]["battery"]
 
-    # Add batteries as StorageUnits
     n.madd(
         "StorageUnit",
-        batteries.index.astype(str) + " battery",
+        batteries.index,
         bus=batteries["bus"],
         carrier="battery",
         p_nom=batteries["p_nom"],
