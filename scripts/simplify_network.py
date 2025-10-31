@@ -115,6 +115,7 @@ sys.settrace
 logger = create_logger(__name__)
 logger.propagate = False
 
+
 def simplify_network_to_base_voltage(n, linetype, base_voltage):
     """
     Fix all lines to a voltage level of base voltage level and remove all
