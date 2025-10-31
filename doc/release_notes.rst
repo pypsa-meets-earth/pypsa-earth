@@ -12,6 +12,7 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
 
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
