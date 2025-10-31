@@ -556,10 +556,6 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     lines : GeoDataFrame
         GeoDataFrame containing the lines
     """
-    # Ensure backward compatibility with schema changes
-    if "bus_id" not in buses.columns:
-        buses = buses.reset_index().rename(columns={"index": "bus_id"})
-
     if lines.empty:
         return lines, buses
 
