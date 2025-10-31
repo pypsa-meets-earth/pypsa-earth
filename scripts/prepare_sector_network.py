@@ -3310,7 +3310,7 @@ if __name__ == "__main__":
             f"with total capacity {total_cap:.1f} GW from electricity network."
         )
 
-    add_co2(n, costs)  # TODO add costs
+    add_co2(n, costs, options["co2_network"])  # TODO add costs
 
     # remove conventional generators built in elec-only model
     remove_elec_base_techs(n)
