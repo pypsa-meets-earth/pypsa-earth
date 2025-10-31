@@ -365,66 +365,67 @@ def attach_wind_and_solar(
     costs,
     ppl,
     input_files,
-    technologies,
+    carriers,
     extendable_carriers,
     line_length_factor,
 ):
     """Attach wind and solar generators using real positions from powerplants.csv.
     Plants without a matching bus are reassigned to the nearest one."""
-    _add_missing_carriers_from_costs(n, costs, technologies)
+    _add_missing_carriers_from_costs(n, costs, carriers)
 
     df = ppl.rename(columns={"country": "Country"})
 
-    for tech in technologies:
-        if tech == "hydro":
+    for carrier in carriers:
+        if carrier == "hydro":
             continue
 
-        if tech == "offwind-ac":
+        if carrier == "offwind-ac":
+            # add all offwind wind power plants by default as offwind-ac
             df["carrier"] = df["carrier"].mask(
                 df.technology == "Offshore", "offwind-ac"
             )
-        elif tech == "offwind-dc":
+        elif carrier == "offwind-dc":
             df["carrier"] = df["carrier"].mask(
                 df.technology == "Offshore", "offwind-dc"
             )
         else:
             df["carrier"] = df["carrier"].mask(df.technology == "Onshore", "onwind")
 
-        with xr.open_dataset(getattr(input_files, "profile_" + tech)) as ds:
+        with xr.open_dataset(getattr(input_files, "profile_" + carrier)) as ds:
             if ds.indexes["bus"].empty:
                 continue
 
-            suptech = tech.split("-", 2)[0]
-            if suptech == "offwind":
+            supcarrier = carrier.split("-", 2)[0]
+            if supcarrier == "offwind":
                 underwater_fraction = ds["underwater_fraction"].to_pandas()
                 connection_cost = (
                     line_length_factor
                     * ds["average_distance"].to_pandas()
                     * (
                         underwater_fraction
-                        * costs.at[tech + "-connection-submarine", "capital_cost"]
+                        * costs.at[carrier + "-connection-submarine", "capital_cost"]
                         + (1.0 - underwater_fraction)
-                        * costs.at[tech + "-connection-underground", "capital_cost"]
+                        * costs.at[carrier + "-connection-underground", "capital_cost"]
                     )
                 )
                 capital_cost = (
                     costs.at["offwind", "capital_cost"]
-                    + costs.at[tech + "-station", "capital_cost"]
+                    + costs.at[carrier + "-station", "capital_cost"]
                     + connection_cost
                 )
                 logger.info(
                     f"Added connection cost of {connection_cost.min():.0f}-"
-                    f"{connection_cost.max():.0f} {snakemake.params.costs['output_currency']}/MW/a to {tech}"
+                    f"{connection_cost.max():.0f} {snakemake.params.costs['output_currency']}/MW/a to {carrier}"
                 )
             else:
-                capital_cost = costs.at[tech, "capital_cost"]
+                capital_cost = costs.at[carrier, "capital_cost"]
 
             # Directly assign capacity from powerplants.csv
-            if not df.query("carrier == @tech").empty:
-                tech_ppl = df.query("carrier == @tech").copy()
-                valid_mask = tech_ppl["bus"].isin(n.buses.index)
-                valid = tech_ppl[valid_mask]
-                missing = tech_ppl[~valid_mask]
+            if not df.query("carrier == @carrier").empty:
+                carrier_ppl = df.query("carrier == @carrier").copy()
+                valid_mask = carrier_ppl["bus"].isin(n.buses.index)
+                valid = carrier_ppl[valid_mask]
+                missing = carrier_ppl[~valid_mask]
 
                 # Reassign plants with missing bus to the nearest valid one
                 reassigned = 0
@@ -442,34 +443,34 @@ def attach_wind_and_solar(
                         reassigned += 1
 
                     logger.info(
-                        f"{tech}: reassigned {reassigned} plants without valid bus to nearest network node."
+                        f"{carrier}: reassigned {reassigned} plants without valid bus to nearest network node."
                     )
 
                 caps = valid.groupby("bus")["p_nom"].sum()
                 caps = caps.reindex(ds.indexes["bus"], fill_value=0)
             else:
-                caps = pd.Series(index=ds.indexes["bus"], data=0)
+                caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
 
             n.madd(
                 "Generator",
                 ds.indexes["bus"],
-                " " + tech,
+                " " + carrier,
                 bus=ds.indexes["bus"],
-                carrier=tech,
+                carrier=carrier,
                 p_nom=caps,
-                p_nom_extendable=tech in extendable_carriers["Generator"],
+                p_nom_extendable=carrier in extendable_carriers["Generator"],
                 p_nom_min=caps,
                 p_nom_max=ds["p_nom_max"].to_pandas(),
                 p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
                 weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[suptech, "marginal_cost"],
+                marginal_cost=costs.at[supcarrier, "marginal_cost"],
                 capital_cost=capital_cost,
-                efficiency=costs.at[suptech, "efficiency"],
+                efficiency=costs.at[supcarrier, "efficiency"],
             )
 
             if not caps.empty and caps.sum() > 0:
                 logger.info(
-                    f"Added {tech} from powerplants.csv with total installed capacity "
+                    f"Added {carrier} from powerplants.csv with total installed capacity "
                     f"{caps.sum() / 1e3:.2f} GW across {len(caps[caps > 0])} buses."
                 )
 
