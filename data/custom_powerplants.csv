@@ -1,1 +1,47 @@
-Name,Fueltype,Technology,Set,Country,Capacity,Efficiency,Duration,Volume_Mm3,DamHeight_m,StorageCapacity_MWh,DateIn,DateRetrofit,DateOut,lat,lon,EIC,projectID,bus
+,Name,Fueltype,Technology,Set,Country,Capacity,Efficiency,Duration,Volume_Mm3,DamHeight_m,StorageCapacity_MWh,DateIn,DateRetrofit,DateOut,lat,lon,EIC,projectID,bus
+272,Hidroituango,Hydro,Reservoir,PP,CO,2400,,,0,0,0,2024,2024,2124,7.1347,-75.6624,{nan},{'GHPT': {'G601434'}},32
+3,Guavio,Hydro,Reservoir,PP,CO,1250,,,0,0,0,1990,1990,2090,4.7247,-73.4831,{nan},"{'GHPT': {'G601432'}, 'GEO': {'GEO-43448'}, 'GPD': {'WRI1018568'}}",256
+6,San Carlos,Hydro,Reservoir,PP,CO,1240,,,0,0,0,1984,1984,2084,6.2137,-74.8161,{nan},"{'GHPT': {'G601450'}, 'GEO': {'GEO-43434'}, 'GPD': {'WRI1018576'}}",264
+2,Chivor,Hydro,Reservoir,PP,CO,1000,,,0,0,0,1970,1970,2070,4.9008,-73.2969,{nan},"{'GHPT': {'G601421'}, 'GEO': {'GEO-43431'}, 'GPD': {'WRI1018566'}}",355
+23,Sogamoso,Hydro,Reservoir,PP,CO,820,,,0,0,0,2015,2015,2115,7.1011,-73.4075,{nan},"{'GHPT': {'G601452'}, 'GPD': {'WRI1018578'}}",360
+5,Porce,Hydro,Reservoir,PP,CO,660,,,0,0,0,2010,2010,2110,6.9386,-75.1386,{nan},"{'GHPT': {'G601446'}, 'GEO': {'GEO-43449'}, 'GPD': {'WRI1018575'}}",226
+21,Termo Flores,CCGT,CCGT,PP,CO,610,,,0,0,0,1993,1993,2033,11.026,-74.8125,"{nan, nan}","{'GGPT': {'L100000406570'}, 'GPD': {'WRI1018583'}}",30
+40,Termocandelaria,CCGT,CCGT,PP,CO,566,,,0,0,0,2023,2023,2063,10.3585,-75.4856,{nan},{'GGPT': {'L100000406573'}},22
+26,Guatape,Hydro,Reservoir,PP,CO,560,,,0,0,0,1971,1971,2071,6.3201,-75.1659,{nan},"{'GHPT': {'G601431'}, 'GPD': {'WRI1018565'}}",93
+15,Betania,Hydro,Reservoir,PP,CO,540,,,0,0,0,1987,1987,2087,2.7082,-75.4298,{nan},"{'GHPT': {'G601416'}, 'GEO': {'GEO-43451'}}",147
+42,Termoemcali,CCGT,CCGT,PP,CO,481,,,0,0,0,1998,1998,2038,3.5623395,-76.460952,"{nan, nan}","{'GGPT': {'L100000406590', 'L100000406580'}}",66
+20,Termosierra,CCGT,CCGT,PP,CO,460,,,0,0,0,2001,2001,2041,6.23605,-74.561158,{nan},"{'GGPT': {'L100000406577'}, 'GPD': {'WRI1018572'}}",96
+12,Gecelca,Hard Coal,Steam Turbine,PP,CO,437,,,0,0,0,2015,2015,2060,7.99111,-75.59456,"{nan, nan}","{'GCPT': {'G100000102974', 'G100000102973'}, 'GPD': {'WRI1075561'}}",307
+18,Porce,Hydro,Reservoir,PP,CO,405,,,0,0,0,2001,2001,2101,6.8056,-75.1491,{nan},"{'GHPT': {'G601445'}, 'GEO': {'GEO-43450'}}",50
+4,Miel,Hydro,Reservoir,PP,CO,396,,,0,0,0,2002,2002,2102,5.5606,-74.8866,{nan},"{'GHPT': {'G601440'}, 'GEO': {'GEO-43432'}, 'GPD': {'WRI1018573'}}",33
+269,El Quimbo,Hydro,Reservoir,PP,CO,396,,,0,0,0,2015,2015,2115,2.4507,-75.565,{nan},{'GHPT': {'G601425'}},167
+14,Alto Anchicaya,Hydro,Reservoir,PP,CO,353,,,0,0,0,1974,1974,2074,3.5243,-76.7127,{nan},"{'GHPT': {'G601415'}, 'GEO': {'GEO-42249'}}",79
+0,Termopaipa,Hard Coal,Steam Turbine,PP,CO,350,,,0,0,0,1963,1963,2035,5.7682,-73.1472,"{nan, nan, nan, nan}","{'GCPT': {'G100000110017', 'G100000110015', 'G100000110016', 'G100000110014'}, 'GEO': {'GEO-43462'}, 'GPD': {'WRI1018584'}}",182
+17,Urra,Hydro,Reservoir,PP,CO,340,,,0,0,0,2000,2008,2108,8.012,-76.2021,{nan},"{'GHPT': {'G601453'}, 'GEO': {'GEO-43473'}}",114
+9,Termotasajero,Hard Coal,Steam Turbine,PP,CO,333,,,0,0,0,1984,1984,2029,7.8473,-72.6328,"{nan, nan}","{'GCPT': {'G100000110019', 'G100000110020'}, 'GEO': {'GEO-43427'}, 'GPD': {'WRI1018579'}}",301
+270,Guaca,Hydro,Run-Of-River,PP,CO,324,,,0,0,0,1985,1985,2085,4.5899,-74.4601,{nan},{'GHPT': {'G601428'}},117
+24,La Tasajera,Hydro,Reservoir,PP,CO,306,,,0,0,0,1993,1993,2093,6.3771,-75.4478,{nan},"{'GHPT': {'G601437'}, 'GPD': {'WRI1018561'}}",170
+1,Termocentro,CCGT,CCGT,PP,CO,300,,,0,0,0,1997,1997,2037,6.444481,-74.380683,{nan},"{'GGPT': {'L100000406583'}, 'GEO': {'GEO-43433'}, 'GPD': {'WRI1018582'}}",145
+7,Termoguajira,Hard Coal,Steam Turbine,PP,CO,290,,,0,0,0,1983,1983,2028,11.262213,-73.415568,"{nan, nan}","{'GCPT': {'G100000110012', 'G100000110013'}, 'GEO': {'GEO-43428'}, 'GPD': {'WRI1075562'}}",164
+275,Salvajina,Hydro,Reservoir,PP,CO,285,,,0,0,0,1985,1985,2085,2.9435,-76.7079,{nan},{'GHPT': {'G601448'}},133
+268,El Paraiso,Hydro,Reservoir,PP,CO,276,,,0,0,0,1986,1986,2086,4.5717,-74.4015,{nan},{'GHPT': {'G601424'}},117
+27,Guadalupe,Hydro,Reservoir,PP,CO,270,,,0,0,0,1962,1962,2062,6.793,-75.2273,{nan},"{'GHPT': {'G601429'}, 'GPD': {'WRI1018564'}}",51
+8,Termozipa,Hard Coal,Steam Turbine,PP,CO,236,,,0,0,0,1964,1964,2027,4.970817,-73.947258,"{nan, nan, nan, nan}","{'GCPT': {'G100000110026', 'G100000110023', 'G100000110024', 'G100000110025'}, 'GEO': {'GEO-43461'}, 'GPD': {'WRI1018588'}}",142
+38,El Tesorito,CCGT,CCGT,PP,CO,209,,,0,0,0,2022,2022,2062,8.646644,-75.45943,{nan},{'GGPT': {'L100000406566'}},253
+273,Playas,Hydro,Reservoir,PP,CO,204,,,0,0,0,1988,1988,2088,6.2923,-74.9408,{nan},{'GHPT': {'G601444'}},47
+11,Termovalle Ccgt Colombia,Oil,Steam Turbine,PP,CO,194.530454,,,0,0,0,1998,1998,2038,3.5649,-76.4532,"{nan, nan}","{'GEO': {'GEO-43463'}, 'GPD': {'WRI1018585'}}",66
+25,Jaguas,Hydro,Reservoir,PP,CO,170,,,0,0,0,1988,1988,2088,6.3486,-75.005,{nan},"{'GHPT': {'G601435'}, 'GPD': {'WRI1018571'}}",280
+28,Merilectrica,CCGT,CCGT,PP,CO,167,,,0,0,0,1998,1998,2038,7.0543,-73.82,{nan},"{'GGPT': {'L100000406571'}, 'GEO': {'GEO-43454'}}",160
+44,Termoyopal,CCGT,CCGT,PP,CO,150,,,0,0,0,2020,2020,2060,5.444559,-72.453533,"{nan, nan, nan}",{'GGPT': {'L100000406693'}},271
+267,Dario Valencia,Hydro,Reservoir,PP,CO,150,,,0,0,0,1973,1973,2073,4.602,-74.4315,{nan},{'GHPT': {'G601423'}},117
+16,San Francisco Colombia,Hydro,Reservoir,PP,CO,135,,,0,0,0,1969,1969,2069,5.0503,-75.7427,{nan},"{'GHPT': {'G601451'}, 'GEO': {'GEO-43472'}}",92
+265,Calima,Hydro,Reservoir,PP,CO,132,,,0,0,0,1966,1966,2066,3.8803,-76.5599,{nan},{'GHPT': {'G601418'}},361
+39,Mamonal,CCGT,CCGT,PP,CO,100,,,0,0,0,1993,1993,2033,10.350741,-75.493065,"{nan, nan}",{'GGPT': {'L100000406564'}},22
+43,Termonorte,CCGT,CCGT,PP,CO,93,,,0,0,0,2018,2018,2058,11.259618,-74.103376,{nan},{'GGPT': {'L100000406578'}},163
+274,Rio Amoya,Hydro,Run-Of-River,PP,CO,80,,,0,0,0,2013,2013,2113,3.8061,-75.5931,{nan},{'GHPT': {'G601447'}},310
+266,Carlos Lleras Restrepo,Hydro,Run-Of-River,PP,CO,78,,,0,0,0,2015,2015,2115,6.5197,-75.2528,{nan},{'GHPT': {'G601420'}},331
+41,Termodorada,CCGT,CCGT,PP,CO,50,,,0,0,0,1997,1997,2037,5.445266,-74.674434,{nan},{'GGPT': {'L100000406581'}},330
+37,Troneras Central,Hydro,,PP,CO,40,,,0,0,0,1988.035714,1988.035714,2088.035714,6.7244,-75.2817,{nan},{'GPD': {'WRI1018587'}},51
+36,Calderas,Hydro,,PP,CO,26,,,0,0,0,1988.035714,1988.035714,2088.035714,7.7918,-74.7732,{nan},{'GPD': {'WRI1018560'}},119
+30,Esmeralda Colombia,Hydro,Run-Of-River,PP,CO,22.18248946,,,0,0,0,1963,1963,2063,5.0401,-75.7271,"{nan, nan}",{'GEO': {'GEO-43471'}},92
+31,Insula Colombia,Hydro,Run-Of-River,PP,CO,13.30949368,,,0,0,0,1951,1951,2051,5,-75.6459,"{nan, nan, nan}",{'GEO': {'GEO-43470'}},239
