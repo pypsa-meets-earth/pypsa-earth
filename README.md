@@ -34,7 +34,7 @@ To run the stable modelling workflow for any country of the workd, please refer 
 
 To run the workflow with past OSM data versions, these steps can be followed:
 1. Download a previous version of OSM data as pbf file and place it into `data/custom/osm` (e.g. `colombia-230101.osm.pbf` downloaded from `https://download.geofabrik.de/south-america/`)
-2. Enable `osm_data` flag to run the workflow: 
+2. Enable `osm_data` flag to run the workflow:
 
 ```yaml
 custom_data:

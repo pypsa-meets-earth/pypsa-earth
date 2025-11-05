@@ -3,7 +3,7 @@ name: Dev Container Build and Push Image
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [development]
     paths:
     - envs/linux-64.lock.yaml
 

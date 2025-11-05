@@ -9,7 +9,7 @@ RUN conda config --set solver libmamba
 
 RUN apt-get update && apt-get install -y bash git && apt-get install gcc -y
 
-WORKDIR /pypsa-earth
+WORKDIR /pypsa-earth-osm
 
 COPY ./envs ./temp
 

@@ -12,7 +12,7 @@ env:
 
 jobs:
   update-locked-environment:
-    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.ref == 'refs/heads/development' || github.event_name == 'workflow_dispatch' }}
     name: Update pinned envs
     runs-on: ubuntu-latest
     defaults:
