@@ -35,7 +35,13 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-from _helpers import BASE_DIR, configure_logging, create_logger, read_osm_config
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_osm_config,
+    two_digits_2_name_country,
+)
 from earth_osm import eo
 
 logger = create_logger(__name__)
@@ -104,90 +110,186 @@ if __name__ == "__main__":
 
     run = snakemake.config.get("run", {})
     RDIR = run["name"] + "/" if run.get("name") else ""
+    country_list = country_list_to_geofk(snakemake.params.countries)
 
-    # Check for historical date configuration
-    historical_config = snakemake.config.get("historical_osm_data", {})
-    target_date = historical_config.get("osm_date", None)
+    # Get unified OSM data configuration
+    osm_config = snakemake.config.get("osm_data", {})
+    source = osm_config.get("source", "latest").lower()
+
+    # Validate source option
+    valid_sources = ["latest", "historical", "custom"]
+    if source not in valid_sources:
+        logger.warning(
+            f"Invalid osm_data source '{source}'. Must be one of {valid_sources}. Defaulting to 'latest'."
+        )
+        source = "latest"
+
+    # Extract configuration based on source
+    custom_path_config = osm_config.get("custom_path", {})
+    target_date = str(osm_config.get("target_date", None))
+
+    # Handle custom_path - dict with pbf/power keys
+    if isinstance(custom_path_config, dict):
+        custom_pbf_path = custom_path_config.get("pbf", "data/custom/osm/pbf")
+        custom_power_path = custom_path_config.get("power", "data/custom/osm/power")
+    else:
+        # Default paths
+        custom_pbf_path = "data/custom/osm/pbf"
+        custom_power_path = "data/custom/osm/power"
 
     # Create date-specific subdirectory for OSM data if historical date is provided
     osm_subdir = ""
-    if target_date:
+    if source == "historical" and target_date:
         if isinstance(target_date, str):
-            osm_subdir = target_date.replace("-", "")[:6] + "/"  # Format: YYYYMM/
-        else:
-            osm_subdir = target_date.strftime("%Y%m") + "/"
+            # Extract YYYYMM from date string
+            osm_subdir = target_date.replace("-", "")[:6]  # Format: YYYYMM
+        elif isinstance(target_date, datetime):
+            osm_subdir = target_date.strftime("%Y%m")
+    elif source == "custom":
+        osm_subdir = "custom"
     else:
-        osm_subdir = "latest/"
+        osm_subdir = "latest"
 
     store_path_resources = Path.joinpath(
         Path(BASE_DIR), "resources", RDIR, "osm", "raw"
     )
     store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm", osm_subdir)
-    country_list = country_list_to_geofk(snakemake.params.countries)
-    custom_data = snakemake.config.get("custom_data", {}).get("osm_data", {})
-    set_custom_data = custom_data.get("set", False)
-    custom_data_path = custom_data.get("custom_path", "data/custom/osm")
 
-    # Parse and validate target_date if provided as string
-    if target_date and isinstance(target_date, str):
-        try:
-            target_date = datetime.strptime(target_date, "%Y-%m-%d")
+    # Parse target_date if provided as string (for historical source)
+    if source == "historical" and target_date:
+        if isinstance(target_date, str):
+            try:
+                target_date = datetime.strptime(target_date, "%Y-%m-%d")
+                logger.info(
+                    f"Historical OSM data mode: Using data from {target_date.strftime('%Y-%m-%d')}"
+                )
+                # Update osm_subdir after parsing
+                osm_subdir = target_date.strftime("%Y%m")
+                store_path_data = Path.joinpath(
+                    Path(BASE_DIR), "data", "osm", osm_subdir
+                )
+            except ValueError:
+                logger.warning(
+                    f"Invalid date format '{target_date}', expected YYYY-MM-DD. Falling back to latest data download."
+                )
+                source = "latest"
+                target_date = None
+                osm_subdir = "latest"
+                store_path_data = Path.joinpath(
+                    Path(BASE_DIR), "data", "osm", osm_subdir
+                )
+        else:
             logger.info(
-                f"Using historical OSM data for date: {target_date.strftime('%Y-%m-%d')}"
+                f"Historical OSM data mode: Using data from {target_date.strftime('%Y-%m-%d')}"
             )
-        except ValueError:
-            logger.warning(
-                f"Invalid date format '{target_date}', expected YYYY-MM-DD. Using latest data."
+    elif source == "historical" and not target_date:
+        logger.warning(
+            "Historical source selected but no target_date provided. Falling back to latest data download."
+        )
+        source = "latest"
+
+    # Log the data storage path
+    logger.info(f"OSM data will be stored in: {store_path_data}")
+
+    # Process OSM data based on selected source
+    if source == "custom":
+        # Custom data mode: copy user-provided OSM files then process them
+        # PBF path is required, power path is optional
+
+        # Check if pbf path exists (required)
+        if not os.path.exists(custom_pbf_path):
+            raise FileNotFoundError(
+                f"Custom OSM pbf data path '{custom_pbf_path}' does not exist. "
+                f"This path is required when using source: 'custom'. "
+                f"Please provide valid pbf files or change osm_data.source to 'latest'."
             )
-            target_date = None
-    elif target_date:
-        logger.info(
-            f"Using historical OSM data for date: {target_date.strftime('%Y-%m-%d')}"
-        )
 
-    # allow for custom data usage
-    if set_custom_data and not os.path.exists(custom_data_path):
-        raise FileNotFoundError(
-            f"Custom OSM data path {custom_data_path} does not exist. Please provide a valid path."
-        )
-    elif set_custom_data and os.path.exists(custom_data_path):
-        logger.info(
-            "Custom OSM data usage is activated. Skipping the download of OSM data."
-        )
+        # Validate that required pbf files exist for the specified countries
+        # country_list contains ISO codes or special region codes
+        # Earth-osm converts these to lowercase country names for pbf files
+        missing_files = []
+        for country_code in country_list:
+            # Convert ISO code to full country name, then lowercase for geofabrik format
+            # e.g., "BO" -> "Bolivia" -> "bolivia"
+            # Special regions like "SN-GM" are handled by the helper function
+            try:
+                country_name = two_digits_2_name_country(country_code).lower()
+            except:
+                # If conversion fails, use the code itself lowercased
+                country_name = country_code.lower()
+
+            expected_file = f"{country_name}-latest.osm.pbf"
+            expected_path = os.path.join(custom_pbf_path, expected_file)
+            if not os.path.exists(expected_path):
+                missing_files.append(expected_file)
+
+        if missing_files:
+            raise FileNotFoundError(
+                f"Custom OSM data mode requires pbf files for all specified countries. "
+                f"Missing files in '{custom_pbf_path}': {', '.join(missing_files)}. "
+                f"Expected files should be named '<country>-latest.osm.pbf' (e.g., 'bolivia-latest.osm.pbf'). "
+                f"Please provide the required pbf files or change osm_data.source to 'latest'."
+            )
+
+        # Create the data directories
         os.makedirs(store_path_data, exist_ok=True)
-        shutil.copytree(custom_data_path, store_path_data, dirs_exist_ok=True)
-    else:
-        # Create the data directory with date-specific subdirectory
-        os.makedirs(store_path_data, exist_ok=True)
-        logger.info(f"OSM data will be stored in: {store_path_data}")
+        pbf_target_path = Path.joinpath(store_path_data, "pbf")
+        power_target_path = Path.joinpath(store_path_data, "power")
 
-        # Prepare save_osm_data arguments
-        save_args = {
-            "primary_name": "power",
-            "region_list": country_list,
-            "feature_list": ["substation", "line", "cable", "generator"],
-            "update": False,
-            "mp": True,
-            "data_dir": store_path_data,
-            "out_dir": store_path_resources,
-            "out_format": ["csv", "geojson"],
-            "out_aggregate": True,
-            "progress_bar": snakemake.config["enable"]["progress_bar"],
-        }
+        # Copy pbf files (required)
+        logger.info(
+            f"Custom OSM data mode: Copying pbf files from '{custom_pbf_path}' to '{pbf_target_path}'"
+        )
+        shutil.copytree(custom_pbf_path, pbf_target_path, dirs_exist_ok=True)
 
-        # Add historical date support if available and target_date is provided
-        if (
-            target_date
-            and "target_date" in inspect.signature(eo.save_osm_data).parameters
-        ):
+        # Copy power files if path exists (optional)
+        if os.path.exists(custom_power_path):
+            logger.info(
+                f"Custom OSM data mode: Copying power files from '{custom_power_path}' to '{power_target_path}'"
+            )
+            shutil.copytree(custom_power_path, power_target_path, dirs_exist_ok=True)
+        else:
+            logger.info(
+                f"Custom power files path '{custom_power_path}' not found. "
+                f"OSM data will be processed from pbf files only."
+            )
+
+    # Prepare save_osm_data arguments for all sources
+    # earth-osm will skip downloading if pbf files already exist (custom mode)
+    save_args = {
+        "primary_name": "power",
+        "region_list": country_list,
+        "feature_list": ["substation", "line", "cable", "generator"],
+        "update": False,
+        "mp": True,
+        "data_dir": store_path_data,
+        "out_dir": store_path_resources,
+        "out_format": ["csv", "geojson"],
+        "out_aggregate": True,
+        "progress_bar": snakemake.config["enable"]["progress_bar"],
+    }
+
+    # Add historical date support if source is 'historical' and earth-osm supports it
+    if source == "historical" and target_date:
+        if "target_date" in inspect.signature(eo.save_osm_data).parameters:
             save_args["target_date"] = target_date
-            logger.info("Historical data download enabled")
-        elif target_date:
-            logger.warning(
-                "Historical date requested but earth-osm version doesn't support target_date parameter. Downloading the latest OSM data."
+            logger.info(
+                f"Downloading historical OSM data for {target_date.strftime('%Y-%m-%d')}"
             )
+        else:
+            logger.warning(
+                f"Historical date requested but earth-osm version doesn't support target_date parameter. "
+                f"Downloading the latest OSM data instead."
+            )
+    elif source == "latest":
+        logger.info("Downloading latest OSM data")
+    elif source == "custom":
+        logger.info(
+            "Processing custom OSM data (earth-osm will use existing pbf files)"
+        )
 
-        eo.save_osm_data(**save_args)
+    # Process OSM data (download or process existing pbf files)
+    eo.save_osm_data(**save_args)
 
     out_path = Path.joinpath(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]

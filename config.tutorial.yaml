@@ -61,6 +61,14 @@ renewable:
   csp:
     cutout: cutout-2013-era5-tutorial
 
+# OpenStreetMap (OSM) data configuration
+osm_data:
+  source: "latest" # Options: "latest", "historical", or "custom"
+  custom_path:
+    pbf: "data/custom/osm/pbf"  # Path to pbf files (required if source: "custom")
+    power: "data/custom/osm/power"  # Path to power files (optional)
+  target_date: # e.g., "2020-01-01" (used when source: "historical")
+
 solving:
   solver:
     name: glpk
