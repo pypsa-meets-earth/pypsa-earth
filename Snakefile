@@ -695,6 +695,37 @@ rule cluster_network:
         "scripts/cluster_network.py"
 
 
+solar_rooftop_config = config["sector"]["solar_rooftop"]
+if isinstance(solar_rooftop_config, dict):
+    SOLAR_ROOFTOP = {
+        "install_ratio": solar_rooftop_config["install_ratio"],
+        "tolerance": solar_rooftop_config["tolerance"],
+    }
+    SOLAR_ROOFTOP_IF = (
+        solar_rooftop_config["enable"] and solar_rooftop_config["use_building_size"],
+    )
+else:
+    SOLAR_ROOFTOP = {}
+    SOLAR_ROOFTOP_IF = False
+
+
+rule download_global_buildings:
+    params:
+        **SOLAR_ROOFTOP,
+        crs=config["crs"],
+        countries=config["countries"],
+    input:
+        regions_onshore="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+    output:
+        solar_rooftop_layout="resources/"
+        + RDIR
+        + "solar_rooftop_layout_elec_s{simpl}_{clusters}.csv",
+    script:
+        "scripts/download_global_buildings.py"
+
+
 rule augmented_line_connections:
     params:
         lines=config["lines"],
@@ -1148,6 +1179,10 @@ rule prepare_sector_network:
                 + SECDIR
                 + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             ),
+        ),
+        solar_rooftop_layout=branch(
+            SOLAR_ROOFTOP_IF,
+            "resources/" + RDIR + "solar_rooftop_layout_elec_s{simpl}_{clusters}.csv",
         ),
     output:
         RESDIR

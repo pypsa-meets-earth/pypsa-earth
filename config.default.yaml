@@ -655,7 +655,20 @@ sector:
   efficiency_heat_gas_to_elec: 0.9
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
-  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+    enable: true
+    kW_per_m2: 0.1
+    m2_per_person: 20
+    use_building_size: false
+    install_ratio:
+      0: 0
+      10: 0.3
+      100: 0.36
+      200: 0.41
+      450: 0.49
+      2300: 0.66
+    tolerance: 100
+
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
   transmission_efficiency:
     electricity distribution grid:
