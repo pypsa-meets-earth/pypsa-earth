@@ -702,7 +702,7 @@ if isinstance(solar_rooftop_config, dict):
         "tolerance": solar_rooftop_config["tolerance"],
     }
     SOLAR_ROOFTOP_IF = (
-        solar_rooftop_config["enable"] and solar_rooftop_config["use_building_size"],
+        solar_rooftop_config["enable"] and solar_rooftop_config["use_building_size"]
     )
 else:
     SOLAR_ROOFTOP = {}
