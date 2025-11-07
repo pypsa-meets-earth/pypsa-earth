@@ -28,18 +28,77 @@ That is an experimental modeling implementation intended to be used for bridging
 
 To run the stable modelling workflow for any country of the workd, please refer to [PyPSA-Earth repository](https://github.com/pypsa-meets-earth/pypsa-earth).
 
-## Usage
+## How Earth-OSM Works
 
-### Running workflow with old OSM data
+PyPSA-Earth-OSM leverages OpenStreetMap (OSM) data to build power grid topology models for energy system analysis. The workflow extracts, processes, and validates power infrastructure data from OSM, enabling researchers to analyze electricity networks using crowd-sourced geographic information.
 
-To run the workflow with past OSM data versions, these steps can be followed:
-1. Download a previous version of OSM data as pbf file and place it into `data/custom/osm` (e.g. `colombia-230101.osm.pbf` downloaded from `https://download.geofabrik.de/south-america/`)
-2. Enable `osm_data` flag to run the workflow:
+### Data Sources and Workflow
+
+The Earth-OSM workflow supports three different approaches for obtaining OpenStreetMap data:
+
+#### 1. Latest OSM Data (Default)
+Downloads the most current version of OSM data directly from OpenStreetMap servers. This ensures access to the latest updates from the OSM community, including recent infrastructure additions and corrections.
+
+#### 2. Historical OSM Data
+Enables analysis of past grid configurations by downloading OSM data from a specific date. This is valuable for:
+- Temporal analysis and grid evolution studies
+- Validation against historical records
+- Reproducibility of previous research
+- Comparison of infrastructure development over time
+
+Historical data is available from approximately 2012 onwards, depending on OSM data availability.
+
+#### 3. Custom OSM Data
+Allows users to provide their own OpenStreetMap data files (in `.pbf` format). This option is useful for:
+- Working with locally cached OSM data
+- Using pre-processed or validated OSM datasets
+- Offline workflows or environments with limited internet access
+- Testing with specific OSM data snapshots
+
+### Configuration Options
+
+The `osm_data` section in the configuration file (`config.default.yaml` or `config.yaml`) controls how Earth-OSM retrieves and processes OpenStreetMap data:
 
 ```yaml
-custom_data:
-  osm_data: true
+osm_data:
+  source: "latest"  # Options: "latest", "historical", or "custom"
+
+  # For historical data
+  target_date: "2020-01-01"  # Format: YYYY-MM-DD
+
+  # For custom data
+  custom_path:
+    pbf: "data/custom/osm/pbf"      # Path to custom .pbf files (required)
+    power: "data/custom/osm/power"  # Path to processed power files (optional)
 ```
+
+**Key Configuration Parameters:**
+
+- **`source`**: Determines the OSM data source
+  - `"latest"`: Downloads current OSM data (default)
+  - `"historical"`: Downloads OSM data from a specific date
+  - `"custom"`: Uses user-provided OSM files
+
+- **`target_date`**: Specifies the date for historical data (format: YYYY-MM-DD)
+  - Only used when `source: "historical"`
+  - Example dates: `"2018-01-01"`, `"2020-06-15"`, `"2022-12-31"`
+
+- **`custom_path`**: Defines paths for custom OSM data files
+  - **`pbf`**: Directory containing raw OSM data files (`.osm.pbf` format)
+    - Files must follow naming pattern: `<country>-latest.osm.pbf`
+    - Example: `bolivia-latest.osm.pbf`, `nigeria-latest.osm.pbf`
+  - **`power`**: Directory for pre-processed power infrastructure JSON files (optional)
+
+### Data Processing Pipeline
+
+Once OSM data is obtained, Earth-OSM processes it through several stages:
+
+1. **Download/Load**: Retrieves OSM data based on the configured source
+2. **Filter**: Extracts power infrastructure elements (substations, lines, cables, generators)
+3. **Clean**: Validates and standardizes the data using configurable thresholds and rules
+4. **Build Network**: Constructs the power network topology, connecting buses and lines
+5. **Validate**: Performs quality checks and consistency validation
+
 
 ## Collaborators
 
