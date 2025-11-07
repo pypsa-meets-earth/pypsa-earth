@@ -1,0 +1,250 @@
+/* SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+/* ============================================
+   PyPSA-Earth Documentation Styles
+   ============================================ */
+
+/* ============================================
+   1. CSS VARIABLES
+   ============================================ */
+
+:root {
+  /* Primary colors */
+  --md-primary-fg-color: #3f51b5;
+  --md-primary-fg-color--light: #757de8;
+  --md-primary-fg-color--dark: #002984;
+  
+  /* Spacing */
+  --content-spacing: 1.5rem;
+  --grid-gap: 1rem;
+  
+  /* Borders and shadows */
+  --border-radius: 4px;
+  --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ============================================
+   2. LAYOUT COMPONENTS
+   ============================================ */
+
+/* Grid layout for images */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--grid-gap);
+  margin: 2rem 0;
+}
+
+.grid img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+/* Grid for image galleries */
+.grid-images {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: stretch;
+  margin: var(--content-spacing) 0;
+}
+
+.grid-images img {
+  width: 32%;
+  height: auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+/* Video responsive container */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin: 2rem 0;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   3. TABLES
+   ============================================ */
+
+table {
+  width: 100%;
+  margin: var(--content-spacing) 0;
+  border-collapse: collapse;
+}
+
+table th {
+  background-color: var(--md-primary-fg-color);
+  color: white;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+table tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ============================================
+   4. ADMONITIONS
+   ============================================ */
+
+.admonition {
+  margin: var(--content-spacing) 0;
+  padding: 0 0.75rem;
+  border-left: 4px solid;
+  border-radius: var(--border-radius);
+}
+
+.admonition.note {
+  border-left-color: #448aff;
+  background-color: rgba(68, 138, 255, 0.05);
+}
+
+.admonition.warning {
+  border-left-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.05);
+}
+
+.admonition.tip {
+  border-left-color: #00c853;
+  background-color: rgba(0, 200, 83, 0.05);
+}
+
+.admonition.danger {
+  border-left-color: #f44336;
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.admonition.info {
+  border-left-color: #2196f3;
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+/* ============================================
+   5. CODE BLOCKS
+   ============================================ */
+
+/* Code block styling */
+.md-typeset pre {
+  border-radius: var(--border-radius);
+}
+
+/* Copy button positioning */
+.md-typeset .highlight .md-clipboard {
+  top: 0.5em;
+  right: 0.5em;
+}
+
+/* Inline code */
+.md-typeset code {
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+/* ============================================
+   6. BADGES & BUTTONS
+   ============================================ */
+
+/* Badge styling */
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  font-size: 0.875em;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 3px;
+  margin: 0.2em;
+}
+
+/* ============================================
+   7. RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Mobile adjustments */
+@media screen and (max-width: 768px) {
+  .grid-images {
+    flex-direction: column;
+  }
+  
+  .grid-images img {
+    width: 100%;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .grid-images img {
+    width: 48%;
+  }
+}
+
+/* ============================================
+   8. NAVIGATION ENHANCEMENTS
+   ============================================ */
+
+/* Table of contents improvements */
+.md-sidebar--secondary {
+  position: sticky;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   9. UTILITY CLASSES
+   ============================================ */
+
+/* Text alignment */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Spacing utilities */
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+/* ============================================
+   END OF STYLES
+   ============================================ */
