@@ -5,9 +5,10 @@ This guide will help you run your first PyPSA-Earth model in under 10 minutes.
 ## Prerequisites
 
 Before starting, ensure you have:
-- Completed the [installation](installation.md)
-- At least 8GB of RAM available
-- A working internet connection (for data download)
+
+  - Completed the [installation](installation.md)
+  - At least 8GB of RAM available
+  - A working internet connection (for data download)
 
 ## Run the Tutorial Model
 
@@ -28,19 +29,21 @@ snakemake -call results/NG/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile co
 ```
 
 This command will:
-- Download required data for Nigeria
-- Build the power system network
-- Run the optimization
-- Generate results
+
+  - Download required data for Nigeria
+  - Build the power system network
+  - Run the optimization
+  - Generate results
 
 The tutorial model typically completes in 5-15 minutes depending on your system.
 
 ### 3. View Results
 
 Once complete, you can find:
-- **Network file**: `results/NG/networks/elec_s_6_ec_lcopt_Co2L-4H.nc`
-- **Summary statistics**: `results/NG/stats/`
-- **Plots**: `results/NG/plots/`
+
+  - **Network file**: `results/NG/networks/elec_s_6_ec_lcopt_Co2L-4H.nc`
+  - **Summary statistics**: `results/NG/stats/`
+  - **Plots**: `results/NG/plots/`
 
 ## What's Next?
 
