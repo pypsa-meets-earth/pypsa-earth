@@ -1,0 +1,201 @@
+# SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+site_name: PyPSA-Earth Documentation
+site_url: https://pypsa-earth.readthedocs.io
+repo_url: https://github.com/pypsa-meets-earth/pypsa-earth
+repo_name: pypsa-earth
+edit_uri: edit/main/doc/
+
+# Documentation directory
+docs_dir: doc
+
+# Navigation
+nav:
+  - Home:
+    - index.md
+    - Introduction: home/introduction.md
+    - Installation: home/installation.md
+    - Quick Start: home/quick-start.md
+  
+  - Tutorials:
+    - Electricity Model: tutorials/electricity-model.md
+    - Sector-Coupled Model: tutorials/sector-coupled-model.md
+    - Examples: tutorials/examples.md
+  
+  - User Guide:
+    - Configuration: user-guide/configuration.md
+    - Wildcards: user-guide/wildcards.md
+    - Costs: user-guide/costs.md
+    - Structure: user-guide/structure.md
+    - Rules Overview: user-guide/rules-overview.md
+    - Optimization: user-guide/optimization.md
+    - Plotting: user-guide/plotting.md
+    - Data Workflow: user-guide/data-workflow.md
+    - Model Customization: user-guide/model-customization.md
+    - Customization Guides:
+      - Basic Setup: user-guide/customization/basic-setup.md
+      - Advanced Configuration: user-guide/customization/advanced-config.md
+      - Copernicus Data: user-guide/customization/copernicus-data.md
+      - Validation: user-guide/customization/validation.md
+      - Running Models: user-guide/customization/running-models.md
+    - Rules Reference:
+      - Download & Filter:
+        - Build Shapes: user-guide/rules-reference/download-and-filter/build-shapes.md
+        - Retrieve Data Bundle: user-guide/rules-reference/download-and-filter/retrieve-databundle-light.md
+      - Populate Data:
+        - Build Bus Regions: user-guide/rules-reference/populate/build-bus-regions.md
+        - Build Cutout: user-guide/rules-reference/populate/build-cutout.md
+        - Build Demand Profiles: user-guide/rules-reference/populate/build-demand-profiles.md
+        - Build Natura Raster: user-guide/rules-reference/populate/build-natura-raster.md
+        - Build Powerplants: user-guide/rules-reference/populate/build-powerplants.md
+        - Build Renewable Profiles: user-guide/rules-reference/populate/build-renewable-profiles.md
+      - Create Network:
+        - Base Network: user-guide/rules-reference/create-network/base-network.md
+        - Add Electricity: user-guide/rules-reference/create-network/add-electricity.md
+        - Simplify Network: user-guide/rules-reference/create-network/simplify-network.md
+        - Cluster Network: user-guide/rules-reference/create-network/cluster-network.md
+        - Add Extra Components: user-guide/rules-reference/create-network/add-extra-components.md
+        - Prepare Network: user-guide/rules-reference/create-network/prepare-network.md
+      - Solving:
+        - Solve Network: user-guide/rules-reference/solving/solve-network.md
+        - Solve Operations: user-guide/rules-reference/solving/solve-operations-network.md
+  
+  - Advanced:
+    - Monte Carlo: advanced/monte-carlo.md
+  
+  - API Reference:
+    - api-reference/index.md
+  
+  - Community & Resources:
+    - Contributing: community/contributing.md
+    - Project Structure: community/project-structure.md
+    - Release Notes: community/release-notes.md
+    - Users List: community/users-list.md
+    - Talks & Papers: community/talks-and-papers.md
+    - Learning Materials: community/learning-materials.md
+    - Software Hints: community/software-hints.md
+
+# Theme settings
+theme:
+  name: material
+  logo: https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png
+  favicon: https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.top
+    - header.autohide
+    - content.action.edit
+    - content.action.view
+    - content.code.copy
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - announce.dismiss
+  
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+hooks:
+  - doc/hooks/cleanup.py
+
+markdown_extensions:
+  # Standard Extensions
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - md_in_html
+  - toc:
+      title: On this page
+      permalink: true
+      toc_depth: 3
+  - footnotes
+  
+  # PyMdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.mark
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - abbr
+  - attr_list
+  - def_list
+  - tables
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      type: timeago
+      timezone: UTC
+      enable_creation_date: true
+  - mkdocstrings:
+      enabled: true
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+            group_by_category: true
+  - table-reader
+  - autorefs
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pypsa-meets-earth/pypsa-earth
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/AnuJBk23FU
+    - icon: fontawesome/brands/google
+      link: https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz
+  version:
+    provider: mike

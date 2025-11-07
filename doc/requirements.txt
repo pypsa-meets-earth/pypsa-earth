@@ -2,12 +2,15 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-setuptools
-sphinx
-sphinx_book_theme
-sphinxcontrib-bibtex
-myst-parser  # recommark is deprecated, https://stackoverflow.com/a/71660856/13573820
-sphinx-copybutton
+# MkDocs and theme
+mkdocs>=1.5.0
+mkdocs-material>=9.5.0
+mkdocs-git-revision-date-localized-plugin
+mkdocs-table-reader-plugin
+mkdocs-video
+mkdocstrings[python]>=0.24.0
+mkdocs-autorefs
+pymdown-extensions
 
 pypsa >=0.25, <=0.30
 vresutils>=0.3.1
