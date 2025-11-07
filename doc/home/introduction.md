@@ -23,10 +23,6 @@ For more details on PyPSA-Earth read the below milestone paper. For citations, p
 
 The generation of the model is controlled by the workflow management system [Snakemake](https://snakemake.bitbucket.io/). In a nutshell, the `Snakefile` declares for each python script in the `scripts` directory a rule which describes which files the scripts consume and produce (their corresponding input and output files). The `snakemake` tool then runs the scripts in the correct order according to the rules' input/output dependencies. Moreover, it is able to track what parts of the workflow have to be regenerated when a data file or a script is modified/updated. For example, by executing the following snakemake routine:
 
-``` bash
-pip install pypsa
-```
-
 ```bash
 .../pypsa-earth % snakemake -j 1 networks/elec_s_128.nc
 ```
