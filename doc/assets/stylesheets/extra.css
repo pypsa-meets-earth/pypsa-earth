@@ -246,5 +246,93 @@ html {
 .mb-4 { margin-bottom: 2rem; }
 
 /* ============================================
+   10. MERMAID DIAGRAM STYLING
+   ============================================ */
+
+/* Light mode Mermaid styling */
+[data-md-color-scheme="default"] .mermaid {
+  /* Node styling */
+  --md-mermaid-node-bg-color: #e3f2fd;
+  --md-mermaid-node-fg-color: #1565c0;
+  
+  /* Edge styling */
+  --md-mermaid-edge-color: #64b5f6;
+  
+  /* Label styling */
+  --md-mermaid-label-bg-color: #ffffff;
+  --md-mermaid-label-fg-color: #1565c0;
+  
+  /* Font */
+  --md-mermaid-font-family: 'Roboto', sans-serif;
+}
+
+/* Dark mode Mermaid styling */
+[data-md-color-scheme="slate"] .mermaid {
+  /* Node styling - lighter colors for visibility */
+  --md-mermaid-node-bg-color: #42a5f5;
+  --md-mermaid-node-fg-color: #ffffff;
+  
+  /* Edge styling - visible lines */
+  --md-mermaid-edge-color: #90caf9;
+  
+  /* Label styling */
+  --md-mermaid-label-bg-color: #1e1e1e;
+  --md-mermaid-label-fg-color: #ffffff;
+  
+  /* Font */
+  --md-mermaid-font-family: 'Roboto', sans-serif;
+}
+
+/* Mermaid container styling */
+.mermaid {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background-color: transparent;
+}
+
+/* Make sure text is readable in both modes */
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Increase text size in Mermaid diagrams */
+.mermaid text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Increase node label text size */
+.mermaid .nodeLabel {
+  font-size: 16px !important;
+}
+
+/* Node text styling for light mode */
+[data-md-color-scheme="default"] .mermaid .nodeLabel {
+  color: #1565c0 !important;
+  font-weight: 500;
+}
+
+/* Node text styling for dark mode */
+[data-md-color-scheme="slate"] .mermaid .nodeLabel {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+/* Edge label styling for light mode */
+[data-md-color-scheme="default"] .mermaid .edgeLabel {
+  background-color: #ffffff !important;
+  color: #1565c0 !important;
+}
+
+/* Edge label styling for dark mode */
+[data-md-color-scheme="slate"] .mermaid .edgeLabel {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+/* ============================================
    END OF STYLES
    ============================================ */
