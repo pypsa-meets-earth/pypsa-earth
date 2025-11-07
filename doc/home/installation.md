@@ -85,16 +85,16 @@ The python package requirements are located in the [envs/environment.yaml](https
 
 There are also regularly updated locked environment files for each platform generated with conda-lock to ensure reproducibility. Choose the correct file for your platform:
 
-**For Intel/AMD processors:**
+=== "For Intel/AMD processors"
 
-- Linux: `envs/linux-64.lock.yaml`
-- macOS: `envs/osx-64.lock.yaml`
-- Windows: `envs/win-64.lock.yaml`
+    - Linux: `envs/linux-64.lock.yaml`
+    - macOS: `envs/osx-64.lock.yaml`
+    - Windows: `envs/win-64.lock.yaml`
 
-**For ARM processors:**
+=== "For ARM processors"
 
-- macOS (Apple Silicon): `envs/osx-arm64.lock.yaml`
-- Linux (ARM): Currently not supported via lock files; requires building certain packages, such as `PySCIPOpt`, from source
+    - macOS (Apple Silicon): `envs/osx-arm64.lock.yaml`
+    - Linux (ARM): Currently not supported via lock files; requires building certain packages, such as `PySCIPOpt`, from source
 
 We recommend using these locked files for a stable environment.
 
