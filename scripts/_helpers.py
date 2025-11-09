@@ -1187,8 +1187,8 @@ def load_costs(  # previously named prepare_costs()
     )
 
     modified_costs = apply_currency_conversion(
-        costs, 
-        config["output_currency"], 
+        costs,
+        config["output_currency"],
         _currency_conversion_cache,
     )
 
