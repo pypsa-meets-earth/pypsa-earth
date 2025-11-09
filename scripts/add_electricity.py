@@ -21,6 +21,7 @@ Relevant Settings
         country_specific_data:
         cost_scenario:
         financial_case:
+        output_currency:
         default_exchange_rate:
         future_exchange_rate_strategy:
         custom_future_exchange_rate:
