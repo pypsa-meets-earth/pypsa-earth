@@ -747,11 +747,12 @@ sector:
 
   conventional_generation: # generator : carrier
     OCGT: gas
+    CCGT: gas
     oil: oil
     coal: coal
     lignite: lignite
     biomass: biomass
-  keep_existing_capacities: true
+  keep_existing_capacities: false
 
 solving:
   options:

@@ -112,7 +112,7 @@ def add_generation(
     # Not required, because nodes are already defined in "nodes"
     # nodes = pop_layout.index
 
-    fallback = {"OCGT": "gas"}
+    fallback = {"OCGT": "gas", "CCGT": "gas"}
     conventionals = options.get("conventional_generation", fallback)
 
     for generator, carrier in conventionals.items():
@@ -156,6 +156,10 @@ def add_generation(
             efficiency2=costs.at[carrier, "CO2 intensity"],
             lifetime=costs.at[generator, "lifetime"],
         )
+
+        # remove newly added links that have no capacity and are not extendable
+        to_remove = n.links.query("carrier == @carrier & p_nom == 0 & not p_nom_extendable").index
+        n.remove("Link", to_remove)
 
         # set the "co2_emissions" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)
         n.carriers.loc[carrier, "co2_emissions"] = 0
