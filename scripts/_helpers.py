@@ -1148,16 +1148,6 @@ def load_costs(  # previously named prepare_costs()
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     Always uses the module-level reference_year.
     """
-
-    # configuration for currency conversion
-    output_currency = config.get("output_currency", "EUR")
-    fill_values = config.get("fill_values", {})
-    default_exchange_rate = config.get("default_exchange_rate")
-    future_exchange_rate_strategy = config.get(
-        "future_exchange_rate_strategy", "latest"
-    )
-    custom_future_exchange_rate = config.get("custom_future_exchange_rate")
-
     costs = pd.read_csv(cost_file, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW
@@ -1190,14 +1180,16 @@ def load_costs(  # previously named prepare_costs()
     # Build a shared cache for exchange rates using the global reference_year
     _currency_conversion_cache = build_currency_conversion_cache(
         costs,
-        output_currency,
-        default_exchange_rate=default_exchange_rate,
-        future_exchange_rate_strategy=future_exchange_rate_strategy,
-        custom_future_exchange_rate=custom_future_exchange_rate,
+        output_currency=config["output_currency"],
+        default_exchange_rate=config["default_exchange_rate"],
+        future_exchange_rate_strategy=config.get("future_exchange_rate_strategy"),
+        custom_future_exchange_rate=config.get("custom_future_exchange_rate"),
     )
 
     modified_costs = apply_currency_conversion(
-        costs, output_currency, _currency_conversion_cache
+        costs, 
+        config["output_currency"], 
+        _currency_conversion_cache,
     )
 
     modified_costs = (
@@ -1206,7 +1198,7 @@ def load_costs(  # previously named prepare_costs()
         .groupby("technology")
         .sum(min_count=1)
     )
-    modified_costs = modified_costs.fillna(fill_values)
+    modified_costs = modified_costs.fillna(config["fill_values"])
 
     def overwrite_costs(costs, config, attr_list):
         for attr in attr_list:
