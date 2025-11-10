@@ -160,8 +160,8 @@ def add_generation(
         # remove newly added links that have no capacity and are not extendable
         to_remove = n.links.query(
             "carrier == @carrier & p_nom == 0 & not p_nom_extendable"
-        ).index.to_list()
-        n.remove("Link", to_remove)
+        ).index
+        n.mremove("Link", to_remove)
 
         # set the "co2_emissions" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)
         n.carriers.loc[carrier, "co2_emissions"] = 0
