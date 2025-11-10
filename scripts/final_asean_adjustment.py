@@ -186,6 +186,10 @@ def include_electricity_growth(n, options, planning_horizons):
     elec_per_capita = pd.Series(options["elec_per_capita"])
     demand_forecast = pop_forecast.T[elec_per_capita.index] * 1e3 * elec_per_capita
 
+    if options["total_elec_demand"]:
+        total_elec_demand = pd.Series(options["total_elec_demand"])[int(planning_horizons)]
+        demand_forecast = total_elec_demand * demand_forecast / demand_forecast.sum()
+
     loads = n.loads[n.loads.carrier.isin(elec_carrier)].copy()
 
     loads_dynamic_i = n.loads_t.p_set.columns.intersection(loads.index)

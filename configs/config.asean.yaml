@@ -6,8 +6,8 @@ version: 0.7.0
 foresight: myopic
 
 run:
-  name: baseline-no-projects-3H # use this to keep track of runs with different settings
-  sector_name: baseline-no-projects-3H
+  name: baseline-aims-3H # use this to keep track of runs with different settings
+  sector_name: baseline-aims-3H
   shared_cutouts: true  # set to true to share the default cutout(s) across runs
                         # Note: value false requires build_cutout to be enabled
 
@@ -114,8 +114,8 @@ electricity:
 transmission_projects:
   enable: true
   include:
-    ID_SuperGrid: false
-    AIMS: false
+    ID_SuperGrid: true
+    AIMS: true
   skip: []
   status:
   - in_planning
@@ -133,7 +133,7 @@ cluster_options:
 
 costs:
   append_cost_data: true
-  regional_factor: true
+  regional_factor: false
 
 sector:
   enable:
@@ -182,7 +182,7 @@ sector:
 
 policy_config:
   hydrogen:
-    temporal_matching: "no_res_matching"
+    temporal_matching: "no_temporal_matching"
 
 export:
   enable: false
@@ -207,6 +207,14 @@ final_adjustment:
     TH: 2.97
     TL: 0.29
     VN: 2.59
+
+  total_elec_demand: # Baseline Scenario https://aseanenergy.org/wp-content/uploads/2024/09/8th-ASEAN-Energy-Outlook.pdf
+    2025: 1.4014e+09
+    2030: 1.6588e+09
+    2035: 1.9402e+09
+    2040: 2.2646e+09
+    2045: 2.6350e+09
+    2050: 3.0363e+09
 
   redistribute_industry: true
   industry_share:

@@ -5,14 +5,14 @@
 # ==== Baseline Scenarios ====
 # ============================
 
-baseline-3H:
+baseline-aims-3H:
 
-baseline-no-AIMS-3H:
+baseline-asean-3H:
   transmission_projects:
     include:
       AIMS: false
 
-baseline-no-projects-3H:
+baseline-existing-3H:
   transmission_projects:
     include:
       AIMS: false
@@ -21,11 +21,19 @@ baseline-no-projects-3H:
 # ==== Decarbonization Scenarios ====
 # ===================================
 
-decarbonize-3H:
+decarbonize-aims-3H:
   co2_budget:
     enable: true
 
-decarbonize-no-projects-3H:
+decarbonize-asean-3H:
+  co2_budget:
+    enable: true
+
+  transmission_projects:
+    include:
+      AIMS: false
+
+decarbonize-existing-3H:
   co2_budget:
     enable: true
 
@@ -33,11 +41,3 @@ decarbonize-no-projects-3H:
     include:
       AIMS: false
       ID_SuperGrid: false
-
-decarbonize-no-AIMS-3H:
-  co2_budget:
-    enable: true
-
-  transmission_projects:
-    include:
-      AIMS: false
