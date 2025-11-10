@@ -39,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
+
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
 
 * The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
