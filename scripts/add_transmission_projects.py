@@ -51,17 +51,6 @@ def attach_transmission_projects(
 
         elif "new_links" in path.name:
             logger.info(f"Adding new links from {path}")
-
-            link_buses = pd.Series(
-                pd.concat([df["bus0"], df["bus1"]]).unique(), name="bus"
-            )
-
-            # Find all buses required for these links
-            link_buses = pd.Series(
-                pd.concat([df["bus0"], df["bus1"]]).unique(), name="bus"
-            )
-
-            # Finally add the links
             n.madd("Link", df.index, **df.to_dict(orient="list"))
 
         elif "adjust_lines" in path.name:

@@ -123,6 +123,7 @@ transmission_projects:
   - existing
   - under_consideration
   new_link_capacity: keep #keep or zero
+  distance_upper_bound: 0.3
   set_by_build_year: true
   delay_construction: 0
 

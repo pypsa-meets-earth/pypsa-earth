@@ -109,7 +109,7 @@ def connect_new_lines(
         if not lines_port.match_distance.all() and offshore_shapes is not None:
             potential_new_buses = lines_port[~lines_port.match_distance]
             is_offshore = potential_new_buses.apply(
-                lambda x: offshore_shapes.unary_union.contains(Point(x.x, x.y)), axis=1
+                lambda x: offshore_shapes.union_all().contains(Point(x.x, x.y)), axis=1
             )
             new_buses = potential_new_buses[is_offshore]
 
@@ -129,7 +129,7 @@ def connect_new_lines(
             potential_new_buses = lines_port[~lines_port.match_distance]
 
             is_onshore = potential_new_buses.apply(
-                lambda x: country_shapes.unary_union.contains(Point(x.x, x.y)), axis=1
+                lambda x: country_shapes.union_all().contains(Point(x.x, x.y)), axis=1
             )
             new_buses = potential_new_buses[is_onshore]
 
@@ -475,6 +475,7 @@ def add_projects(
     plan,
     status=["confirmed", "under construction"],
     skip=[],
+    distance_upper_bound=0.30,
 ):
     lines_dict = get_project_files(path, skip=skip)
     for key, lines in lines_dict.items():
@@ -495,7 +496,7 @@ def add_projects(
                 country_shapes=country_shapes,
             )
             duplicate_lines = find_closest_lines(
-                n.lines, new_lines, distance_upper_bound=0.10, type="new"
+                n.lines, new_lines, distance_upper_bound=distance_upper_bound, type="new"
             )
             new_lines = new_lines.drop(duplicate_lines.index, errors="ignore")
             new_lines_df = pd.concat([new_lines_df, new_lines])
@@ -511,12 +512,12 @@ def add_projects(
                 new_buses_df,
                 status,
                 offshore_shapes=offshore_shapes,
-                distance_upper_bound=0.4,
+                distance_upper_bound=0.3,
                 bus_carrier=["AC", "DC"],
                 country_shapes=country_shapes,
             )
             duplicate_links = find_closest_lines(
-                n.links, new_links, distance_upper_bound=0.10, type="new"
+                n.links, new_links, distance_upper_bound=distance_upper_bound, type="new"
             )
             new_links = new_links.drop(duplicate_links.index, errors="ignore")
             set_underwater_fraction(new_links, offshore_shapes)
@@ -567,7 +568,7 @@ def add_projects(
 
         elif key == "upgraded_lines":
             line_map = find_closest_lines(
-                n.lines, lines, distance_upper_bound=0.30, type="upgraded"
+                n.lines, lines, distance_upper_bound=distance_upper_bound, type="upgraded"
             )
             upgraded_lines = lines.loc[line_map.index]
             lines_to_adjust = adjust_decommissioning(upgraded_lines, line_map)
@@ -589,7 +590,7 @@ def add_projects(
             line_map = find_closest_lines(
                 n.links.query("carrier=='DC'"),
                 lines,
-                distance_upper_bound=0.30,
+                distance_upper_bound=distance_upper_bound,
                 type="upgraded",
             )
             upgraded_links = lines.loc[line_map.index]
@@ -672,6 +673,7 @@ if __name__ == "__main__":
                 plan=project,
                 status=transmission_projects["status"],
                 skip=transmission_projects["skip"],
+                distance_upper_bound=transmission_projects["distance_upper_bound"]
             )
         )
     if "underground" in adjust_lines_df.columns:
