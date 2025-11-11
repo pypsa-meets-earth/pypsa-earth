@@ -63,6 +63,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
+* Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
+
 PyPSA-Earth 0.7.0
 =================
 
