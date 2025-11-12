@@ -182,7 +182,9 @@ electricity:
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
-  agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
   hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
@@ -1038,6 +1040,15 @@ plotting:
     high-temp electrolysis: "magenta"
     today: "#D2691E"
     Ambient: "k"
+    industry coal emissions: "#654321"
+    agriculture oil: "#1e1e1e"
+    gas emissions: "#666666"
+    industry oil emissions: "#654321"
+    industry electricity: "#222222"
+    rail transport electricity: "grey"
+    solid biomass for industry: "#654321"
+    rail transport oil: "#44DD33"
+    low voltage: "y"
 
 
   nice_names:

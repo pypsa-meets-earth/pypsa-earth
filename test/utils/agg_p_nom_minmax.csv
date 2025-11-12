@@ -1,0 +1,7 @@
+,,2030,2030,2040,2040,2050,2050
+,,min,max,min,max,min,max
+country,carrier,,,,,,
+NG,onwind,,900000.0,,,,
+NG,solar,,250000.0,,,,
+BJ,solar,,150000.0,,,,
+BJ,onwind,100000.0,200000.0,,,,
