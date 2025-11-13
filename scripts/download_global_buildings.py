@@ -75,19 +75,23 @@ def get_building_area_center(df, crs):
         unit=" quadrants",
         desc="Merge Buildings ",
     )
-    
+
     for i in tqdm(df.index, **tqdm_kwargs):
-        geo_df = pd.read_json(df.loc[i,"Url"], lines=True)
-        gdf = gpd.GeoDataFrame(geometry=geo_df["geometry"].apply(geometry.shape), crs=crs["geo_crs"])
+        geo_df = pd.read_json(df.loc[i, "Url"], lines=True)
+        gdf = gpd.GeoDataFrame(
+            geometry=geo_df["geometry"].apply(geometry.shape), crs=crs["geo_crs"]
+        )
         area = gdf.to_crs(crs["area_crs"]).geometry.area.astype(int).to_list()
-        center = gdf.to_crs(crs["distance_crs"]).geometry.centroid.to_crs(crs["geo_crs"]).to_list()
+        center = (
+            gdf.to_crs(crs["distance_crs"])
+            .geometry.centroid.to_crs(crs["geo_crs"])
+            .to_list()
+        )
 
-        yield pd.DataFrame({"area":area,"center":center})
+        yield pd.DataFrame({"area": area, "center": center})
 
 
-def download_global_buildings(
-    country_code, country_buildings_fn, crs, update=False
-):
+def download_global_buildings(country_code, country_buildings_fn, crs, update=False):
     logger.info(f"Downloading Global Buildings for {country_code}")
 
     df_url = download_global_buildings_url(update=update)

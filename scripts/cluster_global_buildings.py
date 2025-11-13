@@ -6,8 +6,6 @@
 """
 TEST
 """
-from shapely import wkt
-
 import country_converter as coco
 import geopandas as gpd
 import numpy as np
@@ -17,6 +15,7 @@ from _helpers import (
     configure_logging,
     create_logger,
 )
+from shapely import wkt
 
 cc = coco.CountryConverter()
 
@@ -85,7 +84,7 @@ if __name__ == "__main__":
     # Retrieve files
     logger.info(f"Reading Global Buildings for {country_code}")
     df = pd.read_csv(snakemake.input.country_buildings, index_col=0)
-    df['center'] = df['center'].apply(wkt.loads)
+    df["center"] = df["center"].apply(wkt.loads)
 
     shapes = gpd.read_file(snakemake.input.regions_onshore).set_index("name")[
         ["country", "geometry"]
