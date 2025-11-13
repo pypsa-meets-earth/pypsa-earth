@@ -2859,8 +2859,13 @@ def add_electricity_distribution_grid(n, costs):
 
         if solar_opts.get("use_building_size"):
             solar_logger = "building_size"
-            solar_rooftop_layout = pd.read_csv(
-                snakemake.input.solar_rooftop_layout, index_col=0
+
+            solar_rooftop_layout = pd.concat(
+                [
+                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    for fn in snakemake.input.keys()
+                    if "solar_rooftop_layout" in fn
+                ]
             )
             solar_rooftop_layout = solar_rooftop_layout["usefull_area"].rename(
                 index=lambda x: x + " solar"

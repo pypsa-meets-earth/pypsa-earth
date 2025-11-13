@@ -8,6 +8,7 @@ tutorial: true
 enable:
   retrieve_databundle: true
   retrieve_databundle_sector: true
+  download_global_buildings: true
 
 run:
   name: sector

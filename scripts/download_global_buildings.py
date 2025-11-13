@@ -69,94 +69,83 @@ def download_global_buildings_url(update=False):
     return df_url
 
 
-def download_global_buildings(country_code, geo_crs="EPSG:4326", update=False):
-    country_buildings_fn = os.path.join(
-        BASE_DIR,
-        "data",
-        "global_buildings",
-        country_code + "_global_buildings_raw.geojson",
+def download_global_buildings(
+    country_code, country_buildings_fn, geo_crs="EPSG:4326", update=False
+):
+    logger.info(f"Downloading Global Buildings for {country_code}")
+
+    df_url = download_global_buildings_url(update=update)
+    df_url = df_url[df_url.Country == country_code]
+
+    tqdm_kwargs = dict(
+        ascii=False,
+        unit=" quadrants",
+        desc="Merge Buildings ",
     )
 
-    if not os.path.exists(country_buildings_fn) or update is True:
-        logger.info(f"Downloading Global Buildings for {country_code}")
+    geometry_lists = (
+        pd.read_json(url, lines=True)["geometry"].apply(geometry.shape).tolist()
+        for url in tqdm(df_url["Url"], **tqdm_kwargs)
+    )
+    geometry_list = list(chain.from_iterable(geometry_lists))
 
-        df_url = download_global_buildings_url(update=update)
-        df_url = df_url[df_url.Country == country_code]
+    gdf = gpd.GeoDataFrame(geometry=geometry_list, crs=geo_crs)
 
-        tqdm_kwargs = dict(
-            ascii=False,
-            unit=" quadrants",
-            desc="Merge Buildings ",
-        )
-
-        geometry_lists = (
-            pd.read_json(url, lines=True)["geometry"].apply(geometry.shape).tolist()
-            for url in tqdm(df_url["Url"], **tqdm_kwargs)
-        )
-        geometry_list = list(chain.from_iterable(geometry_lists))
-
-        gdf = gpd.GeoDataFrame(geometry=geometry_list, crs=geo_crs)
-
-        logger.info(f"Saving Global Buildings for {country_code}")
-        save_to_geojson(gdf, country_buildings_fn)
-    else:
-        logger.info(f"Reading Global Buildings for {country_code}")
-        gdf = read_geojson(country_buildings_fn)
-
-    return gdf
+    logger.info(f"Saving Global Buildings for {country_code}")
+    save_to_geojson(gdf, country_buildings_fn)
 
 
-def calculate_solar_rooftop_area(gb_gdf, shapes, crs, install_ratio, tolerance=100):
+# def calculate_solar_rooftop_area(gb_gdf, shapes, crs, install_ratio, tolerance=100):
 
-    distance_crs = crs["distance_crs"]
-    area_crs = crs["area_crs"]
+#     distance_crs = crs["distance_crs"]
+#     area_crs = crs["area_crs"]
 
-    keys = np.array(sorted(install_ratio.keys()))
-    values = np.array([install_ratio[k] for k in keys])
+#     keys = np.array(sorted(install_ratio.keys()))
+#     values = np.array([install_ratio[k] for k in keys])
 
-    def get_ratio(area):
-        # find the largest key <= area
-        idx = np.searchsorted(keys, area, side="right") - 1
-        if idx < 0:
-            return np.nan  # or 0 if you prefer a default
-        return values[idx]
+#     def get_ratio(area):
+#         # find the largest key <= area
+#         idx = np.searchsorted(keys, area, side="right") - 1
+#         if idx < 0:
+#             return np.nan  # or 0 if you prefer a default
+#         return values[idx]
 
-    solar_rooftop_layout = pd.DataFrame()
+#     solar_rooftop_layout = pd.DataFrame()
 
-    for country_code in gb_gdf.keys():
-        gdf = gb_gdf[country_code]
+#     for country_code in gb_gdf.keys():
+#         gdf = gb_gdf[country_code]
 
-        gdf["area"] = gdf.to_crs(area_crs).geometry.area
-        gdf["install_ratio"] = gdf["area"].apply(get_ratio)
-        gdf["usefull_area"] = gdf["area"] * gdf["install_ratio"]
+#         gdf["area"] = gdf.to_crs(area_crs).geometry.area
+#         gdf["install_ratio"] = gdf["area"].apply(get_ratio)
+#         gdf["usefull_area"] = gdf["area"] * gdf["install_ratio"]
 
-        gdf.geometry = gdf.to_crs(distance_crs).geometry.centroid
+#         gdf.geometry = gdf.to_crs(distance_crs).geometry.centroid
 
-        shapes_country = shapes[shapes.country == country_code].copy()
-        shapes_country = shapes_country.to_crs(distance_crs)
+#         shapes_country = shapes[shapes.country == country_code].copy()
+#         shapes_country = shapes_country.to_crs(distance_crs)
 
-        joined = gpd.sjoin(gdf, shapes_country, how="left", predicate="intersects")
-        unmatched = joined[joined.name.isna()].copy()
-        unmatched = unmatched.drop(["name", "country"], axis=1)
+#         joined = gpd.sjoin(gdf, shapes_country, how="left", predicate="intersects")
+#         unmatched = joined[joined.name.isna()].copy()
+#         unmatched = unmatched.drop(["name", "country"], axis=1)
 
-        if not unmatched.empty:
-            nearest = gpd.sjoin_nearest(
-                unmatched,
-                shapes_country,
-                max_distance=tolerance * 1e3,
-            )
+#         if not unmatched.empty:
+#             nearest = gpd.sjoin_nearest(
+#                 unmatched,
+#                 shapes_country,
+#                 max_distance=tolerance * 1e3,
+#             )
 
-            # Replace the unmatched rows in `joined` with the nearest results
-            matched = joined[joined.name.notna()]
-            joined = pd.concat([matched, nearest], ignore_index=True)
+#             # Replace the unmatched rows in `joined` with the nearest results
+#             matched = joined[joined.name.notna()]
+#             joined = pd.concat([matched, nearest], ignore_index=True)
 
-        usefull_area = joined.groupby("name")["usefull_area"].sum()
-        shapes_country["usefull_area"] = shapes_country.index.map(usefull_area)
-        solar_rooftop_layout = pd.concat(
-            [solar_rooftop_layout, shapes_country["usefull_area"]]
-        )
+#         usefull_area = joined.groupby("name")["usefull_area"].sum()
+#         shapes_country["usefull_area"] = shapes_country.index.map(usefull_area)
+#         solar_rooftop_layout = pd.concat(
+#             [solar_rooftop_layout, shapes_country["usefull_area"]]
+#         )
 
-    return solar_rooftop_layout
+#     return solar_rooftop_layout
 
 
 if __name__ == "__main__":
@@ -166,25 +155,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("download_global_buildings", simpl="", clusters=10)
 
     configure_logging(snakemake)
-    crs = snakemake.params.crs
 
-    shapes = gpd.read_file(snakemake.input.regions_onshore).set_index("name")[
-        ["country", "geometry"]
-    ]
+    geo_crs = snakemake.params.geo_crs
+    country = snakemake.wildcards.country
+    output = snakemake.output[0]
 
-    gb_gdf = {
-        country_code: download_global_buildings(
-            country_code, geo_crs=crs["geo_crs"], update=False
-        )
-        for country_code in snakemake.params.countries
-    }
-
-    solar_rooftop_layout = calculate_solar_rooftop_area(
-        gb_gdf,
-        shapes,
-        crs,
-        snakemake.params.install_ratio,
-        snakemake.params.tolerance,
-    )
-
-    solar_rooftop_layout.to_csv(snakemake.output.solar_rooftop_layout)
+    download_global_buildings(country, output, geo_crs=geo_crs, update=False)
