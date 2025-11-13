@@ -6,8 +6,7 @@
 """
 TEST
 """
-import os
-from itertools import chain
+from shapely import wkt
 
 import country_converter as coco
 import geopandas as gpd
@@ -17,7 +16,6 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
-    read_geojson,
 )
 
 cc = coco.CountryConverter()
@@ -26,7 +24,7 @@ logger = create_logger(__name__)
 
 
 def calculate_solar_rooftop_area(
-    gdf,
+    df,
     country_code,
     shapes,
     output,
@@ -35,7 +33,7 @@ def calculate_solar_rooftop_area(
     tolerance=100,
 ):
     distance_crs = crs["distance_crs"]
-    area_crs = crs["area_crs"]
+    geo_crs = crs["geo_crs"]
 
     keys = np.array(sorted(install_ratio.keys()))
     values = np.array([install_ratio[k] for k in keys])
@@ -47,17 +45,12 @@ def calculate_solar_rooftop_area(
             return np.nan  # or 0 if you prefer a default
         return values[idx]
 
-    gdf["area"] = gdf.to_crs(area_crs).geometry.area
-    gdf["install_ratio"] = gdf["area"].apply(get_ratio)
-    gdf["usefull_area"] = gdf["area"] * gdf["install_ratio"]
-
-    gdf.geometry = gdf.to_crs(distance_crs).geometry.centroid
-
-    shapes_country = shapes[shapes.country == country_code].copy()
-    shapes_country = shapes_country.to_crs(distance_crs)
+    df["usefull_area"] = df["area"] * df["area"].apply(get_ratio)
+    gdf = gpd.GeoDataFrame(df, geometry="center", crs=geo_crs).to_crs(distance_crs)
+    shapes_country = shapes[shapes.country == country_code].to_crs(distance_crs)
 
     joined = gpd.sjoin(gdf, shapes_country, how="left", predicate="intersects")
-    unmatched = joined[joined.name.isna()].copy()
+    unmatched = joined[joined.name.isna()]
     unmatched = unmatched.drop(["name", "country"], axis=1)
 
     if not unmatched.empty:
@@ -73,10 +66,9 @@ def calculate_solar_rooftop_area(
 
     usefull_area = joined.groupby("name")["usefull_area"].sum()
     shapes_country["usefull_area"] = shapes_country.index.map(usefull_area)
-    solar_rooftop_layout = shapes_country["usefull_area"]
 
     # Save file
-    solar_rooftop_layout.to_csv(output)
+    shapes_country["usefull_area"].to_csv(output)
 
 
 if __name__ == "__main__":
@@ -92,7 +84,9 @@ if __name__ == "__main__":
 
     # Retrieve files
     logger.info(f"Reading Global Buildings for {country_code}")
-    gdf = read_geojson(snakemake.input.country_buildings)
+    df = pd.read_csv(snakemake.input.country_buildings, index_col=0)
+    df['center'] = df['center'].apply(wkt.loads)
+
     shapes = gpd.read_file(snakemake.input.regions_onshore).set_index("name")[
         ["country", "geometry"]
     ]
@@ -101,7 +95,7 @@ if __name__ == "__main__":
         logger.info(f"Calculate solar rooftop area for {country_code}")
 
         calculate_solar_rooftop_area(
-            gdf,
+            df,
             country_code,
             shapes,
             snakemake.output.solar_rooftop_layout,
