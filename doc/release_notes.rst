@@ -39,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Merges the ``load_costs`` and ``prepare_costs`` functions into a single ``load_costs`` function within the `_helper.py` script. Renames ``fixed`` to ``capital_cost`` to better reflect annualized investment costs `PR #1572 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1572>`__
+
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
 
 * The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
