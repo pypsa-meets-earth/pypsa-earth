@@ -74,10 +74,7 @@ def add_brownfield(n, n_p, year):
         c.df[f"{attr}_nom_extendable"] = False
 
         # remove assets if name already exist in the new network
-        n_p.mremove(
-            c.name,
-            c.df.index.intersection(getattr(n,c.list_name).index)
-        )
+        n_p.mremove(c.name, c.df.index.intersection(getattr(n, c.list_name).index))
 
         n.import_components_from_dataframe(c.df, c.name)
 
