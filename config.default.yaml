@@ -1060,6 +1060,15 @@ plotting:
     high-temp electrolysis: "magenta"
     today: "#D2691E"
     Ambient: "k"
+    industry coal emissions: "#654321"
+    agriculture oil: "#1e1e1e"
+    gas emissions: "#666666"
+    industry oil emissions: "#654321"
+    industry electricity: "#222222"
+    rail transport electricity: "grey"
+    solid biomass for industry: "#654321"
+    rail transport oil: "#44DD33"
+    low voltage: "y"
 
 
   nice_names:
