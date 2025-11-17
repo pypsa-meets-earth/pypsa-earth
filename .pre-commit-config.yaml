@@ -101,3 +101,13 @@ repos:
   rev: v6.2.0
   hooks:
   - id: reuse
+
+# Auto-update config documentation snippets when config.default.yaml changes
+- repo: local
+  hooks:
+  - id: extract-config-snippets
+    name: Extract config snippets for documentation
+    entry: python3 doc/assets/scripts/extract_config_snippets.py
+    language: system
+    files: ^config\.default\.yaml$
+    pass_filenames: false
