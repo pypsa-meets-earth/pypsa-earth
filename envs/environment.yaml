@@ -15,7 +15,7 @@ dependencies:
 - atlite>=0.4.1
 - dask
 - powerplantmatching>=0.5.19  # due to this https://github.com/PyPSA/powerplantmatching/pull/202
-# - earth-osm>=2.3.post1  # Temporarily commented out for historical data development
+- earth-osm>=3.0.2
 
 # Dependencies of the workflow itself
 - xlrd
@@ -81,5 +81,3 @@ dependencies:
 - pip:
   - currencyconverter
   - googledrivedownloader>=1.1
-  # Historical OSM data support - development version until PR is merged
-  - git+https://github.com/GbotemiB/earth-osm.git@feat/historical-data-download
