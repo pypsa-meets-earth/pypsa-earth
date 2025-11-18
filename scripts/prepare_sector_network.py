@@ -1253,7 +1253,7 @@ def add_aviation(n, cost, energy_totals, airports_fn):
 
     aviation_demand = energy_totals.loc[countries, all_aviation].sum(axis=1)
 
-    airports = pd.read_csv_nafix(airports_fn, keep_default_na=False)
+    airports = read_csv_nafix(airports_fn, keep_default_na=False)
 
     airports = airports[airports.country.isin(countries)]
 
@@ -1403,7 +1403,7 @@ def h2_hc_conversions(n, costs):
 
 
 def add_shipping(n, costs, energy_totals, ports_fn):
-    ports = pd.read_csv_nafix(ports_fn, index_col=None, keep_default_na=False).squeeze()
+    ports = read_csv_nafix(ports_fn, index_col=None, keep_default_na=False).squeeze()
     ports = ports[ports.country.isin(countries)]
 
     gadm_layer_id = snakemake.params.gadm_layer_id
@@ -3180,7 +3180,7 @@ if __name__ == "__main__":
 
     # TODO logging
 
-    energy_totals = pd.read_csv_nafix(
+    energy_totals = read_csv_nafix(
         snakemake.input.energy_totals,
         index_col=0,
         keep_default_na=False,
