@@ -1,8 +1,0 @@
-technology,parameter,value,unit,source,further description,currency_year
-HDPE water pipeline,investment,1588,EUR/(m^3-H2O/h)/km,"HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf -> Based on pipe diamter 171.65mm and 16 Bars with flow 34.71 kg/s. Considered mass flow rate for 1000 MW Electrolyzer","High-density polyethylene (HDPE) water pipeline cost",2023.0
-HDPE water pipeline,FOM,5,%/year,"HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf",,
-HDPE water pipeline,lifetime,50,years,"HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf",,
-water booster pump,investment,4775,EUR/kW,"Calculated based on HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf","Cost of water booster pump per horsepower",2023.0
-water booster pump,FOM,2,%/year,"HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf",,
-water booster pump,lifetime,30,years,"HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf",,
-water booster pump,efficiency,0.765,per unit,"HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf",,

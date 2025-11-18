@@ -195,218 +195,6 @@ def H2_liquid_fossil_conversions(n, costs):
     )
 
 
-def add_water_network(n, costs):
-    """
-    Add water network for hydrogen production via electrolysis.
-    """
-    logger.info("Adding water and desalination")
-
-    n.add("Carrier", "H2O")
-
-    n.madd(
-        "Bus",
-        spatial.nodes + " H2O",
-        location=spatial.nodes,
-        carrier="H2O",
-        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
-        x=n.buses.loc[list(spatial.nodes)].x.values,
-        y=n.buses.loc[list(spatial.nodes)].y.values,
-    )
-
-    # DEVELOPMENT STAGE 1
-
-    # n.madd(
-    #     "Generator",
-    #     spatial.nodes
-    #     + " H2O",  # Output unit of generator is in liters, this is defined by the electrolysis.
-    #     bus=spatial.nodes + " H2O",
-    #     carrier="H2O",
-    #     p_nom_extendable=True,
-    #     # capital_cost
-    #     # marginal_cost
-    #     # life
-    #     efficiency=1,
-    #     lifetime=costs.at["seawater desalination", "lifetime"],
-    # )
-
-    # DEVELOPMENT STAGE 2
-
-    # n.madd(
-    #     "Link",
-    #     spatial.nodes + " desalination",
-    #     bus0=spatial.nodes,
-    #     bus1=spatial.nodes + " H20",
-    #     carrier="desalination",
-    #     p_nom_extendable=True,
-    #     efficiency=costs.at["seawater desalination", "electricity-input"],
-    #     capital_cost=costs.at["seawater desalination", "fixed"],
-    #     marginal_cost=costs.at["seawater desalination", "FOM"],
-    #     lifetime=costs.at["seawater desalination", "lifetime"],
-    # )
-
-    n.add("Carrier", "seawater")
-
-    water_network = gpd.read_file(snakemake.input.clustered_water_network)
-
-    seawater_nodes = n.buses[n.buses.index.isin(water_network.nearest_point_bus)].index
-    H20_nodes_desal_connceted = n.buses[
-        n.buses.index.isin(water_network.centroid_bus)
-    ].index
-    H20_nodes_none_desal_connceted = spatial.nodes.difference(H20_nodes_desal_connceted)
-
-    # Create index column
-    water_network["buses_idx"] = (
-        "H2O pipeline "
-        + water_network["centroid_bus"]
-        + " -> "
-        + water_network["nearest_point_bus"]
-    )
-
-    # Add seawater nodes to the network
-    n.madd(
-        "Bus",
-        seawater_nodes + " seawater",
-        location=seawater_nodes,
-        carrier="seawater",
-        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
-        x=n.buses.loc[list(seawater_nodes)].x.values,
-        y=n.buses.loc[list(seawater_nodes)].y.values,
-    )
-
-    # Add fictive sewater generator as a source for seawater
-    n.madd(
-        "Generator",
-        seawater_nodes + " seawater",
-        bus=seawater_nodes + " seawater",
-        carrier="seawater",
-        p_nom_extendable=True,
-        # capital_cost
-        # marginal_cost
-        efficiency=1,
-        lifetime=costs.at["seawater desalination", "lifetime"],
-    )
-
-    n.add("Carrier", "H2O_desalinated")
-
-    n.madd(
-        "Bus",
-        seawater_nodes + " H2O_desalinated",
-        location=seawater_nodes,
-        carrier="H2O_desalinated",
-        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
-        x=n.buses.loc[list(seawater_nodes)].x.values,
-        y=n.buses.loc[list(seawater_nodes)].y.values,
-    )
-
-    n.madd(
-        "Link",
-        seawater_nodes + " desalination",
-        bus0=seawater_nodes + " seawater",
-        bus1=seawater_nodes + " H2O_desalinated",
-        bus2=seawater_nodes,
-        carrier="desalination",
-        p_nom_extendable=True,
-        efficiency=costs.at["seawater desalination", "efficiency"],
-        efficiency2=-(
-            costs.at["seawater desalination", "electricity-input"] / 1000
-        ),  # Electricity-input is in kWh/m3 -> convert to MWh/m3
-        capital_cost=costs.at["seawater desalination", "fixed"],
-        lifetime=costs.at["seawater desalination", "lifetime"],
-    )
-
-    CAPEX_pipline = (
-        costs.at["HDPE water pipeline", "fixed"]
-        * water_network.adjusted_distance_km.values
-    )  # not complete yet
-
-    power_kw = water_network.power_kW.values
-    n_pumping_stations = water_network.n_pumping_stations.values
-    mass_flow_rate_m3h = water_network.mass_flow_rate_m3h.values
-
-    CAPEX_pumps = (
-        costs.at["water booster pump", "fixed"]
-        * power_kw
-        / 1e3
-        * n_pumping_stations
-        / mass_flow_rate_m3h
-    )
-
-    n.madd(
-        "Link",
-        water_network.buses_idx.values,
-        bus0=water_network.nearest_point_bus.values + " H2O_desalinated",
-        bus1=water_network.centroid_bus.values + " H2O",
-        bus2=water_network.nearest_point_bus.values,
-        p_nom_extendable=True,
-        length=water_network.adjusted_distance_km.values,
-        # capital_cost=0.0172 * water_network.adjusted_distance_km.values, # 0.0172 €/m3/km source: backward calucation from https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf
-        capital_cost=CAPEX_pipline + CAPEX_pumps,
-        carrier="H2O pipeline",
-        lifetime=costs.at["HDPE water pipeline", "lifetime"],
-        efficiency=1,  # No losses in the pipeline
-        efficiency2=water_network.efficiency2.values,  # Efficieny of both pipeline and pumps calculated in prepare_water_netowrk.py.  MW consumed per m³/h transferred
-    )
-
-    n.madd(
-        "Bus",
-        H20_nodes_desal_connceted + " H2O store",
-        location=H20_nodes_desal_connceted,
-        carrier="H2O store",
-        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
-        x=n.buses.loc[list(H20_nodes_desal_connceted)].x.values,
-        y=n.buses.loc[list(H20_nodes_desal_connceted)].y.values,
-    )
-
-    n.madd(
-        "Link",
-        H20_nodes_desal_connceted + " H2O store charger",
-        bus0=H20_nodes_desal_connceted + " H2O",
-        bus1=H20_nodes_desal_connceted + " H2O store",
-        carrier="H2O store charger",
-        efficiency=costs.at["water tank charger", "efficiency"],
-        # capital_cost=costs.at["battery inverter", "fixed"],
-        p_nom_extendable=True,
-        # lifetime=costs.at["battery inverter", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        H20_nodes_desal_connceted + " H2O store discharger",
-        bus0=H20_nodes_desal_connceted + " H2O store",
-        bus1=H20_nodes_desal_connceted + " H2O",
-        carrier="H2O store discharger",
-        efficiency=costs.at["water tank discharger", "efficiency"],
-        p_nom_extendable=True,
-        # lifetime=costs.at["battery inverter", "lifetime"],
-    )
-
-    n.madd(
-        "Store",
-        H20_nodes_desal_connceted + " H2O store",
-        bus=H20_nodes_desal_connceted + " H2O store",
-        e_nom_extendable=True,
-        # e_nom_max=h2_pot.values,
-        e_cyclic=True,
-        carrier="H2O store",
-        capital_cost=costs.at["clean water tank storage", "fixed"],
-        lifetime=costs.at["clean water tank storage", "lifetime"],
-    )
-
-    # Add generator for H2O
-    n.madd(
-        "Generator",
-        H20_nodes_none_desal_connceted
-        + " H2O",  # Output unit of generator is in m3, this is defined by the electrolysis.
-        bus=H20_nodes_none_desal_connceted + " H2O",
-        carrier="H2O generator",
-        p_nom_extendable=True,
-        # capital_cost=20000,
-        marginal_cost=0.019159507,  # Added costs for hydrogen [EUR/MWh] TODO PUT in config
-        efficiency=1,
-        lifetime=costs.at["seawater desalination", "lifetime"],
-    )
-
-
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
     logger.info("Adding hydrogen")
@@ -433,86 +221,86 @@ def add_hydrogen(n, costs):
             "bus1": spatial.nodes + " grid H2",
             "efficiency": costs.at["electrolysis", "efficiency"],
         },
-        # "Alkaline electrolyzer large": {
-        #     "cost_name": "Alkaline electrolyzer large size",
-        #     "bus0": spatial.nodes,
-        #     "bus1": spatial.nodes + " grid H2",
-        #     "efficiency": 1
-        #     / costs.at["Alkaline electrolyzer large size", "electricity-input"],
-        # },
-        # "Alkaline electrolyzer medium": {
-        #     "cost_name": "Alkaline electrolyzer medium size",
-        #     "bus0": spatial.nodes,
-        #     "bus1": spatial.nodes + " grid H2",
-        #     "efficiency": 1
-        #     / costs.at["Alkaline electrolyzer medium size", "electricity-input"],
-        # },
-        # "Alkaline electrolyzer small": {
-        #     "cost_name": "Alkaline electrolyzer small size",
-        #     "bus0": spatial.nodes,
-        #     "bus1": spatial.nodes + " grid H2",
-        #     "efficiency": 1
-        #     / costs.at["Alkaline electrolyzer small size", "electricity-input"],
-        # },
-        # "PEM electrolyzer": {
-        #     "cost_name": "PEM electrolyzer small size",
-        #     "bus0": spatial.nodes,
-        #     "bus1": spatial.nodes + " grid H2",
-        #     "efficiency": 1
-        #     / costs.at["PEM electrolyzer small size", "electricity-input"],
-        # },
-        # "SOEC": {
-        #     "cost_name": "SOEC",
-        #     "bus0": spatial.nodes,
-        #     "bus1": spatial.nodes + " grid H2",
-        #     "efficiency": 1 / costs.at["SOEC", "electricity-input"],
-        # },
-        # "Solid biomass steam reforming": {
-        #     "cost_name": "H2 production solid biomass steam reforming",
-        #     "bus0": spatial.biomass.nodes,
-        #     "bus1": spatial.nodes + " green H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "efficiency": 1
-        #     / costs.at["H2 production solid biomass steam reforming", "wood-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production solid biomass steam reforming", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production solid biomass steam reforming", "wood-input"],
-        #     "efficiency3": costs.at["solid biomass", "CO2 intensity"],
-        # },
-        # "Biomass gasification": {
-        #     "cost_name": "H2 production biomass gasification",
-        #     "bus0": spatial.biomass.nodes,
-        #     "bus1": spatial.nodes + " green H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "efficiency": 1
-        #     / costs.at["H2 production biomass gasification", "wood-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production biomass gasification", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production biomass gasification", "wood-input"],
-        #     "efficiency3": costs.at["solid biomass", "CO2 intensity"],
-        # },
-        # "Biomass gasification CC": {
-        #     "cost_name": "H2 production biomass gasification CC",
-        #     "bus0": spatial.biomass.nodes,
-        #     "bus1": spatial.nodes + " green H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "bus4": spatial.co2.nodes,
-        #     "efficiency": 1
-        #     / costs.at["H2 production biomass gasification CC", "wood-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production biomass gasification CC", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production biomass gasification CC", "wood-input"],
-        #     "efficiency3": costs.at["solid biomass", "CO2 intensity"]
-        #     * (1 - options["cc_fraction"]),
-        #     "efficiency4": costs.at["solid biomass", "CO2 intensity"]
-        #     * options["cc_fraction"],
-        # },
+        "Alkaline electrolyzer large": {
+            "cost_name": "Alkaline electrolyzer large size",
+            "bus0": spatial.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency": 1
+            / costs.at["Alkaline electrolyzer large size", "electricity-input"],
+        },
+        "Alkaline electrolyzer medium": {
+            "cost_name": "Alkaline electrolyzer medium size",
+            "bus0": spatial.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency": 1
+            / costs.at["Alkaline electrolyzer medium size", "electricity-input"],
+        },
+        "Alkaline electrolyzer small": {
+            "cost_name": "Alkaline electrolyzer small size",
+            "bus0": spatial.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency": 1
+            / costs.at["Alkaline electrolyzer small size", "electricity-input"],
+        },
+        "PEM electrolyzer": {
+            "cost_name": "PEM electrolyzer small size",
+            "bus0": spatial.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency": 1
+            / costs.at["PEM electrolyzer small size", "electricity-input"],
+        },
+        "SOEC": {
+            "cost_name": "SOEC",
+            "bus0": spatial.nodes,
+            "bus1": spatial.nodes + " grid H2",
+            "efficiency": 1 / costs.at["SOEC", "electricity-input"],
+        },
+        "Solid biomass steam reforming": {
+            "cost_name": "H2 production solid biomass steam reforming",
+            "bus0": spatial.biomass.nodes,
+            "bus1": spatial.nodes + " green H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "efficiency": 1
+            / costs.at["H2 production solid biomass steam reforming", "wood-input"],
+            "efficiency2": -costs.at[
+                "H2 production solid biomass steam reforming", "electricity-input"
+            ]
+            / costs.at["H2 production solid biomass steam reforming", "wood-input"],
+            "efficiency3": costs.at["solid biomass", "CO2 intensity"],
+        },
+        "Biomass gasification": {
+            "cost_name": "H2 production biomass gasification",
+            "bus0": spatial.biomass.nodes,
+            "bus1": spatial.nodes + " green H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "efficiency": 1
+            / costs.at["H2 production biomass gasification", "wood-input"],
+            "efficiency2": -costs.at[
+                "H2 production biomass gasification", "electricity-input"
+            ]
+            / costs.at["H2 production biomass gasification", "wood-input"],
+            "efficiency3": costs.at["solid biomass", "CO2 intensity"],
+        },
+        "Biomass gasification CC": {
+            "cost_name": "H2 production biomass gasification CC",
+            "bus0": spatial.biomass.nodes,
+            "bus1": spatial.nodes + " green H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "bus4": spatial.co2.nodes,
+            "efficiency": 1
+            / costs.at["H2 production biomass gasification CC", "wood-input"],
+            "efficiency2": -costs.at[
+                "H2 production biomass gasification CC", "electricity-input"
+            ]
+            / costs.at["H2 production biomass gasification CC", "wood-input"],
+            "efficiency3": costs.at["solid biomass", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency4": costs.at["solid biomass", "CO2 intensity"]
+            * options["cc_fraction"],
+        },
         "SMR": {
             "cost_name": "SMR",
             "bus0": spatial.gas.nodes,
@@ -532,102 +320,84 @@ def add_hydrogen(n, costs):
             * (1 - options["cc_fraction"]),
             "efficiency3": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
         },
-        # "Natural gas steam reforming": {
-        #     "cost_name": "H2 production natural gas steam reforming",
-        #     "bus0": spatial.gas.nodes,
-        #     "bus1": spatial.nodes + " grey H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "efficiency": 1
-        #     / costs.at["H2 production natural gas steam reforming", "gas-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production natural gas steam reforming", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production natural gas steam reforming", "gas-input"],
-        #     "efficiency3": costs.at["gas", "CO2 intensity"],
-        # },
-        # "Natural gas steam reforming CC": {
-        #     "cost_name": "H2 production natural gas steam reforming CC",
-        #     "bus0": spatial.gas.nodes,
-        #     "bus1": spatial.nodes + " blue H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "bus4": spatial.co2.nodes,
-        #     "efficiency": 1
-        #     / costs.at["H2 production natural gas steam reforming CC", "gas-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production natural gas steam reforming CC", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production natural gas steam reforming CC", "gas-input"],
-        #     "efficiency3": costs.at["gas", "CO2 intensity"]
-        #     * (1 - options["cc_fraction"]),
-        #     "efficiency4": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-        # },
-        # "Coal gasification": {
-        #     "cost_name": "H2 production coal gasification",
-        #     "bus0": spatial.coal.nodes,
-        #     "bus1": spatial.nodes + " grey H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "efficiency": 1 / costs.at["H2 production coal gasification", "coal-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production coal gasification", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production coal gasification", "coal-input"],
-        #     "efficiency3": costs.at["coal", "CO2 intensity"],
-        # },
-        # "Coal gasification CC": {
-        #     "cost_name": "H2 production coal gasification CC",
-        #     "bus0": spatial.coal.nodes,
-        #     "bus1": spatial.nodes + " blue H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "bus4": spatial.co2.nodes,
-        #     "efficiency": 1
-        #     / costs.at["H2 production coal gasification CC", "coal-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production coal gasification CC", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production coal gasification CC", "coal-input"],
-        #     "efficiency3": costs.at["coal", "CO2 intensity"]
-        #     * (1 - options["cc_fraction"]),
-        #     "efficiency4": costs.at["coal", "CO2 intensity"] * options["cc_fraction"],
-        # },
-        # "Heavy oil partial oxidation": {
-        #     "cost_name": "H2 production heavy oil partial oxidation",
-        #     "bus0": spatial.oil.nodes,
-        #     "bus1": spatial.nodes + " grey H2",
-        #     "bus2": spatial.nodes,
-        #     "bus3": "co2 atmosphere",
-        #     "efficiency": 1
-        #     / costs.at["H2 production heavy oil partial oxidation", "oil-input"],
-        #     "efficiency2": -costs.at[
-        #         "H2 production heavy oil partial oxidation", "electricity-input"
-        #     ]
-        #     / costs.at["H2 production heavy oil partial oxidation", "oil-input"],
-        #     "efficiency3": costs.at["oil", "CO2 intensity"],
-        # },
+        "Natural gas steam reforming": {
+            "cost_name": "H2 production natural gas steam reforming",
+            "bus0": spatial.gas.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "efficiency": 1
+            / costs.at["H2 production natural gas steam reforming", "gas-input"],
+            "efficiency2": -costs.at[
+                "H2 production natural gas steam reforming", "electricity-input"
+            ]
+            / costs.at["H2 production natural gas steam reforming", "gas-input"],
+            "efficiency3": costs.at["gas", "CO2 intensity"],
+        },
+        "Natural gas steam reforming CC": {
+            "cost_name": "H2 production natural gas steam reforming CC",
+            "bus0": spatial.gas.nodes,
+            "bus1": spatial.nodes + " blue H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "bus4": spatial.co2.nodes,
+            "efficiency": 1
+            / costs.at["H2 production natural gas steam reforming CC", "gas-input"],
+            "efficiency2": -costs.at[
+                "H2 production natural gas steam reforming CC", "electricity-input"
+            ]
+            / costs.at["H2 production natural gas steam reforming CC", "gas-input"],
+            "efficiency3": costs.at["gas", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency4": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
+        },
+        "Coal gasification": {
+            "cost_name": "H2 production coal gasification",
+            "bus0": spatial.coal.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "efficiency": 1 / costs.at["H2 production coal gasification", "coal-input"],
+            "efficiency2": -costs.at[
+                "H2 production coal gasification", "electricity-input"
+            ]
+            / costs.at["H2 production coal gasification", "coal-input"],
+            "efficiency3": costs.at["coal", "CO2 intensity"],
+        },
+        "Coal gasification CC": {
+            "cost_name": "H2 production coal gasification CC",
+            "bus0": spatial.coal.nodes,
+            "bus1": spatial.nodes + " blue H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "bus4": spatial.co2.nodes,
+            "efficiency": 1
+            / costs.at["H2 production coal gasification CC", "coal-input"],
+            "efficiency2": -costs.at[
+                "H2 production coal gasification CC", "electricity-input"
+            ]
+            / costs.at["H2 production coal gasification CC", "coal-input"],
+            "efficiency3": costs.at["coal", "CO2 intensity"]
+            * (1 - options["cc_fraction"]),
+            "efficiency4": costs.at["coal", "CO2 intensity"] * options["cc_fraction"],
+        },
+        "Heavy oil partial oxidation": {
+            "cost_name": "H2 production heavy oil partial oxidation",
+            "bus0": spatial.oil.nodes,
+            "bus1": spatial.nodes + " grey H2",
+            "bus2": spatial.nodes,
+            "bus3": "co2 atmosphere",
+            "efficiency": 1
+            / costs.at["H2 production heavy oil partial oxidation", "oil-input"],
+            "efficiency2": -costs.at[
+                "H2 production heavy oil partial oxidation", "electricity-input"
+            ]
+            / costs.at["H2 production heavy oil partial oxidation", "oil-input"],
+            "efficiency3": costs.at["oil", "CO2 intensity"],
+        },
     }
 
-    if snakemake.config["sector"]["hydrogen"]["water_network"]:
-        add_water_network(n, costs)
-        for tech in [
-            "H2 Electrolysis",
-            "Alkaline electrolyzer large",
-            "Alkaline electrolyzer medium",
-            "Alkaline electrolyzer small",
-            "PEM electrolyzer",
-            "SOEC",
-        ]:
-            if tech in tech_params:
-                tech_params[tech]["bus2"] = spatial.nodes + " H2O"
-                tech_params[tech]["efficiency2"] = (
-                    -costs.at["electrolysis", "efficiency"]
-                    * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-                    / 33  # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion TODO: integrate ratio_water_elec in technology data
-                )
-
-     if options["hydrogen"].get("hydrogen_colors", False):
+    if options["hydrogen"].get("hydrogen_colors", False):
         color_techs = {
             "grid H2": [
                 "H2 Electrolysis",
@@ -967,16 +737,17 @@ def add_hydrogen(n, costs):
         h2_links["bus0"] = buses_ordered.str[0] + "_AC"
         h2_links["bus1"] = buses_ordered.str[1] + "_AC"
 
-            # Create index column
-            h2_links["buses_idx"] = (
-                "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
-            )
+        # Create index column
+        h2_links["buses_idx"] = (
+            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+        )
 
-            # Aggregate pipelines applying mean on length and sum on capacities
-            h2_links = h2_links.groupby("buses_idx").agg(
-                {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
-            )
+        # Aggregate pipelines applying mean on length and sum on capacities
+        h2_links = h2_links.groupby("buses_idx").agg(
+            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+        )
 
+        if len(h2_links) > 0:
             if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
             if (
@@ -3390,19 +3161,10 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
-    # ------
-    ##### TO BE REMOVED AGAIN AFTER MERGING desalination data to technologydata
-    costs1 = pd.read_csv(snakemake.input.costs)
-    costs2 = pd.read_csv(snakemake.input.costs_desal)
-    merged = pd.concat([costs1, costs2], ignore_index=True)
-    # merged.to_csv("data/costs_merged.csv", index=False)
-
-    path_to_save = Path(os.path.join(BASE_DIR, "data/costs_merged.csv"))
-    merged.to_csv(path_to_save, index=False)
 
     # Prepare the costs dataframe
     costs = prepare_costs(
-        path_to_save,
+        snakemake.input.costs,
         snakemake.config["costs"],
         snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
@@ -3411,20 +3173,6 @@ if __name__ == "__main__":
         snakemake.params.costs["future_exchange_rate_strategy"],
         snakemake.params.costs["custom_future_exchange_rate"],
     )
-    # ------
-
-    ##### TO BE USED AGAIN AFTER MERGING desalination data to technologydata
-    # # Prepare the costs dataframe
-    # costs = prepare_costs(
-    #     snakemake.input.costs,
-    #     snakemake.config["costs"],
-    #     snakemake.params.costs["output_currency"],
-    #     snakemake.params.costs["fill_values"],
-    #     Nyears,
-    #     snakemake.params.costs["default_exchange_rate"],
-    #     snakemake.params.costs["future_exchange_rate_strategy"],
-    #     snakemake.params.costs["custom_future_exchange_rate"],
-    # )
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)

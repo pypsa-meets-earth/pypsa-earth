@@ -177,15 +177,15 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 	<tbody>
 		<tr>
             <td align="center">
-                <a href="https://github.com/doneachh">
-                    <img src="https://avatars.githubusercontent.com/u/132910766?v=4" width="100;" alt="doneachh"/>
+               <a href="https://github.com/FabianHofmann">
+                    <img src="https://avatars.githubusercontent.com/u/19226431?v=4" width="100;" alt="FabianHofmann"/>
                     <br />
                     <sub><b>FabianHofmann</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/davide-f">
-                    <img src="https://avatars.githubusercontent.com/u/67809479?v=4" width="100;" alt="davide-f"/>
+                <a href="https://github.com/fneum">
+                    <img src="https://avatars.githubusercontent.com/u/29101152?v=4" width="100;" alt="fneum"/>
                     <br />
                     <sub><b>fneum</b></sub>
                 </a>
@@ -285,8 +285,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>energyLS</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+		    <td align="center">
+                <a href="https://github.com/AnasAlgarei">
+                    <img src="https://avatars.githubusercontent.com/u/101210563?v=4" width="100;" alt="AnasAlgarei"/>
+                    <br />
+                    <sub><b>AnasAlgarei</b></sub>
+                </a>
+            </td>
             <td align="center">
                 <a href="https://github.com/yerbol-akhmetov">
                     <img src="https://avatars.githubusercontent.com/u/113768325?v=4" width="100;" alt="yerbol-akhmetov"/>
@@ -399,7 +404,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-
                 <a href="https://github.com/lkstrp">
                     <img src="https://avatars.githubusercontent.com/u/62255395?v=4" width="100;" alt="lkstrp"/>
                     <br />
