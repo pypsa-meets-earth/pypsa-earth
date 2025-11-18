@@ -28,7 +28,7 @@ The cleaned OSM network data that are the output of the `osm_data_cleaning` rule
 Contribute and improve
 ------------------------------------
 
-As a collaborative mapping project that gathers millions of volunteers and professionals to contribute arround the world, you are likely to improve the provided data for power grids.
+As a collaborative mapping project that gathers millions of volunteers and professionals to contribute around the world, you are likely to improve the provided data for power grids.
 
 The `MapYourGrid initiative <https://mapyourgrid.org/>`_, started in 2025, allowed to produce tools and training to empower anyone to contribute in many areas. As a beginner you can refer to the `mapping starter kit <https://mapyourgrid.org/starter-kit/>`_ or as an experienced mapper, directly find a country to map on the `Map-it page <https://mapyourgrid.org/map-it/>`_. As a complex topic, several `strategies <https://mapyourgrid.org/strategies/>`_ has been defined to help improve the most prominent quality topics even in already mapped areas, to close the gaps in the grid or find the missing substations for instance.
 
