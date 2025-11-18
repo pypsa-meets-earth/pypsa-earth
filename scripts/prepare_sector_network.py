@@ -3161,7 +3161,6 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
-
     # Prepare the costs dataframe
     costs = prepare_costs(
         snakemake.input.costs,
