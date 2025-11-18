@@ -177,7 +177,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 	<tbody>
 		<tr>
             <td align="center">
-               <a href="https://github.com/FabianHofmann">
+                <a href="https://github.com/FabianHofmann">
                     <img src="https://avatars.githubusercontent.com/u/19226431?v=4" width="100;" alt="FabianHofmann"/>
                     <br />
                     <sub><b>FabianHofmann</b></sub>
@@ -285,7 +285,7 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>energyLS</b></sub>
                 </a>
             </td>
-		    <td align="center">
+            <td align="center">
                 <a href="https://github.com/AnasAlgarei">
                     <img src="https://avatars.githubusercontent.com/u/101210563?v=4" width="100;" alt="AnasAlgarei"/>
                     <br />
