@@ -19,11 +19,8 @@ import rasterio.features
 import requests
 import rioxarray
 import shapely.geometry
-from _helpers import (
-    mock_snakemake,
-    to_csv_nafix,
-    COPERNICUS_CRS
-)
+from _helpers import COPERNICUS_CRS, mock_snakemake, to_csv_nafix
+
 
 # TODO: consider externalizing this download in a retrieve_* rule or helper function
 def download_potash_data():

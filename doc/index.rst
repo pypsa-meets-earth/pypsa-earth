@@ -103,6 +103,7 @@ Documentation
 * :doc:`tutorial_electricity`
 * :doc:`tutorial_sector`
 * :doc:`model_customization`
+* :doc:`custom_data`
 * :doc:`data_workflow`
 * :doc:`notebooks`
 
@@ -116,6 +117,8 @@ Documentation
    tutorial_electricity
    tutorial_sector
    model_customization
+   custom_data
+   optimization
    data_workflow
    notebooks
 

@@ -202,7 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import BASE_DIR, configure_logging, create_logger, COPERNICUS_CRS
+from _helpers import BASE_DIR, COPERNICUS_CRS, configure_logging, create_logger
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
