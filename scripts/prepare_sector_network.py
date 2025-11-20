@@ -1954,9 +1954,9 @@ def add_land_transport(
         n.madd(
             "Store",
             spatial.nodes,
-            suffix=" battery storage",
+            suffix=" EV battery storage",
             bus=spatial.nodes + " EV battery",
-            carrier="battery storage",
+            carrier="EV battery storage",
             e_cyclic=True,
             e_nom=e_nom,
             e_max_pu=1,
