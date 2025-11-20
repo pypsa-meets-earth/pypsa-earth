@@ -526,7 +526,6 @@ def add_hydrogen(n, costs):
 
             # n.add("Carrier", "H2 UHS")
 
-
             n.madd(
                 "Store",
                 cavern_nodes.index + " H2 UHS",
@@ -539,7 +538,6 @@ def add_hydrogen(n, costs):
                 lifetime=costs.at["hydrogen storage underground", "lifetime"],
             )
 
-            
         else:
             cavern_types = snakemake.params.sector_options["hydrogen"][
                 "underground_storage"
@@ -586,7 +584,6 @@ def add_hydrogen(n, costs):
                     capital_cost=h2_capital_cost,
                     lifetime=costs.at["hydrogen storage underground", "lifetime"],
                 )
-
 
     # hydrogen stored overground (where not already underground)
     h2_capital_cost = costs.at[
