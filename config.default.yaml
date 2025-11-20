@@ -951,6 +951,7 @@ plotting:
     Lignite: "grey"
     Lignite marginal: "grey"
     H2: "#ea048a"
+    H2 export: "#ea048a"
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
     H2 liquefaction: "m"
@@ -958,7 +959,7 @@ plotting:
     battery: "slategray"
     battery discharger: "slategray"
     battery charger: "slategray"
-    battery storage: "slategray"
+    EV battery storage: "slategray"
     home battery: "#614700"
     home battery storage: "#614700"
     lines: "#70af1d"
@@ -1059,6 +1060,6 @@ plotting:
     PHS: Pumped Hydro Storage
     hydro: Reservoir & Dam
     battery: Battery Storage
-    H2: Hydrogen Storage
+    H2: H2
     lines: Transmission Lines
     ror: Run of River
