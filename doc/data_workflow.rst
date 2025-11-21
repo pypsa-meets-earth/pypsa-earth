@@ -32,7 +32,7 @@ As a collaborative mapping project that gathers millions of volunteers and profe
 
 The `MapYourGrid initiative <https://mapyourgrid.org/>`_, started in 2025, allowed to produce tools and training to empower anyone to contribute in many areas. As a beginner you can refer to the `mapping starter kit <https://mapyourgrid.org/starter-kit/>`_ or as an experienced mapper, directly find a country to map on the `Map-it page <https://mapyourgrid.org/map-it/>`_. As a complex topic, several `strategies <https://mapyourgrid.org/strategies/>`_ has been defined to help improve the most prominent quality topics even in already mapped areas, to close the gaps in the grid or find the missing substations for instance.
 
-You can browse the `progress page <https://mapyourgrid.org/progress/>`_ or the `quality globe <https://mapyourgrid.org/quality/>`_ to get accurate insights about the availability and already spoted issues in the data consumed from OpenStreetMap project. In any case, you are welcome to join the `initiative's Discord channel <https://discord.gg/a5znpdFWfD>`_` to get in touch with other contributors that share the same interest.
+You can browse the `progress page <https://mapyourgrid.org/progress/>`_ or the `quality globe <https://mapyourgrid.org/quality/>`_ to get accurate insights about the availability and already spoted issues in the data consumed from OpenStreetMap project. In any case, you are welcome to join the `initiative's Discord channel <https://discord.gg/a5znpdFWfD>`_ to get in touch with other contributors that share the same interest.
 
 2. Climate data
 ===================================
