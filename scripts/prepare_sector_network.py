@@ -735,7 +735,7 @@ def add_hydrogen(n, costs):
             ):
                 add_links_elec_routing_new_H2_pipelines()
             else:
-                add_links_new_H2_pipelines
+                add_links_new_H2_pipelines()
         else:
             print(
                 "No existing gas network; applying greenfield for H2 network"
@@ -3299,3 +3299,4 @@ if __name__ == "__main__":
     n.export_to_netcdf(snakemake.output[0])
 
     # TODO changes in case of myopic oversight
+
