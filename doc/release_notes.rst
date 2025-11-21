@@ -65,6 +65,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
 
+* Fix Labeling of technologies `PR #1644 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644>`__
+
 PyPSA-Earth 0.7.0
 =================
 
