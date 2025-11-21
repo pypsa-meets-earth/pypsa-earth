@@ -37,6 +37,7 @@ countries: [BN, KH, ID, LA, MM, MY, PH, SG, TH, TL, VN]
 enable:
   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: false
+  download_global_buildings: true # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: false # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false # If True, then an exclusion raster will be build
@@ -111,6 +112,9 @@ electricity:
   base_network: osm-plus-prebuilt
   base_network_version: 0.1.1
 
+  extendable_carriers:
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT, CCGT]
+
 transmission_projects:
   enable: true
   include:
@@ -130,7 +134,9 @@ transmission_projects:
 cluster_options:
   simplify_network:
     remove_stubs_across_borders: false
-    p_threshold_drop_isolated: 50 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
+    p_threshold_drop_isolated: 0 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
+    p_threshold_merge_isolated: 0 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
+    s_threshold_fetch_isolated: 0.1 # [-] a share of the national load for merging an isolated network into a backbone network
 
 costs:
   append_cost_data: true
@@ -180,6 +186,9 @@ sector:
     DEC_2040: 0.00
     DEC_2045: 0.00
     DEC_2050: 0.00
+
+  solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+    use_building_size: true
 
 policy_config:
   hydrogen:
