@@ -167,7 +167,7 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     n.mremove("Bus", n.buses.index.difference(trafo_map))
     n.export_to_netcdf("test.nc")
 
-    return n, trafo_map
+    return n, trafo_map #qui c'è ancora linea
 
 
 def _prepare_connection_costs_per_link(
