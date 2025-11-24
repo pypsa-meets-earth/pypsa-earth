@@ -1,14 +1,16 @@
 ,Unit,Values,Description
 **policy_config**,,,
 -- hydrogen,,,
--- -- temporal_matching,--,"One of {'h2_yearly_matching', 'h2_monthly_matching', 'no_res_matching'}",Specifies the temporal matching method for hydrogen production and renewable energy.
--- -- spatial_matching,bool,"{true, false}",Indicates whether spatial matching is applied for hydrogen production.
--- -- additionality,bool,"{true, false}","If true, ensures renewable electricity is equal to the amount required for additional hydrogen export compared to the reference case without hydrogen export."
+-- -- temporal_matching,--,"One of {'hour', 'month', 'year', 'no_temporal_matching'}",Specifies the temporal matching method for hydrogen production.
+-- -- spatial_matching,bool,"{true, false}","Indicates whether spatial matching is applied for hydrogen production. Currently, only 'false' is supported."
+-- -- temporal_matching_carriers,--,"Any subset of {'csp', 'solar', 'onwind', 'offwind-ac', 'offwind-dc', 'ror', 'hydro'}",Defines a list of renewable energy carriers considered for temporal matching of hydrogen production.
+-- -- matching_technologies,--,"Any subset of {'H2 Electrolysis', 'Alkaline electrolyzer large', 'Alkaline electrolyzer medium', 'Alkaline electrolyzer small', 'PEM electrolyzer', 'SOEC'}",Defines a list of hydrogen production technologies considered for matching.
+-- -- additionality,bool,"{true, false}","If true, ensures renewable electricity is equal to the amount required for additional hydrogen export compared to the reference case without hydrogen export. Currently, only 'false' is supported."
 -- -- allowed_excess,p.u.,float,Defines the allowable excess renewable energy for hydrogen production.
 -- -- is_reference,bool,"{true, false}",Indicates whether the network is a reference case for additionality calculations. It is relavant only if ``additionality`` is true.
 -- -- remove_h2_load,bool,"{true, false}",Specifies whether to remove hydrogen load from the network in the reference case. It is relevant only if ``is_reference`` is true.
 -- -- path_to_ref,--,string,Path to the reference case network for additionality calculation. It is relevant only if ``addtionality`` is true and ``is_reference`` is false.
--- -- re_country_load,bool,"{true, false}","If true, forces renewable electricity to match hydrogen export and country electricity load. If false, renewable electricity is only matched to hydrogen export."
+-- -- re_country_load,bool,"{true, false}","If true, forces renewable electricity to match hydrogen export and country electricity load. If false, renewable electricity is only matched to hydrogen export. Currently, only 'false' is supported."
 
 **demand_data**,,,
 -- update_data,bool,"{true, false}","If true, the workflow downloads the energy balances data saved in ``data/demand/unsd/data`` again."
@@ -22,8 +24,8 @@
 **export**,,,
 -- endogenous,bool,"{true, false}","If true, the export demand is endogenously determined by the model."
 -- endogenous_price,EUR/MWh,float,"Market price at which hydrogen for endogenous exports is sold. Only considered if ``endogenous`` is true."
--- store,bool,"{true, false}","Indicates whether an export store is implemented to balance hydrogen export demand."
--- store_capital_costs,--,"One of {'standard_costs', 'no_costs'}","Specifies the costs of the export store. 'standard_costs' uses CAPEX of 'hydrogen storage tank type 1 including compressor'."
+-- store,bool,"{true, false}","Indicates whether an export store is implemented to balance hydrogen export demand. Default is 'true'."
+-- store_capital_costs,--,"One of {'standard_costs', 'no_costs'}","Specifies the costs of the export store. 'standard_costs' uses CAPEX of 'hydrogen storage tank type 1 including compressor'. 'no_costs' assumes zero costs for the export store. Only considered if ``store`` is true."
 -- h2export,TWh,float,"Specifies the yearly hydrogen export demand in TWh. This parameter is only applicable if ``endogenous`` is set to false."
 -- export_profile,--,"One of {'ship', 'constant'}","Specifies the export profile. Only considered if ``endogenous`` is false."
 -- ship_capacity,TWh,float,"Specifies the ship capacity for hydrogen export. Example values: 0.05 TWh for new ships, 0.003 TWh for Susio Frontier, and 0.4 TWh based on Hampp2021. This corresponds to 11,360 t of liquid hydrogen (LHV of 33.3333 MWh/t_H2) as per Cihlar et al. 2020, referencing IEA 2019, Table 3-B."
