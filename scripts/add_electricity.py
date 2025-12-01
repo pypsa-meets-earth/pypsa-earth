@@ -266,7 +266,23 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     return costs
 
 
-def load_powerplants(ppl_fn):
+def load_powerplants(ppl_fn, costs, fill_values):
+    """
+    Load and preprocess powerplant matching data and fill missing datein/dateout.
+    Parameters
+    ----------
+    ppl_fn : str
+        Path to powerplant matching csv file.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    fill_values : dict
+        Dictionary containing default values for lifetime.
+        
+    Returns
+    -------
+    ppl : pd.DataFrame
+        Power plant list DataFrame.
+    """
     carrier_dict = {
         "ocgt": "OCGT",
         "ccgt": "CCGT",
@@ -287,6 +303,59 @@ def load_powerplants(ppl_fn):
     if not null_ppls.empty:
         logger.warning(f"Drop powerplants with null capacity: {list(null_ppls.name)}.")
         ppl = ppl.drop(null_ppls.index)
+
+    # Fill missing datein and dateout columns
+    #ppl = fill_datein_dateout(ppl, costs, fill_values)
+
+    return ppl
+
+
+def fill_datein_dateout(ppl, costs, fill_values):
+    """
+    Fill missing datein and dateout values in ppl DataFrame.
+
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Dataframe containing power plants.
+    costs : pd.DataFrame
+        DataFrame containing cost assumptions.
+    fill_values : dict
+        Dictionary containing default values for lifetime.
+
+    Returns
+    -------
+    ppl : pd.DataFrame
+        Power plant list DataFrame with filled missing datein and dateout columns.
+    """
+    # Fill missing datein with mean build year per technology
+    if ppl["datein"].isna().any():
+        missing_datein = ppl[ppl["datein"].isna()].index
+        mean_datein = ppl.groupby("carrier")["datein"].mean()
+        ppl.loc[missing_datein, "datein"] = ppl.loc[missing_datein, "carrier"].map(mean_datein)
+        logger.warning(
+            f"Filling missing 'datein' for powerplants {list(missing_datein)} with mean build year per technology."
+        )
+
+    # Fill missing dateout based on lifetime from costs DataFrame
+    if ppl["dateout"].isna().any():
+        missing_dateout = ppl[ppl["dateout"].isna()].index
+        lifetimes = pd.Series(fill_values.get("lifetime", {}))
+        default_lifetime = fill_values.get("lifetime_default", 40)
+        lifetimes = lifetimes.reindex(costs.index).fillna(default_lifetime)
+        ppl.loc[missing_dateout, "dateout"] = (
+            ppl.loc[missing_dateout, "datein"]
+            + ppl.loc[missing_dateout, "carrier"].map(lifetimes)
+        )
+        logger.warning(
+            f"Filling missing 'dateout' for powerplants {list(missing_dateout)} based on 'datein' and technology lifetimes."
+        )
+
+
+    if "datein" not in n.generators.columns:
+        n.generators["datein"] = 0
+    if "dateout" not in n.generators.columns:
+        n.generators["dateout"] = np.inf
     return ppl
 
 
@@ -454,6 +523,7 @@ def attach_conventional_generators(
     renewable_carriers,
     conventional_config,
     conventional_inputs,
+    existing_capacities_config,
 ):
     carriers = set(conventional_carriers) | (
         set(extendable_carriers["Generator"]) - set(renewable_carriers)
@@ -861,7 +931,8 @@ if __name__ == "__main__":
         snakemake.params.electricity,
         Nyears,
     )
-    ppl = load_powerplants(snakemake.input.powerplants)
+    ppl = load_powerplants(snakemake.input.powerplants, costs, snakemake.params.costs["fill_values"])
+
     if "renewable_carriers" in snakemake.params.electricity:
         renewable_carriers = set(snakemake.params.electricity["renewable_carriers"])
     else:
@@ -895,6 +966,7 @@ if __name__ == "__main__":
         renewable_carriers,
         snakemake.params.conventional,
         conventional_inputs,
+        snakemake.params.existing_capacities,
     )
     attach_wind_and_solar(
         n,
