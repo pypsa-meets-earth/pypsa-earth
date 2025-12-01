@@ -80,6 +80,7 @@ There are multiple ways to get involved and learn more about our work:
         - AI asset detection meeting
         - Outreach meeting for planning, discussing events, workshops, communication, community activities
 5. Join us and **propose your stream**.
+6. Participate in mapping power grids on [**OpenStreetMap project**](https://osm.org) through the [**MapYourGrid initiative**](https://mapyourgrid.org). Many resources as [video tutorials](https://www.youtube.com/channel/UC52jOcw_6_7iTMW-lXwLrQQ) or [starter-kit](https://mapyourgrid.org/starter-kit/) help to improve open data that is used by PyPSA-Earth to build the grid topology.
 
 ## Installation
 
