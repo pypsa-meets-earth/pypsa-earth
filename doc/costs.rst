@@ -8,8 +8,7 @@ Cost Assumptions
 
 The database of cost assumptions is retrieved from the repository
 `PyPSA/technology-data <https://github.com/pypsa/technology-data>`_ and then
-saved to ``resources/costs.csv``. Cost assumptions of previous PyPSA-Earth
-versions can be restored by using setting retrieve_costs in the config to false.
+saved to ``resources/costs.csv``. If you have still downloaded cost assumptions previously and are willing to use them without an update it can be done by settiin ``retrieve_costs`` in the config to ``false``.
 
 The ``config.yaml`` provides options to choose a reference year (``costs: year:``) and use a specific version of the repository ``costs: version:``.
 
