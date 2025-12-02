@@ -15,6 +15,7 @@ from _helpers import (
     create_logger,
     read_geojson,
     read_osm_config,
+    save_to_geojson,
     to_csv_nafix,
 )
 from scipy.spatial import cKDTree
@@ -38,7 +39,18 @@ LINES_COLUMNS = [
     "length",
     "dc",
     "geometry",
-    "bounds",
+]
+CONVERTERS_COLUMNS = [
+    "converter_id",
+    "bus0",
+    "bus1",
+    "geometry",
+]
+TRANSFORMERS_COLUMNS = [
+    "line_id",
+    "bus0",
+    "bus1",
+    "geometry",
 ]
 
 
@@ -496,6 +508,7 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
+
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
 
@@ -726,7 +739,6 @@ def built_network(
     countries_config,
     geo_crs,
     distance_crs,
-    lines_cols_standard=LINES_COLUMNS,
     force_ac=False,
 ):
     logger.info("Stage 1/5: Read input data")
@@ -791,17 +803,23 @@ def built_network(
     if not os.path.exists(outputs["lines"]):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
-    lines = lines[lines_cols_standard]
+    lines = lines[LINES_COLUMNS]
+    converters = converters[CONVERTERS_COLUMNS]
+    transformers = transformers[TRANSFORMERS_COLUMNS]
 
-    to_csv_nafix(lines, outputs["lines"])  # Generate CSV
-    to_csv_nafix(converters, outputs["converters"])  # Generate CSV
-    to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
+    to_csv_nafix(lines, outputs["lines"])
+    save_to_geojson(lines, outputs["lines_geo"])
+    to_csv_nafix(converters, outputs["converters"])
+    save_to_geojson(converters, outputs["converters_geo"])
+    to_csv_nafix(transformers, outputs["transformers"])
+    save_to_geojson(transformers, outputs["transformers_geo"])
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):
         os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
-    # Generate CSV
+
     to_csv_nafix(buses, outputs["substations"])
+    save_to_geojson(buses, outputs["substations_geo"])
 
     return None
 

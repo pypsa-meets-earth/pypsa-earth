@@ -12,6 +12,9 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
+
+* Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
 * Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__
 
@@ -29,6 +32,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds `PR #1592 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592>`__
 
+* Update ``build_natura_raster.py`` to function regardless of RAM size `PR #1545 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545>`__
+
+* Enable config options to customize hydrogen and renewable carriers for temporal matching `PR #1489 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489>`__
+
+* Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
 
 **Minor Changes and bug-fixing**
 
@@ -48,11 +56,18 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix and reactivate the option for a custom busmap in ``cluster_network.py`` `PR #1537 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537>`__
 
+* Create a section in the documentation to include information about custom data in the model `PR #1571 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1571>`__
+
 * Bug-fixing override co2opt in add_co2_budget `PR #1597 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1597>`__
 
 * Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
 
 * Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings `PR #1608 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608>`__
+
+* Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
+
+* Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
+
 
 PyPSA-Earth 0.7.0
 =================
