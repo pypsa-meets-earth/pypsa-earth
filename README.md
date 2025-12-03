@@ -96,7 +96,7 @@ There are multiple ways to get involved and learn more about our work:
     .../pypsa-earth % conda env create -f envs/environment.yaml
 ```
 
-   If the above takes longer than 30min, you might want to try mamba for faster installation:
+   If the above takes longer than 30 min, you might want to try mamba for faster installation:
 
 ```bash
     (base) conda install -c conda-forge mamba
@@ -104,14 +104,13 @@ There are multiple ways to get involved and learn more about our work:
     .../pypsa-earth % mamba env create -f envs/environment.yaml
 ```
 
-3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
-4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
+3. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
    ```bash
       .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
       .../pypsa-earth % jupyter lab
    ```
-5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
+4. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
    To verify the successful installation the following code can be tested from bash:
 
    ```bash
