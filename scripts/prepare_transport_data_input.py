@@ -60,7 +60,7 @@ def download_number_of_vehicles():
         )
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
+        logger.warning("Failed to read the file. Falling back on hard-coded data")
         return pd.DataFrame()
 
     vehicles_gho = vehicles_gho.rename(
