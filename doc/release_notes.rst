@@ -12,6 +12,7 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
@@ -38,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
 
 **Minor Changes and bug-fixing**
+
+* Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
 

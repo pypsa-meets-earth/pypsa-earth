@@ -200,6 +200,8 @@ electricity:
     H2: 168
 
   extendable_carriers:
+      # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
+          # from the Generator list below, as these offshore wind technologies require coastline access.
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
@@ -782,11 +784,12 @@ sector:
 
   conventional_generation: # generator : carrier
     OCGT: gas
+    CCGT: gas
     oil: oil
     coal: coal
     lignite: lignite
     biomass: biomass
-  keep_existing_capacities: true
+  keep_existing_capacities: false
 
 solving:
   options:
