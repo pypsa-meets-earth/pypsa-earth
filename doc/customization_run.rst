@@ -11,7 +11,7 @@
 Run full model
 --------------
 
-PyPSA-Earth utilized ``snakemake`` workflow management tool inherited from PyPSA-Eur.
+PyPSA-Earth utilized ``snakemake`` workflow management tool to create reproducible and scalable data analyses.
 Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
 
 To execute a full model run, the following command needs to be applied:
