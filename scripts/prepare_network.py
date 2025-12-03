@@ -270,13 +270,13 @@ def apply_time_segmentation(n, segments, solver_name):
             "Optional dependency 'tsam' not found." "Install via 'pip install tsam'"
         )
 
-    p_max_pu_norm = n.generators_t.p_max_pu.max()
+    p_max_pu_norm = n.generators_t.p_max_pu.abs().max().clip(lower=1e-6)
     p_max_pu = n.generators_t.p_max_pu / p_max_pu_norm
 
-    load_norm = n.loads_t.p_set.max()
+    load_norm = n.loads_t.p_set.abs().max().clip(lower=1e-6)
     load = n.loads_t.p_set / load_norm
 
-    inflow_norm = n.storage_units_t.inflow.max()
+    inflow_norm = n.storage_units_t.inflow.abs().max().clip(lower=1e-6)
     inflow = n.storage_units_t.inflow / inflow_norm
 
     raw = pd.concat([p_max_pu, load, inflow], axis=1, sort=False)
