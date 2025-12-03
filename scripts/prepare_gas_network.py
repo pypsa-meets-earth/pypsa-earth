@@ -936,7 +936,9 @@ if not snakemake.params.custom_gas_network:
         print("total_system_capacity = ", total_system_capacity)
 
     else:
-        bus_regions_onshore["country"] = bus_regions_onshore["gadm_id"].str.split(".").str[0]
+        bus_regions_onshore["country"] = (
+            bus_regions_onshore["gadm_id"].str.split(".").str[0]
+        )
         print(
             "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
             + ", ".join(bus_regions_onshore.country.unique().tolist())
