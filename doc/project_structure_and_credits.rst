@@ -36,7 +36,7 @@ Team
 - PyPSA-Earth Maintainers: Emmanuel Bolarinwa, Yerbol Akhmetov, Eddy Jalbout
 - PyPSA-Earth Lab Maintainers: Daniele Lerede, Arizeo Salac
 - Outreach Maintainer: Charlotte Heikendorf
-Maintainer Earth-OSMMatin Mahmood
+- Maintainer Earth-OSMMatin Mahmood
 - PyPSA-Earth Distribution: Margherita Capitani
 - Regional Coordinatiors: Virio Andreyana, Tosin George, Emre Yorat
 
@@ -55,6 +55,7 @@ Contributors Team
 
 - Davide Fioriti (University of Pisa, Italy)
 - Yerbol Akhmetov (Open Energy Transition, Germany)
+- Margherita Capitani (University of Pisa, Italy)
 - Eddy Jalbout (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
 - Hazem Abdel-Khalek (Open Energy Transition, Germany)
 - Max Parzen (University of Edinburgh, United Kingdom)
@@ -68,23 +69,23 @@ Contributors Team
 - Lukas Trippe (Technical University of Berlin, Germany)
 - Leon Schumm (Ostbayerische Technische Hochschule Regensburg, Germany)
 - Sermisha Narayana (Open Energy Transition, Germany)
-- Fabian Neumann (Technical University of Berlin, Germany)
+- Denise Giubilato (University of Pisa, Italy)
 - Carlos Fernandez (ULiege)
 - Tosin George (Open Energy Transition, Germany)
 - Anton Achhammer (Ostbayerische Technische Hochschule Regensburg, Germany)
 - Arizeo Salac (University of Pisa, Italy)
 - Lukas Jansen (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
-- Johannes Hampp (Justus Liebig University Giessen, Germany)
+- Johannes Hampp (Open Energy Transition, Germany)
+- Fabian Neumann (Technical University of Berlin, Germany)
 - Ekaterina Fedotova (Open Energy Transition, Germany)
 - Muhammad Ilyas
 - Lukas Franken (University of Edinburgh, United Kingdom)
 - Jess Ryan
 - Kevin Steijn (Open Energy Transition, Germany)
 - Stephen Lee (Massachusetts Institute of Technology, United States)
-- Albert Solà Vilalta
+- Albert Solà Vilalta (Universitat Politècnica de Catalunya)
 - Martha Frysztacki (Open Energy Transition, Germany)
-- Denise Giubilato
-- Anas Algarei
+- Anas Algarei (University of Edinburgh, United Kingdom)
 - Siddharth Krishna (Open Energy Transition, Germany)
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants aka. EMRC, Nigeria)
 - Nse-Abasi Ayara (University of Abuja, Nigeria)
