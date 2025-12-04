@@ -32,7 +32,7 @@ Team
 =====
 
 - Steering Committee: Davide Fioriti, Hazem Abdel-Khalek, Ekaterina Fedotova, Leon Schumm
-- Founder of the initiative Maximilian Parzen
+- Founder of Initiative and Advisor: Maximilian Parzen
 - PyPSA-Earth Maintainers: Emmanuel Bolarinwa, Yerbol Akhmetov, Eddy Jalbout
 - PyPSA-Earth Lab Maintainers: Daniele Lerede, Arizeo Salac
 - Outreach Maintainer: Charlotte Heikendorf
@@ -58,7 +58,7 @@ Contributors Team
 - Margherita Capitani (University of Pisa, Italy)
 - Eddy Jalbout (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
 - Hazem Abdel-Khalek (Open Energy Transition, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
+- Max Parzen (Open Energy Transition, Germany)
 - Emre Yorat (Adana Science and Technology University)
 - Matin Mahmood (http://matin.ai/)
 - Virio Andreyana (Open Energy Transition, Germany)
