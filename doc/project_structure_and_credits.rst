@@ -54,33 +54,38 @@ Contributors Team
 -----------------
 
 - Davide Fioriti (University of Pisa, Italy)
-- Yerbol Akhmetov
-- Eddy Jalbout (Fraunhofer IEG, Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
-- Hazem Abdel-Khalek (Fraunhofer IEG, Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
+- Yerbol Akhmetov (Open Energy Transition, Germany)
+- Eddy Jalbout (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
+- Hazem Abdel-Khalek (Open Energy Transition, Germany)
 - Max Parzen (University of Edinburgh, United Kingdom)
-- Emre Yorat
+- Emre Yorat (Adana Science and Technology University)
 - Matin Mahmood (University of Edinburgh, United Kingdom)
-- Daniele Lerede
+- Virio Andreyana (Open Energy Transition, Germany)
+- Daniele Lerede (Open Energy Transition, Germany)
 - Alexander Meisinger (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Emmanuel Bolarinwa
+- Emmanuel Bolarinwa (Open Energy Transition, Germany)
+- Eric Nitschke (Technische Universität Hamburg, Germany)
 - Lukas Trippe (Technical University of Berlin, Germany)
 - Leon Schumm (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Sermisha Narayana
+- Sermisha Narayana (Open Energy Transition, Germany)
 - Fabian Neumann (Technical University of Berlin, Germany)
-- Carlos Fernandez
-- Anton Achhammer
-- Arizeo Salac
+- Carlos Fernandez (ULiege)
+- Tosin George (Open Energy Transition, Germany)
+- Anton Achhammer (Ostbayerische Technische Hochschule Regensburg, Germany)
+- Arizeo Salac (University of Pisa, Italy)
+- Lukas Jansen (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
 - Johannes Hampp (Justus Liebig University Giessen, Germany)
-- Ekaterina Fedotova
+- Ekaterina Fedotova (Open Energy Transition, Germany)
 - Muhammad Ilyas
 - Lukas Franken (University of Edinburgh, United Kingdom)
 - Jess Ryan
+- Kevin Steijn (Open Energy Transition, Germany)
 - Stephen Lee (Massachusetts Institute of Technology, United States)
 - Albert Solà Vilalta
-- Martha Frysztacki
+- Martha Frysztacki (Open Energy Transition, Germany)
 - Denise Giubilato
 - Anas Algarei
-- Siddharth Krishna
+- Siddharth Krishna (Open Energy Transition, Germany)
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants aka. EMRC, Nigeria)
 - Nse-Abasi Ayara (University of Abuja, Nigeria)
 - Jarrad Wright (Council for Scientific Research and Industry CSIR, South Africa)
