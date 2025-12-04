@@ -22,8 +22,9 @@ Project structure
 PyPSA-meets-Earth initiative is build upon the code base which can be accessed from the initiative repository on GitHub. A list below aims to give a quick overview:
 
 - `PyPSA Earth <https://github.com/pypsa-meets-earth/pypsa-earth>`__ is a model for power or sector-coupled system modeling for any country of the world
-- `PyPSA Distribution <https://github.com/pypsa-meets-earth/pypsa-distribution>`__ is an optimization model for micro-grids and distribution grids with an automated extraction of the inputs needed to build grid topology and electricity load profiles https://github.com/pypsa-meets-earth/pypsa-distribution
+- `PyPSA Distribution <https://github.com/pypsa-meets-earth/pypsa-distribution>`__ is an optimization model for micro-grids and distribution grids with an automated extraction of the inputs needed to build grid topology and electricity load profiles
 - `Earth OSM <https://github.com/pypsa-meets-earth/earth-osm>`__ provides a toolset to download, pre-process and export energy-relevant infrastructure data from OpenStreetMap (OSM)
+- `PyPSA Earth Status <https://github.com/pypsa-meets-earth/pypsa-earth-status>`__ enables a reproducible workflow to validate PyPSA networks against real-world energy system data
 
 The list is by no means exhaustive and is growing continuously. Feel free to explore more looking into the repositories available in `PyPSA meets Earth organization <https://github.com/pypsa-meets-earth>`__ and don't forget to give us a star ;). The contributions are very welcome to enhance the description of the available projects!
 
