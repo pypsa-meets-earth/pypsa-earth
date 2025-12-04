@@ -60,7 +60,7 @@ Contributors Team
 - Hazem Abdel-Khalek (Open Energy Transition, Germany)
 - Max Parzen (University of Edinburgh, United Kingdom)
 - Emre Yorat (Adana Science and Technology University)
-- Matin Mahmood (University of Edinburgh, United Kingdom)
+- Matin Mahmood (http://matin.ai/)
 - Virio Andreyana (Open Energy Transition, Germany)
 - Daniele Lerede (Open Energy Transition, Germany)
 - Alexander Meisinger (Ostbayerische Technische Hochschule Regensburg, Germany)
