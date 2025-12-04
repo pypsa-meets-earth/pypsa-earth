@@ -43,7 +43,7 @@ Maintainer Earth-OSMMatin Mahmood
 .. _credits:
 
 Credits
-=============
+=======
 
 PyPSA-meets-Earth is an independent research and software development initiative which is developing thanks to the efforts of code and non-code contributors and users of our models. Every discussion comment, bug report and typo fixed count and are precious contributions into the community knowledge base.
 
@@ -89,32 +89,3 @@ Contributors Team
 - Caputo Cesare (Imperial College London, United Kingdom)
 - Desen Kirli (University of Edinburgh, United Kingdom)
 - Olukunle Owolabi (Tufts University, United States)
-
-Outreach Team
---------------
-
-- Stuart James (VDMA, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
-- Tosin George
-- Mousa Zerai (University of Edinburgh, United Kingdom)
-- Ilaria Capelli (EY, Italy)
-- Rebecca Grant (University of Edinburgh, United Kingdom)
-
-
-Advisor Team
---------------
-
-- Nafiu Tijjani (Assistant Chief Scientific Officer in the Renewable Energy Department of Energy Commission of Nigeria)
-- Aminu Haruna Isa (Energy Planning and Analysis Dep't at the Energy Commission of Nigeria)
-- Dahunsi Okekunle (Energy Market and Regulatory Consultants EMRC, Nigeria)
-- Bruno Merven (Energy system modeller for IRENA, SEA and University of Cape Town, South Africa)
-- Jarrad Wright (Principal Researcher at Council for Scientific Research and Industry CSIR, South Africa)
-- Chandima Gomes (Professor at University of Witwatersrand and Chair of ESKOM Power Plant Engineering Institute, South Africa)
-- Dave Dorrell (Distinguished Professor at University of Witwatersrand, South Africa)
-- Matija Pavicevic (Creator of Dispa-Set Africa, KU Leuven, Belgium)
-- Sylvain Quoilin (Professor and creator of Dispa-Set Africa, KU Leuven, Belgium)
-- Fabian Neumann (PyPSA-Eur maintainer at TU Berlin, Germany)
-- Tom Brown (PyPSA creator, Professor and Head of Energy System Analysis Department at the TU Berlin, Germany)
-- Aristides Kiprakis (Professor at University of Edinburgh, United Kingdom)
-- Yusuf Kuvvetli (Associate Professor and Deputy Head of Industrial Engineering Department at Cukurova University, Turkey)
-- İclal Çetin Taş (Assistant Professor of Software Engineering Department at OSTİM Technical University, Turkey)
