@@ -31,12 +31,12 @@ The list is by no means exhaustive and is growing continuously. Feel free to exp
 Team
 =====
 
-- Steering Committee: Prof. Davide Fioriti, Hazem Abdel-Khalek, Ekaterina Fedotova, Leon Schumm
+- Steering Committee: Davide Fioriti, Hazem Abdel-Khalek, Ekaterina Fedotova, Leon Schumm
 - Founder of the initiative Maximilian Parzen
 - PyPSA-Earth Maintainers: Emmanuel Bolarinwa, Yerbol Akhmetov, Eddy Jalbout
 - PyPSA-Earth Lab Maintainers: Daniele Lerede, Arizeo Salac
 - Outreach Maintainer: Charlotte Heikendorf
-- Maintainer Earth-OSMMatin Mahmood
+- Maintainer Earth-OSM: Matin Mahmood
 - PyPSA-Earth Distribution: Margherita Capitani
 - Regional Coordinatiors: Virio Andreyana, Tosin George, Emre Yorat
 
