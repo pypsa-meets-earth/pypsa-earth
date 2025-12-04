@@ -95,16 +95,6 @@ Contributors Team
 - Desen Kirli (University of Edinburgh, United Kingdom)
 - Olukunle Owolabi (Tufts University, United States)
 
-Outreach Team
---------------
-
-- Stuart James (VDMA, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
-- Tosin George
-- Mousa Zerai (University of Edinburgh, United Kingdom)
-- Ilaria Capelli (EY, Italy)
-- Rebecca Grant (University of Edinburgh, United Kingdom)
-
 
 Advisor Team
 --------------
