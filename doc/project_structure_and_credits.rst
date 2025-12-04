@@ -28,20 +28,17 @@ PyPSA-meets-Earth initiative is build upon the code base which can be accessed f
 The list is by no means exhaustive and is growing continuously. Feel free to explore more looking into the repositories available in `PyPSA meets Earth organization <https://github.com/pypsa-meets-earth>`__ and don't forget to give us a star ;). The contributions are very welcome to enhance the description of the available projects!
 
 
-Track leaders
-==============
+Team
+=====
 
-- Director (`Max Parzen <https://www.linkedin.com/in/maximilian-parzen-b047a1126/>`_)
-- `Co-Director <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EfjniQIxmfZIp8ih_WQuy-0BfCiOCLPKEvDZUuylp9xOhA?e=s7KRQy>`_ (`Davide Fioriti <https://www.linkedin.com/in/davide-fioriti-745693a5/>`_)
-- `PyPSA-Earth leaders <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (Davide, Katia, Hazem, Max)
-- Sector-coupling leaders (`Hazem Abdel-Khalek <https://www.linkedin.com/in/hazemakhalek/>`_ , `Leon Schumm <https://www.linkedin.com/in/leon-schumm-253b22201/>`_ and `Eddy Jalbout <https://www.linkedin.com/in/eddyjalbout/>`_ )
-- Climate modeling leader (Katia)
-- Coordinators of Regional Studies
-- `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
-- Western Asia Coordinators (Emre Yorat and `Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
-- Africa Coordinator (Emmanuel Bolarinwa)
-- South America Coordinator (Carlos Fernandez)
-- `AI and demand leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
+- Steering Committee: Prof. Davide Fioriti, Hazem Abdel-Khalek, Ekaterina Fedotova, Leon Schumm
+- Founder of the initiative Maximilian Parzen
+- PyPSA-Earth Maintainers: Emmanuel Bolarinwa, Yerbol Akhmetov, Eddy Jalbout
+- PyPSA-Earth Lab Maintainers: Daniele Lerede, Arizeo Salac
+- Outreach Maintainer: Charlotte Heikendorf
+Maintainer Earth-OSMMatin Mahmood
+- PyPSA-Earth Distribution: Margherita Capitani
+- Regional Coordinatiors: Virio Andreyana, Tosin George, Emre Yorat
 
 .. _credits:
 
