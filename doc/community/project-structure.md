@@ -51,22 +51,25 @@ The lists below is an attempt to give the credits to the contributors, though it
 - Eric Nitschke (Technische Universität Hamburg, Germany)
 - Lukas Trippe (Technical University of Berlin, Germany)
 - Leon Schumm (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Sermisha Narayana
+- Sermisha Narayana (Open Energy Transition, Germany)
+- Denise Giubilato (University of Pisa, Italy)
+- Carlos Fernandez (ULiege)
+- Tosin George (Open Energy Transition, Germany)
+- Anton Achhammer (Ostbayerische Technische Hochschule Regensburg, Germany)
+- Arizeo Salac (University of Pisa, Italy)
+- Lukas Jansen (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
+- Johannes Hampp (Open Energy Transition, Germany)
 - Fabian Neumann (Technical University of Berlin, Germany)
-- Carlos Fernandez
-- Anton Achhammer
-- Arizeo Salac
-- Johannes Hampp (Justus Liebig University Giessen, Germany)
-- Ekaterina Fedotova
+- Ekaterina Fedotova (Open Energy Transition, Germany)
 - Muhammad Ilyas
 - Lukas Franken (University of Edinburgh, United Kingdom)
 - Jess Ryan
+- Kevin Steijn (Open Energy Transition, Germany)
 - Stephen Lee (Massachusetts Institute of Technology, United States)
-- Albert Solà Vilalta
-- Martha Frysztacki
-- Denise Giubilato
-- Anas Algarei
-- Siddharth Krishna
+- Albert Solà Vilalta (Universitat Politècnica de Catalunya)
+- Martha Frysztacki (Open Energy Transition, Germany)
+- Anas Algarei (University of Edinburgh, United Kingdom)
+- Siddharth Krishna (Open Energy Transition, Germany)
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants aka. EMRC, Nigeria)
 - Nse-Abasi Ayara (University of Abuja, Nigeria)
 - Jarrad Wright (Council for Scientific Research and Industry CSIR, South Africa)
