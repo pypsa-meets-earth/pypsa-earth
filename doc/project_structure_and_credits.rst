@@ -33,7 +33,7 @@ Team
 =====
 
 - Steering Committee: Davide Fioriti, Hazem Abdel-Khalek, Ekaterina Fedotova, Leon Schumm
-- Founder of Initiative and Advisor: Maximilian Parzen
+- Founder of the Initiative and Advisor: Maximilian Parzen
 - PyPSA-Earth Maintainers: Emmanuel Bolarinwa, Yerbol Akhmetov, Eddy Jalbout
 - PyPSA-Earth Lab Maintainers: Daniele Lerede, Arizeo Salac
 - Outreach Maintainer: Charlotte Heikendorf
