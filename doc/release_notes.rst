@@ -187,6 +187,8 @@ PyPSA-Earth 0.7.0
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
 
+* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
+
 PyPSA-Earth 0.6.0
 =================
 
