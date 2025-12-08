@@ -39,8 +39,8 @@ and aim for `REUSE compliance <https://reuse.software/>`_):
 Testing
 -------
 Add a new test if you want to contribute new functionality to the config.
-We perform currently *multiple* integration tests which means various workflows need to work.
-All test configs are build by updating the ``config.tutorial.yaml`` with the configs in ``pypysa-earth/test/*.yaml``.
+We currently perform *multiple* integration tests which means various workflows need to work.
+All test configs are build by updating ``config.tutorial.yaml`` with the configs in ``pypysa-earth/test/*.yaml``.
 
   * You can test your contribution locally with ``make test``.
   * See the Makefile for further information which configurations are tested.
@@ -54,7 +54,7 @@ To contribute a test:
 Performance-profiling
 ---------------------
 Performance profiling is important to understand bottlenecks and
-the accordingly optimize the speed in PyPSA-Earth. We use the Python built-in
+accordingly optimize the speed in PyPSA-Earth. We use the Python built-in
 `cProfiler`, custom decorators on single functions and analysis tools
 like `snakeviz <https://jiffyclub.github.io/snakeviz/>`_. See a detailed example
 in `this discussion #557 <https://github.com/pypsa-meets-earth/pypsa-earth/discussions/557>`_.
@@ -66,11 +66,11 @@ How to docs?
 -------------
 
 We add the code documentation along the way.
-You might think that cost a lot of time and is not efficient - but that's not really true anymore!
-Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speed up the overall process.
+You might think that costs a lot of time and is not efficient - but that's not really true anymore!
+Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speeds up the overall process.
 Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add-on
 `sphinx.ext.autodoc  <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ we document in our
-code scripts which then will automatically generate the documentation you might see here.
+code scripts, which then will automatically generate the documentation you might see here.
 
 Thank you Eric Holscher & team for your wonderful *Readthedocs* open source project.
 You can find an emotional speech by Eric `here <https://www.youtube.com/watch?v=U6ueKExLzSY>`_.
@@ -87,7 +87,7 @@ You could differentiate between to elements:
 
 We found three important files/file groups for the documentation:
 
-1. `index.rst`. This is the starter page of the *Readthedocs* page and generates also the sidebar with the outline (see `pypsa <https://pypsa.readthedocs.io/en/latest/index.html>`_).
+1. `index.rst`. This is the starter page of the *Readthedocs* page and also generates the sidebar with the outline (see `pypsa <https://pypsa.readthedocs.io/en/latest/index.html>`_).
 2. `The .py script` with the actual code documentation.
 3. `conf.py` with some useful information if something does not work.
 
