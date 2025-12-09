@@ -694,7 +694,9 @@ rule cluster_network:
     script:
         "scripts/cluster_network.py"
 
-if(config["augmented_line_connection"].get("add_to_snakefile") == True):
+
+if config["augmented_line_connection"].get("add_to_snakefile") == True:
+
     rule augmented_line_connections:
         params:
             lines=config["lines"],
