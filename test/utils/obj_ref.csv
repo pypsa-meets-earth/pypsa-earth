@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: CC-BY-4.0
 folder,file,objective
+historical_test,elec_s_6_ec_lcopt_Co2L-4H_python.log,3153.56
 landlock,elec_s_6_ec_lcopt_Co2L-4H_python.log,1054754877.00
 test,elec_s_4_ec_lc1_Co2L-24h_144h_2030_0.071_python.log,300623748500.00
 test,elec_s_4_ec_lc1_Co2L-24h_144h_2050_0.071_python.log,683702855500.00
