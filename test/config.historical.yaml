@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+### TEST CONFIG FOR HISTORICAL OSM DATA FEATURE ###
+version: 0.7.0
+
+run:
+  name: "historical_test"
+  shared_cutouts: true # set to true to share the default cutout(s) across runs
+  base_config: config.tutorial.yaml  # base configuration file
+
+enable:
+  retrieve_cost_data: false
+
+# OpenStreetMap (OSM) data configuration - testing historical feature
+osm_data:
+  source: "historical" # Test the historical data download feature
+  target_date: "2020-01-01" # Use a specific historical date for testing
