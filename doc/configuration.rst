@@ -69,7 +69,7 @@ facilitate running multiple scenarios through a single command
 
 For each wildcard, a **list of values** is provided. The rule ``solve_all_networks`` will trigger the rules for creating ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc`` for **all combinations** of the provided wildcard values as defined by Python's `itertools.product(...) <https://docs.python.org/2/library/itertools.html#itertools.product>`_ function that snakemake's `expand(...) function <https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets>`_ uses.
 
-An example dpendency graph (starting from the simplification rules) looks like this:
+An example dependency graph (starting from the simplification rules) looks like this:
 
 .. image:: img/scenarios.png
 
