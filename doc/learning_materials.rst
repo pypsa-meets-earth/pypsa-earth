@@ -7,7 +7,7 @@
 Learning materials
 ===================================
 
-PyPSA meets Earth builds on top of several open-source packages, which are here recalled together with recommended sources to learn them from scratch.
+PyPSA meets Earth builds on several open-source packages. Below are the recommended sources for learning each one from the beginning.
 
 .. _data_science_basics:
 
@@ -29,9 +29,9 @@ PyPSA Introduction (essential)
 -------------------------------
 
 - `Watch <https://www.youtube.com/watch?v=ty47YU1_eeQ>`_ how PyPSA-Eur is designed (1h)
-- `Watch <https://www.youtube.com/watch?v=mAwhQnNRIvs>`_ and put your hands on to make PyPSA-Eur work on your computer (1-3h)
-- While watching these PyPSA videos always have a look into the excellent `PyPSA-Eur documentation <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_
-- To see what data we can extract we work usually closely with the `basic PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html>`_
+- `Watch <https://www.youtube.com/watch?v=mAwhQnNRIvs>`_ and get hands-on to make PyPSA-Eur work on your computer (1-3h)
+- While watching these PyPSA videos, always have a look into the excellent `PyPSA-Eur documentation <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_
+- To see what data we can extract, we work usually closely with the `basic PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html>`_
 - Follow the `PyPSA-Earth hackathon <https://github.com/pypsa-meets-earth/documentation#1-hackathon-material>`_. Check the videos from this `Youtube series <https://www.youtube.com/watch?v=2nakM174CME&list=PLz1RcE1NdLlEzCT8G_v-sJKOeHOhZvw5R&index=7>`_ since it explains and applies partially the hackathon material.
 
 Data science basics (essential)
