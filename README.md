@@ -663,3 +663,4 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
 	<tbody>
 </table>
 <!-- readme: collaborators,contributors,restyled-commits/- -end -->
+- Contributor: 정민규
