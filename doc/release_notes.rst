@@ -40,6 +40,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix issues where gas and biomass powerplant capacity were not added in ``add_existing_baseyear.py``. Replace `urban central solid biomass CHP` with `biomass` for historical capacity `PR #1678 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1678>`__
+
 * Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
