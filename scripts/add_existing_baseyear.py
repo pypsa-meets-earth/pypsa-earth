@@ -363,7 +363,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
             if not new_build.empty:
                 new_capacity = capacity.loc[new_build.str.replace(name_suffix, "")]
 
-                #if generator != "urban central solid biomass CHP":
+                # if generator != "urban central solid biomass CHP":
                 n.madd(
                     "Link",
                     new_capacity.index,
