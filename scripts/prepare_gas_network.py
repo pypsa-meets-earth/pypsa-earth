@@ -532,9 +532,11 @@ def load_bus_region(onshore_path, pipelines):
     # Convert CRS to EPSG:3857 so we can measure distances
     bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
-    bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1).loc[
-        :, ["gadm_id", "geometry"]
-    ]
+    bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1)
+    keep_cols = ["gadm_id", "geometry"]
+    if "country" in bus_regions_onshore.columns:
+        keep_cols.insert(1, "country")
+    bus_regions_onshore = bus_regions_onshore.loc[:, keep_cols]
 
     if snakemake.params.alternative_clustering:
         countries_list = snakemake.params.countries_list
@@ -936,9 +938,30 @@ if not snakemake.params.custom_gas_network:
         print("total_system_capacity = ", total_system_capacity)
 
     else:
-        print(
-            "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
-            + ", ".join(bus_regions_onshore.country.unique().tolist())
+        # Use 'country' if present; otherwise derive from 'gadm_id' prefix (e.g., 'EG' from 'EG0 0').
+        if "country" in bus_regions_onshore.columns:
+            countries = (
+                bus_regions_onshore["country"].dropna().astype(str).unique().tolist()
+            )
+        elif "gadm_id" in bus_regions_onshore.columns:
+            countries = (
+                bus_regions_onshore["gadm_id"]
+                .astype(str)
+                .str.extract(r"^([A-Z]{2,3})", expand=False)
+                .dropna()
+                .unique()
+                .tolist()
+            )
+        else:
+            countries = []
+
+        logger.warning(
+            "The following countries have no existing Natural Gas network between the chosen bus regions:\n%s",
+            (
+                ", ".join(sorted(map(str, countries)))
+                if countries
+                else "(no country identifiers found)"
+            ),
         )
 
         # Create an empty DataFrame with the specified column names
