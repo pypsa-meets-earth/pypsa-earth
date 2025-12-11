@@ -148,7 +148,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
         "Oil": "oil",
         "OCGT": "OCGT",
         "CCGT": "CCGT",
-        "Bioenergy": "urban central solid biomass CHP",
+        "Bioenergy": "biomass",
     }
 
     # Replace Fueltype "Natural Gas" with the respective technology (OCGT or CCGT)
@@ -176,7 +176,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
     # Intermediate fix for DateIn & DateOut
     # Fill missing DateIn
     # TODO: revise CHP
-    biomass_i = df_agg.loc[df_agg.Fueltype == "urban central solid biomass CHP"].index
+    biomass_i = df_agg.loc[df_agg.Fueltype == "biomass"].index
     if biomass_i.empty:
         mean = 0
     else:
@@ -238,7 +238,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
         "oil": "oil",
         "lignite": "lignite",
         "nuclear": "uranium",
-        "urban central solid biomass CHP": "biomass",
+        "biomass": "biomass",
     }
 
     for grouping_year, generator in df.index:
@@ -330,7 +330,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
                     )
 
         else:
-            if generator not in vars(spatial).keys():
+            if carrier[generator] not in vars(spatial).keys():
                 logger.debug(f"Carrier type {generator} not in spatial data, skipping")
                 continue
 
@@ -363,44 +363,44 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
             if not new_build.empty:
                 new_capacity = capacity.loc[new_build.str.replace(name_suffix, "")]
 
-                if generator != "urban central solid biomass CHP":
-                    n.madd(
-                        "Link",
-                        new_capacity.index,
-                        suffix=name_suffix,
-                        bus0=bus0,
-                        bus1=new_capacity.index,
-                        bus2="co2 atmosphere",
-                        carrier=generator,
-                        marginal_cost=costs.at[generator, "efficiency"]
-                        * costs.at[generator, "VOM"],  # NB: VOM is per MWel
-                        capital_cost=costs.at[generator, "efficiency"]
-                        * costs.at[generator, "fixed"],  # NB: fixed cost is per MWel
-                        p_nom=new_capacity / costs.at[generator, "efficiency"],
-                        efficiency=costs.at[generator, "efficiency"],
-                        efficiency2=costs.at[carrier[generator], "CO2 intensity"],
-                        build_year=grouping_year,
-                        lifetime=lifetime_assets.loc[new_capacity.index],
-                    )
-                else:
-                    key = "central solid biomass CHP"
-                    n.madd(
-                        "Link",
-                        new_capacity.index,
-                        suffix=name_suffix,
-                        bus0=spatial.biomass.df.loc[new_capacity.index]["nodes"].values,
-                        bus1=new_capacity.index,
-                        bus2=new_capacity.index + " urban central heat",
-                        carrier=generator,
-                        p_nom=new_capacity / costs.at[key, "efficiency"],
-                        capital_cost=costs.at[key, "fixed"]
-                        * costs.at[key, "efficiency"],
-                        marginal_cost=costs.at[key, "VOM"],
-                        efficiency=costs.at[key, "efficiency"],
-                        build_year=grouping_year,
-                        efficiency2=costs.at[key, "efficiency-heat"],
-                        lifetime=lifetime_assets.loc[new_capacity.index],
-                    )
+                # if generator != "urban central solid biomass CHP":
+                n.madd(
+                    "Link",
+                    new_capacity.index,
+                    suffix=name_suffix,
+                    bus0=bus0,
+                    bus1=new_capacity.index,
+                    bus2="co2 atmosphere",
+                    carrier=generator,
+                    marginal_cost=costs.at[generator, "efficiency"]
+                    * costs.at[generator, "VOM"],  # NB: VOM is per MWel
+                    capital_cost=costs.at[generator, "efficiency"]
+                    * costs.at[generator, "fixed"],  # NB: fixed cost is per MWel
+                    p_nom=new_capacity / costs.at[generator, "efficiency"],
+                    efficiency=costs.at[generator, "efficiency"],
+                    efficiency2=costs.at[carrier[generator], "CO2 intensity"],
+                    build_year=grouping_year,
+                    lifetime=lifetime_assets.loc[new_capacity.index],
+                )
+                # else:
+                #     key = "central solid biomass CHP"
+                #     n.madd(
+                #         "Link",
+                #         new_capacity.index,
+                #         suffix=name_suffix,
+                #         bus0=spatial.biomass.df.loc[new_capacity.index]["nodes"].values,
+                #         bus1=new_capacity.index,
+                #         bus2=new_capacity.index + " urban central heat",
+                #         carrier=generator,
+                #         p_nom=new_capacity / costs.at[key, "efficiency"],
+                #         capital_cost=costs.at[key, "fixed"]
+                #         * costs.at[key, "efficiency"],
+                #         marginal_cost=costs.at[key, "VOM"],
+                #         efficiency=costs.at[key, "efficiency"],
+                #         build_year=grouping_year,
+                #         efficiency2=costs.at[key, "efficiency-heat"],
+                #         lifetime=lifetime_assets.loc[new_capacity.index],
+                #     )
         # check if existing capacities are larger than technical potential
         existing_large = n.generators[
             n.generators["p_nom_min"] > n.generators["p_nom_max"]
