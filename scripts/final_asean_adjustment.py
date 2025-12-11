@@ -28,6 +28,10 @@ carrier_to_keep = [
     "solar",
     "solar rooftop",
     "biomass",
+    "biomass EOP",
+    "solid biomass",
+    # "biogas", # Only used to reduce gas consumption
+    # "biogas to gas", # Only used to reduce gas consumption
     "PHS",
     "ror",
     "DC",

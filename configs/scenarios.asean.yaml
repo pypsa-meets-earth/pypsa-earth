@@ -42,44 +42,46 @@ decarbonize-existing-3H:
       AIMS: false
       ID_SuperGrid: false
 
-# ==== Sensitivity Scenarios ====
+# ====== Sensitivity Scenarios ======
 # ===================================
+
+# ====== Clustering ======
 
 sensitivity-nodes-3H:
   # sensitivity using default decarbonize-aims-3H
   scenario:
-  clusters: [50, 100, 200]
+    clusters: [50, 100, 200]
     planning_horizons:
     - 2050
 
   co2_budget:
     enable: true
 
-sensitivity-roof100-3H:
-  # sensitivity using default decarbonize-aims-3H
+# ====== Timesteps ======
+
+sensitivity-1H:
   scenario:
+    sopts:
+    - "1h"
     planning_horizons:
     - 2050
 
   co2_budget:
     enable: true
 
-  sector:
-    solar_rooftop:
-      install_ratio:
-        0: 0
-        10: 0
-        100: 0.36
-        200: 0.41
-        450: 0.49
-        2300: 0.66
-
-sensitivity-roof200-3H:
-  # sensitivity using default decarbonize-aims-3H
+sensitivity-6H:
   scenario:
+    sopts:
+    - "6h"
     planning_horizons:
     - 2050
 
+  co2_budget:
+    enable: true
+
+# ====== Limit Rooftops ======
+
+decarbonize-aims-roof200-3H:
   co2_budget:
     enable: true
 

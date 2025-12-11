@@ -37,7 +37,7 @@ countries: [BN, KH, ID, LA, MM, MY, PH, SG, TH, TL, VN]
 enable:
   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: false
-  download_global_buildings: true # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: false # If 'true', OpenStreetMap data will be downloaded for the above given countries
   build_natura_raster: false # If True, then an exclusion raster will be build
@@ -142,6 +142,9 @@ costs:
   append_cost_data: true
   regional_factor: false
 
+demand_data:
+  update_data: false
+
 sector:
   enable:
     heat: true
@@ -156,6 +159,8 @@ sector:
     services: true
 
   biomass_transport: false
+  solid_biomass_potential: 360 # TWh/a, technical maximum in Southeast Asia (higher granular data needed). https://doi.org/10.1016/j.energy.2017.06.162
+  # biogas_potential: 0.5 # TODO find ASEAN equivalent # TWh/a, Potential of whole modelled area
 
   hydrogen:
     network: false
