@@ -19,7 +19,7 @@ scenario:
   ll: 
   - "v2.0"
   opts: 
-  - "EQ0.7c"
+  - ""
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2025
   - 2030

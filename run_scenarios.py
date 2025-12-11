@@ -159,7 +159,19 @@ def main():
         with open("config.temp.yaml", "w") as file:
             yaml.safe_dump(config, file, default_flow_style=False)
 
-        run_cmd = f"snakemake {selected_profile} solve_sector_networks --configfile config.temp.yaml"
+        # Duplicate files:
+        from pathlib import Path
+        duplicate_file = ["resources/energy_totals_base.csv"]
+
+        for file in duplicate_file:
+            parts = Path(file).parts
+
+            new_file_path = Path(parts[0]) / selected_scenario / Path(*parts[1:])
+            new_file_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(file, new_file_path)
+
+        run_cmd = f"snakemake {selected_profile} solve_sector_networks --configfile config.temp.yaml --rerun-trigger mtime"
+        os.system(run_cmd + " --touch")
         os.system(run_cmd)
 
         temp_file = "config.temp.yaml"
