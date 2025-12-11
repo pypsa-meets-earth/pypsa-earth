@@ -23,16 +23,16 @@ OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build pow
 
 The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and written as a geojsons in the folder `data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
-The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
+The cleaned OSM network data, which are the output of the `osm_data_cleaning` rule that processes the raw OSM data to produce cleaned datasets of all network assets—namely generators, substations, lines, and cables—are stored in the `/resources/osm/` folder.
 
 Contribute and improve
 ------------------------------------
 
 As a collaborative mapping project that gathers millions of volunteers and professionals to contribute around the world, you are likely to improve the provided data for power grids.
 
-The `MapYourGrid initiative <https://mapyourgrid.org/>`_, started in 2025, allowed to produce tools and training to empower anyone to contribute in many areas. As a beginner you can refer to the `mapping starter kit <https://mapyourgrid.org/starter-kit/>`_ or as an experienced mapper, directly find a country to map on the `Map-it page <https://mapyourgrid.org/map-it/>`_. As a complex topic, several `strategies <https://mapyourgrid.org/strategies/>`_ has been defined to help improve the most prominent quality topics even in already mapped areas, to close the gaps in the grid or find the missing substations for instance.
+The `MapYourGrid initiative <https://mapyourgrid.org/>`_, started in 2025, has produced tools and training to empower anyone to contribute in many areas. Beginners can refer to the `mapping starter kit <https://mapyourgrid.org/starter-kit/>`_ while experienced mappers can directly select a country to map on the `Map-it page <https://mapyourgrid.org/map-it/>`_. As a complex topic, several `strategies <https://mapyourgrid.org/strategies/>`_ have been defined to help improve the most prominent quality topics even in already mapped areas, to close the gaps in the grid or find the missing substations for instance.
 
-You can browse the `progress page <https://mapyourgrid.org/progress/>`_ or the `quality globe <https://mapyourgrid.org/quality/>`_ to get accurate insights about the availability and already spoted issues in the data consumed from OpenStreetMap project. In any case, you are welcome to join the `initiative's Discord channel <https://discord.gg/a5znpdFWfD>`_ to get in touch with other contributors that share the same interest.
+You can browse the `progress page <https://mapyourgrid.org/progress/>`_ or the `quality globe <https://mapyourgrid.org/quality/>`_ to get accurate insights about the availability and already spotted issues in the data consumed from OpenStreetMap project. In any case, you are welcome to join the `initiative's Discord channel <https://discord.gg/a5znpdFWfD>`_ to get in touch with other contributors that share the same interest.
 
 2. Climate data
 ===================================
@@ -71,7 +71,7 @@ These data are used in the `build_renewable_profiles` rule. `GEBCO <https://www.
 
 * **hydrobasins** datasets on watershed boundaries and basins, as available from HydroBASINS. These data are used to estimate the hydropower generation in the `build_renewable_profiles` rule.
 
-* **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. The `landcover` dataset was used to generate a `natura.tiff` raster. Nowadays the pre-compiled `natura.tiff` raster has global coverage, so there is no need to re-calculate it locally to being able run the modeling workflow.
+* **landcover** describes the shapes of global protected areas, which are needed to identify areas where no (renewable) assets can be installed. The `landcover` dataset was used to generate a `natura.tiff` raster. Nowadays the pre-compiled `natura.tiff` raster has global coverage, so there is no need to re-calculate it locally to run the modeling workflow.
 
 Economical
 ------------------------------------
@@ -87,14 +87,14 @@ Economical
 Technological
 ------------------------------------
 
-* **eia_hydro_annual_generation.csv** contains data on total energy production of existing plants as reported per country by the open US Energy Information Administration `EIA platforms <https://www.eia.gov/international/data/world>`_. Is used to calibrate the runoff time series are obtained from the global reanalysis data.
+* **eia_hydro_annual_generation.csv** contains data on the total energy production of existing plants as reported per country by the open US Energy Information Administration `EIA platforms <https://www.eia.gov/international/data/world>`_. Is used to calibrate the runoff time series obtained from the global reanalysis data.
 
 4. Pre-calculated datasets
 ===================================
 
 There are some datasets which were prepared to ensure smooth run of the model. However, they may (and, in some cases, must) be replaced by custom ones.
 
-* **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as a mask to exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
+* **natura.tiff** contains geo-spatial data on the location of protected and reserved areas and may be used as a mask to exclude such areas when calculating the renewable potential using the `build_renewable_profiles` rule. The `natura` flag in the configuration file allows you to switch on this option while the presence of the `natura.tiff` in the `resources` folder is needed to run the model.
 
 Currently the pre-build file is calculated for Africa, global `natura.tiff` raster is under development.
 
