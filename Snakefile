@@ -224,6 +224,16 @@ rule build_osm_network:
         + RDIR
         + "base_network/all_transformers_build_network.csv",
         substations="resources/" + RDIR + "base_network/all_buses_build_network.csv",
+        lines_geo="resources/" + RDIR + "base_network/all_lines_build_network.geojson",
+        converters_geo="resources/"
+        + RDIR
+        + "base_network/all_converters_build_network.geojson",
+        transformers_geo="resources/"
+        + RDIR
+        + "base_network/all_transformers_build_network.geojson",
+        substations_geo="resources/"
+        + RDIR
+        + "base_network/all_buses_build_network.geojson",
     log:
         "logs/" + RDIR + "build_osm_network.log",
     benchmark:
@@ -685,33 +695,35 @@ rule cluster_network:
         "scripts/cluster_network.py"
 
 
-rule augmented_line_connections:
-    params:
-        lines=config["lines"],
-        augmented_line_connection=config["augmented_line_connection"],
-        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        electricity=config["electricity"],
-        costs=config["costs"],
-    input:
-        tech_costs=COSTS,
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
-        regions_onshore="resources/"
-        + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/"
-        + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-    output:
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-    log:
-        "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
-    benchmark:
-        "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
-    threads: 1
-    resources:
-        mem_mb=3000,
-    script:
-        "scripts/augmented_line_connections.py"
+if config["augmented_line_connection"].get("add_to_snakefile") == True:
+
+    rule augmented_line_connections:
+        params:
+            lines=config["lines"],
+            augmented_line_connection=config["augmented_line_connection"],
+            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+            electricity=config["electricity"],
+            costs=config["costs"],
+        input:
+            tech_costs=COSTS,
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+            regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+        log:
+            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:
@@ -795,6 +807,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
         input:
             overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         log:
@@ -865,6 +878,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             "results/"
             + RDIR
@@ -1646,6 +1660,7 @@ if config["foresight"] == "overnight":
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
+            agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -2118,6 +2133,7 @@ if config["foresight"] == "myopic":
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
+            agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             network=RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",

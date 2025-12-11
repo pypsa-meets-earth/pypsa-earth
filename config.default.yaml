@@ -182,7 +182,9 @@ electricity:
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
-  agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
   hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
@@ -198,6 +200,8 @@ electricity:
     H2: 168
 
   extendable_carriers:
+      # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
+          # from the Generator list below, as these offshore wind technologies require coastline access.
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
@@ -389,7 +393,7 @@ renewable:
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration
 costs:
-  year: 2030
+  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
   technology_data_version: v0.13.2
   discountrate: [0.071] #, 0.086, 0.111]
   country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
@@ -399,8 +403,7 @@ costs:
   # Management of output currencies and exchange rates
   output_currency: "EUR" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
   default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
-  # Only needed if customized exchange rates are needed for future years
-  future_exchange_rate_strategy: "latest" # "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  future_exchange_rate_strategy: "reference" # reference uses the exchange rate from `reference_year` for all conversions, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
   custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
   rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
   fill_values:
@@ -746,11 +749,12 @@ sector:
 
   conventional_generation: # generator : carrier
     OCGT: gas
+    CCGT: gas
     oil: oil
     coal: coal
     lignite: lignite
     biomass: biomass
-  keep_existing_capacities: true
+  keep_existing_capacities: false
 
 solving:
   options:
@@ -1037,6 +1041,15 @@ plotting:
     high-temp electrolysis: "magenta"
     today: "#D2691E"
     Ambient: "k"
+    industry coal emissions: "#654321"
+    agriculture oil: "#1e1e1e"
+    gas emissions: "#666666"
+    industry oil emissions: "#654321"
+    industry electricity: "#222222"
+    rail transport electricity: "grey"
+    solid biomass for industry: "#654321"
+    rail transport oil: "#44DD33"
+    low voltage: "y"
 
 
   nice_names:
