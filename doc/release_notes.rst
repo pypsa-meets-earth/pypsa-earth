@@ -12,6 +12,7 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
 * Add an option to estimate solar-rooftop potentials using `GlobalMLBuildingFootprints <https://github.com/microsoft/GlobalMLBuildingFootprints>`_, a simplified data is provided for tutorials, `PR #1629 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1629>`__
 
@@ -68,6 +69,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
+
+* fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
 
 PyPSA-Earth 0.7.0
 =================
@@ -185,6 +188,8 @@ PyPSA-Earth 0.7.0
 * Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
+
+* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
 
 PyPSA-Earth 0.6.0
 =================
