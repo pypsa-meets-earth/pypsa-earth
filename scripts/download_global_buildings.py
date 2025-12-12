@@ -113,7 +113,9 @@ def get_building_area_center(df, crs):
             .to_list()
         )
 
-        yield pd.DataFrame({"area": area, "x": [c.x for c in center], "y": [c.y for c in center]})
+        yield pd.DataFrame(
+            {"area": area, "x": [c.x for c in center], "y": [c.y for c in center]}
+        )
 
 
 def download_global_buildings(country_code, country_buildings_fn, crs, update=False):
