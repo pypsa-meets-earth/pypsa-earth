@@ -4,21 +4,17 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # -*- coding: utf-8 -*-
 """
-TEST
+This script handles the downloading and processing of global building data.
 """
 import os
-from itertools import chain
 
 import country_converter as coco
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
-    read_geojson,
-    save_to_geojson,
 )
 from shapely import geometry
 from tqdm import tqdm
@@ -29,6 +25,20 @@ logger = create_logger(__name__)
 
 
 def download_global_buildings_url(update=False):
+    """
+    Downloads or retrieves the global building URLs from a CSV file, specifically
+    from the Microsoft Global Buildings dataset (https://github.com/microsoft/GlobalMLBuildingFootprints).
+
+    Parameters
+    ----------
+    update : bool, optional
+        If True, forces a re-download of the URL list. The default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame containing the global building URLs and country codes.
+    """
     global_buildings_path = os.path.join(
         BASE_DIR,
         "data",
@@ -70,6 +80,21 @@ def download_global_buildings_url(update=False):
 
 
 def get_building_area_center(df, crs):
+    """
+    Calculates the area and centroid of buildings from a DataFrame of building geometries.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing building URLs and other information.
+    crs : dict
+        A dictionary containing coordinate reference systems (CRS) for 'geo_crs', 'area_crs', and 'distance_crs'.
+
+    Yields
+    ------
+    pandas.DataFrame
+        A DataFrame with 'area', 'x' and 'y' based on the centroid for each building.
+    """
     tqdm_kwargs = dict(
         ascii=False,
         unit=" quadrants",
@@ -88,10 +113,28 @@ def get_building_area_center(df, crs):
             .to_list()
         )
 
-        yield pd.DataFrame({"area": area, "center": center})
+        yield pd.DataFrame({"area": area, "x": [c.x for c in center], "y": [c.y for c in center]})
 
 
 def download_global_buildings(country_code, country_buildings_fn, crs, update=False):
+    """
+    Downloads global building data for a specific country using links from the
+    Microsoft Global Buildings dataset (https://github.com/microsoft/GlobalMLBuildingFootprints).
+    The shapes are simplified to a rounded area size and center coordinates,
+    and then saved into parquet files. This process is done to optimize computer
+    memory usage and speed up computational time.
+
+    Parameters
+    ----------
+    country_code : str
+        The ISO2 country code for which to download building data.
+    country_buildings_fn : str
+        The file path where the processed building data will be saved.
+    crs : dict
+        A dictionary containing coordinate reference systems (CRS) for 'geo_crs', 'area_crs', and 'distance_crs'.
+    update : bool, optional
+        If True, forces a re-download of the URL list. The default is False.
+    """
     logger.info(f"Downloading Global Buildings for {country_code}")
 
     df_url = download_global_buildings_url(update=update)
@@ -99,7 +142,7 @@ def download_global_buildings(country_code, country_buildings_fn, crs, update=Fa
     df = pd.concat(list(get_building_area_center(df_url, crs)), ignore_index=True)
 
     logger.info(f"Saving Global Buildings for {country_code}")
-    df.to_csv(country_buildings_fn)
+    df.to_parquet(country_buildings_fn)
 
 
 if __name__ == "__main__":

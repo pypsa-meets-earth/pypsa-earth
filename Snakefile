@@ -169,7 +169,7 @@ if config["enable"].get("download_global_buildings", True):
         params:
             crs=config["crs"],
         output:
-            "data/global_buildings/{country}_global_buildings_raw.csv",
+            "data/global_buildings/{country}_global_buildings_raw.parquet",
         script:
             "scripts/download_global_buildings.py"
 
@@ -726,7 +726,7 @@ rule cluster_global_buildings:
         **solar_rooftop_params,
         crs=config["crs"],
     input:
-        country_buildings="data/global_buildings/{country}_global_buildings_raw.csv",
+        country_buildings="data/global_buildings/{country}_global_buildings_raw.parquet",
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",

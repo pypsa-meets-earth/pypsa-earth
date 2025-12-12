@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # -*- coding: utf-8 -*-
 """
-TEST
+This script processes global building data to calculate solar rooftop area.
 """
 import country_converter as coco
 import geopandas as gpd
@@ -15,7 +15,7 @@ from _helpers import (
     configure_logging,
     create_logger,
 )
-from shapely import wkt
+from shapely import Point
 
 cc = coco.CountryConverter()
 
@@ -31,6 +31,31 @@ def calculate_solar_rooftop_area(
     install_ratio,
     tolerance=100,
 ):
+    """
+    Calculates the usable solar rooftop area for buildings within a country, considering
+    that only a portion of each rooftop can be allocated for PV installation based on its size.
+    Smaller buildings are less likely to host PV systems, while larger buildings can dedicate
+    a greater share of their rooftop to PVs. This approach is based on the methodology
+    described in a paper by Hideaki Obane (https://eneken.ieej.or.jp/data/12710.pdf).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing building areas and center points.
+    country_code : str
+        The ISO2 country code.
+    shapes : geopandas.GeoDataFrame
+        GeoDataFrame of regional shapes with 'country' and 'geometry' columns.
+    output : str
+        The file path to save the calculated solar rooftop area.
+    crs : dict
+        A dictionary containing coordinate reference systems (CRS) for 'distance_crs' and 'geo_crs'.
+    install_ratio : dict
+        A dictionary mapping building area thresholds to solar installation ratios.
+    tolerance : int, optional
+        Maximum distance in kilometers for spatial join to find nearest shapes.
+        The default is 100.
+    """
     distance_crs = crs["distance_crs"]
     geo_crs = crs["geo_crs"]
 
@@ -83,8 +108,8 @@ if __name__ == "__main__":
 
     # Retrieve files
     logger.info(f"Reading Global Buildings for {country_code}")
-    df = pd.read_csv(snakemake.input.country_buildings, index_col=0)
-    df["center"] = df["center"].apply(wkt.loads)
+    df = pd.read_parquet(snakemake.input.country_buildings)
+    df["center"] = df.apply(lambda row: Point(row["x"], row["y"]), axis=1)
 
     shapes = gpd.read_file(snakemake.input.regions_onshore).set_index("name")[
         ["country", "geometry"]

@@ -53,10 +53,10 @@ databundles:
     category: global_buildings
     destination: "data"
     urls:
-      gdrive: https://drive.google.com/file/d/1va0FsKvFB3hhfFELONKEQrxdPMuM3CuQ/view?usp=drive_link
+      gdrive: https://drive.google.com/file/d/1nnseF1A740Gp0IaryeCQ8IRcEF91-aUe/view?usp=drive_link
     output:
-    - data/global_buildings/NG_global_buildings_raw.csv  # needed in cluster_global_buildings
-    - data/global_buildings/BJ_global_buildings_raw.csv  # needed in cluster_global_buildings
+    - data/global_buildings/NG_global_buildings_raw.parquet  # needed in cluster_global_buildings
+    - data/global_buildings/BJ_global_buildings_raw.parquet  # needed in cluster_global_buildings
 
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
