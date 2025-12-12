@@ -741,33 +741,35 @@ rule cluster_global_buildings:
         "scripts/cluster_global_buildings.py"
 
 
-rule augmented_line_connections:
-    params:
-        lines=config["lines"],
-        augmented_line_connection=config["augmented_line_connection"],
-        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        electricity=config["electricity"],
-        costs=config["costs"],
-    input:
-        tech_costs=COSTS,
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
-        regions_onshore="resources/"
-        + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/"
-        + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-    output:
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-    log:
-        "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
-    benchmark:
-        "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
-    threads: 1
-    resources:
-        mem_mb=3000,
-    script:
-        "scripts/augmented_line_connections.py"
+if config["augmented_line_connection"].get("add_to_snakefile") == True:
+
+    rule augmented_line_connections:
+        params:
+            lines=config["lines"],
+            augmented_line_connection=config["augmented_line_connection"],
+            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+            electricity=config["electricity"],
+            costs=config["costs"],
+        input:
+            tech_costs=COSTS,
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+            regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+        log:
+            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:
