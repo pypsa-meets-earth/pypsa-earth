@@ -65,7 +65,7 @@ jobs:
         conda-remove-defaults: true
 
     - name: Cache Conda env
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ env.CONDA }}/envs
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
