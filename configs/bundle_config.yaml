@@ -46,6 +46,18 @@ databundles:
     - data/gadm/gadm36_NGA/gadm36_NGA.gpkg  # needed in sector-coupled model
     - data/gadm/gadm36_BEN/gadm36_BEN.gpkg  # needed in sector-coupled model
 
+  # tutorial bundle specific for Nigeria and Benin only (TODO: merge with above)
+  bundle_tutorial_NGBJ_global_buildings:
+    countries: [NG, BJ]
+    tutorial: true
+    category: global_buildings
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/1nnseF1A740Gp0IaryeCQ8IRcEF91-aUe/view?usp=drive_link
+    output:
+    - data/global_buildings/NG_global_buildings_raw.parquet  # needed in cluster_global_buildings
+    - data/global_buildings/BJ_global_buildings_raw.parquet  # needed in cluster_global_buildings
+
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
     countries: [BW]
