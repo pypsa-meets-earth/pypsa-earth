@@ -16,9 +16,9 @@ summary_dir: results/
 
 scenario:
   clusters: [100]
-  ll: 
+  ll:
   - "v2.0"
-  opts: 
+  opts:
   - ""
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2025

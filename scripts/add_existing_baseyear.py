@@ -641,7 +641,7 @@ if __name__ == "__main__":
     add_build_year_to_new_assets(n, baseyear)
 
     filter_transmission_project_build_year(
-        n, 
+        n,
         snakemake.params.transmission_projects,
         baseyear,
     )

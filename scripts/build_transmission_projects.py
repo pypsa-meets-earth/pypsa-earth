@@ -496,7 +496,10 @@ def add_projects(
                 country_shapes=country_shapes,
             )
             duplicate_lines = find_closest_lines(
-                n.lines, new_lines, distance_upper_bound=distance_upper_bound, type="new"
+                n.lines,
+                new_lines,
+                distance_upper_bound=distance_upper_bound,
+                type="new",
             )
             new_lines = new_lines.drop(duplicate_lines.index, errors="ignore")
             new_lines_df = pd.concat([new_lines_df, new_lines])
@@ -517,7 +520,10 @@ def add_projects(
                 country_shapes=country_shapes,
             )
             duplicate_links = find_closest_lines(
-                n.links, new_links, distance_upper_bound=distance_upper_bound, type="new"
+                n.links,
+                new_links,
+                distance_upper_bound=distance_upper_bound,
+                type="new",
             )
             new_links = new_links.drop(duplicate_links.index, errors="ignore")
             set_underwater_fraction(new_links, offshore_shapes)
@@ -568,7 +574,10 @@ def add_projects(
 
         elif key == "upgraded_lines":
             line_map = find_closest_lines(
-                n.lines, lines, distance_upper_bound=distance_upper_bound, type="upgraded"
+                n.lines,
+                lines,
+                distance_upper_bound=distance_upper_bound,
+                type="upgraded",
             )
             upgraded_lines = lines.loc[line_map.index]
             lines_to_adjust = adjust_decommissioning(upgraded_lines, line_map)
@@ -673,7 +682,7 @@ if __name__ == "__main__":
                 plan=project,
                 status=transmission_projects["status"],
                 skip=transmission_projects["skip"],
-                distance_upper_bound=transmission_projects["distance_upper_bound"]
+                distance_upper_bound=transmission_projects["distance_upper_bound"],
             )
         )
     if "underground" in adjust_lines_df.columns:
@@ -686,7 +695,9 @@ if __name__ == "__main__":
 
         if mask_upgraded_lines.any():
             # Identify upgraded lines where s_nom is missing or zero
-            missing_capacity = new_lines_df.loc[mask_upgraded_lines, "s_nom"].fillna(0) == 0
+            missing_capacity = (
+                new_lines_df.loc[mask_upgraded_lines, "s_nom"].fillna(0) == 0
+            )
             affected = new_lines_df.loc[mask_upgraded_lines][missing_capacity]
 
             for idx, row in affected.iterrows():

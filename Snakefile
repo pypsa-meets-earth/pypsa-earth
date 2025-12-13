@@ -552,8 +552,8 @@ if config["enable"].get("retrieve_cost_data", True):
             branch(
                 config["costs"].get("append_cost_data"),
                 "resources/" + RDIR + "pre_costs_{year}.csv",
-                "resources/" + RDIR + "costs_{year}.csv"
-            )
+                "resources/" + RDIR + "costs_{year}.csv",
+            ),
         log:
             "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:

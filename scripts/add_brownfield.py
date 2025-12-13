@@ -268,7 +268,7 @@ if __name__ == "__main__":
         n,
         snakemake.params.transmission_projects,
         year,
-        )
+    )
 
     disable_grid_expansion_if_limit_hit(n)
 
