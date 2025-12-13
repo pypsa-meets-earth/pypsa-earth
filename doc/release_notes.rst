@@ -14,6 +14,8 @@ This part of documentation collects descriptive release notes to capture the mai
 **New Features and Major Changes**
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
+* Add an option to estimate solar-rooftop potentials using `GlobalMLBuildingFootprints <https://github.com/microsoft/GlobalMLBuildingFootprints>`_, a simplified data is provided for tutorials, `PR #1629 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1629>`__
+
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
 * Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__
@@ -41,6 +43,8 @@ This part of documentation collects descriptive release notes to capture the mai
 **Minor Changes and bug-fixing**
 
 * Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river `PR #1683 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1683>`__
+
+* Fix issues where gas and biomass powerplant capacity were not added in ``add_existing_baseyear.py``. Replace `urban central solid biomass CHP` with `biomass` for historical capacity `PR #1678 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1678>`__
 
 * Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 

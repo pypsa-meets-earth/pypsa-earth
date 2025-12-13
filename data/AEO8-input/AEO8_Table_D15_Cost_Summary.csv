@@ -1,0 +1,48 @@
+technology,sub-technology,capital_cost,FOM,VOM
+Coal,Coal Subcritical,1513,30.3,2.3
+Coal,Coal Supercritical,1806,32.1,2.3
+Coal,Coal Ultrasupercritical,1934,42.9,2.0
+Coal,Coal Supercritical CCS,3802,75.3,5.5
+Coal,Coal Ultrasupercritical CCS,4072,100.7,4.8
+Coal,Coal IGCC,2730,68.4,13.7
+Coal,Coal IGCC with CCS,4770,123.0,22.0
+Coal,Coal average,2947,67.5,7.5
+Oil,Diesel,910,9.1,7.3
+Oil,Fuel Oil,910,9.1,7.3
+Oil,Oil average,910,9.1,7.3
+Gas,Gas Turbine,616,23.1,3.6
+Gas,Gas Engine,949,23.2,1.0
+Gas,Gas Steam,1062,23.2,1.0
+Gas,Gas Combined Cycle,918,29.2,2.2
+Gas,Gas Combined Cycle with CCS,2080,38.5,3.4
+Gas,Gas average,1125,27.4,2.2
+Nuclear,Nuclear LWR,9000,75.3,5.1
+Nuclear,Nuclear SMR,9600,110.0,2.2
+Nuclear,Nuclear SFR,5953,211.9,0.0
+Nuclear,Nuclear average,8184,132.4,2.4
+Hydro,Large Hydro,1500,37.3,0.6
+Hydro,Small Hydro,1350,38.0,0.5
+Hydro,Hydro average,1425,37.7,0.6
+Geothermal,Geothermal,3560,18.4,0.3
+Geothermal,Geothermal ORC,4640,20.5,0.4
+Geothermal,Geothermal average,4100,19.5,0.3
+Solar,Solar PV,970,8.8,0.0
+Solar,Solar PV Rooftop,1200,4.9,0.0
+Solar,Solar CSP,6308,64.3,3.4
+Solar,Solar Floating,1200,9.0,0.0
+Solar,Solar average,2419,21.8,0.8
+Tidal & Wave,Tidal,5480,272.4,11.4
+Tidal & Wave,Wave,10360,457.0,15.8
+Tidal & Wave,Tidal & Wave average,7920,364.7,13.6
+Wind,Wind Onshore,1570,39.9,4.1
+Wind,Wind Offshore,3390,78.7,3.6
+Wind,Wind average,2480,59.3,3.9
+Bioenergy,Biomass Other,1986,46.8,3.0
+Bioenergy,Biomass Gasification,2900,142.5,15.4
+Bioenergy,Bioenergy with CCS,5299,146.2,6.3
+Bioenergy,Biogas,2450,110.6,0.1
+Bioenergy,Waste,4901,232.7,24.0
+Bioenergy,Bioenergy average,3507,135.8,9.7
+Energy Storage,Lithium Ion Batteries,515,15.0,2.0
+Energy Storage,Pumped Hydro,950,8.3,1.4
+Energy Storage,Energy Storage average,733,11.7,1.7

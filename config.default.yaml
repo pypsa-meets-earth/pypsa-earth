@@ -23,6 +23,7 @@ enable:
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
@@ -179,6 +180,8 @@ co2_budget:
 
 electricity:
   base_voltage: 380.
+  base_network: false # ["osm-prebuilt", "osm-plus-prebuilt"]
+  base_network_version: 0.1.1 # see in data/
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
@@ -250,6 +253,21 @@ transformers:
   x: 0.1
   s_nom: 2000.
   type: ""
+
+transmission_projects:
+  enable: true
+  include:
+    ID_SuperGrid: true
+    AIMS: true
+  skip: []
+  status:
+  - in_planning
+  - under_construction
+  - existing
+  - under_consideration
+  new_link_capacity: keep #keep or zero
+  set_by_build_year: true
+  delay_construction: 0
 
 atlite:
   nprocesses: 4
@@ -366,8 +384,8 @@ renewable:
     clip_min_inflow: 1.0
     extendable: true
     normalization:
-      method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
-      year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
+      method: irena # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' or 'irena' to rescale by eia or irena data, false for no rescaling
+      year: 2023 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
     hydro_min_inflow_pu: 1.0
   csp:
@@ -504,6 +522,7 @@ fossil_reserves:
   oil: 100 #TWh Maybe redundant
 
 export:
+  enable: true
   endogenous: false # If true, the export demand is endogenously determined by the model
   endogenous_price: 400 # EUR/MWh # Market price, for wich the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
@@ -658,7 +677,20 @@ sector:
   efficiency_heat_gas_to_elec: 0.9
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
-  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+    enable: true
+    kW_per_m2: 0.1
+    m2_per_person: 20
+    use_building_size: false
+    install_ratio:
+      0: 0
+      10: 0.3
+      100: 0.36
+      200: 0.41
+      450: 0.49
+      2300: 0.66
+    tolerance: 100
+
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
   transmission_efficiency:
     electricity distribution grid:

@@ -186,6 +186,7 @@ def build_demand_profiles(
     admin_shapes,
     countries,
     scale,
+    substitute,
     start_date,
     end_date,
     out_path,
@@ -206,6 +207,8 @@ def build_demand_profiles(
         List of countries that is config input
     scale : float
         The scale factor is multiplied with the load (1.3 = 30% more load)
+    substitute : float
+        Replace the demand profile of one country using another
     start_date: parameter
         The start_date is the first hour of the first day of the snapshots
     end_date: parameter
@@ -232,6 +235,23 @@ def build_demand_profiles(
     logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
     gegis_load = xr.merge(gegis_load_list)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+
+    # substitutes load data for specified countries
+    if isinstance(substitute, dict):
+        for country_a, country_b in substitute.items():
+
+            gegis_load = gegis_load[~gegis_load["region_code"].isin([country_a])]
+
+            gegis_load_new = gegis_load.loc[gegis_load.region_code == country_b].copy()
+            gegis_load_new.loc[:, ["region_code", "region_name"]] = country_a
+
+            # Obtain only the profile, not the entire demand
+            gegis_load_new["Electricity demand"] *= (
+                1 / gegis_load_new["Electricity demand"].mean()
+            )
+            gegis_load = pd.concat([gegis_load, gegis_load_new])
+
+            logger.info(f"substitute load data of {country_a} using {country_b}.")
 
     # filter load for analysed countries
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
@@ -321,6 +341,7 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.params.load_options.get("scale", 1.0)
+    substitute = snakemake.params.load_options.get("substitute")
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
@@ -332,6 +353,7 @@ if __name__ == "__main__":
         admin_shapes,
         countries,
         scale,
+        substitute,
         start_date,
         end_date,
         out_path,

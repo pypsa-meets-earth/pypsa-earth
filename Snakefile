@@ -69,6 +69,15 @@ else:
     COSTS = "data/costs.csv"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
+if config["electricity"]["base_network"] in ["osm-prebuilt", "osm-plus-prebuilt"]:
+    base_network_name = config["electricity"]["base_network"]
+    base_network_version = config["electricity"].get("base_network_version", 0.1)
+    OSMDIR = f"data/{base_network_name}/{base_network_version}/"
+    osm_powerplants_fn = OSMDIR + "all_clean_generators.csv"
+else:
+    OSMDIR = "resources/" + RDIR + "base_network/"
+    osm_powerplants_fn = "resources/" + RDIR + "osm/clean/all_clean_generators.csv"
+
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -101,7 +110,8 @@ rule clean:
 
 rule solve_all_networks:
     input:
-        expand(
+        base_extended="networks/" + RDIR + "base_extended.nc",
+        networks=expand(
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             **config["scenario"],
         ),
@@ -161,6 +171,17 @@ if config["enable"].get("retrieve_databundle", True):
             "benchmarks/" + RDIR + "retrieve_databundle_light"
         script:
             "scripts/retrieve_databundle_light.py"
+
+
+if config["enable"].get("download_global_buildings", True):
+
+    rule download_global_buildings:
+        params:
+            crs=config["crs"],
+        output:
+            "data/global_buildings/{country}_global_buildings_raw.csv",
+        script:
+            "scripts/download_global_buildings.py"
 
 
 if config["enable"].get("download_osm_data", True):
@@ -283,14 +304,10 @@ rule base_network:
         countries=config["countries"],
         base_network=config["base_network"],
     input:
-        osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
-        osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
-        osm_converters="resources/"
-        + RDIR
-        + "base_network/all_converters_build_network.csv",
-        osm_transformers="resources/"
-        + RDIR
-        + "base_network/all_transformers_build_network.csv",
+        osm_buses=OSMDIR + "all_buses_build_network.csv",
+        osm_lines=OSMDIR + "all_lines_build_network.csv",
+        osm_converters=OSMDIR + "all_converters_build_network.csv",
+        osm_transformers=OSMDIR + "all_transformers_build_network.csv",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
     output:
@@ -306,6 +323,99 @@ rule base_network:
         "scripts/base_network.py"
 
 
+""" todo for realism
+rule build_line_rating:
+    params:
+        snapshots=config["snapshots"],
+    input:
+        base_network="networks/" + RDIR + "base.nc",
+        cutout="cutouts/"
+        + CDIR
+        + [c["cutout"] for _, c in config["renewable"].items()][0]
+        + ".nc",
+    output:
+        output="resources/" + RDIR + "dlr.nc",
+    log:
+        "logs/" + RDIR +"build_line_rating.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_line_rating",
+    threads: config["atlite"].get("nprocesses", 4),
+    resources:
+        mem_mb=config["atlite"].get("nprocesses", 4) * 1000,
+    conda:
+        "envs/environment.yaml"
+    script:
+        "scripts/build_line_rating.py"
+
+"""
+
+
+rule build_transmission_projects:
+    params:
+        transmission_projects=config["transmission_projects"],
+        line_factor=config["lines"]["length_factor"],
+        s_max_pu=config["lines"]["s_max_pu"],
+    input:
+        base_network="networks/" + RDIR + "base.nc",
+        offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        region_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+        transmission_projects=lambda w: [
+            "data/transmission_projects/" + name
+            for name, include in config["transmission_projects"]["include"].items()
+            if include
+        ],
+    output:
+        new_buses="resources/" + RDIR + "transmission_projects/new_buses.csv",
+        new_lines="resources/" + RDIR + "transmission_projects/new_lines.csv",
+        new_links="resources/" + RDIR + "transmission_projects/new_links.csv",
+        adjust_lines="resources/" + RDIR + "transmission_projects/adjust_lines.csv",
+        adjust_links="resources/" + RDIR + "transmission_projects/adjust_links.csv",
+    log:
+        "logs/" + RDIR + "build_transmission_projects.log",
+    benchmark:
+        "benchmarks/" + RDIR + "build_transmission_projects"
+    resources:
+        mem_mb=4000,
+    threads: 1
+    conda:
+        "envs/environment.yaml"
+    script:
+        "scripts/build_transmission_projects.py"
+
+
+rule add_transmission_projects:
+    params:
+        transmission_projects=config["transmission_projects"],
+        s_max_pu=config["lines"]["s_max_pu"],
+    input:
+        network="networks/" + RDIR + "base.nc",
+        transmission_projects=lambda w: (
+            [
+                "resources/" + RDIR + "transmission_projects/new_buses.csv",
+                "resources/" + RDIR + "transmission_projects/new_lines.csv",
+                "resources/" + RDIR + "transmission_projects/new_links.csv",
+                "resources/" + RDIR + "transmission_projects/adjust_lines.csv",
+                "resources/" + RDIR + "transmission_projects/adjust_links.csv",
+            ]
+            if config["transmission_projects"].get("enable", False)
+            else []
+        ),
+    output:
+        network="networks/" + RDIR + "base_extended.nc",
+    log:
+        "logs/" + RDIR + "add_transmission_projects.log",
+    benchmark:
+        "benchmarks/" + RDIR + "add_transmission_projects"
+    threads: 1
+    resources:
+        mem_mb=4000,
+    conda:
+        "envs/environment.yaml"
+    script:
+        "scripts/add_transmission_projects.py"
+
+
 rule build_bus_regions:
     params:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
@@ -314,7 +424,7 @@ rule build_bus_regions:
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        base_network="networks/" + RDIR + "base.nc",
+        base_network="networks/" + RDIR + "base_extended.nc",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -427,7 +537,6 @@ elif country_data:
 else:
     cost_directory = ""
 
-
 if config["enable"].get("retrieve_cost_data", True):
 
     rule retrieve_cost_data:
@@ -440,13 +549,35 @@ if config["enable"].get("retrieve_cost_data", True):
                 keep_local=True,
             ),
         output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            branch(
+                config["costs"].get("append_cost_data"),
+                "resources/" + RDIR + "pre_costs_{year}.csv",
+                "resources/" + RDIR + "costs_{year}.csv"
+            )
         log:
             "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:
             mem_mb=5000,
         run:
             move(input[0], output[0])
+
+    rule append_cost_data:
+        params:
+            discount_rate=config["costs"]["discountrate"],
+            regional_factor=config["costs"].get("regional_factor"),
+        input:
+            costs="resources/" + RDIR + "pre_costs_{year}.csv",
+            app_costs="data/AEO8-input/AEO8_Table_D15_Cost_Summary.csv",
+            declining_factor="data/AEO8-input/AEO8_Table_D17_Declining_Factor.csv",
+            regional_factor="data/AEO8-input/AEO8_Table_D18_Regional_Factor.csv",
+        output:
+            "resources/" + RDIR + "costs_{year}.csv",
+        log:
+            "logs/" + RDIR + "append_cost_data_{year}.log",
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/append_cost_data.py"
 
 
 rule build_demand_profiles:
@@ -455,7 +586,7 @@ rule build_demand_profiles:
         load_options=config["load_options"],
         countries=config["countries"],
     input:
-        base_network="networks/" + RDIR + "base.nc",
+        base_network="networks/" + RDIR + "base_extended.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
@@ -490,6 +621,7 @@ rule build_renewable_profiles:
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        #irena_stats="data/IRENA_Statistics_Extract_2025H2.xlsx",
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
@@ -521,10 +653,10 @@ rule build_powerplants:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
     input:
-        base_network="networks/" + RDIR + "base.nc",
+        base_network="networks/" + RDIR + "base_extended.nc",
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
-        osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
+        osm_powerplants=osm_powerplants_fn,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -567,7 +699,7 @@ rule add_electricity:
             for attr, fn in d.items()
             if str(fn).startswith("data/")
         },
-        base_network="networks/" + RDIR + "base.nc",
+        base_network="networks/" + RDIR + "base_extended.nc",
         tech_costs=COSTS,
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
@@ -693,6 +825,41 @@ rule cluster_network:
         mem_mb=3000,
     script:
         "scripts/cluster_network.py"
+
+
+solar_rooftop_config = config["sector"]["solar_rooftop"]
+if isinstance(solar_rooftop_config, dict):
+    solar_rooftop_enable = (
+        solar_rooftop_config["enable"] and solar_rooftop_config["use_building_size"]
+    )
+    solar_rooftop_params = {
+        "solar_rooftop_enable": solar_rooftop_enable,
+        "install_ratio": solar_rooftop_config["install_ratio"],
+        "tolerance": solar_rooftop_config["tolerance"],
+    }
+else:
+    solar_rooftop_params = {}
+    solar_rooftop_enable = config["sector"]["solar_rooftop"]
+
+
+rule cluster_global_buildings:
+    params:
+        **solar_rooftop_params,
+        crs=config["crs"],
+    input:
+        country_buildings="data/global_buildings/{country}_global_buildings_raw.csv",
+        regions_onshore="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+    output:
+        solar_rooftop_layout=branch(
+            solar_rooftop_enable,
+            "resources/"
+            + RDIR
+            + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv",
+        ),
+    script:
+        "scripts/cluster_global_buildings.py"
 
 
 if config["augmented_line_connection"].get("add_to_snakefile") == True:
@@ -1109,6 +1276,16 @@ rule prepare_sector_network:
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
+        **branch(
+            solar_rooftop_enable,
+            {
+                f"solar_rooftop_layout_{country}": "resources/"
+                + RDIR
+                + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_"
+                + f"{country}.csv"
+                for country in config["countries"]
+            },
+        ),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
@@ -1180,6 +1357,7 @@ rule add_export:
     params:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        enable=config["export"]["enable"],
         store=config["export"]["store"],
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
@@ -1198,10 +1376,29 @@ rule add_export:
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
+        branch(
+            config.get("final_adjustment"),
+            RESDIR
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}.nc",
+            RESDIR
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        ),
+    script:
+        "scripts/add_export.py"
+
+
+rule final_asean_adjustment:
+    params:
+        electricity=config["electricity"],
+        final_adjustment=config.get("final_adjustment"),
+    input:
+        network=RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}.nc",
+    output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     script:
-        "scripts/add_export.py"
+        "scripts/final_asean_adjustment.py"
 
 
 rule override_respot:
@@ -2018,6 +2215,7 @@ if config["foresight"] == "myopic":
             sector=config["sector"],
             existing_capacities=config["existing_capacities"],
             costs=config["costs"],
+            transmission_projects=config["transmission_projects"],
         input:
             **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR
@@ -2082,6 +2280,7 @@ if config["foresight"] == "myopic":
             snapshots=config["snapshots"],
             # drop_leap_day=config["enable"]["drop_leap_day"],
             carriers=config["electricity"]["renewable_carriers"],
+            transmission_projects=config["transmission_projects"],
         input:
             # unpack(input_profile_tech_brownfield),
             simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",

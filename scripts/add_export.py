@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import locate_bus, override_component_attrs, prepare_costs
+from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
@@ -62,15 +63,17 @@ def select_ports(n):
 
 
 def add_export(n, hydrogen_buses_ports, export_profile):
-    country_shape = gpd.read_file(snakemake.input["shapes_path"])
-    # Find most northwestern point in country shape and get x and y coordinates
-    country_shape = country_shape.to_crs(
+    # Project to Mercator to find offset point
+    country_shape_merc = gpd.read_file(snakemake.input["shapes_path"]).to_crs(
         "EPSG:3395"
-    )  # Project to Mercator projection (Projected)
+    )
+    x = country_shape_merc.geometry.centroid.x.min() - 2e5  # 200 km west
+    y = country_shape_merc.geometry.centroid.y.max() + 2e5  # 200 km north
 
-    # Get coordinates of the most western and northern point of the country and add a buffer of 2 degrees (equiv. to approx 220 km)
-    x_export = country_shape.geometry.centroid.x.min() - 2
-    y_export = country_shape.geometry.centroid.y.max() + 2
+    # Convert back to EPSG:4326 (lat/lon)
+    export_point = gpd.GeoSeries([Point(x, y)], crs="EPSG:3395").to_crs("EPSG:4326")
+    x_export = export_point.geometry.x.iloc[0]
+    y_export = export_point.geometry.y.iloc[0]
 
     # add export bus
     n.add(
@@ -215,28 +218,29 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
     countries = list(n.buses.country.unique())
 
-    # Create export profile
-    export_profile = create_export_profile()
+    if snakemake.params.enable:
+        # Create export profile
+        export_profile = create_export_profile()
 
-    # Prepare the costs dataframe
-    Nyears = n.snapshot_weightings.generators.sum() / 8760
+        # Prepare the costs dataframe
+        Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+        costs = prepare_costs(
+            snakemake.input.costs,
+            snakemake.config["costs"],
+            snakemake.params.costs["output_currency"],
+            snakemake.params.costs["fill_values"],
+            Nyears,
+            snakemake.params.costs["default_exchange_rate"],
+            snakemake.params.costs["future_exchange_rate_strategy"],
+            snakemake.params.costs["custom_future_exchange_rate"],
+        )
 
-    # get hydrogen export buses/ports
-    hydrogen_buses_ports = select_ports(n)
+        # get hydrogen export buses/ports
+        hydrogen_buses_ports = select_ports(n)
 
-    # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_profile)
+        # add export value and components to network
+        add_export(n, hydrogen_buses_ports, export_profile)
 
     n.export_to_netcdf(snakemake.output[0])
 

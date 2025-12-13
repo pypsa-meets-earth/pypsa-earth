@@ -1,0 +1,96 @@
+# SPDX-FileCopyrightText: PyPSA-ASEAN, PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# ==== Baseline Scenarios ====
+# ============================
+
+baseline-aims-3H:
+
+baseline-asean-3H:
+  transmission_projects:
+    include:
+      AIMS: false
+
+baseline-existing-3H:
+  transmission_projects:
+    include:
+      AIMS: false
+      ID_SuperGrid: false
+
+# ==== Decarbonization Scenarios ====
+# ===================================
+
+decarbonize-aims-3H:
+  co2_budget:
+    enable: true
+
+decarbonize-asean-3H:
+  co2_budget:
+    enable: true
+
+  transmission_projects:
+    include:
+      AIMS: false
+
+decarbonize-existing-3H:
+  co2_budget:
+    enable: true
+
+  transmission_projects:
+    include:
+      AIMS: false
+      ID_SuperGrid: false
+
+# ====== Sensitivity Scenarios ======
+# ===================================
+
+# ====== Clustering ======
+
+sensitivity-nodes-3H:
+  # sensitivity using default decarbonize-aims-3H
+  scenario:
+    clusters: [50, 100, 200]
+    planning_horizons:
+    - 2050
+
+  co2_budget:
+    enable: true
+
+# ====== Timesteps ======
+
+sensitivity-1H:
+  scenario:
+    sopts:
+    - "1h"
+    planning_horizons:
+    - 2050
+
+  co2_budget:
+    enable: true
+
+sensitivity-6H:
+  scenario:
+    sopts:
+    - "6h"
+    planning_horizons:
+    - 2050
+
+  co2_budget:
+    enable: true
+
+# ====== Limit Rooftops ======
+
+decarbonize-aims-roof200-3H:
+  co2_budget:
+    enable: true
+
+  sector:
+    solar_rooftop:
+      install_ratio:
+        0: 0
+        10: 0
+        100: 0
+        200: 0.41
+        450: 0.49
+        2300: 0.66

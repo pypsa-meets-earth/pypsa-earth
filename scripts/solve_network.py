@@ -350,7 +350,7 @@ def add_EQ_constraints(n, o, scaling=1e-1):
         spillage_variable = n.model["StorageUnit-spill"]
         lhs_spill = (
             (spillage_variable * (-n.snapshot_weightings.stores * scaling))
-            .groupby_sum(sgrouper)
+            # .groupby_sum(sgrouper)
             .groupby(sgrouper.to_xarray())
             .sum()
             .sum("snapshot")
@@ -642,6 +642,30 @@ def add_land_use_constraint(n):
         _add_land_use_constraint(n)
 
 
+"""
+def _add_land_use_constraint(n):
+    # warning: this will miss existing offwind which is not classed AC-DC and has carrier 'offwind'
+
+    for carrier in ["solar", "onwind", "offwind-ac", "offwind-dc"]:
+        existing = (
+            n.generators.loc[n.generators.carrier == carrier, "p_nom"]
+            .groupby(n.generators.bus.map(n.buses.location))
+            .sum()
+        )
+        #Fillea
+        #planning_horizon = snakemake.config["scenario"]["planning_horizons"][0]
+        #existing.index += " " + carrier + "-" + str(planning_horizon)
+        #existing.index += carrier + "-" + str(planning_horizon)  # no leading space!
+
+
+
+        existing.index += " " + carrier + "-" + snakemake.config["scenario"]["planning_horizons"] #snakemake.wildcards.planning_horizons
+        n.generators.loc[existing.index, "p_nom_max"] -= existing
+
+    n.generators.p_nom_max.clip(lower=0, inplace=True)
+"""
+
+
 def _add_land_use_constraint(n):
     # warning: this will miss existing offwind which is not classed AC-DC and has carrier 'offwind'
 
@@ -652,7 +676,11 @@ def _add_land_use_constraint(n):
             .sum()
         )
         existing.index += " " + carrier + "-" + snakemake.wildcards.planning_horizons
-        n.generators.loc[existing.index, "p_nom_max"] -= existing
+        for idx in existing.index.intersection(n.generators.index):
+            n.generators.at[idx, "p_nom_max"] = max(
+                n.generators.at[idx, "p_nom_max"] - existing.at[idx],
+                n.generators.at[idx, "p_nom_min"],
+            )
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 

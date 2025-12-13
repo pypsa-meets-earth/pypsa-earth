@@ -987,6 +987,19 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
+    for col in ["project_status", "tags", "underground", "under_construction"]:
+        if col in n.lines.columns:
+            logger.info(f"Adjusting '{col}' column in lines.")
+
+            if col in ["project_status", "tags"]:
+                n.lines = n.lines.drop(columns=col)
+
+            elif col == "underground":
+                n.lines[col] = n.lines[col].replace(0, np.nan)
+
+            elif col == "under_construction":
+                n.lines[col] = n.lines[col].fillna(0).astype(bool)
+
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetype = snakemake.params.config_lines["ac_types"][base_voltage]
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
@@ -1134,6 +1147,20 @@ if __name__ == "__main__":
     }.intersection(n.buses.columns)
 
     n.buses = n.buses.drop(buses_c, axis=1)
+    conflict_rule = snakemake.params.cluster_options["simplify_network"].get(
+        "under_construction_conflict_resolution", "max"
+    )
+
+    if "under_construction" in n.lines.columns:
+        logger.info(
+            f"Resolving conflicts in under_construction by conservative rule ({conflict_rule})."
+        )
+        n.lines["under_construction"] = n.lines["under_construction"].astype(float)
+        n.lines["under_construction"] = (
+            n.lines.groupby(["bus0", "bus1"])["under_construction"]
+            .transform(conflict_rule)
+            .astype(bool)
+        )
 
     update_p_nom_max(n)
 
