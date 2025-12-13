@@ -171,6 +171,16 @@ databundles:
     output:
     - data/hydrobasins/hybas_world.shp
 
+  # global data for irena generation, capacity, heat generation and more
+  # bundle_irena_statistics:
+  #   countries: [Earth]
+  #   category: irena
+  #   destination: "data"
+  #   urls:
+  #     direct: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
+  #   output:
+  #   - data/IRENA_Statistics_Extract_2025H2.xlsx
+
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
     countries: [Earth]

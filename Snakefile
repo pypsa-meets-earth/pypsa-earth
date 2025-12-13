@@ -490,6 +490,7 @@ rule build_renewable_profiles:
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         eia_hydro_generation="data/eia_hydro_annual_generation.csv",
+        #irena_stats="data/IRENA_Statistics_Extract_2025H2.xlsx",
         powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"

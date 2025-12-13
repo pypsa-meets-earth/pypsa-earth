@@ -257,6 +257,58 @@ def get_eia_annual_hydro_generation(fn, countries):
     return df
 
 
+# Temporary function, to be migrate to retrieve databundle once working
+def extract_IRENA_energy_stats(file_path="data/IRENA_Statistics_Extract_2025H2.xlsx"):
+    import requests
+
+    if not os.path.exists(file_path):
+        url = "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            with open(file_path, "wb") as file:
+                file.write(response.content)
+
+            return file_path
+
+        except requests.ConnectionError:
+            logger.warning("No internet connection and file not found locally.")
+            raise FileNotFoundError(
+                f"File {file_path} not found and cannot download from the internet."
+            )
+
+    return file_path
+
+
+def get_irena_annual_hydro_generation(fn, countries):
+
+    df = pd.read_excel(fn, sheet_name="Country")
+
+    countries_iso3 = {coco.convert(names=name, to="ISO3"): name for name in countries}
+
+    df = (
+        df.loc[
+            lambda df: df.Technology.isin(["Renewable hydropower"])
+            & ~df["Producer Type"].isin(["All types"])
+            & df["ISO3 code"].isin(countries_iso3.keys())
+        ]
+        .assign(countries=lambda df: df["ISO3 code"].map(countries_iso3))
+        .groupby(["countries", "Year"])["Electricity Generation (GWh)"]
+        .sum()
+        .unstack("countries")
+        .fillna(0)
+        .mul(1e3)
+    )
+
+    missing_countries = set(countries) - set(df.columns)
+
+    for c in missing_countries:
+        df[c] = 0.0
+
+    return df
+
+
 def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
         pd.read_csv(
@@ -606,6 +658,14 @@ if __name__ == "__main__":
                     path_eia_stats = snakemake.input.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
                         path_eia_stats, countries
+                    )
+
+                elif method == "irena":
+                    path_irena_stats = (
+                        extract_IRENA_energy_stats()
+                    )  # snakemake.input.irena_stats
+                    normalize_using_yearly = get_irena_annual_hydro_generation(
+                        path_irena_stats, countries
                     )
 
                 inflow = rescale_hydro(
