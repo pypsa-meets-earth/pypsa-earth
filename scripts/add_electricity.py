@@ -564,22 +564,23 @@ def attach_hydro(n, costs, ppl, hydro_min_inflow_pu=1):
                 )
 
     # Heuristics for missing hydro technologies
-    inflow_pu_limit = inflow_t[tbd.index].divide(tbd["p_nom"], axis=1).sum() / 8760
-    mask_reservoir = inflow_pu_limit >= hydro_min_inflow_pu
-    mask_ror = ~mask_reservoir
-    to_be_hydro = tbd[mask_reservoir]
-    to_be_ror = tbd[mask_ror]
+    if not tbd.empty:
+        inflow_pu_limit = inflow_t[tbd.index].divide(tbd["p_nom"], axis=1).sum() / 8760
+        mask_reservoir = inflow_pu_limit >= hydro_min_inflow_pu
+        mask_ror = ~mask_reservoir
+        to_be_hydro = tbd[mask_reservoir]
+        to_be_ror = tbd[mask_ror]
 
-    print(
-        f"Identified {len(tbd)} hydro powerplants with unknown technology.\n"
-        f"Hydropower plants with energy-to-capacity ratio ≥ {hydro_min_inflow_pu} "
-        f"are classified as 'Reservoir'. The rest are 'Run-Of-River'.\n"
-        f"Reservoir: {mask_reservoir.sum()}\n"
-        f"Run-Of-River: {mask_ror.sum()}"
-    )
+        logger.info(
+            f"Identified {len(tbd)} hydro powerplants with unknown technology.\n"
+            f"Hydropower plants with energy-to-capacity ratio ≥ {hydro_min_inflow_pu} "
+            f"are classified as 'Reservoir'. The rest are 'Run-Of-River'.\n"
+            f"Reservoir: {mask_reservoir.sum()} \n"
+            f"Run-Of-River: {mask_ror.sum()}"
+        )
 
-    ror = pd.concat([ror, to_be_ror])
-    hydro = pd.concat([hydro, to_be_hydro])
+        ror = pd.concat([ror, to_be_ror])
+        hydro = pd.concat([hydro, to_be_hydro])
 
     if "ror" in carriers and not ror.empty:
         n.madd(
