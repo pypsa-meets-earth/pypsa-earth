@@ -526,7 +526,7 @@ def attach_hydro(n, costs, ppl, hydro_min_inflow_pu=1):
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
     hydro = ppl.query('technology == "Reservoir"')
-    tbd = ppl.technology.isna()  # To be determined technologies
+    tbd = ppl[ppl.technology.isna()]  # To be determined technologies
 
     inflow_idx = ror.index.union(hydro.index).union(tbd.index)
     if not inflow_idx.empty:

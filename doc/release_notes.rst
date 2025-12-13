@@ -40,6 +40,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river `PR #1683 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1683>`__
+
 * Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
