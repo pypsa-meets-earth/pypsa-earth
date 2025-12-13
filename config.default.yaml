@@ -369,6 +369,7 @@ renewable:
       method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+    hydro_min_inflow_pu: 1.0
   csp:
     cutout: cutout-2013-era5
     resource:
