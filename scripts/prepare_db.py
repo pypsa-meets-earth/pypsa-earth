@@ -266,7 +266,7 @@ add_conv("urban central solid biomass CHP", "hv", 1, False, reg=True)
 add_conv("urban central solid biomass CHP CC", "hv", 1, False)
 
 add_store("battery", "hv", reg=True)
-add_store("battery storage", "hv")
+add_store("EV battery storage", "hv")
 add_store("home battery", "hv")
 
 add_storage("PHS", "hv")  # TODO commented out because there is no storage untis
