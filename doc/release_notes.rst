@@ -70,6 +70,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix Labeling of technologies `PR #1644 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644>`__
 
+* fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
+
 PyPSA-Earth 0.7.0
 =================
 
