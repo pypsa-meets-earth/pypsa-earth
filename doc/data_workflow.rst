@@ -23,7 +23,7 @@ OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build pow
 
 The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and written as a geojsons in the folder `data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
-The cleaned OSM network data, which are the output of the `osm_data_cleaning` rule that processes the raw OSM data to produce cleaned datasets of all network assets—namely generators, substations, lines, and cables—are stored in the `/resources/osm/` folder.
+The cleaned OSM network data, which are the output of the `clean_osm_data` rule that processes the raw OSM data to produce cleaned datasets of all network assets—namely generators, substations, lines, and cables—are stored in the `/resources/osm/` folder.
 
 Contribute and improve
 ------------------------------------

@@ -66,7 +66,7 @@ How to docs?
 -------------
 
 We add the code documentation along the way.
-You might think that costs a lot of time and is not efficient - but that's not really true anymore!
+It might seem time-consuming and inefficient, but that's not really true anymore!
 Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speeds up the overall process.
 Using `Readthedocs <https://docs.readthedocs.io/en/stable/intro/getting-started-with-sphinx.html>`_ and its add-on
 `sphinx.ext.autodoc  <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ we document in our
