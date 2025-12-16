@@ -11,6 +11,11 @@ edit_uri: edit/main/doc/
 # Documentation directory
 docs_dir: doc
 
+# Watch additional directories for live reload
+watch:
+  - doc
+  - scripts
+
 # Navigation
 nav:
   - Home:
@@ -33,18 +38,19 @@ nav:
     - Optimization: user-guide/optimization.md
     - Plotting: user-guide/plotting.md
     - Data Workflow: user-guide/data-workflow.md
-    - Model Customization: user-guide/model-customization.md
-    - Customization Guides:
+    - Model Customization:
+      - General Modeling Guidelines: user-guide/model-customization.md
       - Basic Setup: user-guide/customization/basic-setup.md
-      - Advanced Configuration: user-guide/customization/advanced-config.md
       - Copernicus Data: user-guide/customization/copernicus-data.md
       - Validation: user-guide/customization/validation.md
       - Running Models: user-guide/customization/running-models.md
     - Rules Reference:
       - Download & Filter:
+        - Overview: user-guide/rules-reference/download-and-filter/index.md
         - Build Shapes: user-guide/rules-reference/download-and-filter/build-shapes.md
         - Retrieve Data Bundle: user-guide/rules-reference/download-and-filter/retrieve-databundle-light.md
       - Populate Data:
+        - Overview: user-guide/rules-reference/populate/index.md
         - Build Bus Regions: user-guide/rules-reference/populate/build-bus-regions.md
         - Build Cutout: user-guide/rules-reference/populate/build-cutout.md
         - Build Demand Profiles: user-guide/rules-reference/populate/build-demand-profiles.md
@@ -52,6 +58,7 @@ nav:
         - Build Powerplants: user-guide/rules-reference/populate/build-powerplants.md
         - Build Renewable Profiles: user-guide/rules-reference/populate/build-renewable-profiles.md
       - Create Network:
+        - Overview: user-guide/rules-reference/create-network/index.md
         - Base Network: user-guide/rules-reference/create-network/base-network.md
         - Add Electricity: user-guide/rules-reference/create-network/add-electricity.md
         - Simplify Network: user-guide/rules-reference/create-network/simplify-network.md
@@ -59,6 +66,7 @@ nav:
         - Add Extra Components: user-guide/rules-reference/create-network/add-extra-components.md
         - Prepare Network: user-guide/rules-reference/create-network/prepare-network.md
       - Solving:
+        - Overview: user-guide/rules-reference/solving/index.md
         - Solve Network: user-guide/rules-reference/solving/solve-network.md
         - Solve Operations: user-guide/rules-reference/solving/solve-operations-network.md
   
@@ -66,7 +74,15 @@ nav:
     - Monte Carlo: advanced/monte-carlo.md
   
   - API Reference:
-    - api-reference/index.md
+    - Overview: api-reference/index.md
+    - Data Download: api-reference/data-download.md
+    - Shapes & Regions: api-reference/shapes-regions.md
+    - Resources: api-reference/resources.md
+    - Network Building: api-reference/network-building.md
+    - Solving: api-reference/solving.md
+    - Sector-Coupling: api-reference/sector-coupling.md
+    - Utilities: api-reference/utilities.md
+    - Advanced: api-reference/advanced.md
   
   - Community & Resources:
     - Contributing: community/contributing.md
@@ -161,7 +177,8 @@ markdown_extensions:
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ['.', 'doc']
   - abbr
   - attr_list
   - def_list
@@ -179,15 +196,17 @@ plugins:
       handlers:
         python:
           options:
-            docstring_style: numpy
-            show_source: true
+            docstring_style: sphinx
+            show_source: false
             show_root_heading: true
             show_root_full_path: false
             show_symbol_type_heading: true
             show_symbol_type_toc: true
             members_order: source
             group_by_category: true
-  - table-reader
+  - table-reader:
+      data_path: "doc"
+      allow_missing_files: false
   - autorefs
 
 extra:

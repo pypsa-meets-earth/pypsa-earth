@@ -1,8 +1,4 @@
-
-
-
-Project structure and credits
-
+# Project Structure and Credits
 
 The PyPSA-Earth model is maintained by the members of the PyPSA meets Earth initiative.
 We implemented in the initiative a project structure to enhance collaboration and give people responsibilities.
@@ -10,25 +6,22 @@ Therefore, the structure is not here to dictate, it is rather a structure that l
 
 We all have the same goal. We want to create a long-term maintained, supported and steadily improving energy system model that is useful for industry and research. Every person helping towards achieving this goal is listed in the credits.
 
-
-
-# Project structure
+## Project Structure
 
 PyPSA-meets-Earth initiative is build upon the code base which can be accessed from the initiative repository on GitHub. A list below aims to give a quick overview:
 
-- [PyPSA Earth](https://github.com/pypsa-meets-earth/pypsa-earth)_ is a model for power or sector-coupled system modeling for any country of the world
-- [PyPSA Distribution](https://github.com/pypsa-meets-earth/pypsa-distribution)_ is an optimization model for micro-grids and distribution grids with an automated extraction of the inputs needed to build grid topology and electricity load profiles https://github.com/pypsa-meets-earth/pypsa-distribution
-- [Earth OSM](https://github.com/pypsa-meets-earth/earth-osm)_ provides a toolset to download, pre-process and export energy-relevant infrastructure data from OpenStreetMap (OSM)
+- [PyPSA Earth](https://github.com/pypsa-meets-earth/pypsa-earth) is a model for power or sector-coupled system modeling for any country of the world
+- [PyPSA Distribution](https://github.com/pypsa-meets-earth/pypsa-distribution) is an optimization model for micro-grids and distribution grids with an automated extraction of the inputs needed to build grid topology and electricity load profiles <https://github.com/pypsa-meets-earth/pypsa-distribution>
+- [Earth OSM](https://github.com/pypsa-meets-earth/earth-osm) provides a toolset to download, pre-process and export energy-relevant infrastructure data from OpenStreetMap (OSM)
 
-The list is by no means exhaustive and is growing continuously. Feel free to explore more looking into the repositories available in [PyPSA meets Earth organization](https://github.com/pypsa-meets-earth)_ and don't forget to give us a star ;). The contributions are very welcome to enhance the description of the available projects!
+The list is by no means exhaustive and is growing continuously. Feel free to explore more looking into the repositories available in [PyPSA meets Earth organization](https://github.com/pypsa-meets-earth) and don't forget to give us a star ;). The contributions are very welcome to enhance the description of the available projects!
 
-
-# Track leaders
+## Track Leaders
 
 - Director ([Max Parzen](https://www.linkedin.com/in/maximilian-parzen-b047a1126/))
 - [Co-Director](https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EfjniQIxmfZIp8ih_WQuy-0BfCiOCLPKEvDZUuylp9xOhA?e=s7KRQy) ([Davide Fioriti](https://www.linkedin.com/in/davide-fioriti-745693a5/))
 - [PyPSA-Earth leaders](https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0) (Davide, Katia, Hazem, Max)
-- Sector-coupling leaders ([Hazem Abdel-Khalek](https://www.linkedin.com/in/hazemakhalek/) , [Leon Schumm](https://www.linkedin.com/in/leon-schumm-253b22201/) and [Eddy Jalbout](https://www.linkedin.com/in/eddyjalbout/) )
+- Sector-coupling leaders ([Hazem Abdel-Khalek](https://www.linkedin.com/in/hazemakhalek/), [Leon Schumm](https://www.linkedin.com/in/leon-schumm-253b22201/) and [Eddy Jalbout](https://www.linkedin.com/in/eddyjalbout/))
 - Climate modeling leader (Katia)
 - Coordinators of Regional Studies
 - [Outreach leader](https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4) ([Stuart James](https://www.linkedin.com/in/stuart-daniel-james/))
@@ -37,16 +30,13 @@ The list is by no means exhaustive and is growing continuously. Feel free to exp
 - South America Coordinator (Carlos Fernandez)
 - [AI and demand leader](https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0) ([Lukas Franken](https://www.linkedin.com/in/lukas-franken-5a3045151/))
 
-
-
-# Credits
+## Credits
 
 PyPSA-meets-Earth is an independent research and software development initiative which is developing thanks to the efforts of code and non-code contributors and users of our models. Every discussion comment, bug report and typo fixed count and are precious contributions into the community knowledge base.
 
-The lists below is an attempt to give the credits to the contributors, though it's maintained manually, and may be outdated and incomplete. Feel free to reach out if you see the need for changes! A more complete version of the contributors list is available in our code repositories, e.g. [pypsa earth](https://github.com/pypsa-meets-earth/pypsa-earth/graphs/contributors)_, [pypsa kz data](https://github.com/pypsa-meets-earth/pypsa-kz-data/graphs/contributors)_, [pypsa distribution](https://github.com/pypsa-meets-earth/pypsa-distribution)_ or [earth osm](https://github.com/pypsa-meets-earth/earth-osm)_. Points of contacts are listed on the site [PyPSA meets Earth team page](https://pypsa-meets-earth.github.io/team.html).
+The lists below is an attempt to give the credits to the contributors, though it's maintained manually, and may be outdated and incomplete. Feel free to reach out if you see the need for changes! A more complete version of the contributors list is available in our code repositories, e.g. [pypsa earth](https://github.com/pypsa-meets-earth/pypsa-earth/graphs/contributors), [pypsa kz data](https://github.com/pypsa-meets-earth/pypsa-kz-data/graphs/contributors), [pypsa distribution](https://github.com/pypsa-meets-earth/pypsa-distribution) or [earth osm](https://github.com/pypsa-meets-earth/earth-osm). Points of contacts are listed on the site [PyPSA meets Earth team page](https://pypsa-meets-earth.github.io/team.html).
 
-
-## Contributors Team
+### Contributors Team
 
 - Davide Fioriti (University of Pisa, Italy)
 - Yerbol Akhmetov
@@ -85,7 +75,7 @@ The lists below is an attempt to give the credits to the contributors, though it
 - Desen Kirli (University of Edinburgh, United Kingdom)
 - Olukunle Owolabi (Tufts University, United States)
 
-## Outreach Team
+### Outreach Team
 
 - Stuart James (VDMA, Germany)
 - Max Parzen (University of Edinburgh, United Kingdom)
@@ -94,8 +84,7 @@ The lists below is an attempt to give the credits to the contributors, though it
 - Ilaria Capelli (EY, Italy)
 - Rebecca Grant (University of Edinburgh, United Kingdom)
 
-
-## Advisor Team
+### Advisor Team
 
 - Nafiu Tijjani (Assistant Chief Scientific Officer in the Renewable Energy Department of Energy Commission of Nigeria)
 - Aminu Haruna Isa (Energy Planning and Analysis Dep't at the Energy Commission of Nigeria)
