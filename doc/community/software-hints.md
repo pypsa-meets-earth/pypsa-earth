@@ -6,9 +6,9 @@ The complete list of software needed for work with PyPSA Earth is listed below.
 
 ### Python
 
-[Python 3](https://www.python.org/) is used as our main programming language, thus its knowledge is mandatory.
+[Python 3](https://www.python.org/) is our main programming language, so proficiency is essential.
 
-To refresh your knowledge, you may use plenty of online courses free-of-charge, e.g. [CSDojo playlist](https://www.youtube.com/c/CSDojo/playlists). Useful content to watch refer to numpy and pandas.
+To refresh your knowledge, you can use plenty of online courses free-of-charge, e.g. [CSDojo playlist](https://www.youtube.com/c/CSDojo/playlists). It is also helpful to review material on NumPy and pandas.
 
 ### Conda
 
@@ -18,7 +18,7 @@ You may check if `conda` is already installed on your system with `conda -V`. In
 
 For instructions for your operating system follow the `conda` [installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/).
 
-We recommend to install [mamba](https://github.com/QuantStack/mamba) in `conda` base environment as that makes dependencies management much faster.
+We recommend installing [mamba](https://github.com/QuantStack/mamba) in the `conda` base environment as that makes dependencies management much faster.
 
 Useful hints on installing Anaconda and setting up Ubuntu terminal with VSCode in Windows is available [here](https://gist.github.com/kauffmanes/5e74916617f9993bc3479f401dfec7da).
 
@@ -26,7 +26,7 @@ There are many things which could go wrong with conda. [This article](https://to
 
 ### Git
 
-[Git](https://git-scm.com/) is a free open source system aimed at tracking changes in the code development and enable to coordinate the parallel software development between many developers.
+[Git](https://git-scm.com/) is a free open source system aimed at tracking changes in the code development and enables coordination of parallel software development between many developers.
 
 It is highly recommended to [learn the git basics](https://git-scm.com/doc).
 
@@ -40,8 +40,8 @@ Useful instructions of installation and setup:
 
 ### Integrated Development Environment
 
-In order to write and debug python code, you need an Integrated Development Environment (IDE) that is a software used to write code. We recommend [Visual Studio Code](https://code.visualstudio.com/), which is freely available online and provides an easy to use interface with Git. Obviously, any alternatives like [PyCharm](https://www.jetbrains.com/pycharm/) or [Sublime](https://www.sublimetext.com/) will work as well.
+In order to write and debug python code, you need an Integrated Development Environment (IDE), which is software used to write code. We recommend [Visual Studio Code](https://code.visualstudio.com/), which is freely available online and provides an easy-to-use interface with Git. Obviously, any alternatives like [PyCharm](https://www.jetbrains.com/pycharm/) or [Sublime](https://www.sublimetext.com/) will work as well.
 
 ## System requirements
 
-Building the model with the scripts in this repository runs on a normal computer with 8-16 GB RAM. Depending of the region of interest, different amounts of storage (HHD/SSD) are required. Model of Africa requires about 40 Gb, the world 250 Gb, a single country between 1-10 Gb. We have also prepared a tutorial which should be below 10Gb.
+Building the model with the scripts in this repository runs on a normal computer with 8-16 GB RAM. Depending of the region of interest, different amounts of storage (HHD/SSD) are required. A model of Africa requires about 40 GB, the world 250 GB, a single country between 1-10 GB. We have also prepared a tutorial which should be below 10 GB.

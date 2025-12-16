@@ -29,8 +29,8 @@ and aim for [REUSE compliance](https://reuse.software/)):
 ### Testing
 
 Add a new test if you want to contribute new functionality to the config.
-We perform currently *multiple* integration tests which means various workflows need to work.
-All test configs are build by updating the `config.tutorial.yaml` with the configs in `pypysa-earth/test/*.yaml`.
+We currently perform *multiple* integration tests which means various workflows need to work.
+All test configs are build by updating `config.tutorial.yaml` with the configs in `pypysa-earth/test/*.yaml`.
 
 * You can test your contribution locally with `make test`.
 * See the Makefile for further information which configurations are tested.
@@ -44,7 +44,7 @@ To contribute a test:
 ### Performance-profiling
 
 Performance profiling is important to understand bottlenecks and
-the accordingly optimize the speed in PyPSA-Earth. We use the Python built-in
+accordingly optimize the speed in PyPSA-Earth. We use the Python built-in
 `cProfiler`, custom decorators on single functions and analysis tools
 like [snakeviz](https://jiffyclub.github.io/snakeviz/). See a detailed example
 in [this discussion #557](https://github.com/pypsa-meets-earth/pypsa-earth/discussions/557).
@@ -54,8 +54,8 @@ in [this discussion #557](https://github.com/pypsa-meets-earth/pypsa-earth/discu
 ### How to docs?
 
 We add the code documentation along the way.
-You might think that cost a lot of time and is not efficient - but that's not really true anymore!
-Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speed up the overall process.
+It might seem time-consuming and inefficient, but that's not really true anymore!
+Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speeds up the overall process.
 Using [MkDocs](https://www.mkdocs.org/) and its plugin
 [mkdocstrings](https://mkdocstrings.github.io/) we document in our
 code scripts which then will automatically generate the documentation you might see here.
