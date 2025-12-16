@@ -1,11 +1,7 @@
 
-
-
 # Learning materials
 
-PyPSA meets Earth builds on top of several open-source packages, which are here recalled together with recommended sources to learn them from scratch.
-
-
+PyPSA meets Earth builds on several open-source packages. Below are the recommended sources for learning each one from the beginning.
 
 ## YouTube Tutorials
 
@@ -19,13 +15,12 @@ External community resources
 
 - [Energy System Modelling Playlist](https://www.youtube.com/playlist?list=PLaXo6_ws0ZKJUYyUu-e6HRUcjuZnen7pA) by Anton Achhammer: An in-depth series exploring advanced energy system modeling techniques and insights from an experienced researcher in the field.
 
-
 ## PyPSA Introduction (essential)
 
 - [Watch](https://www.youtube.com/watch?v=ty47YU1_eeQ) how PyPSA-Eur is designed (1h)
-- [Watch](https://www.youtube.com/watch?v=mAwhQnNRIvs) and put your hands on to make PyPSA-Eur work on your computer (1-3h)
-- While watching these PyPSA videos always have a look into the excellent [PyPSA-Eur documentation](https://pypsa-eur.readthedocs.io/en/latest/index.html)
-- To see what data we can extract we work usually closely with the [basic PyPSA documentation](https://pypsa.readthedocs.io/en/latest/components.html)
+- [Watch](https://www.youtube.com/watch?v=mAwhQnNRIvs) and get hands-on to make PyPSA-Eur work on your computer (1-3h)
+- While watching these PyPSA videos, always have a look into the excellent [PyPSA-Eur documentation](https://pypsa-eur.readthedocs.io/en/latest/index.html)
+- To see what data we can extract, we work usually closely with the [basic PyPSA documentation](https://docs.pypsa.org/latest/user-guide/user-guide/)
 - Follow the [PyPSA-Earth hackathon](https://github.com/pypsa-meets-earth/documentation#1-hackathon-material). Check the videos from this [Youtube series](https://www.youtube.com/watch?v=2nakM174CME&list=PLz1RcE1NdLlEzCT8G_v-sJKOeHOhZvw5R&index=7) since it explains and applies partially the hackathon material.
 
 ## Data science basics (essential)
@@ -34,7 +29,6 @@ External community resources
 - Refresh your Python knowledge by watching [CSDojo's playlist](https://www.youtube.com/c/CSDojo/playlists). His content is excellent as introduction. You will learn in effective short videos the python basics such as variables If/else statements, functions, lists, for loops, while loops, dictionaries, classes and objects, boolean, list comprehensions, sets - put your hands on and write some test scripts as the video suggests. (~3h)
 - Familiarize yourself with numpy and panda dataframes.  In the Python-based PyPSA tool, we do not work with Excel. Powerful panda dataframes are our friends. [Here](https://www.coursera.org/learn/python-data-analysis) is an extensive 30h course that provides a great introduction if this is completely unfamiliar to you.
 - [Introduction to Unix-shell](https://swcarpentry.github.io/shell-novice/) - "Use of the shell is fundamental to a wide range of advanced computing tasks, including high-performance computing and automated workflow. These lessons will introduce you to this powerful tool." (optional 4h, to become a pro)
-
 
 ## Git and GitHub
 
@@ -45,7 +39,6 @@ For code collaboration we use GitHub. Which is a common source control tool that
 - Learning by doing. Maybe one of the best ways to learn is to puts your hands on open a GitHub repository and upload/change/reverse files from your local computer on some dummy scripts.
 - This [cheatsheet](https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet) might help using the Git commands
 
-
 ## Snakemake and advanced changes
 
 Snakemake is our brain in PyPSA.
@@ -55,7 +48,6 @@ We can recommend:
 
 - [snakemake basic and advanced tutorial here](https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html) (takes max 3-5h and makes a lot of fun).
 - Explore how PyPSA uses snakemake in the Snakefile and scripts - the GitHub search function is your best friend to find quickly what interests you.
-
 
 ## Code environment
 
