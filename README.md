@@ -80,49 +80,51 @@ There are multiple ways to get involved and learn more about our work:
         - AI asset detection meeting
         - Outreach meeting for planning, discussing events, workshops, communication, community activities
 5. Join us and **propose your stream**.
+6. Participate in mapping power grids on [**OpenStreetMap project**](https://osm.org) through the [**MapYourGrid initiative**](https://mapyourgrid.org). Many resources as [video tutorials](https://www.youtube.com/channel/UC52jOcw_6_7iTMW-lXwLrQQ) or [starter-kit](https://mapyourgrid.org/starter-kit/) help to improve open data that is used by PyPSA-Earth to build the grid topology.
 
 ## Installation
 
 1. Open your terminal at a location where you want to install pypsa-earth. Type the following in your terminal to download the package from GitHub:
 
    ```bash
-      .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
+   .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
    ```
 2. The python package requirements are curated in the `envs/environment.yaml` file.
    The environment can be installed using:
 
-```bash
-    .../pypsa-earth % conda env create -f envs/environment.yaml
-```
+   ```bash
+   .../pypsa-earth % conda env create -f envs/environment.yaml
+   ```
 
-   If the above takes longer than 30min, you might want to try mamba for faster installation:
+   If the above takes longer than 30 min, you might want to try mamba for faster installation:
 
-```bash
-    (base) conda install -c conda-forge mamba
+   ```bash
+   (base) conda install -c conda-forge mamba
 
-    .../pypsa-earth % mamba env create -f envs/environment.yaml
-```
+   .../pypsa-earth % mamba env create -f envs/environment.yaml
+   ```
 
-3. For running the optimization one has to install the solver. We can recommend the open source HiGHs solver which installation manual is given [here](https://github.com/PyPSA/PyPSA/blob/633669d3f940ea256fb0a2313c7a499cbe0122a5/pypsa/linopt.py#L608-L632).
+3. (optional) In step 2, three solvers are installed: HiGHs, glpk and gurobi. HiGHs is the recommended open-source solver. Gurobi is generally faster, but requires a license for full functionality, which is [freely available to academics](https://www.gurobi.com/features/academic-named-user-license/) (see instructions website).
+
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
    ```bash
-      .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
-      .../pypsa-earth % jupyter lab
+   .../pypsa-earth % ipython kernel install --user --name=pypsa-earth
+   .../pypsa-earth % jupyter lab
    ```
 5. Verify or install a java redistribution from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent.
    To verify the successful installation the following code can be tested from bash:
 
    ```bash
-      .../pypsa-earth % java -version
+   .../pypsa-earth % java -version
    ```
 
    The expected output should resemble the following:
 
    ```bash
-      java version "1.8.0_341"
-      Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
-      Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
+   java version "1.8.0_341"
+   Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
+   Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
    ```
 
 ## Running the model in previous versions
@@ -432,14 +434,21 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/cpschau">
+                    <img src="https://avatars.githubusercontent.com/u/124347782?v=4" width="100;" alt="cpschau"/>
+                    <br />
+                    <sub><b>cpschau</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/arizeosalac">
                     <img src="https://avatars.githubusercontent.com/u/177637669?v=4" width="100;" alt="arizeosalac"/>
                     <br />
                     <sub><b>arizeosalac</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/SermishaNarayana">
                     <img src="https://avatars.githubusercontent.com/u/156903227?v=4" width="100;" alt="SermishaNarayana"/>
@@ -448,10 +457,40 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/cpschau">
-                    <img src="https://avatars.githubusercontent.com/u/124347782?v=4" width="100;" alt="cpschau"/>
+                <a href="https://github.com/AlexanderMeisinger">
+                    <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
                     <br />
-                    <sub><b>cpschau</b></sub>
+                    <sub><b>AlexanderMeisinger</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/asolavi">
+                    <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
+                    <br />
+                    <sub><b>asolavi</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/rajesh-ieg">
+                    <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
+                    <br />
+                    <sub><b>rajesh-ieg</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/LucieRC">
+                    <img src="https://avatars.githubusercontent.com/u/104382956?v=4" width="100;" alt="LucieRC"/>
+                    <br />
+                    <sub><b>LucieRC</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/choiHenry">
+                    <img src="https://avatars.githubusercontent.com/u/51810088?v=4" width="100;" alt="choiHenry"/>
+                    <br />
+                    <sub><b>choiHenry</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -462,40 +501,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/choiHenry">
-                    <img src="https://avatars.githubusercontent.com/u/51810088?v=4" width="100;" alt="choiHenry"/>
-                    <br />
-                    <sub><b>choiHenry</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/LucieRC">
-                    <img src="https://avatars.githubusercontent.com/u/104382956?v=4" width="100;" alt="LucieRC"/>
-                    <br />
-                    <sub><b>LucieRC</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/carlosfv92">
                     <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
                     <br />
                     <sub><b>carlosfv92</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
-                <a href="https://github.com/rajesh-ieg">
-                    <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
+                <a href="https://github.com/saikumarvasa100-hash">
+                    <img src="https://avatars.githubusercontent.com/u/228767710?v=4" width="100;" alt="saikumarvasa100-hash"/>
                     <br />
-                    <sub><b>rajesh-ieg</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/asolavi">
-                    <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
-                    <br />
-                    <sub><b>asolavi</b></sub>
+                    <sub><b>saikumarvasa100-hash</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -512,6 +528,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>ollie-bell</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/juli-a-ko">
                     <img src="https://avatars.githubusercontent.com/u/126512394?v=4" width="100;" alt="juli-a-ko"/>
@@ -526,8 +544,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>squoilin</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/siddharth-krishna">
                     <img src="https://avatars.githubusercontent.com/u/10712637?v=4" width="100;" alt="siddharth-krishna"/>
@@ -556,6 +572,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Netotse</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/milyas009">
                     <img src="https://avatars.githubusercontent.com/u/144870279?v=4" width="100;" alt="milyas009"/>
@@ -570,8 +588,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>kma33</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/jome1">
                     <img src="https://avatars.githubusercontent.com/u/49280197?v=4" width="100;" alt="jome1"/>
@@ -594,10 +610,33 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/huyhoang-mike">
+                    <img src="https://avatars.githubusercontent.com/u/109945762?v=4" width="100;" alt="huyhoang-mike"/>
+                    <br />
+                    <sub><b>huyhoang-mike</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/HanaElattar">
                     <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
                     <br />
                     <sub><b>HanaElattar</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Vamsipriya22">
+                    <img src="https://avatars.githubusercontent.com/u/188459113?v=4" width="100;" alt="Vamsipriya22"/>
+                    <br />
+                    <sub><b>Vamsipriya22</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/flacombe">
+                    <img src="https://avatars.githubusercontent.com/u/5690599?v=4" width="100;" alt="flacombe"/>
+                    <br />
+                    <sub><b>flacombe</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -612,15 +651,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <img src="https://avatars.githubusercontent.com/u/19359510?v=4" width="100;" alt="AndreCNF"/>
                     <br />
                     <sub><b>AndreCNF</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/AlexanderMeisinger">
-                    <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
-                    <br />
-                    <sub><b>AlexanderMeisinger</b></sub>
                 </a>
             </td>
             <td align="center">
