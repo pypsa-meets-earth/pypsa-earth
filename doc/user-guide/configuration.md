@@ -272,4 +272,3 @@ Specify linear power flow formulation and optimization solver settings.
 
 Specifies plotting options.
 --8<-- "doc/configtables/plotting.csv"
-
