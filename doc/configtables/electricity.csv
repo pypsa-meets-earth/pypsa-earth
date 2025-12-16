@@ -1,37 +1,37 @@
 ,Unit,Values,Description
-base_voltage, kV, float, "Base voltage to which all lines are simplified/aggregated. Simplification preserves transmission capacities."
-voltages, kV, "A subset of 'standard' voltages considered to map OSM-extracted voltages into 'standard' linetypes."
-co2limit,:math:`t_{CO_2-eq}/a`, float, "Cap on system total annual carbon dioxide equivalent emissions."
-co2base,:math:`t_{CO_2-eq}/a`, float, "Reference value of system total annual carbon dioxide equivalent emissions. Used only if relative emission reduction target is specified in ``{opts}`` wildcard."
-automatic_emission, bool, "{True, False}", "True: Emissions are obtained from automatic emission extraction procedure. False: Emissions are obtained manually"
-automatic_emission_base_year,, integer, "CO2 emissions of year 1990 from EDGAR category 1A1a (Public electricity and heat production)."
-agg_p_nom_limits,,, "Configure per carrier generator capacity constraints limiting minimum and maximum values of the expanded capacity `p_nom_opt` for individual countries. Is enabled if ``'CCL'`` is present in ``{opts}`` wildcard."
--- file, file, path, "Reference to ``.csv`` file that specifies per carrier generator nominal capacity constraints for individual countries. Default is ``data/agg_p_nom_minmax.csv``."
--- include_existing, bool, "{True, False}", "True: Existing capacities are considered in the CCL constraints. False: Existing capacities are not considered in the CCL constraints. Default is false."
-hvdc_as_lines, bool, "{True, False}", "True: HVDC cables are modelled as PyPSA Line components. False: HVDC cables are modeled as PyPSA Link components."
-operational_reserve,,, "The total operational reserve requirements consist of three components: epsilon_load, epsilon_vres, contingency. See `GenX <https://genxproject.github.io/GenX/dev/core/#Reserves>`_ for more details."
--- activate, bool, "{True, False}", "True: Operational reserve requirements are considered in the model."
--- epsilon_load, float, "[0, 1]", "Share of total load that is required for operational reserve."
--- epsilon_vres, float, "[0, 1]", "Share of total renewable supply that is required for operational reserve."
--- contingency, MW,, "Operational reserve added as a contigency. For example, 5000 adds 5000 MW to the operational reserve requirements."
+base_voltage,kV,float,Base voltage to which all lines are simplified/aggregated. Simplification preserves transmission capacities.
+voltages,kV,A subset of 'standard' voltages considered to map OSM-extracted voltages into 'standard' linetypes.
+co2limit,:math:`t_{CO_2-eq}/a`,float,Cap on system total annual carbon dioxide equivalent emissions.
+co2base,:math:`t_{CO_2-eq}/a`,float,Reference value of system total annual carbon dioxide equivalent emissions. Used only if relative emission reduction target is specified in ``{opts}`` wildcard.
+automatic_emission,bool,"{True, False}",True: Emissions are obtained from automatic emission extraction procedure. False: Emissions are obtained manually
+automatic_emission_base_year,,integer,CO2 emissions of year 1990 from EDGAR category 1A1a (Public electricity and heat production).
+agg_p_nom_limits,,,Configure per carrier generator capacity constraints limiting minimum and maximum values of the expanded capacity `p_nom_opt` for individual countries. Is enabled if ``'CCL'`` is present in ``{opts}`` wildcard.
+-- file,file,path,Reference to ``.csv`` file that specifies per carrier generator nominal capacity constraints for individual countries. Default is ``data/agg_p_nom_minmax.csv``.
+-- include_existing,bool,"{True, False}",True: Existing capacities are considered in the CCL constraints. False: Existing capacities are not considered in the CCL constraints. Default is false.
+hvdc_as_lines,bool,"{True, False}",True: HVDC cables are modelled as PyPSA Line components. False: HVDC cables are modeled as PyPSA Link components.
+operational_reserve,,,"The total operational reserve requirements consist of three components: epsilon_load, epsilon_vres, contingency. See `GenX <https://genxproject.github.io/GenX/dev/core/#Reserves>`_ for more details."
+-- activate,bool,"{True, False}",True: Operational reserve requirements are considered in the model.
+-- epsilon_load,float,"[0, 1]",Share of total load that is required for operational reserve.
+-- epsilon_vres,float,"[0, 1]",Share of total renewable supply that is required for operational reserve.
+-- contingency,MW,,"Operational reserve added as a contigency. For example, 5000 adds 5000 MW to the operational reserve requirements."
 max_hours,,,
--- battery, hours,, "Amount of time it takes to fully charge batteries from empty if done at maximum power rate. See `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_. It is used in the rule add_extra_components."
--- H2, hours,, "Amount of time it takes to fully charge hydrogen storage from empty if done at maximum power rate. See `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_. It is used in the rule add_extra_components."
+-- battery,hours,,Amount of time it takes to fully charge batteries from empty if done at maximum power rate. See `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_. It is used in the rule add_extra_components.
+-- H2,hours,,Amount of time it takes to fully charge hydrogen storage from empty if done at maximum power rate. See `PyPSA documentation <https://pypsa.readthedocs.io/en/latest/components.html#storage-unit>`_. It is used in the rule add_extra_components.
 extendable_carriers,,,
--- Generator,--,"Any subset of {OCGT,CCGT}", "Adds extendable OCGT and/or CCGT in nodes where gas power plants are located today without capacity limits. Note that solar, onwind, offwind-ac, offwind-dc are extendable by default according to their potentials. It is used in the add_electricity rule."
--- StorageUnit,--,"Any subset of {battery, H2}", "Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity. It is used in the add_extra_components rule."
--- Store,--,"Any subset of {battery,H2}", "Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity."
--- Link,--, "Any subset of {H2 pipeline}", "Adds extendable links (H2 pipelines only) at every connection where there are lines or HVDC links without capacity limits and with zero initial capacity. Hydrogen pipelines require hydrogen storage to be modelled as ``Store``."
-powerplants_filter,--,"use `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ strings here, e.g. Country not in ['Germany']", "Filter query for the default powerplant database."
-custom_powerplants,--,"{false, merge, replace}", "Adds custom powerplants from ``custom_powerplants.csv``: false - use only powerplantmatching (ppm) data, merge - combines ppm and custom powerplants, replace - use only custom powerplants."
-conventional_carriers,--,"Any subset of {nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass}", "List of conventional power plants to include in the model from ``resources/powerplants.csv``."
-renewable_carriers,--, "Any subset of {solar, onwind, offwind-ac, offwind-dc, hydro}", "List of renewable power plants to include in the model from ``resources/powerplants.csv``."
+-- Generator,--,"Any subset of {OCGT,CCGT}","Adds extendable OCGT and/or CCGT in nodes where gas power plants are located today without capacity limits. Note that solar, onwind, offwind-ac, offwind-dc are extendable by default according to their potentials. It is used in the add_electricity rule."
+-- StorageUnit,--,"Any subset of {battery, H2}",Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity. It is used in the add_extra_components rule.
+-- Store,--,"Any subset of {battery,H2}",Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity.
+-- Link,--,Any subset of {H2 pipeline},Adds extendable links (H2 pipelines only) at every connection where there are lines or HVDC links without capacity limits and with zero initial capacity. Hydrogen pipelines require hydrogen storage to be modelled as ``Store``.
+powerplants_filter,--,"use `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ strings here, e.g. Country not in ['Germany']",Filter query for the default powerplant database.
+custom_powerplants,--,"{false, merge, replace}","Adds custom powerplants from ``custom_powerplants.csv``: false - use only powerplantmatching (ppm) data, merge - combines ppm and custom powerplants, replace - use only custom powerplants."
+conventional_carriers,--,"Any subset of {nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass}",List of conventional power plants to include in the model from ``resources/powerplants.csv``.
+renewable_carriers,--,"Any subset of {solar, onwind, offwind-ac, offwind-dc, hydro}",List of renewable power plants to include in the model from ``resources/powerplants.csv``.
 estimate_renewable_capacities,,,
--- stats,, "{""irena"" or False}", "Defines which database to use, currently only ""irena"" is available. ""irena"" uses IRENA stats to add expansion limits. ``False`` enables greenfield expansion."
--- year,, "Any year beetween 2000 and 2023", "Reference year for renewable capacities. Available years for IRENA stats are from 2000 to 2023."
+-- stats,,{irena or False},"Defines which database to use, currently only irena is available. irena uses IRENA stats to add expansion limits. ``False`` enables greenfield expansion."
+-- year,,Any year beetween 2000 and 2023,Reference year for renewable capacities. Available years for IRENA stats are from 2000 to 2023.
 -- p_nom_min,,float,"Scales the minimum expansion acquired from stats. For example, 110% of <years>'s capacities is obtained with p_nom_min: 1.1."
 -- p_nom_max,,float or ``False``,"sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly."
--- technology_mapping,,, "Maps the technologies defined in ppm.data.Capacity_stats with the carriers in PyPSA-Earth."
+-- technology_mapping,,,Maps the technologies defined in ppm.data.Capacity_stats with the carriers in PyPSA-Earth.
 -- -- Offshore,,"{'offwind-ac', 'offwind-dc'}",
 -- -- Onshore,,{'onwind'},
 -- -- PV,,{'solar'},
