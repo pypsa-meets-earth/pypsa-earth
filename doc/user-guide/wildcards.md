@@ -85,7 +85,7 @@ The `{opts}` wildcard triggers optional constraints, which are activated in eith
 It may hold multiple triggers separated by `-`, i.e. `Co2L-3H` contains the
 `Co2L` trigger and the `3H` switch. There are currently:
 
-> **Configuration options:** See [`opts.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/opts.csv) for details.
+{{ read_csv('configtables/opts.csv') }}
 
 # The `{country}` wildcard
 
