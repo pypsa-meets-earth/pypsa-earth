@@ -85,7 +85,7 @@ The `{opts}` wildcard triggers optional constraints, which are activated in eith
 It may hold multiple triggers separated by `-`, i.e. `Co2L-3H` contains the
 `Co2L` trigger and the `3H` switch. There are currently:
 
---8<-- "doc/configtables/opts.csv"
+{{ read_csv('configtables/opts.csv') }}
 
 # The `{country}` wildcard
 

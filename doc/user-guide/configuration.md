@@ -20,7 +20,7 @@ confer installation instructions at [installation](../home/installation.md).
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/toplevel.csv"
+{{ read_csv('configtables/toplevel.csv') }}
 
 # `run`
 
@@ -32,7 +32,7 @@ The `run` section is used for running and storing scenarios with different confi
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/run.csv"
+{{ read_csv('configtables/run.csv') }}
 
 # `scenario`
 
@@ -52,7 +52,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/scenario.csv"
+{{ read_csv('configtables/scenario.csv') }}
 
 # `snapshots`
 
@@ -60,7 +60,7 @@ Specifies the temporal range for the historical weather data, which is used to b
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/snapshots.csv"
+{{ read_csv('configtables/snapshots.csv') }}
 
 # `crs`
 
@@ -68,7 +68,7 @@ Defines the coordinate reference systems (crs).
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/crs.csv"
+{{ read_csv('configtables/crs.csv') }}
 
 # `augmented_line_connection`
 
@@ -78,7 +78,7 @@ algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.ht
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/augmented_line_connection.csv"
+{{ read_csv('configtables/augmented_line_connection.csv') }}
 
 # `cluster_options`
 
@@ -86,7 +86,7 @@ Specifies the options to simplify and cluster the network. This is done in two s
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/cluster_options.csv"
+{{ read_csv('configtables/cluster_options.csv') }}
 
 # `build_shape_options`
 
@@ -94,7 +94,7 @@ Specifies the options to build the shapes in which the region of interest (`coun
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/build_shape_options.csv"
+{{ read_csv('configtables/build_shape_options.csv') }}
 
 # `subregion`
 
@@ -103,7 +103,7 @@ which can be activated at various stages of the workflow. Currently, it is used 
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/subregion.csv"
+{{ read_csv('configtables/subregion.csv') }}
 
 The names of subregions are arbitrary. Its sizes are determined by how many GADM IDs that are included in the list.
 A single country can be divided into multiple subregions, and a single subregion can include GADM IDs from multiple countries.
@@ -129,7 +129,7 @@ Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.or
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/clean_osm_data_options.csv"
+{{ read_csv('configtables/clean_osm_data_options.csv') }}
 
 # `build_osm_network`
 
@@ -137,7 +137,7 @@ Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.or
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/build_osm_network.csv"
+{{ read_csv('configtables/build_osm_network.csv') }}
 
 # `base_network`
 
@@ -145,7 +145,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/base_network.csv"
+{{ read_csv('configtables/base_network.csv') }}
 
 # `load_options`
 
@@ -153,7 +153,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/load_options.csv"
+{{ read_csv('configtables/load_options.csv') }}
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
@@ -164,7 +164,7 @@ If enabled, this option allows setting different CO₂ targets for each planning
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/co2_budget.csv"
+{{ read_csv('configtables/co2_budget.csv') }}
 
 # `electricity`
 
@@ -172,7 +172,7 @@ Specifies the options for the rule `add_electricity`. This includes options acro
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/electricity.csv"
+{{ read_csv('configtables/electricity.csv') }}
 
 Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
@@ -181,25 +181,25 @@ Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
 Specifies electricity line parameters.
    :start-after: PV:
---8<-- "doc/configtables/lines.csv"
+{{ read_csv('configtables/lines.csv') }}
 
 # `links`
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .   :end-before: transformers:
 
---8<-- "doc/configtables/links.csv"
+{{ read_csv('configtables/links.csv') }}
 
 # `transformers`
 
 Specifies transformers parameters and types.   :end-before: atlite:
 
---8<-- "doc/configtables/transformers.csv"
+{{ read_csv('configtables/transformers.csv') }}
 
 # `atlite`
 
 Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).   :end-before: renewable:
 
---8<-- "doc/configtables/atlite.csv"
+{{ read_csv('configtables/atlite.csv') }}
 
 # `renewable`
 
@@ -207,37 +207,37 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 
 ## `onwind`   :end-before:   offwind-ac:
 
---8<-- "doc/configtables/onwind.csv"
+{{ read_csv('configtables/onwind.csv') }}
 
 ## `offwind-ac`   :end-before:   offwind-dc:
 
---8<-- "doc/configtables/offwind-ac.csv"
+{{ read_csv('configtables/offwind-ac.csv') }}
 
 ## `offwind-dc`   :end-before:   solar:
 
---8<-- "doc/configtables/offwind-dc.csv"
+{{ read_csv('configtables/offwind-dc.csv') }}
 
 ## `solar`   :end-before:   hydro:
 
---8<-- "doc/configtables/solar.csv"
+{{ read_csv('configtables/solar.csv') }}
 
 ## `hydro`
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/hydro.csv"
+{{ read_csv('configtables/hydro.csv') }}
 
 ## `csp`
 
 > **See `config.default.yaml` for the full configuration.**
 
---8<-- "doc/configtables/csp.csv"
+{{ read_csv('configtables/csp.csv') }}
 
 # `costs`
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
    :start-after: Costs Configuration
---8<-- "doc/configtables/costs.csv"
+{{ read_csv('configtables/costs.csv') }}
 
 To change cost assumptions in more detail (i.e. other than `marginal_cost`), consider modifying cost assumptions directly in `data/costs.csv` as this is not yet supported through the config file.
    You can also build multiple different cost databases. Make a renamed copy of `data/costs.csv` (e.g. `data/costs-optimistic.csv`) and set the variable `COSTS=data/costs-optimistic.csv` in the `Snakefile`.
@@ -254,7 +254,7 @@ To change cost assumptions in more detail (i.e. other than `marginal_cost`), con
 
 Specifies the options for Monte Carlo sampling.   :end-before:   solving:
 
---8<-- "doc/configtables/monte-carlo.csv"
+{{ read_csv('configtables/monte-carlo.csv') }}
 
 # `solving`
 
@@ -262,13 +262,13 @@ Specify linear power flow formulation and optimization solver settings.
 
 ## `options`   :end-before:   solver:
 
---8<-- "doc/configtables/solving-options.csv"
+{{ read_csv('configtables/solving-options.csv') }}
 
 ## `solver`   :end-before: plotting:
 
---8<-- "doc/configtables/solving-solver.csv"
+{{ read_csv('configtables/solving-solver.csv') }}
 
 # `plotting`
 
 Specifies plotting options.
---8<-- "doc/configtables/plotting.csv"
+{{ read_csv('configtables/plotting.csv') }}
