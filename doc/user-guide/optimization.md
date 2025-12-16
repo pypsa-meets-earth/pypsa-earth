@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Optimization Models in Energy Systems
 
 The aim of this section is to provide an overview of the most common optimization approaches used in energy system models.

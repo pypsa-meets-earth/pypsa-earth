@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Welcome to the PyPSA-Earth documentation!
 
 [![GitHub release](https://img.shields.io/github/v/release/pypsa-meets-earth/pypsa-earth?include_prereleases)](https://github.com/pypsa-meets-earth/pypsa-earth/releases)

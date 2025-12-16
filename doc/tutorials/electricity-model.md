@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Tutorial: Building and Running the Electricity Model
 
 !!! note

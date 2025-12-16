@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Download & Filter
 
 The download and filtering process of the PyPSA-Earth energy system model consists of a group of `snakemake` rules which are briefly outlined and explained in detail in the sections below.

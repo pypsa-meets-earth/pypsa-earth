@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Introduction
 
 A short video explaining the logic of PyPSA-Eur which is similar to PyPSA-Earth:

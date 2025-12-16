@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Sector-Coupling
 
 Scripts for sector-coupling features including heat, transport, industry, and hydrogen.
