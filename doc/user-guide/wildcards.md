@@ -5,20 +5,15 @@ SPDX-License-Identifier: CC-BY-4.0
 -->
 
 
-
-
-Wildcards
-
-
-It is easy to run PyPSA-Earth for multiple scenarios using the wildcards feature of [`snakemake`.
+# Wildcards
+It is easy to run PyPSA-Earth for multiple scenarios using the wildcards feature of `snakemake`.
 Wildcards allow to generalise a rule to produce all files that follow a regular expression pattern
 which e.g. defines one particular scenario. One can think of a wildcard as a parameter that shows
 up in the input/output file names of the `Snakefile` and thereby determines which rules to run,
 what data to retrieve and what files to produce.
 
-Detailed explanations of how wildcards work in `snakemake`` can be found in the
-`relevant section of the documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#wildcards).
-
+Detailed explanations of how wildcards work in `snakemake` can be found in the
+[relevant section of the documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#wildcards).
 
 
 # The `{simpl}` wildcard
@@ -26,7 +21,6 @@ Detailed explanations of how wildcards work in `snakemake`` can be found in the
 The `{simpl}` wildcard specifies number of buses a detailed
 network model should be pre-clustered to in the rule
 `simplify_network` (before `cluster_network`).
-
 
 
 # The `{clusters}` wildcard
@@ -49,7 +43,6 @@ The wildcard value `all` specifies that no clustering is executed and the whole 
 
 The wildcard value `min` specifies that the network is clustered to the smallest network possible
 accounting for the topology of the network (e.g. not fully meshed networks, isolated areas, etc.).
-
 
 
 # The `{ll}` wildcard
@@ -85,7 +78,6 @@ The wildcard, in general, consists of two parts:
            each line is expanded to no more than 25% of its capacity.
 
 
-
 # The `{opts}` wildcard
 
 The `{opts}` wildcard triggers optional constraints, which are activated in either
@@ -93,13 +85,7 @@ The `{opts}` wildcard triggers optional constraints, which are activated in eith
 It may hold multiple triggers separated by `-`, i.e. `Co2L-3H` contains the
 `Co2L` trigger and the `3H` switch. There are currently:
 
-
-
-   :header-rows: 1
-   :widths: 10,20,10,10
-   :file: configtables/opts.csv
-
-
+--8<-- "doc/configtables/opts.csv"
 
 # The `{country}` wildcard
 
@@ -118,15 +104,11 @@ in Germany (in the solution for Europe) use:
 snakemake -j 1 results/summaries/elec_s_all_lall_Co2L-3H_DE
 
 ``
-
-
-
 # The `{cutout}` wildcard
 
 The `{cutout}` wildcard facilitates running the rule `build_cutout`
 for all cutout configurations specified under `atlite: cutouts:`.
 These cutouts will be stored in a folder specified by `{cutout}`.
-
 
 
 # The `{technology}` wildcard
@@ -141,14 +123,12 @@ For instance `{technology}` can be used to plot regionally disaggregated potenti
 with the rule `plot_p_nom_max`.
 
 
-
 # The `{attr}` wildcard
 
 The `{attr}` wildcard specifies which attribute is used for size
 representations of network components on a map plot produced by the rule
 `plot_network`. While it might be extended in the future, `{attr}`
 currently only supports plotting of `p_nom`.
-
 
 
 # The `{ext}` wildcard
@@ -158,9 +138,8 @@ rule `plot_network`, `plot_summary`, and `plot_p_nom_max` produce.
 Typical examples are `pdf` and `png`. The list of supported file
 formats depends on the used backend. To query the supported file types on your system, issue:
 
-``python
+`python
 import matplotlib.pyplot as plt
 
-``
-
+```
     plt.gcf().canvas.get_supported_filetypes()
