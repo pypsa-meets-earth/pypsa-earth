@@ -20,7 +20,7 @@ confer installation instructions at [installation](../home/installation.md).
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/toplevel.csv') }}
+> **Configuration options:** See [`toplevel.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/toplevel.csv) for details.
 
 # `run`
 
@@ -32,7 +32,7 @@ The `run` section is used for running and storing scenarios with different confi
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/run.csv') }}
+> **Configuration options:** See [`run.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/run.csv) for details.
 
 # `scenario`
 
@@ -52,7 +52,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/scenario.csv') }}
+> **Configuration options:** See [`scenario.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/scenario.csv) for details.
 
 # `snapshots`
 
@@ -60,7 +60,7 @@ Specifies the temporal range for the historical weather data, which is used to b
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/snapshots.csv') }}
+> **Configuration options:** See [`snapshots.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/snapshots.csv) for details.
 
 # `crs`
 
@@ -68,7 +68,7 @@ Defines the coordinate reference systems (crs).
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/crs.csv') }}
+> **Configuration options:** See [`crs.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/crs.csv) for details.
 
 # `augmented_line_connection`
 
@@ -78,7 +78,7 @@ algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.ht
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/augmented_line_connection.csv') }}
+> **Configuration options:** See [`augmented_line_connection.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/augmented_line_connection.csv) for details.
 
 # `cluster_options`
 
@@ -86,7 +86,7 @@ Specifies the options to simplify and cluster the network. This is done in two s
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/cluster_options.csv') }}
+> **Configuration options:** See [`cluster_options.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/cluster_options.csv) for details.
 
 # `build_shape_options`
 
@@ -94,7 +94,7 @@ Specifies the options to build the shapes in which the region of interest (`coun
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/build_shape_options.csv') }}
+> **Configuration options:** See [`build_shape_options.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/build_shape_options.csv) for details.
 
 # `subregion`
 
@@ -103,7 +103,7 @@ which can be activated at various stages of the workflow. Currently, it is used 
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/subregion.csv') }}
+> **Configuration options:** See [`subregion.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/subregion.csv) for details.
 
 The names of subregions are arbitrary. Its sizes are determined by how many GADM IDs that are included in the list.
 A single country can be divided into multiple subregions, and a single subregion can include GADM IDs from multiple countries.
@@ -129,7 +129,7 @@ Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.or
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/clean_osm_data_options.csv') }}
+> **Configuration options:** See [`clean_osm_data_options.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/clean_osm_data_options.csv) for details.
 
 # `build_osm_network`
 
@@ -137,7 +137,7 @@ Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.or
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/build_osm_network.csv') }}
+> **Configuration options:** See [`build_osm_network.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/build_osm_network.csv) for details.
 
 # `base_network`
 
@@ -145,7 +145,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/base_network.csv') }}
+> **Configuration options:** See [`base_network.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/base_network.csv) for details.
 
 # `load_options`
 
@@ -153,7 +153,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/load_options.csv') }}
+> **Configuration options:** See [`load_options.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/load_options.csv) for details.
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
@@ -164,7 +164,7 @@ If enabled, this option allows setting different CO₂ targets for each planning
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/co2_budget.csv') }}
+> **Configuration options:** See [`co2_budget.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/co2_budget.csv) for details.
 
 # `electricity`
 
@@ -172,7 +172,7 @@ Specifies the options for the rule `add_electricity`. This includes options acro
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/electricity.csv') }}
+> **Configuration options:** See [`electricity.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/electricity.csv) for details.
 
 Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
@@ -181,25 +181,25 @@ Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
 Specifies electricity line parameters.
    :start-after: PV:
-{{ read_csv('configtables/lines.csv') }}
+> **Configuration options:** See [`lines.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/lines.csv) for details.
 
 # `links`
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .   :end-before: transformers:
 
-{{ read_csv('configtables/links.csv') }}
+> **Configuration options:** See [`links.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/links.csv) for details.
 
 # `transformers`
 
 Specifies transformers parameters and types.   :end-before: atlite:
 
-{{ read_csv('configtables/transformers.csv') }}
+> **Configuration options:** See [`transformers.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/transformers.csv) for details.
 
 # `atlite`
 
 Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).   :end-before: renewable:
 
-{{ read_csv('configtables/atlite.csv') }}
+> **Configuration options:** See [`atlite.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/atlite.csv) for details.
 
 # `renewable`
 
@@ -207,37 +207,37 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 
 ## `onwind`   :end-before:   offwind-ac:
 
-{{ read_csv('configtables/onwind.csv') }}
+> **Configuration options:** See [`onwind.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/onwind.csv) for details.
 
 ## `offwind-ac`   :end-before:   offwind-dc:
 
-{{ read_csv('configtables/offwind-ac.csv') }}
+> **Configuration options:** See [`offwind-ac.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/offwind-ac.csv) for details.
 
 ## `offwind-dc`   :end-before:   solar:
 
-{{ read_csv('configtables/offwind-dc.csv') }}
+> **Configuration options:** See [`offwind-dc.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/offwind-dc.csv) for details.
 
 ## `solar`   :end-before:   hydro:
 
-{{ read_csv('configtables/solar.csv') }}
+> **Configuration options:** See [`solar.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/solar.csv) for details.
 
 ## `hydro`
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/hydro.csv') }}
+> **Configuration options:** See [`hydro.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/hydro.csv) for details.
 
 ## `csp`
 
 > **See `config.default.yaml` for the full configuration.**
 
-{{ read_csv('configtables/csp.csv') }}
+> **Configuration options:** See [`csp.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/csp.csv) for details.
 
 # `costs`
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
    :start-after: Costs Configuration
-{{ read_csv('configtables/costs.csv') }}
+> **Configuration options:** See [`costs.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/costs.csv) for details.
 
 To change cost assumptions in more detail (i.e. other than `marginal_cost`), consider modifying cost assumptions directly in `data/costs.csv` as this is not yet supported through the config file.
    You can also build multiple different cost databases. Make a renamed copy of `data/costs.csv` (e.g. `data/costs-optimistic.csv`) and set the variable `COSTS=data/costs-optimistic.csv` in the `Snakefile`.
@@ -254,7 +254,7 @@ To change cost assumptions in more detail (i.e. other than `marginal_cost`), con
 
 Specifies the options for Monte Carlo sampling.   :end-before:   solving:
 
-{{ read_csv('configtables/monte-carlo.csv') }}
+> **Configuration options:** See [`monte-carlo.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/monte-carlo.csv) for details.
 
 # `solving`
 
@@ -262,13 +262,13 @@ Specify linear power flow formulation and optimization solver settings.
 
 ## `options`   :end-before:   solver:
 
-{{ read_csv('configtables/solving-options.csv') }}
+> **Configuration options:** See [`solving-options.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/solving-options.csv) for details.
 
 ## `solver`   :end-before: plotting:
 
-{{ read_csv('configtables/solving-solver.csv') }}
+> **Configuration options:** See [`solving-solver.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/solving-solver.csv) for details.
 
 # `plotting`
 
 Specifies plotting options.
-{{ read_csv('configtables/plotting.csv') }}
+> **Configuration options:** See [`plotting.csv`](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/doc/configtables/plotting.csv) for details.
