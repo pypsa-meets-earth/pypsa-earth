@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # API Reference
 
 This section provides automatically generated API documentation for all PyPSA-Earth scripts, organized by category.

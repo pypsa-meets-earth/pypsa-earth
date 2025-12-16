@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Advanced
 
 Utility scripts that are not part of the main Snakemake workflow. These include helper tools for data management, file handling, and the Monte Carlo analysis feature.

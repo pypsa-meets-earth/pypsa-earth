@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Create Network
 
 The simplification `snakemake` rules prepare **approximations** of the full model, for which it is computationally viable to co-optimize generation, storage and transmission capacities.

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Installation
 
 Before installing PyPSA-Earth on your computer, it's crucial to ensure that your system meets the necessary hardware and software requirements. The following sections outline the prerequisites in terms of hardware and software. Additionally, detailed installation guidelines for required software tools will be provided, followed by step-by-step instructions for installing PyPSA-Earth.

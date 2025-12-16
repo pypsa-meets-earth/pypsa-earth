@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Solving
 
 After generating and simplifying the networks they can be solved through the `solve_network` rule by using the collection rule `solve_all_networks`.

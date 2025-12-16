@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Project Structure and Credits
 
 The PyPSA-Earth model is maintained by the members of the PyPSA meets Earth initiative.

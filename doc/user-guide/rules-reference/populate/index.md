@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Populate Data
 
 Once the download and filtering process is complete, the clean data are then processed through a set of `snakemake` rules to identify the main data inputs for the network modelling.

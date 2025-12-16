@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Usage of PyPSA-Earth
 
 The list below contains some the applications of PyPSA-Earth for educational, research and industrial projects and is likely to be incomplete. If you want to add your contribution into the list, feel free to open a PR to [PyPSA Earth repo](https://github.com/pypsa-meets-earth/pypsa-earth) or flag your interest via [PyPSA meets Earth Discord server](https://discord.gg/AnuJBk23FU).
