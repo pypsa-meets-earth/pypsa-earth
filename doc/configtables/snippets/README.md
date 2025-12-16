@@ -39,6 +39,6 @@ Instead of using hardcoded line numbers (which break when the config changes), w
 
 Each `.yaml` file corresponds to a configuration section:
 - `run.yaml` → `run:` section
-- `scenario.yaml` → `scenario:` section  
+- `scenario.yaml` → `scenario:` section
 - `renewable_onwind.yaml` → `renewable: onwind:` section
 - etc.
