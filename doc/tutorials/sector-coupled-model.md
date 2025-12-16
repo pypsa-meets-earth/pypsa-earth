@@ -9,7 +9,6 @@ The sector-coupling code can be run as an overnight/greenfield scenario or myopi
 The overnight scenario is a long-term scenario that runs for a year, while the myopic scenario
 is a short-term scenario that runs for a day.
 
-
 ## Overnight Scenarios
 
 ### Configuration
@@ -27,7 +26,6 @@ foresight: overnight
 Documentation for all options is currently being updated in [config](../user-guide/configuration.md).
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options.
-
 
 It is important to set the following flags `retrieve_databundle` and `retrieve_databundle_sector` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
 
@@ -52,20 +50,20 @@ scenario:
 ```
 
 !!! note
-	For allowed wildcard values, refer to [wildcards](../user-guide/wildcards.md).
+ For allowed wildcard values, refer to [wildcards](../user-guide/wildcards.md).
 
 ### Execution
+
 To run the tutorial for the sector-coupled model, you need to activate the pypsa-earth environment.
 You need to have installed PyPSA-Earth using the instructions provided in the [installation](../home/installation.md) section.
 Make sure to be in the PyPSA-Earth root directory and run the following command:
 
 !!! tip
-	It is good practice to perform a dry-run using the option -n, before you commit to a run:
+ It is good practice to perform a dry-run using the option -n, before you commit to a run:
 
-	```bash
-	snakemake solve_sector_networks -j2 --configfile test/config.sector.yaml -n
-	```
-
+ ```bash
+ snakemake solve_sector_networks -j2 --configfile test/config.sector.yaml -n
+ ```
 
 ```bash
 conda activate pypsa-earth
@@ -251,7 +249,6 @@ graph TD
     cluster_network --> prepare_gas_network
 ```
 
-
 In the terminal, this will show up as a list of jobs to be run:
 
 ```console
@@ -304,7 +301,6 @@ solve_sector_networks 1
 total46
 ```
 
-
 ## Myopic Foresight Scenarios
 
 ### Configuration
@@ -317,24 +313,24 @@ foresight: myopic
 ```
 
 !!! note
-	It is important to set the following flag `retrieve_databundle` and `retrieve_databundle_sector` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
+ It is important to set the following flag `retrieve_databundle` and `retrieve_databundle_sector` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
 
-	```yaml
-	enable:
-	retrieve_databundle: true
-	retrieve_databundle_sector: true
-	```
+ ```yaml
+ enable:
+ retrieve_databundle: true
+ retrieve_databundle_sector: true
+ ```
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options. For the myopic foresight mode, the `{planning_horizons}` wildcard defines the sequence of investment horizons.
 
 !!! hint
-	The myopic optimisation is only possible on the sector-coupled model
+ The myopic optimisation is only possible on the sector-coupled model
 
 ```yaml
 scenario:
   simpl: [""]
   clusters: [4]
-  planning_horizons: [2030] # investment years for myopcondaic and perfect; or costs year for overnight
+  planning_horizons: [2030] # investment years for myopic and perfect; or costs year for overnight
   ll: ["c1"]
   opts: ["Co2L-24H"]
   sopts: ["144h"]
@@ -346,16 +342,17 @@ For allowed wildcard values, refer to [wildcards].
 Documentation for all options will be added successively to [config].
 
 ### Execution
+
 To run the tutorial for the sector-coupled model with myopic foresight, you need to activate the
 pypsa-earth environment. You need to have installed PyPSA-Earth using the instructions provided in the
 [installation] section. Make sure to be in the PyPSA-Earth root directory and run the following command
 
 !!! tip "Pro Tip"
-	It is good practice to perform a dry-run using the option -n, before you commit to a run:
+ It is good practice to perform a dry-run using the option -n, before you commit to a run:
 
-	```bash
-	snakemake solve_sector_networks -j2 --configfile test/config.myopic.yaml -n
-	```
+ ```bash
+ snakemake solve_sector_networks -j2 --configfile test/config.myopic.yaml -n
+ ```
 
 ```bash
 conda activate pypsa-earth
@@ -551,7 +548,6 @@ graph TD
     prepare_heat_data_m --> build_existing_heating
 ```
 
-
 In the terminal, this will show up as a list of jobs to be run:
 
 ```console
@@ -607,8 +603,8 @@ solve_network_myopic   1
 total 49
 ```
 
-
 ## Scaling-Up
+
 If you now feel confident and want to tackle runs with larger temporal, technological and
 spatial scopes, you can adjust the configuration file to your needs. You can also check
 the [model_customization](../user-guide/model-customization.md) for more information on how to customize the model.
