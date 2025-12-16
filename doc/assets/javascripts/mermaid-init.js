@@ -27,7 +27,7 @@ window.mermaidConfig = {
 // Update Mermaid theme based on color scheme
 function updateMermaidTheme() {
   const isDark = document.querySelector('[data-md-color-scheme="slate"]') !== null;
-  
+
   if (isDark) {
     // Dark mode colors
     window.mermaidConfig.themeVariables = {
@@ -75,11 +75,11 @@ function updateMermaidTheme() {
       titleColor: '#1565c0'
     };
   }
-  
+
   // Reinitialize Mermaid with new config
   if (typeof mermaid !== 'undefined') {
     mermaid.initialize(window.mermaidConfig);
-    
+
     // Re-render existing diagrams
     const mermaidDivs = document.querySelectorAll('.mermaid');
     mermaidDivs.forEach((div, index) => {
@@ -93,7 +93,7 @@ function updateMermaidTheme() {
         }
       }
     });
-    
+
     // Trigger re-render
     mermaid.run();
   }

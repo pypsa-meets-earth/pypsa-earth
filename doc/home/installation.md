@@ -12,7 +12,7 @@ Ensure that your system meets the minimum hardware specifications to run PyPSA-E
     - The world requires ~250 GB
     - A single country requires between 1-10 GB
     - Tutorial requires just below 2 GB
-    
+
 Thus, considering all required software tools, at least 40 GB of storage space is recommended.
 
 ## Software Prerequisites
@@ -192,7 +192,7 @@ This section provides a step-by-step guide on how to set up and use Docker conta
     - [Linux](https://docs.docker.com/desktop/install/linux/)
     - [MacOS](https://docs.docker.com/desktop/install/mac-install/)
 
-    !!! note "Important Note" 
+    !!! note "Important Note"
         Ensure Docker is installed on your system.
 
 2. You can use the link [here](https://code.visualstudio.com/download) to install Visual Studio Code on your operating system. Ensure to select the most compatible file for your operating system.

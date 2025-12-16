@@ -123,7 +123,7 @@ graph TD
     prepare_airports["prepare_airports"]
     prepare_gas_network["prepare_gas_network"]
     copy_config["copy_config"]
-    
+
     solve_sector_network --> solve_sector_networks
     add_export --> solve_sector_network
     retrieve_cost_data --> solve_sector_network
@@ -412,7 +412,7 @@ graph TD
     prepare_gas_network_m["prepare_gas_network"]
     build_existing_heating["build_existing_heating_distribution"]
     copy_config_m["copy_config"]
-    
+
     solve_network_myopic --> solve_all_networks_myopic
     add_existing_baseyear --> solve_network_myopic
     retrieve_cost_data_m --> solve_network_myopic

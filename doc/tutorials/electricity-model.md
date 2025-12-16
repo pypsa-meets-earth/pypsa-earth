@@ -102,7 +102,7 @@ graph TD
     build_renewable_hydro["build_renewable_profiles<br/>technology: hydro"]
     retrieve_cost_data["retrieve_cost_data<br/>year: 2030"]
     build_demand_profiles["build_demand_profiles"]
-    
+
     solve_network --> solve_all_networks
     prepare_network --> solve_network
     add_extra_components --> prepare_network
