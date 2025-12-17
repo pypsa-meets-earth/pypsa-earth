@@ -4,14 +4,9 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-
-
-
 Plotting and Summary
 
-
 # Rule `plot_p_nom_max`
-
 
     :align: center
 
@@ -29,20 +24,18 @@ Plotting and Summary
         edge [color=grey,
             penwidth=2
         ];
-        0	 [color="0.42 0.6 0.85",
+        0  [color="0.42 0.6 0.85",
             fillcolor=gray,
             label=plot_p_nom_max,
             style=filled];
-        1	 [color="0.58 0.6 0.85",
+        1  [color="0.58 0.6 0.85",
             label=cluster_network];
         1 -> 0;
     }
 
 |
 
-
 # Rule `make_summary`
-
 
     :align: center
 
@@ -60,26 +53,22 @@ Plotting and Summary
         edge [color=grey,
             penwidth=2
         ];
-        0	 [color="0.47 0.6 0.85",
+        0  [color="0.47 0.6 0.85",
             fillcolor=gray,
             label=make_summary,
             style=filled];
-        1	 [color="0.11 0.6 0.85",
+        1  [color="0.11 0.6 0.85",
             label=solve_network];
         1 -> 0;
     }
 
 |
 
-
 # Rule `plot_summary`
-
 
 |
 
-
 # Rule `plot_network`
-
 
     :align: center
 
@@ -97,17 +86,15 @@ Plotting and Summary
         edge [color=grey,
             penwidth=2
         ];
-        0	 [color="0.00 0.6 0.85",
+        0  [color="0.00 0.6 0.85",
             fillcolor=gray,
             label=plot_network,
             style=filled];
-        1	 [color="0.50 0.6 0.85",
+        1  [color="0.50 0.6 0.85",
             label=solve_network];
         1 -> 0;
     }
 
 |
 
-
-
-![Image](assets/images/tech-colors.png)
+![Image](../assets/images/tech-colors.png)
