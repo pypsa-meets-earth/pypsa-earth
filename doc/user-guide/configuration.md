@@ -18,7 +18,9 @@ confer installation instructions at [installation](../home/installation.md).
 
 # Top-level configuration
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/toplevel.yaml"
+```
 
 {{ read_csv('configtables/toplevel.csv') }}
 
@@ -30,7 +32,9 @@ investment changes as more ambitious greenhouse-gas emission reduction targets a
 
 The `run` section is used for running and storing scenarios with different configurations which are not covered by [wildcards](wildcards.md). It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set `shared_cutouts` to `true`.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/run.yaml"
+```
 
 {{ read_csv('configtables/run.csv') }}
 
@@ -50,7 +54,9 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 ![Image](../assets/images/scenarios.png)
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/scenario.yaml"
+```
 
 {{ read_csv('configtables/scenario.csv') }}
 
@@ -58,7 +64,9 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 Specifies the temporal range for the historical weather data, which is used to build the energy system model. It uses arguments to [pandas.date_range](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html). The date range must be in the past (before 2022). A well-tested year is 2013.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/snapshots.yaml"
+```
 
 {{ read_csv('configtables/snapshots.csv') }}
 
@@ -66,7 +74,9 @@ Specifies the temporal range for the historical weather data, which is used to b
 
 Defines the coordinate reference systems (crs).
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/crs.yaml"
+```
 
 {{ read_csv('configtables/crs.csv') }}
 
@@ -76,7 +86,9 @@ If enabled, it increases the connectivity of the network. It makes the network g
 if fewer than k edges are removed, the network graph stays connected. It uses the [k-edge-augmentation](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation)
 algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.html) Python package.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/augmented_line_connection.yaml"
+```
 
 {{ read_csv('configtables/augmented_line_connection.csv') }}
 
@@ -84,7 +96,9 @@ algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.ht
 
 Specifies the options to simplify and cluster the network. This is done in two stages, first using the rule `simplify_network` and then using the rule `cluster_network`. For more details on this process, see the [PyPSA-Earth paper](https://www.sciencedirect.com/science/article/pii/S0306261923004609), section 3.7.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/cluster_options.yaml"
+```
 
 {{ read_csv('configtables/cluster_options.csv') }}
 
@@ -92,7 +106,9 @@ Specifies the options to simplify and cluster the network. This is done in two s
 
 Specifies the options to build the shapes in which the region of interest (`countries`) is divided.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/build_shape_options.yaml"
+```
 
 {{ read_csv('configtables/build_shape_options.csv') }}
 
@@ -101,7 +117,9 @@ Specifies the options to build the shapes in which the region of interest (`coun
 If enabled, this option allows a region of interest (`countries`) to be redefined into subregions,
 which can be activated at various stages of the workflow. Currently, it is used in `simplify_network` and `cluster_network` rule.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/subregion.yaml"
+```
 
 {{ read_csv('configtables/subregion.csv') }}
 
@@ -127,7 +145,9 @@ snakemake -j 1 build_shapes
 
 Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) data.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/clean_osm_data_options.yaml"
+```
 
 {{ read_csv('configtables/clean_osm_data_options.csv') }}
 
@@ -135,7 +155,9 @@ Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.or
 
 Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) network.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/build_osm_network.yaml"
+```
 
 {{ read_csv('configtables/build_osm_network.csv') }}
 
@@ -143,7 +165,9 @@ Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.or
 
 Specifies the minimum voltage magnitude in the base network and the offshore substations.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/base_network.yaml"
+```
 
 {{ read_csv('configtables/base_network.csv') }}
 
@@ -151,7 +175,9 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 
 Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socioeconomic pathway (GDP and population growth), to enhance modelling capabilities.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/load_options.yaml"
+```
 
 {{ read_csv('configtables/load_options.csv') }}
 
@@ -162,7 +188,9 @@ The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `w
 
 If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/co2budget.yaml"
+```
 
 {{ read_csv('configtables/co2_budget.csv') }}
 
@@ -170,7 +198,9 @@ If enabled, this option allows setting different CO₂ targets for each planning
 
 Specifies the options for the rule `add_electricity`. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, CO2 emission limits, operational reserve, storage parameters. See the table below for more details.
 
-> **See `config.default.yaml` for the full configuration.**
+```yaml
+--8<-- "configtables/snippets/electricity.yaml"
+```
 
 {{ read_csv('configtables/electricity.csv') }}
 
