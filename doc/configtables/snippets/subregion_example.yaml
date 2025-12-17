@@ -1,0 +1,6 @@
+subregion:
+  enable:
+    simplify_network: true # activate subregion in simplify_network
+    cluster_network: true # activate subregion in cluster_network
+  define_by_gadm:
+    Central: [BW.3]
