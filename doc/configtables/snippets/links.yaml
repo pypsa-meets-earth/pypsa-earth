@@ -1,6 +1,5 @@
----
 links:
   p_max_pu: 1.0
   p_nom_max: .inf
   p_nom_max_min: -.inf
-  under_construction: zero  # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+  under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity

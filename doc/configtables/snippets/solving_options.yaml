@@ -1,11 +1,10 @@
----
-options:
-  formulation: kirchhoff
-  load_shedding: 100  # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
-  noisy_costs: true
-  min_iterations: 4
-  max_iterations: 6
-  clip_p_max_pu: 0.01
-  skip_iterations: true
-  track_iterations: false
+  options:
+    formulation: kirchhoff
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
+    noisy_costs: true
+    min_iterations: 4
+    max_iterations: 6
+    clip_p_max_pu: 0.01
+    skip_iterations: true
+    track_iterations: false
     # nhours: 10

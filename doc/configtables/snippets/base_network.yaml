@@ -1,4 +1,3 @@
----
 base_network:
-  min_voltage_substation_offshore: 51000  # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 51000  # [V] minimum voltage in base network
+  min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
+  min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network

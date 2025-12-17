@@ -124,7 +124,8 @@ def main():
         if section_text.strip():
             output_file = snippets_dir / f"{snippet_name}.yaml"
             with open(output_file, "w") as f:
-                f.write(section_text)
+                # Ensure trailing newline for end-of-file-fixer pre-commit hook
+                f.write(section_text.rstrip() + "\n")
             print(f"Created {output_file}")
         else:
             print(f"Warning: No content found for {snippet_name}")
