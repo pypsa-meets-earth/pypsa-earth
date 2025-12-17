@@ -1,0 +1,18 @@
+  offwind-ac:
+    cutout: cutout-2013-era5
+    resource:
+      method: wind
+      turbine: NREL_ReferenceTurbine_5MW_offshore
+    capacity_per_sqkm: 2
+    # correction_factor: 0.8855
+    # proxy for wake losses
+    # from 10.1016/j.energy.2018.08.153
+    # until done more rigorously in #153
+    copernicus:
+      grid_codes: [80, 200]
+    natura: true
+    max_depth: 50
+    max_shore_distance: 30000
+    potential: simple # or conservative
+    clip_p_max_pu: 1.e-2
+    extendable: true
