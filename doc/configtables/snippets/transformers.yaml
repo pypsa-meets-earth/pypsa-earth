@@ -1,5 +1,4 @@
----
 transformers:
   x: 0.1
   s_nom: 2000.
-  type: ''
+  type: ""

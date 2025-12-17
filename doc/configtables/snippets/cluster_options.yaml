@@ -1,24 +1,23 @@
----
 cluster_options:
   simplify_network:
-    to_substations: false  # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
-    algorithm: kmeans  # choose from: [hac, kmeans]
-    feature: solar+onwind-time  # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
+    to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
+    algorithm: kmeans # choose from: [hac, kmeans]
+    feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: false
-    p_threshold_drop_isolated: 20  # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
-    p_threshold_merge_isolated: 300  # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
-    s_threshold_fetch_isolated: false  # [-] a share of the national load for merging an isolated network into a backbone network
+    p_threshold_drop_isolated: 20 # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
+    s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
     exclude_carriers: []
-  alternative_clustering: false  # "False" use Voronoi shapes, "True" use GADM shapes
-  distribute_cluster: [load]  # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
-  out_logging: true  # When "True", logging is printed to console
+  alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
+  distribute_cluster: ["load"] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
+  out_logging: true # When "True", logging is printed to console
   aggregation_strategies:
-    generators:  # use "min" for more conservative assumptions
+    generators: # use "min" for more conservative assumptions
       p_nom: sum
       p_nom_max: sum
       p_nom_min: sum
@@ -29,5 +28,5 @@ cluster_options:
       ramp_limit_up: max
       ramp_limit_down: max
       efficiency: mean
-  focus_weights: false  # When a value specified, set the share of nodes allocated to each country
+  focus_weights: false # When a value specified, set the share of nodes allocated to each country
     # country: share

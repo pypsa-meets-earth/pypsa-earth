@@ -1,4 +1,3 @@
----
 subregion:
   enable:
     simplify_network: true  # activate subregion in simplify_network
