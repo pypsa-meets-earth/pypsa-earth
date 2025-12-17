@@ -122,6 +122,7 @@ plotting:
     Lignite: "grey"
     Lignite marginal: "grey"
     H2: "#ea048a"
+    H2 export: "#ea048a"
     H2 for industry: "#222222"
     H2 for shipping: "#6495ED"
     H2 liquefaction: "m"
@@ -129,7 +130,7 @@ plotting:
     battery: "slategray"
     battery discharger: "slategray"
     battery charger: "slategray"
-    battery storage: "slategray"
+    EV battery storage: "slategray"
     home battery: "#614700"
     home battery storage: "#614700"
     lines: "#70af1d"
@@ -209,6 +210,15 @@ plotting:
     high-temp electrolysis: "magenta"
     today: "#D2691E"
     Ambient: "k"
+    industry coal emissions: "#654321"
+    agriculture oil: "#1e1e1e"
+    gas emissions: "#666666"
+    industry oil emissions: "#654321"
+    industry electricity: "#222222"
+    rail transport electricity: "grey"
+    solid biomass for industry: "#654321"
+    rail transport oil: "#44DD33"
+    low voltage: "y"
 
 
   nice_names:
@@ -221,6 +231,6 @@ plotting:
     PHS: Pumped Hydro Storage
     hydro: Reservoir & Dam
     battery: Battery Storage
-    H2: Hydrogen Storage
+    H2: H2
     lines: Transmission Lines
     ror: Run of River
