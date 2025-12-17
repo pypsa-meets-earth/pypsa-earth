@@ -29,3 +29,5 @@ monte_carlo:
     generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
       type: beta
       args: [0.5, 2]
+
+# ------------------- SECTOR OPTIONS -------------------
