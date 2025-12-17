@@ -1,12 +1,13 @@
+---
 atlite:
   nprocesses: 4
   cutouts:
     cutout-2013-era5:
       module: era5
-      dx: 0.3 # cutout resolution
-      dy: 0.3 # cutout resolution
+      dx: 0.3  # cutout resolution
+      dy: 0.3  # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
-      # y: [33., 72]    # manual set cutout range
+      # y: [33., 72]  # manual set cutout range

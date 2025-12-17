@@ -1,21 +1,22 @@
-  solar:
-    cutout: cutout-2013-era5
-    resource:
-      method: pv
-      panel: CSi
-      orientation: latitude_optimal # will lead into optimal design
+---
+solar:
+  cutout: cutout-2013-era5
+  resource:
+    method: pv
+    panel: CSi
+    orientation: latitude_optimal  # will lead into optimal design
       # slope: 0.  # slope: 0 represent a flat panel
       # azimuth: 180.  # azimuth: 180 south orientation
-    capacity_per_sqkm: 4.6 # From 1.7 to 4.6 addresses issue #361
+  capacity_per_sqkm: 4.6   #  From 1.7 to 4.6 addresses issue  # 361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
     # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
     # sector: The economic potential of photovoltaics and concentrating solar
     # power." Applied Energy 135 (2014): 704-720.
-    correction_factor: 0.854337
-    copernicus:
-      grid_codes: [20, 30, 40, 50, 60, 90, 100]
-    natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
+  correction_factor: 0.854337
+  copernicus:
+    grid_codes: [20, 30, 40, 50, 60, 90, 100]
+  natura: true
+  potential: simple  # or conservative
+  clip_p_max_pu: 1.e-2
+  extendable: true
