@@ -11,19 +11,23 @@ In particular, it covers capacity expansion models and economic dispatch models,
 Before addressing these categories, we introduce some general definitions.
 In general, an optimization problem can be expressed as:
 
+$$
 
    \begin{aligned}
        \min_{\mathbf{x}} \quad & f(\mathbf{x}) \quad \text{(objective function)}
    \end{aligned}
+$$
 
 subject to:
 
+$$
 
 
    \begin{aligned}
        & g_i(\mathbf{x}) \le 0 \quad \forall i \quad \text{(inequality constraints)} \\
        & h_j(\mathbf{x}) = 0 \quad \forall j \quad \text{(equality constraints)}
    \end{aligned}
+$$
 
 
 where:
@@ -42,14 +46,17 @@ where:
 
 Consider the following problem:
 
+$$
 
 
    \begin{aligned}
        \min_{x_1, x_2} \quad & x_1 + x_2 \label{eq:obj_simple}
    \end{aligned}
+$$
 
 subject to:
 
+$$
 
 
    \begin{aligned}
@@ -57,6 +64,7 @@ subject to:
        & x_2 \geq 0 \quad \label{eq:const2} \\
        & x_1 + 2x_2 = 4 \quad \label{eq:const3}
    \end{aligned}
+$$
 
 **Explanation:**
 
@@ -99,15 +107,18 @@ We consider a system composed of:
 
 The optimization problem can be formulated as:
 
+$$
 
 
    \begin{aligned}
        \min_{\substack{P_{\text{PV}},\, P_{\text{gas}}, \\ p_{\text{PV}}(t),\, p_{\text{gas}}(t)}}
        & C_{\text{PV}}^{\text{cap}} \cdot P_{\text{PV}} + C_{\text{gas}}^{\text{cap}} \cdot P_{\text{gas}} \nonumber \\
        & + \sum_{t=1}^T c_{\text{gas}} \cdot p_{\text{gas}}(t) \cdot \Delta t \label{eq:obj_energy}\end{aligned}
+$$
 
 subject to:
 
+$$
 
 
    \begin{aligned}
@@ -115,6 +126,7 @@ subject to:
        & 0 \leq p_{\text{PV}}(t) \leq \min\{G(t) \cdot \eta_{\text{PV}},\; P_{\text{PV}}\} \quad \forall t \label{eq:pv_lim} \\
        & 0 \leq p_{\text{gas}}(t) \leq P_{\text{gas}} \quad \forall t \label{eq:gas_lim} \\
        & P_{\text{PV}} \geq 0, \quad P_{\text{gas}} \geq 0 \label{eq:cap_nonneg}\end{aligned}
+$$
 
 **Interpretation:**
 
@@ -167,15 +179,18 @@ capacity expansion known as *economic dispatch* (ED).
 
 **Optimization problem**
 
+$$
 
 
    \begin{aligned}
        \min_{\{p_{\text{PV}}(t),\, p_{\text{gas}}(t)\}} \quad
        & \sum_{t=1}^T c_{\text{gas}} \, p_{\text{gas}}(t)\, \Delta t
        \label{eq:ed_obj}\end{aligned}
+$$
 
 subject to
 
+$$
 
 
    \begin{aligned}
@@ -191,6 +206,7 @@ subject to
          \quad \forall t
          && \text{(gas capacity limit)}
          \label{eq:ed_gas_bounds}\end{aligned}
+$$
 
 A realistic example could be the validation of a given model with
 historical data, where capacities are set (historical ones) and only
@@ -305,6 +321,7 @@ $\omega$ is revealed.
 
 The two-stage stochastic problem can be written as:
 
+$$
 
 
    \begin{aligned}
@@ -312,6 +329,7 @@ The two-stage stochastic problem can be written as:
        f(x) + \sum_{\omega \in \Omega} p_\omega \, g(x, y_\omega, \omega) \label{eq:stoc_compact} \\
        \text{s.t.} \quad & A_\omega x + B_\omega y_\omega \ge b_\omega, \quad \forall \omega \in \Omega, \\
                          & x \ge 0, \quad y_\omega \ge 0 \quad \forall \omega \in \Omega.\end{aligned}
+$$
 
 Here:
 
@@ -366,23 +384,28 @@ representing, for example, *low*, *medium*, and *high* price conditions.
 
 **Two-stage stochastic formulation:**
 
+$$
 
 
    \begin{aligned}
        \min_{P_{\text{PV}},\, P_{\text{gas}}} \quad
        & C_{\text{PV}}^{\text{cap}} \cdot P_{\text{PV}} + C_{\text{gas}}^{\text{cap}} \cdot P_{\text{gas}} \nonumber \\
        & + \sum_{\omega=1}^3 p_\omega \; Q(P_{\text{PV}},P_{\text{gas}},\omega) \label{eq:stoc_obj_energy}\end{aligned}
+$$
 
 where the second-stage operational cost for scenario $\omega$ is:
 
+$$
 
 
    \begin{aligned}
        Q(P_{\text{PV}},P_{\text{gas}},\omega) \;=\;
        & \sum_{t=1}^T c_{\text{gas}}^{(\omega)} \cdot p_{\text{gas}}(t,\omega) \cdot \Delta t\end{aligned}
+$$
 
 subject to, for each scenario $\omega$:
 
+$$
 
 
    \begin{aligned}
@@ -392,6 +415,7 @@ subject to, for each scenario $\omega$:
          && \forall t \quad \text{(PV limit)} \label{eq:stoc_pv_lim} \\
        & 0 \le p_{\text{gas}}(t,\omega) \le P_{\text{gas}}
          && \forall t \quad \text{(gas capacity)} \label{eq:stoc_gas_lim}\end{aligned}
+$$
 
 **Interpretation:**
 
@@ -449,6 +473,7 @@ approximates the annual cost and performance.
 
 The optimization problem becomes:
 
+$$
 
 
    \begin{aligned}
@@ -456,6 +481,7 @@ The optimization problem becomes:
        f(x) + \sum_{d \in \mathcal{D}} w_d \, g(x, y_d, d) \label{eq:repdays_obj} \\
        \text{s.t.} \quad & A_d x + B_d y_d \ge b_d, \quad \forall d \in \mathcal{D}, \\
                          & x \ge 0, \quad y_d \ge 0 \quad \forall d \in \mathcal{D}.\end{aligned}
+$$
 
 The structure is similar to the stochastic formulation, but:
 
