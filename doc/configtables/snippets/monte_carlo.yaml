@@ -1,12 +1,13 @@
+---
 monte_carlo:
   # Description: Specify Monte Carlo sampling options for uncertainty analysis.
   # Define the option list for Monte Carlo sampling.
   # Make sure add_to_snakefile is set to true to enable Monte-Carlo
   options:
-    add_to_snakefile: false # When set to true, enables Monte Carlo sampling
-    samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
-    sampling_strategy: "chaospy" # "pydoe2", "chaospy", "scipy", packages that are supported
-    seed: 42 # set seedling for reproducibilty
+    add_to_snakefile: false  # When set to true, enables Monte Carlo sampling
+    samples: 9  # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
+    sampling_strategy: chaospy  # "pydoe2", "chaospy", "scipy", packages that are supported
+    seed: 42  # set seedling for reproducibilty
   # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
   # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
   # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
@@ -29,5 +30,4 @@ monte_carlo:
     generators_t.p_max_pu.loc[:, n.generators.carrier == "solar"]:
       type: beta
       args: [0.5, 2]
-
 # ------------------- SECTOR OPTIONS -------------------

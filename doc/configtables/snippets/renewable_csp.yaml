@@ -1,23 +1,23 @@
-  csp:
-    cutout: cutout-2013-era5
-    resource:
-      method: csp
-      installation: SAM_solar_tower
-    capacity_per_sqkm: 2.392 # From 1.7 to 4.6 addresses issue #361
+---
+csp:
+  cutout: cutout-2013-era5
+  resource:
+    method: csp
+    installation: SAM_solar_tower
+  capacity_per_sqkm: 2.392   #  From 1.7 to 4.6 addresses issue  # 361
     # Determined by comparing uncorrected area-weighted full-load hours to those
     # published in Supplementary Data to
     # Pietzcker, Robert Carl, et al. "Using the sun to decarbonize the power
     # sector: The economic potential of photovoltaics and concentrating solar
     # power." Applied Energy 135 (2014): 704-720.
-    copernicus:
-      grid_codes: [20, 30, 40, 60, 90]
-      distancing_codes: [50]
-      distance_to_codes: 3000
-    natura: true
-    potential: simple # or conservative
-    clip_p_max_pu: 1.e-2
-    extendable: true
-    csp_model: advanced # simple or advanced
-
+  copernicus:
+    grid_codes: [20, 30, 40, 60, 90]
+    distancing_codes: [50]
+    distance_to_codes: 3000
+  natura: true
+  potential: simple  # or conservative
+  clip_p_max_pu: 1.e-2
+  extendable: true
+  csp_model: advanced  # simple or advanced
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration

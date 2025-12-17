@@ -1,19 +1,20 @@
-  hydro:
-    cutout: cutout-2013-era5
-    hydrobasins_level: 6
-    resource:
-      method: hydro
-      hydrobasins: data/hydrobasins/hybas_world.shp
-      flowspeed: 1.0 # m/s
+---
+hydro:
+  cutout: cutout-2013-era5
+  hydrobasins_level: 6
+  resource:
+    method: hydro
+    hydrobasins: data/hydrobasins/hybas_world.shp
+    flowspeed: 1.0  # m/s
       # weight_with_height: false
       # show_progress: true
-    carriers: [ror, PHS, hydro]
-    PHS_max_hours: 6
-    hydro_max_hours: "energy_capacity_totals_by_country" # not active
-    hydro_max_hours_default: 6.0 # (optional, default 6) Default value of max_hours for hydro when NaN values are found
-    clip_min_inflow: 1.0
-    extendable: true
-    normalization:
-      method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
-      year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
-    multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+  carriers: [ror, PHS, hydro]
+  PHS_max_hours: 6
+  hydro_max_hours: energy_capacity_totals_by_country  # not active
+  hydro_max_hours_default: 6.0  # (optional, default 6) Default value of max_hours for hydro when NaN values are found
+  clip_min_inflow: 1.0
+  extendable: true
+  normalization:
+    method: eia  # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
+    year: 2013  # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
+  multiplier: 1.1  # multiplier applied after the normalization of the hydro production; default 1.0

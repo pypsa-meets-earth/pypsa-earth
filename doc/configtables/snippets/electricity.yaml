@@ -1,44 +1,47 @@
+---
 electricity:
   base_voltage: 380.
   voltages: [132., 220., 300., 380., 500., 750.]
-  co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 1.487e+9 # European default, adjustment to Africa necessary
-  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
-    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
-    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
-  hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
+  co2limit: 7.75e+7  # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
+  co2base: 1.487e+9  # European default, adjustment to Africa necessary
+  agg_p_nom_limits:  # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv  # path to csv file containing country-wise generation capacity limits
+    include_existing: false  # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
+  hvdc_as_lines: false  # should HVDC lines be modeled as `Line` or as `Link` component?
   automatic_emission: false
-  automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
-
-  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+  automatic_emission_base_year: 1990  # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
+  operational_reserve:  # like https://genxproject.github.io/GenX/dev/core/#Reserves
     activate: false
-    epsilon_load: 0.02 # share of total load
-    epsilon_vres: 0.02 # share of total renewable supply
-    contingency: 0 # fixed capacity in MW
-
+    epsilon_load: 0.02  # share of total load
+    epsilon_vres: 0.02  # share of total renewable supply
+    contingency: 0  # fixed capacity in MW
   max_hours:
     battery: 6
     H2: 168
-
   extendable_carriers:
       # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
           # from the Generator list below, as these offshore wind technologies require coastline access.
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
-    StorageUnit: [] # battery, H2
+    StorageUnit: []  # battery, H2
     Store: [battery, H2]
-    Link: [] # H2 pipeline
-
+    Link: []  # H2 pipeline
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
-  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
-
-  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  custom_powerplants: false  #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+  conventional_carriers:
+    - nuclear
+    - oil
+    - OCGT
+    - CCGT
+    - coal
+    - lignite
+    - geothermal
+    - biomass
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
-
   estimate_renewable_capacities:
-    stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
-    year: 2023 # Reference year, available years for IRENA stats are 2000 to 2023
-    p_nom_min: 1 # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
-    p_nom_max: false # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
+    stats: irena  # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
+    year: 2023  # Reference year, available years for IRENA stats are 2000 to 2023
+    p_nom_min: 1  # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
+    p_nom_max: false  # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
       Offshore: [offwind-ac, offwind-dc]

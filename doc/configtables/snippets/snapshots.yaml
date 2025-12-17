@@ -1,6 +1,6 @@
+---
 snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
-  inclusive: "left" # end is not inclusive
-
+  start: '2013-01-01'
+  end: '2014-01-01'
+  inclusive: left  # end is not inclusive
 # definition of the Coordinate Reference Systems
