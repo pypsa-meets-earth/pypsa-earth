@@ -28,6 +28,26 @@ That is an experimental modeling implementation intended to be used for bridging
 
 To run the stable modelling workflow for any country of the workd, please refer to [PyPSA-Earth repository](https://github.com/pypsa-meets-earth/pypsa-earth).
 
+## Repository Structure
+
+PyPSA-Earth-OSM uses a multi-branch development strategy to enable parallel work on general features and country-specific modeling:
+
+### Branch Overview
+
+- **`development`** (Main development branch): Contains general features, enhancements, and infrastructure improvements for the Earth-OSM workflow. All new features and bug fixes should be developed here first.
+
+- **`columbia-modeling`**: Dedicated branch for Colombia-specific energy system modeling. Contains configurations, data, and analysis specific to Colombia's power grid.
+
+- **`bolivia-modeling`**: Dedicated branch for Bolivia-specific energy system modeling. Contains configurations, data, and analysis specific to Bolivia's power grid.
+
+### Contributing Guidelines
+
+- **For general features**: Create feature branches from `development` and submit pull requests to `development`.
+- **For country-specific modeling**: Work on the respective country branch (`columbia-modeling` or `bolivia-modeling`).
+- **Keeping branches updated**: Country-specific branches should periodically merge updates from `development` to incorporate new features and fixes.
+
+This structure allows researchers to focus on specific country analyses while maintaining a common codebase for shared functionality.
+
 ## How Earth-OSM Works
 
 PyPSA-Earth-OSM leverages OpenStreetMap (OSM) data to build power grid topology models for energy system analysis. The workflow extracts, processes, and validates power infrastructure data from OSM, enabling researchers to analyze electricity networks using crowd-sourced geographic information.
