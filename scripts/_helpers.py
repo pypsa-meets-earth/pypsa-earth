@@ -25,7 +25,7 @@ import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
-from pypsa.components import component_attrs, components
+from pypsa.components import components
 
 logger = logging.getLogger(__name__)
 
@@ -1365,7 +1365,7 @@ def override_component_attrs(directory):
     Dictionary of overridden component attributes.
     """
 
-    attrs = {k: v.copy() for k, v in component_attrs.items()}
+    attrs = {k: v.copy() for k, v in components.component_attrs.items()}
 
     for component, list_name in components.list_name.items():
         fn = f"{directory}/{list_name}.csv"
