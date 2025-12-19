@@ -4,17 +4,15 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-
 # Configuration
+
 PyPSA-Earth imports the configuration options originally developed in [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/index.html) and here reported and adapted.
 The options here described are collected in a `config.yaml` file located in the root directory.
 Users should copy the provided default configuration (`config.default.yaml`) and amend
 their own modifications and assumptions in the user-specific configuration file (`config.yaml`]);
 confer installation instructions at [installation](../home/installation.md).
 
-
   Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
-
 
 # Top-level configuration
 
@@ -44,10 +42,10 @@ The `scenario` section is an extraordinary section of the config file
 that is strongly connected to the [wildcards](wildcards.md) and is designed to
 facilitate running multiple scenarios through a single command
 
-``bash
+```bash
 snakemake -j 1 solve_all_networks
+```
 
-``
 For each wildcard, a **list of values** is provided. The rule `solve_all_networks` will trigger the rules for creating `results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc` for **all combinations** of the provided wildcard values as defined by Python's [itertools.product(...)](https://docs.python.org/2/library/itertools.html#itertools.product) function that snakemake's [expand(...) function](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets) uses.
 
 An exemplary dependency graph (starting from the simplification rules) then looks like this:
@@ -131,15 +129,13 @@ For example, consider the Central District of Botswana, which has a GADM ID of `
 
 > **See `config.default.yaml` for the full configuration.**
 
-
 There are several formats for GADM IDs depending on the version, so before using this feature, please review the `resources/shapes/gadm_shape.geojson` file which can be created using the command:
 
 ``bash
 snakemake -j 1 build_shapes
 
 ``
-   The rule `build_shapes` currently use [Version 4.1 ](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
-
+   The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
 
 # `clean_osm_data_options`
 
@@ -183,7 +179,6 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
-
 # `co2_budget`
 
 If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
@@ -205,7 +200,6 @@ Specifies the options for the rule `add_electricity`. This includes options acro
 {{ read_csv('configtables/electricity.csv') }}
 
 Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
-
 
 # `lines`
 
@@ -235,19 +229,19 @@ Define and specify the `atlite.Cutout` used for calculating renewable potentials
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
-## `onwind`   :end-before:   offwind-ac:
+## `onwind`   :end-before:   offwind-ac
 
 {{ read_csv('configtables/onwind.csv') }}
 
-## `offwind-ac`   :end-before:   offwind-dc:
+## `offwind-ac`   :end-before:   offwind-dc
 
 {{ read_csv('configtables/offwind-ac.csv') }}
 
-## `offwind-dc`   :end-before:   solar:
+## `offwind-dc`   :end-before:   solar
 
 {{ read_csv('configtables/offwind-dc.csv') }}
 
-## `solar`   :end-before:   hydro:
+## `solar`   :end-before:   hydro
 
 {{ read_csv('configtables/solar.csv') }}
 
@@ -272,17 +266,15 @@ Specifies the cost assumptions of the technologies considered. Cost information 
 To change cost assumptions in more detail (i.e. other than `marginal_cost`), consider modifying cost assumptions directly in `data/costs.csv` as this is not yet supported through the config file.
    You can also build multiple different cost databases. Make a renamed copy of `data/costs.csv` (e.g. `data/costs-optimistic.csv`) and set the variable `COSTS=data/costs-optimistic.csv` in the `Snakefile`.
 
-
    The `marginal costs` or in this context `variable costs` of operating the assets is important for realistic operational model outputs.
    It can define the curtailment order of renewable generators, the dispatch order of generators, and the dispatch of storage units.
    If not approapriate set, the model might output unrealistic results. Learn more about this in
    [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
    [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
 
-
 # `monte_carlo`
 
-Specifies the options for Monte Carlo sampling.   :end-before:   solving:
+Specifies the options for Monte Carlo sampling.
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
@@ -290,11 +282,11 @@ Specifies the options for Monte Carlo sampling.   :end-before:   solving:
 
 Specify linear power flow formulation and optimization solver settings.
 
-## `options`   :end-before:   solver:
+## `options`
 
 {{ read_csv('configtables/solving-options.csv') }}
 
-## `solver`   :end-before: plotting:
+## `solver`
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
