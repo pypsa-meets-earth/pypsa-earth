@@ -204,6 +204,7 @@ Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 ## lines
 
 Specifies electricity line parameters.
+
 {{ read_csv('configtables/lines.csv') }}
 
 ## links
@@ -224,33 +225,33 @@ Define and specify the `atlite.Cutout` used for calculating renewable potentials
 
 {{ read_csv('configtables/atlite.csv') }}
 
-## renewable
+### renewable
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
-## onwind
+#### onwind
 
 {{ read_csv('configtables/onwind.csv') }}
 
-## offwind-ac
+#### offwind-ac
 
 {{ read_csv('configtables/offwind-ac.csv') }}
 
-## offwind-dc
+#### offwind-dc
 
 {{ read_csv('configtables/offwind-dc.csv') }}
 
-## solar
+#### solar
 
 {{ read_csv('configtables/solar.csv') }}
 
-## hydro
+#### hydro
 
 > **See `config.default.yaml` for the full configuration.**
 
 {{ read_csv('configtables/hydro.csv') }}
 
-## csp
+#### csp
 
 > **See `config.default.yaml` for the full configuration.**
 
@@ -280,11 +281,11 @@ Specifies the options for Monte Carlo sampling.
 
 Specify linear power flow formulation and optimization solver settings.
 
-## options
+### options
 
 {{ read_csv('configtables/solving-options.csv') }}
 
-## solver
+### solver
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
