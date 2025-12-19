@@ -14,4 +14,4 @@ copernicus,,,
 natura,bool,"{true, false}",Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``.
 potential,--,"One of {'simple', 'conservative'}",Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`
 clip_p_max_pu,p.u.,float,To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.
-extendable, bool, "{True, False}", "True: In nodes where there is no solar generation, adds a zero-capacity solar generator so that solar is considered for capacity expansion. It is done in the ``add_electricity`` rule."
+extendable,bool,"{True, False}","True: In nodes where there is no solar generation, adds a zero-capacity solar generator so that solar is considered for capacity expansion. It is done in the ``add_electricity`` rule."
