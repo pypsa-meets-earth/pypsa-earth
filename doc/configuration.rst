@@ -117,7 +117,7 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
-   .. _natura_cf:
+.. _natura_cf:
 
 ``natura``
 ===============
