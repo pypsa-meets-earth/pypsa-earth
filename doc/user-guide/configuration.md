@@ -14,7 +14,7 @@ confer installation instructions at [installation](../home/installation.md).
 
   Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
 
-# Top-level configuration
+## Top-level configuration
 
 ```yaml
 --8<-- "configtables/snippets/toplevel.yaml"
@@ -22,7 +22,7 @@ confer installation instructions at [installation](../home/installation.md).
 
 {{ read_csv('configtables/toplevel.csv') }}
 
-# run
+## run
 
 It is common conduct to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
 e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
@@ -36,7 +36,7 @@ The `run` section is used for running and storing scenarios with different confi
 
 {{ read_csv('configtables/run.csv') }}
 
-# scenario
+## scenario
 
 The `scenario` section is an extraordinary section of the config file
 that is strongly connected to the [wildcards](wildcards.md) and is designed to
@@ -58,7 +58,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 {{ read_csv('configtables/scenario.csv') }}
 
-# snapshots
+## snapshots
 
 Specifies the temporal range for the historical weather data, which is used to build the energy system model. It uses arguments to [pandas.date_range](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html). The date range must be in the past (before 2022). A well-tested year is 2013.
 
@@ -68,7 +68,7 @@ Specifies the temporal range for the historical weather data, which is used to b
 
 {{ read_csv('configtables/snapshots.csv') }}
 
-# crs
+## crs
 
 Defines the coordinate reference systems (crs).
 
@@ -78,7 +78,7 @@ Defines the coordinate reference systems (crs).
 
 {{ read_csv('configtables/crs.csv') }}
 
-# augmented_line_connection
+## augmented_line_connection
 
 If enabled, it increases the connectivity of the network. It makes the network graph [k-edge-connected](https://en.wikipedia.org/wiki/K-edge-connected_graph), i.e.,
 if fewer than k edges are removed, the network graph stays connected. It uses the [k-edge-augmentation](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation)
@@ -90,7 +90,7 @@ algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.ht
 
 {{ read_csv('configtables/augmented_line_connection.csv') }}
 
-# cluster_options
+## cluster_options
 
 Specifies the options to simplify and cluster the network. This is done in two stages, first using the rule `simplify_network` and then using the rule `cluster_network`. For more details on this process, see the [PyPSA-Earth paper](https://www.sciencedirect.com/science/article/pii/S0306261923004609), section 3.7.
 
@@ -100,7 +100,7 @@ Specifies the options to simplify and cluster the network. This is done in two s
 
 {{ read_csv('configtables/cluster_options.csv') }}
 
-# build_shape_options
+## build_shape_options
 
 Specifies the options to build the shapes in which the region of interest (`countries`) is divided.
 
@@ -110,7 +110,7 @@ Specifies the options to build the shapes in which the region of interest (`coun
 
 {{ read_csv('configtables/build_shape_options.csv') }}
 
-# subregion
+## subregion
 
 If enabled, this option allows a region of interest (`countries`) to be redefined into subregions,
 which can be activated at various stages of the workflow. Currently, it is used in `simplify_network` and `cluster_network` rule.
@@ -137,7 +137,7 @@ snakemake -j 1 build_shapes
 ``
    The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
 
-# clean_osm_data_options
+## clean_osm_data_options
 
 Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) data.
 
@@ -147,7 +147,7 @@ Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.or
 
 {{ read_csv('configtables/clean_osm_data_options.csv') }}
 
-# build_osm_network
+## build_osm_network
 
 Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) network.
 
@@ -157,7 +157,7 @@ Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.or
 
 {{ read_csv('configtables/build_osm_network.csv') }}
 
-# base_network
+## base_network
 
 Specifies the minimum voltage magnitude in the base network and the offshore substations.
 
@@ -167,7 +167,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 
 {{ read_csv('configtables/base_network.csv') }}
 
-# load_options
+## load_options
 
 Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socioeconomic pathway (GDP and population growth), to enhance modelling capabilities.
 
@@ -179,7 +179,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
-# co2_budget
+## co2_budget
 
 If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
 
@@ -189,7 +189,7 @@ If enabled, this option allows setting different CO₂ targets for each planning
 
 {{ read_csv('configtables/co2_budget.csv') }}
 
-# electricity
+## electricity
 
 Specifies the options for the rule `add_electricity`. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, CO2 emission limits, operational reserve, storage parameters. See the table below for more details.
 
@@ -201,31 +201,31 @@ Specifies the options for the rule `add_electricity`. This includes options acro
 
 Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
-# lines
+## lines
 
 Specifies electricity line parameters.
    :start-after: PV:
 {{ read_csv('configtables/lines.csv') }}
 
-# links
+## links
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .   :end-before: transformers:
 
 {{ read_csv('configtables/links.csv') }}
 
-# transformers
+## transformers
 
 Specifies transformers parameters and types.   :end-before: atlite:
 
 {{ read_csv('configtables/transformers.csv') }}
 
-# atlite
+## atlite
 
 Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).   :end-before: renewable:
 
 {{ read_csv('configtables/atlite.csv') }}
 
-# renewable
+## renewable
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
@@ -257,7 +257,7 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 
 {{ read_csv('configtables/csp.csv') }}
 
-# costs
+## costs
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
    :start-after: Costs Configuration
@@ -272,13 +272,13 @@ To change cost assumptions in more detail (i.e. other than `marginal_cost`), con
    [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
    [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
 
-# monte_carlo
+## monte_carlo
 
 Specifies the options for Monte Carlo sampling.
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
-# solving
+## solving
 
 Specify linear power flow formulation and optimization solver settings.
 
@@ -290,7 +290,7 @@ Specify linear power flow formulation and optimization solver settings.
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
-# plotting
+## plotting
 
 Specifies plotting options.
 {{ read_csv('configtables/plotting.csv') }}
