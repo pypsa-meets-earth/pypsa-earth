@@ -488,30 +488,84 @@ def attach_wind_and_solar(
             else:
                 capital_cost = costs.at[tech, "capital_cost"]
 
-            if not df.query("carrier == @tech").empty:
-                buses = n.buses.loc[ds.indexes["bus"]]
-                caps = map_country_bus(df.query("carrier == @tech"), buses)
-                caps = caps.groupby(["bus"]).p_nom.sum()
-                caps = pd.Series(data=caps, index=ds.indexes["bus"]).fillna(0)
-            else:
-                caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
+            # Get p_max_pu profile for all buses
+            p_max_pu = ds["profile"].transpose("time", "bus").to_pandas()
+            p_nom_max_per_bus = ds["p_nom_max"].to_pandas()
+            weight = ds["weight"].to_pandas()
 
-            n.madd(
-                "Generator",
-                ds.indexes["bus"],
-                " " + tech,
-                bus=ds.indexes["bus"],
-                carrier=tech,
-                p_nom=caps,
-                p_nom_extendable=tech in extendable_carriers["Generator"],
-                p_nom_min=caps,
-                p_nom_max=ds["p_nom_max"].to_pandas(),
-                p_max_pu=ds["profile"].transpose("time", "bus").to_pandas(),
-                weight=ds["weight"].to_pandas(),
-                marginal_cost=costs.at[suptech, "marginal_cost"],
-                capital_cost=capital_cost,
-                efficiency=costs.at[suptech, "efficiency"],
-            )
+            # Add existing generators (not extendable)
+            tech_ppl = df.query("carrier == @tech")
+            if not tech_ppl.empty:
+                buses = n.buses.loc[ds.indexes["bus"]]
+                existing = map_country_bus(tech_ppl, buses)
+
+                # Define indices for existing generators
+                existing_idx = pd.Index(
+                    existing.index.astype(str) + " " + tech + " existing",
+                    name="Generator",
+                )
+
+                # Get p_max_pu for each existing generator's bus
+                existing_p_max_pu = pd.DataFrame(
+                    p_max_pu[existing["bus"].values].values,
+                    index=p_max_pu.index,
+                    columns=existing_idx,
+                )
+
+                n.madd(
+                    "Generator",
+                    existing_idx,
+                    bus=existing["bus"].values,
+                    carrier=tech,
+                    p_nom=existing["p_nom"].values,
+                    p_nom_extendable=False,
+                    p_nom_min=existing["p_nom"].values,
+                    p_nom_max=existing["p_nom"].values,
+                    p_max_pu=existing_p_max_pu,
+                    marginal_cost=costs.at[suptech, "marginal_cost"],
+                    capital_cost=capital_cost,
+                    efficiency=costs.at[suptech, "efficiency"],
+                    build_year=existing["datein"].values,
+                    lifetime=(existing["dateout"] - existing["datein"]).values,
+                )
+
+                # Calculate existing capacity per bus for adjusting p_nom_max
+                existing_per_bus = existing.groupby("bus")["p_nom"].sum()
+                existing_per_bus = existing_per_bus.reindex(ds.indexes["bus"]).fillna(0)
+
+                logger.info(
+                    f"Added {len(existing)} existing {tech} generators "
+                    f"with total capacity {existing['p_nom'].sum() / 1e3:.2f} GW"
+                )
+            else:
+                existing_per_bus = pd.Series(0.0, index=ds.indexes["bus"])
+
+            # Add extendable generators
+            if tech in extendable_carriers["Generator"]:
+                # Adjust p_nom_max by subtracting existing capacities
+                adjusted_p_nom_max = (p_nom_max_per_bus - existing_per_bus).clip(lower=0.0)
+
+                n.madd(
+                    "Generator",
+                    ds.indexes["bus"],
+                    suffix=" " + tech,
+                    bus=ds.indexes["bus"],
+                    carrier=tech,
+                    p_nom_extendable=True,
+                    p_nom_max=adjusted_p_nom_max,
+                    p_max_pu=p_max_pu,
+                    weight=weight,
+                    marginal_cost=costs.at[suptech, "marginal_cost"],
+                    capital_cost=capital_cost,
+                    efficiency=costs.at[suptech, "efficiency"],
+                    build_year=0,
+                    lifetime=costs.at[suptech, "lifetime"],
+                )
+
+                logger.info(
+                    f"Added extendable {tech} generators at {len(ds.indexes['bus'])} buses "
+                    f"with total potential {adjusted_p_nom_max.sum() / 1e3:.2f} GW"
+                )
 
 
 def attach_conventional_generators(
@@ -523,7 +577,6 @@ def attach_conventional_generators(
     renewable_carriers,
     conventional_config,
     conventional_inputs,
-    existing_capacities_config,
 ):
     carriers = set(conventional_carriers) | (
         set(extendable_carriers["Generator"]) - set(renewable_carriers)
@@ -546,17 +599,40 @@ def attach_conventional_generators(
     n.madd(
         "Generator",
         ppl.index,
+        suffix=" existing",
         carrier=ppl.carrier,
         bus=ppl.bus,
-        p_nom_min=ppl.p_nom.where(ppl.carrier.isin(conventional_carriers), 0),
-        p_nom=ppl.p_nom.where(ppl.carrier.isin(conventional_carriers), 0),
-        p_nom_extendable=ppl.carrier.isin(extendable_carriers["Generator"]),
+        p_nom=ppl.p_nom,
+        p_nom_extendable=False,
+        p_nom_min=ppl.p_nom,
+        p_nom_max=ppl.p_nom,
         efficiency=ppl.efficiency,
         marginal_cost=ppl.marginal_cost,
         capital_cost=ppl.capital_cost,
         build_year=ppl.datein.fillna(0).astype(int),
         lifetime=(ppl.dateout - ppl.datein).fillna(np.inf),
     )
+
+    # Add extendable conventional generators
+    extendable_conventional = set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    carrier_buses = n.buses.index
+
+    for carrier in extendable_conventional:
+        n.madd(
+            "Generator",
+            carrier_buses,
+            suffix=" " + carrier,
+            carrier=carrier,
+            bus=carrier_buses,
+            p_nom_extendable=True,
+            efficiency=costs.at[carrier, "efficiency"],
+            marginal_cost=costs.at[carrier, "marginal_cost"],
+            capital_cost=costs.at[carrier, "capital_cost"],
+            lifetime=costs.at[carrier, "lifetime"],
+        )
+
+        logger.info(f"Added extendable {carrier} generators at {len(carrier_buses)} buses.")
+
 
     for carrier in conventional_config:
         # Generators with technology affected
@@ -966,7 +1042,6 @@ if __name__ == "__main__":
         renewable_carriers,
         snakemake.params.conventional,
         conventional_inputs,
-        snakemake.params.existing_capacities,
     )
     attach_wind_and_solar(
         n,
