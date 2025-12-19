@@ -158,7 +158,7 @@ markdown_extensions:
 - toc:
     title: On this page
     permalink: true
-    toc_depth: 3
+    toc_depth: 4
 - footnotes
 
   # PyMdown Extensions
