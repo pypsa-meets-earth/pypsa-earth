@@ -259,7 +259,6 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 ## costs
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
-   :start-after: Costs Configuration
 {{ read_csv('configtables/costs.csv') }}
 
 To change cost assumptions in more detail (i.e. other than `marginal_cost`), consider modifying cost assumptions directly in `data/costs.csv` as this is not yet supported through the config file.
