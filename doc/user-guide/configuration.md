@@ -204,24 +204,23 @@ Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 ## lines
 
 Specifies electricity line parameters.
-   :start-after: PV:
 {{ read_csv('configtables/lines.csv') }}
 
 ## links
 
-Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .   :end-before: transformers:
+Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .
 
 {{ read_csv('configtables/links.csv') }}
 
 ## transformers
 
-Specifies transformers parameters and types.   :end-before: atlite:
+Specifies transformers parameters and types.
 
 {{ read_csv('configtables/transformers.csv') }}
 
 ## atlite
 
-Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).   :end-before: renewable:
+Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).
 
 {{ read_csv('configtables/atlite.csv') }}
 
@@ -229,19 +228,19 @@ Define and specify the `atlite.Cutout` used for calculating renewable potentials
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
-## onwind   :end-before:   offwind-ac
+## onwind
 
 {{ read_csv('configtables/onwind.csv') }}
 
-## offwind-ac   :end-before:   offwind-dc
+## offwind-ac
 
 {{ read_csv('configtables/offwind-ac.csv') }}
 
-## offwind-dc   :end-before:   solar
+## offwind-dc
 
 {{ read_csv('configtables/offwind-dc.csv') }}
 
-## solar   :end-before:   hydro
+## solar
 
 {{ read_csv('configtables/solar.csv') }}
 
