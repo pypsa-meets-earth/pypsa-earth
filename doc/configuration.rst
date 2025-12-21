@@ -34,7 +34,7 @@ Top-level configuration
 ``run``
 =======
 
-It is common conduct to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
+It is common to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
 e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
 investment changes as more ambitious greenhouse-gas emission reduction targets are applied.
 
@@ -65,7 +65,7 @@ facilitate running multiple scenarios through a single command
 
 For each wildcard, a **list of values** is provided. The rule ``solve_all_networks`` will trigger the rules for creating ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc`` for **all combinations** of the provided wildcard values as defined by Python's `itertools.product(...) <https://docs.python.org/2/library/itertools.html#itertools.product>`_ function that snakemake's `expand(...) function <https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets>`_ uses.
 
-An exemplary dependency graph (starting from the simplification rules) then looks like this:
+An example dependency graph (starting from the simplification rules) looks like this:
 
 .. image:: img/scenarios.png
 
@@ -202,7 +202,7 @@ which can be activated at various stages of the workflow. Currently, it is used 
    :widths: 25,10,22,27
    :file: configtables/subregion.csv
 
-The names of subregions are arbitrary. Its sizes are determined by how many GADM IDs that are included in the list.
+The names of subregions are arbitrary. Its sizes are determined by the number of GADM IDs included in the list.
 A single country can be divided into multiple subregions, and a single subregion can include GADM IDs from multiple countries.
 If the same GADM ID appears in different subregions, the first subregion listed will take precedence over that region.
 The remaining GADM IDs that are not listed will be merged back to form the remaining parts of their respective countries.

@@ -7,7 +7,7 @@
 Learning materials
 ===================================
 
-PyPSA meets Earth builds on top of several open-source packages, which are here recalled together with recommended sources to learn them from scratch.
+PyPSA meets Earth builds on several open-source packages. Below are the recommended sources for learning each one from the beginning.
 
 .. _data_science_basics:
 
