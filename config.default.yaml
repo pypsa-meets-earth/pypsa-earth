@@ -783,6 +783,7 @@ solving:
       primal_feasibility_tolerance: 1e-8
       dual_feasibility_tolerance: 1e-8
       ipm_optimality_tolerance: 1e-8
+      parallel: "on"
       random_seed: 123
     gurobi-default:
       threads: 4
