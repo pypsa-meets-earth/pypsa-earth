@@ -12,6 +12,7 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
@@ -38,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
 
 **Minor Changes and bug-fixing**
+
+* Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
 
@@ -66,6 +69,12 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
 
 * Adjust default solver parameters for using HiGHS to improve convergence `PR #1650 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1650>`__
+
+* Fix Labeling of technologies `PR #1644 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644>`__
+
+* fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
+
+* Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__
 
 PyPSA-Earth 0.7.0
 =================
@@ -183,6 +192,8 @@ PyPSA-Earth 0.7.0
 * Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
+
+* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
 
 PyPSA-Earth 0.6.0
 =================
