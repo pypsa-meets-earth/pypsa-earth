@@ -9,7 +9,7 @@ Wildcards
 #########
 
 It is easy to run PyPSA-Earth for multiple scenarios using the wildcards feature of ``snakemake``.
-Wildcards allow to generalise a rule to produce all files that follow a regular expression pattern
+Wildcards allow you to generalise a rule to produce all files that follow a regular expression pattern
 which e.g. defines one particular scenario. One can think of a wildcard as a parameter that shows
 up in the input/output file names of the ``Snakefile`` and thereby determines which rules to run,
 what data to retrieve and what files to produce.
@@ -22,7 +22,7 @@ Detailed explanations of how wildcards work in ``snakemake`` can be found in the
 The ``{simpl}`` wildcard
 ========================
 
-The ``{simpl}`` wildcard specifies number of buses a detailed
+The ``{simpl}`` wildcard specifies the number of buses a detailed
 network model should be pre-clustered to in the rule
 :mod:`simplify_network` (before :mod:`cluster_network`).
 
@@ -62,8 +62,9 @@ It is handled in the rule :mod:`prepare_network`.
 The wildcard, in general, consists of two parts:
 
     1. The first part can be
-       ``v`` (for setting a limit on line volume) or
-       ``c`` (for setting a limit on line cost)
+       ``v`` (for setting a limit on line volume), or
+       ``c`` (for setting a limit on line cost), or
+       ``l`` (for a line-specific limit on line expansion).
 
     2. The second part can be
        ``opt`` or a float bigger than one (e.g. 1.25).
@@ -80,6 +81,9 @@ The wildcard, in general, consists of two parts:
 
        (c) ``c1.25`` will allow to build a transmission network that
            costs no more than 25 % more than the current system.
+
+       (d) ``l1.25`` will allow to build a transmission network where
+           each line is expanded to no more than 25% of its capacity.
 
 .. _opts:
 
@@ -108,9 +112,9 @@ generation potentials for renewable technologies) can be narrowed to
 individual countries using the ``{country}`` wildcard.
 
 If ``country=all``, then the rule acts on the network for all countries
-defined in ``config.yaml``. If otherwise ``country=DE`` or another 2-letter
+defined in ``config.yaml``. If ``country=DE`` or another 2-letter
 country code, then the network is narrowed to buses of this country
-for the rule. For example to get a summary of the energy generated
+for the rule. For example, to get a summary of the energy generated
 in Germany (in the solution for Europe) use:
 
 .. code:: bash
@@ -136,7 +140,7 @@ series and potentials using the rule :mod:`build_renewable_profiles`.
 It can take the values ``onwind``, ``offwind-ac``, ``offwind-dc``, and ``solar`` but **not** ``hydro``
 (since hydroelectric plant profiles are created by a different rule).
 
-The wildcard can moreover be used to create technology specific figures and summaries.
+The wildcard can moreover be used to create technology-specific figures and summaries.
 For instance ``{technology}`` can be used to plot regionally disaggregated potentials
 with the rule :mod:`plot_p_nom_max`.
 

@@ -965,105 +965,94 @@ def annuity(n, r):
         return 1 / n
 
 
+# Single source for the currency reference year (aligned with `technology-data` output files / PyPSA-Earth input cost files).
+# Change this value to update the reference year everywhere.
+TECH_DATA_REFERENCE_YEAR = 2020
+
 # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 _currency_conversion_cache = {}
 
 
-# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 def get_yearly_currency_exchange_rate(
     initial_currency: str,
     output_currency: str,
-    year: int,
     default_exchange_rate: float = None,
     _currency_conversion_cache: dict = None,
-    future_exchange_rate_strategy: str = "latest",
+    future_exchange_rate_strategy: str = "reference",  # "reference", "latest", "custom"
     custom_future_exchange_rate: float = None,
 ):
     """
-    Returns the average EUR-to-output currency exchange rate and the currency year.
+    Returns the average currency exchange rate for the global reference_year.
 
-    Uses cached values if available; otherwise computes the average from daily rates.
-    Falls back to a default exchange rate if provided and no data is available.
+    Parameters
+    ----------
+    initial_currency : str
+        Input currency (e.g. "EUR", "USD").
+    output_currency : str
+        Desired output currency (e.g. "USD").
+    default_exchange_rate : float, optional
+        Fallback value if no rate data is found.
+    _currency_conversion_cache : dict, optional
+        Cache for repeated calls.
+    future_exchange_rate_strategy : str
+        "reference" (use TECH_DATA_REFERENCE_YEAR),
+        "latest" (use most recent available year),
+        "custom" (use custom_future_exchange_rate).
+    custom_future_exchange_rate : float, optional
+        Custom exchange rate if strategy is "custom".
     """
-
     if _currency_conversion_cache is None:
-        _currency_conversion_cache = {}  # Use empty cache if not provided
+        _currency_conversion_cache = {}
 
-    key = (initial_currency, output_currency, year)
+    key = (
+        initial_currency,
+        output_currency,
+        TECH_DATA_REFERENCE_YEAR,
+        future_exchange_rate_strategy,
+    )
     if key in _currency_conversion_cache:
         return _currency_conversion_cache[key]
 
-    successful_years = []
-    default_years = []
+    # Handle EUR specially (no direct rates, fallback on USD dates)
+    if initial_currency == "EUR":
+        available_dates = sorted(currency_converter._rates["USD"].keys())
+    else:
+        if initial_currency not in currency_converter._rates:
+            if default_exchange_rate is not None:
+                return default_exchange_rate
+            raise RuntimeError(f"No data for currency {initial_currency}.")
+        available_dates = sorted(currency_converter._rates[initial_currency].keys())
 
-    # Helper inner function to handle one year at a time
-    def _average_for_year(y):
-        if initial_currency == "EUR":
-            # EUR has no direct rates, use USD dates as reference
-            available_dates = sorted(currency_converter._rates["USD"].keys())
-        else:
-            if initial_currency not in currency_converter._rates:
-                if default_exchange_rate is not None:
-                    default_years.append(y)
-                    return default_exchange_rate
-                raise RuntimeError(
-                    f"No data for currency {initial_currency} and no default rate provided."
-                )
-            available_dates = sorted(currency_converter._rates[initial_currency].keys())
+    max_date = available_dates[-1]
 
-        max_date = available_dates[-1]
-        # If year is beyond available data and strategy is "custom", return custom value
-        if y > max_date.year:
-            if future_exchange_rate_strategy == "custom":
-                if custom_future_exchange_rate is not None:
-                    logger.info(
-                        f"Using custom future exchange rate ({custom_future_exchange_rate}) for {initial_currency}->{output_currency} in {y}."
-                    )
-                    return custom_future_exchange_rate
-                else:
-                    raise RuntimeError(
-                        "Custom future exchange rate strategy selected, but no value was provided."
-                    )
-            # fallback to latest available year
-            effective_year = max_date.year
-            logger.info(
-                f"Using latest available year ({effective_year}) for future exchange rate of {initial_currency}->{output_currency} in {y}."
-            )
-        else:
-            effective_year = y
-        dates_to_use = [d for d in available_dates if d.year == effective_year]
-
-        rates = []
-        for date in dates_to_use:
-            try:
-                rate = currency_converter.convert(
-                    1, initial_currency, output_currency, date
-                )
-                rates.append(rate)
-            except Exception:
-                continue
-
-        if rates:
-            successful_years.append(effective_year)
-            return sum(rates) / len(rates)
-
-        if default_exchange_rate is not None:
-            default_years.append(effective_year)
-            return default_exchange_rate
-
-        raise RuntimeError(
-            f"No exchange rate data found for {initial_currency}->{output_currency} in {effective_year}, and no default rate provided."
+    # Decide which year to use
+    if future_exchange_rate_strategy == "custom":
+        if custom_future_exchange_rate is None:
+            raise RuntimeError("Custom strategy selected but no rate provided.")
+        avg_rate = custom_future_exchange_rate
+    elif future_exchange_rate_strategy == "latest":
+        effective_year = max_date.year
+        logger.info(
+            f"Using latest available year ({effective_year}) for {initial_currency}->{output_currency}."
         )
+        dates_to_use = [d for d in available_dates if d.year == effective_year]
+        rates = [
+            currency_converter.convert(1, initial_currency, output_currency, d)
+            for d in dates_to_use
+        ]
+        avg_rate = sum(rates) / len(rates) if rates else default_exchange_rate
+    else:  # "reference": use module-level reference_year
+        effective_year = TECH_DATA_REFERENCE_YEAR
+        dates_to_use = [d for d in available_dates if d.year == effective_year]
+        if not dates_to_use and default_exchange_rate is not None:
+            avg_rate = default_exchange_rate
+        else:
+            rates = [
+                currency_converter.convert(1, initial_currency, output_currency, d)
+                for d in dates_to_use
+            ]
+            avg_rate = sum(rates) / len(rates)
 
-    avg_rate = _average_for_year(year)
-
-    # Log only once per call, avoiding multiple repeated messages
-    if successful_years:
-        logger.info(f"Currency conversion succeeded for years: {successful_years}")
-    if default_years:
-        logger.warning(f"Using default exchange rate for years: {default_years}")
-
-    # Save computed rate to cache
     _currency_conversion_cache[key] = avg_rate
     return avg_rate
 
@@ -1072,38 +1061,38 @@ def build_currency_conversion_cache(
     df,
     output_currency,
     default_exchange_rate=None,
-    future_exchange_rate_strategy: str = "latest",
+    future_exchange_rate_strategy: str = "reference",
     custom_future_exchange_rate: float = None,
 ):
     """
-    Builds a cache of exchange rates for all unique (output_currency, year) pairs in the dataset.
-
-    Rates are computed once and stored for reuse to improve performance.
+    Builds a cache of exchange rates for all unique (currency, output_currency) pairs,
+    always using the module-level reference_year.
     """
     currency_list = currency_converter.currencies
-
-    unique_keys = {
-        (x["unit"][:3], output_currency, int(x["currency_year"]))
+    unique_currencies = {
+        x["unit"][0:3]
         for _, x in df.iterrows()
-        if x["unit"][:3] in currency_list
+        if isinstance(x["unit"], str) and x["unit"][0:3] in currency_list
     }
 
     _currency_conversion_cache = {}
-    for key in unique_keys:
-        initial_currency, _, year = key
+    for initial_currency in unique_currencies:
         try:
             rate = get_yearly_currency_exchange_rate(
                 initial_currency,
                 output_currency,
-                year,
-                default_exchange_rate,
+                default_exchange_rate=default_exchange_rate,
                 _currency_conversion_cache=_currency_conversion_cache,
                 future_exchange_rate_strategy=future_exchange_rate_strategy,
                 custom_future_exchange_rate=custom_future_exchange_rate,
             )
-            _currency_conversion_cache[key] = rate
+            _currency_conversion_cache[
+                (initial_currency, output_currency, TECH_DATA_REFERENCE_YEAR)
+            ] = rate
         except Exception as e:
-            logger.warning(f"Failed to get rate for {key}: {e}")
+            logger.warning(
+                f"Failed to get rate for {initial_currency}->{output_currency}: {e}"
+            )
             continue
 
     return _currency_conversion_cache
@@ -1113,7 +1102,7 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     """
     Applies exchange rates from the cache to convert all cost values and units.
 
-    Converts only rows with monetary units that start with a known currency symbol and contain '/'.
+    All rows are assumed to be in `*_reference_year` already (e.g. EUR_2020).
     """
     currency_list = currency_converter.currencies
 
@@ -1125,30 +1114,19 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
             return pd.Series([value, unit])
 
         currency = unit[:3]
-        year = x.get("currency_year")
 
         if currency not in currency_list:
             return pd.Series([value, unit])
 
-        if pd.isnull(year):
-            logger.warning(
-                f"Missing currency_year for row with unit '{unit}' and value '{value}'. Skipping currency conversion."
-            )
+        key = (currency, output_currency, TECH_DATA_REFERENCE_YEAR)
+        rate = cache.get(key)
+        if rate is not None:
+            new_value = value * rate
+            new_unit = unit.replace(currency, output_currency, 1)
+            return pd.Series([new_value, new_unit])
+        else:
+            logger.warning(f"Missing exchange rate for {key}. Skipping conversion.")
             return pd.Series([value, unit])
-
-        try:
-            key = (currency, output_currency, int(year))
-            rate = cache.get(key)
-            if rate is not None:
-                new_value = value * rate
-                new_unit = unit.replace(currency, output_currency)
-                return pd.Series([new_value, new_unit])
-            else:
-                logger.warning(f"Missing exchange rate for {key}. Skipping conversion.")
-        except Exception as e:
-            logger.warning(f"Failed to convert row {x.name}: {e}")
-
-        return pd.Series([value, unit])
 
     cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
     return cost_dataframe
@@ -1168,6 +1146,7 @@ def prepare_costs(
     Loads and processes cost data, converting units and currency to a common format.
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
+    Always uses the module-level reference_year.
     """
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 
@@ -1198,13 +1177,13 @@ def prepare_costs(
             "Some rows are missing 'currency_year' and will be skipped in currency conversion."
         )
 
-    # Create a shared cache for exchange rates
+    # Build a shared cache for exchange rates using the global reference_year
     _currency_conversion_cache = build_currency_conversion_cache(
         costs,
         output_currency,
-        default_exchange_rate,
-        future_exchange_rate_strategy,
-        custom_future_exchange_rate,
+        default_exchange_rate=default_exchange_rate,
+        future_exchange_rate_strategy=future_exchange_rate_strategy,
+        custom_future_exchange_rate=custom_future_exchange_rate,
     )
 
     modified_costs = apply_currency_conversion(
@@ -1218,6 +1197,15 @@ def prepare_costs(
         .sum(min_count=1)
     )
     modified_costs = modified_costs.fillna(fill_values)
+
+    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+        overwrites = config.get(attr)
+        if overwrites is not None:
+            overwrites = pd.Series(overwrites)
+            modified_costs.loc[overwrites.index, attr] = overwrites
+            logger.info(
+                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
+            )
 
     def annuity_factor(v):
         return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
@@ -1811,3 +1799,215 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         """
         # set the required compression demand
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
+
+
+def nearest_shape(n, path_shapes, crs, tolerance=100):
+    """
+    Reassigns buses in the network `n` to the nearest country shape based on coordinates.
+
+    Parameters
+    ----------
+    n: pypsa network
+    path_shapes: str
+        path to shapefile with geometries and 'name' column
+    crs: str
+        dict with keys 'geo_crs' and 'distance_crs' (e.g., EPSG codes or proj strings)
+    tolerance: int, optional
+        distance (in km) for assigning a shape to a bus (The default tolerance is 100 km)
+
+    Returns
+    -------
+    pypsa network with modified 'country' column in n.buses
+
+    """
+
+    from pyproj import Transformer
+    from shapely.geometry import Point
+
+    # Load and reproject country shapes
+    shapes = gpd.read_file(path_shapes).set_index("name")["geometry"]
+    shapes = shapes.to_crs(crs["distance_crs"])
+
+    # Create transformer once (from geo_crs to distance_crs)
+    transformer = Transformer.from_crs(
+        crs["geo_crs"], crs["distance_crs"], always_xy=True
+    )
+
+    for i in n.buses.index:
+        # Original coordinates
+        x, y = n.buses.loc[i, "x"], n.buses.loc[i, "y"]
+
+        # Transform point directly
+        x_proj, y_proj = transformer.transform(x, y)
+        point_proj = Point(x_proj, y_proj)
+
+        # Check containment
+        contains = shapes.contains(point_proj)
+        if contains.any():
+            n.buses.loc[i, "country"] = contains[contains].index[0]
+        else:
+            distances = shapes.distance(point_proj).sort_values()
+            if distances.iloc[0] < tolerance * 1e3:
+                n.buses.loc[i, "country"] = distances.index[0]
+            else:
+                logger.warning(
+                    f"The bus {i} is {distances.iloc[0]:.2f} meters away from {distances.index[0]} — unassigned."
+                )
+
+    return n
+
+
+def branch(condition, then, otherwise=None):
+    """
+    This is a placeholder function that exists in Snakemake versions > 8.3.0.
+    It can be removed once Snakemake is updated to a compatible version.
+    """
+    if condition:
+        return then
+
+    if otherwise is None:
+        if isinstance(then, dict):
+            return {}
+        elif isinstance(then, str):
+            return []
+        else:
+            return None
+
+    return otherwise
+
+
+def rename_techs(label):
+    prefix_to_remove = [
+        "residential ",
+        "services ",
+        "urban ",
+        "rural ",
+        "central ",
+        "decentral ",
+    ]
+
+    rename_if_contains = [
+        "CHP",
+        "gas boiler",
+        "biogas",
+        "solar thermal",
+        "air heat pump",
+        "ground heat pump",
+        "resistive heater",
+        "Fischer-Tropsch",
+    ]
+
+    rename_if_contains_dict = {
+        "water tanks": "hot water storage",
+        "retrofitting": "building retrofitting",
+        "H2": "H2",
+        "battery": "battery storage",
+        "CCS": "CCS",
+    }
+
+    rename = {
+        "solar": "solar PV",
+        "Sabatier": "methanation",
+        "offwind": "offshore wind",
+        "offwind-ac": "offshore wind (AC)",
+        "offwind-dc": "offshore wind (DC)",
+        "onwind": "onshore wind",
+        "ror": "hydroelectricity",
+        "hydro": "hydroelectricity",
+        "PHS": "hydroelectricity",
+        "co2 Store": "DAC",
+        "co2 stored": "CO2 sequestration",
+        "AC": "transmission lines",
+        "DC": "transmission lines",
+        "B2B": "transmission lines",
+    }
+
+    for ptr in prefix_to_remove:
+        if label[: len(ptr)] == ptr:
+            label = label[len(ptr) :]
+
+    for rif in rename_if_contains:
+        if rif in label:
+            label = rif
+
+    for old, new in rename_if_contains_dict.items():
+        if old in label:
+            label = new
+
+    for old, new in rename.items():
+        if old == label:
+            label = new
+    return label
+
+
+def add_missing_carriers(n, carriers):
+    """
+    Function to add missing carriers to the network without raising errors.
+    """
+    valid_carriers = {c for c in carriers if isinstance(c, str) and c.strip() != ""}
+    missing_carriers = valid_carriers - set(n.carriers.index)
+    if len(missing_carriers) > 0:
+        for carrier in missing_carriers:
+            n.add("Carrier", carrier)
+
+
+def sanitize_carriers(n, config):
+    """
+    Sanitize the carrier information in a PyPSA Network object.
+
+    The function ensures that all unique carrier names are present in the network's
+    carriers attribute, and adds nice names and colors for each carrier according
+    to the provided configuration dictionary.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        A PyPSA Network object that represents an electrical power system.
+    config : dict
+        A dictionary containing configuration information, specifically the
+        "plotting" key with "nice_names" and "tech_colors" keys for carriers.
+
+    Returns
+    -------
+    None
+        The function modifies the 'n' PyPSA Network object in-place, updating the
+        carriers attribute with nice names and colors.
+
+    Warnings
+    --------
+    Raises a warning if any carrier's "tech_colors" are not defined in the config dictionary.
+    """
+
+    for c in n.iterate_components():
+        if "carrier" in c.df:
+            add_missing_carriers(n, c.df.carrier)
+
+    carrier_i = n.carriers.index
+    nice_names = (
+        pd.Series(config["plotting"]["nice_names"])
+        .reindex(carrier_i)
+        .fillna(carrier_i.to_series())
+    )
+    n.carriers["nice_name"] = n.carriers.nice_name.where(
+        n.carriers.nice_name != "", nice_names
+    )
+
+    tech_colors = config["plotting"]["tech_colors"]
+    colors = pd.Series(tech_colors).reindex(carrier_i)
+    # try to fill missing colors with tech_colors after renaming
+    missing_colors_i = colors[colors.isna()].index
+    colors[missing_colors_i] = missing_colors_i.map(rename_techs).map(tech_colors)
+    if colors.isna().any():
+        missing_i = list(colors.index[colors.isna()])
+        logger.warning(f"tech_colors for carriers {missing_i} not defined in config.")
+    n.carriers["color"] = n.carriers.color.where(n.carriers.color != "", colors)
+
+
+def sanitize_locations(n):
+    if "location" in n.buses.columns:
+        n.buses["x"] = n.buses.x.where(n.buses.x != 0, n.buses.location.map(n.buses.x))
+        n.buses["y"] = n.buses.y.where(n.buses.y != 0, n.buses.location.map(n.buses.y))
+        n.buses["country"] = n.buses.country.where(
+            n.buses.country.ne("") & n.buses.country.notnull(),
+            n.buses.location.map(n.buses.country),
+        )

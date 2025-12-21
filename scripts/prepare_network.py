@@ -65,7 +65,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    sanitize_carriers,
+    sanitize_locations,
+)
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -184,7 +190,7 @@ def set_line_s_max_pu(n, s_max_pu):
     logger.info(f"N-1 security margin of lines set to {s_max_pu}")
 
 
-def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
+def set_transmission_limit(n, ll_type, factor, costs, lines, links):
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
 
     _lines_s_nom = (
@@ -210,7 +216,12 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
         n.links.loc[links_dc_b, "p_nom_min"] = n.links.loc[links_dc_b, "p_nom"]
         n.links.loc[links_dc_b, "p_nom_extendable"] = True
 
-    if factor != "opt":
+    if ll_type == "l":
+        n.lines["s_nom_max"] = n.lines["s_nom"] * float(factor)
+        n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
+            factor
+        )
+    elif factor != "opt":  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -221,6 +232,9 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
             constant=rhs,
             carrier_attribute="AC, DC",
         )
+
+    set_line_nom_max(n, lines, links)
+
     return n
 
 
@@ -310,9 +324,11 @@ def enforce_autarky(n, only_crossborder=False):
     n.mremove("Link", links_rm)
 
 
-def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-    n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
-    n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
+def set_line_nom_max(n, lines, links):
+    s_max, s_min = lines.get("s_nom_max"), lines.get("s_nom_max_min")
+    p_max, p_min = links.get("p_nom_max"), links.get("p_nom_max_min")
+    n.lines.s_nom_max = n.lines.s_nom_max.clip(lower=s_min, upper=s_max)
+    n.links.p_nom_max = n.links.p_nom_max.clip(lower=p_min, upper=p_max)
 
 
 if __name__ == "__main__":
@@ -325,7 +341,7 @@ if __name__ == "__main__":
             clusters="4",
             ll="c1",
             opts="Co2L-4H",
-            configfile="test/config.sector.yaml",
+            # configfile="test/config.sector.yaml",
         )
 
     configure_logging(snakemake)
@@ -425,18 +441,17 @@ if __name__ == "__main__":
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
-    set_transmission_limit(n, ll_type, factor, costs, Nyears)
-
-    set_line_nom_max(
-        n,
-        s_nom_max_set=snakemake.params.lines.get("s_nom_max,", np.inf),
-        p_nom_max_set=snakemake.params.links.get("p_nom_max,", np.inf),
-    )
+    lines = snakemake.params.lines
+    links = snakemake.params.links
+    set_transmission_limit(n, ll_type, factor, costs, lines, links)
 
     if "ATK" in opts:
         enforce_autarky(n)
     elif "ATKc" in opts:
         enforce_autarky(n, only_crossborder=True)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

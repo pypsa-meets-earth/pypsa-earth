@@ -27,3 +27,4 @@ aggregation_strategies,,,
 -- -- ramp_limit_up,, "{min, mean, max, sum}", "Indicates how the ramp_limit_up of the aggregated generator is computed from the original ramp_limit_up values."
 -- -- ramp_limit_down,, "{min, mean, max, sum}", "Indicates how the ramp_limit_down of the aggregated generator is computed from the original ramp_limit_down values."
 -- -- efficiency,, "{min, mean, max, sum}", "Indicates how the efficiency of the aggregated generator is computed from the original efficiency values."
+focus_weights,, "Dict consisting of {country: share} such as {NG: 0.4}", "When specified, set the share of nodes allocated to each country. The sum of focus weights must be less than or equal to 1."
