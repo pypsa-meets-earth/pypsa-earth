@@ -76,6 +76,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__
 
+* Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
+
 PyPSA-Earth 0.7.0
 =================
 
