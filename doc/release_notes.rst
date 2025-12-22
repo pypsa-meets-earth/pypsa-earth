@@ -76,6 +76,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__
 
+* Add configtable for some sector parameters `PR #1494 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1494>`__
+
 PyPSA-Earth 0.7.0
 =================
 
