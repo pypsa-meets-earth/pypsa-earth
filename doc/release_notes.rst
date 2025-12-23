@@ -12,6 +12,8 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
+
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
 * Account for existing batteries in powerplants file and improve logging on installed capacity `PR #1623 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1623>`__
@@ -42,6 +44,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
+
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
 
 * The configuration setting for ``focus_weights`` has been moved from ``focus_weights:`` to ``cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>`__
@@ -67,6 +71,14 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
+
+* Fix Labeling of technologies `PR #1644 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644>`__
+
+* fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
+
+* Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__
+
+* Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
 
 PyPSA-Earth 0.7.0
 =================
@@ -184,6 +196,8 @@ PyPSA-Earth 0.7.0
 * Avoid adding CO2 pipeline links when option is disabled `PR #1504 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504>`__
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
+
+* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
 
 PyPSA-Earth 0.6.0
 =================
