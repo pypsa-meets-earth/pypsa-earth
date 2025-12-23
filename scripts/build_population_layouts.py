@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from _helpers import read_csv_nafix
-from vresutils import shapes as vshapes
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -31,7 +30,7 @@ if __name__ == "__main__":
     )  # os.path.abspath(snakemake.config["atlite"]["cutout"])
     cutout = atlite.Cutout(cutout_path)
 
-    grid_cells = cutout.grid.geometry.to_list()
+    grid_cells = cutout.grid.geometry
 
     # nuts3 has columns country, gdp, pop, geometry
     nuts3 = gpd.read_file(snakemake.input.nuts3_shapes).set_index("GADM_ID")
@@ -50,7 +49,6 @@ if __name__ == "__main__":
 
     urban_percent_df = read_csv_nafix(
         snakemake.input.urban_percent,
-        usecols=[0, 1, 4],
         index_col=0,
     )
 
@@ -69,15 +67,13 @@ if __name__ == "__main__":
 
     # Squeeze into a Series
     urban_fraction = urban_percent_df.squeeze() / 100.0
-    urban_fraction = urban_fraction.groupby(urban_fraction.index).sum()
 
     # population in each grid cell
     pop_cells = pd.Series(I.dot(nuts3["pop"]))
     gdp_cells = pd.Series(I.dot(nuts3["gdp"]))
 
-    # in km^2
-    with mp.Pool(processes=snakemake.threads) as pool:
-        cell_areas = pd.Series(pool.map(vshapes.area, grid_cells)) / 1e6
+    area_crs = snakemake.config["crs"]["area_crs"]
+    cell_areas = grid_cells.to_crs(area_crs).area / 1e6
 
     # pop per km^2
     density_cells_pop = pop_cells / cell_areas

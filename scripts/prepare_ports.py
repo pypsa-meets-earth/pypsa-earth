@@ -4,11 +4,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
 import os
+import shutil
 from pathlib import Path
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
+from _helpers import BASE_DIR
 
 # from _helpers import configure_logging
 
@@ -31,12 +33,43 @@ def download_ports():
     return wpi_csv
 
 
+def filter_ports(dataframe):
+    """
+    Filters ports based on their harbor size and returns a DataFrame containing
+    only the largest port for each country.
+    """
+    # Filter large sized ports
+    large_ports = dataframe[dataframe["Harbor Size"] == "Large"]
+    countries_with_large_ports = large_ports["country"].unique()
+
+    # Filter out countries with large ports
+    remaining_ports = dataframe[~dataframe["country"].isin(countries_with_large_ports)]
+
+    # Filter medium sized ports from remaining ports
+    medium_ports = remaining_ports[remaining_ports["Harbor Size"] == "Medium"]
+    countries_with_medium_ports = medium_ports["country"].unique()
+
+    # Filter out countries with medium ports
+    remaining_ports = remaining_ports[
+        ~remaining_ports["country"].isin(countries_with_medium_ports)
+    ]
+
+    # Filter small sized ports from remaining ports
+    small_ports = remaining_ports[remaining_ports["Harbor Size"] == "Small"]
+
+    # Combine all filtered ports
+    filtered_ports = pd.concat([large_ports, medium_ports, small_ports])
+
+    return filtered_ports
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake("prepare_ports")
 
+    config = snakemake.config
     # configure_logging(snakemake)
 
     # run = snakemake.config.get("run", {})
@@ -102,3 +135,14 @@ if __name__ == "__main__":
     ports["fraction"] = ports["Harbor_size_nr"] / ports["Total_Harbor_size_nr"]
 
     ports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
+
+    if snakemake.params.custom_export:
+        custom_export_path = Path(BASE_DIR).joinpath(
+            "data", "custom", "export_ports.csv"
+        )
+        shutil.copy(custom_export_path, snakemake.output[1])
+
+    else:
+        filter_ports(ports).to_csv(
+            snakemake.output[1], sep=",", encoding="utf-8", header="true"
+        )

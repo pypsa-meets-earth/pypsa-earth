@@ -1,0 +1,225 @@
+name: Test workflows
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  schedule:
+  - cron: "0 5 * * TUE"
+
+# Cancel any in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BASE_ENV: envs/environment.yaml
+
+jobs:
+  run-tests:
+    name: OS
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos, windows]
+        include:
+        - os: ubuntu
+          env_file: envs/linux-64.lock.yaml
+        - os: macos
+          env_file: envs/osx-arm64.lock.yaml
+        - os: windows
+          env_file: envs/win-64.lock.yaml
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Use base env file if it was changed
+      run: |
+        git fetch origin main
+        if git diff --name-only origin/main | grep -E '(${{env.BASE_ENV }}|.*lock.yaml)$'; then
+          if git diff --name-only origin/main | grep -E '.*lock.yaml'; then
+            echo "Lock files changed. Using lock files."
+            echo "env_file=${{ matrix.env_file }}" >> $GITHUB_ENV
+          else
+            echo "Only base env ${{ env.BASE_ENV }} changed. Using it instead of locked envs."
+            echo "env_file=${{ env.BASE_ENV }}" >> $GITHUB_ENV
+          fi
+        else
+          echo "Neither base env nor lock files changed. Using lock files."
+          echo "env_file=${{ matrix.env_file }}" >> $GITHUB_ENV
+        fi
+
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniforge-version: latest
+        activate-environment: pypsa-earth
+        channel-priority: strict
+        conda-remove-defaults: true
+
+    - name: Cache Conda env
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.CONDA }}/envs
+        key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
+      id: cache-env
+
+    - name: Update environment
+      if: steps.cache-env.outputs.cache-hit != 'true'
+      run: conda env update -n pypsa-earth -f ${{ matrix.env_file }}
+
+    - name: Conda list
+      run: conda list
+
+    - name: Run Test
+      run: make test
+
+    - name: Upload artifacts
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: results-${{ matrix.os }}
+        path: |
+          logs
+          .snakemake/log
+          results
+        retention-days: 3
+
+        # - name: Test plotting and summaries
+        #   run: |
+        #     snakemake --cores all plot_all_p_nom
+        #     snakemake --cores all plot_all_summaries
+        #     snakemake --cores all make_all_summaries
+        #     rm -rf resources/*.nc resources/*.geojson resources/*.h5 networks results
+
+    # Download artifacts
+    - name: Download feature logs
+      uses: actions/download-artifact@v6
+      with:
+        name: results-${{ matrix.os }}
+        # path: ./artifacts  # All artifacts go here, each in their own subfolder
+
+    # TODO Remove after debugging
+    - name: Show downloaded structure
+      run: |
+        echo "Current working directory: $(pwd)"
+        echo "All files and folders after artifact download:"
+        find . -type f -o -type d | sort
+
+    - name: Extract objective
+      id: extract_obj
+      run: |2
+
+        shopt -s nullglob
+
+        OBJ_STRING="(?<=INFO:__main__:Objective function: ).*"
+        LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
+        echo "Extracting the objective values from the logs"
+        echo "Solver log files: $LOG_FILES"
+        OBJ_FOUND=$(
+          awk '/INFO:__main__:Objective function: /{
+                 sub(/\r$/, "");
+                 sub(/.*INFO:__main__:Objective function: /, "");
+                 print FILENAME ":" $0
+               }' "${LOG_FILES[@]}" || true
+        )
+
+        shopt -u nullglob
+
+        # The objective can be also empty (in case some tests failed)
+        if [ -z "$OBJ_FOUND" ]; then
+          echo "Objective not found."
+          exit 1
+        else
+          echo "Objective value found: $OBJ_FOUND"
+          echo "Writing to GitHub output"
+          #printf "%s\n" "obj_match=$OBJ_FOUND" >> "$GITHUB_OUTPUT"
+          delim="OBJ_EOF_$(date +%s%N)"
+          {
+            echo "obj_match<<$delim"
+            printf '%s\n' "$OBJ_FOUND"
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+        fi
+
+        echo "The objective extracted successfully"
+
+        # Add Python import
+        extract_obj_for_path_py() {
+          python - "$1" "$2" <<'PY'
+        import sys
+        from test.utils.extract_ref_objective import extract_obj_for_path
+        dir, fl = sys.argv[1], sys.argv[2]
+        print(extract_obj_for_path(dir, fl))
+        PY
+        }
+
+        # Create properly formatted outputs
+        clean_csv_cell() {
+          local s=$1
+          # Add quotes if the field contains a delimiter or a new string
+          if [[ "$s" == *\"* || "$s" == *,* || "$s" == *$'\n'* || "$s" == *$'\r'* || "$s" == " "* || "$s" == *" " ]]; then
+            # Escape embedded quotes by doubling them
+            s=${s//\"/\"\"}
+            printf '"%s"' "$s"
+          else
+            printf '%s' "$s"
+          fi
+        }
+
+        # Table is used as a visual part in Actions Summary
+        TABLE="| Folder | File | Current Objective | Reference Objective |"
+        TABLE+="\n|:----|:-----|------------------:|--------------------:|"
+
+        # Generation of csv files facilitates objective update
+        CSV_FILE="ref_objectives-${{ matrix.os }}.csv"
+        CSV_CONTENT="folder,file,objective"
+
+        while IFS= read -r line; do
+          FILE=$(echo "$line" | cut -d: -f1)
+          VALUE=$(echo "$line" | cut -d: -f2-)
+          BASENAME=$(basename "$FILE")
+
+          # An enclosing folder contains a name of the run
+          FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
+
+          if [[ "$FILE" == ./logs/solve_network/* ]]; then
+            FOLDER="default"
+          fi
+
+          OBJ_SCALE=1000000
+          VALUE_SCALED=$(awk -v v="$VALUE" -v s="$OBJ_SCALE" 'BEGIN { if (s==0) { print "NaN"; exit 1 } printf "%.2f\n", v/s }')
+
+          REF_VALUE=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
+
+          TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE_SCALED\` | \`$REF_VALUE\` |"
+          CSV_CONTENT+=$'\n'"$(clean_csv_cell $FOLDER),$(clean_csv_cell $BASENAME),$(clean_csv_cell $VALUE_SCALED)"
+
+        done <<< "$OBJ_FOUND"
+
+        echo -e "$TABLE"
+
+        echo "The output table is formed"
+
+        echo "### Objective Results of CI Run" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "GITHUB_STEP_SUMMARY successfully supplemented with a header"
+
+        printf "%b\n" "$TABLE" >> "$GITHUB_STEP_SUMMARY"
+
+        printf "%b" "$CSV_CONTENT" > "$CSV_FILE"
+
+        echo "Objective values uploaded to csv"
+
+    - name: Upload csv artifacts
+      uses: actions/upload-artifact@v5
+      with:
+        name: ref_objectives-${{ matrix.os }}
+        path: ref_objectives-${{ matrix.os }}.csv

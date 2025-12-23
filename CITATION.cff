@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+title: PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa
+abstract: This repository contains the source code of the paper PyPSA-Earth. A new global open energy system optimization model demonstrated in Africa by Maximilian Parzen, Hazem Abdel-Khalek, Ekaterina Fedotova, Matin Mahmood, Martha Maria Frysztacki, Johannes Hampp, Lukas Franken, Leon Schumm, Fabian Neumann, Davide Poli, Aristides Kiprakis and Davide Fioriti, from Applied Energy
+doi: 10.1016/j.apenergy.2023.121096
+repository-code: https://github.com/pypsa-meets-earth/pypsa-earth
+version: 1.0.0
+date-released: 2023-04-18
+message: If you use this software in your work, please cite it using the following metadata.
+authors:
+  - given-names: Maximilian
+    family-names: Parzen
+    orcid: https://orcid.org/0000-0002-4390-0063
+  - given-names: Hazem
+    family-names: Abdel-Khalek
+  - given-names: Ekaterina
+    family-names: Fedotova
+    orcid: https://orcid.org/0000-0002-5590-9591
+  - given-names: Matin
+    family-names: Mahmood
+  - given-names: Martha Maria
+    family-names: Frysztacki
+    orcid: https://orcid.org/0000-0002-0788-1328
+  - given-names: Johannes
+    family-names: Hampp
+    orcid: https://orcid.org/0000-0002-1776-116X
+  - given-names: Lukas
+    family-names: Franken
+  - given-names: Leon
+    family-names: Schumm
+  - given-names: Fabian
+    family-names: Neumann
+    orcid: https://orcid.org/0000-0002-6604-5450
+  - given-names: Davide
+    family-names: Poli
+    orcid: https://orcid.org/0000-0002-5045-9034
+  - given-names: Aristides
+    family-names: Kiprakis
+  - given-names: Davide
+    family-names: Fioriti
+    orcid: https://orcid.org/0000-0001-5491-7912
+cff-version: 1.2.0

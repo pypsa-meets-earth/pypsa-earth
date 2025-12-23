@@ -55,7 +55,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "augmented_line_connections", network="elec", simpl="", clusters="54"
+            "augmented_line_connections", network="elec", simpl="", clusters="4"
         )
 
     configure_logging(snakemake)

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.4.1
+version: 0.7.0
 tutorial: false
 
 logging:
@@ -11,7 +11,6 @@ logging:
 
 results_dir: results/
 summary_dir: results/
-costs_dir: data/ # TODO change to the equivalent of technology data
 
 foresight: overnight
 
@@ -24,12 +23,13 @@ enable:
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  build_natura_raster: false # If True, then an exclusion raster will be build
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/api-how-to
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   progress_bar: true # show progress bar during downloading routines and other long-running tasks
+  custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
 
 
 
@@ -37,6 +37,7 @@ custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder
 
 run:
   name: "" # use this to keep track of runs with different settings
+  sector_name: "" # use this to keep track of sector scenario runs
   shared_cutouts: true # set to true to share the default cutout(s) across runs
   # Note: value false requires build_cutout to be enabled
   allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
@@ -45,11 +46,11 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [Co2L-3H]
+  opts: [Co2L-3h]
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   sopts:
-  - "144H"
+  - "144h"
   demand:
   - "AB"
 
@@ -63,6 +64,12 @@ crs:
   geo_crs: EPSG:4326 # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
   distance_crs: EPSG:3857 # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
   area_crs: ESRI:54009 # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+
+natura: # only relevant when using build_natura_raster: true
+  natura_size: countries # countries, cutout, or global. Select which regions to include in the natura raster.
+  natura_resolution: 100 # [m] Grid resolution of the natura data.
+  window_size: 10000 # [bytes] Size of the shifting rasterization window. The required RAM scales with window_size^2.
+  buffer_size: 10000 # [unit of area_crs, default: m] Buffer around the regions of interest to include every required value. A buffer of around 100 km will be sufficient for most cases.
 
 # download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 
@@ -81,10 +88,10 @@ cluster_options:
     feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
     exclude_carriers: []
     remove_stubs: true
-    remove_stubs_across_borders: true
-    p_threshold_drop_isolated: 20 # [MW] isolated buses are being discarded if bus mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated buses are being merged into a single isolated bus if a bus mean power is below the specified threshold
-    s_threshold_fetch_isolated: 0.05 # [-] a share of the national load for merging an isolated network into a backbone network
+    remove_stubs_across_borders: false
+    p_threshold_drop_isolated: 20 # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
+    p_threshold_merge_isolated: 300 # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
+    s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
   cluster_network:
     algorithm: kmeans
     feature: solar+onwind-time
@@ -98,15 +105,19 @@ cluster_options:
       p_nom_max: sum
       p_nom_min: sum
       p_min_pu: mean
+      p_max_pu: weighted_average
       marginal_cost: mean
       committable: any
       ramp_limit_up: max
       ramp_limit_down: max
       efficiency: mean
+  focus_weights: false # When a value specified, set the share of nodes allocated to each country
+    # country: share
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
   simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
+  simplify_gadm: true # When true, shape polygons are simplified else no
   update_file: false # When true, all the input files are downloaded again and replace the existing files
   out_logging: true # When true, logging is printed to console
   year: 2020 # reference year used to derive shapes, info on population and info on GDP
@@ -116,17 +127,25 @@ build_shape_options:
   gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
+subregion:
+  enable:
+    simplify_network: true # activate subregion in simplify_network
+    cluster_network: false # activate subregion in cluster_network
+  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
+  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
+
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
   threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
-  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
-  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_substations: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
-  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), or both data sets (add_custom)
+  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
 build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMap
@@ -146,12 +165,27 @@ load_options:
   prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
+co2_budget:
+  enable: false
+  override_co2opt: true
+  co2base_value: co2limit # choose from: [co2limit, co2base, absolute, {float}]
+  year:
+    2020: 1.0
+    2025: 0.85
+    2030: 0.70
+    2035: 0.55
+    2040: 0.40
+    2045: 0.25
+    2050: 0.1
+
 electricity:
   base_voltage: 380.
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
-  agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
   hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
@@ -201,12 +235,14 @@ lines:
     500.: "HVDC XLPE 1000"
   s_max_pu: 0.7
   s_nom_max: .inf
+  s_nom_max_min: -.inf
   length_factor: 1.25
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 links:
   p_max_pu: 1.0
   p_nom_max: .inf
+  p_nom_max_min: -.inf
   under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
 
 transformers:
@@ -329,7 +365,7 @@ renewable:
     clip_min_inflow: 1.0
     extendable: true
     normalization:
-      method: hydro_capacities # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
+      method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
       year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
   csp:
@@ -354,13 +390,21 @@ renewable:
     csp_model: advanced # simple or advanced
 
 # TODO: Needs to be adjusted for Africa.
+# Costs Configuration
 costs:
-  year: 2030
-  version: v0.6.2
+  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
+  technology_data_version: v0.13.2
   discountrate: [0.071] #, 0.086, 0.111]
-  # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html # noqa: E501
-  USD2013_to_EUR2013: 0.7532 # [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
-  rooftop_share: 0.14 # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
+  country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
+  # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
+  cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
+  financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
+  # Management of output currencies and exchange rates
+  output_currency: "EUR" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
+  default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  future_exchange_rate_strategy: "reference" # reference uses the exchange rate from `reference_year` for all conversions, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
+  rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
   fill_values:
     FOM: 0
     VOM: 0
@@ -422,7 +466,7 @@ monte_carlo:
   uncertainties:
     loads_t.p_set:
       type: uniform
-      args: [0, 1]
+      args: [0.5, 1]
     generators_t.p_max_pu.loc[:, n.generators.carrier == "onwind"]:
       type: lognormal
       args: [1.5]
@@ -434,8 +478,10 @@ monte_carlo:
 
 policy_config:
   hydrogen:
-    temporal_matching: "no_res_matching" # either "h2_yearly_matching", "h2_monthly_matching", "no_res_matching"
+    temporal_matching: "no_temporal_matching" #either "hour", "month", "year", "no_temporal_matching"
     spatial_matching: false
+    temporal_matching_carriers: [csp, solar, onwind, offwind-ac, offwind-dc, ror, hydro]
+    matching_technologies: ["H2 Electrolysis", "Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC"]
     additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
     allowed_excess: 1.0
     is_reference: false # Whether or not this network is a reference case network, relevant only if additionality is _true_
@@ -456,10 +502,12 @@ fossil_reserves:
   oil: 100 #TWh Maybe redundant
 
 export:
-  h2export: [10] # Yearly export demand in TWh
+  endogenous: false # If true, the export demand is endogenously determined by the model
+  endogenous_price: 400 # EUR/MWh # Market price, for wich the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
-  export_profile: "ship" # use "ship" or "constant"
+  h2export: [10] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
+  export_profile: "ship" # use "ship" or "constant". Only considered, if ["export"]["endogenous"] is set to false
   ship:
     ship_capacity: 0.4 # TWh # 0.05 TWh for new ones, 0.003 TWh for Susio Frontier, 0.4 TWh according to Hampp2021: "Corresponds to 11360 t H2 (l) with LHV of 33.3333 Mwh/t_H2. Cihlar et al 2020 based on IEA 2019, Table 3-B"
     travel_time: 288 # hours # From Agadir to Rotterdam and back (12*24)
@@ -478,6 +526,8 @@ custom_data:
   add_existing: false
   custom_sectors: false
   gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
+  export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
+  airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.
 
 industry:
   reference_year: 2015
@@ -500,6 +550,18 @@ existing_capacities:
   - uranium
 
 sector:
+  enable:
+    heat: true
+    biomass: true
+    industry: true
+    shipping: true
+    aviation: true
+    land_transport: true
+    rail_transport: true
+    agriculture: true
+    residential: true
+    services: true
+
   gas:
     spatial_gas: true # ALWAYS TRUE
     network: false # ALWAYS FALSE for now (NOT USED)
@@ -516,8 +578,13 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
+    production_technologies: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"] a list of H2 production technologies that can be added
+
   coal:
+    spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
+  lignite:
+    spatial_lignite: false
 
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
@@ -588,6 +655,16 @@ sector:
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
 
+  electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
+  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
+  transmission_efficiency:
+    electricity distribution grid:
+      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+    H2 pipeline:
+      efficiency_per_1000km: 1
+      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
+
   dynamic_transport:
     enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
     land_transport_electric_share:
@@ -642,7 +719,6 @@ sector:
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
-  hydrogen_underground_storage: true
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
 
@@ -657,30 +733,31 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
 
-  gadm_level: 1
   h2_cavern: true
   marginal_cost_storage: 0
   methanation: true
   helmeth: true
   dac: true
-  SMR: true
-  SMR CC: true
   cc_fraction: 0.9
   cc: true
   space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
   airport_sizing_factor: 3
 
+  fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
 
   conventional_generation: # generator : carrier
     OCGT: gas
-    #Gen_Test: oil # Just for testing purposes
-
+    oil: oil
+    coal: coal
+    lignite: lignite
+    biomass: biomass
+  keep_existing_capacities: true
 
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: true
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
@@ -815,152 +892,163 @@ plotting:
   - central solar thermal collector
 
   tech_colors:
-    onwind: #235ebc
-    onshore wind: #235ebc
-    offwind: #6895dd
-    offwind-ac: #6895dd
-    offshore wind: #6895dd
-    offshore wind ac: #6895dd
-    offshore wind (AC): #6895dd
-    offwind-dc: #74c6f2
-    offshore wind dc: #74c6f2
-    offshore wind (DC): #74c6f2
-    wave: #004444
-    hydro: #08ad97
-    hydro+PHS: #08ad97
-    PHS: #08ad97
-    hydro reservoir: #08ad97
-    hydroelectricity: #08ad97
-    ror: #4adbc8
-    run of river: #4adbc8
-    solar: #f9d002
-    solar PV: #f9d002
-    solar thermal: #ffef60
-    solar rooftop: #ffef60
-    biomass: #0c6013
-    solid biomass: #06540d
-    solid biomass for industry co2 from atmosphere: #654321
-    solid biomass for industry co2 to stored: #654321
-    solid biomass for industry CC: #654321
-    biogas: #23932d
-    waste: #68896b
-    geothermal: #ba91b1
-    OCGT: #d35050
-    OCGT marginal: sandybrown
-    OCGT-heat: #ee8340
-    gas: #d35050
-    natural gas: #d35050
-    gas boiler: #ee8340
-    gas boilers: #ee8340
-    gas boiler marginal: #ee8340
-    gas-to-power/heat: brown
-    SMR: #4F4F2F
-    SMR CC: darkblue
-    oil: #262626
-    oil boiler: #B5A642
-    oil emissions: #666666
-    gas for industry: #333333
-    gas for industry CC: brown
-    gas for industry co2 to atmosphere: #654321
-    gas for industry co2 to stored: #654321
-    nuclear: #ff9000
-    Nuclear: r
-    Nuclear marginal: r
-    uranium: r
-    coal: #707070
-    Coal: k
-    Coal marginal: k
-    lignite: #9e5a01
-    Lignite: grey
-    Lignite marginal: grey
-    H2: #ea048a
-    H2 for industry: #222222
-    H2 for shipping: #6495ED
-    H2 liquefaction: m
-    hydrogen storage: #ea048a
-    battery: slategray
-    battery discharger: slategray
-    battery charger: slategray
-    battery storage: slategray
-    home battery: #614700
-    home battery storage: #614700
-    lines: #70af1d
-    transmission lines: #70af1d
-    AC: #70af1d
-    AC-AC: #70af1d
-    AC line: #70af1d
-    links: #8a1caf
-    HVDC links: #8a1caf
-    DC: #8a1caf
-    DC-DC: #8a1caf
-    DC link: #8a1caf
-    load: #ff0000
-    load shedding: #ff0000
-    Electric load: b
-    electricity: k
-    electric demand: k
-    electricity distribution grid: y
-    heat: darkred
-    Heat load: r
-    heat pumps: #76EE00
-    heat pump: #76EE00
-    air heat pump: #76EE00
-    ground heat pump: #40AA00
-    CHP: r
-    CHP heat: r
-    CHP electric: r
-    heat demand: darkred
-    rural heat: #880000
-    central heat: #b22222
-    decentral heat: #800000
-    low-temperature heat for industry: #991111
-    process heat: #FF3333
-    power-to-heat: red
-    resistive heater: pink
-    Sabatier: #FF1493
-    methanation: #FF1493
-    power-to-gas: purple
-    power-to-liquid: darkgreen
-    helmeth: #7D0552
-    DAC: deeppink
-    co2 stored: #123456
-    CO2 pipeline: gray
-    CO2 sequestration: #123456
-    co2: #123456
-    co2 vent: #654321
-    process emissions: #222222
-    process emissions CC: gray
-    process emissions to stored: #444444
-    process emissions to atmosphere: #888888
-    agriculture heat: #D07A7A
-    agriculture machinery oil: #1e1e1e
-    agriculture machinery oil emissions: #111111
-    agriculture electricity: #222222
-    Fischer-Tropsch: #44DD33
-    kerosene for aviation: #44BB11
-    naphtha for industry: #44FF55
-    land transport oil: #44DD33
-    land transport oil emissions: #666666
-    land transport fuel cell: #AAAAAA
-    land transport EV: grey
-    V2G: grey
-    BEV charger: grey
-    shipping: #6495ED
-    shipping oil: #6495ED
-    shipping oil emissions: #6495ED
-    water tanks: #BBBBBB
-    hot water storage: #BBBBBB
-    hot water charging: #BBBBBB
-    hot water discharging: #999999
-    Li ion: grey
-    district heating: #CC4E5C
-    retrofitting: purple
-    building retrofitting: purple
-    solid biomass transport: green
-    biomass EOP: green
-    high-temp electrolysis: magenta
-    today: #D2691E
-    Ambient: k
+    onwind: "#235ebc"
+    onshore wind: "#235ebc"
+    offwind: "#6895dd"
+    offwind-ac: "#6895dd"
+    offshore wind: "#6895dd"
+    offshore wind ac: "#6895dd"
+    offshore wind (AC): "#6895dd"
+    offwind-dc: "#74c6f2"
+    offshore wind dc: "#74c6f2"
+    offshore wind (DC): "#74c6f2"
+    wave: "#004444"
+    hydro: "#08ad97"
+    hydro+PHS: "#08ad97"
+    PHS: "#08ad97"
+    hydro reservoir: "#08ad97"
+    hydroelectricity: "#08ad97"
+    ror: "#4adbc8"
+    run of river: "#4adbc8"
+    solar: "#f9d002"
+    solar PV: "#f9d002"
+    solar thermal: "#ffef60"
+    solar rooftop: "#ffef60"
+    biomass: "#0c6013"
+    solid biomass: "#06540d"
+    solid biomass for industry co2 from atmosphere: "#654321"
+    solid biomass for industry co2 to stored: "#654321"
+    solid biomass for industry CC: "#654321"
+    biogas: "#23932d"
+    waste: "#68896b"
+    geothermal: "#ba91b1"
+    OCGT: "#d35050"
+    OCGT marginal: "sandybrown"
+    OCGT-heat: "#ee8340"
+    CCGT: "#b80404"
+    gas: "#d35050"
+    natural gas: "#d35050"
+    gas boiler: "#ee8340"
+    gas boilers: "#ee8340"
+    gas boiler marginal: "#ee8340"
+    gas-to-power/heat: "brown"
+    SMR: "#4F4F2F"
+    SMR CC: "darkblue"
+    oil: "#262626"
+    oil boiler: "#B5A642"
+    oil emissions: "#666666"
+    gas for industry: "#333333"
+    gas for industry CC: "brown"
+    gas for industry co2 to atmosphere: "#654321"
+    gas for industry co2 to stored: "#654321"
+    nuclear: "#ff9000"
+    Nuclear: "r"
+    Nuclear marginal: "r"
+    uranium: "r"
+    coal: "#707070"
+    Coal: "k"
+    Coal marginal: "k"
+    lignite: "#9e5a01"
+    Lignite: "grey"
+    Lignite marginal: "grey"
+    H2: "#ea048a"
+    H2 for industry: "#222222"
+    H2 for shipping: "#6495ED"
+    H2 liquefaction: "m"
+    hydrogen storage: "#ea048a"
+    battery: "slategray"
+    battery discharger: "slategray"
+    battery charger: "slategray"
+    battery storage: "slategray"
+    home battery: "#614700"
+    home battery storage: "#614700"
+    lines: "#70af1d"
+    transmission lines: "#70af1d"
+    AC: "#70af1d"
+    AC-AC: "#70af1d"
+    AC line: "#70af1d"
+    links: "#8a1caf"
+    HVDC links: "#8a1caf"
+    DC: "#8a1caf"
+    DC-DC: "#8a1caf"
+    DC link: "#8a1caf"
+    load: "#ff0000"
+    load shedding: "#ff0000"
+    Electric load: "b"
+    electricity: "k"
+    electric demand: "k"
+    electricity distribution grid: "y"
+    heat: "darkred"
+    Heat load: "r"
+    heat pumps: "#76EE00"
+    heat pump: "#76EE00"
+    air heat pump: "#76EE00"
+    ground heat pump: "#40AA00"
+    CHP: "r"
+    CHP heat: "r"
+    CHP electric: "r"
+    heat demand: "darkred"
+    rural heat: "#880000"
+    central heat: "#b22222"
+    decentral heat: "#800000"
+    low-temperature heat for industry: "#991111"
+    process heat: "#FF3333"
+    power-to-heat: "red"
+    resistive heater: "pink"
+    Sabatier: "#FF1493"
+    methanation: "#FF1493"
+    power-to-gas: "purple"
+    power-to-liquid: "darkgreen"
+    helmeth: "#7D0552"
+    DAC: "deeppink"
+    co2 stored: "#123456"
+    CO2 pipeline: "gray"
+    CO2 sequestration: "#123456"
+    co2: "#123456"
+    co2 vent: "#654321"
+    process emissions: "#222222"
+    process emissions CC: "gray"
+    process emissions to stored: "#444444"
+    process emissions to atmosphere: "#888888"
+    agriculture heat: "#D07A7A"
+    agriculture machinery oil: "#1e1e1e"
+    agriculture machinery oil emissions: "#111111"
+    agriculture electricity: "#222222"
+    Fischer-Tropsch: "#44DD33"
+    kerosene for aviation: "#44BB11"
+    naphtha for industry: "#44FF55"
+    land transport oil: "#44DD33"
+    land transport oil emissions: "#666666"
+    land transport fuel cell: "#AAAAAA"
+    land transport EV: "grey"
+    V2G: "grey"
+    BEV charger: "grey"
+    shipping: "#6495ED"
+    shipping oil: "#6495ED"
+    shipping oil emissions: "#6495ED"
+    water tanks: "#BBBBBB"
+    hot water storage: "#BBBBBB"
+    hot water charging: "#BBBBBB"
+    hot water discharging: "#999999"
+    Li ion: "grey"
+    district heating: "#CC4E5C"
+    retrofitting: "purple"
+    building retrofitting: "purple"
+    solid biomass transport: "green"
+    biomass EOP: "green"
+    high-temp electrolysis: "magenta"
+    today: "#D2691E"
+    Ambient: "k"
+    industry coal emissions: "#654321"
+    agriculture oil: "#1e1e1e"
+    gas emissions: "#666666"
+    industry oil emissions: "#654321"
+    industry electricity: "#222222"
+    rail transport electricity: "grey"
+    solid biomass for industry: "#654321"
+    rail transport oil: "#44DD33"
+    low voltage: "y"
+
 
   nice_names:
     OCGT: Open-Cycle Gas

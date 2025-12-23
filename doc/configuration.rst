@@ -117,6 +117,23 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
+   .. _natura_cf:
+
+``natura``
+===============
+
+If enabled, ``build_natura_raster`` creates an updated raster of the wold protected areas instead of using the provided default raster in ``data/natura/natura.tiff``.
+The options below select which regions to include in the raster and configure the rasterization process itself.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: natura:
+   :end-at: buffer_size:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/natura.csv
 
 .. _augmented_line_connection_cf:
 
@@ -170,6 +187,44 @@ Specifies the options to build the shapes in which the region of interest (``cou
    :header-rows: 1
    :widths: 25,10,22,27
    :file: configtables/build_shape_options.csv
+
+.. _subregion_cf:
+
+``subregion``
+=============================
+
+If enabled, this option allows a region of interest (``countries``) to be redefined into subregions,
+which can be activated at various stages of the workflow. Currently, it is used in ``simplify_network`` and ``cluster_network`` rule.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: subregion:
+   :end-at: path_custom_shapes:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/subregion.csv
+
+The names of subregions are arbitrary. Its sizes are determined by how many GADM IDs that are included in the list.
+A single country can be divided into multiple subregions, and a single subregion can include GADM IDs from multiple countries.
+If the same GADM ID appears in different subregions, the first subregion listed will take precedence over that region.
+The remaining GADM IDs that are not listed will be merged back to form the remaining parts of their respective countries.
+For example, consider the Central District of Botswana, which has a GADM ID of ``BW.3``. To separate this district from the rest of the country, you can select:
+
+.. literalinclude:: ../test/config.landlock.yaml
+   :language: yaml
+   :start-at: subregion:
+   :end-at: Central: 0.3
+
+There are several formats for GADM IDs depending on the version, so before using this feature, please review the ``resources/shapes/gadm_shape.geojson`` file which can be created using the command:
+
+.. code:: bash
+
+    snakemake -j 1 build_shapes
+
+.. note::
+   The rule ``build_shapes`` currently use `Version 4.1  <https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/>`_ for their GADM data. This may change in the future.
 
 .. _clean_osm_data_options_cf:
 
@@ -241,6 +296,23 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 .. warning::
     The snapshots date range (``snapshots\start`` - ``snapshots\end``) must be in the ``weather_year``.
+
+.. _co2_budget_cf:
+
+``co2_budget``
+=============================
+
+If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: co2_budget:
+   :end-at: 2050:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,10,22,27
+   :file: configtables/co2_budget.csv
 
 .. _electricity_cf:
 

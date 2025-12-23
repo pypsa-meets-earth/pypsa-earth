@@ -39,28 +39,23 @@ def select_ports(n):
         keep_default_na=False,
     ).squeeze()
 
-    ports = ports[ports.country.isin(countries)]
-    if len(ports) < 1:
-        logger.error(
-            "No export ports chosen, please add ports to the file data/export_ports.csv"
-        )
-    gadm_level = snakemake.params.gadm_level
+    gadm_layer_id = snakemake.params.gadm_layer_id
 
-    ports["gadm_{}".format(gadm_level)] = ports[["x", "y", "country"]].apply(
-        lambda port: locate_bus(
-            port[["x", "y"]],
-            port["country"],
-            gadm_level,
-            snakemake.input["shapes_path"],
-            snakemake.params.alternative_clustering,
-        ),
-        axis=1,
+    ports = locate_bus(
+        ports,
+        countries,
+        gadm_layer_id,
+        snakemake.input.shapes_path,
+        snakemake.params.alternative_clustering,
     )
 
-    ports = ports.set_index("gadm_{}".format(gadm_level))
+    # TODO: revise if ports quantity and property by shape become relevant
+    # drop duplicated entries
+    gcol = "gadm_{}".format(gadm_layer_id)
+    ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports
-    hydrogen_buses_ports = n.buses.loc[ports.index + " H2"]
+    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
@@ -129,14 +124,27 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     elif snakemake.params.store == False:
         pass
 
-    # add load
-    n.add(
-        "Load",
-        "H2 export load",
-        bus="H2 export bus",
-        carrier="H2",
-        p_set=export_profile,
-    )
+    if snakemake.params.export_endogenous:
+        # add endogenous export by implementing a negative generation
+        n.add(
+            "Generator",
+            "H2 export load",
+            bus="H2 export bus",
+            carrier="H2",
+            sign=-1,
+            p_nom_extendable=True,
+            marginal_cost=snakemake.params.endogenous_price * (-1),
+        )
+
+    else:
+        # add exogenous export by implementing a load
+        n.add(
+            "Load",
+            "H2 export load",
+            bus="H2 export bus",
+            carrier="H2",
+            p_set=export_profile,
+        )
 
     return
 
@@ -147,7 +155,8 @@ def create_export_profile():
     and resamples it to temp resolution obtained from the wildcard.
     """
 
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6  # convert TWh to MWh
+    # convert TWh to MWh
+    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6
 
     if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760
@@ -191,14 +200,15 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="10",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate="0.071",
             demand="AB",
             h2export="120",
+            # configfile="test/config.test1.yaml",
         )
 
     overrides = override_component_attrs(snakemake.input.overrides)
@@ -213,9 +223,13 @@ if __name__ == "__main__":
 
     costs = prepare_costs(
         snakemake.input.costs,
-        snakemake.params.costs["USD2013_to_EUR2013"],
+        snakemake.config["costs"],
+        snakemake.params.costs["output_currency"],
         snakemake.params.costs["fill_values"],
         Nyears,
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
     )
 
     # get hydrogen export buses/ports

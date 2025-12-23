@@ -8,14 +8,14 @@
 Data used by the model
 ##########################################
 
-To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the :ref:`Tutorial <tutorial>` section.
+To properly model any region of the Earth, PyPSA-Earth downloads and fetches different data that are explained in detail in this section. Here we'll look into architecture of the data workflow while practical hand-ons are given in the :ref:`Tutorial <model_customization>` section.
 
 Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart from that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
 
 1. Grid topology data
 ===================================
 
-OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references.
+OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The data are available under ODbL licence and should be `credited appropriately <https://osm.org/copyright/>`_ when used.
 
 .. image:: img/africa_osm_map.png
     :height: 150 px
@@ -24,6 +24,15 @@ OpenStreetMap `OSM <https://www.openstreetmap.org/>`_ data are used to build pow
 The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and written as a geojsons in the folder `data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 
 The cleaned OSM network data that are the output of the `osm_data_cleaning` rule, which process the raw OSM data to obtain cleaned datasets of all the network assets, namely generators, substations, lines and cables. These data are stored in `/resources/osm/` folder.
+
+Contribute and improve
+------------------------------------
+
+As a collaborative mapping project that gathers millions of volunteers and professionals to contribute around the world, you are likely to improve the provided data for power grids.
+
+The `MapYourGrid initiative <https://mapyourgrid.org/>`_, started in 2025, allowed to produce tools and training to empower anyone to contribute in many areas. As a beginner you can refer to the `mapping starter kit <https://mapyourgrid.org/starter-kit/>`_ or as an experienced mapper, directly find a country to map on the `Map-it page <https://mapyourgrid.org/map-it/>`_. As a complex topic, several `strategies <https://mapyourgrid.org/strategies/>`_ has been defined to help improve the most prominent quality topics even in already mapped areas, to close the gaps in the grid or find the missing substations for instance.
+
+You can browse the `progress page <https://mapyourgrid.org/progress/>`_ or the `quality globe <https://mapyourgrid.org/quality/>`_ to get accurate insights about the availability and already spoted issues in the data consumed from OpenStreetMap project. In any case, you are welcome to join the `initiative's Discord channel <https://discord.gg/a5znpdFWfD>`_ to get in touch with other contributors that share the same interest.
 
 2. Climate data
 ===================================

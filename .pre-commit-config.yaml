@@ -9,47 +9,56 @@ exclude: ^(LICENSES)
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
-  - id: fix-encoding-pragma
   - id: mixed-line-ending
   - id: trailing-whitespace
 #   - id: check-added-large-files
 #     args: ['--maxkb=2000']
 
+# Automatically upgrade syntax for newer versions of Python
+# this may introduce changes to code that may not be backward compatible
+# - repo: https://github.com/asottile/pyupgrade
+#   rev: v3.20.0
+#   hooks:
+#   - id: pyupgrade
+
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 5.13.2
+  rev: 7.0.0
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.1
   hooks:
   - id: codespell
     args: ['--ignore-regex="(\b[A-Z]+\b)"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,fo,FO']
     types_or: [python, rst, markdown]
     files: ^(scripts|doc)/
 
-# Make docstrings PEP 257 compliant
-- repo: https://github.com/PyCQA/docformatter
-  rev: v1.7.5
-  hooks:
-  - id: docformatter
-    args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
+# # Make docstrings PEP 257 compliant
+# - repo: https://github.com/PyCQA/docformatter
+#   rev: v1.7.5
+#   hooks:
+#   - id: docformatter
+#     args: ["--in-place", "--make-summary-multi-line", "--pre-summary-newline"]
+#     entry: docformatter
+#     language: python
+#     types: [python]
 
 - repo: https://github.com/keewis/blackdoc
-  rev: v0.3.9
+  rev: v0.4.5
   hooks:
   - id: blackdoc
 
 # Formatting with "black" coding style
-- repo: https://github.com/psf/black
-  rev: 24.10.0
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: 25.9.0
   hooks:
   # Format Python files
   - id: black
@@ -58,7 +67,7 @@ repos:
 
 # Find common spelling mistakes in comments and docstrings
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.3.0
+  rev: v2.4.1
   hooks:
   - id: codespell
     args: ['--ignore-regex="\b[A-Z]+\b"', '--ignore-words-list=fom,appartment,bage,ore,setis,tabacco,berfore,vor'] # Ignore capital case words, e.g. country codes
@@ -67,26 +76,28 @@ repos:
 
 # Do YAML formatting (before the linter checks it for misses)
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.14.0
+  rev: v2.15.0
   hooks:
   - id: pretty-format-yaml
+    exclude: pinned\.yaml$
     args: [--autofix, --indent, '2', --preserve-quotes]
 
 # Use yamllint to check for valid YAML files and list syntax errors
 - repo: https://github.com/adrienverge/yamllint.git
-  rev: v1.35.1
+  rev: v1.37.1
   hooks:
   - id: yamllint
+    exclude: pinned\.yaml$
     args: [--format, parsable, -c=.yamllint]
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v0.10.2
+  rev: v0.11.2
   hooks:
   - id: snakefmt
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v4.0.3
+  rev: v6.2.0
   hooks:
   - id: reuse

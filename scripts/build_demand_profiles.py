@@ -50,7 +50,13 @@ import pandas as pd
 import pypsa
 import scipy.sparse as sparse
 import xarray as xr
-from _helpers import configure_logging, create_logger, read_csv_nafix, read_osm_config
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+    read_osm_config,
+)
 from shapely.prepared import prep
 from shapely.validation import make_valid
 
@@ -58,6 +64,8 @@ logger = create_logger(__name__)
 
 
 def normed(s):
+    if s.sum() == 0:
+        return s
     return s / s.sum()
 
 
@@ -121,7 +129,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     for continent in region_load:
         sel_ext = ".nc"
         for ext in [".nc", ".csv"]:
-            load_path = os.path.join(str(load_dir), str(continent) + str(ext))
+            load_path = os.path.join(BASE_DIR, str(load_dir), str(continent) + str(ext))
             if os.path.exists(load_path):
                 sel_ext = ext
                 break
@@ -268,6 +276,13 @@ def build_demand_profiles(
             # (refer to vresutils.load._upsampling_weights)
             # TODO: require adjustment for Africa
             factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
+            if factors.sum() == 0:
+                logger.warning(
+                    f"Upsampling factors for {cntry} are all zero, returning uniform distribution across {len(factors)} shapes."
+                )
+                factors = pd.Series(
+                    np.ones(len(factors)) / len(factors), index=factors.index
+                )
             return pd.DataFrame(
                 factors.values * l.values[:, np.newaxis],
                 index=l.index,

@@ -65,7 +65,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import requests
-from _helpers import configure_logging, create_logger
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    sanitize_carriers,
+    sanitize_locations,
+)
 from add_electricity import load_costs, update_transmission_costs
 
 idx = pd.IndexSlice
@@ -85,11 +91,14 @@ def download_emission_data():
     try:
         url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
         with requests.get(url) as rq:
-            with open("data/co2.zip", "wb") as file:
+            with open(os.path.join(BASE_DIR, "data/co2.zip"), "wb") as file:
                 file.write(rq.content)
-        file_path = "data/co2.zip"
+        file_path = os.path.join(BASE_DIR, "data/co2.zip")
         with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract("v60_CO2_excl_short-cycle_org_C_1970_2018.xls", "data")
+            zipObj.extract(
+                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+                os.path.join(BASE_DIR, "data"),
+            )
         os.remove(file_path)
         return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
     except:
@@ -117,7 +126,7 @@ def emission_extractor(filename, emission_year, country_names):
     """
 
     # data reading process
-    datapath = os.path.join(os.getcwd(), "data", filename)
+    datapath = os.path.join(BASE_DIR, "data", filename)
     df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
     df.columns = df.iloc[0]
     df = df.set_index("Country_code_A3")
@@ -181,7 +190,7 @@ def set_line_s_max_pu(n, s_max_pu):
     logger.info(f"N-1 security margin of lines set to {s_max_pu}")
 
 
-def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
+def set_transmission_limit(n, ll_type, factor, costs, lines, links):
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
 
     _lines_s_nom = (
@@ -207,7 +216,12 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
         n.links.loc[links_dc_b, "p_nom_min"] = n.links.loc[links_dc_b, "p_nom"]
         n.links.loc[links_dc_b, "p_nom_extendable"] = True
 
-    if factor != "opt":
+    if ll_type == "l":
+        n.lines["s_nom_max"] = n.lines["s_nom"] * float(factor)
+        n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
+            factor
+        )
+    elif factor != "opt":  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -218,6 +232,9 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
             constant=rhs,
             carrier_attribute="AC, DC",
         )
+
+    set_line_nom_max(n, lines, links)
+
     return n
 
 
@@ -307,9 +324,11 @@ def enforce_autarky(n, only_crossborder=False):
     n.mremove("Link", links_rm)
 
 
-def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-    n.lines.s_nom_max = n.lines.s_nom_max.clip(upper=s_nom_max_set)
-    n.links.p_nom_max = n.links.p_nom_max.clip(upper=p_nom_max_set)
+def set_line_nom_max(n, lines, links):
+    s_max, s_min = lines.get("s_nom_max"), lines.get("s_nom_max_min")
+    p_max, p_min = links.get("p_nom_max"), links.get("p_nom_max_min")
+    n.lines.s_nom_max = n.lines.s_nom_max.clip(lower=s_min, upper=s_max)
+    n.links.p_nom_max = n.links.p_nom_max.clip(lower=p_min, upper=p_max)
 
 
 if __name__ == "__main__":
@@ -319,9 +338,10 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="10",
-            ll="v0.3",
-            opts="Co2L-24H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
+            # configfile="test/config.sector.yaml",
         )
 
     configure_logging(snakemake)
@@ -369,10 +389,10 @@ if __name__ == "__main__":
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
-                co2limit = float(m[0]) * snakemake.params.electricity["co2base"]
+                co2limit = float(m[0]) * float(snakemake.params.electricity["co2base"])
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = snakemake.params.electricity["co2limit"]
+                co2limit = float(snakemake.params.electricity["co2limit"])
                 logger.info("Setting CO2 limit according to config value.")
             add_co2limit(n, co2limit, Nyears)
             break
@@ -388,51 +408,50 @@ if __name__ == "__main__":
                 add_gaslimit(n, snakemake.params.electricity.get("gaslimit"), Nyears)
                 logger.info("Setting gas usage limit according to config value.")
 
-        for o in opts:
-            oo = o.split("+")
-            suptechs = map(lambda c: c.split("-", 2)[0], n.carriers.index)
-            if oo[0].startswith(tuple(suptechs)):
-                carrier = oo[0]
-                # handles only p_nom_max as stores and lines have no potentials
-                attr_lookup = {
-                    "p": "p_nom_max",
-                    "c": "capital_cost",
-                    "m": "marginal_cost",
-                }
-                attr = attr_lookup[oo[1][0]]
-                factor = float(oo[1][1:])
-                if carrier == "AC":  # lines do not have carrier
-                    n.lines[attr] *= factor
-                else:
-                    comps = {"Generator", "Link", "StorageUnit", "Store"}
-                    for c in n.iterate_components(comps):
-                        sel = c.df.carrier.str.contains(carrier)
-                        c.df.loc[sel, attr] *= factor
+    for o in opts:
+        oo = o.split("+")
+        suptechs = map(lambda c: c.split("-", 2)[0], n.carriers.index)
+        if oo[0].startswith(tuple(suptechs)):
+            carrier = oo[0]
+            # handles only p_nom_max as stores and lines have no potentials
+            attr_lookup = {
+                "p": "p_nom_max",
+                "c": "capital_cost",
+                "m": "marginal_cost",
+            }
+            attr = attr_lookup[oo[1][0]]
+            factor = float(oo[1][1:])
+            if carrier == "AC":  # lines do not have carrier
+                n.lines[attr] *= factor
+            else:
+                comps = {"Generator", "Link", "StorageUnit", "Store"}
+                for c in n.iterate_components(comps):
+                    sel = c.df.carrier.str.contains(carrier)
+                    c.df.loc[sel, attr] *= factor
 
-        for o in opts:
-            if "Ep" in o:
-                m = re.findall("[0-9]*\.?[0-9]+$", o)
-                if len(m) > 0:
-                    logger.info("Setting emission prices according to wildcard value.")
-                    add_emission_prices(n, dict(co2=float(m[0])))
-                else:
-                    logger.info("Setting emission prices according to config value.")
-                    add_emission_prices(n, snakemake.params.costs["emission_prices"])
-                break
+    for o in opts:
+        if "Ep" in o:
+            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            if len(m) > 0:
+                logger.info("Setting emission prices according to wildcard value.")
+                add_emission_prices(n, dict(co2=float(m[0])))
+            else:
+                logger.info("Setting emission prices according to config value.")
+                add_emission_prices(n, snakemake.params.costs["emission_prices"])
+            break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
-    set_transmission_limit(n, ll_type, factor, costs, Nyears)
-
-    set_line_nom_max(
-        n,
-        s_nom_max_set=snakemake.params.lines.get("s_nom_max,", np.inf),
-        p_nom_max_set=snakemake.params.links.get("p_nom_max,", np.inf),
-    )
+    lines = snakemake.params.lines
+    links = snakemake.params.links
+    set_transmission_limit(n, ll_type, factor, costs, lines, links)
 
     if "ATK" in opts:
         enforce_autarky(n)
     elif "ATKc" in opts:
         enforce_autarky(n, only_crossborder=True)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])

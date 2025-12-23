@@ -5,11 +5,15 @@
 import os
 from shutil import copy
 
+from _helpers import BASE_DIR
+
 files_to_copy = {
-    "./config.yaml": "config.yaml",
-    "./Snakefile": "Snakefile",
-    "./scripts/solve_network.py": "solve_network.py",
-    "./scripts/prepare_sector_network.py": "prepare_sector_network.py",
+    os.path.join(BASE_DIR, "./config.yaml"): "config.yaml",
+    os.path.join(BASE_DIR, "./Snakefile"): "Snakefile",
+    os.path.join(BASE_DIR, "./scripts/solve_network.py"): "solve_network.py",
+    os.path.join(
+        BASE_DIR, "./scripts/prepare_sector_network.py"
+    ): "prepare_sector_network.py",
 }
 
 if __name__ == "__main__":

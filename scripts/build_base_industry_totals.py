@@ -94,7 +94,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_industry_totals",
             planning_horizons=2030,
-            demand="EG",
+            demand="AB",
         )
 
     # Loading config file and wild cards
@@ -117,9 +117,7 @@ if __name__ == "__main__":
     renaming_dit = transaction.set_index("Transaction")["clean_name"].to_dict()
     clean_industry_list = list(transaction.clean_name.unique())
 
-    unsd_path = (
-        os.path.dirname(snakemake.input["energy_totals_base"]) + "/demand/unsd/data/"
-    )
+    unsd_path = snakemake.input.unsd_export_path
 
     # Get the files from the path provided in the OP
     all_files = list(Path(unsd_path).glob("*.txt"))

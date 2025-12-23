@@ -489,9 +489,8 @@ def base_network(
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
-    lines_ac = lines[lines.tag_frequency.astype(float) != 0].copy()
-    lines_dc = lines[lines.tag_frequency.astype(float) == 0].copy()
-
+    lines_ac = lines[~lines.dc].copy()
+    lines_dc = lines[lines.dc].copy()
     lines_ac = _set_electrical_parameters_lines(lines_config, voltages_config, lines_ac)
 
     lines_dc = _set_electrical_parameters_dc_lines(
@@ -523,20 +522,6 @@ def base_network(
             result_type="reduce",
         )
         n.import_components_from_dataframe(lines_ac, "Line")
-        # The columns which names starts with "bus" are mixed up with the third-bus specification
-        # when executing additional_linkports()
-        lines_dc.drop(
-            labels=[
-                "bus0_lon",
-                "bus0_lat",
-                "bus1_lon",
-                "bus1_lat",
-                "bus_0_coors",
-                "bus_1_coors",
-            ],
-            axis=1,
-            inplace=True,
-        )
         n.import_components_from_dataframe(lines_dc, "Link")
 
     n.import_components_from_dataframe(transformers, "Transformer")

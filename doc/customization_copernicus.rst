@@ -18,7 +18,7 @@ To build custom cutouts, it is important to access to `Copernicus Climate Data S
 Steps to get access to Copernicus database:
 
 1. Register to  the `Copernicus Climate Data Store <https://cds.climate.copernicus.eu>`_;
-2. Setup your CDS API key as described `on their website <https://cds.climate.copernicus.eu/api-how-to>`_.
+2. Setup your CDS API key as described `on their website <https://cds.climate.copernicus.eu/how-to-api>`_.
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
+from _helpers import sanitize_carriers, sanitize_locations
 from add_existing_baseyear import add_build_year_to_new_assets
 
 # from pypsa.clustering.spatial import normed_or_uniform
@@ -232,9 +233,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_brownfield",
             simpl="",
-            clusters="10",
-            ll="c1.0",
-            opts="Co2L",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
@@ -258,6 +259,9 @@ if __name__ == "__main__":
     add_brownfield(n, n_p, year)
 
     disable_grid_expansion_if_limit_hit(n)
+
+    sanitize_carriers(n, snakemake.config)
+    sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
