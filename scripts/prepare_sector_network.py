@@ -2150,6 +2150,7 @@ def add_heat(
         district_heat_share
     )
 
+    # TODO Check if the comment is still relevant
     # NB: must add costs of central heating afterwards (EUR 400 / kWpeak, 50a, 1% FOM from Fraunhofer ISE)
 
     # exogenously reduce space heat demand
