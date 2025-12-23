@@ -180,30 +180,63 @@ def prepare_heat_data(n, snapshots, countries):
     energy_services = nodal_energy_totals.loc[:, services_cols].sum().sum()
     energy_total = nodal_energy_totals.sum().sum()
 
-    nodal_energy_totals[f"heat residential space"] = (
-        SHARE_HEAT_RESID_DEMAND * energy_residential
-    )
-    nodal_energy_totals[f"heat residential water"] = (
-        SHARE_WATER_RESID_DEMAND * energy_residential
-    )
-    nodal_energy_totals[f"cool residential space"] = (
-        SHARE_COOL_RESID_DEMAND * energy_residential
-    )
-    nodal_energy_totals[f"electricity residential space"] = (
-        SHARE_ELECTRICITY_RESID_SPACE * energy_residential
+    def calibrate_sector(
+        df,
+        sector,
+        sector_df,
+        shares
+    ):
+    """
+    Calibrate the sector demand according to the custom inputs
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Overall energy demand
+    sector : str
+        Name of heating sector ("residential" or "services")
+    sector_df : pandas.DataFrame
+        Sectoral energy demand
+    shares : dict
+
+    Returns
+    -------
+    pandas.DataFrame
+        Calibrated dataframe
+
+    """
+        df[f"heat {sector} space"] = shares["heat_space"] * sector_df
+        df[f"heat {sector} water"] = shares["heat_water"] * sector_df
+        df[f"cool {sector} space"] = shares["cool_space"] * sector_df
+        df[f"electricity {sector} space"] = shares["electricity_space"] * sector_df
+        return df
+
+    residential_shares = {
+        "heat_space": SHARE_HEAT_RESID_DEMAND,
+        "heat_water": SHARE_WATER_RESID_DEMAND,
+        "cool_space": SHARE_COOL_RESID_DEMAND,
+        "electricity_space": SHARE_ELECTRICITY_RESID_SPACE,
+    }
+
+    services_shares = {
+        "heat_space": SHARE_HEAT_SERVICES_DEMAND,
+        "heat_water": SHARE_WATER_SERVICES_DEMAND,
+        "cool_space": SHARE_COOL_SERVICES_DEMAND,
+        "electricity_space": SHARE_ELECTRICITY_SERVICES_SPACE,
+    }
+
+    nodal_energy_totals = calibrate_sector(
+        df=nodal_energy_totals,
+        sector="residential",
+        sector_df=energy_residential,
+        shares,
     )
 
-    nodal_energy_totals[f"heat services space"] = (
-        SHARE_HEAT_SERVICES_DEMAND * energy_services
-    )
-    nodal_energy_totals[f"heat services water"] = (
-        SHARE_WATER_SERVICES_DEMAND * energy_services
-    )
-    nodal_energy_totals[f"cool services space"] = (
-        SHARE_COOL_SERVICES_DEMAND * energy_services
-    )
-    nodal_energy_totals[f"electricity services space"] = (
-        SHARE_ELECTRICITY_SERVICES_SPACE * energy_services
+    nodal_energy_totals = calibrate_sector(
+        df=nodal_energy_totals,
+        sector="services",
+        sector_df=energy_services,
+        shares,
     )
 
     # heating/cooling demand profiles
