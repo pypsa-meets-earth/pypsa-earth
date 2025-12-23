@@ -269,6 +269,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_northamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Ao_kuHssRaP1qLV-IEG91Hu7E04-nBZg/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -296,6 +297,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418864/files/bundle_cutouts_oceania.zip?download=1
       gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -345,7 +347,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_southamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
