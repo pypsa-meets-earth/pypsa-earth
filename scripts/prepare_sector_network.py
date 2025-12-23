@@ -1334,7 +1334,8 @@ def add_storage(n, costs, existing_battery_capacity=None):
         f"Battery carry-over from elec.nc: {total/1e3:.2f} GW across {nodes_with_cap} nodes."
     )
 
-    try:
+    # Read existing battery assets from powerplants.csv (if present)
+    if "df_powerplants" in globals():
         # Ensure 'bus' and 'DateOut' are numeric
         if "bus" in df_powerplants.columns:
             df_powerplants["bus"] = (
@@ -1344,68 +1345,64 @@ def add_storage(n, costs, existing_battery_capacity=None):
                 .replace("", "0")
                 .astype(int)
             )
-        if "DateOut" in df_powerplants.columns:
-            df_powerplants["DateOut"] = (
-                pd.to_numeric(df_powerplants["DateOut"], errors="coerce")
-                .fillna(0)
-                .astype(int)
-            )
-
-        # Filter for battery assets still active in baseyear
-        baseyear = (
-            snakemake.params.planning_horizons
-            if isinstance(snakemake.params.planning_horizons, int)
-            else snakemake.params.planning_horizons[0]
+    if "DateOut" in df_powerplants.columns:
+        df_powerplants["DateOut"] = (
+            pd.to_numeric(df_powerplants["DateOut"], errors="coerce")
+            .fillna(0)
+            .astype(int)
         )
-        df_batteries = df_powerplants[
-            (df_powerplants.Fueltype == "battery")
-            & (df_powerplants.DateOut >= baseyear)
-        ].copy()
 
-        if not df_batteries.empty:
-            # assign clustered bus
-            busmap_s = pd.read_csv(snakemake.input.busmap_s, index_col=0).squeeze()
-            busmap = pd.read_csv(snakemake.input.busmap, index_col=0).squeeze()
+    # Filter for battery assets still active in baseyear
+    baseyear = (
+        snakemake.params.planning_horizons
+        if isinstance(snakemake.params.planning_horizons, int)
+        else snakemake.params.planning_horizons[0]
+    )
+    df_batteries = df_powerplants[
+        (df_powerplants.Fueltype == "battery")
+        & (df_powerplants.DateOut >= baseyear)
+    ].copy()
 
-            inv_busmap = {}
-            for k, v in busmap.items():
-                inv_busmap[v] = inv_busmap.get(v, []) + [k]
+    if not df_batteries.empty:
+        # assign clustered bus
+        busmap_s = pd.read_csv(snakemake.input.busmap_s, index_col=0).squeeze()
+        busmap = pd.read_csv(snakemake.input.busmap, index_col=0).squeeze()
 
-            clustermaps = busmap_s.map(busmap)
-            clustermaps.index = clustermaps.index.astype(int)
+        inv_busmap = {}
+        for k, v in busmap.items():
+            inv_busmap[v] = inv_busmap.get(v, []) + [k]
 
-            df_batteries["cluster_bus"] = df_batteries.bus.map(clustermaps)
+        clustermaps = busmap_s.map(busmap)
+        clustermaps.index = clustermaps.index.astype(int)
 
-            existing_capacity = df_batteries.groupby("cluster_bus")["Capacity"].sum()
+        df_batteries["cluster_bus"] = df_batteries.bus.map(clustermaps)
 
-            df_batteries["grouping_year"] = np.take(
-                grouping_years_power,
-                np.digitize(df_batteries.DateIn, grouping_years_power, right=True),
-            )
+        existing_capacity = df_batteries.groupby("cluster_bus")["Capacity"].sum()
 
-            df_batteries["lifetime"] = (
-                df_batteries.DateOut - df_batteries["grouping_year"] + 1
-            )
+        df_batteries["grouping_year"] = np.take(
+            grouping_years_power,
+            np.digitize(df_batteries.DateIn, grouping_years_power, right=True),
+        )
 
-            # Apply threshold and collect per-node capacity
-            threshold = snakemake.params.existing_capacities.get(
-                "threshold_capacity", 1.0
-            )
-            for node in spatial.nodes:
-                cap = existing_capacity.get(node, 0.0)
-                if cap > threshold:
-                    existing_battery_capacity[node] = cap
+        df_batteries["lifetime"] = (
+            df_batteries.DateOut - df_batteries["grouping_year"] + 1
+        )
 
-            total = sum(existing_battery_capacity.values())
-            nodes = len(existing_battery_capacity)
-            logger.info(
-                f"Found existing battery capacity from powerplants.csv: "
-                f"{total:.1f} MW in {nodes} nodes"
-            )
+        # Apply threshold and collect per-node capacity
+        threshold = snakemake.params.existing_capacities.get(
+            "threshold_capacity", 1.0
+        )
+        for node in spatial.nodes:
+            cap = existing_capacity.get(node, 0.0)
+            if cap > threshold:
+                existing_battery_capacity[node] = cap
 
-    except Exception as e:
-        logger.warning(f"Could not load existing battery capacities: {e}")
-        existing_battery_capacity = {}
+        total = sum(existing_battery_capacity.values())
+        nodes = len(existing_battery_capacity)
+        logger.info(
+            f"Found existing battery capacity from powerplants.csv: "
+            f"{total:.1f} MW in {nodes} nodes"
+        )
 
     # Use configured max_hours for battery duration
     elec_config = snakemake.config["electricity"]
