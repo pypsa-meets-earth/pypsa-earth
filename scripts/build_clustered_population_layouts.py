@@ -56,7 +56,6 @@ if __name__ == "__main__":
 
     pop = {}
     for item in ["total", "urban", "rural"]:
-        # TODO Rural population is zero
         pop_layout = xr.open_dataarray(snakemake.input[f"pop_layout_{item}"])
         pop[item] = I.dot(pop_layout.stack(spatial=("y", "x")))
 
@@ -73,7 +72,6 @@ if __name__ == "__main__":
     #    )
 
     pop["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
-    # pop["ct"] = "US"
 
     country_population = pop.total.groupby(pop.ct).sum()
     pop["fraction"] = (pop.total / pop.ct.map(country_population)).fillna(0.0)

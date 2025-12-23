@@ -243,9 +243,8 @@ if __name__ == "__main__":
 
             cop.to_netcdf(snakemake.output[f"cop_{source}_{area}"])
 
-    # cooling performance
-    # for area in ["total", "urban", "rural"]:
     # currently we don't distinguish between rural and urban areas
+    # which is different from how heating is being treated where `area` is in `["total", "urban", "rural"]`
     for area in ["total"]:
         # assuming the bulb point inside at some reasonable level
         # TODO check if K->C transformations is needed
