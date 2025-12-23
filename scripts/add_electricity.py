@@ -111,7 +111,6 @@ from powerplantmatching.export import map_country_bus
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
-logger.propagate = False
 
 
 def normed(s):
