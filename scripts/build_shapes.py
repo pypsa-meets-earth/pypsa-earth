@@ -263,7 +263,15 @@ def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
     return polys.simplify(tolerance=tolerance)
 
 
-def countries(countries, geo_crs, contended_flag, update=False, out_logging=False, tolerance=0.01, minarea=0.01):
+def countries(
+    countries,
+    geo_crs,
+    contended_flag,
+    update=False,
+    out_logging=False,
+    tolerance=0.01,
+    minarea=0.01,
+):
     "Create country shapes"
 
     if out_logging:
@@ -284,7 +292,9 @@ def countries(countries, geo_crs, contended_flag, update=False, out_logging=Fals
     df_countries.rename(columns={"GID_0": "name"}, inplace=True)
 
     # set index and simplify polygons
-    ret_df = df_countries.set_index("name")["geometry"].map(lambda x: _simplify_polys(x,tolerance=tolerance,minarea=minarea))
+    ret_df = df_countries.set_index("name")["geometry"].map(
+        lambda x: _simplify_polys(x, tolerance=tolerance, minarea=minarea)
+    )
 
     # there may be "holes" in the countries geometry which cause troubles along the workflow
     # e.g. that is the case for enclaves like Dahagram–Angarpota for IN/BD
@@ -1245,7 +1255,7 @@ def gadm(
     nprocesses=None,
     simplify_gadm=True,
     tolerance=0.01,
-    minarea=0.01
+    minarea=0.01,
 ):
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
@@ -1295,9 +1305,11 @@ def gadm(
         lambda x: x if x.find(".") == 0 else "." + x
     )
     df_gadm.set_index("GADM_ID", inplace=True)
-    
+
     if simplify_gadm:
-        df_gadm["geometry"] = df_gadm["geometry"].map(lambda x: _simplify_polys(x,tolerance=tolerance,minarea=minarea))
+        df_gadm["geometry"] = df_gadm["geometry"].map(
+            lambda x: _simplify_polys(x, tolerance=tolerance, minarea=minarea)
+        )
     df_gadm.geometry = df_gadm.geometry.apply(
         lambda r: make_valid(r) if not r.is_valid else r
     )
@@ -1390,9 +1402,9 @@ if __name__ == "__main__":
     contended_flag = snakemake.params.build_shape_options["contended_flag"]
     worldpop_method = snakemake.params.build_shape_options["worldpop_method"]
     gdp_method = snakemake.params.build_shape_options["gdp_method"]
-    tolerance = snakemake.params.build_shape_options['simplify_tolerance']
+    tolerance = snakemake.params.build_shape_options["simplify_tolerance"]
     simplify_gadm = snakemake.params.build_shape_options["simplify_gadm"]
-    minarea = snakemake.params.build_shape_options['minarea']
+    minarea = snakemake.params.build_shape_options["minarea"]
 
     country_shapes = countries(
         countries_list,
@@ -1405,7 +1417,13 @@ if __name__ == "__main__":
     country_shapes.to_file(snakemake.output.country_shapes)
 
     offshore_shapes = eez(
-        countries_list, geo_crs, country_shapes, EEZ_gpkg, out_logging, simplify_gadm, tolerance
+        countries_list,
+        geo_crs,
+        country_shapes,
+        EEZ_gpkg,
+        out_logging,
+        simplify_gadm,
+        tolerance,
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
