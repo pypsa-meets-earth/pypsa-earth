@@ -1291,7 +1291,7 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     )
 
 
-def fetch_existing_battery_capacity_from_elec(n_elec) -> dict:
+def fetch_existing_battery_capacity_from_elec(n_elec):
     """
     Read existing battery capacity from the electricity network and
     return a dict {bus_name: p_nom_MW} aggregated per AC bus.
@@ -1308,7 +1308,7 @@ def fetch_existing_battery_capacity_from_elec(n_elec) -> dict:
     return bat.groupby("bus")["p_nom"].sum().to_dict()
 
 
-def add_storage(n, costs, existing_battery_capacity: dict | None = None):
+def add_storage(n, costs, existing_battery_capacity=None):
     """Function to add the different types of storage systems, including
     existing battery capacities from powerplants.csv."""
     logger.info("Add battery storage")
