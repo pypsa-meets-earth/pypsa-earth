@@ -298,7 +298,7 @@ databundles:
     destination: "cutouts"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418864/files/bundle_cutouts_oceania.zip?download=1
-      gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
+      # gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
@@ -322,8 +322,8 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
-      gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
+      zenodo: https://sandbox.zenodo.org/records/418866/files/bundle_cutouts_asia.zip?download=1
+      # gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
