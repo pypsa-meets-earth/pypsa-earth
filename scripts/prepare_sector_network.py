@@ -1359,8 +1359,7 @@ def add_storage(n, costs, existing_battery_capacity=None):
         else snakemake.params.planning_horizons[0]
     )
     df_batteries = df_powerplants[
-        (df_powerplants.Fueltype == "battery")
-        & (df_powerplants.DateOut >= baseyear)
+        (df_powerplants.Fueltype == "battery") & (df_powerplants.DateOut >= baseyear)
     ].copy()
 
     if not df_batteries.empty:
@@ -1389,9 +1388,7 @@ def add_storage(n, costs, existing_battery_capacity=None):
         )
 
         # Apply threshold and collect per-node capacity
-        threshold = snakemake.params.existing_capacities.get(
-            "threshold_capacity", 1.0
-        )
+        threshold = snakemake.params.existing_capacities.get("threshold_capacity", 1.0)
         for node in spatial.nodes:
             cap = existing_capacity.get(node, 0.0)
             if cap > threshold:
