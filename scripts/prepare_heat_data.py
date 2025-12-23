@@ -104,6 +104,19 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id, k=1):
 
 
 def prepare_heat_data(n, snapshots, countries):
+    """
+    Apply a linear transformation to the demand dataframe to match
+    the demand values with the measured or modeled ones.
+
+    Parameters
+    ----------
+    n : PyPSA Network
+        Original network model
+    snapshots : list
+        List of modelling snapshots
+    countries : list
+        List of countries included in the model
+    """
     # heating
     ashp_cop = (
         xr.open_dataarray(snakemake.input.cop_air_total)
