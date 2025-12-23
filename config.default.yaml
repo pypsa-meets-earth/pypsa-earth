@@ -553,6 +553,7 @@ existing_capacities:
 sector:
   enable:
     heat: true
+    cooling: false
     biomass: true
     industry: true
     shipping: true
