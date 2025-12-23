@@ -1,1 +1,2 @@
-,state,obs_sum,mod_sum,corr_with_model,scaling_cooling,bus,x,y,full_name,country
+,region_name,obs_sum,mod_sum,corr_with_model,scaling_cooling,bus,x,y,full_name,country
+,FL,51212623084.5,2040128495.3,0.92,25.1,US.10_1,-81.686783 ,27.766279,Florida,US
