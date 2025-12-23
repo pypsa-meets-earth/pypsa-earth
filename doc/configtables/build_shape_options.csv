@@ -2,6 +2,7 @@
 gadm_layer_id,,"""{0",1,"2}""","""GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country",1: region/county-like,"2: municipality-like."""
 simplify_gadm,bool,"{True, False}",True: shape polygons are simplified else no,,,,
 simplify_tolerance,float,>= 0,Specifies tolerance limit when simplifying GADM shapes. A higher value indicates more simplification,,,,
+minarea,float,>= 0,"Minimum area of polygons to be retained after GADM simplification. If area is lower than minarea, then the shape is removed",,,,
 update_file," bool"," ""{True"," False}"""," ""True: all input files are downloaded again and replace the existing files.""",,,
 out_logging," bool"," ""{True"," False}"""," ""True: Logging is printed in the console.""",,,
 year,," ""past year; e.g. YYYY"""," ""Reference year used to derive shapes"," info on population and info on GDP.""",,,
