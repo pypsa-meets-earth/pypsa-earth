@@ -2110,9 +2110,15 @@ def create_nodes_for_cooling_sector():
     return c_nodes
 
 
-def add_heat(n, costs):
-    # TODO options?
-    # TODO pop_layout?
+def add_heat(
+    n,
+    costs,
+    heat_demand_fn,
+    solar_thermal_fn,
+    gshp_cop_fn,
+    ashp_cop_fn,
+    district_heat_share_fn,
+):
 
     logger.info("adding heat")
 
@@ -3409,11 +3415,6 @@ if __name__ == "__main__":
 
     h2_hc_conversions(n, costs)
 
-    add_heat(n, costs)
-    add_cooling(n, costs)
-
-    add_biomass(n, costs)
-
     if enable["heat"]:
         add_heat(
             n,
@@ -3423,6 +3424,12 @@ if __name__ == "__main__":
             gshp_cop_fn=snakemake.input.gshp_cop,
             ashp_cop_fn=snakemake.input.ashp_cop,
             district_heat_share_fn=snakemake.input.district_heat_share,
+        )
+
+    if enable["cooling"]:
+        add_cooling(
+            n,
+            costs,
         )
 
     if enable["biomass"]:
