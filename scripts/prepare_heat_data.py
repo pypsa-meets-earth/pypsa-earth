@@ -180,31 +180,7 @@ def prepare_heat_data(n, snapshots, countries):
     energy_services = nodal_energy_totals.loc[:, services_cols].sum().sum()
     energy_total = nodal_energy_totals.sum().sum()
 
-    def calibrate_sector(
-        df,
-        sector,
-        sector_df,
-        shares
-    ):
-    """
-    Calibrate the sector demand according to the custom inputs
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Overall energy demand
-    sector : str
-        Name of heating sector ("residential" or "services")
-    sector_df : pandas.DataFrame
-        Sectoral energy demand
-    shares : dict
-
-    Returns
-    -------
-    pandas.DataFrame
-        Calibrated dataframe
-
-    """
+    def calibrate_sector(df, sector, sector_df, shares):
         df[f"heat {sector} space"] = shares["heat_space"] * sector_df
         df[f"heat {sector} water"] = shares["heat_water"] * sector_df
         df[f"cool {sector} space"] = shares["cool_space"] * sector_df
@@ -229,14 +205,14 @@ def prepare_heat_data(n, snapshots, countries):
         df=nodal_energy_totals,
         sector="residential",
         sector_df=energy_residential,
-        shares,
+        shares=residential_shares,
     )
 
     nodal_energy_totals = calibrate_sector(
         df=nodal_energy_totals,
         sector="services",
         sector_df=energy_services,
-        shares,
+        shares=services_shares,
     )
 
     # heating/cooling demand profiles
