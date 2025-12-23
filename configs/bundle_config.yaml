@@ -282,7 +282,8 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/1c2-8pChoxv4CDJW01vkPpggBSWHs9Mqi/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_europe.zip?download=1
+      # gdrive: https://drive.google.com/file/d/1c2-8pChoxv4CDJW01vkPpggBSWHs9Mqi/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
