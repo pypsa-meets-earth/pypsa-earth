@@ -368,6 +368,18 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # cutouts bundle of the cutouts folder for North Eurasia
+  # Size about 19.6 GB (zipped)
+  bundle_cutouts_northernasia:
+    countries: ["LT", "LV", "EE", "BY", "RU", "KZ", "MN", "GE"]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/11EzaAaP4eOPzhfKCkm0zZ6HOv-JpgZFd/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
   # data bundle containing the protected data for the whole world
   bundle_landcover_earth:
     countries: [Earth]
