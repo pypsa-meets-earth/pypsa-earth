@@ -2122,6 +2122,28 @@ def add_heat(
 
     logger.info("adding heat")
 
+    # Load data required for the heat sector
+    heat_demand = pd.read_csv(
+        heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
+    ).fillna(0)
+
+    # Solar thermal availability profiles
+    solar_thermal = pd.read_csv(solar_thermal_fn, index_col=0, parse_dates=True)
+
+    # Ground-sourced heatpump coefficient of performance
+    gshp_cop = pd.read_csv(
+        gshp_cop_fn, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+    # TODO add option heat_dep_hp_cop to the config
+
+    # Air-sourced heatpump coefficient of performance
+    ashp_cop = pd.read_csv(
+        ashp_cop_fn, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+
+    # Share of district heating at each node
+    district_heat_share = pd.read_csv(district_heat_share_fn, index_col=0)
+
     sectors = ["residential", "services"]
 
     h_nodes, dist_fraction, urban_fraction = create_nodes_for_heat_sector(
@@ -2406,8 +2428,29 @@ def add_heat(
             )
 
 
-def add_cooling(n, costs):
+def add_cooling(
+    n,
+    costs,
+    cooling_demand_fn,
+    cop_hp_fn,
+    cop_ac_fn,
+    capft_abch_fn,
+):
     logger.info("adding cooling")
+
+    # Load data required for the cooling sector
+    cooling_demand = pd.read_csv(
+        cooling_demand_fn, index_col=0, header=[0, 1], parse_dates=True
+    ).fillna(0)
+
+    # Heatpump coefficient of performance when in cooling mode
+    hp_cooling_cop = pd.read_csv(cop_hp_fn, index_col=0, parse_dates=True)
+
+    # Air conditioners coefficient of performance
+    ac_cooling_cop = pd.read_csv(cop_ac_fn, index_col=0, parse_dates=True)
+
+    # Capacity coefficient of absorption chillers
+    abch_cooling_cop = pd.read_csv(capft_abch_fn, index_col=0, parse_dates=True)
 
     c_nodes = create_nodes_for_cooling_sector()
 
@@ -3326,50 +3369,6 @@ if __name__ == "__main__":
         snakemake.input.nodal_transport_data, index_col=0
     )
 
-    # Load data required for the heat sector
-    heat_demand = pd.read_csv(
-        snakemake.input.heat_demand, index_col=0, header=[0, 1], parse_dates=True
-    ).fillna(0)
-    # Ground-sourced heatpump coefficient of performance
-    gshp_cop = pd.read_csv(
-        snakemake.input.gshp_cop, index_col=0, parse_dates=True
-    )  # only needed with heat dep. hp cop allowed from config
-    # TODO add option heat_dep_hp_cop to the config
-
-    # Air-sourced heatpump coefficient of performance
-    ashp_cop = pd.read_csv(
-        snakemake.input.ashp_cop, index_col=0, parse_dates=True
-    )  # only needed with heat dep. hp cop allowed from config
-
-    # Solar thermal availability profiles
-    solar_thermal = pd.read_csv(
-        snakemake.input.solar_thermal, index_col=0, parse_dates=True
-    )
-    gshp_cop = pd.read_csv(snakemake.input.gshp_cop, index_col=0, parse_dates=True)
-
-    # Share of district heating at each node
-    district_heat_share = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
-
-    # Load data required for the cooling sector
-    cooling_demand = pd.read_csv(
-        snakemake.input.cooling_demand, index_col=0, header=[0, 1], parse_dates=True
-    ).fillna(0)
-
-    # Heatpump coefficient of performance when in cooling mode
-    hp_cooling_cop = pd.read_csv(
-        snakemake.input.cop_hp_cooling_total, index_col=0, parse_dates=True
-    )
-
-    # Air conditioners coefficient of performance
-    ac_cooling_cop = pd.read_csv(
-        snakemake.input.cop_ac_cooling_total, index_col=0, parse_dates=True
-    )
-
-    # Capacity coefficient of absorption chillers
-    abch_cooling_cop = pd.read_csv(
-        snakemake.input.capft_abch_cooling_total, index_col=0, parse_dates=True
-    )
-
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat
 
@@ -3430,6 +3429,10 @@ if __name__ == "__main__":
         add_cooling(
             n,
             costs,
+            cooling_demand_fn=snakemake.input.cooling_demand,
+            cop_hp_fn=snakemake.input.cop_hp_cooling_total,
+            cop_ac_fn=snakemake.input.cop_ac_cooling_total,
+            capft_abch_fn=snakemake.input.capft_abch_cooling_total,
         )
 
     if enable["biomass"]:
