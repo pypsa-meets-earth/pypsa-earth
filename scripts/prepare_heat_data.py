@@ -186,22 +186,21 @@ def prepare_heat_data(n, snapshots, countries):
     nodal_energy_totals[f"heat residential water"] = (
         SHARE_WATER_RESID_DEMAND * energy_residential
     )
+    nodal_energy_totals[f"cool residential space"] = (
+        SHARE_COOL_RESID_DEMAND * energy_residential
+    )
+    nodal_energy_totals[f"electricity residential space"] = (
+        SHARE_ELECTRICITY_RESID_SPACE * energy_residential
+    )
+
     nodal_energy_totals[f"heat services space"] = (
         SHARE_HEAT_SERVICES_DEMAND * energy_services
     )
     nodal_energy_totals[f"heat services water"] = (
         SHARE_WATER_SERVICES_DEMAND * energy_services
     )
-
-    nodal_energy_totals[f"cool residential space"] = (
-        SHARE_COOL_RESID_DEMAND * energy_residential
-    )
     nodal_energy_totals[f"cool services space"] = (
         SHARE_COOL_SERVICES_DEMAND * energy_services
-    )
-
-    nodal_energy_totals[f"electricity residential space"] = (
-        SHARE_ELECTRICITY_RESID_SPACE * energy_residential
     )
     nodal_energy_totals[f"electricity services space"] = (
         SHARE_ELECTRICITY_SERVICES_SPACE * energy_services
