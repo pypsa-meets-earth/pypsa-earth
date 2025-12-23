@@ -23,10 +23,10 @@ setup:
 
 clean:
 	# Add clean-up commands here
-	snakemake -j1 solve_sector_networks --delete-all-output --configfile test/config.sector.yaml
-	snakemake -j1 solve_sector_networks_myopic --delete-all-output --configfile config.tutorial.yaml test/config.myopic.yaml
 	snakemake -j1 solve_all_networks --delete-all-output --configfile config.tutorial.yaml test/config.custom.yaml
 	snakemake -j1 solve_all_networks --delete-all-output --configfile config.tutorial.yaml configs/scenarios/config.NG.yaml
 	snakemake -j1 solve_all_networks_monte --delete-all-output --configfile test/config.monte_carlo.yaml
 	snakemake -j1 run_all_scenarios --delete-all-output --configfile test/config.landlock.yaml
+	snakemake -j1 solve_sector_networks --delete-all-output --configfile test/config.sector.yaml
+	snakemake -j1 solve_sector_networks_myopic --delete-all-output --configfile config.tutorial.yaml test/config.myopic.yaml
 	echo "Clean-up complete."
