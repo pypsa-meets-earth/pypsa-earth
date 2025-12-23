@@ -8,14 +8,10 @@
 Configuration
 ##########################################
 
-PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
-The options here described are collected in a ``config.yaml`` file located in the root directory.
+PyPSA-Earth is using configuration files as an interface which allows to customise a data preparation and modelling workflow. The options here described are collected in a ``config.yaml`` file located in the root directory.
 Users should copy the provided default configuration (``config.default.yaml``) and amend
 their own modifications and assumptions in the user-specific configuration file (``config.yaml``);
 confer installation instructions at :ref:`installation`.
-
-.. note::
-  Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
 
 .. _toplevel_cf:
 
@@ -38,7 +34,7 @@ Top-level configuration
 ``run``
 =======
 
-It is common conduct to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
+It is common to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
 e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
 investment changes as more ambitious greenhouse-gas emission reduction targets are applied.
 
@@ -69,7 +65,7 @@ facilitate running multiple scenarios through a single command
 
 For each wildcard, a **list of values** is provided. The rule ``solve_all_networks`` will trigger the rules for creating ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc`` for **all combinations** of the provided wildcard values as defined by Python's `itertools.product(...) <https://docs.python.org/2/library/itertools.html#itertools.product>`_ function that snakemake's `expand(...) function <https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets>`_ uses.
 
-An exemplary dependency graph (starting from the simplification rules) then looks like this:
+An example dependency graph (starting from the simplification rules) looks like this:
 
 .. image:: img/scenarios.png
 
@@ -117,6 +113,23 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
+   .. _natura_cf:
+
+``natura``
+===============
+
+If enabled, ``build_natura_raster`` creates an updated raster of the wold protected areas instead of using the provided default raster in ``data/natura/natura.tiff``.
+The options below select which regions to include in the raster and configure the rasterization process itself.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: natura:
+   :end-at: buffer_size:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/natura.csv
 
 .. _augmented_line_connection_cf:
 
@@ -189,7 +202,7 @@ which can be activated at various stages of the workflow. Currently, it is used 
    :widths: 25,10,22,27
    :file: configtables/subregion.csv
 
-The names of subregions are arbitrary. Its sizes are determined by how many GADM IDs that are included in the list.
+The names of subregions are arbitrary. Its sizes are determined by the number of GADM IDs included in the list.
 A single country can be divided into multiple subregions, and a single subregion can include GADM IDs from multiple countries.
 If the same GADM ID appears in different subregions, the first subregion listed will take precedence over that region.
 The remaining GADM IDs that are not listed will be merged back to form the remaining parts of their respective countries.

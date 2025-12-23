@@ -96,6 +96,45 @@ logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
 
 
+def get_load_shedding_capacity(n, safety_margin=1.2):
+    """
+    Calculate required load shedding p_nom per bus based on the
+    maximum aggregated load observed in any snapshot.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network
+    safety_margin : float, default 1.2
+        Safety factor to apply to the maximum load
+
+    Returns
+    -------
+    pd.Series
+        Required p_nom per bus for load shedding.
+    """
+
+    load_shedding_p_nom = pd.Series(0.0, index=n.buses.index)
+
+    for bus_name, bus_loads in n.loads.groupby("bus"):
+
+        if not n.loads_t.p_set.empty:
+            bus_load_timeseries = n.loads_t.p_set[
+                bus_loads.index.intersection(n.loads_t.p_set.columns)
+            ]
+            # Sum loads across all components at this bus for each snapshot
+            total_load_per_snapshot = bus_load_timeseries.sum(axis=1)
+            max_total_load = total_load_per_snapshot.max()
+        else:
+            max_total_load = bus_loads["p_set"].sum()
+
+        required_p_nom = max_total_load * safety_margin
+
+        load_shedding_p_nom[bus_name] = required_p_nom
+
+    return load_shedding_p_nom
+
+
 def prepare_network(n, solve_opts, config):
     if "clip_p_max_pu" in solve_opts:
         for df in (
@@ -110,16 +149,17 @@ def prepare_network(n, solve_opts, config):
         n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
 
     if solve_opts.get("load_shedding"):
-        n.add("Carrier", "Load")
+        required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
+        n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
         n.madd(
             "Generator",
             n.buses.index,
-            " load",
+            " load shedding",
             bus=n.buses.index,
-            carrier="load",
+            carrier="load shedding",
             sign=1,
             marginal_cost=solve_opts.get("load_shedding") * 1000,  # convert to Eur/MWh
-            p_nom=1e12,
+            p_nom=required_p_nom.reindex(n.buses.index, fill_value=0.5e6),
         )
 
     if solve_opts.get("noisy_costs"):
@@ -156,6 +196,8 @@ def add_CCL_constraints(n, config):
     Add minimum and maximum levels of generator nominal capacity per carrier
     for individual countries. Opts and path for agg_p_nom_minmax.csv must be defined
     in config.yaml. Default file is available at data/agg_p_nom_minmax.csv.
+    Parameter include_existing in config.yaml decides whether existing capacities
+    are considered in the CCL constraints. Default is false.
 
     Parameters
     ----------
@@ -165,14 +207,18 @@ def add_CCL_constraints(n, config):
     Example
     -------
     scenario:
-        opts: [Co2L-CCL-24H]
+        opts: [CCL-Co2L-24H]
     electricity:
-        agg_p_nom_limits: data/agg_p_nom_minmax.csv
+        agg_p_nom_limits:
+            file: data/agg_p_nom_minmax.csv
+            include_existing: false
     """
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
-        agg_p_nom_minmax = pd.read_csv(agg_p_nom_limits, index_col=list(range(2)))
+        agg_p_nom_minmax = pd.read_csv(
+            snakemake.input.agg_p_nom_minmax, index_col=list(range(2)), header=[0, 1]
+        )[snakemake.wildcards.planning_horizons]
     except IOError:
         logger.exception(
             "Need to specify the path to a .csv file containing "
@@ -183,33 +229,68 @@ def add_CCL_constraints(n, config):
         "Adding per carrier generation capacity constraints for " "individual countries"
     )
 
-    gen_country = n.generators.bus.map(n.buses.country)
     capacity_variable = n.model["Generator-p_nom"]
 
-    lhs = []
+    # get carriers to which CCL constraints apply
+    ccl_carriers = agg_p_nom_minmax.index.get_level_values(1).unique()
     ext_carriers = n.generators.query("p_nom_extendable").carrier.unique()
-    for c in ext_carriers:
-        ext_carrier = n.generators.query("p_nom_extendable and carrier == @c")
-        country_grouper = (
-            ext_carrier.bus.map(n.buses.country)
-            .rename_axis("Generator-ext")
-            .rename("country")
+    ccl_carriers = ccl_carriers[ccl_carriers.isin(ext_carriers)]
+
+    # If no CCL carriers found, return early
+    if not ccl_carriers.any():
+        logger.info(
+            "No CCL carriers found that are extendable. Skipping CCL constraints."
         )
-        ext_carrier_per_country = capacity_variable.loc[
-            country_grouper.index
-        ].groupby_sum(country_grouper)
-        lhs.append(ext_carrier_per_country)
-    lhs = merge(lhs, dim=pd.Index(ext_carriers, name="carrier"))
+        return
 
-    min_matrix = agg_p_nom_minmax["min"].to_xarray().unstack().reindex_like(lhs)
-    max_matrix = agg_p_nom_minmax["max"].to_xarray().unstack().reindex_like(lhs)
+    # Get extendable generators for relevant carriers
+    gens = n.generators[n.generators.carrier.isin(ccl_carriers)]
+    gens = gens.rename_axis(index="Generator-ext")
 
-    n.model.add_constraints(
-        lhs >= min_matrix, name="agg_p_nom_min", mask=min_matrix.notnull()
+    # Prepare country and carrier grouper
+    grouper = pd.concat(
+        [gens.bus.map(n.buses.country).rename("country"), gens.carrier], axis=1
     )
-    n.model.add_constraints(
-        lhs <= max_matrix, name="agg_p_nom_max", mask=max_matrix.notnull()
-    )
+
+    # Prepare LHS
+    lhs = capacity_variable.groupby(grouper).sum()
+
+    # Obtain existing capacities
+    existing_capacities = gens.p_nom.groupby(
+        [grouper["country"], grouper["carrier"]]
+    ).sum()
+
+    # Obtain minimum and maximum constraint limits
+    min_values = agg_p_nom_minmax["min"]
+    max_values = agg_p_nom_minmax["max"]
+
+    # Adjust limits if existing capacities are considered
+    if agg_p_nom_limits.get("include_existing", False):
+        min_values = (min_values - existing_capacities).clip(lower=0)
+        max_values = (max_values - existing_capacities).clip(lower=0)
+        logger.info(
+            f"Considered existing capacities in CCL constraints for carrier {c}."
+        )
+
+    # Convert limits to xarray for masking
+    min_values = xr.DataArray(min_values.dropna()).rename(dim_0="group")
+    max_values = xr.DataArray(max_values.dropna()).rename(dim_0="group")
+
+    # Valid constraints
+    valid_min_index = min_values.indexes["group"].intersection(lhs.indexes["group"])
+    valid_max_index = max_values.indexes["group"].intersection(lhs.indexes["group"])
+
+    if not valid_min_index.empty:
+        n.model.add_constraints(
+            lhs.sel(group=valid_min_index) >= min_values.loc[valid_min_index],
+            name="agg_p_nom_min",
+        )
+
+    if not valid_max_index.empty:
+        n.model.add_constraints(
+            lhs.sel(group=valid_max_index) <= max_values.loc[valid_max_index],
+            name="agg_p_nom_max",
+        )
 
 
 def add_EQ_constraints(n, o, scaling=1e-1):
@@ -633,24 +714,40 @@ def add_h2_network_cap(n, cap):
 
 
 def hydrogen_temporal_constraint(n, n_ref, time_period):
-
-    res_techs = [
-        "csp",
-        "solar",
-        "onwind",
-        "offwind-ac",
-        "offwind-dc",
-        "ror",
+    """
+    Applies temporal constraints for hydrogen production based on renewable energy sources (RES)
+    and electrolysis within a specified time period. The function ensures that the hydrogen production
+    adheres to policy configurations such as temporal matching and allowed excess.
+    Parameters:
+    -----------
+    n : pypsa.Network
+        The PyPSA network object containing the current state of the energy system model.
+    n_ref : pypsa.Network
+        A reference PyPSA network object used for additionality constraints (if enabled).
+    time_period : str
+        The time period for grouping constraints. Can be one of "hour", "month", or "year".
+    Returns:
+    --------
+    None
+        Adds constraints directly to the PyPSA network model.
+    Raises:
+    -------
+    KeyError
+        If required configuration keys are missing in `snakemake.config`.
+    ValueError
+        If an unsupported `time_period` is provided.
+    """
+    temporal_matching_carriers = snakemake.params.policy_config["hydrogen"][
+        "temporal_matching_carriers"
     ]
-
-    res_stor_techs = ["hydro"]
-
     allowed_excess = snakemake.params.policy_config["hydrogen"]["allowed_excess"]
 
     # Generation
-    res_gen_index = n.generators.loc[n.generators.carrier.isin(res_techs)].index
+    res_gen_index = n.generators.loc[
+        n.generators.carrier.isin(temporal_matching_carriers)
+    ].index
     res_stor_index = n.storage_units.loc[
-        n.storage_units.carrier.isin(res_stor_techs)
+        n.storage_units.carrier.isin(temporal_matching_carriers)
     ].index
 
     weightings_gen = pd.DataFrame(
@@ -678,15 +775,10 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         res = res + store
 
     # Electrolysis
-    electrolysis_carriers = [
-        "H2 Electrolysis",
-        "Alkaline electrolyzer large",
-        "Alkaline electrolyzer medium",
-        "Alkaline electrolyzer small",
-        "PEM electrolyzer",
-        "SOEC",
+    matching_technologies = snakemake.params.policy_config["hydrogen"][
+        "matching_technologies"
     ]
-    electrolysis_index = n.links.index[n.links.carrier.isin(electrolysis_carriers)]
+    electrolysis_index = n.links.index[n.links.carrier.isin(matching_technologies)]
 
     link_p = n.model["Link-p"]
     electrolysis = link_p.loc[:, electrolysis_index]

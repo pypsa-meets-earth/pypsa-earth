@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC-BY-4.0
+folder,file,objective
+tutorial,elec_s_6_ec_lcopt_Co2L-4H_python.log,2839036244.0
+custom,elec_s_6_ec_lcopt_Co2L-4H_python.log,2669287067.0
+NG,elec_s_5_ec_lcopt_Co2L-4H_python.log,2671484779.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m0_python.log,1825115005.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m1_python.log,10092009600.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m2_python.log,884183066.9
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m3_python.log,1867725959.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m4_python.log,45032070970.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m5_python.log,2756737870.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m6_python.log,6436852411.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m7_python.log,1447523254.0
+monte-carlo,elec_s_6_ec_lcopt_Co2L-4H_m8_python.log,406621644.0
+landlock,elec_s_6_ec_lcopt_Co2L-4H_python.log,1064141619.0
+sector,elec_s_4_ec_lcopt_CCL-Co2L-24h_144h_2030_0.071_AB_120export_python.log,1583077339000.0
+myopic,elec_s_4_ec_lc1_Co2L-24H_144h_2030_0.071_DF_120export_python.log,665825850500.0

@@ -112,7 +112,7 @@ def add_generation(
     # Not required, because nodes are already defined in "nodes"
     # nodes = pop_layout.index
 
-    fallback = {"OCGT": "gas"}
+    fallback = {"OCGT": "gas", "CCGT": "gas"}
     conventionals = options.get("conventional_generation", fallback)
 
     for generator, carrier in conventionals.items():
@@ -156,6 +156,12 @@ def add_generation(
             efficiency2=costs.at[carrier, "CO2 intensity"],
             lifetime=costs.at[generator, "lifetime"],
         )
+
+        # remove newly added links that have no capacity and are not extendable
+        to_remove = n.links.query(
+            "carrier == @carrier & p_nom == 0 & not p_nom_extendable"
+        ).index
+        n.mremove("Link", to_remove)
 
         # set the "co2_emissions" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)
         n.carriers.loc[carrier, "co2_emissions"] = 0
@@ -1231,9 +1237,7 @@ def add_aviation(n, cost, energy_totals, airports_fn):
 
     all_aviation = ["total international aviation", "total domestic aviation"]
 
-    aviation_demand = (
-        energy_totals.loc[countries, all_aviation].sum(axis=1).sum()  # * 1e6 / 8760
-    )
+    aviation_demand = energy_totals.loc[countries, all_aviation].sum(axis=1)
 
     airports = pd.read_csv(airports_fn, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
@@ -1252,8 +1256,8 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
 
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
-    airports["p_set"] = airports["fraction"].apply(
-        lambda frac: frac * aviation_demand * 1e6 / 8760
+    airports["p_set"] = (
+        airports["fraction"] * airports["country"].map(aviation_demand) * 1e6 / 8760
     )
 
     airports = pd.concat([airports, ind])
@@ -1391,9 +1395,7 @@ def add_shipping(n, costs, energy_totals, ports_fn):
 
     all_navigation = ["total international navigation", "total domestic navigation"]
 
-    navigation_demand = (
-        energy_totals.loc[countries, all_navigation].sum(axis=1).sum()  # * 1e6 / 8760
-    )
+    navigation_demand = energy_totals.loc[countries, all_navigation].sum(axis=1)
 
     efficiency = (
         options["shipping_average_efficiency"] / costs.at["fuel cell", "efficiency"]
@@ -1415,10 +1417,10 @@ def add_shipping(n, costs, energy_totals, ports_fn):
     ind = pd.DataFrame(n.buses.index[n.buses.carrier == "AC"])
     ind = ind.set_index(n.buses.index[n.buses.carrier == "AC"])
 
-    ports["p_set"] = ports["fraction"].apply(
-        lambda frac: shipping_hydrogen_share
-        * frac
-        * navigation_demand
+    ports["p_set"] = (
+        shipping_hydrogen_share
+        * ports["fraction"]
+        * ports["country"].map(navigation_demand)
         * efficiency
         * 1e6
         / 8760
@@ -1472,8 +1474,12 @@ def add_shipping(n, costs, energy_totals, ports_fn):
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
 
-        ports["p_set"] = ports["fraction"].apply(
-            lambda frac: shipping_oil_share * frac * navigation_demand * 1e6 / 8760
+        ports["p_set"] = (
+            shipping_oil_share
+            * ports["fraction"]
+            * ports["country"].map(navigation_demand)
+            * 1e6
+            / 8760
         )
 
         n.madd(
@@ -1986,9 +1992,9 @@ def add_land_transport(
         n.madd(
             "Store",
             spatial.nodes,
-            suffix=" battery storage",
+            suffix=" EV battery storage",
             bus=spatial.nodes + " EV battery",
-            carrier="battery storage",
+            carrier="EV battery storage",
             e_cyclic=True,
             e_nom=e_nom,
             e_max_pu=1,
@@ -3043,12 +3049,13 @@ def add_electricity_distribution_grid(n, costs):
 
 def add_co2_budget(n, co2_budget, investment_year, elec_opts):
     # Check if CO2Limit already exists
-    if "CO2Limit" in n.global_constraints.index and co2_budget["override_co2opt"]:
-        logger.warning("CO2Limit already exists, value will be overwritten.")
-        n.global_constraints.drop(index="CO2Limit", inplace=True)
-    else:
-        logger.info("CO2Limit already exists, value will not be overwritten.")
-        return
+    if "CO2Limit" in n.global_constraints.index:
+        if co2_budget["override_co2opt"]:
+            logger.warning("CO2Limit already exists, value will be overwritten.")
+            n.global_constraints.drop(index="CO2Limit", inplace=True)
+        else:
+            logger.info("CO2Limit already exists, value will not be overwritten.")
+            return
 
     # Get base year emission factor
     factor = (
