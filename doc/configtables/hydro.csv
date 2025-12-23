@@ -14,3 +14,4 @@ normalization,--,dict,"When specified, it describes how to normalize hydro time 
 --method,--,str,"Data source used to rescale the hydro runoff; option 'hydro_capacities' to use the provided 'data/hydro_capacities.csv' or 'eia' for using the eia file"
 --year,--,year,"(optional) Specify the desired year to be used for normalization, the default value corresponds to the cutout weather year"
 multiplier,--,float,"Multiplier factor of the rescaling process (default 1.0)"
+hydro_min_inflow_pu,--,float,"Minimum energy-to-capacity ratio used to classify hydropower plants with missing technology information: values above this threshold are treated as reservoir plants, while smaller values are classified as run-of-river."
