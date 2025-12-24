@@ -93,10 +93,10 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id, k=1):
         data_df.mul(scale_coeff_clean.to_dict()[data_col], axis=1)
     # TODO Avoid using the global variables
     elif load_mode == "heating":
-        k = HEAT_DEMAND_TOTAL / data_df.sum().sum()
+        k = thermal_load_calibrate["HEAT_DEMAND_TOTAL"] / data_df.sum().sum()
         data_df = k * data_df
     elif load_mode == "cooling":
-        k = COOL_DEMAND_TOTAL / data_df.sum().sum()
+        k = thermal_load_calibrate["COOL_DEMAND_TOTAL"] / data_df.sum().sum()
         data_df = k * data_df
     else:
         data_df = k * data_df
@@ -164,7 +164,9 @@ def prepare_heat_data(n, snapshots, countries):
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
     # TODO keeping the solution consistent
-    nodal_energy_totals["district heat share"] = SHARE_DISTRICT_HEAT
+    nodal_energy_totals["district heat share"] = thermal_load_calibrate[
+        "SHARE_DISTRICT_HEAT"
+    ]
     # district heat share not weighted by population
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
@@ -186,17 +188,17 @@ def prepare_heat_data(n, snapshots, countries):
         return df
 
     residential_shares = {
-        "heat_space": SHARE_HEAT_RESID_DEMAND,
-        "heat_water": SHARE_WATER_RESID_DEMAND,
-        "cool_space": SHARE_COOL_RESID_DEMAND,
-        "electricity_space": SHARE_ELECTRICITY_RESID_SPACE,
+        "heat_space": thermal_load_calibrate["SHARE_HEAT_RESID_DEMAND"],
+        "heat_water": thermal_load_calibrate["SHARE_WATER_RESID_DEMAND"],
+        "cool_space": thermal_load_calibrate["SHARE_COOL_RESID_DEMAND"],
+        "electricity_space": thermal_load_calibrate["SHARE_ELECTRICITY_RESID_SPACE"],
     }
 
     services_shares = {
-        "heat_space": SHARE_HEAT_SERVICES_DEMAND,
-        "heat_water": SHARE_WATER_SERVICES_DEMAND,
-        "cool_space": SHARE_COOL_SERVICES_DEMAND,
-        "electricity_space": SHARE_ELECTRICITY_SERVICES_SPACE,
+        "heat_space": thermal_load_calibrate["SHARE_HEAT_SERVICES_DEMAND"],
+        "heat_water": thermal_load_calibrate["SHARE_WATER_SERVICES_DEMAND"],
+        "cool_space": thermal_load_calibrate["SHARE_COOL_SERVICES_DEMAND"],
+        "electricity_space": thermal_load_calibrate["SHARE_ELECTRICITY_SERVICES_SPACE"],
     }
 
     nodal_energy_totals = calibrate_sector(
@@ -235,10 +237,18 @@ def prepare_heat_data(n, snapshots, countries):
 
     if CALIBRATE_LOAD:
         calibr_heat_df = pd.read_csv(
-            os.path.join(CALIBR_DIR, CALIBR_HEAT_FL), index_col=0
+            os.path.join(
+                thermal_load_calibrate["CALIBR_DIR"],
+                thermal_load_calibrate["CALIBR_HEAT_FL"],
+            ),
+            index_col=0,
         )
         calibr_cool_df = pd.read_csv(
-            os.path.join(CALIBR_DIR, CALIBR_COOL_FL), index_col=0
+            os.path.join(
+                thermal_load_calibrate["CALIBR_DIR"],
+                thermal_load_calibrate["CALIBR_COOL_FL"],
+            ),
+            index_col=0,
         )
 
         calibr_heat_buses_df = locate_bus(
@@ -317,7 +327,7 @@ def prepare_heat_data(n, snapshots, countries):
         data_df=heat_demand,
         calibr_df=calibr_heat_buses_df,
         load_mode="heating",
-        geom_id=CALIBRATION_LEVEL,
+        geom_id=thermal_load_calibrate["CALIBRATION_LEVEL"],
     )
 
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
@@ -404,6 +414,8 @@ if __name__ == "__main__":
     # Add options
     options = snakemake.config["sector"]
     country_list = snakemake.params.countries
+
+    thermal_load_calibrate = snakemake.params.thermal_load_calibrate
 
     # Get Nyears
     Nyears = n.snapshot_weightings.generators.sum() / 8760

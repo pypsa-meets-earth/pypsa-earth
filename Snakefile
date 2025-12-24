@@ -1352,6 +1352,7 @@ rule build_cop_profiles:
 rule prepare_heat_data:
     params:
         countries=config["countries"],
+        thermal_load_calibrate=config["sector"]["thermal_load_calibrate"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="resources/"
