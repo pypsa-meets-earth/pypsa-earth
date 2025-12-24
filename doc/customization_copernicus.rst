@@ -22,7 +22,7 @@ Steps to get access to Copernicus database:
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 
-The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident. The `snapshots` values set when generating the cutout, will determine the temporal parameters of the cutout. Accessible years which can be used to build a cutout depend on ERA5 data availability. `ERA5 page <https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5>`_ explains that the data is available from 1950 and updated continuously with about 3 month delay while the data on 1950-1978 should be treated as preliminary as that is a rather recent development.
+The `build_cutout` flag should be set `true` to generate the cutout. After the cutout is ready, it's recommended to set `build_cutout` to `false` to avoid overwriting the existing cutout by accident. The `snapshots` values set when generating the cutout, will determine the temporal parameters of the cutout. Years which can be used to build a cutout depend on ERA5 data availability: as of 2025, data is available `from 1940 until present <https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5>`__. Data is updated with `about 3 month delay <https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation>`__, and uncertainty is higher for earlier years, as fewer weather observations are available for assimilation.
 
 .. note::
 

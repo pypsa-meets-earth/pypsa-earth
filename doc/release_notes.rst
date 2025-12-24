@@ -12,6 +12,8 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
+
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
@@ -67,6 +69,16 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
+
+* Fix Labeling of technologies `PR #1644 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644>`__
+
+* fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
+
+* Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__
+
+* Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
+
+* Included a configuration option to quantitavely set the tolerance levels for simplifying GADM shapes `PR #1147 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1147/commits>`__
 
 PyPSA-Earth 0.7.0
 =================
@@ -185,6 +197,8 @@ PyPSA-Earth 0.7.0
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
 
+* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
+
 PyPSA-Earth 0.6.0
 =================
 
@@ -279,6 +293,7 @@ PyPSA-Earth 0.5.0
 * Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`__
 
 * Fix the environment placing a version limit to numpoly `PR #1237 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1237>`__
+
 
 PyPSA-Earth 0.4.1
 =================
