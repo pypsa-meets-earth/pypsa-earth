@@ -85,7 +85,7 @@ Year-related parameters are also being used when specifying `load_options`:
       prediction_year: 2030
       scale: 1
 
-The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` corresponds to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts, likely resulting in global warming below 2.0°C by the end of the 21st century.
+The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` corresponds to the point of a `Shared Socioeconomic Pathways (SSP) <https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways>`__ trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts, as supported in `GlobalEnergyGIS <https://github.com/niclasmattsson/GlobalEnergyGIS>`__.
 The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
 
 Use custom demand data
