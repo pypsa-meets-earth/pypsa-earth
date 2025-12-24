@@ -555,6 +555,7 @@ existing_capacities:
 sector:
   enable:
     heat: true
+    cooling: false
     biomass: true
     industry: true
     shipping: true
@@ -619,6 +620,28 @@ sector:
   # 2045: 0.21
   # 2050: 0.29
 
+  thermal_load_calibrate:
+    enable: false
+    calibr_dir: "data/custom"
+    calibr_heat_fl: "mod_heating_calibr_clean.csv"
+    calibr_cool_fl: "mod_cooling_calibr_clean.csv"
+    # administrative level at which calibration inputs are provided
+    calibration_level: 1
+    # scaling coefficient for the overall heating/cooling loads
+    heat_demand_total: 1
+    cool_demand_total: 1
+    # share of a respective load from the overall demand of a sector
+    share_heat_resid_demand: 0.12
+    share_water_resid_demand: 0.12
+    share_heat_services_demand: 0.32
+    share_water_services_demand: 0.05
+    share_cool_resid_demand: 0.19
+    share_cool_services_demand: 0.11
+    share_electricity_resid_space: 0.10
+    share_electricity_services_space: 0.13
+    share_district_heat: 0.1
+
+
   tes: true
   tes_tau: # 180 day time constant for centralised, 3 day for decentralised
     decentral: 3
@@ -629,6 +652,8 @@ sector:
   micro_chp: false
   solar_thermal: true
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  # TODO a rough assumption must be replaced by a parametrisation
+  t_wet_bulb: 14 #Celsius, wet bulb temperature inside the cooled room
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
   solar_cf_correction: 0.788457 # = >>>1/1.2683
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S

@@ -20,7 +20,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
             simpl="",
-            clusters=4,
+            clusters=10,
+            planning_horizons=2030,
         )
 
     cutout_path = (
@@ -46,6 +47,7 @@ if __name__ == "__main__":
     pop = pd.DataFrame(pop, index=clustered_regions.index)
 
     pop["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
+
     country_population = pop.total.groupby(pop.ct).sum()
     pop["fraction"] = (pop.total / pop.ct.map(country_population)).fillna(0.0)
 
