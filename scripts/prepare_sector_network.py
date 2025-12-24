@@ -2803,8 +2803,9 @@ def add_residential(n, costs, energy_totals):
     temporal_resolution = n.snapshot_weightings.generators
 
     heat_ind = (
-        n.loads_t.p_set.filter(like="residential").filter(like="heat")
-        # .dropna(axis=1)
+        n.loads_t.p_set.filter(like="residential")
+        .filter(like="heat")
+        .fillna(0, axis=1)
         .columns
     )
     heat_shape_raw = normalize_by_country(n.loads_t.p_set[heat_ind])
