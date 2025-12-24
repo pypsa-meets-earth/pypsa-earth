@@ -30,21 +30,6 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(cutout_path)
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
-    # if alternative_clustering:
-    #    clustered_regions = (
-    #        gpd.read_file(snakemake.input.gadm_shapes)
-    #        .set_index("GADM_ID")
-    #        .buffer(0)
-    #        .squeeze()
-    #    )
-    # else:
-    #    clustered_regions = (
-    #        gpd.read_file(snakemake.input.regions_onshore)
-    #        .set_index("name")
-    #        .buffer(0)
-    #        .squeeze()
-    #    )
-
     clustered_regions = (
         gpd.read_file(snakemake.input.regions_onshore)
         .set_index("name")
@@ -60,16 +45,6 @@ if __name__ == "__main__":
         pop[item] = I.dot(pop_layout.stack(spatial=("y", "x")))
 
     pop = pd.DataFrame(pop, index=clustered_regions.index)
-
-    # if alternative_clustering:
-    #    regions_tmp = gpd.read_file(snakemake.input.regions_onshore)
-    #    regions_tmp["GADM_ID"] = regions_tmp["name"]
-    #    # TODO pop is longer than rigions_onshore
-    #    pop["ct"] = regions_tmp.set_index("GADM_ID").country
-    # else:
-    #    pop["ct"] = (
-    #        gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
-    #    )
 
     pop["ct"] = gpd.read_file(snakemake.input.regions_onshore).set_index("name").country
 
