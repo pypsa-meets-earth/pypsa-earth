@@ -17,6 +17,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
 
+* Account for existing batteries in powerplants file and improve logging on installed capacity `PR #1623 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1623>`__
+
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
 * Add an option to redefine countries into subregions in ``cluster_networks`` `PR #1542 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542>`__

@@ -1297,8 +1297,26 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     )
 
 
-def add_storage(n, costs):
-    "function to add the different types of storage systems"
+def fetch_existing_battery_capacity_from_elec(n_elec):
+    """
+    Read existing battery capacity from the electricity network and
+    return a dict {bus_name: p_nom_MW} aggregated per AC bus.
+    """
+    if getattr(n_elec, "storage_units", None) is None or n_elec.storage_units.empty:
+        return {}
+
+    su = n_elec.storage_units
+    bat = su[su.carrier == "battery"]
+    if bat.empty:
+        return {}
+
+    # Aggregate capacity per bus (MW)
+    return bat.groupby("bus")["p_nom"].sum().to_dict()
+
+
+def add_storage(n, costs, existing_battery_capacity=None):
+    """Function to add battery storage to the sector network, including
+    carry-over of existing capacities from the electricity network."""
     logger.info("Add battery storage")
 
     n.add("Carrier", "battery")
@@ -1311,6 +1329,31 @@ def add_storage(n, costs):
         x=n.buses.loc[list(spatial.nodes)].x.values,
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
+
+    # Existing battery capacity per AC node (MW) passed in
+    if existing_battery_capacity is None:
+        existing_battery_capacity = {}
+
+    total = float(sum(existing_battery_capacity.values()))
+    nodes_with_cap = len([p for p in existing_battery_capacity.values() if p > 0])
+    logger.info(
+        f"Battery carry-over from elec.nc: {total/1e3:.2f} GW across {nodes_with_cap} nodes."
+    )
+
+    # Use configured max_hours for battery duration
+    elec_config = snakemake.config["electricity"]
+    max_hours = elec_config["max_hours"]
+    battery_duration = max_hours["battery"]
+
+    e_nom_mins = []
+    p_nom_mins_charger = []
+    p_nom_mins_discharger = []
+
+    for node in spatial.nodes:
+        p = existing_battery_capacity.get(node, 0)
+        e_nom_mins.append(p * battery_duration)
+        p_nom_mins_charger.append(p)
+        p_nom_mins_discharger.append(p)
 
     n.madd(
         "Store",
@@ -3188,6 +3231,18 @@ if __name__ == "__main__":
     else:
         existing_capacities, existing_efficiencies, existing_nodes = 0, None, None
 
+    if options.get("keep_existing_capacities", False):
+        total_cap = (
+            sum(v.sum() for v in existing_capacities.values()) / 1e3
+            if existing_capacities
+            else 0
+        )
+        n_plants = sum(len(v) for v in existing_nodes.values()) if existing_nodes else 0
+        logger.info(
+            f"Imported {n_plants} existing conventional units "
+            f"with total capacity {total_cap:.1f} GW from electricity network."
+        )
+
     add_co2(n, costs, options["co2_network"])  # TODO add costs
 
     # remove conventional generators built in elec-only model
@@ -3200,7 +3255,27 @@ if __name__ == "__main__":
 
     add_hydrogen(n, costs)  # TODO add costs
 
-    add_storage(n, costs)
+    # Fetch existing battery capacities directly from the input network (elec.nc)
+    existing_batt = fetch_existing_battery_capacity_from_elec(n)
+
+    # Add storage using carried-over capacities
+    add_storage(n, costs, existing_battery_capacity=existing_batt)
+
+    # Check resulting battery components in sector network
+    bat_links = n.links[n.links.carrier.str.contains("battery", case=False, na=False)]
+    bat_stores = n.stores[
+        n.stores.carrier.str.contains("battery", case=False, na=False)
+    ]
+
+    if not bat_links.empty or not bat_stores.empty:
+        logger.info(
+            f"Sector network includes {len(bat_stores)} battery stores "
+            f"({bat_stores.e_nom.sum() / 1e3:.2f} GWh) and "
+            f"{len(bat_links)} battery converter links "
+            f"({bat_links.p_nom.sum() / 1e3:.2f} GW total)."
+        )
+    else:
+        logger.info("No battery components found after sector integration.")
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)
