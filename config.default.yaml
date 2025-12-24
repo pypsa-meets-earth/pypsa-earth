@@ -675,6 +675,7 @@ sector:
       200: 0.41
       450: 0.49
       2300: 0.66
+     # maximum distance [km] to allocate a building within the nearest bus shapes
     tolerance: 100
 
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
