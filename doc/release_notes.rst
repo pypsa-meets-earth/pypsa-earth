@@ -12,6 +12,8 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Revise heating and add cooling sector `PR #1376 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1376>`__
+
 * Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
 
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
