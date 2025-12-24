@@ -211,7 +211,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         snakemake.input.cooling_profile, index_col=0
     )  # TODO GHALAT
 
-    if calibrate_load:
+    if thermal_load_calibrate["enable"]:
         calibr_heat_df = pd.read_csv(
             os.path.join(
                 thermal_load_calibrate["calibr_dir"],
