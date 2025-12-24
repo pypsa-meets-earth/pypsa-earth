@@ -778,11 +778,11 @@ solving:
       threads: 4
       solver: "ipm"
       run_crossover: "on"
-      small_matrix_value: 1e-9
+      small_matrix_value: 1e-6
       large_matrix_value: 1e15
-      primal_feasibility_tolerance: 1e-8
-      dual_feasibility_tolerance: 1e-8
-      ipm_optimality_tolerance: 1e-8
+      primal_feasibility_tolerance: 1e-6
+      dual_feasibility_tolerance: 1e-6
+      ipm_optimality_tolerance: 1e-6
       parallel: "on"
       random_seed: 123
     gurobi-default:
