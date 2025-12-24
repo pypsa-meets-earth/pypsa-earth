@@ -63,7 +63,7 @@ sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
   enable:
     heat: true
-    cooling: false
+    cooling: true
 
 snapshots:
   # arguments to pd.date_range
