@@ -103,7 +103,7 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id, k=1):
     return data_df
 
 
-def prepare_heat_data(n, snapshots, countries):
+def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
     """
     Apply a linear transformation to the demand dataframe to match
     the demand values with the measured or modeled ones.
@@ -116,6 +116,8 @@ def prepare_heat_data(n, snapshots, countries):
         List of modelling snapshots
     countries : list
         List of countries included in the model
+    thermal_load_calibrate: dictionary
+        Dictionary of parameters used for calibration
     """
     # heating
     ashp_cop = (
@@ -431,7 +433,7 @@ if __name__ == "__main__":
         ac_cooling_total_cop,
         apft_abch_cooling_total_cop,
         district_heat_share,
-    ) = prepare_heat_data(n, n.snapshots, country_list)
+    ) = prepare_heat_data(n, n.snapshots, country_list, thermal_load_calibrate)
 
     # Save the generated output files to snakemake paths
     nodal_energy_totals.to_csv(snakemake.output.nodal_energy_totals)
