@@ -933,6 +933,65 @@ def define_spatial(nodes, options):
     return spatial
 
 
+def create_nodes_for_heat_sector(district_heat_share):
+    # TODO pop_layout
+
+    # rural are areas with low heating density and individual heating
+    # urban are areas with high heating density
+    # urban can be split into district heating (central) and individual heating (decentral)
+
+    ct_urban = pop_layout.urban.groupby(pop_layout.ct).sum()
+    # distribution of urban population within a country
+    pop_layout["urban_ct_fraction"] = pop_layout.urban / pop_layout.ct.map(ct_urban.get)
+
+    sectors = ["residential", "services"]
+
+    h_nodes = {}
+    urban_fraction = pop_layout.urban / pop_layout[["rural", "urban"]].sum(axis=1)
+
+    for sector in sectors:
+        h_nodes[sector + " rural"] = pop_layout.index
+        h_nodes[sector + " urban decentral"] = pop_layout.index
+
+    # maximum potential of urban demand covered by district heating
+    central_fraction = options["district_heating"]["potential"]
+    # district heating share at each node
+    dist_fraction_node = (
+        district_heat_share["district heat share"]
+        * pop_layout["urban_ct_fraction"]
+        # NB pop_layout["fraction"] can be zero
+        / (pop_layout.fraction.where(pop_layout.fraction != 0, np.nan))
+    ).replace(np.inf, 0)
+    h_nodes["urban central"] = dist_fraction_node.index
+    # if district heating share larger than urban fraction -> set urban
+    # fraction to district heating share
+    urban_fraction = pd.concat([urban_fraction, dist_fraction_node], axis=1).max(axis=1)
+    # difference of max potential and today's share of district heating
+    diff = (urban_fraction * central_fraction) - dist_fraction_node
+    progress = get(options["district_heating"]["progress"], investment_year)
+    dist_fraction_node += diff * progress
+    # logger.info(
+    #     "The current district heating share compared to the maximum",
+    #     f"possible is increased by a progress factor of\n{progress}",
+    #     "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
+    # )
+
+    return h_nodes, dist_fraction_node, urban_fraction
+
+
+def create_nodes_for_cooling_sector():
+
+    # assume that all the cooling technologies are applicable both for urban and rural areas
+    # district heating is not accounted for
+    c_nodes = {}
+
+    # for sector in sectors:
+    #    c_nodes[sector + " rural"] = pop_layout.index
+    c_nodes["cooling" + " overall"] = pop_layout.index
+
+    return c_nodes
+
+
 def add_biomass(n, costs):
     logger.info("adding biomass")
 
@@ -2048,66 +2107,6 @@ def add_land_transport(
             carrier="land transport oil emissions",
             p_set=-co2,
         )
-
-
-def create_nodes_for_heat_sector(district_heat_share):
-    # TODO pop_layout
-
-    # rural are areas with low heating density and individual heating
-    # urban are areas with high heating density
-    # urban can be split into district heating (central) and individual heating (decentral)
-
-    ct_urban = pop_layout.urban.groupby(pop_layout.ct).sum()
-    # distribution of urban population within a country
-    pop_layout["urban_ct_fraction"] = pop_layout.urban / pop_layout.ct.map(ct_urban.get)
-
-    sectors = ["residential", "services"]
-
-    h_nodes = {}
-    urban_fraction = pop_layout.urban / pop_layout[["rural", "urban"]].sum(axis=1)
-
-    for sector in sectors:
-        h_nodes[sector + " rural"] = pop_layout.index
-        h_nodes[sector + " urban decentral"] = pop_layout.index
-
-    # maximum potential of urban demand covered by district heating
-    central_fraction = options["district_heating"]["potential"]
-    # district heating share at each node
-    dist_fraction_node = (
-        district_heat_share["district heat share"]
-        * pop_layout["urban_ct_fraction"]
-        # NB pop_layout["fraction"] can be zero
-        / (pop_layout.fraction.where(pop_layout.fraction != 0, np.nan))
-    ).replace(np.inf, 0)
-    h_nodes["urban central"] = dist_fraction_node.index
-    # if district heating share larger than urban fraction -> set urban
-    # fraction to district heating share
-    urban_fraction = pd.concat([urban_fraction, dist_fraction_node], axis=1).max(axis=1)
-    # difference of max potential and today's share of district heating
-    diff = (urban_fraction * central_fraction) - dist_fraction_node
-    progress = get(options["district_heating"]["progress"], investment_year)
-    dist_fraction_node += diff * progress
-    # logger.info(
-    #     "The current district heating share compared to the maximum",
-    #     f"possible is increased by a progress factor of\n{progress}",
-    #     "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
-    # )
-
-    return h_nodes, dist_fraction_node, urban_fraction
-
-
-# a simplistic formulation which can be elaborated
-def create_nodes_for_cooling_sector():
-
-    # assume that all the cooling technologies are applicable both for urban and rural areas
-    # district heating is not accounted for
-    c_nodes = {}
-
-    # for sector in sectors:
-    #    c_nodes[sector + " rural"] = pop_layout.index
-    c_nodes["cooling" + " overall"] = pop_layout.index
-
-    return c_nodes
 
 
 def add_heat(
