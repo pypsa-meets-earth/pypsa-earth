@@ -64,5 +64,5 @@ renewable:
 
 solving:
   solver:
-    name: highs
-    options: highs-default
+    name: glpk
+    options: glpk-default
