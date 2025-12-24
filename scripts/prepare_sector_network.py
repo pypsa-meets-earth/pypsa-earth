@@ -2542,7 +2542,7 @@ def add_cooling(
             else cooling_costs.at["absorption chiller", "efficiency"]
         )
 
-        # TODO A heat source is needed to make this part work
+        # TODO An integration with a heat source is needed
         # n.madd(
         #    "Link",
         #    c_nodes[name],
