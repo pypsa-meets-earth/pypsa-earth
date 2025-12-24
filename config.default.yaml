@@ -667,6 +667,7 @@ sector:
     kW_per_m2: 0.1
     m2_per_person: 20
     use_building_size: false
+    # proportion of rooftop suitable for PV installation
     install_ratio:
       0: 0
       10: 0.3
