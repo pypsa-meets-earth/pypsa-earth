@@ -113,7 +113,7 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
-   .. _natura_cf:
+.. _natura_cf:
 
 ``natura``
 ===============
@@ -522,12 +522,31 @@ Specifies the options for Monte Carlo sampling.
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: monte_carlo:
-   :end-before:   solving:
+   :end-before: # ------------------- SECTOR OPTIONS -------------------
 
 .. csv-table::
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/monte-carlo.csv
+
+
+.. _sector_cf:
+
+``sector``
+=============
+
+Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: policy_config:
+   :end-before: solving:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/sector.csv
+
 
 .. _solving_cf:
 
