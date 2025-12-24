@@ -1289,6 +1289,7 @@ rule prepare_transport_data:
 rule build_cop_profiles:
     params:
         heat_pump_sink_T=config["sector"]["heat_pump_sink_T"],
+        t_wet_bulb=config["sector"]["t_wet_bulb"],
     input:
         temp_soil_total="resources/"
         + SECDIR

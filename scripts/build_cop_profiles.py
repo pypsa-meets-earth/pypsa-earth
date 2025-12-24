@@ -8,9 +8,6 @@ Build COP time series for air- or ground-sourced heat pumps.
 
 import xarray as xr
 
-# wet bulb temperature inside the cooled room
-T_WB_ROOM = 14
-
 
 def coefficient_of_performance(delta_T, source="air"):
     """
@@ -231,6 +228,8 @@ if __name__ == "__main__":
             "build_cop_profiles", simpl="", clusters=10, planning_horizons=2030
         )
 
+    t_wet_bulb = snakemake.params.t_wet_bulb
+
     # heating performance
     for area in ["total", "urban", "rural"]:
         # assuming that the heat source for heat pumps is outdoor air or soil
@@ -251,14 +250,14 @@ if __name__ == "__main__":
         outdoor_T = xr.open_dataarray(snakemake.input[f"temp_air_{area}"])
 
         cop_hp_cooling = 1 / eir_heat_pump_cooling(
-            t_ewb=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage"
+            t_ewb=t_wet_bulb, t_odb=outdoor_T, unit_type="single stage"
         )
         cop_ac_cooling = 1 / eir_air_conditioner(
-            t_ewb=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage"
+            t_ewb=t_wet_bulb, t_odb=outdoor_T, unit_type="single stage"
         )
 
         capft_abch_cooling = capft_absorption_chiller_air_cool(
-            t_chws=T_WB_ROOM, t_odb=outdoor_T, unit_type="single stage absorption"
+            t_chws=t_wet_bulb, t_odb=outdoor_T, unit_type="single stage absorption"
         )
 
         cop_hp_cooling.to_netcdf(snakemake.output[f"cop_hp_cooling_{area}"])

@@ -650,6 +650,8 @@ sector:
   micro_chp: false
   solar_thermal: true
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  # TODO a rough assumption must be replaced by a parametrisation
+  t_wet_bulb: 14 #Celsius, wet bulb temperature inside the cooled room
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
   solar_cf_correction: 0.788457 # = >>>1/1.2683
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
