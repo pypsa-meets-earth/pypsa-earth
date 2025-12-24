@@ -622,24 +622,24 @@ sector:
 
   thermal_load_calibrate:
     enable: false
-    CALIBR_DIR: "data/custom"
-    CALIBR_HEAT_FL: "mod_heating_calibr_clean.csv"
-    CALIBR_COOL_FL: "mod_cooling_calibr_clean.csv"
+    calibr_dir: "data/custom"
+    calibr_heat_fl: "mod_heating_calibr_clean.csv"
+    calibr_cool_fl: "mod_cooling_calibr_clean.csv"
     # administrative level at which calibration inputs are provided
-    CALIBRATION_LEVEL: 1
+    calibration_level: 1
     # scaling coefficient for the overall heating/cooling loads
-    HEAT_DEMAND_TOTAL: 1
-    COOL_DEMAND_TOTAL: 1
+    heat_demand_total: 1
+    cool_demand_total: 1
     # share of a respective load from the overall demand of a sector
-    SHARE_HEAT_RESID_DEMAND: 0.12
-    SHARE_WATER_RESID_DEMAND: 0.12
-    SHARE_HEAT_SERVICES_DEMAND: 0.32
-    SHARE_WATER_SERVICES_DEMAND: 0.05
-    SHARE_COOL_RESID_DEMAND: 0.19
-    SHARE_COOL_SERVICES_DEMAND: 0.11
-    SHARE_ELECTRICITY_RESID_SPACE: 0.10
-    SHARE_ELECTRICITY_SERVICES_SPACE: 0.13
-    SHARE_DISTRICT_HEAT: 0.1
+    share_heat_resid_demand: 0.12
+    share_water_resid_demand: 0.12
+    share_heat_services_demand: 0.32
+    share_water_services_demand: 0.05
+    share_cool_resid_demand: 0.19
+    share_cool_services_demand: 0.11
+    share_electricity_resid_space: 0.10
+    share_electricity_services_space: 0.13
+    share_district_heat: 0.1
 
 
   tes: true

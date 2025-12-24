@@ -13,30 +13,30 @@ import xarray as xr
 from _helpers import locate_bus, mock_snakemake
 
 # TODO Add to Snakemake
-CALIBR_DIR = "data/custom"
-CALIBR_HEAT_FL = "mod_heating_calibr_clean.csv"
-CALIBR_COOL_FL = "mod_cooling_calibr_clean.csv"
+calibr_dir = "data/custom"
+calibr_heat_fl = "mod_heating_calibr_clean.csv"
+calibr_cool_fl = "mod_cooling_calibr_clean.csv"
 
 # TODO Add to the parameters into a configuration file
-HEAT_DEMAND_TOTAL = 1
-COOL_DEMAND_TOTAL = 1
+heat_demand_total = 1
+cool_demand_total = 1
 
-SHARE_HEAT_RESID_DEMAND = 0.12
-SHARE_WATER_RESID_DEMAND = 0.12
+share_heat_resid_demand = 0.12
+share_water_resid_demand = 0.12
 
-SHARE_HEAT_SERVICES_DEMAND = 0.32
-SHARE_WATER_SERVICES_DEMAND = 0.05
+share_heat_services_demand = 0.32
+share_water_services_demand = 0.05
 
-SHARE_COOL_RESID_DEMAND = 0.19
-SHARE_COOL_SERVICES_DEMAND = 0.11
+share_cool_resid_demand = 0.19
+share_cool_services_demand = 0.11
 
-SHARE_ELECTRICITY_RESID_SPACE = 0.10
-SHARE_ELECTRICITY_SERVICES_SPACE = 0.13
+share_electricity_resid_space = 0.10
+share_electricity_services_space = 0.13
 
-SHARE_DISTRICT_HEAT = 0.1
+share_district_heat = 0.1
 
-CALIBRATE_LOAD = False
-CALIBRATION_LEVEL = 1
+calibrate_load = False
+calibration_level = 1
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -93,10 +93,10 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id, k=1):
         data_df.mul(scale_coeff_clean.to_dict()[data_col], axis=1)
     # TODO Avoid using the global variables
     elif load_mode == "heating":
-        k = thermal_load_calibrate["HEAT_DEMAND_TOTAL"] / data_df.sum().sum()
+        k = thermal_load_calibrate["heat_demand_total"] / data_df.sum().sum()
         data_df = k * data_df
     elif load_mode == "cooling":
-        k = thermal_load_calibrate["COOL_DEMAND_TOTAL"] / data_df.sum().sum()
+        k = thermal_load_calibrate["cool_demand_total"] / data_df.sum().sum()
         data_df = k * data_df
     else:
         data_df = k * data_df
@@ -167,7 +167,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
     nodal_energy_totals.index = pop_layout.index
     # TODO keeping the solution consistent
     nodal_energy_totals["district heat share"] = thermal_load_calibrate[
-        "SHARE_DISTRICT_HEAT"
+        "share_district_heat"
     ]
     # district heat share not weighted by population
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
@@ -190,17 +190,17 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         return df
 
     residential_shares = {
-        "heat_space": thermal_load_calibrate["SHARE_HEAT_RESID_DEMAND"],
-        "heat_water": thermal_load_calibrate["SHARE_WATER_RESID_DEMAND"],
-        "cool_space": thermal_load_calibrate["SHARE_COOL_RESID_DEMAND"],
-        "electricity_space": thermal_load_calibrate["SHARE_ELECTRICITY_RESID_SPACE"],
+        "heat_space": thermal_load_calibrate["share_heat_resid_demand"],
+        "heat_water": thermal_load_calibrate["share_water_resid_demand"],
+        "cool_space": thermal_load_calibrate["share_cool_resid_demand"],
+        "electricity_space": thermal_load_calibrate["share_electricity_resid_space"],
     }
 
     services_shares = {
-        "heat_space": thermal_load_calibrate["SHARE_HEAT_SERVICES_DEMAND"],
-        "heat_water": thermal_load_calibrate["SHARE_WATER_SERVICES_DEMAND"],
-        "cool_space": thermal_load_calibrate["SHARE_COOL_SERVICES_DEMAND"],
-        "electricity_space": thermal_load_calibrate["SHARE_ELECTRICITY_SERVICES_SPACE"],
+        "heat_space": thermal_load_calibrate["share_heat_services_demand"],
+        "heat_water": thermal_load_calibrate["share_water_services_demand"],
+        "cool_space": thermal_load_calibrate["share_cool_services_demand"],
+        "electricity_space": thermal_load_calibrate["share_electricity_services_space"],
     }
 
     nodal_energy_totals = calibrate_sector(
@@ -237,18 +237,18 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         snakemake.input.cooling_profile, index_col=0
     )  # TODO GHALAT
 
-    if CALIBRATE_LOAD:
+    if calibrate_load:
         calibr_heat_df = pd.read_csv(
             os.path.join(
-                thermal_load_calibrate["CALIBR_DIR"],
-                thermal_load_calibrate["CALIBR_HEAT_FL"],
+                thermal_load_calibrate["calibr_dir"],
+                thermal_load_calibrate["calibr_heat_fl"],
             ),
             index_col=0,
         )
         calibr_cool_df = pd.read_csv(
             os.path.join(
-                thermal_load_calibrate["CALIBR_DIR"],
-                thermal_load_calibrate["CALIBR_COOL_FL"],
+                thermal_load_calibrate["calibr_dir"],
+                thermal_load_calibrate["calibr_cool_fl"],
             ),
             index_col=0,
         )
@@ -329,7 +329,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         data_df=heat_demand,
         calibr_df=calibr_heat_buses_df,
         load_mode="heating",
-        geom_id=thermal_load_calibrate["CALIBRATION_LEVEL"],
+        geom_id=thermal_load_calibrate["calibration_level"],
     )
 
     electric_heat_supply = pd.concat(electric_heat_supply, axis=1)
@@ -374,7 +374,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         data_df=cooling_demand,
         calibr_df=calibr_cool_buses_df,
         load_mode="cooling",
-        geom_id=CALIBRATION_LEVEL,
+        geom_id=calibration_level,
     )
 
     return (
