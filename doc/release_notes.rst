@@ -78,6 +78,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
 
+* Add configtable for some sector parameters `PR #1494 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1494>`__
+
 * Included a configuration option to quantitavely set the tolerance levels for simplifying GADM shapes `PR #1147 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1147/commits>`__
 
 PyPSA-Earth 0.7.0
