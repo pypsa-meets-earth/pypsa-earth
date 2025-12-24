@@ -12,32 +12,6 @@ import pytz
 import xarray as xr
 from _helpers import locate_bus, mock_snakemake
 
-# TODO Add to Snakemake
-calibr_dir = "data/custom"
-calibr_heat_fl = "mod_heating_calibr_clean.csv"
-calibr_cool_fl = "mod_cooling_calibr_clean.csv"
-
-# TODO Add to the parameters into a configuration file
-heat_demand_total = 1
-cool_demand_total = 1
-
-share_heat_resid_demand = 0.12
-share_water_resid_demand = 0.12
-
-share_heat_services_demand = 0.32
-share_water_services_demand = 0.05
-
-share_cool_resid_demand = 0.19
-share_cool_services_demand = 0.11
-
-share_electricity_resid_space = 0.10
-share_electricity_services_space = 0.13
-
-share_district_heat = 0.1
-
-calibrate_load = False
-calibration_level = 1
-
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
     """
@@ -324,7 +298,6 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
 
     heat_demand = pd.concat(heat_demand, axis=1)
 
-    # TODO Account for the differences in a column name alternative/Voronoi clustering
     heat_demand = scale_demand(
         data_df=heat_demand,
         calibr_df=calibr_heat_buses_df,
@@ -374,7 +347,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         data_df=cooling_demand,
         calibr_df=calibr_cool_buses_df,
         load_mode="cooling",
-        geom_id=calibration_level,
+        geom_id=thermal_load_calibrate["calibration_level"],
     )
 
     return (
