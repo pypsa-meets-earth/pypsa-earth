@@ -620,7 +620,7 @@ sector:
   # 2045: 0.21
   # 2050: 0.29
 
-  district_heating_calibrate:
+  thermal_load_calibrate:
     enable: false
     CALIBR_DIR: "data/custom"
     CALIBR_HEAT_FL: "mod_heating_calibr_clean.csv"
