@@ -89,19 +89,30 @@ There are multiple ways to get involved and learn more about our work:
    ```bash
    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
    ```
-2. The python package requirements are curated in the `envs/environment.yaml` file.
-   The environment can be installed using:
-
-   ```bash
-   .../pypsa-earth % conda env create -f envs/environment.yaml
-   ```
+2. The python package requirements are curated in the `envs/{your operating system}64.lock.yaml` file.
+   - On linux, the environment can be installed using:
+     ```bash
+     .../pypsa-earth % conda env create -f envs/linux-64.lock.yaml
+     ```
+   - On newest macOS (arm-based), the environment can be installed using:
+     ```bash
+     .../pypsa-earth % conda env create -f envs/osx-arm64.lock.yaml
+     ```
+     On non-arm macOS, the environment can be installed using:
+     ```bash
+     .../pypsa-earth % conda env create -f envs/osx-64.lock.yaml
+     ```
+    - On Windows, the environment can be installed using:
+      ```bash
+      .../pypsa-earth % conda env create -f envs/win-64.lock.yaml
+     ```
 
    If the above takes longer than 30 min, you might want to try mamba for faster installation:
 
    ```bash
    (base) conda install -c conda-forge mamba
 
-   .../pypsa-earth % mamba env create -f envs/environment.yaml
+   .../pypsa-earth % mamba env create -f envs/{{your operating system}}64.lock.yaml.yaml
    ```
 
 3. (optional) In step 2, three solvers are installed: HiGHs, glpk and gurobi. HiGHs is the recommended open-source solver. Gurobi is generally faster, but requires a license for full functionality, which is [freely available to academics](https://www.gurobi.com/features/academic-named-user-license/) (see instructions website).
@@ -129,10 +140,10 @@ There are multiple ways to get involved and learn more about our work:
 
 ## Running the model in previous versions
 
-The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.6.0, which is the last version before the recent PyPSA update, the following command can be used:
+The model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.8.0, which is the last version before the recent PyPSA update, the following command can be used:
 
 ```bash
-git checkout v0.6.0
+git checkout v0.8.0
 ```
 After checking out the tag, the model can be run as usual. Please make sure to use the environment built for the respective version.
 
