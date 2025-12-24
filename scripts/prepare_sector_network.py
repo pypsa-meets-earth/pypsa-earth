@@ -3353,11 +3353,11 @@ if __name__ == "__main__":
         keep_default_na=False,
         na_values=[""],
     )
-    # # Get the data required for land transport
-    # # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    # transport = pd.read_csv(
-    #     snakemake.input.transport, index_col=0, parse_dates=True
-    # ).reindex(columns=nodes, fill_value=0.0)
+    # Get the data required for land transport
+    # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
+    transport = pd.read_csv(
+        snakemake.input.transport, index_col=0, parse_dates=True
+    ).reindex(columns=nodes, fill_value=0.0)
 
     avail_profile = pd.read_csv(
         snakemake.input.avail_profile, index_col=0, parse_dates=True
