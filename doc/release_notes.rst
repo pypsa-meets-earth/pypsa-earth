@@ -12,6 +12,7 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+
 * Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
 
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
@@ -74,7 +75,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
 
-* Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__
+* Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__, `PR #1674 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1674>`__ and `PR #1673 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1673>`__
 
 * Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
 
@@ -118,6 +119,8 @@ PyPSA-Earth 0.7.0
 * Introduce US-specific cost configurations and update to `technology_data_version` v0.13.2 `PR #1448 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448>`__
 
 * Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
+
+* Add all cutouts to sandbox zenodo `PR #1688 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1688>`__
 
 **Minor Changes and bug-fixing**
 
@@ -199,7 +202,7 @@ PyPSA-Earth 0.7.0
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
 
-* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
+* Update team description in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
 
 PyPSA-Earth 0.6.0
 =================
