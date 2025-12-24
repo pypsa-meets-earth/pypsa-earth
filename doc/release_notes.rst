@@ -13,6 +13,17 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+*
+
+**Minor Changes and bug-fixing**
+
+*
+
+PyPSA-Earth 0.7.0
+=================
+
+**New Features and Major Changes**
+
 * Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
 
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
@@ -738,7 +749,7 @@ Release Process
 
 * Make sure thah pinned versions of the environments ``*-pinned.yaml`` in ``envs`` folder are up-to-date.
 
-* Update version number in ``doc/conf.py``, ``default.config.yaml``, ``tutorial.config.yaml`` and ``test/config.*.yaml``.
+* Update version number in ``doc/conf.py``, ``default.config.yaml``, and ``tutorial.config.yaml``.
 
 * Open, review and merge pull request for branch ``release-v0.x.x``.
   Make sure to close issues and PRs or the release milestone with it (e.g. closes #X).
