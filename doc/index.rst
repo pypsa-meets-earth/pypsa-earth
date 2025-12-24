@@ -29,8 +29,8 @@ Welcome to the PyPSA-Earth documentation!
     :target: https://www.gnu.org/licenses/agpl-3.0
     :alt: License
 
-.. image:: https://api.reuse.software/badge/github.com/pypsa/pypsa-eur
-    :target: https://api.reuse.software/info/github.com/pypsa/pypsa-eur
+.. image:: https://api.reuse.software/badge/github.com/pypsa-meets-earth/pypsa-earth
+    :target: https://api.reuse.software/info/github.com/pypsa-meets-earth/pypsa-earth
     :alt: REUSE
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg

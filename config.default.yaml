@@ -116,7 +116,9 @@ cluster_options:
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
   simplify_gadm: true # When true, shape polygons are simplified else no
+  minarea: 0.01 # Minimum area of polygons to be retained in GADM shapes after simplification, in square degrees. Polygons with area smaller than this value will be removed
   update_file: false # When true, all the input files are downloaded again and replace the existing files
   out_logging: true # When true, logging is printed to console
   year: 2020 # reference year used to derive shapes, info on population and info on GDP
@@ -602,9 +604,11 @@ sector:
     # 2040: 0.6
     # 2050: 1.0
     district_heating_loss: 0.15
-  reduce_space_heat_exogenously: true # reduces space heat demand by a given factor (applied before losses in DH)
+  reduce_space_heat_exogenously: false # reduces space heat demand by a given factor (applied before losses in DH)
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth
+  # NB The value of space heat reduction are Europe-specific
+  # if they usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
   # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
   # 2020: 0.10  # this results in a space heat demand reduction of 10%
