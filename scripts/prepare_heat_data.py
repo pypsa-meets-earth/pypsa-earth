@@ -171,8 +171,6 @@ def prepare_heat_data(n, snapshots, countries):
 
     energy_col_names = nodal_energy_totals.columns
 
-    # TODO reimplement using DRY approach
-    # a proper structure of the inputs is essential
     residential_cols = energy_col_names[energy_col_names.str.contains("residential")]
     services_cols = energy_col_names[energy_col_names.str.contains("services")]
 
