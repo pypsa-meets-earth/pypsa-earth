@@ -266,7 +266,7 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     return costs
 
 
-def load_powerplants(ppl_fn, costs, fill_values):
+def load_powerplants(ppl_fn, costs=None, fill_values=None):
     """
     Load and preprocess powerplant matching data and fill missing datein/dateout.
     Parameters
@@ -305,7 +305,8 @@ def load_powerplants(ppl_fn, costs, fill_values):
         ppl = ppl.drop(null_ppls.index)
 
     # Fill missing datein and dateout columns
-    #ppl = fill_datein_dateout(ppl, costs, fill_values)
+    if costs is not None and fill_values is not None:
+        ppl = fill_datein_dateout(ppl, costs, fill_values)
 
     return ppl
 
@@ -336,26 +337,25 @@ def fill_datein_dateout(ppl, costs, fill_values):
         logger.warning(
             f"Filling missing 'datein' for powerplants {list(missing_datein)} with mean build year per technology."
         )
+        
+        # Check if there are still missing datein values after carrier mean filling
+        if ppl["datein"].isna().any():
+            still_missing = ppl[ppl["datein"].isna()].index
+            raise ValueError(
+                f"Could not fill 'datein' for powerplants {list(still_missing)} by averaging over technology. Please provide explicit 'datein' values for these powerplants."
+            )
 
     # Fill missing dateout based on lifetime from costs DataFrame
     if ppl["dateout"].isna().any():
         missing_dateout = ppl[ppl["dateout"].isna()].index
-        lifetimes = pd.Series(fill_values.get("lifetime", {}))
-        default_lifetime = fill_values.get("lifetime_default", 40)
-        lifetimes = lifetimes.reindex(costs.index).fillna(default_lifetime)
         ppl.loc[missing_dateout, "dateout"] = (
             ppl.loc[missing_dateout, "datein"]
-            + ppl.loc[missing_dateout, "carrier"].map(lifetimes)
+            + ppl.loc[missing_dateout, "carrier"].map(costs["lifetime"]).fillna(fill_values["lifetime"])
         )
         logger.warning(
             f"Filling missing 'dateout' for powerplants {list(missing_dateout)} based on 'datein' and technology lifetimes."
         )
 
-
-    if "datein" not in n.generators.columns:
-        n.generators["datein"] = 0
-    if "dateout" not in n.generators.columns:
-        n.generators["dateout"] = np.inf
     return ppl
 
 
@@ -558,7 +558,6 @@ def attach_wind_and_solar(
                     marginal_cost=costs.at[suptech, "marginal_cost"],
                     capital_cost=capital_cost,
                     efficiency=costs.at[suptech, "efficiency"],
-                    build_year=0,
                     lifetime=costs.at[suptech, "lifetime"],
                 )
 
@@ -609,7 +608,7 @@ def attach_conventional_generators(
         efficiency=ppl.efficiency,
         marginal_cost=ppl.marginal_cost,
         capital_cost=ppl.capital_cost,
-        build_year=ppl.datein.fillna(0).astype(int),
+        build_year=ppl.datein.astype(int),
         lifetime=(ppl.dateout - ppl.datein).fillna(np.inf),
     )
 
@@ -631,7 +630,7 @@ def attach_conventional_generators(
             lifetime=costs.at[carrier, "lifetime"],
         )
 
-        logger.info(f"Added extendable {carrier} generators at {len(carrier_buses)} buses.")
+    logger.info(f"Added extendable {extendable_conventional} generators at {len(carrier_buses)} buses.")
 
 
     for carrier in conventional_config:
@@ -717,6 +716,7 @@ def attach_hydro(n, costs, ppl):
         n.madd(
             "Generator",
             ror.index,
+            suffix=" existing",
             carrier="ror",
             bus=ror["bus"],
             p_nom=ror["p_nom"],
@@ -728,6 +728,8 @@ def attach_hydro(n, costs, ppl):
                 .divide(ror["p_nom"], axis=1)
                 .where(lambda df: df <= 1.0, other=1.0)
             ),
+            build_year=ror["datein"],
+            lifetime=(ror["dateout"] - ror["datein"]),
         )
 
     if "PHS" in carriers and not phs.empty:
@@ -737,6 +739,7 @@ def attach_hydro(n, costs, ppl):
         n.madd(
             "StorageUnit",
             phs.index,
+            suffix=" existing",
             carrier="PHS",
             bus=phs["bus"],
             p_nom=phs["p_nom"],
@@ -745,6 +748,8 @@ def attach_hydro(n, costs, ppl):
             efficiency_store=np.sqrt(costs.at["PHS", "efficiency"]),
             efficiency_dispatch=np.sqrt(costs.at["PHS", "efficiency"]),
             cyclic_state_of_charge=True,
+            build_year=phs["datein"],
+            lifetime=(phs["dateout"] - phs["datein"]),
         )
 
     if "hydro" in carriers and not hydro.empty:
@@ -809,6 +814,8 @@ def attach_hydro(n, costs, ppl):
             efficiency_store=0.0,
             cyclic_state_of_charge=True,
             inflow=inflow_t.loc[:, hydro.index],
+            build_year=hydro["datein"],
+            lifetime=(hydro["dateout"] - hydro["datein"]),
         )
 
 
@@ -884,8 +891,27 @@ def attach_extendable_generators(n, costs, ppl):
 
 
 def estimate_renewable_capacities_irena(
-    n, estimate_renewable_capacities_config, countries_config
-):
+    n: pypsa.Network,
+    estimate_renewable_capacities_config: dict,
+    countries_config: list
+) -> None:
+    """
+    Estimate renewable capacities based on IRENA statistics.
+    
+    This function distributes country-level IRENA capacity statistics to 
+    extendable generators, accounting for existing capacity already in the network.
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    estimate_renewable_capacities_config : dict
+        Configuration dictionary for renewable capacity estimation.
+    countries_config : list
+        List of countries to consider for capacity estimation.
+    Returns
+    -------
+    None
+    """
     stats = estimate_renewable_capacities_config["stats"]
     if not stats:
         return
@@ -938,26 +964,73 @@ def estimate_renewable_capacities_irena(
         tech_capacities = capacities.loc[ppm_technology].reindex(
             countries, fill_value=0.0
         )
-        tech_i = n.generators.query("carrier in @techs").index
-        n.generators.loc[tech_i, "p_nom"] = (
-            (
-                n.generators_t.p_max_pu[tech_i].mean()
-                * n.generators.loc[tech_i, "p_nom_max"]
+
+        # Separate existing and extendable generators
+        all_tech_i = n.generators.query("carrier in @techs").index
+        existing_i = all_tech_i[all_tech_i.str.contains("existing")]
+        extendable_i = all_tech_i[~all_tech_i.str.contains("existing")]
+
+        # Calculate existing capacities per country
+        existing_capacity_per_country = (
+            n.generators.loc[existing_i, "p_nom"]
+            .groupby(n.generators.loc[existing_i, "bus"].map(n.buses.country))
+            .sum()
+            .reindex(countries, fill_value=0.0)
+        )
+
+        # Calculate remaining capacity to distribute (IRENA - existing)
+        remaining_capacities = (
+            tech_capacities - existing_capacity_per_country
+        ).clip(lower=0.0)
+
+
+        logger.info(
+            f"For {ppm_technology}: {stats} total = {tech_capacities.sum():.1f} MW, "
+            f"Existing = {existing_capacity_per_country.sum():.1f} MW, "
+            f"Remaining to distribute = {remaining_capacities.sum():.1f} MW"
+        )
+
+        # Skip if no remaining capacity to distribute
+        if remaining_capacities.sum() <= 0.0:
+            logger.info(
+                f"Existing capacity exceeds or equals {stats} stats for {ppm_technology}. "
+                "No additional capacity distributed to extendable generators."
             )
-            # maximal yearly generation
-            .groupby(n.generators.bus.map(n.buses.country))
-            .transform(lambda s: normed(s) * tech_capacities.at[s.name])
-            .where(lambda s: s > 0.1, 0.0)
-        )  # only capacities above 100kW
-        n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[tech_i, "p_nom"]
+            continue
+
+        # Skip if no extendable generators for the technology
+        if extendable_i.empty:
+            logger.info(
+                f"No extendable generators for {ppm_technology}. "
+                "Cannot distribute remaining capacity."
+            )
+            continue
+
+        # Distribute remaining capacity to extendable generators based on potential
+        potential = (
+            n.generators_t.p_max_pu[extendable_i].mean()
+            * n.generators.loc[extendable_i, "p_nom_max"]
+        )
+
+        # Distribute by country, weighted by potential
+        distributed_capacities = potential.groupby(
+            n.generators.loc[extendable_i, "bus"].map(n.buses.country)
+        ).transform(
+            lambda s: normed(s) * remaining_capacities.at[s.name]
+            if s.name in remaining_capacities.index
+            else 0.0
+        ).where(lambda s: s > 0.1, 0.0)  # only capacities above 100kW
+
+        n.generators.loc[extendable_i, "p_nom"] = distributed_capacities
+        n.generators.loc[extendable_i, "p_nom_min"] = distributed_capacities
 
         if p_nom_min:
             assert np.isscalar(p_nom_min)
             logger.info(
                 f"Scaling capacity stats to {p_nom_min*100:.2f}% of installed capacity acquired from stats."
             )
-            n.generators.loc[tech_i, "p_nom_min"] = n.generators.loc[
-                tech_i, "p_nom"
+            n.generators.loc[extendable_i, "p_nom_min"] = n.generators.loc[
+                extendable_i, "p_nom"
             ] * float(p_nom_min)
 
         if p_nom_max:
@@ -965,8 +1038,8 @@ def estimate_renewable_capacities_irena(
             logger.info(
                 f"Scaling capacity expansion limit to {p_nom_max*100:.2f}% of installed capacity acquired from stats."
             )
-            n.generators.loc[tech_i, "p_nom_max"] = n.generators.loc[
-                tech_i, "p_nom_min"
+            n.generators.loc[extendable_i, "p_nom_max"] = n.generators.loc[
+                extendable_i, "p_nom_min"
             ] * float(p_nom_max)
 
 
@@ -991,7 +1064,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("add_electricity")
+        snakemake = mock_snakemake("add_electricity", configfile="config.US.yaml")
 
     configure_logging(snakemake)
 
