@@ -88,6 +88,7 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, override_component_attrs
 from linopy import merge
+from linopy.remote.oetc import OetcCredentials, OetcSettings, OetcHandler
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
@@ -1107,6 +1108,19 @@ def solve_network(n, config, solving, **kwargs):
     )
     kwargs["solver_name"] = solving["solver"]["name"]
     kwargs["extra_functionality"] = extra_functionality
+
+    oetc = solving.get("oetc", None)
+    if oetc:
+        # Create a copy of oetc to avoid modifying the original dictionary
+        oetc_config = oetc.copy()
+        oetc_config["credentials"] = OetcCredentials(
+            email=os.environ["OETC_EMAIL"], password=os.environ["OETC_PASSWORD"]
+        )
+        oetc_config["solver"] = kwargs["solver_name"]
+        oetc_config["solver_options"] = kwargs["solver_options"]
+        oetc_settings = OetcSettings(**oetc_config)
+        oetc_handler = OetcHandler(oetc_settings)
+        kwargs["remote"] = oetc_handler
 
     skip_iterations = cf_solving.get("skip_iterations", False)
     if not n.lines.s_nom_extendable.any():
