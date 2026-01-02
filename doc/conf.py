@@ -65,7 +65,7 @@ author = "PyPSA-Earth developers"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
-release = "0.7.0"
+release = "0.8.0"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
