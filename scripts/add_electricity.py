@@ -453,9 +453,7 @@ def attach_wind_and_solar(
 
                 buses_country = n.buses.loc[ds.indexes["bus"], "country"]
 
-                existing_by_country = (
-                    caps_existing.groupby(buses_country).sum()
-                )
+                existing_by_country = caps_existing.groupby(buses_country).sum()
 
                 gap_by_country = (targets - existing_by_country).clip(lower=0.0)
 
