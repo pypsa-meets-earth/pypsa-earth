@@ -266,7 +266,11 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
     return costs
 
 
-def load_powerplants(ppl_fn, costs=None, fill_values=None):
+def load_powerplants(
+    ppl_fn: str,
+    costs: pd.DataFrame = None,
+    fill_values: dict = None
+    ) -> pd.DataFrame:
     """
     Load and preprocess powerplant matching data and fill missing datein/dateout.
     Parameters
@@ -311,7 +315,11 @@ def load_powerplants(ppl_fn, costs=None, fill_values=None):
     return ppl
 
 
-def fill_datein_dateout(ppl, costs, fill_values):
+def fill_datein_dateout(
+    ppl: pd.DataFrame,
+    costs: pd.DataFrame,
+    fill_values: dict
+    ) -> pd.DataFrame:
     """
     Fill missing datein and dateout values in ppl DataFrame.
 
@@ -430,14 +438,38 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
 
 
 def attach_wind_and_solar(
-    n,
-    costs,
-    ppl,
-    input_files,
-    technologies,
-    extendable_carriers,
-    line_length_factor,
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame,
+    input_files: dict, # snakemake input
+    technologies: set,
+    extendable_carriers: dict,
+    line_length_factor: float,
 ):
+    """
+    Add existing and extendable wind and solar generators to the network.
+    
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    ppl : pd.DataFrame
+        Power plant DataFrame.
+    input_files : dict
+        Snakemake input object.
+    technologies : set
+        Set of renewable technologies to be added.
+    extendable_carriers : dict
+        Dictionary of extendable carriers for different component types.
+    line_length_factor : float
+        Factor to adjust line lengths for connection cost calculations.
+
+    Returns
+    -------
+    None
+    """
     # TODO: rename tech -> carrier, technologies -> carriers
     _add_missing_carriers_from_costs(n, costs, technologies)
 
@@ -568,15 +600,41 @@ def attach_wind_and_solar(
 
 
 def attach_conventional_generators(
-    n,
-    costs,
-    ppl,
-    conventional_carriers,
-    extendable_carriers,
-    renewable_carriers,
-    conventional_config,
-    conventional_inputs,
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame,
+    conventional_carriers: list,
+    extendable_carriers: dict,
+    renewable_carriers: set,
+    conventional_config: list,
+    conventional_inputs: dict,
 ):
+    """
+    Add existing conventional generators to the network and extendable conventional generators at all buses.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    ppl : pd.DataFrame
+        Power plant DataFrame.
+    conventional_carriers : list
+        List of conventional carriers to be added.
+    extendable_carriers : dict
+        Dictionary of extendable carriers for different component types.
+    renewable_carriers : set
+        Set of renewable carriers.
+    conventional_config : list
+        List of conventional configuration settings.
+    conventional_inputs : dict
+        Dictionary of conventional input parameters.
+
+    Returns
+    -------
+    None
+    """
     carriers = set(conventional_carriers) | (
         set(extendable_carriers["Generator"]) - set(renewable_carriers)
     )
@@ -653,7 +711,27 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
-def attach_hydro(n, costs, ppl):
+def attach_hydro(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame
+    ) -> None:
+    """
+    Add existing hydro powerplants to the network as Hydro Storage units, Run-Of-River generators, and Pumped Hydro storage units.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    ppl : pd.DataFrame
+        Power plant DataFrame.
+    
+    Returns
+    -------
+    None
+    """
     if "hydro" not in snakemake.params.renewable:
         return
     c = snakemake.params.renewable["hydro"]
@@ -819,7 +897,27 @@ def attach_hydro(n, costs, ppl):
         )
 
 
-def attach_extendable_generators(n, costs, ppl):
+def attach_extendable_generators(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame
+    ) -> None:
+    """
+    Add extendable conventional generators (OCGT, CCGT, nuclear) with zero capacity.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    ppl : pd.DataFrame
+        Power plant DataFrame.
+
+    Returns
+    -------
+    None
+    """
     logger.warning("The function is deprecated with the next release")
     elec_opts = snakemake.params.electricity
     carriers = pd.Index(elec_opts["extendable_carriers"]["Generator"])
@@ -908,6 +1006,7 @@ def estimate_renewable_capacities_irena(
         Configuration dictionary for renewable capacity estimation.
     countries_config : list
         List of countries to consider for capacity estimation.
+
     Returns
     -------
     None
@@ -1064,7 +1163,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("add_electricity", configfile="config.US.yaml")
+        snakemake = mock_snakemake("add_electricity")
 
     configure_logging(snakemake)
 
