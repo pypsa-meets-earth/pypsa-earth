@@ -270,11 +270,11 @@ def _aggregate_and_move_components(
 ):
     """
     Aggregate and move components according to busmap.
-    
-    For generators, existing (p_nom_extendable=False) and extendable 
+
+    For generators, existing (p_nom_extendable=False) and extendable
     (p_nom_extendable=True) generators are aggregated separately to preserve
     their distinct characteristics for myopic optimization.
-    
+
     Parameters
     ----------
     n : pypsa.Network
@@ -291,7 +291,8 @@ def _aggregate_and_move_components(
         Strategies for aggregating components.
     exclude_carriers : list
         Carriers to exclude from aggregation.
-    """ 
+    """
+
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
 
@@ -320,7 +321,9 @@ def _aggregate_and_move_components(
     extendable_carriers = set(n.generators.loc[extendable_mask, "carrier"]) & carriers
 
     # Temporarily rename existing generator's carriers to separate them
-    n.generators.loc[existing_mask, "carrier"] = n.generators.loc[existing_mask, "carrier"] + " existing"
+    n.generators.loc[existing_mask, "carrier"] = (
+        n.generators.loc[existing_mask, "carrier"] + " existing"
+    )
 
     all_generators = []
     all_generators_pnl = {}
@@ -328,7 +331,9 @@ def _aggregate_and_move_components(
     # Aggregate existing generators by (bus, carrier, grouping_year)
     if existing_carriers:
         gens_exist, pnl_exist = aggregateoneport(
-            n, busmap, "Generator",
+            n,
+            busmap,
+            "Generator",
             carriers=existing_carriers,
             custom_strategies=generator_strategies,
         )
@@ -339,7 +344,9 @@ def _aggregate_and_move_components(
     # Aggregate extendable generators
     if extendable_carriers:
         gens_ext, pnl_ext = aggregateoneport(
-            n, busmap, "Generator",
+            n,
+            busmap,
+            "Generator",
             carriers=extendable_carriers,
             custom_strategies=generator_strategies,
         )
@@ -347,7 +354,9 @@ def _aggregate_and_move_components(
             all_generators.append(gens_ext)
             for k, v in pnl_ext.items():
                 if k in all_generators_pnl:
-                    all_generators_pnl[k] = pd.concat([all_generators_pnl[k], v], axis=1)
+                    all_generators_pnl[k] = pd.concat(
+                        [all_generators_pnl[k], v], axis=1
+                    )
                 else:
                     all_generators_pnl[k] = v
 
@@ -358,8 +367,9 @@ def _aggregate_and_move_components(
 
     # Restore original carrier names (remove " existing" suffix)
     n.generators.loc[n.generators.carrier.str.endswith(" existing"), "carrier"] = (
-        n.generators.loc[n.generators.carrier.str.endswith(" existing"), "carrier"]
-        .str.replace(" existing", "", regex=False)
+        n.generators.loc[
+            n.generators.carrier.str.endswith(" existing"), "carrier"
+        ].str.replace(" existing", "", regex=False)
     )
 
     for one_port in aggregate_one_ports:
@@ -420,7 +430,7 @@ def simplify_links(
         List of carriers to exclude from simplification, by default [].
     aggregation_strategies : dict, optional
         Strategies for aggregating components, by default dict().
-    
+
     Returns
     -------
     n : pypsa.Network

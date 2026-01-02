@@ -267,10 +267,8 @@ def load_costs(tech_costs, config, elec_config, Nyears=1):
 
 
 def load_powerplants(
-    ppl_fn: str,
-    costs: pd.DataFrame = None,
-    fill_values: dict = None
-    ) -> pd.DataFrame:
+    ppl_fn: str, costs: pd.DataFrame = None, fill_values: dict = None
+) -> pd.DataFrame:
     """
     Load and preprocess powerplant matching data and fill missing datein/dateout.
     Parameters
@@ -281,7 +279,7 @@ def load_powerplants(
         DataFrame containing technology costs.
     fill_values : dict
         Dictionary containing default values for lifetime.
-        
+
     Returns
     -------
     ppl : pd.DataFrame
@@ -316,10 +314,8 @@ def load_powerplants(
 
 
 def fill_datein_dateout(
-    ppl: pd.DataFrame,
-    costs: pd.DataFrame,
-    fill_values: dict
-    ) -> pd.DataFrame:
+    ppl: pd.DataFrame, costs: pd.DataFrame, fill_values: dict
+) -> pd.DataFrame:
     """
     Fill missing datein and dateout values in ppl DataFrame.
 
@@ -341,11 +337,13 @@ def fill_datein_dateout(
     if ppl["datein"].isna().any():
         missing_datein = ppl[ppl["datein"].isna()].index
         mean_datein = ppl.groupby("carrier")["datein"].mean()
-        ppl.loc[missing_datein, "datein"] = ppl.loc[missing_datein, "carrier"].map(mean_datein)
+        ppl.loc[missing_datein, "datein"] = ppl.loc[missing_datein, "carrier"].map(
+            mean_datein
+        )
         logger.warning(
             f"Filling missing 'datein' for powerplants {list(missing_datein)} with mean build year per technology."
         )
-        
+
         # Check if there are still missing datein values after carrier mean filling
         if ppl["datein"].isna().any():
             still_missing = ppl[ppl["datein"].isna()].index
@@ -356,9 +354,10 @@ def fill_datein_dateout(
     # Fill missing dateout based on lifetime from costs DataFrame
     if ppl["dateout"].isna().any():
         missing_dateout = ppl[ppl["dateout"].isna()].index
-        ppl.loc[missing_dateout, "dateout"] = (
-            ppl.loc[missing_dateout, "datein"]
-            + ppl.loc[missing_dateout, "carrier"].map(costs["lifetime"]).fillna(fill_values["lifetime"])
+        ppl.loc[missing_dateout, "dateout"] = ppl.loc[
+            missing_dateout, "datein"
+        ] + ppl.loc[missing_dateout, "carrier"].map(costs["lifetime"]).fillna(
+            fill_values["lifetime"]
         )
         logger.warning(
             f"Filling missing 'dateout' for powerplants {list(missing_dateout)} based on 'datein' and technology lifetimes."
@@ -441,14 +440,14 @@ def attach_wind_and_solar(
     n: pypsa.Network,
     costs: pd.DataFrame,
     ppl: pd.DataFrame,
-    input_files: dict, # snakemake input
+    input_files: dict,  # snakemake input
     technologies: set,
     extendable_carriers: dict,
     line_length_factor: float,
 ):
     """
     Add existing and extendable wind and solar generators to the network.
-    
+
     Parameters
     ----------
     n : pypsa.Network
@@ -575,7 +574,9 @@ def attach_wind_and_solar(
             # Add extendable generators
             if tech in extendable_carriers["Generator"]:
                 # Adjust p_nom_max by subtracting existing capacities
-                adjusted_p_nom_max = (p_nom_max_per_bus - existing_per_bus).clip(lower=0.0)
+                adjusted_p_nom_max = (p_nom_max_per_bus - existing_per_bus).clip(
+                    lower=0.0
+                )
 
                 n.madd(
                     "Generator",
@@ -671,7 +672,9 @@ def attach_conventional_generators(
     )
 
     # Add extendable conventional generators
-    extendable_conventional = set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    extendable_conventional = set(extendable_carriers["Generator"]) - set(
+        renewable_carriers
+    )
     carrier_buses = n.buses.index
 
     for carrier in extendable_conventional:
@@ -688,8 +691,9 @@ def attach_conventional_generators(
             lifetime=costs.at[carrier, "lifetime"],
         )
 
-    logger.info(f"Added extendable {extendable_conventional} generators at {len(carrier_buses)} buses.")
-
+    logger.info(
+        f"Added extendable {extendable_conventional} generators at {len(carrier_buses)} buses."
+    )
 
     for carrier in conventional_config:
         # Generators with technology affected
@@ -711,11 +715,7 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
-def attach_hydro(
-    n: pypsa.Network,
-    costs: pd.DataFrame,
-    ppl: pd.DataFrame
-    ) -> None:
+def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> None:
     """
     Add existing hydro powerplants to the network as Hydro Storage units, Run-Of-River generators, and Pumped Hydro storage units.
 
@@ -727,7 +727,7 @@ def attach_hydro(
         DataFrame containing technology costs.
     ppl : pd.DataFrame
         Power plant DataFrame.
-    
+
     Returns
     -------
     None
@@ -898,10 +898,8 @@ def attach_hydro(
 
 
 def attach_extendable_generators(
-    n: pypsa.Network,
-    costs: pd.DataFrame,
-    ppl: pd.DataFrame
-    ) -> None:
+    n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
+) -> None:
     """
     Add extendable conventional generators (OCGT, CCGT, nuclear) with zero capacity.
 
@@ -989,14 +987,12 @@ def attach_extendable_generators(
 
 
 def estimate_renewable_capacities_irena(
-    n: pypsa.Network,
-    estimate_renewable_capacities_config: dict,
-    countries_config: list
+    n: pypsa.Network, estimate_renewable_capacities_config: dict, countries_config: list
 ) -> None:
     """
     Estimate renewable capacities based on IRENA statistics.
-    
-    This function distributes country-level IRENA capacity statistics to 
+
+    This function distributes country-level IRENA capacity statistics to
     extendable generators, accounting for existing capacity already in the network.
     Parameters
     ----------
@@ -1078,10 +1074,9 @@ def estimate_renewable_capacities_irena(
         )
 
         # Calculate remaining capacity to distribute (IRENA - existing)
-        remaining_capacities = (
-            tech_capacities - existing_capacity_per_country
-        ).clip(lower=0.0)
-
+        remaining_capacities = (tech_capacities - existing_capacity_per_country).clip(
+            lower=0.0
+        )
 
         logger.info(
             f"For {ppm_technology}: {stats} total = {tech_capacities.sum():.1f} MW, "
@@ -1112,13 +1107,19 @@ def estimate_renewable_capacities_irena(
         )
 
         # Distribute by country, weighted by potential
-        distributed_capacities = potential.groupby(
-            n.generators.loc[extendable_i, "bus"].map(n.buses.country)
-        ).transform(
-            lambda s: normed(s) * remaining_capacities.at[s.name]
-            if s.name in remaining_capacities.index
-            else 0.0
-        ).where(lambda s: s > 0.1, 0.0)  # only capacities above 100kW
+        distributed_capacities = (
+            potential.groupby(
+                n.generators.loc[extendable_i, "bus"].map(n.buses.country)
+            )
+            .transform(
+                lambda s: (
+                    normed(s) * remaining_capacities.at[s.name]
+                    if s.name in remaining_capacities.index
+                    else 0.0
+                )
+            )
+            .where(lambda s: s > 0.1, 0.0)
+        )  # only capacities above 100kW
 
         n.generators.loc[extendable_i, "p_nom"] = distributed_capacities
         n.generators.loc[extendable_i, "p_nom_min"] = distributed_capacities
@@ -1179,7 +1180,9 @@ if __name__ == "__main__":
         snakemake.params.electricity,
         Nyears,
     )
-    ppl = load_powerplants(snakemake.input.powerplants, costs, snakemake.params.costs["fill_values"])
+    ppl = load_powerplants(
+        snakemake.input.powerplants, costs, snakemake.params.costs["fill_values"]
+    )
 
     if "renewable_carriers" in snakemake.params.electricity:
         renewable_carriers = set(snakemake.params.electricity["renewable_carriers"])
