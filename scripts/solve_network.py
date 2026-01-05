@@ -966,7 +966,7 @@ def add_existing(n):
             n.generators.loc[tech_index, tech] = existing_res
 
 
-def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> None:
+def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
     """
     Ensures that the two links simulating a bidirectional_link are extended the same amount.
     """
