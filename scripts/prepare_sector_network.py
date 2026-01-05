@@ -3126,7 +3126,7 @@ if __name__ == "__main__":
     # clustering of regions must be double checked.. refer to regions onshore
 
     # Add location. TODO: move it into pypsa-earth
-    n.buses.location = n.buses.index
+    n.buses.loc[:, "location"] = n.buses.index
 
     # Set carrier of AC loads
     existing_nodes = [node for node in acnodes if node in n.loads.index]
