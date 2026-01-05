@@ -3083,9 +3083,8 @@ def remove_carrier_related_components(n, carriers_to_drop):
         n.mremove(c.name, names)
 
     # remove links connected to buses that were removed
-    links_to_remove = n.links.query(
-        "bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove"
-    ).index
+    bus_cols = [c for c in n.links.columns if c.startswith("bus")]
+    links_to_remove = n.links[n.links[bus_cols].isin(buses_to_remove).any(axis=1)].index
     logger.info(
         f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
     )
