@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, override_component_attrs, prepare_costs
+from _helpers import locate_bus, prepare_costs
 
 logger = logging.getLogger(__name__)
 
@@ -211,8 +211,7 @@ if __name__ == "__main__":
             # configfile="test/config.test1.yaml",
         )
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
     countries = list(n.buses.country.unique())
 
     # Create export profile
