@@ -8,14 +8,10 @@
 Configuration
 ##########################################
 
-PyPSA-Earth imports the configuration options originally developed in `PyPSA-Eur <https://pypsa-eur.readthedocs.io/en/latest/index.html>`_ and here reported and adapted.
-The options described here are collected in a ``config.yaml`` file located in the root directory.
-Users should copy the provided default configuration (``config.default.yaml``) and add
+PyPSA-Earth is using configuration files as an interface which allows to customise a data preparation and modelling workflow. The options here described are collected in a ``config.yaml`` file located in the root directory.
+Users should copy the provided default configuration (``config.default.yaml``) and amend
 their own modifications and assumptions in the user-specific configuration file (``config.yaml``);
-see installation instructions at :ref:`installation`.
-
-.. note::
-  Credits to PyPSA-Eur developers for the initial drafting of this configuration documentation
+confer installation instructions at :ref:`installation`.
 
 .. _toplevel_cf:
 
@@ -117,7 +113,7 @@ Defines the coordinate reference systems (crs).
    :widths: 25,7,22,30
    :file: configtables/crs.csv
 
-   .. _natura_cf:
+.. _natura_cf:
 
 ``natura``
 ===============
@@ -526,12 +522,31 @@ Specifies the options for Monte Carlo sampling.
 .. literalinclude:: ../config.default.yaml
    :language: yaml
    :start-at: monte_carlo:
-   :end-before:   solving:
+   :end-before: # ------------------- SECTOR OPTIONS -------------------
 
 .. csv-table::
    :header-rows: 1
    :widths: 25,7,22,30
    :file: configtables/monte-carlo.csv
+
+
+.. _sector_cf:
+
+``sector``
+=============
+
+Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+
+.. literalinclude:: ../config.default.yaml
+   :language: yaml
+   :start-at: policy_config:
+   :end-before: solving:
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/sector.csv
+
 
 .. _solving_cf:
 
