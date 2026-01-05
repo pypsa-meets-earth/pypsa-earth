@@ -22,7 +22,6 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
-    override_component_attrs,
     prepare_costs,
     safe_divide,
     sanitize_carriers,
@@ -3154,8 +3153,7 @@ if __name__ == "__main__":
     enable = options["enable"]
 
     # Load input network
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
