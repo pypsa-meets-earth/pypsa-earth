@@ -25,7 +25,6 @@ import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
-from pypsa.components import components
 
 logger = logging.getLogger(__name__)
 
