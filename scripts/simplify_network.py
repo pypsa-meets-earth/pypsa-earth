@@ -270,11 +270,11 @@ def _aggregate_and_move_components(
 ):
     """
     Aggregate and move components according to busmap.
-    
-    For generators, existing (p_nom_extendable=False) and extendable 
+
+    For generators, existing (p_nom_extendable=False) and extendable
     (p_nom_extendable=True) generators are aggregated separately to preserve
     their distinct characteristics for myopic optimization.
-    
+
     Parameters
     ----------
     n : pypsa.Network
@@ -291,7 +291,8 @@ def _aggregate_and_move_components(
         Strategies for aggregating components.
     exclude_carriers : list
         Carriers to exclude from aggregation.
-    """ 
+    """
+
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
 
@@ -378,7 +379,7 @@ def simplify_links(
         List of carriers to exclude from simplification, by default [].
     aggregation_strategies : dict, optional
         Strategies for aggregating components, by default dict().
-    
+
     Returns
     -------
     n : pypsa.Network
