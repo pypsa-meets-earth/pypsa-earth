@@ -88,7 +88,7 @@ import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, override_component_attrs
 from linopy import merge
-from linopy.remote.oetc import OetcCredentials, OetcSettings, OetcHandler
+from linopy.remote.oetc import OetcCredentials, OetcHandler, OetcSettings
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
