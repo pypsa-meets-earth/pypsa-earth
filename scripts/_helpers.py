@@ -1954,7 +1954,7 @@ def add_missing_carriers(n, carriers):
 def get_base_carrier(carrier: str) -> str:
     """
     Extract base carrier from carrier_gy format.
-    
+
     Examples:
         "solar-2020" -> "solar"
         "offwind-ac-2020" -> "offwind-ac"
@@ -2005,10 +2005,7 @@ def sanitize_carriers(n, config):
 
     # Map nice names from base carrier
     nice_names_config = pd.Series(config["plotting"]["nice_names"])
-    nice_names = (
-        base_carriers.map(nice_names_config)
-        .fillna(carrier_i.to_series())
-    )
+    nice_names = base_carriers.map(nice_names_config).fillna(carrier_i.to_series())
     n.carriers["nice_name"] = n.carriers.nice_name.where(
         n.carriers.nice_name != "", nice_names
     )
