@@ -303,225 +303,6 @@ def prepare_IGGIELGN_data(
     return df
 
 
-def get_GADM_filename(country_code):
-    """
-    Function to get the GADM filename given the country code.
-    """
-    special_codes_GADM = {
-        "XK": "XKO",  # kosovo
-        "CP": "XCL",  # clipperton island
-        "SX": "MAF",  # sint maartin
-        "TF": "ATF",  # french southern territories
-        "AX": "ALA",  # aland
-        "IO": "IOT",  # british indian ocean territory
-        "CC": "CCK",  # cocos island
-        "NF": "NFK",  # norfolk
-        "PN": "PCN",  # pitcairn islands
-        "JE": "JEY",  # jersey
-        "XS": "XSP",  # spratly
-        "GG": "GGY",  # guernsey
-        "UM": "UMI",  # united states minor outlying islands
-        "SJ": "SJM",  # svalbard
-        "CX": "CXR",  # Christmas island
-    }
-
-    if country_code in special_codes_GADM:
-        return f"gadm41_{special_codes_GADM[country_code]}"
-    else:
-        return f"gadm41_{two_2_three_digits_country(country_code)}"
-
-
-def download_GADM(country_code, update=False, out_logging=False):
-    """
-    Download gpkg file from GADM for a given country code.
-
-    Parameters
-    ----------
-    country_code : str
-        Two letter country codes of the downloaded files
-    update : bool
-        Update = true, forces re-download of files
-
-    Returns
-    -------
-    gpkg file per country
-    """
-
-    GADM_filename = get_GADM_filename(country_code)
-
-    GADM_inputfile_gpkg = os.path.join(
-        BASE_DIR,
-        "data",
-        "gadm",
-        GADM_filename,
-        GADM_filename + ".gpkg",
-    )  # Input filepath gpkg
-
-    return GADM_inputfile_gpkg, GADM_filename
-
-
-def filter_gadm(
-    geodf,
-    layer,
-    cc,
-    contended_flag,
-    output_nonstd_to_csv=False,
-):
-    # identify non standard geodf rows
-    geodf_non_std = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].copy()
-
-    if not geodf_non_std.empty:
-        logger.info(
-            f"Contended areas have been found for gadm layer {layer}. They will be treated according to {contended_flag} option"
-        )
-
-        # NOTE: in these options GID_0 is not changed because it is modified below
-        if contended_flag == "drop":
-            geodf.drop(geodf_non_std.index, inplace=True)
-        elif contended_flag != "set_by_country":
-            # "set_by_country" option is the default; if this elif applies, the desired option falls back to the default
-            logger.warning(
-                f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
-                + "Fallback to 'set_by_country'"
-            )
-
-    # force GID_0 to be the country code for the relevant countries
-    geodf["GID_0"] = cc
-
-    # country shape should have a single geometry
-    if (layer == 0) and (geodf.shape[0] > 1):
-        logger.warning(
-            f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
-        )
-        # take the first row only to re-define geometry keeping other columns
-        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
-
-    # debug output to file
-    if output_nonstd_to_csv and not geodf_non_std.empty:
-        geodf_non_std.to_csv(
-            f"resources/non_standard_gadm{layer}_{cc}_raw.csv", index=False
-        )
-
-    return geodf
-
-
-def get_GADM_layer(
-    country_list,
-    layer_id,
-    geo_crs,
-    contended_flag,
-    update=False,
-    outlogging=False,
-):
-    """
-    Function to retrieve a specific layer id of a geopackage for a selection of
-    countries.
-
-    Parameters
-    ----------
-    country_list : str
-        List of the countries
-    layer_id : int
-        Layer to consider in the format GID_{layer_id}.
-        When the requested layer_id is greater than the last available layer, then the last layer is selected.
-        When a negative value is requested, then, the last layer is requested
-    """
-    # initialization of the geoDataFrame
-    geodf_list = []
-
-    for country_code in country_list:
-        # Set the current layer id (cur_layer_id) to global layer_id
-        cur_layer_id = layer_id
-
-        # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
-
-        # get layers of a geopackage
-        list_layers = fiona.listlayers(file_gpkg)
-
-        # get layer name
-        if (cur_layer_id < 0) or (cur_layer_id >= len(list_layers)):
-            # when layer id is negative or larger than the number of layers, select the last layer
-            cur_layer_id = len(list_layers) - 1
-
-        # read gpkg file
-        geodf_temp = gpd.read_file(
-            file_gpkg, layer="ADM_ADM_" + str(cur_layer_id)
-        ).to_crs(geo_crs)
-
-        geodf_temp = filter_gadm(
-            geodf=geodf_temp,
-            layer=cur_layer_id,
-            cc=country_code,
-            contended_flag=contended_flag,
-            output_nonstd_to_csv=False,
-        )
-
-        if layer_id == 0:
-            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-                lambda x: two_2_three_digits_country(x[:2])
-            ) + pd.Series(range(1, geodf_temp.shape[0] + 1)).astype(str)
-        else:
-            # create a subindex column that is useful
-            # in the GADM processing of sub-national zones
-            # Fix issues with missing "." in selected cases
-            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-                lambda x: x if x[3] == "." else x[:3] + "." + x[3:]
-            )
-
-        # append geodataframes
-        geodf_list.append(geodf_temp)
-
-    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geo_crs)
-
-    return geodf_GADM
-
-
-def gadm(
-    countries,
-    geo_crs,
-    contended_flag,
-    layer_id=2,
-    update=False,
-    out_logging=False,
-    year=2020,
-    nprocesses=None,
-):
-    if out_logging:
-        logger.info("Stage 4/4: Creation GADM GeoDataFrame")
-
-    # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
-
-    # select and rename columns
-    df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
-
-    # drop useless columns
-    df_gadm.drop(
-        df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
-        axis=1,
-        inplace=True,
-        errors="ignore",
-    )
-
-    # renaming 3 letter to 2 letter ISO code before saving GADM file
-    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
-    # df_gadm["GADM_ID"] = (
-    #     df_gadm["GADM_ID"]
-    #     .str.split(".")
-    #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
-    # )
-    # df_gadm.set_index("GADM_ID", inplace=True)
-    # df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
-    df_gadm.geometry = df_gadm.geometry.apply(
-        lambda r: make_valid(r) if not r.is_valid else r
-    )
-    df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
-
-    return df_gadm
-
-
 def load_bus_region(onshore_path, pipelines):
     """
     Load pypsa-earth-sec onshore regions.
@@ -535,35 +316,6 @@ def load_bus_region(onshore_path, pipelines):
     bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1).loc[
         :, ["gadm_id", "geometry"]
     ]
-
-    if snakemake.params.alternative_clustering:
-        countries_list = snakemake.params.countries_list
-        layer_id = snakemake.params.layer_id
-        update = snakemake.params.update
-        out_logging = snakemake.params.out_logging
-        year = snakemake.params.year
-        nprocesses = snakemake.params.nprocesses
-        contended_flag = snakemake.params.contended_flag
-        geo_crs = snakemake.params.geo_crs
-
-        bus_regions_onshore = gadm(
-            countries_list,
-            geo_crs,
-            contended_flag,
-            layer_id,
-            update,
-            out_logging,
-            year,
-            nprocesses=nprocesses,
-        )
-
-        # bus_regions_onshore = bus_regions_onshore.reset_index()
-        bus_regions_onshore = bus_regions_onshore.rename(columns={"GADM_ID": "gadm_id"})
-        # Conversion of GADM id to from 3 to 2-digit
-        # bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].apply(
-        #     lambda x: two_2_three_digits_country(x[:2]) + x[2:]
-        # )
-        bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
     country_borders = unary_union(bus_regions_onshore.geometry)
 
@@ -916,13 +668,13 @@ if not snakemake.params.custom_gas_network:
         )
 
         # Conversion of GADM id to from 3 to 2-digit
-        pipelines["bus0"] = pipelines["bus0"].apply(
-            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        )
+        # pipelines["bus0"] = pipelines["bus0"].apply(
+        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        # )
 
-        pipelines["bus1"] = pipelines["bus1"].apply(
-            lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        )
+        # pipelines["bus1"] = pipelines["bus1"].apply(
+        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+        # )
 
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
@@ -936,6 +688,9 @@ if not snakemake.params.custom_gas_network:
         print("total_system_capacity = ", total_system_capacity)
 
     else:
+        bus_regions_onshore["country"] = (
+            bus_regions_onshore["gadm_id"].str.split(".").str[0]
+        )
         print(
             "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
             + ", ".join(bus_regions_onshore.country.unique().tolist())
