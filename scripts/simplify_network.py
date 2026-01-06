@@ -266,7 +266,7 @@ def _aggregate_and_move_components(
     output,
     aggregate_one_ports={"Load", "StorageUnit"},
     aggregation_strategies=dict(),
-    exclude_carriers=None,
+    exclude_carriers=[],
 ):
     """
     Aggregate and move components according to busmap.
@@ -310,57 +310,15 @@ def _aggregate_and_move_components(
     generator_strategies = aggregation_strategies["generators"]
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
-
-    # Separating existing and extendable generators
-    existing_mask = ~n.generators.p_nom_extendable
-    extendable_mask = n.generators.p_nom_extendable
-    original_carriers = n.generators.carrier.copy()
-
-    existing_carriers = set(n.generators.loc[existing_mask, "carrier"]) & carriers
-    extendable_carriers = set(n.generators.loc[extendable_mask, "carrier"]) & carriers
-
-    # Temporarily rename existing generator's carriers to separate them
-    n.generators.loc[existing_mask, "carrier"] = n.generators.loc[existing_mask, "carrier"] + " existing"
-
-    all_generators = []
-    all_generators_pnl = {}
-
-    # Aggregate existing generators by (bus, carrier, grouping_year)
-    if existing_carriers:
-        gens_exist, pnl_exist = aggregateoneport(
-            n, busmap, "Generator",
-            carriers=existing_carriers,
-            custom_strategies=generator_strategies,
-        )
-        if not gens_exist.empty:
-            all_generators.append(gens_exist)
-            all_generators_pnl = pnl_exist
-
-    # Aggregate extendable generators
-    if extendable_carriers:
-        gens_ext, pnl_ext = aggregateoneport(
-            n, busmap, "Generator",
-            carriers=extendable_carriers,
-            custom_strategies=generator_strategies,
-        )
-        if not gens_ext.empty:
-            all_generators.append(gens_ext)
-            for k, v in pnl_ext.items():
-                if k in all_generators_pnl:
-                    all_generators_pnl[k] = pd.concat([all_generators_pnl[k], v], axis=1)
-                else:
-                    all_generators_pnl[k] = v
-
-    # Combine and replace
-    if all_generators:
-        generators = pd.concat(all_generators)
-        replace_components(n, "Generator", generators, all_generators_pnl)
-
-    # Restore original carrier names (remove " existing" suffix)
-    n.generators.loc[n.generators.carrier.str.endswith(" existing"), "carrier"] = (
-        n.generators.loc[n.generators.carrier.str.endswith(" existing"), "carrier"]
-        .str.replace(" existing", "", regex=False)
+    generators, generators_pnl = aggregateoneport(
+        n,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=generator_strategies,
     )
+
+    replace_components(n, "Generator", generators, generators_pnl)
 
     for one_port in aggregate_one_ports:
         df, pnl = aggregateoneport(n, busmap, component=one_port)
@@ -1076,7 +1034,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("simplify_network", simpl="")
+        snakemake = mock_snakemake("simplify_network", simpl="", configfile="config.US.yaml")
 
     configure_logging(snakemake)
 

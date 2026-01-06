@@ -553,6 +553,7 @@ rule add_electricity:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
+        existing_capacities=config["existing_capacities"],
     input:
         **{
             f"profile_{tech}": "resources/"
