@@ -160,7 +160,7 @@ def add_generation(
         to_remove = n.links.query(
             "carrier == @carrier & p_nom == 0 & not p_nom_extendable"
         ).index
-        n.mremove("Link", to_remove)
+        n.remove("Link", to_remove)
 
         # set the "co2_emissions" of the carrier to 0, as emissions are accounted by link efficiency separately (efficiency to 'co2 atmosphere' bus)
         n.carriers.loc[carrier, "co2_emissions"] = 0
@@ -3080,7 +3080,7 @@ def remove_carrier_related_components(n, carriers_to_drop):
         names = c.df.index[c.df.carrier.isin(carriers_to_drop)]
         if c.name == "Bus":
             buses_to_remove = names
-        n.mremove(c.name, names)
+        n.remove(c.name, names)
 
     # remove links connected to buses that were removed
     bus_cols = [c for c in n.links.columns if c.startswith("bus")]
@@ -3088,7 +3088,7 @@ def remove_carrier_related_components(n, carriers_to_drop):
     logger.info(
         f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
     )
-    n.mremove("Link", links_to_remove)
+    n.remove("Link", links_to_remove)
 
 
 if __name__ == "__main__":

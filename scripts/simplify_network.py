@@ -155,8 +155,8 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
             if col.startswith("bus"):
                 df[col] = df[col].map(trafo_map)
 
-    n.mremove("Transformer", n.transformers.index)
-    n.mremove("Bus", n.buses.index.difference(trafo_map))
+    n.remove("Transformer", n.transformers.index)
+    n.remove("Bus", n.buses.index.difference(trafo_map))
 
     return n, trafo_map
 
@@ -269,7 +269,7 @@ def _aggregate_and_move_components(
     exclude_carriers=None,
 ):
     def replace_components(n, c, df, pnl):
-        n.mremove(c, n.df(c).index)
+        n.remove(c, n.df(c).index)
 
         import_components_from_dataframe(n, df, c)
         for attr, df in pnl.items():
@@ -301,10 +301,10 @@ def _aggregate_and_move_components(
         replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
-    n.mremove("Bus", buses_to_del)
+    n.remove("Bus", buses_to_del)
     for c in n.branch_components:
         df = n.df(c)
-        n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
+        n.remove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
 
 # Filter AC lines to avoid mixing with DC part when processing links
@@ -483,8 +483,8 @@ def simplify_links(
                 )
             )
 
-            n.mremove("Link", all_links)
-            n.mremove("Line", all_dc_lines)
+            n.remove("Link", all_links)
+            n.remove("Line", all_dc_lines)
 
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.items():
@@ -738,11 +738,11 @@ def drop_isolated_networks(n, threshold):
         n.lines.bus0.isin(i_islands) | n.lines.bus1.isin(i_islands)
     ].index
 
-    n.mremove("Bus", i_islands)
-    n.mremove("Load", i_loads_drop)
-    n.mremove("Generator", i_generators_drop)
-    n.mremove("Link", i_links_drop)
-    n.mremove("Line", i_lines_drop)
+    n.remove("Bus", i_islands)
+    n.remove("Load", i_loads_drop)
+    n.remove("Generator", i_generators_drop)
+    n.remove("Link", i_links_drop)
+    n.remove("Line", i_lines_drop)
 
     n.determine_network_topology()
 
@@ -843,7 +843,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
 
     i_lines_islands = n.lines.loc[n.lines.bus1.isin(gdf_islands.index)].index
-    n.mremove("Line", i_lines_islands)
+    n.remove("Line", i_lines_islands)
 
     isolated_buses_mapping = (
         gdf_map[["bus_id_right"]].droplevel("country").to_dict()["bus_id_right"]
