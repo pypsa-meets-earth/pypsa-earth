@@ -7,7 +7,7 @@
 
 - [ ] I consent to the release of this PR's code under the AGPLv3 license and non-code contributions under CC0-1.0 and CC-BY-4.0.
 - [ ] I tested my contribution locally and it seems to work fine.
-- [ ] Code and workflow changes are sufficiently documented including ammending docstrings for meaningful functions.
+- [ ] Code and workflow changes are sufficiently documented, including updates to docstrings for meaningful functions.
 - [ ] Newly introduced dependencies are added to `envs/environment.yaml` and `doc/requirements.txt`.
 - [ ] Changes in configuration options are added in all of `config.default.yaml` and `config.tutorial.yaml`.
 - [ ] Add a test config or line additions to `test/` (note tests are changing the config.tutorial.yaml)
