@@ -76,14 +76,14 @@ def add_brownfield(n, n_p, year):
         # remove assets if name already exist in the new network
         n_p.remove(c.name, c.df.index.intersection(getattr(n, c.list_name).index))
 
-        n.import_components_from_dataframe(c.df, c.name)
+        n.add(c.name, c.df.index, **c.df)
 
         # copy time-dependent
         selection = n.component_attrs[c.name].type.str.contains(
             "series"
         ) & n.component_attrs[c.name].status.str.contains("Input")
         for tattr in n.component_attrs[c.name].index[selection]:
-            n.import_series_from_dataframe(c.pnl[tattr], c.name, tattr)
+            n._import_series_from_df(c.pnl[tattr], c.name, tattr)
 
         # deal with gas network
         pipe_carrier = ["gas pipeline"]

@@ -107,7 +107,6 @@ from pypsa.clustering.spatial import (
     busmap_by_stubs,
     get_clustering_from_busmap,
 )
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
@@ -271,10 +270,10 @@ def _aggregate_and_move_components(
     def replace_components(n, c, df, pnl):
         n.remove(c, n.df(c).index)
 
-        import_components_from_dataframe(n, df, c)
+        n.add(c, df.index, **df)
         for attr, df in pnl.items():
             if not df.empty:
-                import_series_from_dataframe(n, df, c, attr)
+                n._import_series_from_df(df, c, attr)
 
     _adjust_capital_costs_using_connection_costs(
         n,
