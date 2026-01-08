@@ -309,7 +309,7 @@ def attach_load(n, demand_profiles):
     """
     demand_df = read_csv_nafix(demand_profiles, index_col=0, parse_dates=True)
 
-    n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
+    n.add("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
 def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
@@ -427,7 +427,7 @@ def attach_wind_and_solar(
             else:
                 caps = pd.Series(index=ds.indexes["bus"]).fillna(0)
 
-            n.madd(
+            n.add(
                 "Generator",
                 ds.indexes["bus"],
                 " " + tech,
@@ -473,7 +473,7 @@ def attach_conventional_generators(
         )
     )
 
-    n.madd(
+    n.add(
         "Generator",
         ppl.index,
         carrier=ppl.carrier,
@@ -568,7 +568,7 @@ def attach_hydro(n, costs, ppl):
                 )
 
     if "ror" in carriers and not ror.empty:
-        n.madd(
+        n.add(
             "Generator",
             ror.index,
             carrier="ror",
@@ -588,7 +588,7 @@ def attach_hydro(n, costs, ppl):
         # fill missing max hours to config value and
         # assume no natural inflow due to lack of data
         phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
-        n.madd(
+        n.add(
             "StorageUnit",
             phs.index,
             carrier="PHS",
@@ -644,7 +644,7 @@ def attach_hydro(n, costs, ppl):
             hydro.max_hours > 0, hydro.country.map(max_hours_country)
         ).fillna(hydro_max_hours_default)
 
-        n.madd(
+        n.add(
             "StorageUnit",
             hydro.index,
             carrier="hydro",
@@ -680,7 +680,7 @@ def attach_extendable_generators(n, costs, ppl):
                 .groupby("bus", as_index=False)
                 .first()
             )
-            n.madd(
+            n.add(
                 "Generator",
                 ocgt.index,
                 suffix=" OCGT",
@@ -699,7 +699,7 @@ def attach_extendable_generators(n, costs, ppl):
                 .groupby("bus", as_index=False)
                 .first()
             )
-            n.madd(
+            n.add(
                 "Generator",
                 ccgt.index,
                 suffix=" CCGT",
@@ -716,7 +716,7 @@ def attach_extendable_generators(n, costs, ppl):
             nuclear = (
                 ppl.query("carrier == 'nuclear'").groupby("bus", as_index=False).first()
             )
-            n.madd(
+            n.add(
                 "Generator",
                 nuclear.index,
                 suffix=" nuclear",

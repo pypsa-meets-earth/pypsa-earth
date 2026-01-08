@@ -50,7 +50,7 @@ def override_values(tech, year, dr):
     else:
         existing_res = custom_res["installedcapacity"].values
 
-    n.madd(
+    n.add(
         "Generator",
         buses,
         " " + tech,

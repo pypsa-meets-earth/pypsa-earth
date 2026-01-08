@@ -151,7 +151,7 @@ def prepare_network(n, solve_opts, config):
     if solve_opts.get("load_shedding"):
         required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
         n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
-        n.madd(
+        n.add(
             "Generator",
             n.buses.index,
             " load shedding",

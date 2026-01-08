@@ -87,7 +87,7 @@ def attach_storageunits(n, costs, config):
     lookup_dispatch = {"H2": "fuel cell", "battery": "battery inverter"}
 
     for carrier in carriers:
-        n.madd(
+        n.add(
             "StorageUnit",
             buses_i,
             " " + carrier,
@@ -113,9 +113,9 @@ def attach_stores(n, costs, config):
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
     if "H2" in carriers:
-        h2_buses_i = n.madd("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
+        h2_buses_i = n.add("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
 
-        n.madd(
+        n.add(
             "Store",
             h2_buses_i,
             bus=h2_buses_i,
@@ -125,7 +125,7 @@ def attach_stores(n, costs, config):
             capital_cost=costs.at["hydrogen storage tank", "capital_cost"],
         )
 
-        n.madd(
+        n.add(
             "Link",
             h2_buses_i + " Electrolysis",
             bus0=buses_i,
@@ -137,7 +137,7 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["electrolysis", "marginal_cost"],
         )
 
-        n.madd(
+        n.add(
             "Link",
             h2_buses_i + " Fuel Cell",
             bus0=h2_buses_i,
@@ -151,11 +151,11 @@ def attach_stores(n, costs, config):
         )
 
     if "battery" in carriers:
-        b_buses_i = n.madd(
+        b_buses_i = n.add(
             "Bus", buses_i + " battery", carrier="battery", **bus_sub_dict
         )
 
-        n.madd(
+        n.add(
             "Store",
             b_buses_i,
             bus=b_buses_i,
@@ -166,7 +166,7 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery", "marginal_cost"],
         )
 
-        n.madd(
+        n.add(
             "Link",
             b_buses_i + " charger",
             bus0=buses_i,
@@ -178,7 +178,7 @@ def attach_stores(n, costs, config):
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
 
-        n.madd(
+        n.add(
             "Link",
             b_buses_i + " discharger",
             bus0=b_buses_i,
@@ -194,7 +194,7 @@ def attach_stores(n, costs, config):
     ):
         # add separate buses for csp
         main_buses = n.generators.query("carrier == 'csp'").bus
-        csp_buses_i = n.madd(
+        csp_buses_i = n.add(
             "Bus",
             main_buses + " csp",
             carrier="csp",
@@ -205,7 +205,7 @@ def attach_stores(n, costs, config):
         n.generators.loc[main_buses.index, "bus"] = csp_buses_i
 
         # add stores for csp
-        n.madd(
+        n.add(
             "Store",
             csp_buses_i,
             bus=csp_buses_i,
@@ -217,7 +217,7 @@ def attach_stores(n, costs, config):
         )
 
         # add links for csp
-        n.madd(
+        n.add(
             "Link",
             csp_buses_i,
             bus0=csp_buses_i,
@@ -257,7 +257,7 @@ def attach_hydrogen_pipelines(n, costs, config, transmission_efficiency):
     h2_links.index = h2_links.apply(lambda c: f"H2 pipeline {c.bus0}-{c.bus1}", axis=1)
 
     # add pipelines
-    n.madd(
+    n.add(
         "Link",
         h2_links.index,
         bus0=h2_links.bus0.values + " H2",
