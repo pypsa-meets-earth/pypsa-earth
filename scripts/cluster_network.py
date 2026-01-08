@@ -573,7 +573,7 @@ def clustering_for_n_clusters(
     )
 
     if not n.links.empty:
-        nc = clustering.network
+        nc = clustering.n
         nc.links["underwater_fraction"] = (
             n.links.eval("underwater_fraction * length").div(nc.links.length).dropna()
         )
@@ -585,7 +585,7 @@ def clustering_for_n_clusters(
             fill_value=0,
         )
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
-        clustering.network.lines["underwater_fraction"] = 0
+        clustering.n.lines["underwater_fraction"] = 0
 
     return clustering
 
@@ -751,7 +751,7 @@ if __name__ == "__main__":
             focus_weights=focus_weights,
         )
 
-    nc = clustering.network
+    nc = clustering.n
 
     update_p_nom_max(nc)
 

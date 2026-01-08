@@ -617,7 +617,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 def cluster(
@@ -680,7 +680,7 @@ def cluster(
         focus_weights=focus_weights,
     )
 
-    return clustering.network, clustering.busmap
+    return clustering.n, clustering.busmap
 
 
 def drop_isolated_networks(n, threshold):
@@ -886,7 +886,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         f"Fetched {len(gdf_islands)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
@@ -974,7 +974,7 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
         f"Merged {len(i_islands_merge)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 if __name__ == "__main__":
