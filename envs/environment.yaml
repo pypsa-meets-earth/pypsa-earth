@@ -14,7 +14,6 @@ dependencies:
 - pypsa>=0.33, <0.34
 - atlite>=0.4.1
 - dask
-- powerplantmatching>=0.5.19  # due to this https://github.com/PyPSA/powerplantmatching/pull/202
 - earth-osm>=2.3.post1
 
 # Dependencies of the workflow itself
@@ -81,3 +80,4 @@ dependencies:
 - pip:
   - currencyconverter
   - googledrivedownloader>=1.1
+  - git+https://github.com/PyPSA/powerplantmatching
