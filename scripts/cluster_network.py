@@ -138,6 +138,7 @@ from _helpers import (
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
+    get_base_carrier,
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
@@ -604,6 +605,40 @@ def cluster_regions(busmaps, inputs, output):
         regions_c.to_file(getattr(output, which))
 
 
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    # Remove year-tagged carriers
+    year_tagged_carriers = []
+    for carrier in n.carriers.index:
+        parts = carrier.rsplit("-", 1)
+        if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
+            year_tagged_carriers.append(carrier)
+
+    if len(year_tagged_carriers) > 0:
+        n.mremove("Carrier", year_tagged_carriers)
+        logger.info(
+            f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}"
+        )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -759,6 +794,9 @@ if __name__ == "__main__":
         clustering.network = nearest_shape(
             clustering.network, country_shapes, crs, tolerance=tolerance
         )
+
+    # Restore base carrier names after all aggregation
+    restore_base_carrier_names(clustering.network)
 
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))

@@ -1305,7 +1305,7 @@ def add_nice_carrier_names(n, config):
     """
     Add nice names and colors to carriers.
 
-    For vintage carriers (e.g., "solar-2020"), uses the nice name and color
+    For existing carriers (e.g., "solar-2020"), uses the nice name and color
     from the base carrier (e.g., "solar").
     """
     carrier_i = n.carriers.index
