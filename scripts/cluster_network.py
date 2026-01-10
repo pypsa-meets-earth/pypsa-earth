@@ -134,11 +134,11 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
+    get_base_carrier,
     locate_bus,
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
-    get_base_carrier,
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
@@ -634,9 +634,7 @@ def restore_base_carrier_names(n: pypsa.Network) -> None:
 
     if len(year_tagged_carriers) > 0:
         n.mremove("Carrier", year_tagged_carriers)
-        logger.info(
-            f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}"
-        )
+        logger.info(f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}")
 
 
 if __name__ == "__main__":
