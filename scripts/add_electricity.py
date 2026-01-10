@@ -101,11 +101,11 @@ from _helpers import (
     build_currency_conversion_cache,
     configure_logging,
     create_logger,
+    get_base_carrier,
     read_csv_nafix,
     sanitize_carriers,
     sanitize_locations,
     update_p_nom_max,
-    get_base_carrier,
 )
 from powerplantmatching.export import map_country_bus
 
@@ -272,7 +272,7 @@ def load_powerplants(
     costs: pd.DataFrame = None,
     fill_values: dict = None,
     grouping_years: list = None,
-    ) -> pd.DataFrame:
+) -> pd.DataFrame:
     """
     Load and preprocess powerplant matching data, fill missing datein/dateout, and assign grouping years.
     Parameters
@@ -285,7 +285,7 @@ def load_powerplants(
         Dictionary containing default values for lifetime.
     grouping_years : list
         List of years to group build years into.
-        
+
     Returns
     -------
     ppl : pd.DataFrame
@@ -449,7 +449,7 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
 def get_grouping_year(build_year, grouping_years):
     """
     Map build_year to the nearest grouping year (rounded up).
-    
+
     Example:
         grouping_years = [1980, 2000, 2010, 2015, 2020]
         build_year = 2012 → returns 2015
@@ -462,22 +462,22 @@ def get_grouping_year(build_year, grouping_years):
 def aggregate_ppl_by_bus_carrier_year(ppl: pd.DataFrame) -> pd.DataFrame:
     """
     Aggregate power plants by (bus, carrier, grouping_year).
-    
+
     Creates a new carrier name with grouping year suffix (e.g., "CCGT-2020")
     and aggregates capacity and other attributes.
-    
+
     Parameters
     ----------
     ppl : pd.DataFrame
-        Power plant DataFrame with columns: bus, carrier, grouping_year, 
+        Power plant DataFrame with columns: bus, carrier, grouping_year,
         p_nom, efficiency, marginal_cost, datein, dateout and so on.
-    
+
     Returns
     -------
     pd.DataFrame
         Aggregated power plants with columns: bus, carrier, carrier_gy,
         p_nom, efficiency, marginal_cost, build_year, lifetime.
-        
+
     Example
     -------
     Input:
@@ -485,7 +485,7 @@ def aggregate_ppl_by_bus_carrier_year(ppl: pd.DataFrame) -> pd.DataFrame:
         bus1   CCGT     2015           100
         bus1   CCGT     2015           200
         bus1   CCGT     2020           150
-        
+
     Output:
         bus    carrier  carrier_gy   p_nom
         bus1   CCGT     CCGT-2015    300
@@ -494,7 +494,7 @@ def aggregate_ppl_by_bus_carrier_year(ppl: pd.DataFrame) -> pd.DataFrame:
     # Add grouping year to carrier name
     ppl = ppl.copy()
     ppl["carrier_gy"] = ppl["carrier"] + "-" + ppl["grouping_year"].astype(str)
-    
+
     # Group by (bus, carrier_gy) and aggregate
     agg_dict = {
         "carrier": "first",
@@ -512,15 +512,19 @@ def aggregate_ppl_by_bus_carrier_year(ppl: pd.DataFrame) -> pd.DataFrame:
         agg_dict["efficiency"] = "mean"
     if "country" in ppl.columns:
         agg_dict["country"] = "first"
-    
+
     ppl_grouped = ppl.groupby(["bus", "carrier_gy"]).agg(agg_dict).reset_index()
-    
+
     # Calculate build_year and lifetime
     ppl_grouped["build_year"] = ppl_grouped["datein"].astype(int)
-    ppl_grouped["lifetime"] = (ppl_grouped["dateout"] - ppl_grouped["datein"]).fillna(np.inf)
-    
+    ppl_grouped["lifetime"] = (ppl_grouped["dateout"] - ppl_grouped["datein"]).fillna(
+        np.inf
+    )
+
     # Set index as "bus carrier_gy"
-    ppl_grouped = ppl_grouped.set_index(ppl_grouped["bus"] + " " + ppl_grouped["carrier_gy"])
+    ppl_grouped = ppl_grouped.set_index(
+        ppl_grouped["bus"] + " " + ppl_grouped["carrier_gy"]
+    )
 
     return ppl_grouped
 
@@ -628,8 +632,11 @@ def attach_wind_and_solar(
                         n.add(
                             "Carrier",
                             carrier_gy,
-                            co2_emissions=n.carriers.at[tech, "co2_emissions"]
-                            if tech in n.carriers.index else 0.0,
+                            co2_emissions=(
+                                n.carriers.at[tech, "co2_emissions"]
+                                if tech in n.carriers.index
+                                else 0.0
+                            ),
                         )
 
                 # Get p_max_pu for each existing generator's bus
@@ -753,7 +760,7 @@ def attach_conventional_generators(
                 carrier_gy,
                 co2_emissions=n.carriers.at[base_carrier, "co2_emissions"],
             )
-    
+
     logger.info(
         "Adding {} existing generators with capacities [GW] \n{}".format(
             len(ppl), ppl.groupby("carrier").p_nom.sum().div(1e3).round(2)
@@ -777,7 +784,9 @@ def attach_conventional_generators(
     )
 
     # Add extendable conventional generators
-    extendable_conventional = set(extendable_carriers["Generator"]) - set(renewable_carriers)
+    extendable_conventional = set(extendable_carriers["Generator"]) - set(
+        renewable_carriers
+    )
 
     for carrier in extendable_conventional:
         carrier_buses = ppl[ppl.carrier == carrier]["bus"].unique()
@@ -914,12 +923,14 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
 
                     # Find original plants in this group
                     mask = (
-                        (ppl["bus"] == bus) &
-                        (ppl["carrier"] == carrier) &
-                        (ppl["grouping_year"] == grouping_year)
+                        (ppl["bus"] == bus)
+                        & (ppl["carrier"] == carrier)
+                        & (ppl["grouping_year"] == grouping_year)
                     )
                     original_plants = ppl[mask].index
-                    valid_plants = original_plants[original_plants.isin(inflow_t.columns)]
+                    valid_plants = original_plants[
+                        original_plants.isin(inflow_t.columns)
+                    ]
 
                     if not valid_plants.empty:
                         inflow_dict[idx] = inflow_t[valid_plants].sum(axis=1)
@@ -1315,9 +1326,8 @@ def add_nice_carrier_names(n, config):
 
     # Map nice names from base carrier
     nice_names_config = pd.Series(config["plotting"]["nice_names"])
-    nice_names = (
-        base_carriers.map(nice_names_config)
-        .fillna(carrier_i.to_series().str.title())
+    nice_names = base_carriers.map(nice_names_config).fillna(
+        carrier_i.to_series().str.title()
     )
     n.carriers["nice_name"] = nice_names
 
