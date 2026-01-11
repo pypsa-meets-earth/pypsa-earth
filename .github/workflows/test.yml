@@ -83,6 +83,9 @@ jobs:
 
     - name: Conda list
       run: conda list
+    
+    - name: Test ppl
+      run: python -c "import powerplantmatching as pm; pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()"
 
     - name: Run Test
       run: make test
