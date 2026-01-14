@@ -16,6 +16,8 @@ from pathlib import Path
 # Value: List of arguments to pass to snakemake
 DAGS = {
     "rulegraph": ["--rulegraph", "solve_all_networks"],
+    "rulegraph-sector": ["--rulegraph", "solve_sector_networks", "--configfile", "test/config.sector.yaml"],
+    "rulegraph-myopic": ["--rulegraph", "solve_sector_networks_myopic", "--configfile", "test/config.myopic.yaml"],
     # Add more DAGs here if needed, e.g.:
     # "dag_solve": ["--dag", "solve_network"],
 }

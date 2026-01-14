@@ -17,7 +17,6 @@ where a simpler model is considered. This section explains how to run and analyz
 The user can explore the majority of the model's functions on a local machine by running the tutorial, which uses fewer computational resources than the entire model does. A tutorial data kit was developed to facilitate exploring the model.
 You can build it using the tutorial configuration file `config.tutorial.yaml` (placed in the project folder `pypsa-earth`). It includes parts deviating from the default config file `config.default.yaml`, which are necessary to run the tutorial model. By default, PyPSA-Earth reads configuration parameters of simulation from `config.yaml` file located in `pypsa-earth` folder. Thus, to run the tutorial model, `config.tutorial.yaml` needs to be stored as `config.yaml`:
 
-
 ## How to configure runs for the tutorial model
 
 The model can be adapted to include any selected country. But this tutorial is limited to `Nigeria ("NG")`,
@@ -83,98 +82,7 @@ snakemake -j 1 solve_all_networks --dryrun
 
 This triggers a workflow of multiple preceding jobs that depend on each rule's inputs and outputs:
 
-```mermaid
-graph TD
-    solve_all_networks["solve_all_networks"]
-    solve_network["solve_network"]
-    prepare_network["prepare_network<br/>ll: copt<br/>opts: Co2L-4H"]
-    add_extra_components["add_extra_components"]
-    cluster_network["cluster_network<br/>clusters: 6"]
-    simplify_network["simplify_network<br/>simpl: "]
-    add_electricity["add_electricity"]
-    build_renewable_onwind["build_renewable_profiles<br/>technology: onwind"]
-    build_natura_raster["build_natura_raster"]
-    retrieve_databundle["retrieve_databundle_light"]
-    build_shapes["build_shapes"]
-    build_powerplants["build_powerplants"]
-    base_network["base_network"]
-    build_osm_network["build_osm_network"]
-    clean_osm_data["clean_osm_data"]
-    download_osm_data["download_osm_data"]
-    build_bus_regions["build_bus_regions"]
-    build_renewable_offwind_ac["build_renewable_profiles<br/>technology: offwind-ac"]
-    build_renewable_offwind_dc["build_renewable_profiles<br/>technology: offwind-dc"]
-    build_renewable_solar["build_renewable_profiles<br/>technology: solar"]
-    build_renewable_hydro["build_renewable_profiles<br/>technology: hydro"]
-    retrieve_cost_data["retrieve_cost_data<br/>year: 2030"]
-    build_demand_profiles["build_demand_profiles"]
-
-    solve_network --> solve_all_networks
-    prepare_network --> solve_network
-    add_extra_components --> prepare_network
-    retrieve_cost_data --> prepare_network
-    cluster_network --> add_extra_components
-    retrieve_cost_data --> add_extra_components
-    simplify_network --> cluster_network
-    build_shapes --> cluster_network
-    retrieve_cost_data --> cluster_network
-    add_electricity --> simplify_network
-    retrieve_cost_data --> simplify_network
-    build_bus_regions --> simplify_network
-    build_shapes --> simplify_network
-    build_renewable_onwind --> add_electricity
-    build_renewable_offwind_ac --> add_electricity
-    build_renewable_offwind_dc --> add_electricity
-    build_renewable_solar --> add_electricity
-    build_renewable_hydro --> add_electricity
-    base_network --> add_electricity
-    retrieve_cost_data --> add_electricity
-    build_powerplants --> add_electricity
-    build_shapes --> add_electricity
-    build_demand_profiles --> add_electricity
-    build_natura_raster --> build_renewable_onwind
-    retrieve_databundle --> build_renewable_onwind
-    build_shapes --> build_renewable_onwind
-    build_powerplants --> build_renewable_onwind
-    build_bus_regions --> build_renewable_onwind
-    retrieve_databundle --> build_natura_raster
-    retrieve_databundle --> build_shapes
-    base_network --> build_powerplants
-    clean_osm_data --> build_powerplants
-    build_shapes --> build_powerplants
-    build_osm_network --> base_network
-    build_shapes --> base_network
-    clean_osm_data --> build_osm_network
-    build_shapes --> build_osm_network
-    download_osm_data --> clean_osm_data
-    build_shapes --> clean_osm_data
-    build_shapes --> build_bus_regions
-    base_network --> build_bus_regions
-    build_natura_raster --> build_renewable_offwind_ac
-    retrieve_databundle --> build_renewable_offwind_ac
-    build_shapes --> build_renewable_offwind_ac
-    build_powerplants --> build_renewable_offwind_ac
-    build_bus_regions --> build_renewable_offwind_ac
-    build_natura_raster --> build_renewable_offwind_dc
-    retrieve_databundle --> build_renewable_offwind_dc
-    build_shapes --> build_renewable_offwind_dc
-    build_powerplants --> build_renewable_offwind_dc
-    build_bus_regions --> build_renewable_offwind_dc
-    build_natura_raster --> build_renewable_solar
-    retrieve_databundle --> build_renewable_solar
-    build_shapes --> build_renewable_solar
-    build_powerplants --> build_renewable_solar
-    build_bus_regions --> build_renewable_solar
-    build_natura_raster --> build_renewable_hydro
-    retrieve_databundle --> build_renewable_hydro
-    build_shapes --> build_renewable_hydro
-    build_powerplants --> build_renewable_hydro
-    build_bus_regions --> build_renewable_hydro
-    base_network --> build_demand_profiles
-    build_bus_regions --> build_demand_profiles
-    retrieve_databundle --> build_demand_profiles
-    build_shapes --> build_demand_profiles
-```
+![Electricity Workflow](../img/gen_rulegraph.svg)
 
 In the terminal, this will show up as a list of jobs to be run:
 
@@ -205,7 +113,6 @@ solve_network1
 total   23
 ```
 
-
 To run the whole model workflow you just need the following command:
 
 ```bash
@@ -234,7 +141,6 @@ Note that data load will need about 1.6GB and model building will take a while (
     ```bash
     python scripts/non_workflow/databundle_cli.py
     ```
-
 
 ## Analyse the solved networks
 
