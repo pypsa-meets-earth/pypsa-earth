@@ -18,10 +18,3 @@ The aim of this section is to guide through the main steps which are needed to b
 * [Validation](customization/validation.md)
 * [Copernicus Data](customization/copernicus-data.md)
 
-
-
-   customization_steps
-   customization_basic1
-   customization_run
-   customization_validation
-   customization_copernicus
