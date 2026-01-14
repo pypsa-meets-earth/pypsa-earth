@@ -12,7 +12,23 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+
+* Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
+
+**Minor Changes and bug-fixing**
+
+*
+
+PyPSA-Earth 0.7.0
+=================
+
+**New Features and Major Changes**
+
+* Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
+
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
+
+* Add an option to estimate solar-rooftop potentials using `GlobalMLBuildingFootprints <https://github.com/microsoft/GlobalMLBuildingFootprints>`_, a simplified data is provided for tutorials, `PR #1629 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1629>`__
 
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
@@ -68,6 +84,20 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
 
+* Adjust default solver parameters for using HiGHS to improve convergence `PR #1650 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1650>`__
+
+* Fix Labeling of technologies `PR #1644 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644>`__
+
+* fix workflow when augmmented_line_connection is false for Tunisia `PR #1677 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677>`__
+
+* Copyedit + fixes of documentation, PR template `PR #1675 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675>`__, `PR #1674 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1674>`__ and `PR #1673 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1673>`__
+
+* Update credits and cross-referals in the documentation `PR #1614 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614>`__
+
+* Add configtable for some sector parameters `PR #1494 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1494>`__
+
+* Included a configuration option to quantitavely set the tolerance levels for simplifying GADM shapes `PR #1147 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1147/commits>`__
+
 PyPSA-Earth 0.7.0
 =================
 
@@ -104,6 +134,8 @@ PyPSA-Earth 0.7.0
 * Introduce US-specific cost configurations and update to `technology_data_version` v0.13.2 `PR #1448 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448>`__
 
 * Add new hydrogen production technologies and reorganize existing structure `PR #1227 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227>`__
+
+* Add all cutouts to sandbox zenodo `PR #1688 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1688>`__
 
 **Minor Changes and bug-fixing**
 
@@ -185,7 +217,7 @@ PyPSA-Earth 0.7.0
 
 * Add possibility to overwrite cost attributes for sector model `PR #1567 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567>`__
 
-* Update team descreption in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
+* Update team description in the documentation `PR #1670 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670>`__
 
 PyPSA-Earth 0.6.0
 =================
@@ -281,6 +313,7 @@ PyPSA-Earth 0.5.0
 * Remove duplicate entries from hydrogen export ports `PR #1233 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1233>`__
 
 * Fix the environment placing a version limit to numpoly `PR #1237 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1237>`__
+
 
 PyPSA-Earth 0.4.1
 =================
@@ -716,7 +749,7 @@ Release Process
 
 * Make sure thah pinned versions of the environments ``*-pinned.yaml`` in ``envs`` folder are up-to-date.
 
-* Update version number in ``doc/conf.py``, ``default.config.yaml``, ``tutorial.config.yaml`` and ``test/config.*.yaml``.
+* Update version number in ``doc/conf.py``, ``default.config.yaml``, and ``tutorial.config.yaml``.
 
 * Open, review and merge pull request for branch ``release-v0.x.x``.
   Make sure to close issues and PRs or the release milestone with it (e.g. closes #X).

@@ -1779,7 +1779,7 @@ def rename_techs(label):
     rename_if_contains_dict = {
         "water tanks": "hot water storage",
         "retrofitting": "building retrofitting",
-        "H2": "hydrogen storage",
+        "H2": "H2",
         "battery": "battery storage",
         "CCS": "CCS",
     }

@@ -1991,9 +1991,9 @@ def add_land_transport(
         n.add(
             "Store",
             spatial.nodes,
-            suffix=" battery storage",
+            suffix=" EV battery storage",
             bus=spatial.nodes + " EV battery",
-            carrier="battery storage",
+            carrier="EV battery storage",
             e_cyclic=True,
             e_nom=e_nom,
             e_max_pu=1,
@@ -2850,15 +2850,53 @@ def add_electricity_distribution_grid(n, costs):
     n.links.loc[mchp, "bus1"] += " low voltage"
 
     if options.get("solar_rooftop", False):
-        logger.info("Adding solar rooftop technology")
+        if isinstance(options["solar_rooftop"], dict):
+            enable_solar_rooftop = options["solar_rooftop"]["enable"]
+            solar_opts = options["solar_rooftop"]
+        else:
+            enable_solar_rooftop = True
+            solar_opts = {}
+
+    if enable_solar_rooftop:
         # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
         solar = n.generators.index[n.generators.carrier == "solar"]
         n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "fixed"]
-        pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
 
-        # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
-        # i.e. 2 kW/person (population data is in thousands of people) so we get MW
-        potential = 0.1 * 20 * pop_solar
+        if solar_opts.get("use_building_size"):
+            solar_logger = "building_size"
+
+            solar_rooftop_layout = pd.concat(
+                [
+                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    for fn in snakemake.input.keys()
+                    if "solar_rooftop_layout" in fn
+                ]
+            )
+            solar_rooftop_layout = solar_rooftop_layout["usefull_area"].rename(
+                index=lambda x: x + " solar"
+            )
+
+            potential = (
+                solar_opts.get("kW_per_m2", 0.1)
+                * 1e-3  # kW to MW
+                * solar_rooftop_layout
+            )
+
+        else:
+            solar_logger = "population distribution"
+            pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
+
+            # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
+            # i.e. 2 kW/person (population data is in thousands of people) so we get MW
+            potential = (
+                solar_opts.get("kW_per_m2", 0.1)
+                * solar_opts.get("m2_per_person", 20)
+                * pop_solar
+            )
+
+        logger.info(
+            f"Adding solar rooftop technology with potential based on {solar_logger}"
+        )
 
         n.add(
             "Generator",

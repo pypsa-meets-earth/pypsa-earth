@@ -39,7 +39,7 @@ jobs:
         shell: bash -l {0}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Use base env file if it was changed
       run: |
@@ -71,7 +71,7 @@ jobs:
         conda-remove-defaults: true
 
     - name: Cache Conda env
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ env.CONDA }}/envs
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}', env.env_file)) }}
@@ -92,7 +92,7 @@ jobs:
 
     - name: Upload artifacts
       if: always()
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: results-${{ matrix.os }}
         path: |
@@ -110,7 +110,7 @@ jobs:
 
     # Download artifacts
     - name: Download feature logs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: results-${{ matrix.os }}
         # path: ./artifacts  # All artifacts go here, each in their own subfolder
@@ -228,7 +228,7 @@ jobs:
         echo "Objective values uploaded to csv"
 
     - name: Upload csv artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ref_objectives-${{ matrix.os }}
         path: ref_objectives-${{ matrix.os }}.csv

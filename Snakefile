@@ -163,6 +163,17 @@ if config["enable"].get("retrieve_databundle", True):
             "scripts/retrieve_databundle_light.py"
 
 
+if config["enable"].get("download_global_buildings", True):
+
+    rule download_global_buildings:
+        params:
+            crs=config["crs"],
+        output:
+            "data/global_buildings/{country}_global_buildings_raw.parquet",
+        script:
+            "scripts/download_global_buildings.py"
+
+
 if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
@@ -695,33 +706,70 @@ rule cluster_network:
         "scripts/cluster_network.py"
 
 
-rule augmented_line_connections:
+solar_rooftop_config = config["sector"]["solar_rooftop"]
+if isinstance(solar_rooftop_config, dict):
+    solar_rooftop_enable = (
+        solar_rooftop_config["enable"] and solar_rooftop_config["use_building_size"]
+    )
+    solar_rooftop_params = {
+        "solar_rooftop_enable": solar_rooftop_enable,
+        "install_ratio": solar_rooftop_config["install_ratio"],
+        "tolerance": solar_rooftop_config["tolerance"],
+    }
+else:
+    solar_rooftop_params = {}
+    solar_rooftop_enable = config["sector"]["solar_rooftop"]
+
+
+rule cluster_global_buildings:
     params:
-        lines=config["lines"],
-        augmented_line_connection=config["augmented_line_connection"],
-        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        electricity=config["electricity"],
-        costs=config["costs"],
+        **solar_rooftop_params,
+        crs=config["crs"],
     input:
-        tech_costs=COSTS,
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+        country_buildings="data/global_buildings/{country}_global_buildings_raw.parquet",
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/"
-        + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-    log:
-        "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
-    benchmark:
-        "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
-    threads: 1
-    resources:
-        mem_mb=3000,
+        solar_rooftop_layout=branch(
+            solar_rooftop_enable,
+            "resources/"
+            + RDIR
+            + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv",
+        ),
     script:
-        "scripts/augmented_line_connections.py"
+        "scripts/cluster_global_buildings.py"
+
+
+if config["augmented_line_connection"].get("add_to_snakefile") == True:
+
+    rule augmented_line_connections:
+        params:
+            lines=config["lines"],
+            augmented_line_connection=config["augmented_line_connection"],
+            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+            electricity=config["electricity"],
+            costs=config["costs"],
+        input:
+            tech_costs=COSTS,
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+            regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+        log:
+            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:
@@ -1104,6 +1152,16 @@ rule prepare_sector_network:
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
+        **branch(
+            solar_rooftop_enable,
+            {
+                f"solar_rooftop_layout_{country}": "resources/"
+                + RDIR
+                + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_"
+                + f"{country}.csv"
+                for country in config["countries"]
+            },
+        ),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
