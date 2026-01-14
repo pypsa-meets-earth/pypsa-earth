@@ -70,8 +70,8 @@ nav:
       - Solve Network: user-guide/rules-reference/solving/solve-network.md
       - Solve Operations: user-guide/rules-reference/solving/solve-operations-network.md
 
-- Advanced:
-  - Monte Carlo: advanced/monte-carlo.md
+- Utilities:
+  - Monte Carlo: utilities/monte-carlo.md
 
 - API Reference:
   - Overview: api-reference/index.md
