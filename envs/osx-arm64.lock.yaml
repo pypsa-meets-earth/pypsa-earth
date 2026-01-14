@@ -370,7 +370,7 @@ dependencies:
 - ply=3.11=pyhd8ed1ab_3
 - polars=1.36.0=pyh6a1acc5_0
 - polars-runtime-32=1.36.0=py310h34bb384_0
-- powerplantmatching=0.7.1=pyhd8ed1ab_0
+- powerplantmatching=0.8.0=pyhd8ed1ab_0
 - pre-commit=4.5.0=pyha770c72_0
 - progressbar2=4.5.0=pyhd8ed1ab_1
 - proj=9.7.1=h46dec42_0
