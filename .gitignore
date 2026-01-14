@@ -74,3 +74,4 @@ screenlog*
 # Exclude specific file paths
 !data/demand/unsd/paths/Energy_Statistics_Database.xlsx
 site/
+doc/img/gen_*.svg

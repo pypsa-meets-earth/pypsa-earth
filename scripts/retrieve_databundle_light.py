@@ -86,7 +86,7 @@ import re
 from zipfile import ZipFile
 
 import geopandas as gpd
-import googledrivedownloader as gdd
+from google_drive_downloader import GoogleDriveDownloader as gdd
 import pandas as pd
 import yaml
 from _helpers import (

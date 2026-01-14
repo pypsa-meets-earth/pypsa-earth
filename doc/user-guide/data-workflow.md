@@ -12,6 +12,8 @@ To properly model any region of the Earth, PyPSA-Earth downloads and fetches dif
 
 Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart from that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
 
+![PyPSA-Earth Rulegraph](../img/gen_rulegraph.svg)
+
 ## 1. Grid topology data
 
 OpenStreetMap [OSM](https://www.openstreetmap.org/) data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The data are available under ODbL licence and should be [credited appropriately](https://osm.org/copyright/) when used.
