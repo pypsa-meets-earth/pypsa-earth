@@ -35,7 +35,7 @@ The generation of the model is controlled by the workflow management system [Sna
 
 the following workflow is automatically executed.
 
-![Workflow diagram](../assets/images/workflow_introduction.png)
+![Workflow diagram](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/workflow_introduction.png)
 
 The **blocks** represent the individual rules which are required to create the file `networks/elec_s_128.nc`. Each rule requires scripts (e.g. Python) to convert inputs to outputs. The **arrows** indicate the outputs from preceding rules which a particular rule takes as input data.
 

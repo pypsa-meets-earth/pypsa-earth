@@ -16,7 +16,7 @@ Two major parts of the energy modeling workflow are preparing of power grid layo
 
 OpenStreetMap [OSM](https://www.openstreetmap.org/) data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The data are available under ODbL licence and should be [credited appropriately](https://osm.org/copyright/) when used.
 
-![Image](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/africa_osm_map.png)
+![Africa OSM Map](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/africa_osm_map.png)
 
 The raw OSM data are being loaded when running the `download_osm_data` rule and stored in the folder `data/osm/{region}/pbf/`. Here `region` denotes a continent, e.g. Africa, or a macro region, e.g. Central America, where the countries of interest belong. The pbf-files contain the entire OSM data for the country; the specific network information related to generators, substations, lines and cables are extracted, cleaned and written as a geojsons in the folder `data/osm/{region}/Elements/`. All network data (generators, substations, lines and cables) for each country are stored as geojson files.
 

@@ -50,7 +50,7 @@ For each wildcard, a **list of values** is provided. The rule `solve_all_network
 
 An exemplary dependency graph (starting from the simplification rules) then looks like this:
 
-![Image](../assets/images/scenarios.png)
+![Image](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/scenarios.png)
 
 ```yaml
 --8<-- "configtables/snippets/scenario.yaml"

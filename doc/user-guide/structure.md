@@ -18,7 +18,7 @@ The main workflow structure built within PyPSA-Earth is as follows:
 
 **5. Summary and plotting**: once the model has been solved, produce nice summaries and plotting
 
-![Image](../assets/images/Flowchart_base.png)
+![Image](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/Flowchart_base.png)
 
 The entire execution of the workflow, from point 1 to point 5, relies on
 the automated workflow management tool [Snakemake](https://snakemake.bitbucket.io/) that
@@ -26,4 +26,4 @@ iterates the execution of so-called "rules" in an organized way following the in
 The chart of the entire workflow is shown in the following image for a general overview: each block represent
 a snakemake rule.
 
-![Image](../assets/images/Flowchart_17_11_2021.png)
+![Image](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/Flowchart_17_11_2021.png)

@@ -78,7 +78,7 @@ To create a DAG of the monte-carlo simulation workflow, use the following comman
 
 The diagram below shows the Monte Carlo simulation workflow:
 
-![Monte Carlo Workflow](../assets/images/monte_carlo_workflow.png)
+![Monte Carlo Workflow](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/monte_carlo_workflow.png)
 
 The monte-carlo simulation can be run using the following rule:
 

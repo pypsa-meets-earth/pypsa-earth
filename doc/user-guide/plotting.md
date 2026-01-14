@@ -29,4 +29,4 @@ graph TD
     1[solve_network] --> 0[plot_network]
 ```
 
-![Image](../assets/images/tech-colors.png)
+![Image](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/tech-colors.png)
