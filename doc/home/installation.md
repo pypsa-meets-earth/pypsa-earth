@@ -14,10 +14,10 @@ Ensure that your system meets the minimum hardware specifications to run PyPSA-E
 
 - 8-16 GB RAM and adequate CPU (at least 2-cores)
 - Storage (HDD/SSD) capacity depends on the region of interest:
-    - Africa model requires 40 GB
-    - The world requires ~250 GB
-    - A single country requires between 1-10 GB
-    - Tutorial requires just below 2 GB
+  - Africa model requires 40 GB
+  - The world requires ~250 GB
+  - A single country requires between 1-10 GB
+  - Tutorial requires just below 2 GB
 
 Thus, considering all required software tools, at least 40 GB of storage space is recommended.
 
@@ -35,7 +35,7 @@ Prior to installing PyPSA-Earth, you'll need to ensure the following software to
 To use packages in python, it is highly recommended to use a `conda` package manager, such as [miniconda](https://docs.conda.io/projects/miniconda/en/latest/). You may check if `conda` is already installed on your system with:
 
 ```bash
-$ conda --version
+conda --version
 ```
 
 If `conda` is not installed, follow the [miniconda installation guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/). For more information on how to install conda and work with it you can look into [Software Hints](../community/software-hints.md).
@@ -53,7 +53,7 @@ In order to write and debug python code, you need an Integrated Development Envi
 PyPSA-Earth currently needs Java redistribution to work properly. To check if Java is still installed you can request its version from a terminal:
 
 ```bash
-$ java --version
+java --version
 ```
 
 The expected output should resemble the following:
@@ -64,7 +64,14 @@ Java(TM) SE Runtime Environment (build 1.8.0_341-b10)
 Java HotSpot(TM) 64-Bit Server VM (build 25.341-b10, mixed mode)
 ```
 
-In case you don't have Java, you have to install it from the [official website](https://www.oracle.com/java/technologies/downloads/) or equivalent. Depending on the version of OS, download and install `JDK 21` or `JDK 17` from the link.
+In case you don't have Java, you have to install it. We recommend:
+
+- **Windows Users**: Install it directly from the [official website](https://www.oracle.com/java/technologies/downloads/). Download and install `JDK 21` or `JDK 17`.
+- **Linux or macOS Users**: You can install `openjdk` directly in your conda environment:
+
+  ```bash
+  mamba install -c conda-forge openjdk
+  ```
 
 ## Installation with Conda/Mamba
 
@@ -76,8 +83,8 @@ In case you don't have Java, you have to install it from the [official website](
 First of all, clone the [PyPSA-Earth repository](https://github.com/pypsa-meets-earth/pypsa-earth/) using the version control system `git`. The path to the directory into which the `git repository` is cloned must **not** have any spaces. The following commands can be executed in command prompt of `miniconda`, terminal of `VSCode`, or in `Git Bash`.
 
 ```bash
-$ git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
-$ cd pypsa-earth
+git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
+cd pypsa-earth
 ```
 
 !!! note
@@ -108,11 +115,11 @@ We recommend using these locked files for a stable environment.
     You can check and verify your platform with `conda info`.
 
 ```bash
-$ conda install -c conda-forge mamba
+conda install -c conda-forge mamba
 
-$ mamba env create -f envs/linux-64.lock.yaml  # select the appropriate file for your platform
+mamba env create -f envs/linux-64.lock.yaml  # select the appropriate file for your platform
 
-$ conda activate pypsa-earth
+conda activate pypsa-earth
 ```
 
 Environment installation with mamba usually takes about 10-20 minutes. Note please that activation is local to the currently open shell. Every time you open a new terminal window, `pypsa-earth` environment should be activated again to supply the workflow with all the dependencies it needs.
@@ -120,17 +127,17 @@ Environment installation with mamba usually takes about 10-20 minutes. Note plea
 In case mamba did not work for you, you might want to try conda instead:
 
 ```bash
-$ conda env create -f envs/linux-64.lock.yaml
+conda env create -f envs/linux-64.lock.yaml
 
-$ conda activate pypsa-earth
+conda activate pypsa-earth
 ```
 
 If a pre-generated lock file is not available for your platform (e.g., `aarch64`, `ARM Mac`, etc.), you can simply install the environment using the `environment.yaml` file, which is not locked and may lead to compatibility issues.
 
 ```bash
-$ conda install -c conda-forge mamba
+conda install -c conda-forge mamba
 
-$ mamba env create -f envs/environment.yaml
+mamba env create -f envs/environment.yaml
 ```
 
 ### Generating the Lock Files (Advanced Users)
@@ -140,13 +147,13 @@ If you wish to generate lock-files for your platform, you can use the following 
 1. Ensure `conda-lock` is installed:
 
    ```bash
-   $ conda install conda-lock -c conda-forge
+   conda install conda-lock -c conda-forge
    ```
 
 2. Generate lock files for target platforms:
 
    ```bash
-   $ conda-lock lock -p <your-platform> -k env -f envs/environment.yaml
+   conda-lock lock -p <your-platform> -k env -f envs/environment.yaml
    ```
 
 For platform codes, refer to the [conda-lock documentation](https://conda.github.io/conda-lock/) or use `conda info` to determine your platform.
@@ -157,7 +164,7 @@ For platform codes, refer to the [conda-lock documentation](https://conda.github
 To confirm the installation, run the following command in the activated environment:
 
 ```bash
-$ snakemake --version
+snakemake --version
 ```
 
 ## Solver Installation
@@ -183,8 +190,8 @@ To further improve performances, commercial solvers like:
 We use Jupyter notebooks to share examples on how to use the model and analyse the results. `VSCode` supports working with Jupyter Notebooks natively. In case you are using a different IDE and don't have Jupyter notebooks pre-installed you can install jupyter lab (new jupyter notebooks) with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
 
 ```bash
-$ ipython kernel install --user --name=pypsa-earth
-$ jupyter lab
+ipython kernel install --user --name=pypsa-earth
+jupyter lab
 ```
 
 ## Alternate installation with Docker
@@ -210,9 +217,11 @@ This section provides a step-by-step guide on how to set up and use Docker conta
     - Click on `File` in the top left corner.
     - Click on `Clone Repository`.
     - Paste the following URL in the URL field:
+
         ```
         https://github.com/pypsa-meets-earth/pypsa-earth.git
         ```
+
     - Click on `Clone`.
     - Choose the location where you want to save the repository.
     - Click on `Current Branch: main` and select `devContainers`.

@@ -10,6 +10,8 @@ mkdocs-table-reader-plugin
 mkdocs-video
 mkdocstrings[python]>=0.24.0
 mkdocs-autorefs
+mkdocstrings-python
+mkdocs-redirects
 pymdown-extensions
 
 pypsa >=0.25, <=0.30
