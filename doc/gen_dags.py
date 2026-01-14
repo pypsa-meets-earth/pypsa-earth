@@ -47,7 +47,7 @@ def generate_dags():
         output_file = DOC_IMG_DIR / f"gen_{name}.svg"
         print(f"Generating {output_file}...")
         
-        cmd_snakemake = [sys.executable, "-m", "snakemake", "-F", "-j", "1"] + args
+        cmd_snakemake = ["snakemake", "-F", "-j", "1"] + args
         
         try:
             p_snakemake = subprocess.Popen(
@@ -107,3 +107,8 @@ if __name__ == "__main__":
         generate_dags()
     else:
         sys.exit(1)
+
+def on_pre_build(config, **kwargs):
+    """MkDocs hook to generate DAGs before the build."""
+    if check_dependencies():
+        generate_dags()

@@ -16,6 +16,9 @@ watch:
 - doc
 - scripts
 
+hooks:
+- doc/gen_dags.py
+
 # Navigation
 nav:
 - Home:
