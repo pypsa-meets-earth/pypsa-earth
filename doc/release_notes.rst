@@ -17,9 +17,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Bump powerplantmatching to 0.8.0 `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
 * Update eia hydro database up to 2023 `PR #1703 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1703>`__
 
-PyPSA-Earth 0.7.0
+PyPSA-Earth 0.8.0
 =================
 
 **New Features and Major Changes**
