@@ -640,7 +640,7 @@ sector:
     share_cool_services_demand: 0.11
     share_electricity_resid_space: 0.10
     share_electricity_services_space: 0.13
-    share_district_heat: 0.1
+    share_district_heat: 0.0
 
 
   tes: true
