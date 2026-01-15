@@ -194,7 +194,7 @@ jobs:
             FOLDER="default"
           fi
 
-          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN printf "%.2f\n", v }')
+          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN { printf "%.2f\n", v }')
           OBJ_SCALE=1000000
           VALUE_SCALED=$(awk -v v="$VALUE" -v s="$OBJ_SCALE" 'BEGIN { if (s==0) { print "NaN"; exit 1 } printf "%.2f\n", v/s }')
 
