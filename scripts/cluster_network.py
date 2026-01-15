@@ -590,6 +590,19 @@ def clustering_for_n_clusters(
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
         clustering.network.lines["underwater_fraction"] = 0
 
+    # Remove zero-filled or NaN-filled time series for StorageUnit
+    for attr in list(clustering.network.storage_units_t.keys()):
+        df = clustering.network.storage_units_t[attr]
+        if not df.empty:
+            # Check if all values are either 0 or NaN
+            all_zero_or_nan = ((df == 0) | df.isna()).all().all()
+            if all_zero_or_nan:
+                # Make it empty with correct index but no columns
+                clustering.network.storage_units_t[attr] = pd.DataFrame(index=df.index)
+                logger.info(
+                    f"Cleared zero/NaN-filled storage_units_t.{attr} after clustering"
+                )
+
     return clustering
 
 
@@ -863,8 +876,8 @@ if __name__ == "__main__":
     restore_base_carrier_names(clustering.network)
 
     # Groupby carrier and bus for overnight simulation
-    # if config["foresight"] == "overnight":
-    groupby_bus_carrier(clustering.network, aggregation_strategies)
+    if config["foresight"] == "overnight":
+        groupby_bus_carrier(clustering.network, aggregation_strategies)
 
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
