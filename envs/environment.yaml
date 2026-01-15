@@ -14,7 +14,7 @@ dependencies:
 - pypsa>=0.25.1, <=0.30.3
 - atlite>=0.4.1
 - dask
-- powerplantmatching>=0.5.19  # due to this https://github.com/PyPSA/powerplantmatching/pull/202
+- powerplantmatching>=0.8
 - earth-osm>=2.3.post1
 
 # Dependencies of the workflow itself
