@@ -139,19 +139,17 @@ from _helpers import (
     nearest_shape,
     update_config_dictionary,
     update_p_nom_max,
-    get_base_carrier,
-    update_config_dictionary,
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from pypsa.clustering.spatial import (
+    aggregateoneport,
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
     get_clustering_from_busmap,
-    aggregateoneport,
 )
+from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from shapely.geometry import Point
 
 idx = pd.IndexSlice
@@ -654,7 +652,7 @@ def groupby_bus_carrier(
     network: pypsa.Network,
     aggregation_strategies: dict,
     exclude_carriers: list = [],
-    ) -> None:
+) -> None:
     """
     Group generators and storage units by (bus, carrier).
 
@@ -666,7 +664,7 @@ def groupby_bus_carrier(
         Aggregation strategies for different columns.
     exclude_carriers : list, optional
         List of carriers to exclude from grouping, by default [].
-    
+
     Returns
     -------
     None
@@ -697,10 +695,13 @@ def groupby_bus_carrier(
     replace_components(network, "Generator", generators, generators_pnl)
 
     # Group storage units
-    storage_units, storage_units_pnl = aggregateoneport(network, busmap, component="StorageUnit")
+    storage_units, storage_units_pnl = aggregateoneport(
+        network, busmap, component="StorageUnit"
+    )
 
     # Replace storage units in network
     replace_components(network, "StorageUnit", storage_units, storage_units_pnl)
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -862,7 +863,7 @@ if __name__ == "__main__":
     restore_base_carrier_names(clustering.network)
 
     # Groupby carrier and bus for overnight simulation
-    #if config["foresight"] == "overnight":
+    # if config["foresight"] == "overnight":
     groupby_bus_carrier(clustering.network, aggregation_strategies)
 
     clustering.network.meta = dict(
