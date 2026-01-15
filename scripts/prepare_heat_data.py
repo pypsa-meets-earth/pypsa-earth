@@ -77,6 +77,14 @@ def scale_demand(data_df, calibr_df, load_mode, geom_id, k=1):
     return data_df
 
 
+def read_nc(fl, t_index):
+    """
+    Transform nc input into a proper format
+    """
+    data_xr = xr.open_dataarray(fl).to_pandas().reindex(index=t_index)
+    return data_xr
+
+
 def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
     """
     Apply a linear transformation to the demand dataframe to match
@@ -94,39 +102,17 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         Dictionary of parameters used for calibration
     """
     # heating
-    ashp_cop = (
-        xr.open_dataarray(snakemake.input.cop_air_total)
-        .to_pandas()
-        .reindex(index=snapshots)
-    )
-    gshp_cop = (
-        xr.open_dataarray(snakemake.input.cop_soil_total)
-        .to_pandas()
-        .reindex(index=snapshots)
-    )
-    solar_thermal = (
-        xr.open_dataarray(snakemake.input.solar_thermal_total)
-        .to_pandas()
-        .reindex(index=snapshots)
-    )
+    ashp_cop = read_nc(snakemake.input.cop_air_total, snapshots)
+    gshp_cop = read_nc(snakemake.input.cop_soil_total, snapshots)
+    solar_thermal = read_nc(snakemake.input.solar_thermal_total, snapshots)
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     solar_thermal = options["solar_cf_correction"] * solar_thermal / 1e3
 
     # cooling
-    hp_cooling_total_cop = (
-        xr.open_dataarray(snakemake.input.cop_hp_cooling_total)
-        .to_pandas()
-        .reindex(index=snapshots)
-    )
-    ac_cooling_total_cop = (
-        xr.open_dataarray(snakemake.input.cop_ac_cooling_total)
-        .to_pandas()
-        .reindex(index=snapshots)
-    )
-    apft_abch_cooling_total_cop = (
-        xr.open_dataarray(snakemake.input.capft_abch_cooling_total)
-        .to_pandas()
-        .reindex(index=snapshots)
+    hp_cooling_total_cop = read_nc(snakemake.input.cop_hp_cooling_total, snapshots)
+    ac_cooling_total_cop = read_nc(snakemake.input.cop_ac_cooling_total, snapshots)
+    apft_abch_cooling_total_cop = read_nc(
+        snakemake.input.capft_abch_cooling_total, snapshots
     )
 
     # energy balance
