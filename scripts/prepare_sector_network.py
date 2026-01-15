@@ -2804,7 +2804,7 @@ def add_residential(n, costs, energy_totals):
     heat_ind = (
         n.loads_t.p_set.filter(like="residential")
         .filter(like="heat")
-        .fillna(0, axis=1)
+        .fillna(0.0, axis=1)
         .columns
     )
     heat_shape_raw = normalize_by_country(n.loads_t.p_set[heat_ind])
