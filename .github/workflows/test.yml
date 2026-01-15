@@ -194,13 +194,14 @@ jobs:
             FOLDER="default"
           fi
 
-          OBJ_SCALE=1
+          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN printf "%.2f\n", v }')
+          OBJ_SCALE=1000000
           VALUE_SCALED=$(awk -v v="$VALUE" -v s="$OBJ_SCALE" 'BEGIN { if (s==0) { print "NaN"; exit 1 } printf "%.2f\n", v/s }')
 
           REF_VALUE=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
 
           TABLE+="\n| $FOLDER | $BASENAME | \`$VALUE_SCALED\` | \`$REF_VALUE\` |"
-          CSV_CONTENT+=$'\n'"$(clean_csv_cell $FOLDER),$(clean_csv_cell $BASENAME),$(clean_csv_cell $VALUE_SCALED)"
+          CSV_CONTENT+=$'\n'"$(clean_csv_cell $FOLDER),$(clean_csv_cell $BASENAME),$(clean_csv_cell $VALUE_RAW)"
 
         done <<< "$OBJ_FOUND"
 
