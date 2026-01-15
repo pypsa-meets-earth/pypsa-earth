@@ -640,8 +640,6 @@ sector:
     share_cool_services_demand: 0.11
     share_electricity_resid_space: 0.10
     share_electricity_services_space: 0.13
-    share_district_heat: 0.0
-
 
   tes: true
   tes_tau: # 180 day time constant for centralised, 3 day for decentralised

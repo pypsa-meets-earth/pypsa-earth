@@ -125,10 +125,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
 
     nodal_energy_totals = energy_totals.loc[pop_layout.ct].fillna(0.0)
     nodal_energy_totals.index = pop_layout.index
-    # TODO keeping the solution consistent
-    nodal_energy_totals["district heat share"] = thermal_load_calibrate[
-        "share_district_heat"
-    ]
+
     # district heat share not weighted by population
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
