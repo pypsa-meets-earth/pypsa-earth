@@ -1505,6 +1505,7 @@ rule prepare_energy_totals:
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
         growth_factors_cagr="data/demand/growth_factors_cagr.csv",
         district_heating="data/demand/district_heating.csv",
+        thermal_loads="data/demand/thermal_loads.csv",
         fuel_shares="data/demand/fuel_shares.csv",
     output:
         energy_totals="resources/"

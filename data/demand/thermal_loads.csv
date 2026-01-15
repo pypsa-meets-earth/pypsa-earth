@@ -1,0 +1,4 @@
+country,share_heat_resid_demand,share_water_resid_demand,share_heat_services_demand,share_water_services_demand,share_cool_resid_demand,share_cool_services_demand,share_electricity_resid_space,share_electricity_services_space
+DEFAULT, 0.12, 0.12, 0.32, 0.05, 0.19, 0.11, 0.10, 0.13
+MA, 0.12, 0.12, 0.32, 0.05, 0.19, 0.11, 0.10, 0.13
+TN, 0.12, 0.12, 0.32, 0.05, 0.19, 0.11, 0.10, 0.13
