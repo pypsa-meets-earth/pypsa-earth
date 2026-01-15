@@ -194,7 +194,7 @@ jobs:
             FOLDER="default"
           fi
 
-          OBJ_SCALE=1000000
+          OBJ_SCALE=1
           VALUE_SCALED=$(awk -v v="$VALUE" -v s="$OBJ_SCALE" 'BEGIN { if (s==0) { print "NaN"; exit 1 } printf "%.2f\n", v/s }')
 
           REF_VALUE=$(extract_obj_for_path_py "$FOLDER" "$BASENAME")
