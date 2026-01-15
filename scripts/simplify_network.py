@@ -1035,9 +1035,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake(
-            "simplify_network", simpl="", configfile="config.US.yaml"
-        )
+        snakemake = mock_snakemake("simplify_network", simpl="")
 
     configure_logging(snakemake)
 

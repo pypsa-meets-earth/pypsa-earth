@@ -139,14 +139,17 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
     get_base_carrier,
+    update_config_dictionary,
 )
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
+from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from pypsa.clustering.spatial import (
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
     get_clustering_from_busmap,
+    aggregateoneport,
 )
 from shapely.geometry import Point
 
@@ -639,6 +642,67 @@ def restore_base_carrier_names(n: pypsa.Network) -> None:
         )
 
 
+def replace_components(n, c, df, pnl):
+    n.mremove(c, n.df(c).index)
+
+    import_components_from_dataframe(n, df, c)
+    for attr, df in pnl.items():
+        if not df.empty:
+            import_series_from_dataframe(n, df, c, attr)
+
+
+def groupby_bus_carrier(
+    network: pypsa.Network,
+    aggregation_strategies: dict,
+    exclude_carriers: list = [],
+    ) -> None:
+    """
+    Group generators and storage units by (bus, carrier).
+
+    Parameters
+    ----------
+    network : pypsa.Network
+        The PyPSA network to modify in-place.
+    aggregation_strategies : dict
+        Aggregation strategies for different columns.
+    exclude_carriers : list, optional
+        List of carriers to exclude from grouping, by default [].
+    
+    Returns
+    -------
+    None
+    """
+    # Carriers for aggregation
+    carriers = set(network.generators.carrier) - set(exclude_carriers)
+
+    # Create 1:1 busmap
+    busmap = pd.Series(network.buses.index, index=network.buses.index)
+
+    # Add p_nom_extendable to aggregation strategy
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="generators",
+        dict_to_use={"p_nom_extendable": "any"},
+    )
+
+    # Group generators
+    generators, generators_pnl = aggregateoneport(
+        network,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=aggregation_strategies["generators"],
+    )
+
+    # Replace generators in network
+    replace_components(network, "Generator", generators, generators_pnl)
+
+    # Group storage units
+    storage_units, storage_units_pnl = aggregateoneport(network, busmap, component="StorageUnit")
+
+    # Replace storage units in network
+    replace_components(network, "StorageUnit", storage_units, storage_units_pnl)
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -797,6 +861,10 @@ if __name__ == "__main__":
 
     # Restore base carrier names after all aggregation
     restore_base_carrier_names(clustering.network)
+
+    # Groupby carrier and bus for overnight simulation
+    #if config["foresight"] == "overnight":
+    groupby_bus_carrier(clustering.network, aggregation_strategies)
 
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
