@@ -13,11 +13,24 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
+
 * Revise heating and add cooling sector `PR #1376 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1376>`__
+
+**Minor Changes and bug-fixing**
+
+*
+
+PyPSA-Earth 0.7.0
+=================
+
+**New Features and Major Changes**
 
 * Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
 
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
+
+* Add an option to estimate solar-rooftop potentials using `GlobalMLBuildingFootprints <https://github.com/microsoft/GlobalMLBuildingFootprints>`_, a simplified data is provided for tutorials, `PR #1629 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1629>`__
 
 * Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years `PR #1604 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604>`__
 
@@ -738,7 +751,7 @@ Release Process
 
 * Make sure thah pinned versions of the environments ``*-pinned.yaml`` in ``envs`` folder are up-to-date.
 
-* Update version number in ``doc/conf.py``, ``default.config.yaml``, ``tutorial.config.yaml`` and ``test/config.*.yaml``.
+* Update version number in ``doc/conf.py``, ``default.config.yaml``, and ``tutorial.config.yaml``.
 
 * Open, review and merge pull request for branch ``release-v0.x.x``.
   Make sure to close issues and PRs or the release milestone with it (e.g. closes #X).
