@@ -1439,8 +1439,8 @@ rule prepare_heat_data:
         + SECDIR
         + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         # heat_profile="data/heat_load_profile_BDEW.csv",
-        heat_profile="data/heating_load_profile_staffel.csv",
-        cooling_profile="data/cooling_load_profile_staffel.csv",
+        heat_profile="data/thermal_loads/heating_load_profile_staffel.csv",
+        cooling_profile="data/thermal_loads/cooling_load_profile_staffel.csv",
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",

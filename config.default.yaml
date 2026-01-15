@@ -600,7 +600,7 @@ sector:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
     #increase of today's district heating demand to potential maximum district heating share
     #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
-    progress: 1
+    progress: 0.0
     # 2020: 0.0
     # 2030: 0.3
     # 2040: 0.6
@@ -623,7 +623,7 @@ sector:
 
   thermal_load_calibrate:
     enable: false
-    calibr_dir: "data/custom"
+    calibr_dir: "data/thermal_load"
     calibr_heat_fl: "mod_heating_calibr_clean.csv"
     calibr_cool_fl: "mod_cooling_calibr_clean.csv"
     # administrative level at which calibration inputs are provided
