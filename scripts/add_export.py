@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, override_component_attrs, prepare_costs
+from _helpers import locate_bus, prepare_costs
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             "Generator",
             "H2 export load",
             bus="H2 export bus",
-            carrier="H2",
+            carrier="H2 export",
             sign=-1,
             p_nom_extendable=True,
             marginal_cost=snakemake.params.endogenous_price * (-1),
@@ -142,7 +142,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             "Load",
             "H2 export load",
             bus="H2 export bus",
-            carrier="H2",
+            carrier="H2 export",
             p_set=export_profile,
         )
 
@@ -180,13 +180,14 @@ def create_export_profile():
             )
 
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
-    sopts = snakemake.wildcards.sopts.split("-")
-    export_profile = export_profile.resample(sopts[0].casefold()).mean()
+    sel_export = export_profile[n.snapshots]
+    pu_profile_export = sel_export / (1e-6 + sel_export.sum())
+    export_profile = pu_profile_export * export_profile.sum() * len(n.snapshots) / 8760
 
     # revise logger msg
     export_type = snakemake.params.export_profile
     logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {sopts[0]}"
+        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {len(n.snapshots)} snapshots."
     )
 
     return export_profile
@@ -211,8 +212,7 @@ if __name__ == "__main__":
             # configfile="test/config.test1.yaml",
         )
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
     countries = list(n.buses.country.unique())
 
     # Create export profile
