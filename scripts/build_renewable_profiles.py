@@ -333,7 +333,7 @@ def filter_cutout_region(cutout, regions):
     return cutout
 
 
-def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
+def rescale_hydro(plants, runoff, normalize_using_yearly, ref_year, q_ror, q_reservoir):
     """
     Function used to rescale the inflows of the hydro capacities to match
     country statistics.
@@ -349,8 +349,12 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
         Runoff at each bus
     normalize_using_yearly : DataFrame
         Dataframe that specifies for every country the total hydro production
-    year : int
+    ref_year : int
         Year used for normalization
+    q_ror : float
+        Quantile used to clip run-of-river inflows
+    q_reservoir : float
+        Quantile used to clip reservoir inflows
     """
 
     if plants.empty or plants.installed_hydro.any() == False:
@@ -365,14 +369,35 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
 
     years_statistics = years_statistics.unique()
 
-    if normalization_year not in set(years_statistics):
+    if ref_year not in set(years_statistics):
         logger.warning(
-            f"Missing hydro statistics for year {normalization_year}; no normalization performed."
+            f"Missing hydro statistics for year {ref_year}; no normalization performed."
         )
     else:
-        # get buses that have installed hydro capacity to be used to compute
-        # the normalization
-        normalization_buses = plants[plants.installed_hydro == True].index
+        p_nom = xr.DataArray(
+            plants["p_nom"],
+            dims=("plant",),
+            coords={"plant": plants.index},
+        )
+        country_of_plant = xr.DataArray(
+            plants["countries"],
+            dims=("plant",),
+            coords={"plant": plants.index},
+        )
+
+        reservoir_buses = plants.query("technology == 'Reservoir'").index
+        ror_buses = plants.index.intersection(reservoir_buses)
+
+        mask_reservoirs = runoff["plant"].isin(reservoir_buses)
+
+        # expected energy
+        common_countries = normalize_using_yearly.columns.intersection(country_of_plant)
+
+        exp_en_by_cnt = xr.DataArray(
+            normalize_using_yearly.loc[ref_year, common_countries].values,
+            dims=("country",),
+            coords={"country": common_countries.values},
+        )
 
         # check nans
         share_nans = float(runoff.isnull().sum() / runoff.shape[0] / runoff.shape[1])
@@ -381,105 +406,76 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
                 "Share of NaN values in hydro cutout: {:.2f}%".format(100 * share_nans)
             )
 
-        # average yearly runoff by plant
-        yearlyavg_runoff_by_plant = (
-            runoff.rename("runoff").mean("time", skipna=True).to_dataframe()
-        ) * 8760.0
-
-        yearlyavg_runoff_by_plant["country"] = plants.loc[
-            yearlyavg_runoff_by_plant.index, "countries"
-        ]
-
-        # group runoff by country
-        grouped_runoffs = (
-            yearlyavg_runoff_by_plant.loc[normalization_buses].groupby("country").sum()
+        # calculate runoff quantiles by category
+        runoff_quantile = xr.where(
+            mask_reservoirs,
+            runoff.quantile(q_reservoir, dim="time", skipna=True),  # reservoir plants
+            runoff.quantile(q_ror, dim="time", skipna=True),  # run-of-river plants
         )
 
-        # common country indices
-        common_countries = normalize_using_yearly.columns.intersection(
-            grouped_runoffs.index
+        # clip runoff values beyond quantile values
+        runoff_clipped = xr.where(
+            runoff > runoff_quantile,
+            runoff_quantile,
+            runoff,
         )
 
-        tot_common_yearly = np.nansum(
-            normalize_using_yearly.loc[normalization_year, common_countries]
-        )
-        tot_common_runoff = np.nansum(grouped_runoffs.runoff[common_countries])
-
-        # define default_factor. When nan values, used the default 1.0
-        default_factor = 1.0
-        if not (
-            isnan(tot_common_yearly)
-            or isnan(tot_common_runoff)
-            or tot_common_runoff <= 0.0
-        ):
-            default_factor = tot_common_yearly / tot_common_runoff
-
-        def create_scaling_factor(
-            normalize_yearly, grouped_runoffs, year, c_bus, default_value=1.0
-        ):
-            if c_bus in normalize_yearly.columns and c_bus in grouped_runoffs.index:
-                # normalization in place
-                return (
-                    np.nansum(normalize_yearly.loc[year, c_bus])
-                    / grouped_runoffs.runoff[c_bus]
-                )
-            elif c_bus not in normalize_yearly.columns:
-                # data not available in the normalization procedure
-                # return unity factor
-                return default_value
-            elif c_bus not in grouped_runoffs.index:
-                # no hydro inflows available for he country
-                return default_value
-
-        unique_countries = plants.countries.unique()
-        missing_countries_normalization = np.setdiff1d(
-            unique_countries, normalize_using_yearly.columns
-        )
-        missing_countries_grouped_runoff = np.setdiff1d(
-            unique_countries, grouped_runoffs.index
-        )
-
-        if missing_countries_normalization.size != 0:
-            logger.warning(
-                f"Missing countries in the normalization dataframe: "
-                + ", ".join(missing_countries_normalization)
-                + ". Default value used"
+        # scale runoff to nominal capacity for run-of-river plants
+        mx = runoff_clipped.max("time", skipna=True)
+        runoff_ror = (
+            xr.where(
+                mask_reservoirs,
+                0.0,
+                runoff_clipped / mx * p_nom,
             )
-
-        if missing_countries_grouped_runoff.size != 0:
-            logger.warning(
-                f"Missing installed plants in: "
-                + ", ".join(missing_countries_grouped_runoff)
-                + ". Default value used"
+            .fillna(0.0)
+            .assign_coords(country=country_of_plant)
+        )
+        runoff_res = (
+            xr.where(
+                mask_reservoirs,
+                runoff_clipped,
+                0.0,
             )
-
-        # matrix used to scale the runoffs
-        scaling_matrix = xr.DataArray(
-            [
-                create_scaling_factor(
-                    normalize_using_yearly,
-                    grouped_runoffs,
-                    normalization_year,
-                    c_bus,
-                    default_factor,
-                )
-                * np.ones(runoff.time.shape)
-                for c_bus in plants.countries
-            ],
-            coords=dict(
-                plant=plants.index.values,
-                time=runoff.time.values,
-            ),
+            .fillna(0.0)
+            .assign_coords(country=country_of_plant)
         )
 
-        # Check all buses to be in the final dataset
-        missing_buses = plants.index.difference(scaling_matrix.plant)
-        if len(missing_buses) > 0:
-            logger.warning(f"Missing hydro inflows for buses: {missing_buses}")
+        # ignore new plants when calculating the normalization factors
+        new_plants_id = plants[plants.installed_hydro != True].index
 
-        runoff *= scaling_matrix
+        # totals per country over the time horizon
+        ror_tot_c = (
+            runoff_ror.sum(dim=("time"), skipna=True)
+            .drop_sel(plant=new_plants_id, errors="ignore")
+            .groupby("country")
+            .sum()
+        )
+        res_tot_c = (
+            runoff_res.sum(dim=("time"), skipna=True)
+            .drop_sel(plant=new_plants_id, errors="ignore")
+            .groupby("country")
+            .sum()
+        )
 
-    return runoff
+        # compute required reservoir scaling factor per country
+        target_res_c = exp_en_by_cnt - ror_tot_c
+        scale_c = xr.where(
+            res_tot_c > 0, target_res_c.sel(country=res_tot_c.country) / res_tot_c, 0.0
+        )
+
+        if (scale_c < 0).any():
+            negative_countries = scale_c.country.values[scale_c < 0].tolist()
+            logger.warning(
+                f"Negative scaling factor for reservoir plants in countries: "
+                f"{', '.join(negative_countries)}. "
+                f"Setting scaling factor to zero."
+            )
+            scale_c = scale_c.clip(min=0.0)
+
+        runoff_final = runoff_ror + runoff_res * scale_c.sel(country=country_of_plant)
+
+        return runoff_final
 
 
 if __name__ == "__main__":
@@ -544,13 +540,15 @@ if __name__ == "__main__":
         hydrobasins = gpd.read_file(hydrobasins_path)
         ppls = load_powerplants(snakemake.input.powerplants)
 
-        all_hydro_ppls = ppls[ppls.carrier == "hydro"]
+        inflow_ppls = ppls.query(
+            "(carrier == 'hydro') and (technology != 'Pumped Storage')"
+        )
 
         # select hydro units within hydrobasins
         hgdf = gpd.GeoDataFrame(
-            all_hydro_ppls,
-            index=all_hydro_ppls.index,
-            geometry=gpd.points_from_xy(all_hydro_ppls.lon, all_hydro_ppls.lat),
+            inflow_ppls,
+            index=inflow_ppls.index,
+            geometry=gpd.points_from_xy(inflow_ppls.lon, inflow_ppls.lat),
             crs=PPL_CRS,
         ).to_crs(hydrobasins.crs)
         temp_gdf = gpd.sjoin(hgdf, hydrobasins, predicate="within", how="left")
@@ -560,17 +558,14 @@ if __name__ == "__main__":
         )
 
         bus_notin_hydrobasins = list(
-            set(all_hydro_ppls.index).difference(set(hydro_ppls.index))
+            set(inflow_ppls.index).difference(set(hydro_ppls.index))
         )
 
         resource["plants"] = hydro_ppls.rename(columns={"country": "countries"})[
-            ["lon", "lat", "countries"]
+            ["lon", "lat", "countries", "technology", "p_nom"]
         ]
 
-        # TODO: possibly revise to account for non-existent hydro powerplants
-        resource["plants"]["installed_hydro"] = [
-            True for bus_id in resource["plants"].index
-        ]
+        resource["plants"]["installed_hydro"] = resource["plants"].p_nom > 0
 
         # get normalization before executing runoff
         normalization = None
@@ -593,7 +588,10 @@ if __name__ == "__main__":
             # check if normalization field belongs to the settings and it is not false
             if normalization:
                 method = normalization["method"]
-                norm_year = normalization.get("year", int(inflow.time[0].dt.year))
+                norm_year = normalization["year"]
+                q_ror = normalization["quantile_ror"]
+                q_reservoir = normalization["quantile_reservoir"]
+                multiplier = normalization["multiplier"]
                 if method == "hydro_capacities":
                     path_hydro_capacities = snakemake.input.hydro_capacities
                     normalize_using_yearly = (
@@ -609,7 +607,12 @@ if __name__ == "__main__":
                     )
 
                 inflow = rescale_hydro(
-                    resource["plants"], inflow, normalize_using_yearly, norm_year
+                    resource["plants"],
+                    inflow,
+                    normalize_using_yearly * multiplier,
+                    norm_year,
+                    q_ror,
+                    q_reservoir,
                 )
                 logger.info(
                     f"Hydro normalization method '{method}' on year-statistics {norm_year}"
@@ -617,11 +620,9 @@ if __name__ == "__main__":
             else:
                 logger.info("No hydro normalization")
 
-            inflow *= config.get("multiplier", 1.0)
-
             # add zero values for out of hydrobasins elements
             if len(bus_notin_hydrobasins) > 0:
-                regions_notin = all_hydro_ppls.loc[
+                regions_notin = inflow_ppls.loc[
                     bus_notin_hydrobasins, ["lon", "lat", "country"]
                 ]
                 logger.warning(

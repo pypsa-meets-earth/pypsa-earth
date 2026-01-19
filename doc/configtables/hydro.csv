@@ -13,4 +13,6 @@ extendable, bool, "{True, False}", "True: In nodes where there is no hydro gener
 normalization,--,dict,"When specified, it describes how to normalize hydro time series to adhere to national statistics"
 --method,--,str,"Data source used to rescale the hydro runoff; option 'hydro_capacities' to use the provided 'data/hydro_capacities.csv' or 'eia' for using the eia file"
 --year,--,year,"(optional) Specify the desired year to be used for normalization, the default value corresponds to the cutout weather year"
-multiplier,--,float,"Multiplier factor of the rescaling process (default 1.0)"
+--quantile_ror,0.9,float,"Quantile of the inflow distribution beyond which inflow values are clipped for run-of-river plants"
+--quantile_reservoir,1.,float,"Quantile of the inflow distribution beyond which inflow values are clipped for reservoir plants"
+--multiplier,--,float,"Multiplier factor of the rescaling process (default 1.0)"
