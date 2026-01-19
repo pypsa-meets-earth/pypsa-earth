@@ -22,26 +22,24 @@ Project structure
 PyPSA-meets-Earth initiative is build upon the code base which can be accessed from the initiative repository on GitHub. A list below aims to give a quick overview:
 
 - `PyPSA Earth <https://github.com/pypsa-meets-earth/pypsa-earth>`__ is a model for power or sector-coupled system modeling for any country of the world
-- `PyPSA Distribution <https://github.com/pypsa-meets-earth/pypsa-distribution>`__ is an optimization model for micro-grids and distribution grids with an automated extraction of the inputs needed to build grid topology and electricity load profiles https://github.com/pypsa-meets-earth/pypsa-distribution
+- `PyPSA Distribution <https://github.com/pypsa-meets-earth/pypsa-distribution>`__ is an optimization model for micro-grids and distribution grids with an automated extraction of the inputs needed to build grid topology and electricity load profiles
 - `Earth OSM <https://github.com/pypsa-meets-earth/earth-osm>`__ provides a toolset to download, pre-process and export energy-relevant infrastructure data from OpenStreetMap (OSM)
+- `PyPSA Earth Status <https://github.com/pypsa-meets-earth/pypsa-earth-status>`__ enables a reproducible workflow to validate PyPSA networks against real-world energy system data
 
 The list is by no means exhaustive and is growing continuously. Feel free to explore more looking into the repositories available in `PyPSA meets Earth organization <https://github.com/pypsa-meets-earth>`__ and don't forget to give us a star ;). The contributions are very welcome to enhance the description of the available projects!
 
 
-Track leaders
-==============
+Team
+=====
 
-- Director (`Max Parzen <https://www.linkedin.com/in/maximilian-parzen-b047a1126/>`_)
-- `Co-Director <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EfjniQIxmfZIp8ih_WQuy-0BfCiOCLPKEvDZUuylp9xOhA?e=s7KRQy>`_ (`Davide Fioriti <https://www.linkedin.com/in/davide-fioriti-745693a5/>`_)
-- `PyPSA-Earth leaders <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (Davide, Katia, Hazem, Max)
-- Sector-coupling leaders (`Hazem Abdel-Khalek <https://www.linkedin.com/in/hazemakhalek/>`_ , `Leon Schumm <https://www.linkedin.com/in/leon-schumm-253b22201/>`_ and `Eddy Jalbout <https://www.linkedin.com/in/eddyjalbout/>`_ )
-- Climate modeling leader (Katia)
-- Coordinators of Regional Studies
-- `Outreach leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EWeumVS1t2hMrAXPWzYj2VsBRYS12ArGwTR1Iuo7vJC78Q?e=xeIkW4>`_ (`Stuart James <https://www.linkedin.com/in/stuart-daniel-james/>`_)
-- Western Asia Coordinators (Emre Yorat and `Kasım Zor <https://www.linkedin.com/in/kasimzor/>`_)
-- Africa Coordinator (Emmanuel Bolarinwa)
-- South America Coordinator (Carlos Fernandez)
-- `AI and demand leader <https://uoe-my.sharepoint.com/:b:/g/personal/s1827105_ed_ac_uk/EdHf1dHFvPhIuWRCPopR5KYB9viUJUkhm_WDhHMeFqbUtg?e=Ja0Mz0>`_ (`Lukas Franken <https://www.linkedin.com/in/lukas-franken-5a3045151/>`_)
+- Steering Committee: Davide Fioriti, Hazem Abdel-Khalek, Ekaterina Fedotova, Leon Schumm
+- Founder of the Initiative and Advisor: Maximilian Parzen
+- PyPSA-Earth Maintainers: Emmanuel Bolarinwa, Yerbol Akhmetov, Eddy Jalbout
+- PyPSA-Earth Lab Maintainers: Daniele Lerede, Arizeo Salac
+- Outreach Maintainer: Charlotte Heikendorf
+- Maintainer Earth-OSM: Matin Mahmood
+- PyPSA-Earth Distribution: Margherita Capitani
+- Regional Coordinatiors: Virio Andreyana, Tosin George, Emre Yorat
 
 .. _credits:
 
@@ -57,33 +55,39 @@ Contributors Team
 -----------------
 
 - Davide Fioriti (University of Pisa, Italy)
-- Yerbol Akhmetov
-- Eddy Jalbout (Fraunhofer IEG, Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
-- Hazem Abdel-Khalek (Fraunhofer IEG, Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
-- Emre Yorat
-- Matin Mahmood (University of Edinburgh, United Kingdom)
-- Daniele Lerede
+- Yerbol Akhmetov (Open Energy Transition, Germany)
+- Margherita Capitani (University of Pisa, Italy)
+- Eddy Jalbout (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
+- Hazem Abdel-Khalek (Open Energy Transition, Germany)
+- Max Parzen (Open Energy Transition, Germany)
+- Emre Yorat (Adana Science and Technology University)
+- Matin Mahmood (http://matin.ai/)
+- Virio Andreyana (Open Energy Transition, Germany)
+- Daniele Lerede (Open Energy Transition, Germany)
 - Alexander Meisinger (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Emmanuel Bolarinwa
+- Emmanuel Bolarinwa (Open Energy Transition, Germany)
+- Eric Nitschke (Technische Universität Hamburg, Germany)
 - Lukas Trippe (Technical University of Berlin, Germany)
 - Leon Schumm (Ostbayerische Technische Hochschule Regensburg, Germany)
-- Sermisha Narayana
+- Sermisha Narayana (Open Energy Transition, Germany)
+- Denise Giubilato (University of Pisa, Italy)
+- Carlos Fernandez (ULiege)
+- Tosin George (Open Energy Transition, Germany)
+- Anton Achhammer (Ostbayerische Technische Hochschule Regensburg, Germany)
+- Arizeo Salac (University of Pisa, Italy)
+- Lukas Jansen (Fraunhofer Institution for Energy Infrastructure and Geotechnics IEG, Germany)
+- Johannes Hampp (Open Energy Transition, Germany)
 - Fabian Neumann (Technical University of Berlin, Germany)
-- Carlos Fernandez
-- Anton Achhammer
-- Arizeo Salac
-- Johannes Hampp (Justus Liebig University Giessen, Germany)
-- Ekaterina Fedotova
+- Ekaterina Fedotova (Open Energy Transition, Germany)
 - Muhammad Ilyas
 - Lukas Franken (University of Edinburgh, United Kingdom)
 - Jess Ryan
+- Kevin Steijn (Open Energy Transition, Germany)
 - Stephen Lee (Massachusetts Institute of Technology, United States)
-- Albert Solà Vilalta
-- Martha Frysztacki
-- Denise Giubilato
-- Anas Algarei
-- Siddharth Krishna
+- Albert Solà Vilalta (Universitat Politècnica de Catalunya)
+- Martha Frysztacki (Open Energy Transition, Germany)
+- Anas Algarei (University of Edinburgh, United Kingdom)
+- Siddharth Krishna (Open Energy Transition, Germany)
 - Dahunsi Okekunle (Energy Market and Regulatory Consultants aka. EMRC, Nigeria)
 - Nse-Abasi Ayara (University of Abuja, Nigeria)
 - Jarrad Wright (Council for Scientific Research and Industry CSIR, South Africa)
@@ -92,16 +96,6 @@ Contributors Team
 - Caputo Cesare (Imperial College London, United Kingdom)
 - Desen Kirli (University of Edinburgh, United Kingdom)
 - Olukunle Owolabi (Tufts University, United States)
-
-Outreach Team
---------------
-
-- Stuart James (VDMA, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
-- Tosin George
-- Mousa Zerai (University of Edinburgh, United Kingdom)
-- Ilaria Capelli (EY, Italy)
-- Rebecca Grant (University of Edinburgh, United Kingdom)
 
 
 Advisor Team
