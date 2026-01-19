@@ -19,7 +19,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying `PR #1662 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662>`__
 
-PyPSA-Earth 0.7.0
+* Bump powerplantmatching to 0.8.0 `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+PyPSA-Earth 0.8.0
 =================
 
 **New Features and Major Changes**
