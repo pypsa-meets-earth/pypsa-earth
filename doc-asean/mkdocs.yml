@@ -1,0 +1,76 @@
+site_name: PyPSA-ASEAN
+theme:
+  name: material
+  logo: https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+
+
+        name: Switch to dark mode
+      primary: grey
+      accent: red
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: grey
+      accent: red
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - rust
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.instant.preview
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.path
+    - navigation.indexes
+    - toc.follow
+    - navigation.top
+
+nav:
+  - index.md
+  - Introduction:
+    - Introduction/index.md
+    - Installation: Introduction/installation.md
+    - Run Scenarios: Introduction/run-scenarios.md
+    - Contributors: Introduction/contributors.md
+  - Configuration:
+    - Configuration/index.md
+    - Project Config: Configuration/project-config.md
+    - Scenarios Config: Configuration/scenarios-config.md
+  - Feature:
+    - Feature/index.md
+    - Append Cost Data: Feature/append-cost-data.md
+    - ASEAN Grid Infrastructure: Feature/asean-grid-infrastructure.md
+    - Final Adjustment: Feature/final-adjustment.md
+    - Dual Pull Request: Feature/dual-pull-request.md
+  - Analysis:
+    - Analysis/index.md
+    - Donwload Scenarios: Analysis/download-scenarios.md
+    - Jupyter Notebooks: Analysis/jupyter-notebooks.md
+
+markdown_extensions:
+  - material.extensions.preview:
+      configurations:
+        - targets:
+            include:
+              - changelog/index.md
+              - customization.md
+              - insiders/changelog/*
+              - setup/extensions/*
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+repo_url: https://github.com/pypsa-meets-earth/pypsa-asean

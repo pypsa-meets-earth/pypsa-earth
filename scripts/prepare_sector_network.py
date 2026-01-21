@@ -936,6 +936,13 @@ def define_spatial(nodes, options):
 def add_biomass(n, costs):
     logger.info("adding biomass")
 
+    # Drop existing biomass generators to add limits (Future fixes can use e_nom_max)
+    drop_gen = n.generators[n.generators.carrier == "biomass"].index
+    n.mremove("Generator",drop_gen)
+
+    drop_store = n.stores[n.stores.carrier == "biomass"].index
+    n.mremove("Store",drop_store)
+
     # TODO get biomass potentials dataset and enable spatially resolved potentials
 
     # Get biomass and biogas potentials from config and convert from TWh to MWh

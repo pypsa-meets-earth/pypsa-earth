@@ -648,12 +648,12 @@ def attach_hydro(n, costs, ppl, hydro_min_inflow_pu=1):
         missing_countries = pd.Index(hydro["country"].unique()).difference(
             max_hours_country.dropna().index
         )
+        hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
         if not missing_countries.empty:
             logger.warning(
                 f"Assuming max_hours={hydro_max_hours_default} for hydro reservoirs in the countries: "
                 "{}".format(", ".join(missing_countries))
             )
-        hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
         hydro_max_hours = hydro.max_hours.where(
             hydro.max_hours > 0, hydro.country.map(max_hours_country)
         ).fillna(hydro_max_hours_default)

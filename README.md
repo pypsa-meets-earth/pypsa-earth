@@ -28,9 +28,12 @@ Made using PyPSA-Earth by
 
 **PyPSA-ASEAN: An ASEAN-Focused Sector-Coupled Open-Source Multi-Energy System Model**
 
+![elec-ASEAN](doc-asean/docs/Images/elec-ASEAN.png)
+
 PyPSA-ASEAN is the first open-source ASEAN-wide cross-sectoral energy system model with high spatial and temporal resolution. It builds on the existing PyPSA-Earth framework and integrates region-specific data tailored to the context of the Southeast Asia region. It aims to leverage the ongoing improvements in PyPSA-Earth using the soft-fork strategy while making it as easy as possible for users to create validated models of individual ASEAN countries or the entire region at once.
 
-Countries available to use in this model:
+The following countries are available to use in this model:
+
 - 🇧🇳 **Brunei**
 - 🇰🇭 **Cambodia**
 - 🇮🇩 **Indonesia**
