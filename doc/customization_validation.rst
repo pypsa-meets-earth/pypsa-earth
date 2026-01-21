@@ -10,40 +10,71 @@
 
 To validate the data obtained with PyPSA-Earth, we recommend to go through the procedure here detailed. An exampled of the validation procedure is available in the `Nigeria validation <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/validation_nigeria.ipynb>`_ notebook. Public information on the power system of Nigeria are compared to those obtained from the PyPSA-Earth model.
 
-Simulation procedure
-^^^^^^^^^^^^^^^^^^^^
+Data workflow
+^^^^^^^^^^^^^^
 
-It may be recommended to check the following quantities in the validation:
+PyPSA-Earth is designed to provide an optimisation model workflow with all necessary data for every country of the world. An architecture of the data workflow looks like follows.
 
-#. Inputs used by the model:
+#. Inputs used by the workflow:
 
-    #. Network characteristics
+    #. Aggregated power and energy demand by sectors
 
-    #. Substations
+    #. Installed generation capacity including it's spatial distribution
 
-    #. Installed generation by type
+    #. Energy-relevant weather parameters, land usage and orthography parameters
 
-#. Outputs of the simulation:
+#. Workflow outputs fed into the optimisation model:
 
-    #. Demand
+    #. Network topology and transmission capacity
 
-    #. Energy mix
+    #. Spatially distributed power and energy demands
+
+    #. Available renewable potential
+
+#. Outputs of the optimisation run:
+
+    #. Power and energy mix
+
+    #. Dispatch time-series
+
+    #. Capital and operational costs
+
+It may be recommended to check the major quantities in a validation procedure both for the workflow and the optimisation.
 
 Where to look for reference data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Data availability for many parts of the world is still quite limited. Usually the best sources to compare with are regional data hubs. There is also a collection of harmonized datasets curated by the international organisations. A non-exhaustive list of helpful sources:
 
-* `World Bank <https://energydata.info/>`_;
+* `Ember <https://ember-climate.org/data/data-explorer/>`_ Data Explorer
 
-* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/>`_;
+* `World Bank <https://energydata.info/>`_
 
-* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_;
+* International Renewable Energy Agency `IRENA <https://pxweb.irena.org/pxweb/en/IRENASTAT/>`_
 
-* `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy;
+* International Energy Agency `IEA <https://www.iea.org/data-and-statistics>`_
 
-* `Ember <https://ember-climate.org/data/data-explorer/>`_ Data Explorer.
+* A global collection of power grid charts `Awesome Electrical Grid Mapping <https://github.com/open-energy-transition/Awesome-Electrical-Grid-Mapping>`_
 
+* `BP <https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy.html>`_ Statistical Review of World Energy
+
+How to tailor the inputs
+^^^^^^^^^^^^^^^^^^^^^^^^
+1. Adjust configuration parameters
+2. Use custom data
+3. Improve data quality in the source
+
+Contribution guide
+
+`Visualization toolkit <https://github.com/ben10dynartio/osm-power-grid-map-analysis>`__ to quickly get insights into OSM-extracted power grid datausing maps and graph analysis
+
+Powerplantmatching
+
+GEM
+
+atlite
+
+ERA5
 
 Advanced validation examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
