@@ -622,12 +622,8 @@ sector:
   # 2050: 0.29
 
   thermal_load_calibrate:
-    # enable: false
-    # calibr_dir: "data/thermal_load"
-    # calibr_heat_fl: "mod_heating_calibr_clean.csv"
-    # calibr_cool_fl: "mod_cooling_calibr_clean.csv"
-    # # administrative level at which calibration inputs are provided
-    calibration_level: 1
+    # replace UN data for space heating and warm water and amend data for cooling
+    enable: false
     # scaling coefficient for the overall heating/cooling loads
     heat_demand_total: 1
     cool_demand_total: 1
