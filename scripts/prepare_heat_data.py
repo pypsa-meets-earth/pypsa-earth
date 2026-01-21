@@ -132,8 +132,14 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
 
     energy_col_names = nodal_energy_totals.columns
 
-    residential_cols = energy_col_names[energy_col_names.str.contains("residential")]
-    services_cols = energy_col_names[energy_col_names.str.contains("services")]
+    residential_cols = energy_col_names[
+        energy_col_names.str.contains("residential")
+        & ~energy_col_names.str.contains("share")
+    ]
+    services_cols = energy_col_names[
+        energy_col_names.str.contains("services")
+        & ~energy_col_names.str.contains("share")
+    ]
 
     energy_residential = nodal_energy_totals.loc[:, residential_cols].sum().sum()
     energy_services = nodal_energy_totals.loc[:, services_cols].sum().sum()
