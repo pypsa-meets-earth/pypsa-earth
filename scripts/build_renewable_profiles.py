@@ -373,6 +373,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, ref_year, q_ror, q_res
         logger.warning(
             f"Missing hydro statistics for year {ref_year}; no normalization performed."
         )
+        return inflow
     else:
         p_nom = xr.DataArray(
             plants["p_nom"],
