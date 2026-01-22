@@ -484,8 +484,8 @@ def base_network(
     transformers_config,
     voltages_config,
 ):
-    buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
-    lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
+    buses = _load_buses_from_osm(inputs.osm_buses)  # .reset_index(drop=True)
+    lines = _load_lines_from_osm(inputs.osm_lines)  # .reset_index(drop=True)
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
@@ -503,7 +503,7 @@ def base_network(
     converters = _set_electrical_parameters_converters(links_config, converters)
 
     n = pypsa.Network()
-    n.name = "PyPSA-Earth"
+    n.name = "PyPSA-ASEAN"
 
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()

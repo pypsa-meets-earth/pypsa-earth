@@ -15,7 +15,7 @@ google_api_key:
 #matching config
 matching_sources:
 # - CARMA  # deprecated as no more public
-- GEO
+# - GEO # too many outdated powerplants in ASEAN
 - GPD
 - GBPT
 - GGPT
@@ -31,7 +31,7 @@ matching_sources:
 
 fully_included_sources:
 # - CARMA  # deprecated as no more public
-- GEO
+# - GEO # too many outdated powerplants in ASEAN
 - GPD
 - GBPT
 - GGPT

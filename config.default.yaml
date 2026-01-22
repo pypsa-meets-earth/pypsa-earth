@@ -182,6 +182,8 @@ co2_budget:
 
 electricity:
   base_voltage: 380.
+  base_network: false # ["osm-prebuilt", "osm-plus-prebuilt"]
+  base_network_version: 0.1.1 # see in data/
   voltages: [132., 220., 300., 380., 500., 750.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
@@ -253,6 +255,21 @@ transformers:
   x: 0.1
   s_nom: 2000.
   type: ""
+
+transmission_projects:
+  enable: false
+  include:
+    ID_SuperGrid: true
+    AIMS: true
+  skip: []
+  status:
+  - in_planning
+  - under_construction
+  - existing
+  - under_consideration
+  new_link_capacity: keep #keep or zero
+  set_by_build_year: true
+  delay_construction: 0
 
 atlite:
   nprocesses: 4
@@ -369,9 +386,10 @@ renewable:
     clip_min_inflow: 1.0
     extendable: true
     normalization:
-      method: eia # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' to rescale by eia data, false for no rescaling
-      year: 2013 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
+      method: irena # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' or 'irena' to rescale by eia or irena data, false for no rescaling
+      year: 2023 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+    hydro_min_inflow_pu: 1.0
   csp:
     cutout: cutout-2013-era5
     resource:
@@ -506,6 +524,7 @@ fossil_reserves:
   oil: 100 #TWh Maybe redundant
 
 export:
+  enable: true
   endogenous: false # If true, the export demand is endogenously determined by the model
   endogenous_price: 400 # EUR/MWh # Market price, for wich the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
