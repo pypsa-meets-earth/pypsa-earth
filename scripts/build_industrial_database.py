@@ -190,7 +190,7 @@ def create_steel_db():
             "Plant ID": "ID",
         }
     )
-    df_steel.capacity = pd.to_numeric(df_steel.capacity)
+    df_steel.capacity = pd.to_numeric(df_steel.capacity, errors="coerce")
     df_steel["technology"] = df_steel["Main production process"].apply(
         lambda x: iron_techs[x]
     )
