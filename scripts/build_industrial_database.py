@@ -67,10 +67,8 @@ def get_cocode_from_coords(df):
 def create_steel_db():
     # Global Steel Plant Tracker data set you requested from Global Energy Monitor from the link below:
 
-    # The following excel file was downloaded from the following webpage
-    # https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx . The dataset contains 1433 Steel plants globally.
-
-    url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
+    # The original data are available from https://globalenergymonitor.org/
+    url = "https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx"
 
     df_steel = pd.read_excel(
         content_retrieve(url),

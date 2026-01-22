@@ -17,7 +17,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Bump powerplantmatching to 0.8.0 `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+* Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update steel database to version 2024 `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
 
 PyPSA-Earth 0.8.0
 =================
