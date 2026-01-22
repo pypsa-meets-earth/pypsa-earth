@@ -257,7 +257,7 @@ transformers:
   type: ""
 
 transmission_projects:
-  enable: true
+  enable: false
   include:
     ID_SuperGrid: true
     AIMS: true
