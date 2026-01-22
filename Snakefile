@@ -897,7 +897,6 @@ rule add_extra_components:
     params:
         transmission_efficiency=config["sector"]["transmission_efficiency"],
     input:
-        overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
     output:
@@ -972,7 +971,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
@@ -1041,7 +1039,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
@@ -1296,7 +1293,6 @@ rule prepare_sector_network:
             + SECDIR
             + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ),
-        overrides="data/override_component_attrs",
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1366,7 +1362,6 @@ rule add_export:
         snapshots=config["snapshots"],
         costs=config["costs"],
     input:
-        overrides="data/override_component_attrs",
         export_ports="resources/" + SECDIR + "export_ports.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
@@ -1423,7 +1418,6 @@ rule override_respot:
             for discountrate in config["costs"]["discountrate"]
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
-        overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         energy_totals="resources/"
         + SECDIR
@@ -1850,7 +1844,6 @@ if config["foresight"] == "overnight":
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             # network=RESDIR
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
@@ -1896,7 +1889,6 @@ rule make_sector_summary:
         h2export_qty=config["export"]["h2export"],
         foresight=config["foresight"],
     input:
-        overrides="data/override_component_attrs",
         networks=expand(
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -1996,7 +1988,6 @@ rule make_statistics:
 
 rule plot_sector_network:
     input:
-        overrides="data/override_component_attrs",
         network=RESDIR
         + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
@@ -2327,7 +2318,6 @@ if config["foresight"] == "myopic":
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}.csv",

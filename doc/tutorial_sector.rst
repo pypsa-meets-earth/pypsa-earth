@@ -14,8 +14,7 @@ Tutorial: Sector-Coupled
 
 In this tutorial, we will show you how to run the sector-coupled model. The sector-coupled model
 is a model that considers the energy system as a whole, including the electricity, heat, transport,
-and industry sectors. The model has been insipred and partially based on the PyPSA-Eur model, which is a model of the European
-energy system. The sector-coupled model is a global model that can be used to model any region
+and industry sectors. The sector-coupled model is a global model that can be used to model any region
 of the Earth. This section explains how to run and analyze the tutorial model.
 
 
@@ -33,7 +32,7 @@ Configuration
 All the configuration for a sector-coupled run are present in the ``config.default.yaml`` file.
 In particular, the default value for foresight parameter is set to ``overnight``. For the purpose
 of this tutorial, ``test/config.sector.yaml`` will be used in addition to ``config.default.yaml``
-to run the sector-coupled model. That allows to enable using a lightweight tutorial datakit
+to run the sector-coupled model. That allows you to use a lightweight tutorial datakit
 enabled with tutorial: true.
 
 .. code:: yaml
@@ -372,7 +371,7 @@ defines the sequence of investment horizons.
     scenario:
       simpl: [""]
       clusters: [4]
-      planning_horizons: [2030] # investment years for myopcondaic and perfect; or costs year for overnight
+      planning_horizons: [2030] # investment years for myopic and perfect; or costs year for overnight
       ll: ["c1"]
       opts: ["Co2L-24H"]
       sopts: ["144h"]
