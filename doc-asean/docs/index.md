@@ -40,3 +40,4 @@ These are the chapters in the documentation:
 - [Introduction](Introduction/index.md)
 - [Feature](Feature/index.md)
 - [Configuration](Configuration/index.md)
+- [Analysis](Analysis/index.md)

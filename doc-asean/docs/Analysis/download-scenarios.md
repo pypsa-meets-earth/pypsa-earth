@@ -19,7 +19,6 @@ results/
 │       └── elec_s_100_ec_lv2.0__3h_2050_0.071_DEC_0export.nc
 ├── ...
 └── sensitivity-roof200-3H/
-
 ```
 
 Descriptions and usage instructions for each notebook are provided [here](jupyter-notebooks.md)

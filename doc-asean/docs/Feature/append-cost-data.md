@@ -5,11 +5,26 @@ This section details the `append_cost_data.py` script, unique to PyPSA-ASEAN, wh
 The primary goal of this script is to integrate specific cost assumptions from the AEO8 into PyPSA-ASEAN's technology cost database. This ensures that your model's cost data reflects regional insights and projections.
 
 ## Input Data
+```
+pypsa-asean/
+├── data/
+│   └── AEO8-input/
+│       ├── AEO8_Table_D15_Cost_Summary.csv
+│       ├── AEO8_Table_D17_Declining_Factor.csv
+│       └── AEO8_Table_D18_Regional_Factor.csv
+├── resources/
+│   ├── pre_costs_2025.csv
+│   ├── pre_costs_{year}.csv
+│   └── pre_costs_2050.csv
+└── ...
+```
+
 The script uses several input files, primarily from the `data/AEO8-input/` directory:
+
 *   `AEO8_Table_D15_Cost_Summary.csv`: Summarizes technology costs.
 *   `AEO8_Table_D17_Declining_Factor.csv`: Contains declining factors for technology costs over time.
 *   `AEO8_Table_D18_Regional_Factor.csv`: Provides a regional adjustment factor for investment costs.
-*   `resources/pre_costs_{year}.csv`: This is the base cost data from PyPSA-Earth, which the script modifies.
+*   `pre_costs_{year}.csv`: This is the base cost data from PyPSA-Earth, which the script modifies before converting.
 
 ## Key Operations
 
@@ -22,6 +37,7 @@ costs:
 ```
 
 With these settings, the script performs the following operations:
+
 1.  **Currency Conversion**: Converts all USD-denominated costs from the AEO8 input tables to EUR, as PyPSA-ASEAN (like PyPSA-Earth) uses EUR as its default currency.
 2.  **Cost Adjustment**: Applies declining factors from `AEO8_Table_D17_Declining_Factor.csv` to the capital expenditure (Capex) and variable operation and maintenance (VOM) costs of various technologies.
 3.  **Regional Factor Application**: If configured, a regional factor from `AEO8_Table_D18_Regional_Factor.csv` (or a user-defined value) is applied to all investment costs.

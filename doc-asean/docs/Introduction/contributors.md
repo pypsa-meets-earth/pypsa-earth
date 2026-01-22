@@ -23,4 +23,4 @@ The following individuals and organizations were the initial contributors to PyP
 
 ## Community Contributors
 
-We welcome contributions from individuals and organizations using and extending PyPSA-ASEAN. If you would like to be acknowledged here, please reach us in [Github](github.com/pypsa-meets-earth/pypsa-asean) or [Discord: PyPSA-ASEAN](https://discord.gg/AnuJBk23FU).
+We welcome contributions from individuals and organizations using and extending PyPSA-ASEAN. If you would like to be acknowledged here, please reach us in [Github](https://github.com/pypsa-meets-earth/pypsa-asean) or [Discord: PyPSA-ASEAN](https://discord.gg/AnuJBk23FU).
