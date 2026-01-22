@@ -80,10 +80,10 @@ def create_steel_db():
     df_steel = df_steel[
         [
             "Plant name (English)",
-            "Country",
+            "Country/Area",
             "Coordinates",
             "Coordinate accuracy",
-            "Status",
+            "Capacity operating status",
             "Start date",
             "Plant age (years)",
             "Nominal crude steel capacity (ttpa)",
@@ -104,11 +104,11 @@ def create_steel_db():
     ]
 
     # Keep only operating steel plants
-    df_steel = df_steel.loc[df_steel["Status"] == "operating"]
+    df_steel = df_steel.loc[df_steel["Capacity operating status"] == "operating"]
 
     # Create a column with iso2 country code
     cc = coco.CountryConverter()
-    Country = pd.Series(df_steel["Country"])
+    Country = pd.Series(df_steel["Country/Area"])
     df_steel["country"] = cc.pandas_convert(series=Country, to="ISO2")
 
     # Split Coordeinates column into x and y columns
