@@ -10,6 +10,7 @@ This chapter compares the default PyPSA-Earth configuration to the PyPSA-ASEAN c
 PyPSA-ASEAN is a regional adaptation of the open-source PyPSA-Earth framework [^15]. It builds on PyPSA-Earth’s preprocessing routines and optimisation capabilities, while leveraging ASEAN-specific data on power plants, renewable resources, transmission infrastructure, and electricity demand. Inclusion of customized data, on top of the PyPSA-Earth compatible databases, allowed the model to represent the region’s electricity system and enable the optimization of least-cost investment and dispatch of generation, storage, and transmission assets.
 
 ![renewable-pot](../Images/renewable-pot.png)
+<p align="center"><b> Figure:</b> Solar (left) and wind (right) potential in GWh per km² based on ERA5 Copernicus climate data for the weather year of 2013. Data is processed by Atlite and clustered by the closest OpenStreetMaps substation.</p>
 
 In this work, input data was compiled from multiple open-source databases to ensure high resolution and consistency.
 
