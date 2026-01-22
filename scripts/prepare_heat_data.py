@@ -130,6 +130,7 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
     district_heat_share = nodal_energy_totals["district heat share"]  # .round(2)
     nodal_energy_totals = nodal_energy_totals.multiply(pop_layout.fraction, axis=0)
 
+    # shares of heating/cooling load don't depend on population
     energy_col_names = nodal_energy_totals.columns
 
     residential_cols = energy_col_names[
