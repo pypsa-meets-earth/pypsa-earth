@@ -147,7 +147,6 @@ def create_steel_db():
 
     # Merge them back to the main df
     df_steel = pd.concat([df_steel, BF_share, DRI_share])
-    df_steel["Main production process"].value_counts()
 
     # Remove plants with unknown production technology
     unknown_ind = df_steel[
@@ -160,7 +159,6 @@ def create_steel_db():
                 len(unknown_ind), len(df_steel)
             )
         )
-    df_steel["Main production process"].value_counts()
 
     # Dict to map the technology names of the source to that expected in the workflow
     iron_techs = {
@@ -170,6 +168,8 @@ def create_steel_db():
         "ironmaking (BF)": "Integrated steelworks",
         "ironmaking (DRI)": "DRI + Electric arc",
         "oxygen": "Integrated steelworks",
+        "ironmaking (other)": "Integrated steelworks",
+        "steelmaking (other)": "Integrated steelworks",
         "electric, oxygen": "Electric arc",
     }
 
@@ -190,12 +190,10 @@ def create_steel_db():
             "Plant ID": "ID",
         }
     )
-    df_steel.capacity = pd.to_numeric(df_steel.capacity, errors="coerce")
-    df_steel["technology"] = df_steel["Main production process"].apply(
-        lambda x: iron_techs[x]
-    )
-    df_steel.x = df_steel.x.apply(lambda x: eval(x))
-    df_steel.y = df_steel.y.apply(lambda y: eval(y))
+    df_steel["technology"] = df_steel["Main production process"].replace(iron_techs)
+
+    for col in ["capacity", "x", "y"]:
+        df_steel[col] = pd.to_numeric(df_steel[col], errors="coerce")
 
     return df_steel[
         [
