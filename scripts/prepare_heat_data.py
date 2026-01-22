@@ -142,8 +142,27 @@ def prepare_heat_data(n, snapshots, countries, thermal_load_calibrate):
         & ~energy_col_names.str.contains("share")
     ]
 
-    energy_residential = nodal_energy_totals.loc[:, residential_cols].sum().sum()
-    energy_services = nodal_energy_totals.loc[:, services_cols].sum().sum()
+    residential_supply_cols = [
+        "electricity residential",
+        "residential gas",
+        "residential biomass",
+        "residential oil",
+    ]
+    services_supply_cols = [
+        "services biomass",
+        "services electricity",
+        "services gas",
+        "services oil",
+    ]
+
+    # UN Energy Stats seems to mix supply and demand
+    # TODO Cross-check to exclude double-counting
+    # energy_residential = nodal_energy_totals.loc[:, residential_cols].sum().sum()
+    # energy_services = nodal_energy_totals.loc[:, services_cols].sum().sum()
+    # energy_total = nodal_energy_totals.sum().sum()
+
+    energy_residential = nodal_energy_totals.loc[:, residential_supply_cols].sum().sum()
+    energy_services = nodal_energy_totals.loc[:, services_supply_cols].sum().sum()
     energy_total = nodal_energy_totals.sum().sum()
 
     def calibrate_sector(df, sector, sector_df, shares):
