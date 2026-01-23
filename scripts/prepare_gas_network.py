@@ -537,7 +537,7 @@ def load_bus_region(onshore_path, pipelines):
     bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
     bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1).loc[
-        :, ["gadm_id", "geometry"]
+        :, ["gadm_id", "country", "geometry"]
     ]
 
     if snakemake.params.alternative_clustering:
