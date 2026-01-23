@@ -86,11 +86,11 @@ def download_GGIT_gas_network():
     https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
     The dataset contains 3144 pipelines.
     """
-    url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+    url = "https://data.pypsa.org/workflows/eur/gem_europe_gas_tracker/may-2024/Europe-Gas-Tracker-2024-05.xlsx"
     GGIT_gas_pipeline = pd.read_excel(
         content_retrieve(url),
         index_col=0,
-        sheet_name="Gas Pipelines 2022-12-16",
+        sheet_name="Gas pipelines - data",
         header=0,
     )
 
@@ -172,7 +172,11 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df = df[df["Status"].isin(snakemake.params.gas_config["network_data_GGIT_status"])]
 
     # Convert the WKT column to a GeoDataFrame
-    df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"]))
+    df = gpd.GeoDataFrame(
+        df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"], on_invalid="warn")
+    )
+
+    df = df[df.geometry.is_valid & ~df.geometry.is_empty]
 
     # Set the CRS to EPSG:4326
     df.crs = CRS.from_epsg(4326)
