@@ -476,7 +476,7 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, ref_year, q_ror, q_res
 
         runoff_final = runoff_ror + runoff_res * scale_c.sel(country=country_of_plant)
 
-        return runoff_final
+        return runoff_final.drop_vars("country")
 
 
 if __name__ == "__main__":
