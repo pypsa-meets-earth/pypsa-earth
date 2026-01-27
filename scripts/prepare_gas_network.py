@@ -90,7 +90,7 @@ def download_GGIT_gas_network():
     GGIT_gas_pipeline = pd.read_excel(
         content_retrieve(url),
         index_col=0,
-        sheet_name="Gas pipelines - data",
+        sheet_name="Pipelines 2022-12-16",
         header=0,
     )
 
