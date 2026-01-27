@@ -86,7 +86,7 @@ def download_GGIT_gas_network():
     https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
     The dataset contains 3144 pipelines.
     """
-    url = "https://data.pypsa.org/workflows/eur/gem_europe_gas_tracker/may-2024/Europe-Gas-Tracker-2024-05.xlsx"
+    url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
     GGIT_gas_pipeline = pd.read_excel(
         content_retrieve(url),
         index_col=0,
