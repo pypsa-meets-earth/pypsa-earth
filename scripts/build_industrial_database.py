@@ -210,13 +210,13 @@ def create_steel_db(fn):
     ].dropna()
 
 
-def create_cement_db():
+def create_cement_db(fn):
     # -------------
     # CEMENT
     # -------------
     # The following excel file was downloaded from the following webpage https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/.
     # The dataset contains 3117 cement plants globally.
-    fn = "data/industry/SFI-Global-Cement-Database-July-2021.xlsx"
+    fn = fn
     cement_orig = pd.read_excel(
         fn,
         index_col=0,
@@ -294,7 +294,7 @@ def create_cement_db():
     ]
 
 
-def create_refineries_df():
+def create_refineries_df(fn):
     # -------------
     # OIL REFINERIES
     # -------------
@@ -303,11 +303,7 @@ def create_refineries_df():
     # and https://www.arcgis.com/home/item.html?id=a917ac2766bc47e1877071f0201b6280
 
     # The dataset contains 536 global Oil refineries.
-
-    base_url = "https://services.arcgis.com"
-    facts = "/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
-
-    first_response = requests.get(base_url + facts)
+    first_response = requests.get(fn)
     response_list = first_response.json()
 
     data = []
@@ -377,13 +373,13 @@ def create_refineries_df():
     ]
 
 
-def create_paper_df():
+def create_paper_df(fn):
     # -------------
     # Paper
     # -------------
     # The following excel file was downloaded from the following webpage https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/ . The dataset contains 3117 cement plants globally.
 
-    fn = "data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx"
+    fn = fn
 
     paper_orig = pd.read_excel(
         fn,
@@ -499,10 +495,19 @@ if __name__ == "__main__":
             demand="AB",
         )
 
-    industrial_database_steel = create_steel_db()
-    industrial_database_cement = create_cement_db()
-    industrial_database_refineries = create_refineries_df()
-    industrial_database_paper = create_paper_df()
+    steel_fn = snakemake.params.url_steel
+    cement_fn = "data/industry/SFI-Global-Cement-Database-July-2021.xlsx"
+
+    refineries_base_url = "https://services.arcgis.com"
+    refineries_facts = "/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
+    refineries_fn = refineries_base_url + refineries_facts
+
+    paper_fn = "data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx"
+
+    industrial_database_steel = create_steel_db(steel_fn)
+    industrial_database_cement = create_cement_db(cement_fn)
+    industrial_database_refineries = create_refineries_df(refineries_fn)
+    industrial_database_paper = create_paper_df(paper_fn)
 
     industrial_database = pd.concat(
         [

@@ -1885,7 +1885,6 @@ rule plot_sector_summary:
 rule build_industrial_database:
     params:
         url_steel="https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx",
-
     output:
         industrial_database="data/industrial_database.csv",
     script:
