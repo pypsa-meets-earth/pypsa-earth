@@ -80,7 +80,7 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/418603/files/bundle_tutorial_data_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/429084/files/bundle_tutorial_data_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1cUei9vH3LzIYfqltaGTaRWCX6J24f1c0/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2025_sub_ice.nc
