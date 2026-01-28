@@ -46,6 +46,18 @@ databundles:
     - data/gadm/gadm36_NGA/gadm36_NGA.gpkg  # needed in sector-coupled model
     - data/gadm/gadm36_BEN/gadm36_BEN.gpkg  # needed in sector-coupled model
 
+  # tutorial bundle specific for Nigeria and Benin only (TODO: merge with above)
+  bundle_tutorial_NGBJ_global_buildings:
+    countries: [NG, BJ]
+    tutorial: true
+    category: global_buildings
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/1nnseF1A740Gp0IaryeCQ8IRcEF91-aUe/view?usp=drive_link
+    output:
+    - data/global_buildings/NG_global_buildings_raw.parquet  # needed in cluster_global_buildings
+    - data/global_buildings/BJ_global_buildings_raw.parquet  # needed in cluster_global_buildings
+
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
     countries: [BW]
@@ -68,11 +80,13 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/323571/files/bundle_tutorial_MA.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/429084/files/bundle_tutorial_data_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1cUei9vH3LzIYfqltaGTaRWCX6J24f1c0/view?usp=drive_link
     output:
     - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    - data/gadm/gadm41_MAR/gadm41_MAR.gpkg  # needed in build_shapes
+    - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
   # load tutorial hydrobasins bundle for Africa only
   bundle_tutorial_hydrobasins:
@@ -269,6 +283,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_northamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Ao_kuHssRaP1qLV-IEG91Hu7E04-nBZg/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -282,6 +297,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_europe.zip?download=1
       gdrive: https://drive.google.com/file/d/1c2-8pChoxv4CDJW01vkPpggBSWHs9Mqi/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -295,6 +311,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418864/files/bundle_cutouts_oceania.zip?download=1
       gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -319,7 +336,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/418866/files/bundle_cutouts_asia.zip?download=1
       gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -344,7 +361,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_southamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -357,7 +374,20 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_westasia.zip?download=1
       gdrive: https://drive.google.com/file/d/1as-fZS4Z70CfDf3bR4i9t9S5-5pBqURP/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # cutouts bundle of the cutouts folder for North Eurasia
+  # Size about 19.6 GB (zipped)
+  bundle_cutouts_northeurasia:
+    countries: ["LT", "LV", "EE", "BY", "RU", "KZ", "MN", "GE"]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/11EzaAaP4eOPzhfKCkm0zZ6HOv-JpgZFd/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]

@@ -8,7 +8,7 @@
 Introduction
 ##########################################
 
-A short video explaining the logic of PyPSA-Eur which is similar to PyPSA-Earth:
+A short video explaining the logic of PyPSA-EuR, which is built on principles similar to PyPSA-Earth but tailored for Europe:
 
 .. raw:: html
 
