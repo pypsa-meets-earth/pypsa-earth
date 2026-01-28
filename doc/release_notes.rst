@@ -21,6 +21,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
 
+* Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
+
 PyPSA-Earth 0.8.0
 =================
 
