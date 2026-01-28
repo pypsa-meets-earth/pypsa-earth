@@ -64,11 +64,11 @@ def get_cocode_from_coords(df):
     return df
 
 
-def create_steel_db():
+def create_steel_db(fn):
     # Global Steel Plant Tracker data set you requested from Global Energy Monitor from the link below:
 
     # The original data are available from https://globalenergymonitor.org/
-    url = "https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx"
+    url = fn
 
     df_steel = pd.read_excel(
         content_retrieve(url),
