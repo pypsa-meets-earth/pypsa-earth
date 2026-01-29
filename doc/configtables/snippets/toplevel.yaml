@@ -1,4 +1,4 @@
-version: 0.7.0
+version: 0.8.0
 tutorial: false
 
 logging:
@@ -19,6 +19,7 @@ enable:
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`

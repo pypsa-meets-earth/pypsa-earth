@@ -20,13 +20,24 @@ from pathlib import Path
 # Value: List of arguments to pass to snakemake
 DAGS = {
     "rulegraph": ["--rulegraph", "solve_all_networks"],
-    "rulegraph-sector": ["--rulegraph", "solve_sector_networks", "--configfile", "test/config.sector.yaml"],
-    "rulegraph-myopic": ["--rulegraph", "solve_sector_networks_myopic", "--configfile", "test/config.myopic.yaml"],
+    "rulegraph-sector": [
+        "--rulegraph",
+        "solve_sector_networks",
+        "--configfile",
+        "test/config.sector.yaml",
+    ],
+    "rulegraph-myopic": [
+        "--rulegraph",
+        "solve_sector_networks_myopic",
+        "--configfile",
+        "test/config.myopic.yaml",
+    ],
     # Add more DAGs here if needed, e.g.:
     # "dag_solve": ["--dag", "solve_network"],
 }
 
 DOC_IMG_DIR = Path("doc/img")
+
 
 def check_dependencies():
     """Check if snakemake and dot are available."""
@@ -41,8 +52,9 @@ def check_dependencies():
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("Error: 'dot' (graphviz) not found. Please install it.")
         return False
-    
+
     return True
+
 
 def generate_dags():
     """Generate the DAGs defined in DAGS."""
@@ -52,38 +64,35 @@ def generate_dags():
     for name, args in DAGS.items():
         output_file = DOC_IMG_DIR / f"gen_{name}.svg"
         print(f"Generating {output_file}...")
-        
+
         cmd_snakemake = ["snakemake", "-F", "-j", "1"] + args
-        
+
         try:
             p_snakemake = subprocess.Popen(
-                cmd_snakemake, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE,
-                text=True
+                cmd_snakemake, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
             # Read snakemake output
             snakemake_out, _ = p_snakemake.communicate()
-            
+
             # Filter for DOT content (lines from "digraph" onwards)
             if "digraph" not in snakemake_out:
                 print(f"Error generating {name}: No DOT graph found in output")
                 print("Output was:", snakemake_out)
                 continue
-                
-            dot_content = snakemake_out[snakemake_out.find("digraph"):]
-            
+
+            dot_content = snakemake_out[snakemake_out.find("digraph") :]
+
             cmd_dot = ["dot", "-Tsvg", "-o", str(output_file)]
             p_dot = subprocess.Popen(
                 cmd_dot,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
-            
+
             dot_out, dot_err = p_dot.communicate(input=dot_content)
-            
+
             if p_dot.returncode != 0:
                 print(f"Error generating {name}: dot failed")
                 print(dot_err)
@@ -96,7 +105,7 @@ def generate_dags():
                 print(f"Error: {output_file} was not created or is empty.")
                 if p_snakemake.returncode != 0:
                     print(f"Snakemake exit code: {p_snakemake.returncode}")
-                    # Capture stderr from snakemake? 
+                    # Capture stderr from snakemake?
                     # We can't easily because we closed stdout? No, stderr is separate.
                     # But we didn't read it.
                     # We can try to read it if we didn't use communicate on p_snakemake.
@@ -108,11 +117,13 @@ def generate_dags():
         except Exception as e:
             print(f"Failed to generate {name}: {e}")
 
+
 if __name__ == "__main__":
     if check_dependencies():
         generate_dags()
     else:
         sys.exit(1)
+
 
 def on_pre_build(config, **kwargs):
     """MkDocs hook to generate DAGs before the build."""

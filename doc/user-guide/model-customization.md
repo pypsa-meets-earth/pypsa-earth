@@ -17,4 +17,3 @@ The aim of this section is to guide through the main steps which are needed to b
 * [Running Models](customization/running-models.md)
 * [Validation](customization/validation.md)
 * [Copernicus Data](customization/copernicus-data.md)
-
