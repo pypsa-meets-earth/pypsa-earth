@@ -4,7 +4,6 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-
 Release Notes
 
 # Upcoming release
@@ -12,6 +11,8 @@ Release Notes
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+
+* Drop use of override_components that is no longer needed in newer PyPSA versions [PR #1699](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699)
 
 * Add an option to redefine countries into subregions in `cluster_networks` [PR #1542](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542)
 
@@ -30,6 +31,12 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds [PR #1592](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592)
 
 **Minor Changes and bug-fixing**
+
+* Bump powerplantmatching to 0.8.0 [PR #1702](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702)
+
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files [PR #1705](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705)
+
+* Update steel GEM data to version 2024 and use backup link for GEM pipelines [PR #1708](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708)
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) [PR #1581](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581)
 
