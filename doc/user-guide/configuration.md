@@ -260,16 +260,22 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 ## costs
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
+
+```yaml
+--8<-- "configtables/snippets/costs.yaml"
+```
+
 {{ read_csv('configtables/costs.csv') }}
 
-To change cost assumptions in more detail (i.e. other than `marginal_cost`), consider modifying cost assumptions directly in `data/costs.csv` as this is not yet supported through the config file.
-   You can also build multiple different cost databases. Make a renamed copy of `data/costs.csv` (e.g. `data/costs-optimistic.csv`) and set the variable `COSTS=data/costs-optimistic.csv` in the `Snakefile`.
+!!! note
+    To change cost assumptions in more detail (i.e. other than `marginal_cost`), consider modifying cost assumptions directly in `data/costs.csv` as this is not yet supported through the config file.
+    You can also build multiple different cost databases. Make a renamed copy of `data/costs.csv` (e.g. `data/costs-optimistic.csv`) and set the variable `COSTS=data/costs-optimistic.csv` in the `Snakefile`.
 
-   The `marginal costs` or in this context `variable costs` of operating the assets is important for realistic operational model outputs.
-   It can define the curtailment order of renewable generators, the dispatch order of generators, and the dispatch of storage units.
-   If not approapriate set, the model might output unrealistic results. Learn more about this in
-   [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
-   [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
+    The `marginal costs` or in this context `variable costs` of operating the assets is important for realistic operational model outputs.
+    It can define the curtailment order of renewable generators, the dispatch order of generators, and the dispatch of storage units.
+    If not appropriately set, the model might output unrealistic results. Learn more about this in
+    [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
+    [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
 
 ## monte_carlo
 
@@ -292,4 +298,9 @@ Specify linear power flow formulation and optimization solver settings.
 ## plotting
 
 Specifies plotting options.
+
+```yaml
+--8<-- "configtables/snippets/plotting.yaml"
+```
+
 {{ read_csv('configtables/plotting.csv') }}
