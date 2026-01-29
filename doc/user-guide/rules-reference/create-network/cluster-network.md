@@ -35,9 +35,9 @@ SPDX-License-Identifier: CC-BY-4.0
         3 -> 2;
     }
 
+## Script Documentation
 
-|
-
-!!! info "Source Code Reference"
-    For implementation details, see the `cluster_network` script in the `scripts/` directory.
-    :noindex:
+::: scripts.cluster_network
+    options:
+        show_root_heading: false
+        show_source: false

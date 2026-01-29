@@ -35,8 +35,9 @@ SPDX-License-Identifier: CC-BY-4.0
         2 -> 1;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `prepare_network` script in the `scripts/` directory.
-    :noindex:
+::: scripts.prepare_network
+    options:
+        show_root_heading: false
+        show_source: false

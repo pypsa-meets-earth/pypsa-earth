@@ -35,8 +35,9 @@ SPDX-License-Identifier: CC-BY-4.0
         13 -> 10;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `build_cutout` script in the `scripts/` directory.
-    :noindex:
+::: scripts.build_cutout
+    options:
+        show_root_heading: false
+        show_source: false

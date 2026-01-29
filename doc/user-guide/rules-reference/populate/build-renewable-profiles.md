@@ -47,8 +47,9 @@ SPDX-License-Identifier: CC-BY-4.0
         13 -> 9;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `build_renewable_profiles` script in the `scripts/` directory.
-    :noindex:
+::: scripts.build_renewable_profiles
+    options:
+        show_root_heading: false
+        show_source: false

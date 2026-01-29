@@ -32,8 +32,9 @@ SPDX-License-Identifier: CC-BY-4.0
         1 -> 0;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `solve_network` script in the `scripts/` directory.
-    :noindex:
+::: scripts.solve_network
+    options:
+        show_root_heading: false
+        show_source: false

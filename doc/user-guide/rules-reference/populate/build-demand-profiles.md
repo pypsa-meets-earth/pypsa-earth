@@ -5,7 +5,9 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Rule `build_demand_profiles`
 
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `build_demand_profiles` script in the `scripts/` directory.
-    :noindex:
+::: scripts.build_demand_profiles
+    options:
+        show_root_heading: false
+        show_source: false

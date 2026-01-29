@@ -35,8 +35,14 @@ SPDX-License-Identifier: CC-BY-4.0
         2 -> 0;
     }
 
-|
 
 !!! info "Source Code Reference"
     For implementation details, see the `solve_operations_network` script in the `scripts/` directory.
       show_source: false
+
+## Script Documentation
+
+::: scripts.solve_operations_network
+    options:
+        show_root_heading: false
+        show_source: false

@@ -35,8 +35,9 @@ SPDX-License-Identifier: CC-BY-4.0
         7 -> 4;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `build_powerplants` script in the `scripts/` directory.
-    :noindex:
+::: scripts.build_powerplants
+    options:
+        show_root_heading: false
+        show_source: false

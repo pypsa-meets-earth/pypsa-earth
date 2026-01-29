@@ -50,8 +50,9 @@ SPDX-License-Identifier: CC-BY-4.0
         10 -> 4;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `add_electricity` script in the `scripts/` directory.
-    :noindex:
+::: scripts.add_electricity
+    options:
+        show_root_heading: false
+        show_source: false

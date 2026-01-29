@@ -35,8 +35,9 @@ SPDX-License-Identifier: CC-BY-4.0
         3 -> 2;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `add_extra_components` script in the `scripts/` directory.
-    :noindex:
+::: scripts.add_extra_components
+    options:
+        show_root_heading: false
+        show_source: false

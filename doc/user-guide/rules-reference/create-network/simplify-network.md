@@ -38,8 +38,9 @@ SPDX-License-Identifier: CC-BY-4.0
         5 -> 3;
     }
 
-|
+## Script Documentation
 
-!!! info "Source Code Reference"
-    For implementation details, see the `simplify_network` script in the `scripts/` directory.
-    :noindex:
+::: scripts.simplify_network
+    options:
+        show_root_heading: false
+        show_source: false
