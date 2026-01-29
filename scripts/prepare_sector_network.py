@@ -1341,9 +1341,7 @@ def add_storage(n, costs, existing_battery_capacity=None):
     )
 
     # Use configured max_hours for battery duration
-    elec_config = snakemake.config["electricity"]
-    max_hours = elec_config["max_hours"]
-    battery_duration = max_hours["battery"]
+    battery_duration = snakemake.params.electricity["max_hours"]["battery"]
 
     e_nom_mins = []
     p_nom_mins_charger = []
