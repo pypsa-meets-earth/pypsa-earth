@@ -1343,16 +1343,6 @@ def add_storage(n, costs, existing_battery_capacity=None):
     # Use configured max_hours for battery duration
     battery_duration = snakemake.params.electricity["max_hours"]["battery"]
 
-    e_nom_mins = []
-    p_nom_mins_charger = []
-    p_nom_mins_discharger = []
-
-    for node in spatial.nodes:
-        p = existing_battery_capacity.get(node, 0)
-        e_nom_mins.append(p * battery_duration)
-        p_nom_mins_charger.append(p)
-        p_nom_mins_discharger.append(p)
-
     n.madd(
         "Store",
         spatial.nodes + " battery",
