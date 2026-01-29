@@ -1,8 +1,7 @@
-.. SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-
-.. SPDX-License-Identifier: CC-BY-4.0
-
-
+<!--
+SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+SPDX-License-Identifier: CC-BY-4.0
+-->
 
 # Rule `retrieve_databundle_light`
 
