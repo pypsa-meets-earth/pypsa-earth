@@ -1343,12 +1343,17 @@ def add_storage(n, costs, existing_battery_capacity=None):
     # Use configured max_hours for battery duration
     battery_duration = snakemake.params.electricity["max_hours"]["battery"]
 
+    # Per-node existing capacity (MW) aligned to spatial.nodes (AC buses)
+    p_nom_min = pd.Series(existing_battery_capacity).reindex(spatial.nodes).fillna(0.0)
+    e_nom_min = p_nom_min * battery_duration  # MWh
+
     n.madd(
         "Store",
         spatial.nodes + " battery",
         bus=spatial.nodes + " battery",
         e_cyclic=True,
         e_nom_extendable=True,
+        e_nom_min=e_nom_min.values,
         carrier="battery",
         capital_cost=costs.at["battery storage", "fixed"],
         lifetime=costs.at["battery storage", "lifetime"],
@@ -1363,6 +1368,7 @@ def add_storage(n, costs, existing_battery_capacity=None):
         efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
         capital_cost=costs.at["battery inverter", "fixed"],
         p_nom_extendable=True,
+        p_nom_min=p_nom_min.values,
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
@@ -1375,6 +1381,7 @@ def add_storage(n, costs, existing_battery_capacity=None):
         efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
         marginal_cost=options["marginal_cost_storage"],
         p_nom_extendable=True,
+        p_nom_min=p_nom_min.values,
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
@@ -3276,32 +3283,16 @@ if __name__ == "__main__":
 
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
+    # Fetch existing battery capacities directly from the input network (elec.nc)
+    existing_batt = fetch_existing_battery_capacity_from_elec(n)
+
     # remove H2 and battery technologies added in elec-only model
     remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
     add_hydrogen(n, costs)  # TODO add costs
 
-    # Fetch existing battery capacities directly from the input network (elec.nc)
-    existing_batt = fetch_existing_battery_capacity_from_elec(n)
-
     # Add storage using carried-over capacities
     add_storage(n, costs, existing_battery_capacity=existing_batt)
-
-    # Check resulting battery components in sector network
-    bat_links = n.links[n.links.carrier.str.contains("battery", case=False, na=False)]
-    bat_stores = n.stores[
-        n.stores.carrier.str.contains("battery", case=False, na=False)
-    ]
-
-    if not bat_links.empty or not bat_stores.empty:
-        logger.info(
-            f"Sector network includes {len(bat_stores)} battery stores "
-            f"({bat_stores.e_nom.sum() / 1e3:.2f} GWh) and "
-            f"{len(bat_links)} battery converter links "
-            f"({bat_links.p_nom.sum() / 1e3:.2f} GW total)."
-        )
-    else:
-        logger.info("No battery components found after sector integration.")
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)
