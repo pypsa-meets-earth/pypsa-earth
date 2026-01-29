@@ -5,6 +5,10 @@ This script runs snakemake --rulegraph and pipes the output to dot to generate S
 Generated images are saved to doc/img/gen_*.svg and are gitignored.
 """
 
+# SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: MIT
+
 import os
 import subprocess
 import sys

@@ -10,12 +10,6 @@ Utility scripts that are not part of the main Snakemake workflow. These include 
 
 ---
 
-## Monte Carlo
-
-::: scripts.monte_carlo
-
----
-
 ## Data Bundle CLI
 
 ::: scripts.non_workflow.databundle_cli

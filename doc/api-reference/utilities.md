@@ -28,4 +28,8 @@ Helper scripts, analysis tools, and utilities.
 
 ## Other Utilities
 
-::: scripts._helpers
+---
+
+## Monte Carlo
+
+::: scripts.monte_carlo
