@@ -38,7 +38,7 @@ Another great resource for cost assumptions is the [cost database from the Danis
 
 ## Modifying Cost Assumptions
 
-Some cost assumptions (e.g. marginal cost and capital cost) can be directly overwritten in the `config.yaml` (cf. Section `costs` in [configuration](configuration.md)).
+Some cost assumptions (e.g. marginal cost and capital cost) can be directly overwritten in the `config.yaml` (see the [costs section in configuration](configuration.md#costs)).
 
 To change cost assumptions in more detail, modify cost assumptions directly in `resources/costs.csv` as this is not yet supported through the config file.
 
