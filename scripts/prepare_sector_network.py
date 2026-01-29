@@ -22,7 +22,6 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
-    override_component_attrs,
     prepare_costs,
     safe_divide,
     sanitize_carriers,
@@ -2851,15 +2850,53 @@ def add_electricity_distribution_grid(n, costs):
     n.links.loc[mchp, "bus1"] += " low voltage"
 
     if options.get("solar_rooftop", False):
-        logger.info("Adding solar rooftop technology")
+        if isinstance(options["solar_rooftop"], dict):
+            enable_solar_rooftop = options["solar_rooftop"]["enable"]
+            solar_opts = options["solar_rooftop"]
+        else:
+            enable_solar_rooftop = True
+            solar_opts = {}
+
+    if enable_solar_rooftop:
         # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
         solar = n.generators.index[n.generators.carrier == "solar"]
         n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "fixed"]
-        pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
 
-        # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
-        # i.e. 2 kW/person (population data is in thousands of people) so we get MW
-        potential = 0.1 * 20 * pop_solar
+        if solar_opts.get("use_building_size"):
+            solar_logger = "building_size"
+
+            solar_rooftop_layout = pd.concat(
+                [
+                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    for fn in snakemake.input.keys()
+                    if "solar_rooftop_layout" in fn
+                ]
+            )
+            solar_rooftop_layout = solar_rooftop_layout["usefull_area"].rename(
+                index=lambda x: x + " solar"
+            )
+
+            potential = (
+                solar_opts.get("kW_per_m2", 0.1)
+                * 1e-3  # kW to MW
+                * solar_rooftop_layout
+            )
+
+        else:
+            solar_logger = "population distribution"
+            pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
+
+            # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
+            # i.e. 2 kW/person (population data is in thousands of people) so we get MW
+            potential = (
+                solar_opts.get("kW_per_m2", 0.1)
+                * solar_opts.get("m2_per_person", 20)
+                * pop_solar
+            )
+
+        logger.info(
+            f"Adding solar rooftop technology with potential based on {solar_logger}"
+        )
 
         n.madd(
             "Generator",
@@ -3084,9 +3121,8 @@ def remove_carrier_related_components(n, carriers_to_drop):
         n.mremove(c.name, names)
 
     # remove links connected to buses that were removed
-    links_to_remove = n.links.query(
-        "bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove"
-    ).index
+    bus_cols = [c for c in n.links.columns if c.startswith("bus")]
+    links_to_remove = n.links[n.links[bus_cols].isin(buses_to_remove).any(axis=1)].index
     logger.info(
         f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
     )
@@ -3116,8 +3152,7 @@ if __name__ == "__main__":
     enable = options["enable"]
 
     # Load input network
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
@@ -3129,7 +3164,7 @@ if __name__ == "__main__":
     # clustering of regions must be double checked.. refer to regions onshore
 
     # Add location. TODO: move it into pypsa-earth
-    n.buses.location = n.buses.index
+    n.buses.loc[:, "location"] = n.buses.index
 
     # Set carrier of AC loads
     existing_nodes = [node for node in acnodes if node in n.loads.index]
