@@ -95,7 +95,7 @@ from _helpers import (
     create_logger,
     progress_retrieve,
 )
-from google_drive_downloader import GoogleDriveDownloader as gdd
+from googledrivedownloader import download_file_from_google_drive
 from tqdm import tqdm
 
 logger = create_logger(__name__)
@@ -219,7 +219,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
         if os.path.exists(file_path):
             os.remove(file_path)
         # download file from google drive
-        gdd.download_file_from_google_drive(
+        download_file_from_google_drive(
             file_id=file_id,
             dest_path=file_path,
             showsize=not disable_progress,
