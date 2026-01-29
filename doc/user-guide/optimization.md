@@ -238,14 +238,14 @@ probability of occurring.
 
   $$
 
+\begin{aligned}
  \mathbb{E}[C(x)]
- = \tfrac13\big(10x\big)
-
-- \tfrac13\big(10x+16(5-x)\big)
-- \tfrac13\big(10x+16(20-x)\big)
- = \frac{400 - 2x}{3}
- = 133.33 - \tfrac{2}{3}x.
-
+ &= \tfrac13\big(10x\big) \\
+ &+ \tfrac13\big(10x+16(5-x)\big) \\
+ &+ \tfrac13\big(10x+16(20-x)\big) \\
+ &= \frac{400 - 2x}{3} \\
+ &= 133.33 - \tfrac{2}{3}x.
+\end{aligned}
   $$
 
 - **Case B — \(5 < x <= 20\)** - no shortage at y=5, only at y=20:
@@ -262,15 +262,14 @@ probability of occurring.
   **Expected cost**
 
   $$
-
+\begin{aligned}
  \mathbb{E}[C(x)]
- = \tfrac13\big(10x\big)
-
-- \tfrac13\big(10x\big)
-- \tfrac13\big(10x+16(20-x)\big)
- = \frac{320 + 14x}{3}
- = 106.67 + \tfrac{14}{3}x.
-
+ &= \tfrac13\big(10x\big) \\
+ &+ \tfrac13\big(10x\big) \\
+ &+ \tfrac13\big(10x+16(20-x)\big) \\
+ &= \frac{320 + 14x}{3} \\
+ &= 106.67 + \tfrac{14}{3}x.
+\end{aligned}
   $$
 
 **Minimizer.** Since $\mathbb{E}[C(x)]$ is decreasing on [0,5] and increasing on [5,20],
