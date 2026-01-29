@@ -8,7 +8,6 @@ SPDX-License-Identifier: CC-BY-4.0
 !!! note "Workflow Diagram"
     See the complete workflow in the repository.
 
-
     digraph snakemake_dag {
         graph [bgcolor=white,
             margin=0,
@@ -23,26 +22,18 @@ SPDX-License-Identifier: CC-BY-4.0
         edge [color=grey,
             penwidth=2
         ];
-        0	 [color="0.06 0.6 0.85",
+        0  [color="0.06 0.6 0.85",
             fillcolor=gray,
             label=solve_operations_network,
             style=filled];
-        1	 [color="0.00 0.6 0.85",
+        1  [color="0.00 0.6 0.85",
             label=cluster_network];
         1 -> 0;
-        2	 [color="0.19 0.6 0.85",
+        2  [color="0.19 0.6 0.85",
             label=solve_network];
         2 -> 0;
     }
 
-
 !!! info "Source Code Reference"
-    For implementation details, see the `solve_operations_network` script in the `scripts/` directory.
-      show_source: false
-
-## Script Documentation
-
-::: scripts.solve_operations_network
-    options:
-        show_root_heading: false
-        show_source: false
+    The `solve_operations_network` rule uses the same `solve_network.py` script but with different configuration.
+    For implementation details, see the [`solve_network` script](file:///Users/gbotemi/Documents/code/PYPSA/pypsa-earth/scripts/solve_network.py).
