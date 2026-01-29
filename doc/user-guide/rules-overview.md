@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Rules Overview
 
-This page provides an overview of the main rule categories in PyPSA-Earth. For detailed documentation of individual rules, see the [Rules Reference](rules-reference/download-and-filter/build-shapes.md) section.
+This page provides an overview of the main rule categories in PyPSA-Earth. For detailed documentation of individual rules, see the Rules Reference section.
 
 ## Rule Categories
 
