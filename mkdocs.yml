@@ -18,6 +18,7 @@ watch:
 
 hooks:
 - doc/gen_dags.py
+- doc/assets/hooks/cleanup.py
 
 # Navigation
 nav:
@@ -145,8 +146,6 @@ extra_javascript:
 - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 - assets/javascripts/mermaid-init.js
 
-hooks:
-- doc/assets/hooks/cleanup.py
 
 markdown_extensions:
   # Standard Extensions

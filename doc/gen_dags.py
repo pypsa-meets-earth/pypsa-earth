@@ -111,7 +111,7 @@ def generate_dags():
                     # We can try to read it if we didn't use communicate on p_snakemake.
                     # But p_snakemake stdout was piped. Stderr was PIPE.
                     # We should have read stderr in a thread or separate read.
-                    # For simplcity, assume if dot failed or file missing, something went wrong.
+                    # For simplicity, assume if dot failed or file missing, something went wrong.
                     print("Check console by running snakemake command manually.")
 
         except Exception as e:
