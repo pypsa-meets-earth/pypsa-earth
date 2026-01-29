@@ -9,7 +9,7 @@ SPDX-License-Identifier: CC-BY-4.0
 PyPSA-Earth imports the configuration options originally developed in [PyPSA-Eur](https://pypsa-eur.readthedocs.io/en/latest/index.html) and here reported and adapted.
 The options here described are collected in a `config.yaml` file located in the root directory.
 Users should copy the provided default configuration (`config.default.yaml`) and amend
-their own modifications and assumptions in the user-specific configuration file (`config.yaml`]);
+their own modifications and assumptions in the user-specific configuration file (`config.yaml`);
 confer installation instructions at [installation](../home/installation.md).
 
   Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
