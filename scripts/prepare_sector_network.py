@@ -22,7 +22,6 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
-    override_component_attrs,
     prepare_costs,
     safe_divide,
     sanitize_carriers,
@@ -3160,9 +3159,8 @@ def remove_carrier_related_components(n, carriers_to_drop):
         n.mremove(c.name, names)
 
     # remove links connected to buses that were removed
-    links_to_remove = n.links.query(
-        "bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove"
-    ).index
+    bus_cols = [c for c in n.links.columns if c.startswith("bus")]
+    links_to_remove = n.links[n.links[bus_cols].isin(buses_to_remove).any(axis=1)].index
     logger.info(
         f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
     )
@@ -3192,8 +3190,7 @@ if __name__ == "__main__":
     enable = options["enable"]
 
     # Load input network
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
@@ -3205,7 +3202,7 @@ if __name__ == "__main__":
     # clustering of regions must be double checked.. refer to regions onshore
 
     # Add location. TODO: move it into pypsa-earth
-    n.buses.location = n.buses.index
+    n.buses.loc[:, "location"] = n.buses.index
 
     # Set carrier of AC loads
     existing_nodes = [node for node in acnodes if node in n.loads.index]
