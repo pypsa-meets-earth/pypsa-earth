@@ -31,10 +31,7 @@ if __name__ == "__main__":
     cutout_config = snakemake.input.cutout
     cutout = atlite.Cutout(cutout_config).sel(time=time)
 
-    regions_gdf = (
-        gpd.read_file(snakemake.input.regions_onshore)
-        .set_index("name")
-    )
+    regions_gdf = gpd.read_file(snakemake.input.regions_onshore).set_index("name")
 
     clustered_regions = regions_gdf.geometry.buffer(0)
 
