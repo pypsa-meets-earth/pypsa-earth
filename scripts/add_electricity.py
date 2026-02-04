@@ -1073,28 +1073,38 @@ def attach_existing_batteries(n, costs, ppl):
 
     _add_missing_carriers_from_costs(n, costs, ["battery"])
 
-    # Remove duplicates and reset index like in attach_hydro
-    batteries = batteries.reset_index(drop=True).rename(index=lambda s: f"{s} battery")
+    # Aggregate batteries by (bus, carrier, grouping_year)
+    batteries_grouped = aggregate_ppl_by_bus_carrier_year(batteries)
+
+    # Add carriers with grouping year
+    for carrier_gy in batteries_grouped["carrier_gy"].unique():
+        if carrier_gy not in n.carriers.index:
+            n.add("Carrier", carrier_gy, co2_emissions=0.0)
 
     max_hours = snakemake.params.electricity["max_hours"]["battery"]
 
     n.madd(
         "StorageUnit",
-        batteries.index,
-        bus=batteries["bus"],
-        carrier="battery",
-        p_nom=batteries["p_nom"],
+        batteries_grouped.index,
+        bus=batteries_grouped["bus"],
+        carrier=batteries_grouped["carrier_gy"],
+        p_nom=batteries_grouped["p_nom"],
+        p_nom_extendable=False,
+        p_nom_min=batteries_grouped["p_nom"],
+        p_nom_max=batteries_grouped["p_nom"],
         capital_cost=costs.at["battery", "capital_cost"],
         max_hours=max_hours,
         efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
         efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
         cyclic_state_of_charge=True,
         marginal_cost=costs.at["battery", "marginal_cost"],
+        build_year=batteries_grouped["build_year"],
+        lifetime=batteries_grouped["lifetime"],
     )
 
     logger.info(
-        f"Added {len(batteries)} existing batteries with total capacity "
-        f"{batteries.p_nom.sum()/1e3:.2f} GW (max_hours={max_hours})."
+        f"Added {len(batteries_grouped)} existing batteries with total capacity "
+        f"{batteries_grouped.p_nom.sum()/1e3:.2f} GW (max_hours={max_hours})."
     )
 
 
@@ -1383,7 +1393,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("add_electricity", configfile="config.US.yaml")
+        snakemake = mock_snakemake("add_electricity")
 
     configure_logging(snakemake)
 
