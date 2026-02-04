@@ -1062,6 +1062,42 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
         )
 
 
+def attach_existing_batteries(n, costs, ppl):
+    """
+    Add existing battery storage units from powerplants.csv to the network.
+    """
+    batteries = ppl.query('carrier == "battery"')
+    if batteries.empty:
+        logger.info("No existing batteries found in powerplants.csv.")
+        return
+
+    _add_missing_carriers_from_costs(n, costs, ["battery"])
+
+    # Remove duplicates and reset index like in attach_hydro
+    batteries = batteries.reset_index(drop=True).rename(index=lambda s: f"{s} battery")
+
+    max_hours = snakemake.params.electricity["max_hours"]["battery"]
+
+    n.madd(
+        "StorageUnit",
+        batteries.index,
+        bus=batteries["bus"],
+        carrier="battery",
+        p_nom=batteries["p_nom"],
+        capital_cost=costs.at["battery", "capital_cost"],
+        max_hours=max_hours,
+        efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
+        efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
+        cyclic_state_of_charge=True,
+        marginal_cost=costs.at["battery", "marginal_cost"],
+    )
+
+    logger.info(
+        f"Added {len(batteries)} existing batteries with total capacity "
+        f"{batteries.p_nom.sum()/1e3:.2f} GW (max_hours={max_hours})."
+    )
+
+
 def attach_extendable_generators(
     n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
 ) -> None:
@@ -1347,7 +1383,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("add_electricity")
+        snakemake = mock_snakemake("add_electricity", configfile="config.US.yaml")
 
     configure_logging(snakemake)
 
@@ -1414,6 +1450,7 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(n, costs, ppl)
+    attach_existing_batteries(n, costs, ppl)
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
@@ -1436,4 +1473,26 @@ if __name__ == "__main__":
         sanitize_locations(n)
 
     n.meta = snakemake.config
+
+    # Log total installed capacities by carrier (GW)
+    gen_caps = (
+        n.generators.groupby(n.generators.carrier.str.strip().str.lower())
+        .p_nom.sum()
+        .div(1e3)
+        .rename("Generators [GW]")
+    )
+    sto_caps = (
+        n.storage_units.groupby(n.storage_units.carrier.str.strip().str.lower())
+        .p_nom.sum()
+        .div(1e3)
+        .rename("StorageUnits [GW]")
+    )
+
+    summary = pd.concat([gen_caps, sto_caps], axis=1).fillna(0).sort_index()
+
+    if not summary.empty:
+        logger.info("\nInstalled capacities summary\n%s", summary.round(2))
+    else:
+        logger.info("No generators or storage units found.")
+
     n.export_to_netcdf(snakemake.output[0])
