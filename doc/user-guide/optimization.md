@@ -155,8 +155,10 @@ capacity expansion known as *economic dispatch* (ED).
 
 ### Decision variables (operation)
 
-   p_{\text{PV}}(t) [MW], \qquad
-   p_{\text{gas}}(t) [MW] \qquad \forall t=1,\dots,T
+$$
+p_{\text{PV}}(t) \, [\text{MW}], \qquad
+p_{\text{gas}}(t) \, [\text{MW}] \qquad \forall t=1,\dots,T
+$$
 
 ### Optimization problem
 
@@ -236,16 +238,16 @@ probability of occurring.
   **Expected cost**
   Each scenario has the same probability, so its contribution is weighted 1/3:
 
-  $$
-  \begin{aligned}
-  \mathbb{E}[C(x)]
-  &= \tfrac13\big(10x\big) \\
-  &+ \tfrac13\big(10x+16(5-x)\big) \\
-  &+ \tfrac13\big(10x+16(20-x)\big) \\
-  &= \frac{400 - 2x}{3} \\
-  &= 133.33 - \tfrac{2}{3}x.
-  \end{aligned}
-  $$
+$$
+\begin{aligned}
+\mathbb{E}[C(x)]
+&= \tfrac13\big(10x\big) \\
+&+ \tfrac13\big(10x+16(5-x)\big) \\
+&+ \tfrac13\big(10x+16(20-x)\big) \\
+&= \frac{400 - 2x}{3} \\
+&= 133.33 - \tfrac{2}{3}x.
+\end{aligned}
+$$
 
 - **Case B — \(5 < x <= 20\)** - no shortage at y=5, only at y=20:
 
@@ -260,21 +262,23 @@ probability of occurring.
 
   **Expected cost**
 
-  $$
-  \begin{aligned}
-  \mathbb{E}[C(x)]
-  &= \tfrac13\big(10x\big) \\
-  &+ \tfrac13\big(10x\big) \\
-  &+ \tfrac13\big(10x+16(20-x)\big) \\
-  &= \frac{320 + 14x}{3} \\
-  &= 106.67 + \tfrac{14}{3}x.
-  \end{aligned}
-  $$
+$$
+\begin{aligned}
+\mathbb{E}[C(x)]
+&= \tfrac13\big(10x\big) \\
+&+ \tfrac13\big(10x\big) \\
+&+ \tfrac13\big(10x+16(20-x)\big) \\
+&= \frac{320 + 14x}{3} \\
+&= 106.67 + \tfrac{14}{3}x.
+\end{aligned}
+$$
 
 **Minimizer.** Since $\mathbb{E}[C(x)]$ is decreasing on [0,5] and increasing on [5,20],
 the minimum is attained at the boundary $x^\star=5$, with
 
-   \mathbb{E}[C(5)] = \frac{390}{3} = 130.
+$$
+\mathbb{E}[C(5)] = \frac{390}{3} = 130.
+$$
 
 ### Interpretation of the Example
 
