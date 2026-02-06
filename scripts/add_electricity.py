@@ -510,77 +510,44 @@ def attach_conventional_generators(
 
 def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     """
-    Apply country-level static nuclear p_max_pu limits based on
-    historical Energy Availability Factors (2022–2024).
-
-    Source: IAEA PRIS (aggregated 2022–2024).
+    Apply country-level nuclear p_max_pu as time-dependent constraint
+    (constant over time), based on IAEA 2022–2024 EAF.
     """
-
-    # --- sanity checks on input file ---
-    required_cols = {"country", "factor"}
-    missing = required_cols - set(nuclear_p_max_pu.columns)
-    if missing:
-        raise ValueError(
-            f"nuclear_p_max_pu file missing required columns: {missing}"
-        )
-
     factors = (
         nuclear_p_max_pu
         .set_index("country")["factor"]
-        .astype(float)
         .div(100.0)
     )
 
-    # --- select nuclear generators ---
-    mask = n.generators.carrier == "nuclear"
-    if not mask.any():
-        logger.info("No nuclear generators found – skipping nuclear p_max_pu limits.")
+    gens = n.generators.query("carrier == 'nuclear'")
+    if gens.empty:
+        logger.info("No nuclear generators found – skipping nuclear p_max_pu.")
         return
 
-    gen_idx = n.generators.index[mask]
-    buses = n.generators.loc[gen_idx, "bus"]
-    countries = n.buses.loc[buses, "country"]
+    snapshots = n.snapshots
 
-    # --- debugging: countries in model vs file ---
-    model_countries = set(countries.unique())
-    file_countries = set(factors.index)
+    for name, gen in gens.iterrows():
+        country = n.buses.at[gen.bus, "country"]
 
-    missing_in_file = model_countries - file_countries
-    unused_in_file = file_countries - model_countries
-
-    if missing_in_file:
-        logger.warning(
-            "Nuclear generators found in countries without p_max_pu data: %s. "
-            "No nuclear availability limit applied for these countries.",
-            ", ".join(sorted(missing_in_file)),
-        )
-
-    if unused_in_file:
-        logger.info(
-            "Nuclear p_max_pu data provided for countries not present in the model: %s.",
-            ", ".join(sorted(unused_in_file)),
-        )
-
-    # --- apply limits generator by generator ---
-    applied = 0
-    for gen, country in countries.items():
         if country not in factors:
+            logger.warning(
+                "No nuclear p_max_pu available for country %s (generator %s).",
+                country, name,
+            )
             continue
 
-        value = factors.at[country]
-        n.generators.at[gen, "p_max_pu"] = value
-        applied += 1
+        value = factors[country]
+
+        n.generators_t.p_max_pu.loc[:, name] = value
 
         logger.info(
             "Applied nuclear p_max_pu = %.3f to generator '%s' (country=%s, source=IAEA 2022–2024).",
-            value,
-            gen,
-            country,
+            value, name, country,
         )
 
     logger.info(
         "Applied nuclear p_max_pu limits to %d nuclear generators (source: IAEA 2022–2024).",
-        applied,
+        len(gens),
     )
 
 
