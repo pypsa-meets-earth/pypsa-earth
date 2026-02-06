@@ -540,7 +540,15 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     valid = values.notna()
 
     # Apply as time-dependent constraint
-    n.generators_t.p_max_pu.loc[:, values.index[valid]] = values[valid].values
+    cols = values.index[valid]
+
+    n.generators_t.p_max_pu.loc[:, cols] = (
+        pd.DataFrame(
+            np.tile(values[valid].values, (len(n.snapshots), 1)),
+            index=n.snapshots,
+            columns=cols,
+        )
+    )
 
     logger.info(
         "Applied nuclear p_max_pu limits to %d nuclear generators (source: IAEA 2022–2024).",
