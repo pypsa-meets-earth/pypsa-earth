@@ -58,7 +58,7 @@ def check_dependencies():
 
 def generate_dags(force=False):
     """Generate the DAGs defined in DAGS.
-    
+
     Args:
         force: If True, regenerate even if SVGs already exist.
     """
@@ -67,11 +67,11 @@ def generate_dags(force=False):
 
     for name, args in DAGS.items():
         output_file = DOC_IMG_DIR / f"gen_{name}.svg"
-        
+
         # Skip if file already exists and is non-empty (unless forced)
         if not force and output_file.exists() and output_file.stat().st_size > 0:
             continue
-        
+
         print(f"Generating {output_file}...")
 
         cmd_snakemake = ["snakemake", "-F", "-j", "1"] + args
