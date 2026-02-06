@@ -510,44 +510,41 @@ def attach_conventional_generators(
 
 def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     """
-    Apply country-level nuclear p_max_pu as time-dependent constraint
-    (constant over time), based on IAEA 2022–2024 EAF.
+    Apply country-level static nuclear p_max_pu limits
+    based on historical Energy Availability Factor (IAEA, 2022–2024).
     """
+
     factors = (
         nuclear_p_max_pu
         .set_index("country")["factor"]
         .div(100.0)
     )
 
-    gens = n.generators.query("carrier == 'nuclear'")
-    if gens.empty:
-        logger.info("No nuclear generators found – skipping nuclear p_max_pu.")
+    mask = n.generators.carrier == "nuclear"
+    if not mask.any():
+        logger.info("No nuclear generators found: skipping nuclear p_max_pu limits.")
         return
 
-    snapshots = n.snapshots
+    buses = n.generators.loc[mask, "bus"]
+    countries = n.buses.loc[buses, "country"]
+    values = countries.map(factors)
 
-    for name, gen in gens.iterrows():
-        country = n.buses.at[gen.bus, "country"]
-
-        if country not in factors:
-            logger.warning(
-                "No nuclear p_max_pu available for country %s (generator %s).",
-                country, name,
-            )
-            continue
-
-        value = factors[country]
-
-        n.generators_t.p_max_pu.loc[:, name] = value
-
-        logger.info(
-            "Applied nuclear p_max_pu = %.3f to generator '%s' (country=%s, source=IAEA 2022–2024).",
-            value, name, country,
+    # DEBUG: countries in CSV but not in model
+    unused = factors.index.difference(countries.unique())
+    if len(unused) > 0:
+        logger.debug(
+            "Nuclear p_max_pu data provided for countries not present in the model: %s",
+            ", ".join(sorted(unused)),
         )
+
+    valid = values.notna()
+
+    # Apply as time-dependent constraint
+    n.generators_t.p_max_pu.loc[:, values.index[valid]] = values[valid].values
 
     logger.info(
         "Applied nuclear p_max_pu limits to %d nuclear generators (source: IAEA 2022–2024).",
-        len(gens),
+        valid.sum(),
     )
 
 
