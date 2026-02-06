@@ -709,7 +709,10 @@ def groupby_bus_carrier(
 
     # Group storage units
     storage_units, storage_units_pnl = aggregateoneport(
-        network, busmap, component="StorageUnit"
+        network,
+        busmap,
+        component="StorageUnit",
+        custom_strategies=aggregation_strategies["one_ports"]["StorageUnit"],
     )
 
     # Replace storage units in network

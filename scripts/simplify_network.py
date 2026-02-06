@@ -309,6 +309,7 @@ def _aggregate_and_move_components(
     )
 
     generator_strategies = aggregation_strategies["generators"]
+    one_port_strategies = aggregation_strategies["one_ports"]
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
     generators, generators_pnl = aggregateoneport(
@@ -322,7 +323,13 @@ def _aggregate_and_move_components(
     replace_components(n, "Generator", generators, generators_pnl)
 
     for one_port in aggregate_one_ports:
-        df, pnl = aggregateoneport(n, busmap, component=one_port)
+        one_port_strategy = one_port_strategies.get(one_port, dict())
+        df, pnl = aggregateoneport(
+            n,
+            busmap,
+            component=one_port,
+            custom_strategies=one_port_strategy,
+        )
         replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
