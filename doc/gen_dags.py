@@ -7,7 +7,7 @@ Generated images are saved to doc/img/gen_*.svg and are gitignored.
 
 # SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 import os
 import subprocess
