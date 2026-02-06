@@ -4,7 +4,7 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-The structure
+# The structure
 
 The main workflow structure built within PyPSA-Earth is as follows:
 
