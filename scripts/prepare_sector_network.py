@@ -46,6 +46,65 @@ def add_lifetime_wind_solar(n, costs):
         n.generators.loc[gen_i, "lifetime"] = costs.at[carrier, "lifetime"]
 
 
+def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
+    """
+    Apply country-level nuclear availability factors (IAEA 2022–2024)
+    to nuclear LINKS as time-dependent p_max_pu.
+    """
+
+    factors = (
+        nuclear_p_max_pu
+        .set_index("country")["factor"]
+        .div(100.0)
+    )
+
+    mask = n.links.carrier == "nuclear"
+    if not mask.any():
+        logger.info("No nuclear links found – skipping nuclear p_max_pu.")
+        return
+
+    # country inferred from electricity bus (bus1)
+    buses = n.links.loc[mask, "bus1"]
+    countries = n.buses.loc[buses, "country"]
+    values = countries.map(factors)
+
+    # warn if CSV contains unused countries
+    unused = factors.index.difference(countries.unique())
+    if len(unused) > 0:
+        logger.info(
+            "Nuclear p_max_pu data provided for countries not present in the model: %s",
+            ", ".join(sorted(unused)),
+        )
+
+    valid = values.notna()
+    if not valid.any():
+        logger.warning("No nuclear links matched nuclear_p_max_pu table.")
+        return
+
+    # initialize timeseries if missing
+    if "p_max_pu" not in n.links_t:
+        n.links_t["p_max_pu"] = pd.DataFrame(
+            1.0,
+            index=n.snapshots,
+            columns=n.links.index,
+        )
+
+    # apply constraint
+    n.links_t.p_max_pu.loc[:, values.index[valid]] = values[valid].values
+
+    # optional debug (one per country, not per snapshot)
+    for link, v in values[valid].items():
+        ct = n.buses.at[n.links.at[link, "bus1"], "country"]
+        logger.debug(
+            f"Applied nuclear p_max_pu = {v:.3f} to link '{link}' (country={ct}, source=IAEA 2022–2024)."
+        )
+
+    logger.info(
+        "Applied nuclear p_max_pu limits to %d nuclear links (source: IAEA 2022–2024).",
+        valid.sum(),
+    )
+
+
 def add_carrier_buses(n, carrier, nodes=None):
     """
     Add buses to connect e.g. coal, nuclear and oil plants.
@@ -3285,6 +3344,11 @@ if __name__ == "__main__":
 
     # remove H2 and battery technologies added in elec-only model
     remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
+
+    apply_nuclear_p_max_pu(
+        n,
+        pd.read_csv(snakemake.input.nuclear_p_max_pu)
+    )
 
     add_hydrogen(n, costs)  # TODO add costs
 
