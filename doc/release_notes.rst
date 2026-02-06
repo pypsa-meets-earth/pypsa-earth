@@ -17,7 +17,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Bump powerplantmatching to 0.8.0 `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+* Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
 
 PyPSA-Earth 0.8.0
 =================
@@ -27,6 +31,8 @@ PyPSA-Earth 0.8.0
 * Generalize usage of SEG option  `PR #1535 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535>`__
 
 * Added a hot-fix to handle UNSD data downtime causing CI to fail `PR #1653 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653>`__
+
+* Account for existing batteries in powerplants file and improve logging on installed capacity `PR #1623 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1623>`__
 
 * Add an option to estimate solar-rooftop potentials using `GlobalMLBuildingFootprints <https://github.com/microsoft/GlobalMLBuildingFootprints>`_, a simplified data is provided for tutorials, `PR #1629 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1629>`__
 
