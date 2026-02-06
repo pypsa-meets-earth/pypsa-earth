@@ -14,6 +14,28 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Drop use of override_components that is no longer needed in newer PyPSA versions [PR #1699](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699)
 
+**Minor Changes and bug-fixing**
+
+* Bump powerplantmatching to 0.8.0 [PR #1702](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702)
+
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files [PR #1705](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705)
+
+* Update steel GEM data to version 2024 and use backup link for GEM pipelines [PR #1708](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708)
+
+# PyPSA-Earth 0.8.0
+
+**New Features and Major Changes**
+
+* Generalize usage of SEG option [PR #1535](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1535)
+
+* Added a hot-fix to handle UNSD data downtime causing CI to fail [PR #1653](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1653)
+
+* Account for existing batteries in powerplants file and improve logging on installed capacity [PR #1623](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1623)
+
+* Add an option to estimate solar-rooftop potentials using [GlobalMLBuildingFootprints](https://github.com/microsoft/GlobalMLBuildingFootprints), a simplified data is provided for tutorials [PR #1629](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1629)
+
+* Align PyPSA-Earth costs with the reference units used in `technology-data`, avoiding discrepancies when combining technologies with different original currency years [PR #1604](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1604)
+
 * Add an option to redefine countries into subregions in `cluster_networks` [PR #1542](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1542)
 
 * Added Section covering Optimization for Energy Systems Models [PR #1558](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1558)
@@ -30,17 +52,19 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add ll wildcard option 'l{factor}' to enable line-wise transmission expansion, including optional lower and upper bounds [PR #1592](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1592)
 
+* Update `build_natura_raster.py` to function regardless of RAM size [PR #1545](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1545)
+
+* Enable config options to customize hydrogen and renewable carriers for temporal matching [PR #1489](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1489)
+
+* Revise CCL constraint and enhance it with an option to include existing capacities in the calculation [PR #1610](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610)
+
 **Minor Changes and bug-fixing**
 
-* Bump powerplantmatching to 0.8.0 [PR #1702](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702)
-
-* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files [PR #1705](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705)
-
-* Update steel GEM data to version 2024 and use backup link for GEM pipelines [PR #1708](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708)
+* Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` [PR #1630](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630)
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) [PR #1581](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581)
 
-* The configuration setting for ``focus_weights` has been moved from [focus_weights:` to `cluster_options: focus_weights:``. Backwards compatibility to old config files is maintained `PR #1565](<https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565>)
+* The configuration setting for `focus_weights` has been moved from `focus_weights:` to `cluster_options: focus_weights:`. Backwards compatibility to old config files is maintained [PR #1565](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1565)
 
 * Disable distribute_cluster only for one subnetwork and country [PR #1539](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1539)
 
@@ -54,15 +78,29 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix and reactivate the option for a custom busmap in `cluster_network.py` [PR #1537](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1537)
 
+* Create a section in the documentation to include information about custom data in the model [PR #1571](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1571)
+
 * Bug-fixing override co2opt in add_co2_budget [PR #1597](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1597)
 
 * Fix shipping and aviation implementation in multi-country models [PR #1582](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582)
 
+* Add geojson output to build_osm_network [PR #1611](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611)
+
 * Add missing colors for energy carriers in the sector-coupled model [PR #1625](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625)
+
+* Adjust default solver parameters for using HiGHS to improve convergence [PR #1650](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1650)
 
 * Fix Labeling of technologies [PR #1644](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1644)
 
 * fix workflow when augmmented_line_connection is false for Tunisia [PR #1677](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1677)
+
+* Copyedit + fixes of documentation, PR template [PR #1675](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1675), [PR #1674](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1674), and [PR #1673](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1673)
+
+* Update credits and cross-referals in the documentation [PR #1614](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1614)
+
+* Add configtable for some sector parameters [PR #1494](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1494)
+
+* Included a configuration option to quantitatively set the tolerance levels for simplifying GADM shapes [PR #1147](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1147)
 
 # PyPSA-Earth 0.7.0
 
