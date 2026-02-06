@@ -508,6 +508,35 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
+def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
+    """
+    Apply country-level static nuclear p_max_pu limits
+    based on historical Energy Availability Factor (2022–2024).
+    """
+    factors = (
+        nuclear_p_max_pu
+        .set_index("country")["factor"]
+        .div(100.0)
+    )
+
+    mask = n.generators.carrier == "nuclear"
+    if not mask.any():
+        logger.info("No nuclear generators found – skipping nuclear p_max_pu limits.")
+        return
+
+    buses = n.generators.loc[mask, "bus"]
+    countries = n.buses.loc[buses, "country"]
+    values = countries.map(factors)
+
+    valid = values.notna()
+    n.generators.loc[values.index[valid], "p_max_pu"] = values[valid].values
+
+    logger.info(
+        "Applied nuclear p_max_pu limits to %d generators (country-specific).",
+        valid.sum(),
+    )
+
+
 def attach_hydro(n, costs, ppl):
     if "hydro" not in snakemake.params.renewable:
         return
@@ -931,6 +960,10 @@ if __name__ == "__main__":
         renewable_carriers,
         snakemake.params.conventional,
         conventional_inputs,
+    )
+    apply_nuclear_p_max_pu(
+        n,
+        pd.read_csv(snakemake.input.nuclear_p_max_pu),
     )
     attach_wind_and_solar(
         n,
