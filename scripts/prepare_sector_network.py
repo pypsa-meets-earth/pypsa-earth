@@ -2235,7 +2235,7 @@ def add_heat(
             suffix=f" {name} heat",
             bus=h_nodes[name] + f" {name} heat",
             carrier=name + " heat",
-            p_set=heat_load,
+            p_set=heat_load.loc[n.snapshots],
         )
 
         ## Add heat pumps
