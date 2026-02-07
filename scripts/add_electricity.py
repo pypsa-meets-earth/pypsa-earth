@@ -980,10 +980,6 @@ if __name__ == "__main__":
         snakemake.params.conventional,
         conventional_inputs,
     )
-    apply_nuclear_p_max_pu(
-        n,
-        pd.read_csv(snakemake.input.nuclear_p_max_pu),
-    )
     attach_wind_and_solar(
         n,
         costs,
@@ -995,6 +991,10 @@ if __name__ == "__main__":
     )
     attach_hydro(n, costs, ppl)
     attach_existing_batteries(n, costs, ppl)
+    apply_nuclear_p_max_pu(
+        n,
+        pd.read_csv(snakemake.input.nuclear_p_max_pu),
+    )
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
