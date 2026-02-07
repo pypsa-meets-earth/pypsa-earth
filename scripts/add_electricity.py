@@ -529,26 +529,11 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     countries = n.buses.loc[buses, "country"]
     values = countries.map(factors)
 
-    # DEBUG: countries in CSV but not in model
-    unused = factors.index.difference(countries.unique())
-    if len(unused) > 0:
-        logger.debug(
-            "Nuclear p_max_pu data provided for countries not present in the model: %s",
-            ", ".join(sorted(unused)),
-        )
-
     valid = values.notna()
 
-    # Apply as time-dependent constraint
-    cols = values.index[valid]
-
-    n.generators_t.p_max_pu.loc[:, cols] = (
-        pd.DataFrame(
-            np.tile(values[valid].values, (len(n.snapshots), 1)),
-            index=n.snapshots,
-            columns=cols,
-        )
-    )
+    # Apply per-column to avoid Pandas duplicate-column failure
+    for gen, v in values[valid].items():
+        n.generators_t.p_max_pu.loc[:, gen] = v
 
     logger.info(
         "Applied nuclear p_max_pu limits to %d nuclear generators (source: IAEA 2022–2024).",
