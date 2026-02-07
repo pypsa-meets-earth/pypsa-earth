@@ -2257,7 +2257,7 @@ def add_heat(
             bus0=h_nodes[name],
             bus1=h_nodes[name] + f" {name} heat",
             carrier=f"{name} {heat_pump_type} heat pump",
-            efficiency=efficiency,
+            efficiency=efficiency.loc[n.snapshots],
             capital_cost=costs.at[costs_name, "efficiency"]
             * costs.at[costs_name, "fixed"],
             p_nom_extendable=True,
