@@ -520,16 +520,17 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
         .div(100.0)
     )
 
-    mask = n.generators.carrier == "nuclear"
-    if not mask.any():
+    gens = n.generators.query("carrier == 'nuclear'")
+    if gens.empty:
         logger.info("No nuclear generators found: skipping nuclear p_max_pu limits.")
         return
 
-    buses = n.generators.loc[mask, "bus"]
-    countries = n.buses.loc[buses, "country"]
+    # Map generator -> bus -> country -> factor
+    countries = gens.bus.map(n.buses.country)
     values = countries.map(factors)
 
-    unused = factors.index.difference(countries.unique())
+    # Debug: countries in CSV but not in model
+    unused = factors.index.difference(countries.dropna().unique())
     if len(unused) > 0:
         logger.debug(
             "Nuclear p_max_pu data provided for countries not present in the model: %s",
@@ -538,11 +539,10 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
 
     valid = values.notna()
 
-    # ✅ THIS IS THE KEY LINE
-    n.generators.loc[values.index[valid], "p_max_pu"] = values[valid].values
+    n.generators.loc[values.index[valid], "p_max_pu"] = values[valid]
 
     logger.info(
-        "Applied nuclear p_max_pu (static) to %d nuclear generators "
+        "Applied static nuclear p_max_pu to %d generators "
         "(source: IAEA 2022–2024).",
         valid.sum(),
     )
