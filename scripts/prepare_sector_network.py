@@ -1980,7 +1980,7 @@ def add_land_transport(
             suffix=" land transport EV",
             bus=spatial.nodes + " EV battery",
             carrier="land transport EV",
-            p_set=p_set,
+            p_set=p_set.loc[n.snapshots],
         )
 
         p_nom = (
@@ -1997,7 +1997,7 @@ def add_land_transport(
             bus1=spatial.nodes + " EV battery",
             p_nom=p_nom,
             carrier="BEV charger",
-            p_max_pu=avail_profile[spatial.nodes],
+            p_max_pu=avail_profile[spatial.nodes].loc[n.snapshots],
             efficiency=options.get("bev_charge_efficiency", 0.9),
             # These were set non-zero to find LU infeasibility when availability = 0.25
             # p_nom_extendable=True,
@@ -2014,7 +2014,7 @@ def add_land_transport(
             bus0=spatial.nodes + " EV battery",
             p_nom=p_nom,
             carrier="V2G",
-            p_max_pu=avail_profile[spatial.nodes],
+            p_max_pu=avail_profile[spatial.nodes].loc[n.snapshots],
             efficiency=options.get("bev_charge_efficiency", 0.9),
         )
 
@@ -2035,7 +2035,7 @@ def add_land_transport(
             e_cyclic=True,
             e_nom=e_nom,
             e_max_pu=1,
-            e_min_pu=dsm_profile[spatial.nodes],
+            e_min_pu=dsm_profile[spatial.nodes].loc[n.snapshots],
         )
 
     if fuel_cell_share > 0:
@@ -2051,7 +2051,7 @@ def add_land_transport(
                 carrier="land transport fuel cell",
                 p_set=fuel_cell_share
                 / options["transport_fuel_cell_efficiency"]
-                * transport[spatial.nodes],
+                * transport[spatial.nodes].loc[n.snapshots],
             )
 
     if ice_share > 0:
@@ -2067,14 +2067,15 @@ def add_land_transport(
             suffix=" land transport oil",
             bus=spatial.oil.nodes,
             carrier="land transport oil",
-            p_set=ice_share / ice_efficiency * transport[spatial.nodes],
+            p_set=ice_share
+            / ice_efficiency
+            * transport[spatial.nodes].loc[n.snapshots],
         )
 
         co2 = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].sum().sum()
-            / 8760
+            * transport[spatial.nodes].mean().sum()
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -2215,15 +2216,17 @@ def add_heat(
             if sector in name:
                 heat_load = (
                     heat_demand[[sector + " water", sector + " space"]]
-                    .groupby(level=1, axis=1)
-                    .sum()[h_nodes[name]]
+                    .T.groupby(level=1)
+                    .sum()
+                    .T[h_nodes[name]]
                     .multiply(factor)
                 )
 
         if name == "urban central":
             heat_load = (
-                heat_demand.groupby(level=1, axis=1)
-                .sum()[h_nodes[name]]
+                heat_demand.T.groupby(level=1)
+                .sum()
+                .T[h_nodes[name]]
                 .multiply(
                     factor * (1 + options["district_heating"]["district_heating_loss"])
                 )
@@ -2362,7 +2365,7 @@ def add_heat(
                 carrier=name + " solar thermal",
                 p_nom_extendable=True,
                 capital_cost=costs.at[name_type + " solar thermal", "fixed"],
-                p_max_pu=solar_thermal[h_nodes[name]],
+                p_max_pu=solar_thermal[h_nodes[name]].loc[n.snapshots],
                 lifetime=costs.at[name_type + " solar thermal", "lifetime"],
             )
 
@@ -3175,11 +3178,11 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             ll="c1",
-            opts="Co2L-4H",
+            opts="Co2L-24H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
+            demand="DF",
         )
 
     # Load population layout
@@ -3190,7 +3193,9 @@ if __name__ == "__main__":
     enable = options["enable"]
 
     # Load input network
-    n = pypsa.Network(snakemake.input.network)
+    n = pypsa.Network(
+        "/home/davide/worldbank/pypsa-earth/results/myopic/prenetworks/elec_s_4_ec_lc1_Co2L-24H_144h_2030_0.071_DF_presec.nc"
+    )  # snakemake.input.network)
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
