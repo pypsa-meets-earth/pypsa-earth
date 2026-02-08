@@ -1725,7 +1725,7 @@ def add_industry(
             suffix=" H2 for industry",
             bus=spatial.nodes + " H2",
             carrier="H2 for industry",
-            p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
+            p_set=industrial_demand.loc[spatial.nodes, "hydrogen"] / 8760,
         )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -1735,7 +1735,7 @@ def add_industry(
         suffix=" naphtha for industry",
         bus=spatial.oil.nodes,
         carrier="naphtha for industry",
-        p_set=industrial_demand["oil"] / 8760,
+        p_set=industrial_demand.loc[spatial.nodes, "oil"] / 8760,
     )
 
     #     #NB: CO2 gets released again to atmosphere when plastics decay or kerosene is burned
@@ -1828,7 +1828,7 @@ def add_industry(
         suffix=" industry electricity",
         bus=spatial.nodes,
         carrier="industry electricity",
-        p_set=industrial_elec,
+        p_set=industrial_elec.loc[spatial.nodes],
     )
 
     n.add("Bus", "process emissions", location="Earth", carrier="process emissions")
@@ -1842,8 +1842,8 @@ def add_industry(
         bus="process emissions",
         carrier="process emissions",
         p_set=-(
-            #    industrial_demand["process emission from feedstock"]+
-            industrial_demand["process emissions"]
+            #    industrial_demand.loc[spatial.nodes, "process emission from feedstock"]+
+            industrial_demand.loc[spatial.nodes, "process emissions"]
         )
         / 8760,
     )
