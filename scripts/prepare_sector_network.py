@@ -3178,11 +3178,11 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             ll="c1",
-            opts="Co2L-24H",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="DF",
+            demand="AB",
         )
 
     # Load population layout
@@ -3193,9 +3193,7 @@ if __name__ == "__main__":
     enable = options["enable"]
 
     # Load input network
-    n = pypsa.Network(
-        "/home/davide/worldbank/pypsa-earth/results/myopic/prenetworks/elec_s_4_ec_lc1_Co2L-24H_144h_2030_0.071_DF_presec.nc"
-    )  # snakemake.input.network)
+    n = pypsa.Network(snakemake.input.network)
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
