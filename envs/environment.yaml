@@ -25,7 +25,7 @@ dependencies:
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
-- pyscipopt>=5
+- pyscipopt
 - lxml
 - numpy<2
 - pandas<3
@@ -54,6 +54,8 @@ dependencies:
 
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
+
+- linopy=0.5.5  # latest linopy 0.6 has issues with scip in quadratic problems that prevents usage
 
 # Jupyter notebook requirement
 - ipykernel
