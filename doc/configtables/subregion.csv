@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 enable,,,
 -- simplify_network,bool,"{True, False}","Enables subregion definitions in ``simplify_network``, allowing network simplification functions to drop or merge nodes based on subregions rather than just countries."
 -- cluster_network,bool,"{True, False}","Enables subregion definitions in ``cluster_network``, allowing ``focus_weights`` to set clustering focus based on subregion names."

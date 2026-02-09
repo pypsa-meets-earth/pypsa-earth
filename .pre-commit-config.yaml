@@ -79,7 +79,7 @@ repos:
   rev: v2.15.0
   hooks:
   - id: pretty-format-yaml
-    exclude: pinned\.yaml$
+    exclude: (pinned\.yaml$|configtables/snippets/)
     args: [--autofix, --indent, '2', --preserve-quotes]
 
 # Use yamllint to check for valid YAML files and list syntax errors
@@ -87,7 +87,7 @@ repos:
   rev: v1.37.1
   hooks:
   - id: yamllint
-    exclude: pinned\.yaml$
+    exclude: (pinned\.yaml$|configtables/snippets/)
     args: [--format, parsable, -c=.yamllint]
 
 # Format Snakemake rule / workflow files
@@ -101,3 +101,13 @@ repos:
   rev: v6.2.0
   hooks:
   - id: reuse
+
+# Auto-update config documentation snippets when config.default.yaml changes
+- repo: local
+  hooks:
+  - id: extract-config-snippets
+    name: Extract config snippets for documentation
+    entry: python3 doc/assets/scripts/extract_config_snippets.py
+    language: system
+    files: ^config\.default\.yaml$
+    pass_filenames: false

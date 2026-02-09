@@ -1,0 +1,49 @@
+costs:
+  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
+  technology_data_version: v0.13.2
+  discountrate: [0.071] #, 0.086, 0.111]
+  country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
+  # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
+  cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
+  financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
+  # Management of output currencies and exchange rates
+  output_currency: "EUR" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
+  default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  future_exchange_rate_strategy: "reference" # reference uses the exchange rate from `reference_year` for all conversions, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
+  rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    CO2 intensity: 0
+    discount rate: 0.07
+  marginal_cost: # EUR/MWh
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    battery: 0.
+    battery inverter: 0.
+  emission_prices: # in currency per tonne emission, only used with the option Ep
+    co2: 0.
+  # investment: # EUR/MW
+  #   CCGT: 830000
+  # FOM: # %/year
+  #   CCGT: 3.35
+  # VOM: # EUR/MWh
+  #   CCGT: 4.2
+  # fuel: # EUR/MWh
+  #   gas: 10.1
+  # lifetime: # years
+  #   CCGT: 25.0
+  # efficiency: # per unit
+  #   CCGT: 0.58
+  lines:
+    length_factor: 1.25 #to estimate offwind connection costs

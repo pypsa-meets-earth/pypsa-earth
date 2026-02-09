@@ -1,0 +1,13 @@
+build_shape_options:
+  gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
+  simplify_gadm: true # When true, shape polygons are simplified else no
+  minarea: 0.01 # Minimum area of polygons to be retained in GADM shapes after simplification, in square degrees. Polygons with area smaller than this value will be removed
+  update_file: false # When true, all the input files are downloaded again and replace the existing files
+  out_logging: true # When true, logging is printed to console
+  year: 2020 # reference year used to derive shapes, info on population and info on GDP
+  nprocesses: 3 # number of processes to be used in build_shapes
+  worldpop_method: "standard" # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster,
+  # false (not "false") no pop addition to shape which is useful when generating only cutout
+  gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
+  contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
