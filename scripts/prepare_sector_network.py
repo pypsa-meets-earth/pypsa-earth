@@ -3283,7 +3283,6 @@ if __name__ == "__main__":
     # remove H2 and battery technologies added in elec-only model
     remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
-
     add_hydrogen(n, costs)  # TODO add costs
 
     # Add storage using carried-over capacities
