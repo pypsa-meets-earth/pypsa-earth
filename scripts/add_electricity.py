@@ -508,6 +508,51 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
+def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
+    """
+    Apply country-level static nuclear p_max_pu limits
+    based on historical Energy Availability Factor (IAEA, 2022–2024).
+
+    - If country is in CSV: apply p_max_pu
+    - If country is NOT in CSV: keep default p_max_pu = 1.0 and warn
+    """
+
+    factors = nuclear_p_max_pu.set_index("country")["factor"].div(100.0)
+
+    gens = n.generators.query("carrier == 'nuclear'")
+    if gens.empty:
+        logger.info("No nuclear generators found: skipping nuclear p_max_pu limits.")
+        return
+
+    countries = gens.bus.map(n.buses.country)
+    values = countries.map(factors)
+
+    # Countries in model but missing in CSV
+    missing = countries[values.isna()].dropna().unique()
+    if len(missing) > 0:
+        logger.warning(
+            "No nuclear p_max_pu data for countries %s: "
+            "keeping default p_max_pu = 1.0 for their nuclear generators.",
+            ", ".join(sorted(missing)),
+        )
+
+    valid = values.notna()
+    if not valid.any():
+        logger.warning(
+            "Nuclear p_max_pu CSV provided, but no matching countries found in the model."
+        )
+        return
+
+    # Apply static constraint
+    n.generators.loc[values.index[valid], "p_max_pu"] = values[valid]
+
+    logger.info(
+        "Applied static nuclear p_max_pu to %d nuclear generator(s) "
+        "(source: IAEA 2022–2024).",
+        valid.sum(),
+    )
+
+
 def attach_hydro(n, costs, ppl):
     if "hydro" not in snakemake.params.renewable:
         return
@@ -943,6 +988,10 @@ if __name__ == "__main__":
     )
     attach_hydro(n, costs, ppl)
     attach_existing_batteries(n, costs, ppl)
+    apply_nuclear_p_max_pu(
+        n,
+        pd.read_csv(snakemake.input.nuclear_p_max_pu),
+    )
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
         estimate_renewable_capacities_irena(
