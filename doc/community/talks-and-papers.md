@@ -38,6 +38,22 @@ Please use the following BibTeX:
 }
 ```
 
+Abdel-Khalek et al., "PyPSA-Earth sector-coupled: A global open-source multi-energy system model showcased for hydrogen applications in countries of the Global South", Applied Energy, 2025, <https://doi.org/10.1016/j.apenergy.2025.125316>.
+
+```bibtex
+@article{ABDELKHALEK2025125316,
+  author = {Hazem Abdel-Khalek and others},
+  title = {PyPSA-Earth sector-coupled: A global open-source multi-energy system model showcased for hydrogen applications in countries of the Global South},
+  journal = {Applied Energy},
+  volume = {383},
+  pages = {125316},
+  year = {2025},
+  issn = {0306-2619},
+  doi = {https://doi.org/10.1016/j.apenergy.2025.125316},
+  url = {https://www.sciencedirect.com/science/article/pii/S0306261925000467},
+}
+```
+
 ## PyPSA, PyPSA-Eur, PyPSA-Eur-Sec
 
 ### Related Publications
