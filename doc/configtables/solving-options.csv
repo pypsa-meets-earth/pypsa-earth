@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 formulation,--,"{angles, kirchhoff, cycles, ptdf}","Specifies which variant of linearized power flow formulations to use in the optimisation problem. Recommended is 'kirchhoff'."
 load_shedding,--,"Either 'false' or float","Add generators with a prohibitively high marginal cost to simulate load shedding. Choose 'false' to turn off or alternatively add willingness to pay for load shedding in EUR/kWh"
 noisy_costs,bool,"{true, false}","Add random noise to marginal cost of generators and capital cost of lines and links."

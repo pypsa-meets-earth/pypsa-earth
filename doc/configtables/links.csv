@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 p_max_pu,--,"Value in [0.,1.]",Correction factor for link capacities ``p_nom``.
 p_nom_max,MW,float,Global upper limit for the maximum capacity of each extendable DC link.
 p_nom_max_min,MW,float,Global lower limit for the maximum capacity of each extendable DC link.

@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 simplify_network,,,
 -- to_substations,bool,"{True, False}",False: network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections).
 -- algorithm,,"{hac, kmeans, modularity}","Clustering algorithm used in the simplify_network rule. Options available are Hierarchical Agglomerative Clustering (HAC), k-means, or greedy modularity."

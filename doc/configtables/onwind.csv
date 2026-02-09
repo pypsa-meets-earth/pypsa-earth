@@ -1,14 +1,14 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 cutout,--,Should be a file name listed in the configuration ``atlite: cutouts:`` (e.g. 'europe-2013-era5') or reference an existing folder in the directory ``cutouts``. Source module must be ERA5.,Specifies the directory where the relevant weather data is stored.
 resource,,,
 -- method,--,Must be 'wind',A superordinate technology type.
--- turbine,--,One of turbine types included in `atlite <https://github.com/PyPSA/atlite/tree/master/atlite/resources/windturbine>`__,Specifies the turbine type and its characteristic power curve.
+-- turbine,--,One of turbine types included in [atlite](https://github.com/PyPSA/atlite/tree/master/atlite/resources/windturbine),Specifies the turbine type and its characteristic power curve.
 capacity_per_sqkm,:math:`MW/km^2`,float,Allowable density of wind turbine placement.
 copernicus,,,
--- grid_codes,--,Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_,Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement.
+-- grid_codes,--,Any subset of the [Copernicus Land Cover code list](https://land.copernicus.eu/pan-european/corine-land-cover/clc2018),Specifies areas based on CLC which generally eligible for AC-connected offshore wind turbine placement.
 -- distance,m,int,(Optional) Distance to reserve as uneligible area around 'distance_grid_codes' for the renewable technology.
--- distance_grid_codes,--,(Optional with 'distance') Any subset of the `Copernicus Land Cover code list <https://land.copernicus.eu/pan-european/corine-land-cover/clc2018>`_,Specifies from which a distance of 'distance' metres is unavailable as a buffer area.
-natura,bool,"{true, false}",Switch to exclude `Natura 2000 <https://en.wikipedia.org/wiki/Natura_2000>`_ natural protection areas. Area is excluded if ``true``.
+-- distance_grid_codes,--,(Optional with 'distance') Any subset of the [Copernicus Land Cover code list](https://land.copernicus.eu/pan-european/corine-land-cover/clc2018),Specifies from which a distance of 'distance' metres is unavailable as a buffer area.
+natura,bool,"{true, false}",Switch to exclude [Natura 2000](https://en.wikipedia.org/wiki/Natura_2000) natural protection areas. Area is excluded if ``true``.
 potential,--,"One of {'simple', 'conservative'}",Method to compute the maximal installable potential for a node; confer :ref:`renewableprofiles`
 clip_p_max_pu,p.u.,float,To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.
 extendable,bool,"{True, False}","True: In nodes where there is no onwind generation, adds a zero-capacity onwind generator so that onwind is considered in the capacity expansion. It is done in the ``add_electricity`` rule."

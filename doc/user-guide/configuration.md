@@ -283,6 +283,16 @@ Specifies the options for Monte Carlo sampling.
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
+## sector
+
+Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+
+```yaml
+--8<-- "configtables/snippets/sector.yaml"
+```
+
+{{ read_csv('configtables/sector.csv') }}
+
 ## solving
 
 Specify linear power flow formulation and optimization solver settings.

@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 **policy_config**,,,
 hydrogen,,,
 -- temporal_matching,--,"One of {'hour', 'month', 'year', 'no_temporal_matching'}",Specifies the temporal matching method for hydrogen production.
@@ -29,7 +29,7 @@ store_capital_costs,--,"One of {'standard_costs', 'no_costs'}","Specifies the co
 h2export,TWh,float,"Specifies the yearly hydrogen export demand in TWh. This parameter is only applicable if ``endogenous`` is set to false."
 export_profile,--,"One of {'ship', 'constant'}","Specifies the export profile. Only considered if ``endogenous`` is false."
 ship,,,"Specifies parameters for hydrogen export via shipping."
-ship_capacity,TWh,float,"Specifies the ship capacity for hydrogen export. Example values: 0.05 TWh for new ships, 0.003 TWh for Susio Frontier, and 0.4 TWh based on `Hampp 2021 <https://arxiv.org/abs/2107.01092>`_ (this corresponds to 11,360 t of liquid hydrogen (LHV of 33.3333 MWh/t_H2))."
+ship_capacity,TWh,float,"Specifies the ship capacity for hydrogen export. Example values: 0.05 TWh for new ships, 0.003 TWh for Susio Frontier, and 0.4 TWh based on [Hampp 2021](https://arxiv.org/abs/2107.01092) (this corresponds to 11,360 t of liquid hydrogen (LHV of 33.3333 MWh/t_H2))."
 travel_time,hours,int,"Travel time for hydrogen export shipping (e.g. from Agadir to Rotterdam and back takes 288 hours)."
-fill_time,hours,int,"Time required to fill the ship for hydrogen export. 48 hours is needed to fill the ship (see `Hampp 2021 <https://arxiv.org/abs/2107.01092>`_)."
-unload_time,hours,int,"Time required to unload the ship for hydrogen export. 48 hours is needed to unload the ship (see `Hampp 2021 <https://arxiv.org/abs/2107.01092>`_)."
+fill_time,hours,int,"Time required to fill the ship for hydrogen export. 48 hours is needed to fill the ship (see [Hampp 2021](https://arxiv.org/abs/2107.01092))."
+unload_time,hours,int,"Time required to unload the ship for hydrogen export. 48 hours is needed to unload the ship (see [Hampp 2021](https://arxiv.org/abs/2107.01092))."

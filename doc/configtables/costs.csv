@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 year,--,"YYYY (e.g. 2030)",Year for which to retrieve cost assumptions for resources/costs.csv
 technology_data_version,--,"vX.X.X (e.g. v0.1.0)",Version of technology-data repository to use
 discountrate,--,float,Rate of return used to discount future cash flows back to their present value

@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 ssp,--,string,Scenario considered for shared socio-economic pathway (GDP and population growth)
 weather_year,--,"YYYY (past year)",Year from which weather data is taken. Must be a year in the past
 prediction_year,--,"YYYY (can be in the future)",Year for which the load scenario is computed (GDP and population)
