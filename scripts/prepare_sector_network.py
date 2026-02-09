@@ -2999,18 +2999,19 @@ def add_electricity_distribution_grid(n, costs):
             f"Adding solar rooftop technology with potential based on {solar_logger}"
         )
 
+        solar_rooftop_index = potential.index
         n.madd(
             "Generator",
-            solar,
+            solar_rooftop_index,
             suffix=" rooftop",
-            bus=n.generators.loc[solar, "bus"] + " low voltage",
+            bus=n.generators.loc[solar_rooftop_index, "bus"] + " low voltage",
             carrier="solar rooftop",
             p_nom_extendable=True,
-            p_nom_max=potential.loc[solar],
-            marginal_cost=n.generators.loc[solar, "marginal_cost"],
+            p_nom_max=potential.loc[solar_rooftop_index],
+            marginal_cost=n.generators.loc[solar_rooftop_index, "marginal_cost"],
             capital_cost=costs.at["solar-rooftop", "fixed"],
-            efficiency=n.generators.loc[solar, "efficiency"],
-            p_max_pu=n.generators_t.p_max_pu[solar],
+            efficiency=n.generators.loc[solar_rooftop_index, "efficiency"],
+            p_max_pu=n.generators_t.p_max_pu[solar_rooftop_index],
             lifetime=costs.at["solar-rooftop", "lifetime"],
         )
 
@@ -3289,14 +3290,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="16",
-            ll="copt",
-            opts="Co2L-48H",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="48H",
+            sopts="144H",
             discountrate=0.071,
             demand="AB",
-            configfile="config.US.yaml",
         )
 
     # Load population layout
