@@ -10,6 +10,7 @@ channels:
 dependencies:
 - python>=3.10, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 - pip
+- setuptools<81
 
 - pypsa>=0.33, <0.34
 - atlite>=0.4.1
