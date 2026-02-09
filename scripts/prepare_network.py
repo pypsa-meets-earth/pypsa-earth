@@ -221,7 +221,7 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
         n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
             factor
         )
-    elif factor != "opt":  # implicitly also ll_type != "l"
+    elif factor != "opt" and float(factor) > 1.0:  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
