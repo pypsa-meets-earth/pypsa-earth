@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# -*- coding: utf-8 -*-
 import logging
 
 import pandas as pd
@@ -197,11 +203,6 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     return cost_dataframe
 
 
-# ==============
-# Overnight Runs
-# ==============
-
-
 def load_costs(tech_costs, config, max_hours, Nyears=1):
     """
     Set all asset costs and other parameters.
@@ -316,11 +317,6 @@ def load_costs(tech_costs, config, max_hours, Nyears=1):
             )
 
     return costs
-
-
-# ===================
-# Myopic/Perfect Runs
-# ===================
 
 
 def prepare_costs(
