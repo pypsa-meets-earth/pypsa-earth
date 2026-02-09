@@ -172,8 +172,8 @@ snakemake --version
 An optimization solver is needed to solve the mathematical problem that is built with the automated workflow of PyPSA-Earth. With the goal of supporting completely open source initiative, we focus on relying on Open-Source solvers, such as:
 
 - [CBC](https://projects.coin-or.org/Cbc)
-- [GLPK](https://www.gnu.org/software/glpk/) and [WinGLPK](http://winglpk.sourceforge.net/) (is included into pypsa-earth environment and installed automatically during environment creation)
-- [HiGHS](https://github.com/ERGO-Code/HiGHS) (Installed automatically as a dependency for PyPSA)
+- [GLPK](https://www.gnu.org/software/glpk/) and [WinGLPK]
+- [HiGHS](https://github.com/ERGO-Code/HiGHS)
 
 To further improve performances, commercial solvers like:
 
