@@ -512,6 +512,9 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     """
     Apply country-level static nuclear p_max_pu limits
     based on historical Energy Availability Factor (IAEA, 2022–2024).
+
+    - If country is in CSV: apply p_max_pu
+    - If country is NOT in CSV: keep default p_max_pu = 1.0 and warn
     """
 
     factors = (
@@ -525,24 +528,30 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
         logger.info("No nuclear generators found: skipping nuclear p_max_pu limits.")
         return
 
-    # Map generator -> bus -> country -> factor
     countries = gens.bus.map(n.buses.country)
     values = countries.map(factors)
 
-    # Debug: countries in CSV but not in model
-    unused = factors.index.difference(countries.dropna().unique())
-    if len(unused) > 0:
-        logger.debug(
-            "Nuclear p_max_pu data provided for countries not present in the model: %s",
-            ", ".join(sorted(unused)),
+    # Countries in model but missing in CSV
+    missing = countries[values.isna()].dropna().unique()
+    if len(missing) > 0:
+        logger.warning(
+            "No nuclear p_max_pu data for countries %s: "
+            "keeping default p_max_pu = 1.0 for their nuclear generators.",
+            ", ".join(sorted(missing)),
         )
 
     valid = values.notna()
+    if not valid.any():
+        logger.warning(
+            "Nuclear p_max_pu CSV provided, but no matching countries found in the model."
+        )
+        return
 
+    # Apply static constraint
     n.generators.loc[values.index[valid], "p_max_pu"] = values[valid]
 
     logger.info(
-        "Applied static nuclear p_max_pu to %d generators "
+        "Applied static nuclear p_max_pu to %d nuclear generator(s) "
         "(source: IAEA 2022–2024).",
         valid.sum(),
     )
