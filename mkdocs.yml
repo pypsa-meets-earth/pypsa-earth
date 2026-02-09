@@ -91,11 +91,12 @@ nav:
 - Community & Resources:
   - Contributing: community/contributing.md
   - Project Structure: community/project-structure.md
-  - Release Notes: community/release-notes.md
   - Users List: community/users-list.md
   - Talks & Papers: community/talks-and-papers.md
   - Learning Materials: community/learning-materials.md
   - Software Hints: community/software-hints.md
+
+- Release Notes: release-notes.md
 
 # Theme settings
 theme:
