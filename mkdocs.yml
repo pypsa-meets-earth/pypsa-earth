@@ -85,6 +85,7 @@ nav:
   - Network Building: api-reference/network-building.md
   - Solving: api-reference/solving.md
   - Sector-Coupling: api-reference/sector-coupling.md
+  - Analysis: api-reference/analysis.md
   - Utilities: api-reference/utilities.md
   - Advanced: api-reference/advanced.md
 
