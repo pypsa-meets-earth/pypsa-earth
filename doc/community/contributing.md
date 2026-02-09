@@ -22,7 +22,7 @@ You can contribute on the code side in many ways:
 
 ### Linting and pre-commit
 
-For every code contribution you should run [pre-commit](https://pre-commit.com/index.html).
+For every code contribution, the [pre-commit](https://pre-commit.com/index.html) utility should be executed.
 This will lint, format and check your code contributions against our guidelines
 (e.g. we use [Black](https://github.com/psf/black) as code style
 and aim for [REUSE compliance](https://reuse.software/)):
@@ -59,15 +59,9 @@ in [this discussion #557](https://github.com/pypsa-meets-earth/pypsa-earth/discu
 
 ### How to docs?
 
-We add the code documentation along the way.
-It might seem time-consuming and inefficient, but that's not really true anymore!
-Documenting with great tools makes life much easier for YOU and YOUR COLLABORATORS and speeds up the overall process.
-Using [MkDocs](https://www.mkdocs.org/) and its plugin
-[mkdocstrings](https://mkdocstrings.github.io/) we document in our
-code scripts which then will automatically generate the documentation you might see here.
-
-Thank you Eric Holscher & team for your wonderful *Readthedocs* open source project.
-You can find an emotional speech by Eric [here](https://www.youtube.com/watch?v=U6ueKExLzSY).
+We add the documentation continuously while the project grows, which makes it easier to understand and maintain for you and the whole community.
+We rely on [MkDocs](https://www.mkdocs.org/) and its plugin
+[mkdocstrings](https://mkdocstrings.github.io/) to document our scripts and generate the documentation website you are reading.
 
 ### Structure and Syntax example
 
@@ -85,7 +79,7 @@ We found three important files/file groups for the documentation:
 
 The images for documentation should be placed into [documentation](https://github.com/pypsa-meets-earth/documentation) repository to the folder "doc/img". The content of the folder "documentation/doc/img/" is copied into "pypsa-earth/doc/img/" during building PyPSA-Earth documentation.
 
-Please, if you have problems with the documentation create an issue and let us know
+Please, if you have problems with the documentation create an issue and let us know.
 
 ### How to build it locally
 
@@ -135,6 +129,7 @@ Check out our [website](https://pypsa-meets-earth.github.io) for more details.
 ## Join us and get involved
 
 Any person/group is welcome to join us. Be it research leader, researcher, undergraduate, or industry professional.
+You can provide reference data, share suggestions and insights, help fellow modellers asking for assistance in [Discord](https://discord.gg/AnuJBk23FU) Support channel, contribute into outreach activities and events, and fund projects.
 A simple way to explore opportunities for collaboration is to join our meetings. All of them are **OPEN**.
 
 * [List of meetings and times](https://github.com/pypsa-meets-earth/pypsa-earth#get-involved)
