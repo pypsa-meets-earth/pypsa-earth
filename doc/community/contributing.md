@@ -140,5 +140,5 @@ A simple way to explore opportunities for collaboration is to join our meetings.
 * [List of meetings and times](https://github.com/pypsa-meets-earth/pypsa-earth#get-involved)
 
 * **Discord**
-  * Chat with the community, team up on features, exchange with developers, code in voice channels
-  * [Discord invitation link](https://discord.gg/AnuJBk23FU)
+    * Chat with the community, team up on features, exchange with developers, code in voice channels
+    * [Discord invitation link](https://discord.gg/AnuJBk23FU)
