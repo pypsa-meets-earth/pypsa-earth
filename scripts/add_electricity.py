@@ -517,11 +517,7 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     - If country is NOT in CSV: keep default p_max_pu = 1.0 and warn
     """
 
-    factors = (
-        nuclear_p_max_pu
-        .set_index("country")["factor"]
-        .div(100.0)
-    )
+    factors = nuclear_p_max_pu.set_index("country")["factor"].div(100.0)
 
     gens = n.generators.query("carrier == 'nuclear'")
     if gens.empty:
