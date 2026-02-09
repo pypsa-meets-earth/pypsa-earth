@@ -66,7 +66,6 @@ from _helpers import (
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
-    load_costs,
 )
 
 idx = pd.IndexSlice
@@ -289,12 +288,7 @@ if __name__ == "__main__":
     transmission_efficiency = snakemake.params.transmission_efficiency
     config = snakemake.config
 
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        config["costs"],
-        config["electricity"],
-        Nyears,
-    )
+    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)
