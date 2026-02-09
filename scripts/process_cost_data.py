@@ -1,14 +1,16 @@
 import logging
+
 import pandas as pd
 import pypsa
-
 from currency_converter import CurrencyConverter
+
 currency_converter = CurrencyConverter(
     fallback_on_missing_rate=True,
     fallback_on_wrong_date=True,
 )
 
 logger = logging.getLogger(__name__)
+
 
 # PYPSA-EARTH-SEC
 def annuity(n, r):
@@ -194,9 +196,11 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
     return cost_dataframe
 
+
 # ==============
 # Overnight Runs
 # ==============
+
 
 def load_costs(tech_costs, config, max_hours, Nyears=1):
     """
@@ -251,10 +255,7 @@ def load_costs(tech_costs, config, max_hours, Nyears=1):
             )
 
     costs["capital_cost"] = (
-        (
-            annuity(costs["lifetime"], costs["discount rate"])
-            + costs["FOM"] / 100.0
-        )
+        (annuity(costs["lifetime"], costs["discount rate"]) + costs["FOM"] / 100.0)
         * costs["investment"]
         * Nyears
     )
@@ -316,9 +317,11 @@ def load_costs(tech_costs, config, max_hours, Nyears=1):
 
     return costs
 
+
 # ===================
 # Myopic/Perfect Runs
 # ===================
+
 
 def prepare_costs(
     cost_file: str,
@@ -404,6 +407,7 @@ def prepare_costs(
     ]
 
     return modified_costs
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

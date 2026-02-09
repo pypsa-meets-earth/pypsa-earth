@@ -464,8 +464,8 @@ rule process_cost_data:
         costs=branch(
             config["enable"].get("retrieve_cost_data", True),
             "resources/" + RDIR + "costs_{year}.csv",
-            "data/costs.csv"
-        )
+            "data/costs.csv",
+        ),
     output:
         "resources/" + RDIR + "costs_{year}_{scope}.csv",
     log:
