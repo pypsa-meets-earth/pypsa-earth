@@ -29,8 +29,8 @@ and aim for [REUSE compliance](https://reuse.software/)):
 
 1. Installation `conda install -c conda-forge pre-commit` or `pip install pre-commit`
 2. Usage:
-   * To automatically activate `pre-commit` on every `git commit`: Run `pre-commit install`
-   * To manually run it: `pre-commit run --all`
+    * To automatically activate `pre-commit` on every `git commit`: Run `pre-commit install`
+    * To manually run it: `pre-commit run --all`
 
 ### Testing
 
