@@ -152,6 +152,9 @@ import pypsa
 network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc")
 ```
 
+!!! tip "Quick Statistics"
+    Use `network.statistics()` to get a quick overview of your solved network, including installed capacities, generation, and costs.
+
 The video below shows how to analyse solved PyPSA-Eur networks in Jupyter Notebooks.
 Fabian Neumann did a great job explaining the basics of PyPSA and how to use it for analysis.
 
