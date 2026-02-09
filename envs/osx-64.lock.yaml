@@ -449,7 +449,7 @@ dependencies:
 - seaborn=0.13.2=hd8ed1ab_3
 - seaborn-base=0.13.2=pyhd8ed1ab_3
 - send2trash=2.1.0=pyh5552912_0
-- setuptools=82.0.0=pyh332efcf_0
+- setuptools=80.9.0=pyhff2d567_0
 - shapely=2.1.2=py311hda9c9d0_2
 - six=1.17.0=pyhe01879c_1
 - smart_open=7.5.0=pyhcf101f3_0
