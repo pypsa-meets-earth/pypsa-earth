@@ -28,7 +28,7 @@ dependencies:
 - pyscipopt>=5
 - lxml
 - numpy<2
-- pandas
+- pandas<3
 - geopandas>=1
 - fiona>=1.10
 - xarray>=2023.11.0, <=2025.01.2
