@@ -1443,6 +1443,7 @@ def add_shipping(n, costs, energy_totals, ports_fn):
         options["shipping_hydrogen_share"], demand_sc + "_" + str(investment_year)
     )
 
+    # TODO: verify and check ability to generalize with/without GADM shapes
     ports = locate_bus(
         ports,
         countries,
@@ -1464,7 +1465,7 @@ def add_shipping(n, costs, energy_totals, ports_fn):
         # TODO double check the use of efficiency
     )  # TODO use real data here
 
-    ports = pd.concat([ports, ind]).drop("Bus", axis=1, errors="ignore")
+    ports = pd.concat([ports, ind]).drop(["Bus", "name"], axis=1, errors="ignore")
 
     # ports = ports.fillna(0.0)
     ports = ports.groupby(ports.index).sum()
