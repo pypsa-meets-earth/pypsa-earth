@@ -114,7 +114,7 @@ def attach_stores(n, costs, config):
 
     if "H2" in carriers:
         h2_buses_i = buses_i + " H2"
-        
+
         n.add("Bus", h2_buses_i, carrier="H2", **bus_sub_dict)
 
         n.add(
@@ -154,10 +154,8 @@ def attach_stores(n, costs, config):
 
     if "battery" in carriers:
         b_buses_i = buses_i + " battery"
-        
-        n.add(
-            "Bus", b_buses_i, carrier="battery", **bus_sub_dict
-        )
+
+        n.add("Bus", b_buses_i, carrier="battery", **bus_sub_dict)
 
         n.add(
             "Store",

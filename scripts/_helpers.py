@@ -19,8 +19,8 @@ from pathlib import Path
 import country_converter as coco
 import geopandas as gpd
 import numpy as np
-import pypsa
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
