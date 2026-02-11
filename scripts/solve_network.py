@@ -87,13 +87,13 @@ import pandas as pd
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger
-from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
-from pypsa.optimization.optimize import optimize
 
 logger = create_logger(__name__)
-pypsa.pf.logger.setLevel(logging.WARNING)
+try:
+    pypsa.pf.logger.setLevel(logging.WARNING)  # PyPSA <1
+except:
+    pypsa.optimization.optimize.logger.setLevel(logging.WARNING)  # PyPSA >= 1
 
 
 def get_load_shedding_capacity(n, safety_margin=1.2):
