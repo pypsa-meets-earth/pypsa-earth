@@ -1120,6 +1120,9 @@ HEAT = {
     "heat_demand": "resources/"
     + SECDIR
     + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "cooling_demand": "resources/"
+    + SECDIR
+    + "demand/heat/cooling_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     "ashp_cop": "resources/"
     + SECDIR
     + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1129,6 +1132,15 @@ HEAT = {
     "solar_thermal": "resources/"
     + SECDIR
     + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "cop_hp_cooling_total": "resources/"
+    + SECDIR
+    + "demand/heat/cop_hp_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "cop_ac_cooling_total": "resources/"
+    + SECDIR
+    + "demand/heat/cop_ac_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+    "capft_abch_cooling_total": "resources/"
+    + SECDIR
+    + "demand/heat/capft_abch_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
     "district_heat_share": "resources/"
     + SECDIR
     + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1165,6 +1177,9 @@ rule prepare_sector_network:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
+        # TODO revise the values which are currently very rough estimations
+        # &replace a temporary file with a more stable solution in future
+        cooling_costs="data/costs_cooling.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
@@ -1324,6 +1339,7 @@ rule prepare_transport_data:
 rule build_cop_profiles:
     params:
         heat_pump_sink_T=config["sector"]["heat_pump_sink_T"],
+        t_wet_bulb=config["sector"]["t_wet_bulb"],
     input:
         temp_soil_total="resources/"
         + SECDIR
@@ -1362,6 +1378,15 @@ rule build_cop_profiles:
         cop_air_urban="resources/"
         + SECDIR
         + "cops/cop_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_ac_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "cops/capft_abch_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:
@@ -1375,6 +1400,9 @@ rule build_cop_profiles:
 
 
 rule prepare_heat_data:
+    params:
+        countries=config["countries"],
+        thermal_load_calibrate=config["sector"]["thermal_load_calibrate"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         energy_totals_name="resources/"
@@ -1395,10 +1423,27 @@ rule prepare_heat_data:
         solar_thermal_total="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_hp_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "cops/cop_ac_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "cops/capft_abch_cooling_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-        heat_profile="data/heat_load_profile_BDEW.csv",
+        cooling_demand_total="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        # heat_profile="data/heat_load_profile_BDEW.csv",
+        heat_profile="data/thermal_loads/heating_load_profile_staffel.csv",
+        cooling_profile="data/thermal_loads/cooling_load_profile_staffel.csv",
+        shapes_path="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
         nodal_energy_totals="resources/"
         + SECDIR
@@ -1406,12 +1451,24 @@ rule prepare_heat_data:
         heat_demand="resources/"
         + SECDIR
         + "demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cooling_demand="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ashp_cop="resources/"
         + SECDIR
         + "demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         gshp_cop="resources/"
         + SECDIR
         + "demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_hp_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_hp_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        cop_ac_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/cop_ac_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        capft_abch_cooling_total="resources/"
+        + SECDIR
+        + "demand/heat/capft_abch_cooling_total_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         solar_thermal="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1448,6 +1505,7 @@ rule prepare_energy_totals:
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
         growth_factors_cagr="data/demand/growth_factors_cagr.csv",
         district_heating="data/demand/district_heating.csv",
+        thermal_loads="data/demand/thermal_loads.csv",
         fuel_shares="data/demand/fuel_shares.csv",
     output:
         energy_totals="resources/"
@@ -1615,6 +1673,15 @@ rule build_heat_demand:
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_urban="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_rural="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        cooling_demand_total="resources/"
+        + SECDIR
+        + "demand/heat/cooling_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     resources:
         mem_mb=20000,
     benchmark:

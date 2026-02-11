@@ -62,6 +62,9 @@ sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
   solar_rooftop:
     use_building_size: true
+  enable:
+    heat: true
+    cooling: true
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
