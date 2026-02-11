@@ -266,8 +266,33 @@ def _aggregate_and_move_components(
     output,
     aggregate_one_ports={"Load", "StorageUnit"},
     aggregation_strategies=dict(),
-    exclude_carriers=None,
+    exclude_carriers=[],
 ):
+    """
+    Aggregate and move components according to busmap.
+
+    For generators, existing (p_nom_extendable=False) and extendable
+    (p_nom_extendable=True) generators are aggregated separately to preserve
+    their distinct characteristics for myopic optimization.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    busmap : pd.Series
+        Mapping from previous bus names to new bus names.
+    connection_costs_to_bus : pd.DataFrame
+        Connection costs per bus.
+    output : object
+        Snakemake output object.
+    aggregate_one_ports : set
+        Set of one-port components to aggregate.
+    aggregation_strategies : dict
+        Strategies for aggregating components.
+    exclude_carriers : list
+        Carriers to exclude from aggregation.
+    """
+
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
 
@@ -284,6 +309,7 @@ def _aggregate_and_move_components(
     )
 
     generator_strategies = aggregation_strategies["generators"]
+    one_port_strategies = aggregation_strategies["one_ports"]
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
     generators, generators_pnl = aggregateoneport(
@@ -297,7 +323,13 @@ def _aggregate_and_move_components(
     replace_components(n, "Generator", generators, generators_pnl)
 
     for one_port in aggregate_one_ports:
-        df, pnl = aggregateoneport(n, busmap, component=one_port)
+        one_port_strategy = one_port_strategies.get(one_port, dict())
+        df, pnl = aggregateoneport(
+            n,
+            busmap,
+            component=one_port,
+            custom_strategies=one_port_strategy,
+        )
         replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
@@ -321,16 +353,45 @@ def contains_ac(ls):
 
 
 def simplify_links(
-    n,
-    costs,
-    renewable_config,
-    hvdc_as_lines,
-    config_lines,
-    config_links,
-    output,
-    exclude_carriers=[],
-    aggregation_strategies=dict(),
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    config_lines: dict,
+    config_links: dict,
+    output: object,
+    exclude_carriers: list = [],
+    aggregation_strategies: dict = dict(),
 ):
+    """
+    Simplifies multi-node DC link components into single links between end-points.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to be simplified.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    config_lines : dict
+        Configuration dictionary for lines.
+    config_links : dict
+        Configuration dictionary for links.
+    output : object
+        Output object containing file paths for saving results.
+    exclude_carriers : list, optional
+        List of carriers to exclude from simplification, by default [].
+    aggregation_strategies : dict, optional
+        Strategies for aggregating components, by default dict().
+
+    Returns
+    -------
+    n : pypsa.Network
+        The simplified PyPSA network.
+    """
     # Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
