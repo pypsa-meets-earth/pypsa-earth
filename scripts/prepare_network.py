@@ -246,7 +246,7 @@ def average_every_nhours(n, offset):
     # For example 24H is deprecated. Instead, 24h is allowed.
 
     logger.info(f"Resampling the network to {offset}")
-    m = n.copy(with_time=False)
+    m = n.copy(snapshots=[])
 
     snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)

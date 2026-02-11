@@ -113,7 +113,9 @@ def attach_stores(n, costs, config):
     bus_sub_dict = {k: n.buses[k].values for k in ["x", "y", "country"]}
 
     if "H2" in carriers:
-        h2_buses_i = n.add("Bus", buses_i + " H2", carrier="H2", **bus_sub_dict)
+        h2_buses_i = buses_i + " H2"
+        
+        n.add("Bus", h2_buses_i, carrier="H2", **bus_sub_dict)
 
         n.add(
             "Store",
@@ -151,8 +153,10 @@ def attach_stores(n, costs, config):
         )
 
     if "battery" in carriers:
-        b_buses_i = n.add(
-            "Bus", buses_i + " battery", carrier="battery", **bus_sub_dict
+        b_buses_i = buses_i + " battery"
+        
+        n.add(
+            "Bus", b_buses_i, carrier="battery", **bus_sub_dict
         )
 
         n.add(
@@ -194,9 +198,10 @@ def attach_stores(n, costs, config):
     ):
         # add separate buses for csp
         main_buses = n.generators.query("carrier == 'csp'").bus
-        csp_buses_i = n.add(
+        csp_buses_i = main_buses + " csp"
+        n.add(
             "Bus",
-            main_buses + " csp",
+            csp_buses_i,
             carrier="csp",
             x=n.buses.loc[main_buses, "x"].values,
             y=n.buses.loc[main_buses, "y"].values,

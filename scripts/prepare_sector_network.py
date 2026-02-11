@@ -1464,7 +1464,7 @@ def add_shipping(n, costs, energy_totals, ports_fn):
         # TODO double check the use of efficiency
     )  # TODO use real data here
 
-    ports = pd.concat([ports, ind]).drop("Bus", axis=1)
+    ports = pd.concat([ports, ind]).drop("Bus", axis=1, errors="ignore")
 
     # ports = ports.fillna(0.0)
     ports = ports.groupby(ports.index).sum()
@@ -2450,7 +2450,7 @@ def add_heat(
 
 def average_every_nhours(n, offset):
     # logger.info(f'Resampling the network to {offset}')
-    m = n.copy(with_time=False)
+    m = n.copy(snapshots=[])
 
     snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
