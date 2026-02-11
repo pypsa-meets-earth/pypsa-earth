@@ -523,14 +523,17 @@ def attach_hydro(n, costs, ppl):
         .rename(index=lambda s: str(s) + " hydro")
     )
 
+    supported_techs = ["Run-Of-River", "Pumped Storage", "Reservoir"]
+    invalid_techs = ppl.loc[~ppl.technology.isin(supported_techs)]
+
     # Current fix, NaN technologies set to ROR
-    if ppl.technology.isna().any():
-        n_nans = ppl.technology.isna().sum()
+    if not invalid_techs.empty:
+        n_invalid = invalid_techs.shape[0]
         logger.warning(
-            f"Identified {n_nans} hydro powerplants with unknown technology.\n"
+            f"Identified {n_invalid} hydro powerplants with unknown technology.\n"
             "Initialized to 'Run-Of-River'"
         )
-        ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
+        ppl.loc[invalid_techs.index, "technology"] = "Run-Of-River"
 
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
@@ -540,7 +543,7 @@ def attach_hydro(n, costs, ppl):
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
-            missing_plants_idxs = ppl.index.difference(found_plants.index)
+            missing_plants_idxs = inflow_idx.difference(found_plants.index)
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants_idxs.empty:
@@ -587,7 +590,10 @@ def attach_hydro(n, costs, ppl):
     if "PHS" in carriers and not phs.empty:
         # fill missing max hours to config value and
         # assume no natural inflow due to lack of data
-        phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
+        phs["max_hours"] = phs.max_hours.where(
+            ~phs.max_hours.isna() & (phs.max_hours > 0),
+            c["PHS_max_hours"],
+        )
         n.madd(
             "StorageUnit",
             phs.index,
