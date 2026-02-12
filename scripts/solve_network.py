@@ -778,7 +778,9 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
         p_dispatch_var = n.model["StorageUnit-p_dispatch"].loc[:, res_stor_index]
 
-        store = (weightings_stor * p_dispatch_var).sum(dim="StorageUnit")
+        store = (weightings_stor * p_dispatch_var).sum(
+            dim=("name" if PYPSA_V1 else "StorageUnit")
+        )
 
         res = res + store
 
@@ -798,7 +800,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     )
 
     elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(
-        dim="Link"
+        dim=("name" if PYPSA_V1 else "Link")
     )
 
     # Grouping
