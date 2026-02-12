@@ -391,9 +391,10 @@ def add_BAU_constraints(n, config):
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
     p_nom = n.model["Generator-p_nom"]
     ext_i = n.generators.query("p_nom_extendable")
-    ext_carrier_i = xr.DataArray(ext_i.carrier)
+    ext_carrier = ext_i.carrier
     if not PYPSA_V1:
-        ext_carrier_i = ext_carrier_i.rename_axis("Generator-ext")
+        ext_carrier = ext_carrier.rename_axis("Generator-ext")
+    ext_carrier_i = xr.DataArray(ext_carrier)
     lhs = p_nom.groupby(ext_carrier_i).sum()
     rhs = mincaps[lhs.indexes["carrier"]].rename_axis("carrier")
     n.model.add_constraints(lhs >= rhs, name="bau_mincaps")
@@ -450,12 +451,14 @@ def add_operational_reserve_margin_constraint(n, sns, config):
     EPSILON_VRES = reserve_config["epsilon_vres"]
     CONTINGENCY = reserve_config["contingency"]
 
+    col_name = "name" if PYPSA_V1 else "Generator"
+
     # Reserve Variables
     n.model.add_variables(
         0, np.inf, coords=[sns, n.generators.index], name="Generator-r"
     )
     reserve = n.model["Generator-r"]
-    summed_reserve = reserve.sum("Generator")
+    summed_reserve = reserve.sum(col_name)
 
     # Share of extendable renewable capacities
     ext_i = n.generators.query("p_nom_extendable").index
@@ -467,7 +470,7 @@ def add_operational_reserve_margin_constraint(n, sns, config):
             p_nom_vres = p_nom_vres.rename({"Generator-ext": "Generator"})
         lhs = summed_reserve + (
             p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor))
-        ).sum("Generator")
+        ).sum(col_name)
 
     # Total demand per t
     demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
@@ -763,7 +766,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
     p_gen_var = n.model["Generator-p"].loc[:, res_gen_index]
 
-    res = (weightings_gen * p_gen_var).sum(dim="Generator")
+    res = (weightings_gen * p_gen_var).sum(dim=("name" if PYPSA_V1 else "Generator"))
 
     # Store
     if not res_stor_index.empty:
