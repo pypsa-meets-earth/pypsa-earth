@@ -1296,8 +1296,26 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     )
 
 
-def add_storage(n, costs):
-    "function to add the different types of storage systems"
+def fetch_existing_battery_capacity_from_elec(n_elec):
+    """
+    Read existing battery capacity from the electricity network and
+    return a dict {bus_name: p_nom_MW} aggregated per AC bus.
+    """
+    if getattr(n_elec, "storage_units", None) is None or n_elec.storage_units.empty:
+        return {}
+
+    su = n_elec.storage_units
+    bat = su[su.carrier == "battery"]
+    if bat.empty:
+        return {}
+
+    # Aggregate capacity per bus (MW)
+    return bat.groupby("bus")["p_nom"].sum().to_dict()
+
+
+def add_storage(n, costs, existing_battery_capacity=None):
+    """Function to add battery storage to the sector network, including
+    carry-over of existing capacities from the electricity network."""
     logger.info("Add battery storage")
 
     n.add("Carrier", "battery")
@@ -1311,12 +1329,30 @@ def add_storage(n, costs):
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
 
+    # Existing battery capacity per AC node (MW) passed in
+    if existing_battery_capacity is None:
+        existing_battery_capacity = {}
+
+    total = float(sum(existing_battery_capacity.values()))
+    nodes_with_cap = len([p for p in existing_battery_capacity.values() if p > 0])
+    logger.info(
+        f"Battery carry-over from elec.nc: {total/1e3:.2f} GW across {nodes_with_cap} nodes."
+    )
+
+    # Use configured max_hours for battery duration
+    battery_duration = snakemake.params.electricity["max_hours"]["battery"]
+
+    # Per-node existing capacity (MW) aligned to spatial.nodes (AC buses)
+    p_nom_min = pd.Series(existing_battery_capacity).reindex(spatial.nodes).fillna(0.0)
+    e_nom_min = p_nom_min * battery_duration  # MWh
+
     n.madd(
         "Store",
         spatial.nodes + " battery",
         bus=spatial.nodes + " battery",
         e_cyclic=True,
         e_nom_extendable=True,
+        e_nom_min=e_nom_min.values,
         carrier="battery",
         capital_cost=costs.at["battery storage", "fixed"],
         lifetime=costs.at["battery storage", "lifetime"],
@@ -1331,6 +1367,7 @@ def add_storage(n, costs):
         efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
         capital_cost=costs.at["battery inverter", "fixed"],
         p_nom_extendable=True,
+        p_nom_min=p_nom_min.values,
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
@@ -1343,6 +1380,7 @@ def add_storage(n, costs):
         efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
         marginal_cost=options["marginal_cost_storage"],
         p_nom_extendable=True,
+        p_nom_min=p_nom_min.values,
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
@@ -3223,6 +3261,18 @@ if __name__ == "__main__":
     else:
         existing_capacities, existing_efficiencies, existing_nodes = 0, None, None
 
+    if options.get("keep_existing_capacities", False):
+        total_cap = (
+            sum(v.sum() for v in existing_capacities.values()) / 1e3
+            if existing_capacities
+            else 0
+        )
+        n_plants = sum(len(v) for v in existing_nodes.values()) if existing_nodes else 0
+        logger.info(
+            f"Imported {n_plants} existing conventional units "
+            f"with total capacity {total_cap:.1f} GW from electricity network."
+        )
+
     add_co2(n, costs, options["co2_network"])  # TODO add costs
 
     # remove conventional generators built in elec-only model
@@ -3230,12 +3280,16 @@ if __name__ == "__main__":
 
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
+    # Fetch existing battery capacities directly from the input network (elec.nc)
+    existing_batt = fetch_existing_battery_capacity_from_elec(n)
+
     # remove H2 and battery technologies added in elec-only model
     remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
     add_hydrogen(n, costs)  # TODO add costs
 
-    add_storage(n, costs)
+    # Add storage using carried-over capacities
+    add_storage(n, costs, existing_battery_capacity=existing_batt)
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)
