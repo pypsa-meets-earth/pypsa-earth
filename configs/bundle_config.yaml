@@ -185,6 +185,20 @@ databundles:
     output:
     - data/hydrobasins/hybas_world.shp
 
+  # DemandCast dataset for electricity demand
+  el_demand_demandcast:
+    countries: [Earth]
+    tutorial: false
+    category: el_demand
+    destination: "data/demand"
+    urls:
+      demandcast:
+        # TODO Update once released
+        base_url: https://zenodo.org/api/records/18374352/draft/files/forecasts_on_historical_period.parquet
+    unzip: false
+    output:
+    - data/demand/forecasts_on_historical_period.parquet
+
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
     countries: [Earth]
