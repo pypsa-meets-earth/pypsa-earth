@@ -179,6 +179,24 @@ def load_demand_csv(path):
     return gegis_load
 
 
+def compose_gegis_load(load_paths):
+    gegis_load_list = []
+
+    for path in load_paths:
+        if str(path).endswith(".csv"):
+            gegis_load_xr = load_demand_csv(path)
+        else:
+            # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
+        gegis_load_list.append(gegis_load_xr)
+
+    logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
+    gegis_load = xr.merge(gegis_load_list)
+    gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+
+    return gegis_load
+
+
 def build_demand_profiles(
     n,
     load_paths,
@@ -217,24 +235,14 @@ def build_demand_profiles(
     """
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
-    load_paths = load_paths
 
-    gegis_load_list = []
+    gegis_load = compose_gegis_load(load_paths=load_paths)
 
-    for path in load_paths:
-        if str(path).endswith(".csv"):
-            gegis_load_xr = load_demand_csv(path)
-        else:
-            # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
-        gegis_load_list.append(gegis_load_xr)
-
-    logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
-    gegis_load = xr.merge(gegis_load_list)
-    gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+    # TODO Add DemandCast load as an option
+    el_load = gegis_load
 
     # filter load for analysed countries
-    gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+    el_load = el_load.loc[el_load.region_code.isin(countries)]
 
     if isinstance(scale, dict):
         logger.info(f"Using custom scaling factor for load data.")
@@ -243,13 +251,13 @@ def build_demand_profiles(
             scale.setdefault(country, DEFAULT_VAL)
 
         for country, scale_country in scale.items():
-            gegis_load.loc[
-                gegis_load.region_code == country, "Electricity demand"
+            el_load.loc[
+                el_load.region_code == country, "Electricity demand"
             ] *= scale_country
 
     elif isinstance(scale, (int, float)):
         logger.info(f"Load data scaled with scaling factor {scale}.")
-        gegis_load["Electricity demand"] *= scale
+        el_load["Electricity demand"] *= scale
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
@@ -258,7 +266,7 @@ def build_demand_profiles(
         """
         Distributes load in country according to population and gdp.
         """
-        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
+        l = el_load.loc[el_load.region_code == cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
