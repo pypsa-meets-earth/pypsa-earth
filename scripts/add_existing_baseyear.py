@@ -363,7 +363,6 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
             if not new_build.empty:
                 new_capacity = capacity.loc[new_build.str.replace(name_suffix, "")]
 
-                # if generator != "urban central solid biomass CHP":
                 n.madd(
                     "Link",
                     new_capacity.index,
@@ -382,25 +381,6 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
                     build_year=grouping_year,
                     lifetime=lifetime_assets.loc[new_capacity.index],
                 )
-                # else:
-                #     key = "central solid biomass CHP"
-                #     n.madd(
-                #         "Link",
-                #         new_capacity.index,
-                #         suffix=name_suffix,
-                #         bus0=spatial.biomass.df.loc[new_capacity.index]["nodes"].values,
-                #         bus1=new_capacity.index,
-                #         bus2=new_capacity.index + " urban central heat",
-                #         carrier=generator,
-                #         p_nom=new_capacity / costs.at[key, "efficiency"],
-                #         capital_cost=costs.at[key, "fixed"]
-                #         * costs.at[key, "efficiency"],
-                #         marginal_cost=costs.at[key, "VOM"],
-                #         efficiency=costs.at[key, "efficiency"],
-                #         build_year=grouping_year,
-                #         efficiency2=costs.at[key, "efficiency-heat"],
-                #         lifetime=lifetime_assets.loc[new_capacity.index],
-                #     )
         # check if existing capacities are larger than technical potential
         existing_large = n.generators[
             n.generators["p_nom_min"] > n.generators["p_nom_max"]
