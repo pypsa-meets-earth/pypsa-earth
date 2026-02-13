@@ -206,6 +206,9 @@ def compose_gegis_load(load_paths):
     return gegis_load
 
 def read_demcast_load(load_paths, weather_year, countries):
+    """
+    region_code;time;region_name;Electricity demand
+    """
     demcast_full_load = pd.read_parquet(load_paths)
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
