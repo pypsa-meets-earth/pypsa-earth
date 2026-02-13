@@ -213,6 +213,8 @@ def read_demcast_load(load_paths, weather_year, countries):
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
     demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
+    demcast_load.rename(columns={"Forecast load (MW)": "Electricity demand"}, inplace=True)
+
     # 
     countries_iso3 = cc.convert(names=countries, to="ISO3")
     if isinstance(countries_iso3, str):
@@ -220,6 +222,11 @@ def read_demcast_load(load_paths, weather_year, countries):
 
     demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
     
+    # cc.convert is pretty slow when being applied over the whole column directly
+    cats = demcast_load["Entity code"].astype("category").cat.categories
+    codes = cc.convert(names=cats.tolist(), to="ISO2", not_found=None)
+    mapping = dict(zip(cats, codes))
+    demcast_load["region_code"] = demcast_load["Entity code"].map(mapping)
 
     return demcast_load
 
