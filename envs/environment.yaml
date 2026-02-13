@@ -12,7 +12,7 @@ dependencies:
 - pip
 - setuptools<81
 
-- pypsa>=1
+- pypsa>=0.33, <0.34
 - atlite>=0.4.1
 - dask
 - powerplantmatching>=0.8
@@ -24,11 +24,11 @@ dependencies:
 - seaborn
 - snakemake-minimal<8
 - memory_profiler
-- ruamel.yaml<=0.17.26
+- ruamel.yaml>=0.18
 - pytables
 - pyscipopt
 - lxml
-- numpy<2
+- numpy
 - pandas<3
 - geopandas>=1
 - fiona>=1.10
@@ -36,7 +36,7 @@ dependencies:
 - netcdf4
 - libgdal-netcdf
 - networkx
-- scipy<1.16
+- scipy
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
@@ -56,7 +56,7 @@ dependencies:
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
 
-- linopy=0.5.5  # latest linopy 0.6 has issues with scip in quadratic problems that prevents usage
+- linopy<0.6  # latest linopy 0.6 has issues with scip in quadratic problems that prevents usage
 
 # Jupyter notebook requirement
 - ipykernel
