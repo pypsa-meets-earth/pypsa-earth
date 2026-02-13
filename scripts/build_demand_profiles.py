@@ -203,8 +203,12 @@ def compose_gegis_load(load_paths):
     return gegis_load
 
 
-def read_demcast_load(load_paths):
-    demcast_load = pd.read_parquet(load_paths)
+def read_demcast_load(load_paths, weather_year):
+    demcast_full_load = pd.read_parquet(load_paths)
+
+    demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
+    demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
+
     return demcast_load
 
 
@@ -216,6 +220,7 @@ def build_demand_profiles(
     admin_shapes,
     countries,
     scale,
+    weather_year,
     start_date,
     end_date,
     out_path,
@@ -256,6 +261,10 @@ def build_demand_profiles(
     else:
         demcast_load = read_demcast_load(load_paths=load_paths)    
         demcast_load = read_demcast_load(load_paths=load_paths)
+        demcast_load = read_demcast_load(
+            load_paths=load_paths,
+            weather_year=weather_year
+        )
 
     # filter load for analysed countries
     el_load = el_load.loc[el_load.region_code.isin(countries)]
@@ -350,6 +359,7 @@ if __name__ == "__main__":
     out_path = snakemake.output[0]
 
     load_source = snakemake.params.load_options.get("source", "gegis")
+    weather_year = snakemake.params.load_options["weather_year"]
 
     if load_source == "ssp":
         warnings.warn(
@@ -364,6 +374,7 @@ if __name__ == "__main__":
         admin_shapes,
         countries,
         scale,
+        weather_year,
         start_date,
         end_date,
         out_path,
