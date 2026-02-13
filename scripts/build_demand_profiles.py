@@ -180,6 +180,12 @@ def load_demand_csv(path):
 
 
 def compose_gegis_load(load_paths):
+    """
+    Read and merge nc files located by load_paths
+    Parameters
+    ----------
+    load_paths: paths of the load files
+    """
     gegis_load_list = []
 
     for path in load_paths:
