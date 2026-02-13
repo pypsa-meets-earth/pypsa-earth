@@ -205,6 +205,18 @@ def compose_gegis_load(load_paths):
 
     return gegis_load
 
+def add_transform_iso3(df, source="Entity code", target="name_short", output="region_name"):
+    """
+    Transform a column containing ISO3 codes according to the target format
+    and add as a new column
+    """
+    # cc.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = cc.convert(names=cats.tolist(), to=target)
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
 
 def read_demcast_load(load_paths, weather_year, countries):
     """
@@ -224,11 +236,18 @@ def read_demcast_load(load_paths, weather_year, countries):
 
     demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
 
-    # cc.convert is pretty slow when being applied over the whole column directly
-    cats = demcast_load["Entity code"].astype("category").cat.categories
-    codes = cc.convert(names=cats.tolist(), to="ISO2", not_found=None)
-    mapping = dict(zip(cats, codes))
-    demcast_load["region_code"] = demcast_load["Entity code"].map(mapping)
+    demcast_load = add_transform_iso3(
+        demcast_load,
+        source="Entity code",
+        target="ISO2",
+        output="region_code",
+    )
+    demcast_load = add_transform_iso3(
+        demcast_load,
+        source="Entity code",
+        target="name_short",
+        output="region_name",
+    )  
 
     return demcast_load
 
