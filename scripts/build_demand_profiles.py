@@ -203,8 +203,14 @@ def compose_gegis_load(load_paths):
     return gegis_load
 
 
+def read_demcast_load(load_paths):
+    demcast_load = pd.read_parquet(load_paths)
+    return demcast_load
+
+
 def build_demand_profiles(
     n,
+    load_source,
     load_paths,
     regions,
     admin_shapes,
@@ -220,6 +226,8 @@ def build_demand_profiles(
     Parameters
     ----------
     n : pypsa network
+    load_source : str
+        Type of data source to be used for electricity demand
     load_paths: paths of the load files
     regions : .geojson
         Contains bus_id of low voltage substations and
@@ -242,10 +250,12 @@ def build_demand_profiles(
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
 
-    gegis_load = compose_gegis_load(load_paths=load_paths)
-
-    # TODO Add DemandCast load as an option
-    el_load = gegis_load
+    if (load_source == "gegis") | (load_source == "ssp"):
+        gegis_load = compose_gegis_load(load_paths=load_paths)
+        el_load = gegis_load
+    else:
+        demcast_load = read_demcast_load(load_paths=load_paths)    
+        demcast_load = read_demcast_load(load_paths=load_paths)
 
     # filter load for analysed countries
     el_load = el_load.loc[el_load.region_code.isin(countries)]
@@ -339,8 +349,16 @@ if __name__ == "__main__":
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
 
+    load_source = snakemake.params.load_options.get("source", "gegis")
+
+    if load_source == "ssp":
+        warnings.warn(
+            f"Configuration option 'load_options::ssp' is deprecated. Use 'load_options::source' instead"
+        )
+
     build_demand_profiles(
         n,
+        load_source,
         load_paths,
         regions,
         admin_shapes,
