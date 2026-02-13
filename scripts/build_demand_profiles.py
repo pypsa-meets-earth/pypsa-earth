@@ -200,10 +200,11 @@ def compose_gegis_load(load_paths):
     gegis_load = xr.merge(gegis_load_list)
     gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
 
+    gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+
     return gegis_load
 
-
-def read_demcast_load(load_paths, weather_year):
+def read_demcast_load(load_paths, weather_year, countries):
     demcast_full_load = pd.read_parquet(load_paths)
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
