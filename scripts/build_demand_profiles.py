@@ -249,6 +249,8 @@ def read_demcast_load(load_paths, weather_year, countries):
         output="region_name",
     )  
 
+    demcast_load = demcast_load[["region_code", "time", "region_name", "Electricity demand"]]
+
     return demcast_load
 
 
