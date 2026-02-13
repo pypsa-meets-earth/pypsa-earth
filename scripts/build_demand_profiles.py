@@ -205,6 +205,7 @@ def compose_gegis_load(load_paths):
 
     return gegis_load
 
+
 def read_demcast_load(load_paths, weather_year, countries):
     """
     region_code;time;region_name;Electricity demand
@@ -213,15 +214,16 @@ def read_demcast_load(load_paths, weather_year, countries):
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
     demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
-    demcast_load.rename(columns={"Forecast load (MW)": "Electricity demand"}, inplace=True)
+    demcast_load.rename(
+        columns={"Forecast load (MW)": "Electricity demand"}, inplace=True
+    )
 
-    # 
     countries_iso3 = cc.convert(names=countries, to="ISO3")
     if isinstance(countries_iso3, str):
         countries_iso3 = [countries_iso3]
 
     demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
-    
+
     # cc.convert is pretty slow when being applied over the whole column directly
     cats = demcast_load["Entity code"].astype("category").cat.categories
     codes = cc.convert(names=cats.tolist(), to="ISO2", not_found=None)
@@ -278,14 +280,12 @@ def build_demand_profiles(
         gegis_load = compose_gegis_load(load_paths=load_paths)
         el_load = gegis_load
     else:
-        demcast_load = read_demcast_load(load_paths=load_paths)    
-        demcast_load = read_demcast_load(load_paths=load_paths)
         demcast_load = read_demcast_load(
             load_paths=load_paths,
-            weather_year=weather_year
             weather_year=weather_year,
             countries=countries,
         )
+        el_load = demcast_load
 
     # filter load for analysed countries
     el_load = el_load.loc[el_load.region_code.isin(countries)]
