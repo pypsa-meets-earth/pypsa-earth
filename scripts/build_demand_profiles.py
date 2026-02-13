@@ -216,6 +216,10 @@ def add_transform_iso3(
     # cc.convert is pretty slow when being applied over the whole column directly
     cats = df[source].astype("category").cat.categories
     target_codes = cc.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
     country_name_mapping = dict(zip(cats, target_codes))
     df[output] = df[source].map(country_name_mapping)
 
