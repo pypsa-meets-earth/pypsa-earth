@@ -44,6 +44,7 @@ import os
 import os.path
 from itertools import product
 
+import country_converter as cc
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -209,6 +210,13 @@ def read_demcast_load(load_paths, weather_year, countries):
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
     demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
+    # 
+    countries_iso3 = cc.convert(names=countries, to="ISO3")
+    if isinstance(countries_iso3, str):
+        countries_iso3 = [countries_iso3]
+
+    demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
+    
 
     return demcast_load
 
@@ -265,6 +273,8 @@ def build_demand_profiles(
         demcast_load = read_demcast_load(
             load_paths=load_paths,
             weather_year=weather_year
+            weather_year=weather_year,
+            countries=countries,
         )
 
     # filter load for analysed countries
