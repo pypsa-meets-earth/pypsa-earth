@@ -221,7 +221,7 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
         n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
             factor
         )
-    elif factor != "opt":  # implicitly also ll_type != "l"
+    elif factor != "opt" and float(factor) > 1.0:  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -246,7 +246,7 @@ def average_every_nhours(n, offset):
     # For example 24H is deprecated. Instead, 24h is allowed.
 
     logger.info(f"Resampling the network to {offset}")
-    m = n.copy(with_time=False)
+    m = n.copy(snapshots=[])
 
     snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
@@ -320,8 +320,8 @@ def enforce_autarky(n, only_crossborder=False):
     else:
         lines_rm = n.lines.index
         links_rm = n.links.loc[n.links.carrier == "DC"].index
-    n.mremove("Line", lines_rm)
-    n.mremove("Link", links_rm)
+    n.remove("Line", lines_rm)
+    n.remove("Link", links_rm)
 
 
 def set_line_nom_max(n, lines, links):
@@ -375,7 +375,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Co2L" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if snakemake.params.electricity["automatic_emission"]:
                 country_names = n.buses.country.unique()
                 emission_year = snakemake.params.electricity[
@@ -399,7 +399,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "CH4L" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 limit = float(m[0]) * 1e6
                 add_gaslimit(n, limit, Nyears)
@@ -431,7 +431,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Ep" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 logger.info("Setting emission prices according to wildcard value.")
                 add_emission_prices(n, dict(co2=float(m[0])))

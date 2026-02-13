@@ -86,14 +86,15 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger
-from linopy import merge
+from _helpers import PYPSA_V1, configure_logging, create_logger
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
-from pypsa.optimization.optimize import optimize
 
 logger = create_logger(__name__)
-pypsa.pf.logger.setLevel(logging.WARNING)
+
+if PYPSA_V1:
+    pypsa.optimization.optimize.logger.setLevel(logging.WARNING)
+else:
+    pypsa.pf.logger.setLevel(logging.WARNING)
 
 
 def get_load_shedding_capacity(n, safety_margin=1.2):
@@ -151,7 +152,7 @@ def prepare_network(n, solve_opts, config):
     if solve_opts.get("load_shedding"):
         required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
         n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
-        n.madd(
+        n.add(
             "Generator",
             n.buses.index,
             " load shedding",
@@ -245,7 +246,8 @@ def add_CCL_constraints(n, config):
 
     # Get extendable generators for relevant carriers
     gens = n.generators[n.generators.carrier.isin(ccl_carriers)]
-    gens = gens.rename_axis(index="Generator-ext")
+    if not PYPSA_V1:
+        gens = gens.rename_axis(index="Generator-ext")
 
     # Prepare country and carrier grouper
     grouper = pd.concat(
@@ -389,7 +391,10 @@ def add_BAU_constraints(n, config):
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
     p_nom = n.model["Generator-p_nom"]
     ext_i = n.generators.query("p_nom_extendable")
-    ext_carrier_i = xr.DataArray(ext_i.carrier.rename_axis("Generator-ext"))
+    ext_carrier = ext_i.carrier
+    if not PYPSA_V1:
+        ext_carrier = ext_carrier.rename_axis("Generator-ext")
+    ext_carrier_i = xr.DataArray(ext_carrier)
     lhs = p_nom.groupby(ext_carrier_i).sum()
     rhs = mincaps[lhs.indexes["carrier"]].rename_axis("carrier")
     n.model.add_constraints(lhs >= rhs, name="bau_mincaps")
@@ -446,26 +451,26 @@ def add_operational_reserve_margin_constraint(n, sns, config):
     EPSILON_VRES = reserve_config["epsilon_vres"]
     CONTINGENCY = reserve_config["contingency"]
 
+    col_name = "name" if PYPSA_V1 else "Generator"
+
     # Reserve Variables
     n.model.add_variables(
         0, np.inf, coords=[sns, n.generators.index], name="Generator-r"
     )
     reserve = n.model["Generator-r"]
-    summed_reserve = reserve.sum("Generator")
+    summed_reserve = reserve.sum(col_name)
 
     # Share of extendable renewable capacities
     ext_i = n.generators.query("p_nom_extendable").index
     vres_i = n.generators_t.p_max_pu.columns
     if not ext_i.empty and not vres_i.empty:
         capacity_factor = n.generators_t.p_max_pu[vres_i.intersection(ext_i)]
-        p_nom_vres = (
-            n.model["Generator-p_nom"]
-            .loc[vres_i.intersection(ext_i)]
-            .rename({"Generator-ext": "Generator"})
-        )
+        p_nom_vres = n.model["Generator-p_nom"].loc[vres_i.intersection(ext_i)]
+        if not PYPSA_V1:
+            p_nom_vres = p_nom_vres.rename({"Generator-ext": "Generator"})
         lhs = summed_reserve + (
             p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor))
-        ).sum("Generator")
+        ).sum(col_name)
 
     # Total demand per t
     demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
@@ -497,9 +502,9 @@ def update_capacity_constraint(n):
 
     # TODO check if `p_max_pu[ext_i]` is safe for empty `ext_i` and drop if cause in case
     if not ext_i.empty:
-        capacity_variable = n.model["Generator-p_nom"].rename(
-            {"Generator-ext": "Generator"}
-        )
+        capacity_variable = n.model["Generator-p_nom"]
+        if not PYPSA_V1:
+            capacity_variable = capacity_variable.rename({"Generator-ext": "Generator"})
         lhs = dispatch + reserve - capacity_variable * xr.DataArray(p_max_pu[ext_i])
 
     rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
@@ -699,7 +704,10 @@ def add_h2_network_cap(n, cap):
     if h2_network.index.empty:
         return
     h2_network_cap = n.model["Link-p_nom"]
-    h2_network_cap_index = h2_network_cap.indexes["Link-ext"]
+    if PYPSA_V1:
+        h2_network_cap_index = h2_network_cap.indexes["name"]
+    else:
+        h2_network_cap_index = h2_network_cap.indexes["Link-ext"]
     subset_index = h2_network.index.intersection(h2_network_cap_index)
     diff_index = h2_network_cap_index.difference(subset_index)
     if len(diff_index) > 0:
@@ -758,7 +766,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
     p_gen_var = n.model["Generator-p"].loc[:, res_gen_index]
 
-    res = (weightings_gen * p_gen_var).sum(dim="Generator")
+    res = (weightings_gen * p_gen_var).sum(dim=("name" if PYPSA_V1 else "Generator"))
 
     # Store
     if not res_stor_index.empty:
@@ -770,7 +778,9 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
         p_dispatch_var = n.model["StorageUnit-p_dispatch"].loc[:, res_stor_index]
 
-        store = (weightings_stor * p_dispatch_var).sum(dim="StorageUnit")
+        store = (weightings_stor * p_dispatch_var).sum(
+            dim=("name" if PYPSA_V1 else "StorageUnit")
+        )
 
         res = res + store
 
@@ -790,7 +800,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
     )
 
     elec_input = (-allowed_excess * weightings_electrolysis * electrolysis).sum(
-        dim="Link"
+        dim=("name" if PYPSA_V1 else "Link")
     )
 
     # Grouping
@@ -844,7 +854,7 @@ def add_chp_constraints(n):
         )
         n.model.add_constraints(lhs == 0, name="chplink-fix_p_nom_ratio")
 
-        rename = {"Link-ext": "Link"}
+        rename = {} if PYPSA_V1 else {"Link-ext": "Link"}
         lhs = (
             p.loc[:, electric_ext]
             + p.loc[:, heat_ext]
@@ -966,7 +976,7 @@ def add_existing(n):
             n.generators.loc[tech_index, tech] = existing_res
 
 
-def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> None:
+def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
     """
     Ensures that the two links simulating a bidirectional_link are extended the same amount.
     """
@@ -1003,9 +1013,14 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.components.Network) -> Non
     # get the p_nom optimization variables for the links using the get_var function
     links_p_nom = n.model["Link-p_nom"]
 
+    if PYPSA_V1:
+        links_p_nom_index = links_p_nom.indexes["name"]
+    else:
+        links_p_nom_index = links_p_nom.indexes["Link-ext"]
+
     # only consider forward and backward links that are present in the optimization variables
-    subset_forward = forward_i.intersection(links_p_nom.indexes["Link-ext"])
-    subset_backward = backward_i.intersection(links_p_nom.indexes["Link-ext"])
+    subset_forward = forward_i.intersection(links_p_nom_index)
+    subset_backward = backward_i.intersection(links_p_nom_index)
 
     # ensure we have a matching number of forward and backward links
     if len(subset_forward) != len(subset_backward):
