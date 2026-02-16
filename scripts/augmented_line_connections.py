@@ -65,7 +65,9 @@ if __name__ == "__main__":
     clusters = str(getattr(snakemake.wildcards, "clusters", ""))
     ac_buses = n.buses.index[n.buses.carrier == "AC"]
     if clusters == "1" or len(ac_buses) < 2:
-        logger.info(f"Skipping augmentation (clusters={clusters}, AC buses={len(ac_buses)}).")
+        logger.info(
+            f"Skipping augmentation (clusters={clusters}, AC buses={len(ac_buses)})."
+        )
         n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
         n.export_to_netcdf(snakemake.output.network)
         raise SystemExit(0)
