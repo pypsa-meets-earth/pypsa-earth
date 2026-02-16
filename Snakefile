@@ -163,6 +163,17 @@ if config["enable"].get("retrieve_databundle", True):
             "scripts/retrieve_databundle_light.py"
 
 
+if config["enable"].get("download_global_buildings", True):
+
+    rule download_global_buildings:
+        params:
+            crs=config["crs"],
+        output:
+            "data/global_buildings/{country}_global_buildings_raw.parquet",
+        script:
+            "scripts/download_global_buildings.py"
+
+
 if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
@@ -695,40 +706,76 @@ rule cluster_network:
         "scripts/cluster_network.py"
 
 
-rule augmented_line_connections:
+solar_rooftop_config = config["sector"]["solar_rooftop"]
+if isinstance(solar_rooftop_config, dict):
+    solar_rooftop_enable = (
+        solar_rooftop_config["enable"] and solar_rooftop_config["use_building_size"]
+    )
+    solar_rooftop_params = {
+        "solar_rooftop_enable": solar_rooftop_enable,
+        "install_ratio": solar_rooftop_config["install_ratio"],
+        "tolerance": solar_rooftop_config["tolerance"],
+    }
+else:
+    solar_rooftop_params = {}
+    solar_rooftop_enable = config["sector"]["solar_rooftop"]
+
+
+rule cluster_global_buildings:
     params:
-        lines=config["lines"],
-        augmented_line_connection=config["augmented_line_connection"],
-        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        electricity=config["electricity"],
-        costs=config["costs"],
+        **solar_rooftop_params,
+        crs=config["crs"],
     input:
-        tech_costs=COSTS,
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+        country_buildings="data/global_buildings/{country}_global_buildings_raw.parquet",
         regions_onshore="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        regions_offshore="resources/"
-        + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
     output:
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-    log:
-        "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
-    benchmark:
-        "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
-    threads: 1
-    resources:
-        mem_mb=3000,
+        solar_rooftop_layout=branch(
+            solar_rooftop_enable,
+            "resources/"
+            + RDIR
+            + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv",
+        ),
     script:
-        "scripts/augmented_line_connections.py"
+        "scripts/cluster_global_buildings.py"
+
+
+if config["augmented_line_connection"].get("add_to_snakefile") == True:
+
+    rule augmented_line_connections:
+        params:
+            lines=config["lines"],
+            augmented_line_connection=config["augmented_line_connection"],
+            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+            electricity=config["electricity"],
+            costs=config["costs"],
+        input:
+            tech_costs=COSTS,
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+            regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+        output:
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+        log:
+            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+        threads: 1
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:
     params:
         transmission_efficiency=config["sector"]["transmission_efficiency"],
     input:
-        overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
     output:
@@ -803,7 +850,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
@@ -872,7 +918,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             network="networks/"
             + RDIR
             + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
@@ -1148,6 +1193,15 @@ rule prepare_sector_network:
             if config["custom_data"]["h2_underground"]
             or config["sector"]["hydrogen"]["underground_storage"]["enabled"]
             else {}
+        **branch(
+            solar_rooftop_enable,
+            {
+                f"solar_rooftop_layout_{country}": "resources/"
+                + RDIR
+                + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_"
+                + f"{country}.csv"
+                for country in config["countries"]
+            },
         ),
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
@@ -1158,7 +1212,6 @@ rule prepare_sector_network:
             + SECDIR
             + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
         ),
-        overrides="data/override_component_attrs",
         clustered_pop_layout="resources/"
         + SECDIR
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -1227,7 +1280,6 @@ rule add_export:
         snapshots=config["snapshots"],
         costs=config["costs"],
     input:
-        overrides="data/override_component_attrs",
         export_ports="resources/" + SECDIR + "export_ports.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
@@ -1265,7 +1317,6 @@ rule override_respot:
             for discountrate in config["costs"]["discountrate"]
             for planning_horizons in config["scenario"]["planning_horizons"]
         },
-        overrides="data/override_component_attrs",
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         energy_totals="resources/"
         + SECDIR
@@ -1692,7 +1743,6 @@ if config["foresight"] == "overnight":
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             # network=RESDIR
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             network=RESDIR
@@ -1738,7 +1788,6 @@ rule make_sector_summary:
         h2export_qty=config["export"]["h2export"],
         foresight=config["foresight"],
     input:
-        overrides="data/override_component_attrs",
         networks=expand(
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -1838,7 +1887,6 @@ rule make_statistics:
 
 rule plot_sector_network:
     input:
-        overrides="data/override_component_attrs",
         network=RESDIR
         + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
@@ -2167,7 +2215,6 @@ if config["foresight"] == "myopic":
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            overrides=BASE_DIR + "/data/override_component_attrs",
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}.csv",

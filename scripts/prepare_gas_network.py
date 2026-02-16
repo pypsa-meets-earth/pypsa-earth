@@ -86,7 +86,7 @@ def download_GGIT_gas_network():
     https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
     The dataset contains 3144 pipelines.
     """
-    url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+    url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
     GGIT_gas_pipeline = pd.read_excel(
         content_retrieve(url),
         index_col=0,
@@ -172,7 +172,11 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     df = df[df["Status"].isin(snakemake.params.gas_config["network_data_GGIT_status"])]
 
     # Convert the WKT column to a GeoDataFrame
-    df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"]))
+    df = gpd.GeoDataFrame(
+        df, geometry=gpd.GeoSeries.from_wkt(df["WKTFormat"], on_invalid="warn")
+    )
+
+    df = df[df.geometry.is_valid & ~df.geometry.is_empty]
 
     # Set the CRS to EPSG:4326
     df.crs = CRS.from_epsg(4326)
@@ -314,7 +318,7 @@ def load_bus_region(onshore_path, pipelines):
     bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
     bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1).loc[
-        :, ["gadm_id", "geometry"]
+        :, ["gadm_id", "country", "geometry"]
     ]
 
     country_borders = unary_union(bus_regions_onshore.geometry)
