@@ -1193,6 +1193,7 @@ rule prepare_sector_network:
             if config["custom_data"]["h2_underground"]
             or config["sector"]["hydrogen"]["underground_storage"]["enabled"]
             else {}
+        ),
         **branch(
             solar_rooftop_enable,
             {
