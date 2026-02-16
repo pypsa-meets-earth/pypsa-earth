@@ -212,8 +212,7 @@ if __name__ == "__main__":
             # configfile="test/config.test1.yaml",
         )
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
     countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
