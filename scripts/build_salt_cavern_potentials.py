@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # -*- coding: utf-8 -*-
 """
 Build salt cavern potentials for hydrogen storage.
