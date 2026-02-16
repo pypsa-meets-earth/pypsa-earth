@@ -8,6 +8,7 @@ import logging
 
 import pandas as pd
 import pypsa
+from _helpers import STORE_LOOKUP
 from currency_converter import CurrencyConverter
 
 currency_converter = CurrencyConverter(
@@ -203,6 +204,84 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     return cost_dataframe
 
 
+def calculate_cost_for_storage_units(
+    costs: pd.DataFrame, 
+    max_hours: dict, 
+    costs_name: str = "capital_cost",
+):
+    """
+    Calculate the capital/fixed costs for storage as defined by storage units.
+
+    Storage units consolidate their charging, discharging, and storage costs into a single combined value.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        DataFrame containing the cost data.
+    max_hours : dict
+        Dictionary of maximum hours for storage units.
+    cost_name : str
+        Name of the column in the costs DataFrame that represents the capital cost.
+    """
+
+    def costs_for_storage(store, link1=None, link2=None, max_hours=1.0, costs_name="capital_cost"):
+        capital_cost = max_hours * store[costs_name]
+        if link1 is not None:
+            capital_cost += link1[costs_name]
+        if link2 is not None:
+            capital_cost += link2[costs_name]
+        return pd.Series(
+            {
+                costs_name: capital_cost,
+                "marginal_cost": 0.0,
+                "CO2 intensity": 0.0,
+            }
+        )
+
+    mod_costs_i = costs.index
+    missing_store = []
+    for k, v in max_hours.items():
+        tech = STORE_LOOKUP[k]
+        store = tech.get("store") if tech.get("store") in mod_costs_i else None
+        bicharger = (
+            tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
+        )
+        charger = (
+            tech.get("charger") if tech.get("charger") in mod_costs_i else None
+        )
+        discharger = (
+            tech.get("discharger")
+            if tech.get("discharger") in mod_costs_i
+            else None
+        )
+        if bicharger:
+            costs.loc[k] = costs_for_storage(
+                costs.loc[store],
+                costs.loc[bicharger],
+                max_hours=v,
+                costs_name=costs_name,
+            )
+        elif store:
+            costs.loc[k] = costs_for_storage(
+                costs.loc[store],
+                costs.loc[charger] if charger else None,
+                costs.loc[discharger] if discharger else None,
+                max_hours=v,
+                costs_name=costs_name,
+            )
+        else:
+            missing_store += [k]
+
+    if missing_store:
+        logger.warning(
+            f"No cost data on:\n - "
+            + "\n - ".join(missing_store)
+            + "\nPlease enable retrieve_cost_data if this storage technology is used"
+        )
+
+    return costs
+
+
 def load_costs(tech_costs, config, max_hours, Nyears=1):
     """
     Set all asset costs and other parameters.
@@ -287,25 +366,7 @@ def load_costs(tech_costs, config, max_hours, Nyears=1):
     )
     costs.loc["csp"] = costs.loc["csp-tower"]
 
-    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
-        if link2 is not None:
-            capital_cost += link2["capital_cost"]
-        return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
-        )
-
-    costs.loc["battery"] = costs_for_storage(
-        costs.loc["battery storage"],
-        costs.loc["battery inverter"],
-        max_hours=max_hours["battery"],
-    )
-    costs.loc["H2"] = costs_for_storage(
-        costs.loc["hydrogen storage tank"],
-        costs.loc["fuel cell"],
-        costs.loc["electrolysis"],
-        max_hours=max_hours["H2"],
-    )
+    costs = calculate_cost_for_storage_units(costs, max_hours, costs_name="capital_cost")
 
     for attr in ("marginal_cost", "capital_cost"):
         overwrites = config.get(attr)
@@ -328,6 +389,7 @@ def prepare_costs(
     default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "latest",
     custom_future_exchange_rate: float = None,
+    max_hours: dict = {},
 ):
     """
     Loads and processes cost data, converting units and currency to a common format.
@@ -335,7 +397,7 @@ def prepare_costs(
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     Always uses the module-level reference_year.
     """
-    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
+    costs = pd.read_csv(cost_file, index_col=["technology", "parameter"]).sort_index()
 
     # correct units to MW
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
@@ -402,6 +464,8 @@ def prepare_costs(
         for _, v in modified_costs.iterrows()
     ]
 
+    modified_costs = calculate_cost_for_storage_units(modified_costs, max_hours, costs_name="fixed")
+
     return modified_costs
 
 
@@ -432,6 +496,7 @@ if __name__ == "__main__":
             snakemake.params.costs["default_exchange_rate"],
             snakemake.params.costs["future_exchange_rate_strategy"],
             snakemake.params.costs["custom_future_exchange_rate"],
+            snakemake.params.max_hours,
         )
 
     costs.to_csv(snakemake.output[0])

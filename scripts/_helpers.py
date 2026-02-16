@@ -47,6 +47,119 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
+# Storage techs lookup
+STORE_LOOKUP = {
+    "battery": {
+        "store": "battery storage",
+        "bicharger": "battery inverter",
+    },
+    "home battery": {
+        "store": "home battery storage",
+        "bicharger": "home battery inverter",
+    },
+    "li-ion": {
+        "store": "battery storage",
+        "bicharger": "battery inverter",
+    },
+    "lfp": {
+        "store": "Lithium-Ion-LFP-store",
+        "bicharger": "Lithium-Ion-LFP-bicharger",
+    },
+    "vanadium": {
+        "store": "Vanadium-Redox-Flow-store",
+        "bicharger": "Vanadium-Redox-Flow-bicharger",
+    },
+    "lair": {
+        "store": "Liquid-Air-store",
+        "charger": "Liquid-Air-charger",
+        "discharger": "Liquid-Air-discharger",
+    },
+    "pair": {
+        "store": "Compressed-Air-Adiabatic-store",
+        "bicharger": "Compressed-Air-Adiabatic-bicharger",
+    },
+    "iron-air": {
+        "store": "iron-air battery",
+        "charger": "iron-air battery charge",
+        "discharger": "iron-air battery discharge",
+    },
+    "H2": {
+        "store": "hydrogen storage tank type 1 including compressor",
+        "charger": "electrolysis",
+        "discharger": "fuel cell",
+    },
+    "H2 underground": {
+        "store": "hydrogen storage underground",
+        "charger": "electrolysis",
+        "discharger": "fuel cell",
+    },
+    "concrete": {
+        "store": "Concrete-store",
+        "charger": "Concrete-charger",
+        "discharger": "Concrete-discharger",
+    },
+    "gravity": {
+        "store": "Gravity-Brick-store",
+        "bicharger": "Gravity-Brick-bicharger",
+    },
+    "gravitywa": {
+        "store": "Gravity-Water-Aboveground-store",
+        "bicharger": "Gravity-Water-Aboveground-bicharger",
+    },
+    "gravitywu": {
+        "store": "Gravity-Water-Underground-store",
+        "bicharger": "Gravity-Water-Underground-bicharger",
+    },
+    "salthight": {
+        "store": "HighT-Molten-Salt-store",
+        "charger": "HighT-Molten-Salt-charger",
+        "discharger": "HighT-Molten-Salt-discharger",
+    },
+    "lead": {
+        "store": "Lead-Acid-store",
+        "bicharger": "Lead-Acid-bicharger",
+    },
+    "nmc": {
+        "store": "Lithium-Ion-NMC-store",
+        "bicharger": "Lithium-Ion-NMC-bicharger",
+    },
+    "saltlowt": {
+        "store": "LowT-Molten-Salt-store",
+        "charger": "LowT-Molten-Salt-charger",
+        "discharger": "LowT-Molten-Salt-discharger",
+    },
+    "nizn": {
+        "store": "Ni-Zn-store",
+        "bicharger": "Ni-Zn-bicharger",
+    },
+    "phes": {
+        "store": "Pumped-Heat-store",
+        "charger": "Pumped-Heat-charger",
+        "discharger": "Pumped-Heat-discharger",
+    },
+    "phs": {  # Current PHS data only has MW cost, not it's storage cost
+        "store": "Pumped-Storage-Hydro-store",
+        "bicharger": "Pumped-Storage-Hydro-bicharger",
+    },
+    "sand": {
+        "store": "Sand-store",
+        "charger": "Sand-charger",
+        "discharger": "Sand-discharger",
+    },
+    "znair": {
+        "store": "Zn-Air-store",
+        "bicharger": "Zn-Air-bicharger",
+    },
+    "znbrflow": {
+        "store": "Zn-Br-Flow-store",
+        "bicharger": "Zn-Br-Flow-bicharger",
+    },
+    "znbr": {
+        "store": "Zn-Br-Nonflow-store",
+        "bicharger": "Zn-Br-Nonflow-bicharger",
+    },
+}
+
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """

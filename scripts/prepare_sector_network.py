@@ -28,6 +28,7 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
+from add_extra_components import attach_storageunits, attach_stores
 from prepare_network import add_co2limit
 from prepare_transport_data import prepare_transport_data
 
@@ -3273,8 +3274,30 @@ if __name__ == "__main__":
     # Fetch existing battery capacities directly from the input network (elec.nc)
     existing_batt = fetch_existing_battery_capacity_from_elec(n)
 
-    # remove H2 and battery technologies added in elec-only model
-    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
+    # remove H2 and storage technologies added in elec-only model
+    extendable_carriers = snakemake.params.electricity["extendable_carriers"]
+    carriers_to_drop = extendable_carriers["Store"] + extendable_carriers["StorageUnit"]
+    remove_carrier_related_components(n, carriers_to_drop=carriers_to_drop)
+
+    # reinclude storage technologies (excl. H2 related technologies)
+    attach_stores(
+        n,
+        costs,
+        spatial.nodes,
+        extendable_carriers["Store"],
+        include_H2=False,
+        cost_name="fixed",
+    )
+
+    attach_storageunits(
+        n,
+        costs,
+        spatial.nodes,
+        extendable_carriers["StorageUnit"],
+        snakemake.params.electricity["max_hours"],
+        include_H2=False,
+        cost_name="fixed",
+    )
 
     add_hydrogen(n, costs)  # TODO add costs
 
