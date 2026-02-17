@@ -641,24 +641,11 @@ if __name__ == "__main__":
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
 
     # Option for subregion
-    subregion_config = snakemake.params.subregion
-    if subregion_config["enable"]["cluster_network"]:
-        if subregion_config["define_by_gadm"]:
-            logger.info("Activate subregion classificaition based on GADM")
-            subregion_shapes = snakemake.input.subregion_shapes
-        elif subregion_config["path_custom_shapes"]:
-            logger.info("Activate subregion classificaition based on custom shapes")
-            subregion_shapes = subregion_config["path_custom_shapes"]
-        else:
-            logger.warning("Although enabled, no subregion classificaition is selected")
-            subregion_shapes = False
-
-        if subregion_shapes:
-            crs = snakemake.params.crs
-            tolerance = subregion_config["tolerance"]
-            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
-    else:
-        subregion_shapes = False
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = snakemake.params.crs
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
 
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
@@ -755,9 +742,9 @@ if __name__ == "__main__":
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
-        country_shapes = snakemake.input.country_shapes
+        original_shapes = snakemake.input.original_shapes
         clustering.network = nearest_shape(
-            clustering.network, country_shapes, crs, tolerance=tolerance
+            clustering.network, original_shapes, crs, tolerance=tolerance
         )
 
     clustering.network.meta = dict(

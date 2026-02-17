@@ -1138,24 +1138,11 @@ if __name__ == "__main__":
     update_p_nom_max(n)
 
     # Option for subregion
-    subregion_config = snakemake.params.subregion
-    if subregion_config["enable"]["simplify_network"]:
-        if subregion_config["define_by_gadm"]:
-            logger.info("Activate subregion classificaition based on GADM")
-            subregion_shapes = snakemake.input.subregion_shapes
-        elif subregion_config["path_custom_shapes"]:
-            logger.info("Activate subregion classificaition based on custom shapes")
-            subregion_shapes = subregion_config["path_custom_shapes"]
-        else:
-            logger.warning("Although enabled, no subregion classificaition is selected")
-            subregion_shapes = False
-
-        if subregion_shapes:
-            crs = snakemake.params.crs
-            tolerance = subregion_config["tolerance"]
-            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
-    else:
-        subregion_shapes = False
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = snakemake.params.crs
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
 
     p_threshold_drop_isolated = cluster_config.get("p_threshold_drop_isolated", False)
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
@@ -1182,8 +1169,8 @@ if __name__ == "__main__":
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
-        country_shapes = snakemake.input.country_shapes
-        n = nearest_shape(n, country_shapes, crs, tolerance=tolerance)
+        original_shapes = snakemake.input.original_shapes
+        n = nearest_shape(n, original_shapes, crs, tolerance=tolerance)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
