@@ -17,6 +17,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update `technology-data` version to the latest release (0.14.0) `PR #1729 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1729>`__
+
 * Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
 
 * Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
