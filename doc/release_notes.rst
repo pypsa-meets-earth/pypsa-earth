@@ -17,6 +17,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Streamline subregions implementation, subdivide EEZs for subregions for ``build_bus_regions`` `PR #1730 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1730>`__
+
 * Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
 
 * Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__

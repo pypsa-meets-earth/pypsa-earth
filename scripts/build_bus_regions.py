@@ -47,7 +47,7 @@ import os
 import geopandas as gpd
 import pandas as pd
 import pypsa
-from _helpers import REGION_COLS, configure_logging, create_logger
+from _helpers import REGION_COLS, configure_logging, create_logger, nearest_shape
 
 logger = create_logger(__name__)
 
@@ -154,24 +154,33 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
+    inputs = snakemake.input
+    country_shapes_fn = inputs.get("subregion_shapes") or inputs.country_shapes
+    offshore_shapes_fn = inputs.get("subregion_offshore") or inputs.offshore_shapes
     countries = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
     metric_crs = snakemake.params.crs["distance_crs"]
 
-    n = pypsa.Network(snakemake.input.base_network)
+    n = pypsa.Network(inputs.base_network)
 
-    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
-        "geometry"
-    ]
+    country_shapes = gpd.read_file(country_shapes_fn).set_index("name")["geometry"]
 
-    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes)
+    offshore_shapes = gpd.read_file(offshore_shapes_fn)
 
     offshore_shapes = offshore_shapes.reindex(columns=REGION_COLS).set_index("name")[
         "geometry"
     ]
 
-    gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")
+    # Option for subregion
+    if inputs.get("subregion_shapes"):
+        crs = {"geo_crs": geo_crs, "distance_crs": metric_crs}
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, country_shapes_fn, crs, tolerance=tolerance)
+
+        countries = list(country_shapes.index)
+
+    gadm_shapes = gpd.read_file(inputs.gadm_shapes).set_index("GADM_ID")
 
     onshore_regions = []
     offshore_regions = []

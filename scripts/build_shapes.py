@@ -30,10 +30,11 @@ from _helpers import (
 from numba import njit
 from numba.core import types
 from numba.typed import Dict
+from pyproj import Transformer
 from rasterio.mask import mask
 from rasterio.windows import Window
 from shapely.geometry import MultiPolygon
-from shapely.ops import unary_union
+from shapely.ops import transform, unary_union
 from shapely.validation import make_valid
 from tqdm import tqdm
 
@@ -1320,10 +1321,21 @@ def gadm(
 
 def crop_country(gadm_shapes, subregion_config):
     """
-    The crop_country function reconstructs country geometries by combining
-    individual GADM shapes, incorporating subregions specified in a configuration.
-    It returns a new GeoDataFrame where the country column includes both full countries
-    and their respective subregions, merging the geometries accordingly.
+    Merge GADM administrative units into custom subregions and aggregate remaining units at the country level,
+    returning combined geometries.
+
+    Parameters
+    ----------
+    gadm_shapes : GeoDataFrame
+        GeoDataFrame of GADM units indexed by administrative ID, containing a ``country`` column and a valid CRS.
+    subregion_config : dict[str, list[str]]
+        Mapping of subregion names to lists of GADM index values to be merged into each subregion.
+
+    Returns
+    -------
+    GeoDataFrame
+        GeoDataFrame indexed by name with merged subregion and country geometries,
+        preserving the input CRS.
     """
 
     country_shapes_new = gpd.GeoDataFrame(columns=["name", "geometry"]).set_index(
@@ -1373,9 +1385,222 @@ def crop_country(gadm_shapes, subregion_config):
 
     return gpd.GeoDataFrame(
         country_shapes_new,
-        crs=offshore_shapes.crs,
+        crs=gadm_shapes.crs,
         geometry=country_shapes_new.geometry,
     )
+
+
+def generate_points_every_km(
+    gdf,
+    distance_crs="EPSG:3857",
+    interval_km=100,
+):
+    """
+    Generate perimeter points for each Polygon/MultiPolygon in a GeoDataFrame
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame containing Polygon or MultiPolygon geometries.
+    distance_crs : str
+        Projected CRS in meters for distance calculation.
+    interval_km : float
+        Target spacing between consecutive points in kilometers.
+
+    Returns
+    -------
+    GeoDataFrame
+        GeoDataFrame of sampled points with a column 'name'
+        preserving the original index of the input geometry.
+    """
+
+    if gdf.crs is None:
+        raise ValueError("Input GeoDataFrame must have a CRS defined.")
+
+    interval_m = interval_km * 1000
+    geo_crs = gdf.crs
+
+    # Transformer objects
+    forward_transformer = Transformer.from_crs(geo_crs, distance_crs, always_xy=True)
+    backward_transformer = Transformer.from_crs(distance_crs, geo_crs, always_xy=True)
+
+    output_rows = []
+
+    for idx, row in gdf.iterrows():
+        geometry = row.geometry
+
+        # Project geometry to metric CRS
+        projected_geom = transform(forward_transformer.transform, geometry)
+
+        if projected_geom.geom_type == "Polygon":
+            polygons = [projected_geom]
+        elif projected_geom.geom_type == "MultiPolygon":
+            polygons = list(projected_geom.geoms)
+        else:
+            continue  # skip non-polygon geometries
+
+        for poly in polygons:
+            ring = poly.exterior
+            total_length = ring.length
+
+            current_distance_along = 0
+            current_point = ring.interpolate(0)
+
+            output_rows.append(
+                {
+                    "name": idx,
+                    "geometry": transform(
+                        backward_transformer.transform, current_point
+                    ),
+                }
+            )
+
+            step_resolution = 1000  # meters
+
+            while current_distance_along < total_length:
+                search_distance = current_distance_along + step_resolution
+                found_next = False
+
+                while search_distance <= total_length:
+                    candidate = ring.interpolate(search_distance)
+
+                    if current_point.distance(candidate) >= interval_m:
+                        current_point = candidate
+                        current_distance_along = search_distance
+
+                        output_rows.append(
+                            {
+                                "name": idx,
+                                "geometry": transform(
+                                    backward_transformer.transform, candidate
+                                ),
+                            }
+                        )
+
+                        found_next = True
+                        break
+
+                    search_distance += step_resolution
+
+                if not found_next:
+                    break
+
+    # Create output GeoDataFrame
+    points_gdf = gpd.GeoDataFrame(
+        output_rows,
+        geometry="geometry",
+        crs=geo_crs,
+    )
+
+    return points_gdf
+
+
+def determine_subregion_country(subregion_shapes, country_shapes, distance_crs):
+    """
+    Assign each subregion to the country with which it has the largest spatial overlap.
+    """
+    intersections = gpd.overlay(
+        subregion_shapes.reset_index(),
+        country_shapes.reset_index(),
+        how="intersection",
+        keep_geom_type=False,
+    )
+
+    intersections["overlap_area"] = intersections.to_crs(distance_crs).geometry.area
+    idx = intersections.groupby("name_1")["overlap_area"].idxmax()
+    largest = intersections.loc[idx]
+
+    return largest.set_index("name_1")["name_2"].to_dict()
+
+
+def crop_offshore(
+    subregion_shapes,
+    country_shapes,
+    offshore_shapes,
+    distance_crs="EPSG:3857",
+):
+    """
+    Split offshore (EEZ) geometries among subregions of the same country,
+    assigning each subregion a portion of the country's offshore area.
+
+    Parameters
+    ----------
+    subregion_shapes : GeoDataFrame
+        GeoDataFrame indexed by subregion name containing onshore geometries with a defined CRS.
+    country_shapes : GeoDataFrame
+        GeoDataFrame of country geometries used to determine which country each subregion belongs to.
+    offshore_shapes : GeoDataFrame
+        GeoDataFrame indexed by country name containing offshore (e.g., EEZ) geometries to be partitioned.
+    distance_crs : str, default "EPSG:3857"
+        Projected CRS used for distance-based operations and Voronoi partitioning.
+
+    Returns
+    -------
+    GeoDataFrame
+        GeoDataFrame indexed by subregion name containing offshore geometries,
+        either equal to the full country offshore area (single subregion) or Voronoi-partitioned among multiple subregions.
+    """
+
+    from build_bus_regions import custom_voronoi_partition_pts
+
+    # Determine country for each subregion
+    subregion_dict = determine_subregion_country(
+        subregion_shapes,
+        country_shapes,
+        distance_crs=distance_crs,
+    )
+
+    subregion_shapes = subregion_shapes.copy()
+    subregion_shapes["country"] = subregion_shapes.index.map(subregion_dict)
+
+    results = []
+
+    # Group once instead of value_counts + filtering
+    for country, sub_shape in subregion_shapes.groupby("country"):
+        if country not in offshore_shapes.index:
+            continue
+
+        outline = offshore_shapes.loc[country].geometry
+
+        # If only one subregion → just use outline
+        if len(sub_shape) == 1:
+            new_gdf = gpd.GeoDataFrame(
+                geometry=[outline],
+                index=sub_shape.index,
+                crs=subregion_shapes.crs,
+            )
+
+        # Multiple subregions → Voronoi partition
+        else:
+            points_gdf = generate_points_every_km(
+                sub_shape,
+                distance_crs=distance_crs,
+                interval_km=100,
+            )
+
+            coords = points_gdf.geometry.get_coordinates()[["x", "y"]]
+
+            voronoi_geoms = custom_voronoi_partition_pts(
+                coords,
+                outline,
+                add_bounds_shape=True,
+                multiplier=5,
+            )
+
+            points_gdf = points_gdf.copy()
+            points_gdf["geometry"] = voronoi_geoms
+
+            new_gdf = points_gdf.dissolve(by="name")
+            new_gdf = new_gdf[~new_gdf.geometry.is_empty]
+
+        results.append(new_gdf)
+
+    if not results:
+        return gpd.GeoDataFrame(
+            columns=["name", "geometry"], geometry="geometry"
+        ).set_index("name")
+
+    return pd.concat(results)
 
 
 if __name__ == "__main__":
@@ -1414,7 +1639,7 @@ if __name__ == "__main__":
         out_logging,
         tolerance=tolerance,
     )
-    country_shapes.to_file(snakemake.output.country_shapes)
+    country_shapes.to_file(out.country_shapes)
 
     offshore_shapes = eez(
         countries_list,
@@ -1426,12 +1651,12 @@ if __name__ == "__main__":
         tolerance,
     )
 
-    offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
+    offshore_shapes.reset_index().to_file(out.offshore_shapes)
 
     africa_shape = gpd.GeoDataFrame(
         geometry=[country_cover(country_shapes, offshore_shapes.geometry)]
     )
-    africa_shape.reset_index().to_file(snakemake.output.africa_shape)
+    africa_shape.reset_index().to_file(out.africa_shape)
 
     gadm_shapes = gadm(
         worldpop_method,
@@ -1452,10 +1677,36 @@ if __name__ == "__main__":
 
     save_to_geojson(gadm_shapes, out.gadm_shapes)
 
-    subregion_config = snakemake.params.subregion["define_by_gadm"]
-    if subregion_config:
-        subregion_shapes = crop_country(gadm_shapes, subregion_config)
+    subregion_config = snakemake.params.subregion
+    define_by_gadm = subregion_config.get("define_by_gadm")
+    custom_path = subregion_config.get("path_custom_shapes")
+
+    if define_by_gadm:
+        subregion_shapes = crop_country(gadm_shapes, define_by_gadm)
+
     else:
-        subregion_shapes = pd.DataFrame()
+        subregion_shapes = gpd.GeoDataFrame(
+            columns=["name", "geometry"],
+            geometry="geometry",
+            crs=gadm_shapes.crs,
+        ).set_index("name")
 
     save_to_geojson(subregion_shapes, out.subregion_shapes)
+
+    if custom_path:
+        subregion_shapes = gpd.read_file(custom_path, geometry="geometry").set_index(
+            "name"
+        )
+
+    if not subregion_shapes.empty:
+        subregion_offshore = crop_offshore(
+            subregion_shapes,
+            country_shapes,
+            offshore_shapes,
+            distance_crs=distance_crs,
+        )
+
+    else:
+        subregion_offshore = subregion_shapes  # empty
+
+    subregion_offshore.reset_index().to_file(out.subregion_offshore)
