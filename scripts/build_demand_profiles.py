@@ -314,6 +314,9 @@ def build_demand_profiles(
         gegis_load = compose_gegis_load(load_paths=load_paths)
         el_load = gegis_load
     else:
+
+        load_paths = "data/demand/forecasts_on_historical_period.parquet"
+
         if not os.path.exists(load_paths):
             url = ("https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet")
             progress_retrieve(url, load_paths)
@@ -406,7 +409,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
-
+    
     # Snakemake imports:
     regions = snakemake.input.regions
     load_paths = snakemake.input["load"]
