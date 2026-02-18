@@ -55,6 +55,7 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
+    progress_retrieve,    
     read_csv_nafix,
     read_osm_config,
 )
@@ -313,6 +314,10 @@ def build_demand_profiles(
         gegis_load = compose_gegis_load(load_paths=load_paths)
         el_load = gegis_load
     else:
+        if not os.path.exists(load_paths):
+            url = ("https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet")
+            progress_retrieve(url, load_paths)
+
         demcast_load = read_demcast_load(
             load_paths=load_paths,
             weather_year=weather_year,
