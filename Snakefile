@@ -487,6 +487,18 @@ rule build_demand_profiles:
         "scripts/build_demand_profiles.py"
 
 
+HYDRO_PROFILES = {
+    "hydro_capacities": "data/hydro_capacities.csv",
+    "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
+    "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
+    "powerplants": "resources/" + RDIR + "powerplants.csv",
+}
+
+
+def inputs_hydro(w):
+    return HYDRO_PROFILES if w.technology == "hydro" else {}
+
+
 rule build_renewable_profiles:
     params:
         crs=config["crs"],
@@ -494,15 +506,12 @@ rule build_renewable_profiles:
         countries=config["countries"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
+        unpack(inputs_hydro),
         natura="resources/" + RDIR + "natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         gebco="data/gebco/GEBCO_2025_sub_ice.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        hydro_capacities="data/hydro_capacities.csv",
-        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
-        #irena_stats="data/IRENA_Statistics_Extract_2025H2.xlsx",
-        powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
             if w.technology in ("onwind", "solar", "hydro", "csp")
