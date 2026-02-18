@@ -294,7 +294,7 @@ def retrieve_subregion(script_name):
         return {}
 
     if subregion_config.get("define_by_gadm"):
-        subregion_shapes = ("resources/" + RDIR + "shapes/subregion_shapes.geojson",)
+        subregion_shapes = "resources/" + RDIR + "shapes/subregion_shapes.geojson"
     elif subregion_config.get("path_custom_shapes"):
         subregion_shapes = subregion_config["path_custom_shapes"]
     else:
