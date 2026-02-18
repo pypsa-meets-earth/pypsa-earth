@@ -119,12 +119,12 @@ def get_available_storage_carriers(n, carriers, include_H2=False):
 
 
 def attach_stores(
-    n: pypsa.Network, 
-    costs: pd.DataFrame, 
-    buses_i: list, 
-    carriers: list, 
-    include_H2: bool = False, 
-    cost_name: str ="capital_cost",
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    buses_i: list,
+    carriers: list,
+    include_H2: bool = False,
+    cost_name: str = "capital_cost",
 ):
     """
     Attach stores to the network.
@@ -215,13 +215,13 @@ def attach_stores(
 
 
 def attach_storageunits(
-    n: pypsa.Network, 
-    costs: pd.DataFrame, 
-    buses_i: list, 
-    carriers: list, 
-    max_hours: dict, 
-    include_H2: bool = False, 
-    cost_name: str = "capital_cost"
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    buses_i: list,
+    carriers: list,
+    max_hours: dict,
+    include_H2: bool = False,
+    cost_name: str = "capital_cost",
 ):
     """
     Attach storage units to the network.
@@ -283,8 +283,8 @@ def attach_storageunits(
 
 
 def attach_advance_csp(
-    n: pypsa.Network, 
-    costs: pd.DataFrame, 
+    n: pypsa.Network,
+    costs: pd.DataFrame,
 ):
     """
     Attach advance CHP to the network.

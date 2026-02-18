@@ -205,8 +205,8 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
 
 
 def calculate_cost_for_storage_units(
-    costs: pd.DataFrame, 
-    max_hours: dict, 
+    costs: pd.DataFrame,
+    max_hours: dict,
     costs_name: str = "capital_cost",
 ):
     """
@@ -224,7 +224,9 @@ def calculate_cost_for_storage_units(
         Name of the column in the costs DataFrame that represents the capital cost.
     """
 
-    def costs_for_storage(store, link1=None, link2=None, max_hours=1.0, costs_name="capital_cost"):
+    def costs_for_storage(
+        store, link1=None, link2=None, max_hours=1.0, costs_name="capital_cost"
+    ):
         capital_cost = max_hours * store[costs_name]
         if link1 is not None:
             capital_cost += link1[costs_name]
@@ -246,13 +248,9 @@ def calculate_cost_for_storage_units(
         bicharger = (
             tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
         )
-        charger = (
-            tech.get("charger") if tech.get("charger") in mod_costs_i else None
-        )
+        charger = tech.get("charger") if tech.get("charger") in mod_costs_i else None
         discharger = (
-            tech.get("discharger")
-            if tech.get("discharger") in mod_costs_i
-            else None
+            tech.get("discharger") if tech.get("discharger") in mod_costs_i else None
         )
         if bicharger:
             costs.loc[k] = costs_for_storage(
@@ -366,7 +364,9 @@ def load_costs(tech_costs, config, max_hours, Nyears=1):
     )
     costs.loc["csp"] = costs.loc["csp-tower"]
 
-    costs = calculate_cost_for_storage_units(costs, max_hours, costs_name="capital_cost")
+    costs = calculate_cost_for_storage_units(
+        costs, max_hours, costs_name="capital_cost"
+    )
 
     for attr in ("marginal_cost", "capital_cost"):
         overwrites = config.get(attr)
@@ -464,7 +464,9 @@ def prepare_costs(
         for _, v in modified_costs.iterrows()
     ]
 
-    modified_costs = calculate_cost_for_storage_units(modified_costs, max_hours, costs_name="fixed")
+    modified_costs = calculate_cost_for_storage_units(
+        modified_costs, max_hours, costs_name="fixed"
+    )
 
     return modified_costs
 
