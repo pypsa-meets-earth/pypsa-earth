@@ -314,6 +314,7 @@ def build_demand_profiles(
         gegis_load = compose_gegis_load(load_paths=load_paths)
         el_load = gegis_load
     else:
+        # TODO replace hard-coding
 
         load_paths = "data/demand/forecasts_on_historical_period.parquet"
 
