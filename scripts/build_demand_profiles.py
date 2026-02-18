@@ -55,7 +55,7 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
-    progress_retrieve,    
+    progress_retrieve,
     read_csv_nafix,
     read_osm_config,
 )
@@ -319,7 +319,7 @@ def build_demand_profiles(
         load_paths = "data/demand/forecasts_on_historical_period.parquet"
 
         if not os.path.exists(load_paths):
-            url = ("https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet")
+            url = "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
             progress_retrieve(url, load_paths)
 
         demcast_load = read_demcast_load(
@@ -410,7 +410,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.base_network)
-    
+
     # Snakemake imports:
     regions = snakemake.input.regions
     load_paths = snakemake.input["load"]
