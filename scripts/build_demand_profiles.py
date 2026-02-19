@@ -320,6 +320,7 @@ def build_demand_profiles(
 
         if not os.path.exists(load_paths):
             url = "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+            logger.info(f"Downloading DemandCast data into {load_paths}")
             progress_retrieve(url, load_paths)
 
         demcast_load = read_demcast_load(
