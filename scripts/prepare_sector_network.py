@@ -22,7 +22,6 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
-    override_component_attrs,
     prepare_costs,
     safe_divide,
     sanitize_carriers,
@@ -1297,8 +1296,26 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     )
 
 
-def add_storage(n, costs):
-    "function to add the different types of storage systems"
+def fetch_existing_battery_capacity_from_elec(n_elec):
+    """
+    Read existing battery capacity from the electricity network and
+    return a dict {bus_name: p_nom_MW} aggregated per AC bus.
+    """
+    if getattr(n_elec, "storage_units", None) is None or n_elec.storage_units.empty:
+        return {}
+
+    su = n_elec.storage_units
+    bat = su[su.carrier == "battery"]
+    if bat.empty:
+        return {}
+
+    # Aggregate capacity per bus (MW)
+    return bat.groupby("bus")["p_nom"].sum().to_dict()
+
+
+def add_storage(n, costs, existing_battery_capacity=None):
+    """Function to add battery storage to the sector network, including
+    carry-over of existing capacities from the electricity network."""
     logger.info("Add battery storage")
 
     n.add("Carrier", "battery")
@@ -1312,12 +1329,30 @@ def add_storage(n, costs):
         y=n.buses.loc[list(spatial.nodes)].y.values,
     )
 
+    # Existing battery capacity per AC node (MW) passed in
+    if existing_battery_capacity is None:
+        existing_battery_capacity = {}
+
+    total = float(sum(existing_battery_capacity.values()))
+    nodes_with_cap = len([p for p in existing_battery_capacity.values() if p > 0])
+    logger.info(
+        f"Battery carry-over from elec.nc: {total/1e3:.2f} GW across {nodes_with_cap} nodes."
+    )
+
+    # Use configured max_hours for battery duration
+    battery_duration = snakemake.params.electricity["max_hours"]["battery"]
+
+    # Per-node existing capacity (MW) aligned to spatial.nodes (AC buses)
+    p_nom_min = pd.Series(existing_battery_capacity).reindex(spatial.nodes).fillna(0.0)
+    e_nom_min = p_nom_min * battery_duration  # MWh
+
     n.madd(
         "Store",
         spatial.nodes + " battery",
         bus=spatial.nodes + " battery",
         e_cyclic=True,
         e_nom_extendable=True,
+        e_nom_min=e_nom_min.values,
         carrier="battery",
         capital_cost=costs.at["battery storage", "fixed"],
         lifetime=costs.at["battery storage", "lifetime"],
@@ -1332,6 +1367,7 @@ def add_storage(n, costs):
         efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
         capital_cost=costs.at["battery inverter", "fixed"],
         p_nom_extendable=True,
+        p_nom_min=p_nom_min.values,
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
@@ -1344,6 +1380,7 @@ def add_storage(n, costs):
         efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
         marginal_cost=options["marginal_cost_storage"],
         p_nom_extendable=True,
+        p_nom_min=p_nom_min.values,
         lifetime=costs.at["battery inverter", "lifetime"],
     )
 
@@ -2851,15 +2888,53 @@ def add_electricity_distribution_grid(n, costs):
     n.links.loc[mchp, "bus1"] += " low voltage"
 
     if options.get("solar_rooftop", False):
-        logger.info("Adding solar rooftop technology")
+        if isinstance(options["solar_rooftop"], dict):
+            enable_solar_rooftop = options["solar_rooftop"]["enable"]
+            solar_opts = options["solar_rooftop"]
+        else:
+            enable_solar_rooftop = True
+            solar_opts = {}
+
+    if enable_solar_rooftop:
         # set existing solar to cost of utility cost rather the 50-50 rooftop-utility
         solar = n.generators.index[n.generators.carrier == "solar"]
         n.generators.loc[solar, "capital_cost"] = costs.at["solar-utility", "fixed"]
-        pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
 
-        # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
-        # i.e. 2 kW/person (population data is in thousands of people) so we get MW
-        potential = 0.1 * 20 * pop_solar
+        if solar_opts.get("use_building_size"):
+            solar_logger = "building_size"
+
+            solar_rooftop_layout = pd.concat(
+                [
+                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    for fn in snakemake.input.keys()
+                    if "solar_rooftop_layout" in fn
+                ]
+            )
+            solar_rooftop_layout = solar_rooftop_layout["usefull_area"].rename(
+                index=lambda x: x + " solar"
+            )
+
+            potential = (
+                solar_opts.get("kW_per_m2", 0.1)
+                * 1e-3  # kW to MW
+                * solar_rooftop_layout
+            )
+
+        else:
+            solar_logger = "population distribution"
+            pop_solar = pop_layout.total.rename(index=lambda x: x + " solar")
+
+            # add max solar rooftop potential assuming 0.1 kW/m2 and 20 m2/person,
+            # i.e. 2 kW/person (population data is in thousands of people) so we get MW
+            potential = (
+                solar_opts.get("kW_per_m2", 0.1)
+                * solar_opts.get("m2_per_person", 20)
+                * pop_solar
+            )
+
+        logger.info(
+            f"Adding solar rooftop technology with potential based on {solar_logger}"
+        )
 
         n.madd(
             "Generator",
@@ -3084,9 +3159,8 @@ def remove_carrier_related_components(n, carriers_to_drop):
         n.mremove(c.name, names)
 
     # remove links connected to buses that were removed
-    links_to_remove = n.links.query(
-        "bus0 in @buses_to_remove or bus1 in @buses_to_remove or bus2 in @buses_to_remove or bus3 in @buses_to_remove or bus4 in @buses_to_remove"
-    ).index
+    bus_cols = [c for c in n.links.columns if c.startswith("bus")]
+    links_to_remove = n.links[n.links[bus_cols].isin(buses_to_remove).any(axis=1)].index
     logger.info(
         f"Removing links with carrier {list(n.links.loc[links_to_remove].carrier.unique())}"
     )
@@ -3116,8 +3190,7 @@ if __name__ == "__main__":
     enable = options["enable"]
 
     # Load input network
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
 
     # Fetch the country list from the network
     # countries = list(n.buses.country.unique())
@@ -3129,7 +3202,7 @@ if __name__ == "__main__":
     # clustering of regions must be double checked.. refer to regions onshore
 
     # Add location. TODO: move it into pypsa-earth
-    n.buses.location = n.buses.index
+    n.buses.loc[:, "location"] = n.buses.index
 
     # Set carrier of AC loads
     existing_nodes = [node for node in acnodes if node in n.loads.index]
@@ -3188,6 +3261,18 @@ if __name__ == "__main__":
     else:
         existing_capacities, existing_efficiencies, existing_nodes = 0, None, None
 
+    if options.get("keep_existing_capacities", False):
+        total_cap = (
+            sum(v.sum() for v in existing_capacities.values()) / 1e3
+            if existing_capacities
+            else 0
+        )
+        n_plants = sum(len(v) for v in existing_nodes.values()) if existing_nodes else 0
+        logger.info(
+            f"Imported {n_plants} existing conventional units "
+            f"with total capacity {total_cap:.1f} GW from electricity network."
+        )
+
     add_co2(n, costs, options["co2_network"])  # TODO add costs
 
     # remove conventional generators built in elec-only model
@@ -3195,12 +3280,16 @@ if __name__ == "__main__":
 
     add_generation(n, costs, existing_capacities, existing_efficiencies, existing_nodes)
 
+    # Fetch existing battery capacities directly from the input network (elec.nc)
+    existing_batt = fetch_existing_battery_capacity_from_elec(n)
+
     # remove H2 and battery technologies added in elec-only model
     remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
     add_hydrogen(n, costs)  # TODO add costs
 
-    add_storage(n, costs)
+    # Add storage using carried-over capacities
+    add_storage(n, costs, existing_battery_capacity=existing_batt)
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)

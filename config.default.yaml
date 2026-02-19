@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: 0.7.0
+version: 0.8.0
 tutorial: false
 
 logging:
@@ -23,6 +23,7 @@ enable:
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
@@ -116,7 +117,9 @@ cluster_options:
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
   simplify_gadm: true # When true, shape polygons are simplified else no
+  minarea: 0.01 # Minimum area of polygons to be retained in GADM shapes after simplification, in square degrees. Polygons with area smaller than this value will be removed
   update_file: false # When true, all the input files are downloaded again and replace the existing files
   out_logging: true # When true, logging is printed to console
   year: 2020 # reference year used to derive shapes, info on population and info on GDP
@@ -207,7 +210,7 @@ electricity:
     Store: [battery, H2]
     Link: [] # H2 pipeline
 
-  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut)
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
   custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
@@ -602,9 +605,11 @@ sector:
     # 2040: 0.6
     # 2050: 1.0
     district_heating_loss: 0.15
-  reduce_space_heat_exogenously: true # reduces space heat demand by a given factor (applied before losses in DH)
+  reduce_space_heat_exogenously: false # reduces space heat demand by a given factor (applied before losses in DH)
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth
+  # NB The value of space heat reduction are Europe-specific
+  # if they usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
   # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
   # 2020: 0.10  # this results in a space heat demand reduction of 10%
@@ -657,7 +662,22 @@ sector:
   efficiency_heat_gas_to_elec: 0.9
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
-  solar_rooftop: true # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+    enable: true
+    kW_per_m2: 0.1
+    m2_per_person: 20
+    use_building_size: false
+    # proportion of rooftop suitable for PV installation
+    install_ratio:
+      0: 0
+      10: 0.3
+      100: 0.36
+      200: 0.41
+      450: 0.49
+      2300: 0.66
+     # maximum distance [km] to allocate a building within the nearest bus shapes
+    tolerance: 100
+
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
   transmission_efficiency:
     electricity distribution grid:
@@ -777,12 +797,12 @@ solving:
       # refer to https://ergo-code.github.io/HiGHS/dev/options/definitions/
       threads: 4
       solver: "ipm"
-      run_crossover: "off"
+      run_crossover: "on"
       small_matrix_value: 1e-6
-      large_matrix_value: 1e9
-      primal_feasibility_tolerance: 1e-5
-      dual_feasibility_tolerance: 1e-5
-      ipm_optimality_tolerance: 1e-4
+      large_matrix_value: 1e15
+      primal_feasibility_tolerance: 1e-6
+      dual_feasibility_tolerance: 1e-6
+      ipm_optimality_tolerance: 1e-6
       parallel: "on"
       random_seed: 123
     gurobi-default:
