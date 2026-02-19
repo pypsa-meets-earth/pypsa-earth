@@ -88,6 +88,8 @@ PyPSA-Earth 0.8.0
 
 * Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
 
+* Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings `PR #1608 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608>`__
+
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
 * Add missing colors for energy carriers in the sector-coupled model `PR #1625 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625>`__
