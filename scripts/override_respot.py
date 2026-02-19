@@ -36,7 +36,7 @@ def override_values(tech, year, dr):
 
     if tech.replace("-", " ") in n.generators.carrier.unique():
         to_drop = n.generators[n.generators.carrier == tech].index
-        n.mremove("Generator", to_drop)
+        n.remove("Generator", to_drop)
 
     if snakemake.wildcards["planning_horizons"] == 2050:
         directory = "results/" + snakemake.params.run.replace("2050", "2030")
@@ -50,7 +50,7 @@ def override_values(tech, year, dr):
     else:
         existing_res = custom_res["installedcapacity"].values
 
-    n.madd(
+    n.add(
         "Generator",
         buses,
         " " + tech,

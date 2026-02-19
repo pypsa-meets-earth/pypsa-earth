@@ -5,26 +5,28 @@
 
 # -*- coding: utf-8 -*-
 
-import calendar
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
 import time
 import zipfile
-from datetime import datetime, timedelta
 from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
+
+PYPSA_V1 = bool(re.match(r"^1\.\d", pypsa.__version__))
 
 logger = logging.getLogger(__name__)
 

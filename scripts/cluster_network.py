@@ -573,7 +573,7 @@ def clustering_for_n_clusters(
     )
 
     if not n.links.empty:
-        nc = clustering.network
+        nc = clustering.n
         nc.links["underwater_fraction"] = (
             n.links.eval("underwater_fraction * length").div(nc.links.length).dropna()
         )
@@ -585,7 +585,7 @@ def clustering_for_n_clusters(
             fill_value=0,
         )
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
-        clustering.network.lines["underwater_fraction"] = 0
+        clustering.n.lines["underwater_fraction"] = 0
 
     return clustering
 
@@ -751,19 +751,17 @@ if __name__ == "__main__":
             focus_weights=focus_weights,
         )
 
-    update_p_nom_max(clustering.network)
+    nc = clustering.n
+
+    update_p_nom_max(nc)
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
         country_shapes = snakemake.input.country_shapes
-        clustering.network = nearest_shape(
-            clustering.network, country_shapes, crs, tolerance=tolerance
-        )
+        nc = nearest_shape(nc, country_shapes, crs, tolerance=tolerance)
 
-    clustering.network.meta = dict(
-        snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
-    )
-    clustering.network.export_to_netcdf(outputs.network)
+    nc.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    nc.export_to_netcdf(outputs.network)
     for attr in (
         "busmap",
         "linemap",

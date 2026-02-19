@@ -107,7 +107,6 @@ from pypsa.clustering.spatial import (
     busmap_by_stubs,
     get_clustering_from_busmap,
 )
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
@@ -155,8 +154,8 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
             if col.startswith("bus"):
                 df[col] = df[col].map(trafo_map)
 
-    n.mremove("Transformer", n.transformers.index)
-    n.mremove("Bus", n.buses.index.difference(trafo_map))
+    n.remove("Transformer", n.transformers.index)
+    n.remove("Bus", n.buses.index.difference(trafo_map))
 
     return n, trafo_map
 
@@ -269,12 +268,12 @@ def _aggregate_and_move_components(
     exclude_carriers=None,
 ):
     def replace_components(n, c, df, pnl):
-        n.mremove(c, n.df(c).index)
+        n.remove(c, n.df(c).index)
 
-        import_components_from_dataframe(n, df, c)
+        n.add(c, df.index, **df)
         for attr, df in pnl.items():
             if not df.empty:
-                import_series_from_dataframe(n, df, c, attr)
+                n._import_series_from_df(df, c, attr)
 
     _adjust_capital_costs_using_connection_costs(
         n,
@@ -301,10 +300,10 @@ def _aggregate_and_move_components(
         replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
-    n.mremove("Bus", buses_to_del)
+    n.remove("Bus", buses_to_del)
     for c in n.branch_components:
         df = n.df(c)
-        n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
+        n.remove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
 
 # Filter AC lines to avoid mixing with DC part when processing links
@@ -483,8 +482,8 @@ def simplify_links(
                 )
             )
 
-            n.mremove("Link", all_links)
-            n.mremove("Line", all_dc_lines)
+            n.remove("Link", all_links)
+            n.remove("Line", all_dc_lines)
 
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.items():
@@ -617,7 +616,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 def cluster(
@@ -680,7 +679,7 @@ def cluster(
         focus_weights=focus_weights,
     )
 
-    return clustering.network, clustering.busmap
+    return clustering.n, clustering.busmap
 
 
 def drop_isolated_networks(n, threshold):
@@ -738,11 +737,11 @@ def drop_isolated_networks(n, threshold):
         n.lines.bus0.isin(i_islands) | n.lines.bus1.isin(i_islands)
     ].index
 
-    n.mremove("Bus", i_islands)
-    n.mremove("Load", i_loads_drop)
-    n.mremove("Generator", i_generators_drop)
-    n.mremove("Link", i_links_drop)
-    n.mremove("Line", i_lines_drop)
+    n.remove("Bus", i_islands)
+    n.remove("Load", i_loads_drop)
+    n.remove("Generator", i_generators_drop)
+    n.remove("Link", i_links_drop)
+    n.remove("Line", i_lines_drop)
 
     n.determine_network_topology()
 
@@ -843,7 +842,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
 
     i_lines_islands = n.lines.loc[n.lines.bus1.isin(gdf_islands.index)].index
-    n.mremove("Line", i_lines_islands)
+    n.remove("Line", i_lines_islands)
 
     isolated_buses_mapping = (
         gdf_map[["bus_id_right"]].droplevel("country").to_dict()["bus_id_right"]
@@ -886,7 +885,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         f"Fetched {len(gdf_islands)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
@@ -974,7 +973,7 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
         f"Merged {len(i_islands_merge)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 if __name__ == "__main__":
