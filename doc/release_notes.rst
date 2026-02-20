@@ -23,6 +23,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
 
+* Fix missing bus warning for hydrogen due to pypsa version change `PR #1723 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723>`__
+
 PyPSA-Earth 0.8.0
 =================
 
