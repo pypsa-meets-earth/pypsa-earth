@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Improve hydro scaling to ensure total inflows match by technology `PR #1707 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1707>`__
+
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
 
 **Minor Changes and bug-fixing**
