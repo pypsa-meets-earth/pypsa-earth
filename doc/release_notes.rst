@@ -13,6 +13,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units.
+  Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` `PR <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731>`__
+
+* Migrate all cost data processing to ``process_cost_data.py`` `PR <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1719>`__
+
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
 
 **Minor Changes and bug-fixing**

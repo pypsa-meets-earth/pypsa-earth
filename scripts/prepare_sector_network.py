@@ -22,13 +22,13 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
-    prepare_costs,
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
+from add_extra_components import attach_storageunits, attach_stores
 from prepare_network import add_co2limit
 from prepare_transport_data import prepare_transport_data
 
@@ -3226,16 +3226,7 @@ if __name__ == "__main__":
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
     # Prepare the costs dataframe
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+    costs = pd.read_csv(snakemake.input.costs, index_col=0)
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
@@ -3290,8 +3281,30 @@ if __name__ == "__main__":
     # Fetch existing battery capacities directly from the input network (elec.nc)
     existing_batt = fetch_existing_battery_capacity_from_elec(n)
 
-    # remove H2 and battery technologies added in elec-only model
-    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
+    # remove H2 and storage technologies added in elec-only model
+    extendable_carriers = snakemake.params.electricity["extendable_carriers"]
+    carriers_to_drop = extendable_carriers["Store"] + extendable_carriers["StorageUnit"]
+    remove_carrier_related_components(n, carriers_to_drop=carriers_to_drop)
+
+    # reinclude storage technologies (excl. H2 related technologies)
+    attach_stores(
+        n,
+        costs,
+        spatial.nodes,
+        extendable_carriers["Store"],
+        include_H2=False,
+        cost_name="fixed",
+    )
+
+    attach_storageunits(
+        n,
+        costs,
+        spatial.nodes,
+        extendable_carriers["StorageUnit"],
+        snakemake.params.electricity["max_hours"],
+        include_H2=False,
+        cost_name="fixed",
+    )
 
     add_hydrogen(n, costs)  # TODO add costs
 

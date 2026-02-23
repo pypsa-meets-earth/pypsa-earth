@@ -56,7 +56,7 @@ import os
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import create_logger, load_costs, update_transmission_costs
+from add_electricity import create_logger, update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -484,7 +484,7 @@ outputs = [
 ]
 
 
-def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all"):
+def make_summaries(networks_dict, inputs, country="all"):
     columns = pd.MultiIndex.from_tuples(
         networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
     )
@@ -509,13 +509,7 @@ def make_summaries(networks_dict, inputs, cost_config, elec_config, country="all
         if country != "all":
             n = n[n.buses.country == country]
 
-        Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-        costs = load_costs(
-            inputs.tech_costs,
-            cost_config,
-            elec_config,
-            Nyears,
-        )
+        costs = pd.read_csv(inputs.tech_costs, index_col=0)
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
 
         assign_carriers(n)
@@ -580,8 +574,6 @@ if __name__ == "__main__":
     dfs = make_summaries(
         networks_dict,
         snakemake.input,
-        snakemake.params.costs,
-        snakemake.params.electricity,
         country=snakemake.wildcards.country,
     )
 
