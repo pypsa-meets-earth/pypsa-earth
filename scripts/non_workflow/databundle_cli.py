@@ -126,8 +126,7 @@ def databundle_check(bundles_to_download, config):
                 f"""The databundle **{", ".join(unextractable_bundle)}** can only be retrieved automatically."""
             )
 
-    console_markdown(
-        f"""
+    console_markdown(f"""
     Options:
 
     - **check**: update the checklist table to see if the file is now included
@@ -135,16 +134,14 @@ def databundle_check(bundles_to_download, config):
     - **rerun**: get all databundles again: **{", ".join(bundles_to_download)}**
     - **bundle_...**: get selected databundles, can be more than one
     - Press **ENTER** to exit
-    """
-    )
+    """)
 
     return missing_bundles
 
 
 if __name__ == "__main__":
 
-    console_markdown(
-        """
+    console_markdown("""
 
     # PyPSA-Earth Databundle Retrieval Command-Line Interface (CLI)
 
@@ -153,8 +150,7 @@ if __name__ == "__main__":
 
     - Set `retrieve_databundle` as false
 
-    """
-    )
+    """)
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
