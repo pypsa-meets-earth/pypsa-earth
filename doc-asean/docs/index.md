@@ -3,6 +3,7 @@
 **PyPSA-ASEAN: An ASEAN-Focused Sector-Coupled Open-Source Multi-Energy System Model**
 
 ![elec-ASEAN](Images/elec-ASEAN.png)
+<p align="center"><b> Figure:</b> ASEAN power system. Transmission data from OpenStreetMaps and national power development plans. Capacity data from powerplantmatching. Data extracted in 2025.</p>
 
 PyPSA-ASEAN is the first open-source ASEAN-wide cross-sectoral energy system model with high spatial and temporal resolution. It builds on the existing PyPSA-Earth framework and integrates region-specific data tailored to the context of the Southeast Asia region. It aims to leverage the ongoing improvements in PyPSA-Earth using the soft-fork strategy while making it as easy as possible for users to create validated models of individual ASEAN countries or the entire region at once.
 

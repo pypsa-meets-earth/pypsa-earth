@@ -10,6 +10,7 @@ This chapter documents the analysis resources, notebooks, and downloadable scena
 > Full results are currently under review
 
 ![validation](../Images/validation.png)
+<p align="center"><b> Figure:</b> Model validation benchmarking PyPSA-ASEAN (2025) against Ember historical data. The plots compare electricity demand (top), generation (middle), and installed capacity (bottom) disaggregated by country (left) and technology (right). Historical data represents 2024 for most regions, with Brunei Darussalam, Laos, and Timor-Leste limited to 2023 levels.</p>
 
 We evaluate the validity of the PyPSA-ASEAN model by benchmarking it against historical regional energy data. The Ember Yearly Electricity Data (2025) [^30] serves as the reference for electricity demand, installed capacity, and generation, which are summarized in Figure 3. Regarding the recency of the dataset, data is available up to the year 2024 for the majority of the region. However, data for Brunei Darussalam, Laos, and Timor-Leste is limited to the year 2023.
 
