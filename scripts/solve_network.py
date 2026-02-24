@@ -701,7 +701,7 @@ def add_h2_network_cap(n, cap):
     h2_network_cap = n.model["Link-p_nom"]
     h2_network_cap_index = h2_network_cap.indexes["Link-ext"]
     subset_index = h2_network.index.intersection(h2_network_cap_index)
-    diff_index = h2_network_cap_index.difference(subset_index)
+    diff_index = h2_network.index.difference(subset_index)
     if len(diff_index) > 0:
         logger.warning(
             f"Impossible to set a limit for H2 pipelines extension for the following links: {diff_index}"
@@ -1203,3 +1203,4 @@ if __name__ == "__main__":
     n.export_to_netcdf(snakemake.output[0])
     logger.info(f"Objective function: {n.objective}")
     logger.info(f"Objective constant: {n.objective_constant}")
+
