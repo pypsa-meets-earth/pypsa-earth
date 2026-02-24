@@ -21,6 +21,11 @@ from _helpers import (
     BASE_DIR,
     branch,  # Remove if Snakemake >= 8.3.0
 )
+from _helpers_output import (
+    check_config_keys,
+    update_cutout,
+    parse_config,
+)
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
@@ -41,6 +46,12 @@ configfile: "config.yaml"
 
 
 check_config_version(config=config)
+
+check_config_keys(config, fl="config.yaml")
+
+config = update_cutout(config, "config.yaml")
+
+# parse_config(config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 
