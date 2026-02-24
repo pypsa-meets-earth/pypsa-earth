@@ -18,6 +18,7 @@ from _helpers import (
     save_to_geojson,
     to_csv_nafix,
 )
+from shapely.ops import linemerge
 
 logger = create_logger(__name__)
 
@@ -750,8 +751,17 @@ def filter_lines_by_geometry(df_all_lines):
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
-    # remove lines represented as Polygons
-    df_all_lines = df_all_lines[df_all_lines.geometry.geom_type == "LineString"]
+    idx_mls = df_all_lines.geometry.geom_type == "MultiLineString"
+    for idx, row in df_all_lines[idx_mls].iterrows():
+        df_all_lines.loc[idx, "geometry"] = linemerge(row.geometry)
+
+    df_drop = df_all_lines[df_all_lines.geometry.geom_type != "LineString"]
+    if not df_drop.empty:
+        # remove lines represented as Polygons or multilinestrings
+        logger.warning(
+            f"Dropping {len(df_drop)} lines with unexpected geometry types:\n{df_drop} "
+        )
+        df_all_lines.drop(df_drop.index, axis=0, inplace=True)
 
     return df_all_lines
 
