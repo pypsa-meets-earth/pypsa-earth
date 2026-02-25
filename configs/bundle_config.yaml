@@ -198,7 +198,7 @@ databundles:
     unzip: false
     output:
     - data/demand/forecasts_on_historical_period.parquet
-  
+
   # IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators.
   # Used in build_renewable_profiles.py to derive hydropower generation potentials.
   # Original source: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx

@@ -64,6 +64,10 @@ from shapely.validation import make_valid
 
 logger = create_logger(__name__)
 
+DEMCAST_URL = (
+    "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+)
+
 
 def normed(s):
     if s.sum() == 0:
@@ -319,7 +323,7 @@ def build_demand_profiles(
         load_paths = "data/demand/forecasts_on_historical_period.parquet"
 
         if not os.path.exists(load_paths):
-            url = "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+            url = DEMCAST_URL
             logger.info(f"Downloading DemandCast data into {load_paths}")
             progress_retrieve(url, load_paths)
 
