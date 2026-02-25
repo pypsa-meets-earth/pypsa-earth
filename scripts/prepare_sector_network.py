@@ -197,6 +197,8 @@ def H2_liquid_fossil_conversions(n, costs):
 
 def add_hydrogen(n, costs):
     "function to add hydrogen as an energy carrier with its conversion technologies from and to AC"
+    remove_carrier_related_components(n, carriers_to_drop=["H2"])
+
     logger.info("Adding hydrogen")
 
     n.add("Carrier", "H2")
@@ -1323,6 +1325,8 @@ def fetch_existing_battery_capacity_from_elec(n_elec):
 def add_storage(n, costs, existing_battery_capacity=None):
     """Function to add battery storage to the sector network, including
     carry-over of existing capacities from the electricity network."""
+    remove_carrier_related_components(n, carriers_to_drop=["battery"])
+
     logger.info("Add battery storage")
 
     n.add("Carrier", "battery")
@@ -3289,9 +3293,6 @@ if __name__ == "__main__":
 
     # Fetch existing battery capacities directly from the input network (elec.nc)
     existing_batt = fetch_existing_battery_capacity_from_elec(n)
-
-    # remove H2 and battery technologies added in elec-only model
-    remove_carrier_related_components(n, carriers_to_drop=["H2", "battery"])
 
     add_hydrogen(n, costs)  # TODO add costs
 
