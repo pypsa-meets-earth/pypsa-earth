@@ -31,6 +31,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix missing bus warning for hydrogen due to pypsa version change `PR #1723 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723>`__
 
+* Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
+
 PyPSA-Earth 0.8.0
 =================
 
