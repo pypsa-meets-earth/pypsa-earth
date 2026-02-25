@@ -243,7 +243,7 @@ def get_eia_annual_hydro_generation(fn, countries):
     df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
     df.index = df.index.str.strip()
 
-    df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
+    df.loc["Germany"] = df.filter(like="Germany", axis=0).astype(float).sum()
     df.loc["Serbia"] += df.loc["Kosovo"]
     df = df.loc[~df.index.str.contains("Former")]
     df.drop(["World", "Germany, West", "Germany, East"], inplace=True)
@@ -251,7 +251,7 @@ def get_eia_annual_hydro_generation(fn, countries):
     df.index = cc.convert(df.index, to="iso2")
     df.index.name = "countries"
 
-    df = df.T[countries] * 1e6  # in MWh/a
+    df = df.T[countries].astype(float) * 1e6  # in MWh/a
     df.index = df.index.astype(int)
 
     return df
