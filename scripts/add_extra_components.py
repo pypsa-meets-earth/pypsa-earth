@@ -61,7 +61,6 @@ from _helpers import (
     configure_logging,
     create_logger,
     lossy_bidirectional_links,
-    override_component_attrs,
     set_length_based_efficiency,
 )
 from add_electricity import (
@@ -285,8 +284,7 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     transmission_efficiency = snakemake.params.transmission_efficiency
     config = snakemake.config
