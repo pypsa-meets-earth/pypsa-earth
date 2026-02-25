@@ -13,6 +13,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Use IRENA statistics for 2023 to normalize countries hydropower generation data `PR #1681 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681>`__
+
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
 
 **Minor Changes and bug-fixing**
