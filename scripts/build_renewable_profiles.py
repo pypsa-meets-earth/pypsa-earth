@@ -257,6 +257,45 @@ def get_eia_annual_hydro_generation(fn, countries):
     return df
 
 
+def get_irena_annual_hydro_generation(fn, countries):
+    """
+    Load annual renewable hydropower generation data from the IRENA Country sheet.
+    Convert ISO3 country codes to ISO2 and annual generation from GWh to MWh.
+
+    Original source:
+    https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
+
+    Note
+    ----
+    IRENA energy statistics dataset is available for non-commercial use only.
+    Users are responsible for ensuring compliance with the dataset’s licensing terms.
+    """
+    df = pd.read_excel(fn, sheet_name="Country")
+
+    iso3_to_iso2 = {coco.convert(names=name, to="ISO3"): name for name in countries}
+
+    df = (
+        df.query(
+            "Technology == 'Renewable hydropower' "
+            "and `Producer Type` != 'All types' "
+            "and `ISO3 code` in @iso3_to_iso2"
+        )
+        .assign(countries=df["ISO3 code"].replace(iso3_to_iso2))
+        .groupby(["countries", "Year"])["Electricity Generation (GWh)"]
+        .sum()
+        .unstack("countries")
+        .fillna(0)
+        .mul(1e3)
+    )
+
+    missing_countries = set(countries) - set(df.columns)
+
+    for c in missing_countries:
+        df[c] = 0.0
+
+    return df
+
+
 def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
         pd.read_csv(
@@ -542,7 +581,7 @@ if __name__ == "__main__":
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
         resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
-        ppls = load_powerplants(snakemake.input.powerplants)
+        ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
@@ -595,7 +634,7 @@ if __name__ == "__main__":
                 method = normalization["method"]
                 norm_year = normalization.get("year", int(inflow.time[0].dt.year))
                 if method == "hydro_capacities":
-                    path_hydro_capacities = snakemake.input.hydro_capacities
+                    path_hydro_capacities = paths.hydro_capacities
                     normalize_using_yearly = (
                         get_hydro_capacities_annual_hydro_generation(
                             path_hydro_capacities, countries, norm_year
@@ -603,9 +642,15 @@ if __name__ == "__main__":
                     )
 
                 elif method == "eia":
-                    path_eia_stats = snakemake.input.eia_hydro_generation
+                    path_eia_stats = paths.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
                         path_eia_stats, countries
+                    )
+
+                elif method == "irena":
+                    path_irena_stats = paths.irena_stats
+                    normalize_using_yearly = get_irena_annual_hydro_generation(
+                        path_irena_stats, countries
                     )
 
                 inflow = rescale_hydro(
