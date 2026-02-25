@@ -13,15 +13,25 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Use IRENA statistics for 2023 to normalize countries hydropower generation data `PR #1681 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681>`__
+
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
 
 **Minor Changes and bug-fixing**
 
+* Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying `PR #1662 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662>`__
+
 * Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
 
-* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705>`__ and `PR #1733 https://github.com/pypsa-meets-earth/pypsa-earth/pull/1733>`__
 
 * Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
+
+* Update eia hydro database up to 2023 `PR #1703 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1703>`__
+
+* Fix missing bus warning for hydrogen due to pypsa version change `PR #1723 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723>`__
+
+* Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
 
 PyPSA-Earth 0.8.0
 =================
@@ -85,6 +95,8 @@ PyPSA-Earth 0.8.0
 * Bug-fixing override co2opt in add_co2_budget `PR #1597 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1597>`__
 
 * Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
+
+* Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings `PR #1608 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608>`__
 
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
