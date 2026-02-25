@@ -21,6 +21,17 @@ from _helpers import BASE_DIR, read_csv_nafix, three_2_two_digits_country
 
 _logger = logging.getLogger(__name__)
 
+THERMAL_LOAD_COLS = [
+    "share_heat_resid_demand",
+    "share_water_resid_demand",
+    "share_heat_services_demand",
+    "share_water_services_demand",
+    "share_cool_resid_demand",
+    "share_cool_services_demand",
+    "share_electricity_resid_space",
+    "share_electricity_services_space",
+]
+
 
 def get(item, investment_year=None):
     """
@@ -70,6 +81,7 @@ if __name__ == "__main__":
     )
     fuel_shares = read_csv_nafix(snakemake.input.fuel_shares, index_col=0)
     district_heating = read_csv_nafix(snakemake.input.district_heating, index_col=0)
+    thermal_loads = read_csv_nafix(snakemake.input.thermal_loads, index_col=0)
 
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.params.base_year
@@ -79,7 +91,8 @@ if __name__ == "__main__":
         fill_country_data(efficiency_gains_cagr, country, label="efficiency gains CAGR")
         fill_country_data(growth_factors_cagr, country, label="growth factors CAGR")
         fill_country_data(fuel_shares, country, label="fuel share")
-        fill_country_data(district_heating, country, label="heating")
+        fill_country_data(district_heating, country, label="district heating")
+        fill_country_data(thermal_loads, country, label="thermal loads")
 
     growth_factors = calculate_end_values(growth_factors_cagr)
     efficiency_gains = calculate_end_values(efficiency_gains_cagr)
@@ -87,6 +100,7 @@ if __name__ == "__main__":
     efficiency_gains = efficiency_gains[efficiency_gains.index.isin(countries)]
     fuel_shares = fuel_shares[fuel_shares.index.isin(countries)]
     district_heating = district_heating[district_heating.index.isin(countries)]
+    thermal_loads = thermal_loads[thermal_loads.index.isin(countries)]
     growth_factors = growth_factors[growth_factors.index.isin(countries)]
 
     options = snakemake.params.sector_options
@@ -293,5 +307,7 @@ if __name__ == "__main__":
 
     energy_totals["electricity services space"] = 0
     energy_totals["electricity services water"] = 0
+
+    energy_totals[THERMAL_LOAD_COLS] = thermal_loads[THERMAL_LOAD_COLS]
 
     energy_totals.fillna(0).to_csv(snakemake.output.energy_totals)

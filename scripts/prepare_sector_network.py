@@ -939,6 +939,65 @@ def define_spatial(nodes, options):
     return spatial
 
 
+def create_nodes_for_heat_sector(district_heat_share):
+    # TODO pop_layout
+
+    # rural are areas with low heating density and individual heating
+    # urban are areas with high heating density
+    # urban can be split into district heating (central) and individual heating (decentral)
+
+    ct_urban = pop_layout.urban.groupby(pop_layout.ct).sum()
+    # distribution of urban population within a country
+    pop_layout["urban_ct_fraction"] = pop_layout.urban / pop_layout.ct.map(ct_urban.get)
+
+    sectors = ["residential", "services"]
+
+    h_nodes = {}
+    urban_fraction = pop_layout.urban / pop_layout[["rural", "urban"]].sum(axis=1)
+
+    for sector in sectors:
+        h_nodes[sector + " rural"] = pop_layout.index
+        h_nodes[sector + " urban decentral"] = pop_layout.index
+
+    # maximum potential of urban demand covered by district heating
+    central_fraction = options["district_heating"]["potential"]
+    # district heating share at each node
+    dist_fraction_node = (
+        district_heat_share["district heat share"]
+        * pop_layout["urban_ct_fraction"]
+        # NB pop_layout["fraction"] can be zero
+        / (pop_layout.fraction.where(pop_layout.fraction != 0, np.nan))
+    ).replace(np.inf, 0)
+    h_nodes["urban central"] = dist_fraction_node.index
+    # if district heating share larger than urban fraction -> set urban
+    # fraction to district heating share
+    urban_fraction = pd.concat([urban_fraction, dist_fraction_node], axis=1).max(axis=1)
+    # difference of max potential and today's share of district heating
+    diff = (urban_fraction * central_fraction) - dist_fraction_node
+    progress = get(options["district_heating"]["progress"], investment_year)
+    dist_fraction_node += diff * progress
+    # logger.info(
+    #     "The current district heating share compared to the maximum",
+    #     f"possible is increased by a progress factor of\n{progress}",
+    #     "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
+    # )
+
+    return h_nodes, dist_fraction_node, urban_fraction
+
+
+def create_nodes_for_cooling_sector():
+
+    # assume that all the cooling technologies are applicable both for urban and rural areas
+    # district heating is not accounted for
+    c_nodes = {}
+
+    # for sector in sectors:
+    #    c_nodes[sector + " rural"] = pop_layout.index
+    c_nodes["cooling" + " overall"] = pop_layout.index
+
+    return c_nodes
+
+
 def add_biomass(n, costs):
     logger.info("adding biomass")
 
@@ -2094,51 +2153,6 @@ def add_land_transport(
         )
 
 
-def create_nodes_for_heat_sector(district_heat_share):
-    # TODO pop_layout
-
-    # rural are areas with low heating density and individual heating
-    # urban are areas with high heating density
-    # urban can be split into district heating (central) and individual heating (decentral)
-
-    ct_urban = pop_layout.urban.groupby(pop_layout.ct).sum()
-    # distribution of urban population within a country
-    pop_layout["urban_ct_fraction"] = pop_layout.urban / pop_layout.ct.map(ct_urban.get)
-
-    sectors = ["residential", "services"]
-
-    h_nodes = {}
-    urban_fraction = pop_layout.urban / pop_layout[["rural", "urban"]].sum(axis=1)
-
-    for sector in sectors:
-        h_nodes[sector + " rural"] = pop_layout.index
-        h_nodes[sector + " urban decentral"] = pop_layout.index
-
-    # maximum potential of urban demand covered by district heating
-    central_fraction = options["district_heating"]["potential"]
-    # district heating share at each node
-    dist_fraction_node = (
-        district_heat_share["district heat share"]
-        * pop_layout["urban_ct_fraction"]
-        / pop_layout["fraction"]
-    )
-    h_nodes["urban central"] = dist_fraction_node.index
-    # if district heating share larger than urban fraction -> set urban
-    # fraction to district heating share
-    urban_fraction = pd.concat([urban_fraction, dist_fraction_node], axis=1).max(axis=1)
-    # difference of max potential and today's share of district heating
-    diff = (urban_fraction * central_fraction) - dist_fraction_node
-    progress = get(options["district_heating"]["progress"], investment_year)
-    dist_fraction_node += diff * progress
-    # logger.info(
-    #     "The current district heating share compared to the maximum",
-    #     f"possible is increased by a progress factor of\n{progress}",
-    #     "resulting in a district heating share of",  # "\n{dist_fraction_node}", #TODO fix district heat share
-    # )
-
-    return h_nodes, dist_fraction_node, urban_fraction
-
-
 def add_heat(
     n,
     costs,
@@ -2148,26 +2162,30 @@ def add_heat(
     ashp_cop_fn,
     district_heat_share_fn,
 ):
-    # Load data required for heat sector
+
+    logger.info("adding heat")
+
+    # Load data required for the heat sector
     heat_demand = pd.read_csv(
         heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
     ).fillna(0)
+
     # Solar thermal availability profiles
     solar_thermal = pd.read_csv(solar_thermal_fn, index_col=0, parse_dates=True)
+
     # Ground-sourced heatpump coefficient of performance
-    gshp_cop = pd.read_csv(gshp_cop_fn, index_col=0, parse_dates=True)
+    gshp_cop = pd.read_csv(
+        gshp_cop_fn, index_col=0, parse_dates=True
+    )  # only needed with heat dep. hp cop allowed from config
+    # TODO add option heat_dep_hp_cop to the config
+
     # Air-sourced heatpump coefficient of performance
     ashp_cop = pd.read_csv(
         ashp_cop_fn, index_col=0, parse_dates=True
     )  # only needed with heat dep. hp cop allowed from config
-    # TODO add option heat_dep_hp_cop to the config
 
     # Share of district heating at each node
     district_heat_share = pd.read_csv(district_heat_share_fn, index_col=0)
-    # TODO options?
-    # TODO pop_layout?
-
-    logger.info("adding heat")
 
     sectors = ["residential", "services"]
 
@@ -2175,6 +2193,7 @@ def add_heat(
         district_heat_share
     )
 
+    # TODO Check if the comment is still relevant
     # NB: must add costs of central heating afterwards (EUR 400 / kWpeak, 50a, 1% FOM from Fraunhofer ISE)
 
     # exogenously reduce space heat demand
@@ -2245,8 +2264,9 @@ def add_heat(
             p_set=heat_load,
         )
 
-        ## Add heat pumps
+        # Add "generators" for heating
 
+        ## Add heat pumps
         heat_pump_type = "air" if "urban" in name else "ground"
 
         costs_name = f"{name_type} {heat_pump_type}-sourced heat pump"
@@ -2450,6 +2470,138 @@ def add_heat(
                 capital_cost=costs.at["micro CHP", "fixed"],
                 lifetime=costs.at["micro CHP", "lifetime"],
             )
+
+
+def add_cooling(
+    n,
+    costs,
+    cooling_demand_fn,
+    cop_hp_fn,
+    cop_ac_fn,
+    capft_abch_fn,
+):
+    logger.info("adding cooling")
+
+    # Load data required for the cooling sector
+    cooling_demand = pd.read_csv(
+        cooling_demand_fn, index_col=0, header=[0, 1], parse_dates=True
+    ).fillna(0)
+
+    # Heatpump coefficient of performance when in cooling mode
+    hp_cooling_cop = pd.read_csv(cop_hp_fn, index_col=0, parse_dates=True)
+
+    # Air conditioners coefficient of performance
+    ac_cooling_cop = pd.read_csv(cop_ac_fn, index_col=0, parse_dates=True)
+
+    # Capacity coefficient of absorption chillers
+    abch_cooling_cop = pd.read_csv(capft_abch_fn, index_col=0, parse_dates=True)
+
+    c_nodes = create_nodes_for_cooling_sector()
+
+    # to keep the implementation generalizable name is used as a parameter
+    # in future can distinguish service/residential, central/decentral, urban/rural
+    cooling_systems = ["cooling overall"]
+
+    for name in cooling_systems:
+        n.add("Carrier", name + " cooling")
+
+        n.madd(
+            "Bus",
+            c_nodes[name] + " {} cooling".format(name),
+            location=c_nodes[name],
+            carrier=name + " cooling",
+        )
+
+        cooling_load = (
+            cooling_demand[["space"]]
+            .groupby(level=1, axis=1)
+            .sum()[c_nodes[name]]
+            # .multiply(factor)
+        )
+
+        n.madd(
+            "Load",
+            c_nodes[name],
+            suffix=f" {name} cooling",
+            bus=c_nodes[name] + f" {name} cooling",
+            carrier=name + " cooling",
+            p_set=cooling_load,
+        )
+
+        cop = {
+            "air conditioner": ac_cooling_cop,
+            "heat pump cooling": hp_cooling_cop,
+            "absorption chiller": abch_cooling_cop,
+        }
+
+        # Add air conditioners
+        efficiency = (
+            cop["air conditioner"][c_nodes[name]]
+            if options["time_dep_hp_cop"]
+            else cooling_costs.at["air conditioner", "efficiency"]
+        )
+
+        n.madd(
+            "Link",
+            c_nodes[name],
+            suffix=f" {name} air conditioner",
+            bus0=c_nodes[name],
+            bus1=c_nodes[name] + f" {name} cooling",
+            carrier=f"{name} air conditioner",
+            efficiency=efficiency,
+            capital_cost=cooling_costs.at["air conditioner", "efficiency"]
+            * cooling_costs.at["air conditioner", "fixed"],
+            p_nom_extendable=True,
+            lifetime=cooling_costs.at["air conditioner", "lifetime"],
+        )
+
+        # TODO Needs to be aligned better with the heating part
+        # Add heat pumps working in a cooling mode
+        efficiency = (
+            cop["heat pump cooling"][c_nodes[name]]
+            if options["time_dep_hp_cop"]
+            else cooling_costs.at["heat pump cooling", "efficiency"]
+        )
+
+        n.madd(
+            "Link",
+            c_nodes[name],
+            suffix=f" {name} heat pump cooling",
+            bus0=c_nodes[name],
+            bus1=c_nodes[name] + f" {name} cooling",
+            carrier=f"{name} heat pump cooling",
+            efficiency=efficiency,
+            capital_cost=cooling_costs.at[
+                "centralized geothermal heat pumps", "efficiency"
+            ]
+            * cooling_costs.at["centralized geothermal heat pumps", "fixed"],
+            p_nom_extendable=True,
+            lifetime=cooling_costs.at["centralized geothermal heat pumps", "lifetime"],
+        )
+
+        # Add absorption chillers
+        efficiency = (
+            cop["absorption chiller"][c_nodes[name]]
+            if options["time_dep_hp_cop"]
+            else cooling_costs.at["absorption chiller", "efficiency"]
+        )
+
+        # TODO An integration with a heat source is needed
+        # n.madd(
+        #    "Link",
+        #    c_nodes[name],
+        #    suffix=f" {name} absorption chiller",
+        #    bus0=waste_heat_source,
+        #    bus=c_nodes[name],
+        #    bus2=c_nodes[name] + f" {name} cooling",
+        #    carrier=f"{name} absorption chiller",
+        #    efficiency=cooling_costs.at["absorption chiller", "efficiency-heat"],
+        #    efficiency2=efficiency,
+        #    capital_cost=cooling_costs.at["absorption chiller", "efficiency"]
+        #    * cooling_costs.at["absorption chiller", "fixed"],
+        #    p_nom_extendable=True,
+        #    lifetime=cooling_costs.at["absorption chiller", "lifetime"],
+        # )
 
 
 def average_every_nhours(n, offset):
@@ -2697,7 +2849,7 @@ def add_residential(n, costs, energy_totals):
     heat_ind = (
         n.loads_t.p_set.filter(like="residential")
         .filter(like="heat")
-        .dropna(axis=1)
+        .fillna(0.0, axis=1)
         .columns
     )
     heat_shape_raw = normalize_by_country(n.loads_t.p_set[heat_ind])
@@ -2828,6 +2980,26 @@ def add_residential(n, costs, energy_totals):
 
     # Revise residential electricity demand
     buses = n.buses[n.buses.carrier == "AC"].index.intersection(n.loads_t.p_set.columns)
+
+    # Removing static loads from the time varying demand to preserve the distribution profile after normalization
+    static_load = (
+        n.loads.query('carrier.str.contains("electricity")').groupby("bus").p_set.sum()
+    )
+    n.loads_t.p_set.loc[:, buses] -= static_load
+    n.loads_t.p_set.loc[:, buses] = n.loads_t.p_set.loc[:, buses].clip(lower=0)
+
+    # Assuming that all cooling load is supplied by air conditioners
+    links_aircon = n.links.query("carrier.str.contains('air condit')")
+    cop_aircon = n.links_t.efficiency[links_aircon.index]
+    cool_load = (
+        n.loads_t.p_set[links_aircon.bus1].rename(
+            dict(zip(links_aircon.bus1, links_aircon.bus0)), axis="columns"
+        )
+        / cop_aircon.rename(
+            dict(zip(links_aircon.index, links_aircon.bus0)), axis="columns"
+        )
+    ).rename(dict(zip(links_aircon.bus1, links_aircon.bus0)), axis="columns")
+    n.loads_t.p_set.loc[:, buses] -= cool_load
 
     profile_pu = normalize_by_country(n.loads_t.p_set[buses]).fillna(0)
     n.loads_t.p_set.loc[:, buses] = p_set_from_scaling(
@@ -3180,9 +3352,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            clusters="10",
+            ll="copt",
+            opts="Co2L-24H",
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
@@ -3236,6 +3408,17 @@ if __name__ == "__main__":
         snakemake.params.costs["future_exchange_rate_strategy"],
         snakemake.params.costs["custom_future_exchange_rate"],
     )
+    # TODO Replace a temporary solution with a more stable one
+    cooling_costs = prepare_costs(
+        snakemake.input.cooling_costs,
+        snakemake.config["costs"],
+        snakemake.params.costs["output_currency"],
+        snakemake.params.costs["fill_values"],
+        Nyears,
+        snakemake.params.costs["default_exchange_rate"],
+        snakemake.params.costs["future_exchange_rate_strategy"],
+        snakemake.params.costs["custom_future_exchange_rate"],
+    )
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
@@ -3252,9 +3435,29 @@ if __name__ == "__main__":
         na_values=[""],
     )
 
+    avail_profile = pd.read_csv(
+        snakemake.input.avail_profile, index_col=0, parse_dates=True
+    )
+    dsm_profile = pd.read_csv(
+        snakemake.input.dsm_profile, index_col=0, parse_dates=True
+    )
+    nodal_transport_data = pd.read_csv(  # TODO This only includes no. of cars, change name to something descriptive?
+        snakemake.input.nodal_transport_data, index_col=0
+    )
+
+    # Load data required for aviation and navigation
+    # TODO follow the same structure as land transport and heat
+
+    # Load industry demand data
+    industrial_demand = pd.read_csv(
+        snakemake.input.industrial_demand, index_col=0, header=0
+    )  # * 1e6
+
     ##########################################################################
     ############## Functions adding different carrires and sectors ###########
     ##########################################################################
+
+    # TODO Add existing capacities of air conditioning
 
     # read existing installed capacities of generators
     if options.get("keep_existing_capacities", False):
@@ -3312,6 +3515,16 @@ if __name__ == "__main__":
             gshp_cop_fn=snakemake.input.gshp_cop,
             ashp_cop_fn=snakemake.input.ashp_cop,
             district_heat_share_fn=snakemake.input.district_heat_share,
+        )
+
+    if enable["cooling"]:
+        add_cooling(
+            n,
+            costs,
+            cooling_demand_fn=snakemake.input.cooling_demand,
+            cop_hp_fn=snakemake.input.cop_hp_cooling_total,
+            cop_ac_fn=snakemake.input.cop_ac_cooling_total,
+            capft_abch_fn=snakemake.input.capft_abch_cooling_total,
         )
 
     if enable["biomass"]:

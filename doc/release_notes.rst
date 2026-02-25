@@ -17,6 +17,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
 
+* Revise heating and add cooling sector `PR #1376 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1376>`__
+
 **Minor Changes and bug-fixing**
 
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying `PR #1662 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662>`__
