@@ -20,7 +20,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
             simpl="",
-            clusters=4,
+            clusters=1,
+            planning_horizons="2050",
         )
 
     cutout_path = (
@@ -29,12 +30,9 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(cutout_path)
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
-    clustered_regions = (
-        gpd.read_file(snakemake.input.regions_onshore)
-        .set_index("name")
-        .buffer(0)
-        .squeeze()
-    )
+    regions_gdf = gpd.read_file(snakemake.input.regions_onshore).set_index("name")
+
+    clustered_regions = regions_gdf.geometry.buffer(0)
 
     I = cutout.indicatormatrix(clustered_regions)
 

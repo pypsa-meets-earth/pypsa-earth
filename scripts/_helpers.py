@@ -47,6 +47,8 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
+COPERNICUS_CRS = "EPSG:4326"  # projection for Copernicus data, used by atlite. "EPSG:4326" is the standard used by OSM and google maps
+
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
@@ -1376,9 +1378,17 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
                     gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
-        else:
-            gdf_shapes = get_GADM_layer(co, gadm_layer_id)
-            col = "GID_{}".format(gadm_layer_id)
+            elif gdf_shapes[col][0][:2].isalpha():
+                if gdf_shapes[col][0][:3].isalpha():
+                    gdf_shapes[col] = gdf_shapes[col].apply(
+                        lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                    )
+            else:
+                gdf_shapes = get_GADM_layer([co], gadm_layer_id)
+                col = "GID_{}".format(gadm_layer_id)
+                gdf_shapes[col] = gdf_shapes[col].apply(
+                    lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                )
     gdf_shapes = gdf_shapes[gdf_shapes[col].str.contains(co)]
     return gdf_shapes, col
 
