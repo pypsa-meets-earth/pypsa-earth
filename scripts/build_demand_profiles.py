@@ -44,6 +44,7 @@ import os
 import os.path
 from itertools import product
 
+import country_converter as cc
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -54,6 +55,7 @@ from _helpers import (
     BASE_DIR,
     configure_logging,
     create_logger,
+    progress_retrieve,
     read_csv_nafix,
     read_osm_config,
 )
@@ -61,6 +63,10 @@ from shapely.prepared import prep
 from shapely.validation import make_valid
 
 logger = create_logger(__name__)
+
+DEMCAST_URL = (
+    "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+)
 
 
 def normed(s):
@@ -179,13 +185,101 @@ def load_demand_csv(path):
     return gegis_load
 
 
+def compose_gegis_load(load_paths):
+    """
+    Read and merge nc files located by load_paths
+    Parameters
+    ----------
+    load_paths: paths of the load files
+    """
+    gegis_load_list = []
+
+    for path in load_paths:
+        if str(path).endswith(".csv"):
+            gegis_load_xr = load_demand_csv(path)
+        else:
+            # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
+            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
+        gegis_load_list.append(gegis_load_xr)
+
+    logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
+    gegis_load = xr.merge(gegis_load_list)
+    gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+
+    gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+
+    return gegis_load
+
+
+def add_transform_iso3(
+    df, source="Entity code", target="name_short", output="region_name"
+):
+    """
+    Transform a column containing ISO3 codes according to the target format
+    and add as a new column
+    """
+    # cc.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = cc.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
+
+
+def read_demcast_load(load_paths, weather_year, countries):
+    """
+    region_code;time;region_name;Electricity demand
+    """
+    demcast_full_load = pd.read_parquet(load_paths)
+
+    demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
+    demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
+    demcast_load.rename(
+        columns={"Forecast load (MW)": "Electricity demand"}, inplace=True
+    )
+
+    countries_iso3 = cc.convert(names=countries, to="ISO3")
+    if isinstance(countries_iso3, str):
+        countries_iso3 = [countries_iso3]
+
+    demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
+
+    demcast_load = add_transform_iso3(
+        demcast_load,
+        source="Entity code",
+        target="ISO2",
+        output="region_code",
+    )
+    demcast_load = add_transform_iso3(
+        demcast_load,
+        source="Entity code",
+        target="name_short",
+        output="region_name",
+    )
+
+    demcast_load = demcast_load[
+        ["region_code", "time", "region_name", "Electricity demand"]
+    ]
+
+    demcast_load = demcast_load.set_index("time")
+
+    return demcast_load
+
+
 def build_demand_profiles(
     n,
+    load_source,
     load_paths,
     regions,
     admin_shapes,
     countries,
     scale,
+    weather_year,
     start_date,
     end_date,
     out_path,
@@ -196,6 +290,8 @@ def build_demand_profiles(
     Parameters
     ----------
     n : pypsa network
+    load_source : str
+        Type of data source to be used for electricity demand
     load_paths: paths of the load files
     regions : .geojson
         Contains bus_id of low voltage substations and
@@ -217,24 +313,29 @@ def build_demand_profiles(
     """
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
     regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
-    load_paths = load_paths
 
-    gegis_load_list = []
+    if (load_source == "gegis") | (load_source == "ssp"):
+        gegis_load = compose_gegis_load(load_paths=load_paths)
+        el_load = gegis_load
+    else:
+        # TODO replace hard-coding
 
-    for path in load_paths:
-        if str(path).endswith(".csv"):
-            gegis_load_xr = load_demand_csv(path)
-        else:
-            # Merge load .nc files: https://stackoverflow.com/questions/47226429/join-merge-multiple-netcdf-files-using-xarray
-            gegis_load_xr = xr.open_mfdataset(path, combine="nested")
-        gegis_load_list.append(gegis_load_xr)
+        load_paths = "data/demand/forecasts_on_historical_period.parquet"
 
-    logger.info(f"Merging demand data from paths {load_paths} into the load data frame")
-    gegis_load = xr.merge(gegis_load_list)
-    gegis_load = gegis_load.to_dataframe().reset_index().set_index("time")
+        if not os.path.exists(load_paths):
+            url = DEMCAST_URL
+            logger.info(f"Downloading DemandCast data into {load_paths}")
+            progress_retrieve(url, load_paths)
+
+        demcast_load = read_demcast_load(
+            load_paths=load_paths,
+            weather_year=weather_year,
+            countries=countries,
+        )
+        el_load = demcast_load
 
     # filter load for analysed countries
-    gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
+    el_load = el_load.loc[el_load.region_code.isin(countries)]
 
     if isinstance(scale, dict):
         logger.info(f"Using custom scaling factor for load data.")
@@ -243,13 +344,13 @@ def build_demand_profiles(
             scale.setdefault(country, DEFAULT_VAL)
 
         for country, scale_country in scale.items():
-            gegis_load.loc[
-                gegis_load.region_code == country, "Electricity demand"
+            el_load.loc[
+                el_load.region_code == country, "Electricity demand"
             ] *= scale_country
 
     elif isinstance(scale, (int, float)):
         logger.info(f"Load data scaled with scaling factor {scale}.")
-        gegis_load["Electricity demand"] *= scale
+        el_load["Electricity demand"] *= scale
 
     shapes = gpd.read_file(admin_shapes).set_index("GADM_ID")
     shapes["geometry"] = shapes["geometry"].apply(lambda x: make_valid(x))
@@ -258,7 +359,7 @@ def build_demand_profiles(
         """
         Distributes load in country according to population and gdp.
         """
-        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
+        l = el_load.loc[el_load.region_code == cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
@@ -325,13 +426,23 @@ if __name__ == "__main__":
     end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
 
+    load_source = snakemake.params.load_options.get("source", "gegis")
+    weather_year = snakemake.params.load_options["weather_year"]
+
+    if load_source == "ssp":
+        warnings.warn(
+            f"Configuration option 'load_options::ssp' is deprecated. Use 'load_options::source' instead"
+        )
+
     build_demand_profiles(
         n,
+        load_source,
         load_paths,
         regions,
         admin_shapes,
         countries,
         scale,
+        weather_year,
         start_date,
         end_date,
         out_path,

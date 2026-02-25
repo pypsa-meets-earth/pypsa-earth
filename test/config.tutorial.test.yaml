@@ -5,3 +5,6 @@
 run:
   name: tutorial
   sector_name: "tutorial"
+
+load_options:
+  source: "demcast"

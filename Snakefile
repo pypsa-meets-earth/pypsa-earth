@@ -61,7 +61,12 @@ SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
-load_data_paths = get_load_paths_gegis("data", config)
+#
+el_load_source = config["load_options"].get("source", "gegis")
+if (el_load_source == "ssp") | (el_load_source == "gegis"):
+    load_data_paths = get_load_paths_gegis("data", config)
+else:
+    load_data_paths = "data/demand"
 
 if config["enable"].get("retrieve_cost_data", True):
     COSTS = "resources/" + RDIR + f"costs_{config['costs']['year']}.csv"
