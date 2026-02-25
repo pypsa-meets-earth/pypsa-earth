@@ -25,6 +25,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
 
+* Fix missing bus warning for hydrogen due to pypsa version change `PR #1723 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723>`__
+
 PyPSA-Earth 0.8.0
 =================
 
@@ -89,6 +91,8 @@ PyPSA-Earth 0.8.0
 * Bug-fixing override co2opt in add_co2_budget `PR #1597 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1597>`__
 
 * Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
+
+* Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings `PR #1608 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608>`__
 
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
