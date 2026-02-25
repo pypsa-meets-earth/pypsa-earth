@@ -565,7 +565,7 @@ def attach_hydro(n, costs, ppl, hydro_min_inflow_pu=1):
 
     # Heuristics for missing hydro technologies
     if not tbd.empty:
-        inflow_pu_limit = inflow_t[tbd.index].divide(tbd["p_nom"], axis=1).sum() / 8760
+        inflow_pu_limit = inflow_t[tbd.index].mean() / tbd["p_nom"]  # Average MWh/MW
         mask_reservoir = inflow_pu_limit >= hydro_min_inflow_pu
         mask_ror = ~mask_reservoir
         to_be_hydro = tbd[mask_reservoir]
