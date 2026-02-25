@@ -68,13 +68,13 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+(m|flex)?|all|min",
-    ll="(v|c|l)([0-9\.]+|opt|all)|all",
-    opts="[-+a-zA-Z0-9\.]*",
-    unc="[-+a-zA-Z0-9\.]*",
-    sopts="[-+a-zA-Z0-9\.\s]*",
-    discountrate="[-+a-zA-Z0-9\.\s]*",
-    demand="[-+a-zA-Z0-9\.\s]*",
-    h2export="[0-9]+(\.[0-9]+)?",
+    ll=r"(v|c|l)([0-9\.]+|opt|all)|all",
+    opts=r"[-+a-zA-Z0-9\.]*",
+    unc=r"[-+a-zA-Z0-9\.]*",
+    sopts=r"[-+a-zA-Z0-9\.\s]*",
+    discountrate=r"[-+a-zA-Z0-9\.\s]*",
+    demand=r"[-+a-zA-Z0-9\.\s]*",
+    h2export=r"[0-9]+(\.[0-9]+)?",
     planning_horizons="20[2-9][0-9]|2100",
 
 
@@ -506,6 +506,18 @@ rule build_demand_profiles:
         "scripts/build_demand_profiles.py"
 
 
+HYDRO_PROFILES = {
+    "hydro_capacities": "data/hydro_capacities.csv",
+    "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
+    "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
+    "powerplants": "resources/" + RDIR + "powerplants.csv",
+}
+
+
+def inputs_hydro(w):
+    return HYDRO_PROFILES if w.technology == "hydro" else {}
+
+
 rule build_renewable_profiles:
     params:
         crs=config["crs"],
@@ -513,14 +525,12 @@ rule build_renewable_profiles:
         countries=config["countries"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
+        unpack(inputs_hydro),
         natura="resources/" + RDIR + "natura.tiff",
         copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
         gebco="data/gebco/GEBCO_2025_sub_ice.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        hydro_capacities="data/hydro_capacities.csv",
-        eia_hydro_generation="data/eia_hydro_annual_generation.csv",
-        powerplants="resources/" + RDIR + "powerplants.csv",
         regions=lambda w: (
             "resources/" + RDIR + "bus_regions/regions_onshore.geojson"
             if w.technology in ("onwind", "solar", "hydro", "csp")
@@ -1090,14 +1100,6 @@ if not config["custom_data"]["gas_network"]:
         params:
             gas_config=config["sector"]["gas"],
             alternative_clustering=config["cluster_options"]["alternative_clustering"],
-            countries_list=config["countries"],
-            layer_id=config["build_shape_options"]["gadm_layer_id"],
-            update=config["build_shape_options"]["update_file"],
-            out_logging=config["build_shape_options"]["out_logging"],
-            year=config["build_shape_options"]["year"],
-            nprocesses=config["build_shape_options"]["nprocesses"],
-            contended_flag=config["build_shape_options"]["contended_flag"],
-            geo_crs=config["crs"]["geo_crs"],
             custom_gas_network=config["custom_data"]["gas_network"],
         input:
             regions_onshore="resources/"
