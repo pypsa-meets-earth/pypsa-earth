@@ -56,6 +56,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
+
 import os
 import re
 from zipfile import ZipFile

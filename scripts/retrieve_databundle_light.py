@@ -80,6 +80,7 @@ according to the following rules:
 - ``cutouts``: input data unzipped into the cutouts folder
 
 """
+
 import datetime as dt
 import os
 import re
@@ -844,13 +845,11 @@ def retrieve_databundle(
     disable_progress=False,
 ):
 
-    logger.warning(
-        "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
+    logger.warning("DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
         to the acceptance of its multiple licenses.\n \
         The use of the code automatically implies that you accept all the licenses.\n \
         See our documentation for more information. \n \
-        Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence"
-    )
+        Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence")
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
