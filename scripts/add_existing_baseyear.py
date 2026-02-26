@@ -148,13 +148,19 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
         "Oil": "oil",
         "OCGT": "OCGT",
         "CCGT": "CCGT",
-        "Bioenergy": "urban central solid biomass CHP",
+        "Bioenergy PP": "biomass",
+        "Bioenergy CHP": "urban central solid biomass CHP",
     }
 
     # Replace Fueltype "Natural Gas" with the respective technology (OCGT or CCGT)
     df_agg.loc[df_agg["Fueltype"] == "Natural Gas", "Fueltype"] = df_agg.loc[
         df_agg["Fueltype"] == "Natural Gas", "Technology"
     ]
+
+    # Differentiate between biomass powerplant and CHP
+    df_agg.loc[df_agg["Fueltype"] == "Bioenergy", "Fueltype"] = (
+        df_agg["Fueltype"] + " " + df_agg["Set"]
+    )
 
     fueltype_to_drop = [
         "Hydro",
@@ -238,6 +244,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
         "oil": "oil",
         "lignite": "lignite",
         "nuclear": "uranium",
+        "biomass": "biomass",
         "urban central solid biomass CHP": "biomass",
     }
 
@@ -330,7 +337,7 @@ def add_power_capacities_installed_before_baseyear(n, grouping_years, costs, bas
                     )
 
         else:
-            if generator not in vars(spatial).keys():
+            if carrier[generator] not in vars(spatial).keys():
                 logger.debug(f"Carrier type {generator} not in spatial data, skipping")
                 continue
 
