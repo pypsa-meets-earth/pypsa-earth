@@ -3219,12 +3219,12 @@ def convert_conventional_generators_to_links(
             conventional_generators.carrier == carrier
         ]
 
+        # Add fuel carrier buses if not already added
+        add_carrier_buses(n, fuel_carrier)
+
         if carrier_gens.empty:
             logger.info(f"No generators with carrier {carrier} found to convert")
             continue
-
-        # Add fuel carrier buses if not already added
-        add_carrier_buses(n, fuel_carrier)
 
         # Map each generator's AC bus to its fuel bus using spatial
         fuel_carrier_df = vars(spatial)[fuel_carrier].df
