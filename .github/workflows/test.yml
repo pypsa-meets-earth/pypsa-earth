@@ -83,7 +83,7 @@ jobs:
 
     - name: Upload artifacts
       if: always()
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: results-${{ matrix.os }}
         path: |
@@ -101,7 +101,7 @@ jobs:
 
     # Download artifacts
     - name: Download feature logs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: results-${{ matrix.os }}
         # path: ./artifacts  # All artifacts go here, each in their own subfolder
@@ -220,7 +220,7 @@ jobs:
         echo "Objective values uploaded to csv"
 
     - name: Upload csv artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: ref_objectives-${{ matrix.os }}
         path: ref_objectives-${{ matrix.os }}.csv
