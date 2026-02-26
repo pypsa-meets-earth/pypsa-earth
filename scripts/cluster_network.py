@@ -674,7 +674,7 @@ if __name__ == "__main__":
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
 
-    if n_clusters == len(n.buses):
+    if n_clusters == len(n.buses) and not alternative_clustering:
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
         linemap = n.lines.index.to_series()
