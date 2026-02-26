@@ -243,7 +243,7 @@ def get_eia_annual_hydro_generation(fn, countries):
     df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
     df.index = df.index.str.strip()
 
-    df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
+    df.loc["Germany"] = df.filter(like="Germany", axis=0).astype(float).sum()
     df.loc["Serbia"] += df.loc["Kosovo"]
     df = df.loc[~df.index.str.contains("Former")]
     df.drop(["World", "Germany, West", "Germany, East"], inplace=True)
@@ -251,49 +251,36 @@ def get_eia_annual_hydro_generation(fn, countries):
     df.index = cc.convert(df.index, to="iso2")
     df.index.name = "countries"
 
-    df = df.T[countries] * 1e6  # in MWh/a
+    df = df.T[countries].astype(float) * 1e6  # in MWh/a
     df.index = df.index.astype(int)
 
     return df
 
 
-# Temporary function, to be migrate to retrieve databundle once working
-def extract_IRENA_energy_stats(file_path="data/IRENA_Statistics_Extract_2025H2.xlsx"):
-    import requests
-
-    if not os.path.exists(file_path):
-        url = "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx"
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-
-            with open(file_path, "wb") as file:
-                file.write(response.content)
-
-            return file_path
-
-        except requests.ConnectionError:
-            logger.warning("No internet connection and file not found locally.")
-            raise FileNotFoundError(
-                f"File {file_path} not found and cannot download from the internet."
-            )
-
-    return file_path
-
-
 def get_irena_annual_hydro_generation(fn, countries):
+    """
+    Load annual renewable hydropower generation data from the IRENA Country sheet.
+    Convert ISO3 country codes to ISO2 and annual generation from GWh to MWh.
 
+    Original source:
+    https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
+
+    Note
+    ----
+    IRENA energy statistics dataset is available for non-commercial use only.
+    Users are responsible for ensuring compliance with the dataset’s licensing terms.
+    """
     df = pd.read_excel(fn, sheet_name="Country")
 
-    countries_iso3 = {coco.convert(names=name, to="ISO3"): name for name in countries}
+    iso3_to_iso2 = {coco.convert(names=name, to="ISO3"): name for name in countries}
 
     df = (
-        df.loc[
-            lambda df: df.Technology.isin(["Renewable hydropower"])
-            & ~df["Producer Type"].isin(["All types"])
-            & df["ISO3 code"].isin(countries_iso3.keys())
-        ]
-        .assign(countries=lambda df: df["ISO3 code"].map(countries_iso3))
+        df.query(
+            "Technology == 'Renewable hydropower' "
+            "and `Producer Type` != 'All types' "
+            "and `ISO3 code` in @iso3_to_iso2"
+        )
+        .assign(countries=df["ISO3 code"].replace(iso3_to_iso2))
         .groupby(["countries", "Year"])["Electricity Generation (GWh)"]
         .sum()
         .unstack("countries")
@@ -594,7 +581,7 @@ if __name__ == "__main__":
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
         resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
-        ppls = load_powerplants(snakemake.input.powerplants)
+        ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
@@ -647,7 +634,7 @@ if __name__ == "__main__":
                 method = normalization["method"]
                 norm_year = normalization.get("year", int(inflow.time[0].dt.year))
                 if method == "hydro_capacities":
-                    path_hydro_capacities = snakemake.input.hydro_capacities
+                    path_hydro_capacities = paths.hydro_capacities
                     normalize_using_yearly = (
                         get_hydro_capacities_annual_hydro_generation(
                             path_hydro_capacities, countries, norm_year
@@ -655,15 +642,13 @@ if __name__ == "__main__":
                     )
 
                 elif method == "eia":
-                    path_eia_stats = snakemake.input.eia_hydro_generation
+                    path_eia_stats = paths.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
                         path_eia_stats, countries
                     )
 
                 elif method == "irena":
-                    path_irena_stats = (
-                        extract_IRENA_energy_stats()
-                    )  # snakemake.input.irena_stats
+                    path_irena_stats = paths.irena_stats
                     normalize_using_yearly = get_irena_annual_hydro_generation(
                         path_irena_stats, countries
                     )
