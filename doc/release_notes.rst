@@ -70,6 +70,8 @@ PyPSA-Earth 0.8.0
 
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
 
+* Added integration with the OETC platform for cloud-based optimization `PR #1697 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1697>`__
+
 **Minor Changes and bug-fixing**
 
 * Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__

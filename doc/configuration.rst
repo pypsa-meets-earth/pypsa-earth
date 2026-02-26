@@ -581,6 +581,14 @@ Specify linear power flow formulation and optimization solver settings.
    :widths: 25,7,22,30
    :file: configtables/solving-solver.csv
 
+``oetc``
+----------
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 25,7,22,30
+   :file: configtables/solving-oetc.csv
+
 .. _plotting_cf:
 
 ``plotting``
