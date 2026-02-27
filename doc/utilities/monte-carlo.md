@@ -93,4 +93,4 @@ The monte-carlo simulation can be run using the following rule:
 
 ## API Reference
 
-See the [Utilities API Reference](../api-reference/utilities.md#monte-carlo) for detailed function documentation.
+See the [Monte Carlo API Reference](../api-reference/monte-carlo.md) for detailed function documentation.

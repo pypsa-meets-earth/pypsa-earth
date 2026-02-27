@@ -6,10 +6,22 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Utilities
 
-Helper scripts and utility tools.
+Utility scripts that are not part of the main Snakemake workflow. These include helper tools for data management, file handling, and the Monte Carlo analysis feature.
 
 ---
 
-## Monte Carlo
+## Data Bundle CLI
 
-::: scripts.monte_carlo
+::: scripts.non_workflow.databundle_cli
+
+---
+
+## Zenodo Handler
+
+::: scripts.non_workflow.zenodo_handler
+
+---
+
+## Zip Folder
+
+::: scripts.non_workflow.zip_folder

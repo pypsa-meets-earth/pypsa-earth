@@ -11,5 +11,6 @@
 - [ ] Changes in configuration options are added in all of `config.default.yaml` and `config.tutorial.yaml`.
 - [ ] Add a test config or line additions to `test/` (note tests are changing the config.tutorial.yaml)
 - [ ] Changes in configuration options are also documented in `doc/configtables/*.csv` and line references are adjusted in `doc/user-guide/configuration.md` and `doc/tutorials/electricity-model.md`.
+- [ ] If config sections were added, renamed, or removed, update `doc/assets/scripts/extract_config_snippets.py` accordingly.
 - [ ] Archives of the uploaded data do not have an enclosing folder and archive names correspond to the conventions of `configs/bundle_config.yaml`.
 - [ ] A note for the release notes `doc/release-notes.md` is amended in the format of previous release notes, including reference to the requested PR.

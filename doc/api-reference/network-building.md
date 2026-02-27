@@ -21,3 +21,5 @@ Scripts for building, simplifying, and clustering the electricity network.
 ::: scripts.add_extra_components
 
 ::: scripts.prepare_network
+
+::: scripts.augmented_line_connections

@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
 Extract YAML sections from config.default.yaml and save them as individual snippet files.
-These snippets will automatically update when config.default.yaml changes.
+These snippets are embedded in the documentation (e.g., configuration.md) via pymdownx.snippets.
+
+When to edit this script:
+    - When a new top-level section is added to config.default.yaml
+    - When a config section is renamed or removed
+    - When a new subsection needs its own snippet file
+
+How it runs:
+    - Automatically via the 'extract-config-snippets' pre-commit hook
+    - Manually: python doc/assets/scripts/extract_config_snippets.py
 """
 
 import re
@@ -94,6 +103,7 @@ def main():
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
         "plotting": ["plotting"],
+        "sector": ["sector"],
     }
 
     for snippet_name, keys in sections.items():
