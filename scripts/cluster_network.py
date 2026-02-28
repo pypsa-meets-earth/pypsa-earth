@@ -134,6 +134,7 @@ from _helpers import (
     REGION_COLS,
     configure_logging,
     create_logger,
+    get_base_carrier,
     locate_bus,
     nearest_shape,
     update_config_dictionary,
@@ -142,11 +143,13 @@ from _helpers import (
 from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
+    aggregateoneport,
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
+from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from shapely.geometry import Point
 
 idx = pd.IndexSlice
@@ -587,6 +590,19 @@ def clustering_for_n_clusters(
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
         clustering.network.lines["underwater_fraction"] = 0
 
+    # Remove zero-filled or NaN-filled time series for StorageUnit
+    for attr in list(clustering.network.storage_units_t.keys()):
+        df = clustering.network.storage_units_t[attr]
+        if not df.empty:
+            # Check if all values are either 0 or NaN
+            all_zero_or_nan = ((df == 0) | df.isna()).all().all()
+            if all_zero_or_nan:
+                # Make it empty with correct index but no columns
+                clustering.network.storage_units_t[attr] = pd.DataFrame(index=df.index)
+                logger.info(
+                    f"Cleared zero/NaN-filled storage_units_t.{attr} after clustering"
+                )
+
     return clustering
 
 
@@ -602,6 +618,105 @@ def cluster_regions(busmaps, inputs, output):
         regions_c.index.name = "name"
         regions_c = regions_c.reset_index()
         regions_c.to_file(getattr(output, which))
+
+
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    # Remove year-tagged carriers
+    year_tagged_carriers = []
+    for carrier in n.carriers.index:
+        parts = carrier.rsplit("-", 1)
+        if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
+            year_tagged_carriers.append(carrier)
+
+    if len(year_tagged_carriers) > 0:
+        n.mremove("Carrier", year_tagged_carriers)
+        logger.info(f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}")
+
+
+def replace_components(n, c, df, pnl):
+    n.mremove(c, n.df(c).index)
+
+    import_components_from_dataframe(n, df, c)
+    for attr, df in pnl.items():
+        if not df.empty:
+            import_series_from_dataframe(n, df, c, attr)
+
+
+def groupby_bus_carrier(
+    network: pypsa.Network,
+    aggregation_strategies: dict,
+    exclude_carriers: list = [],
+) -> None:
+    """
+    Group generators and storage units by (bus, carrier).
+
+    Parameters
+    ----------
+    network : pypsa.Network
+        The PyPSA network to modify in-place.
+    aggregation_strategies : dict
+        Aggregation strategies for different columns.
+    exclude_carriers : list, optional
+        List of carriers to exclude from grouping, by default [].
+
+    Returns
+    -------
+    None
+    """
+    # Carriers for aggregation
+    carriers = set(network.generators.carrier) - set(exclude_carriers)
+
+    # Create 1:1 busmap
+    busmap = pd.Series(network.buses.index, index=network.buses.index)
+
+    # Add p_nom_extendable to aggregation strategy
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="generators",
+        dict_to_use={"p_nom_extendable": "any"},
+    )
+
+    # Group generators
+    generators, generators_pnl = aggregateoneport(
+        network,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=aggregation_strategies["generators"],
+    )
+
+    # Replace generators in network
+    replace_components(network, "Generator", generators, generators_pnl)
+
+    # Group storage units
+    storage_units, storage_units_pnl = aggregateoneport(
+        network,
+        busmap,
+        component="StorageUnit",
+        custom_strategies=aggregation_strategies["one_ports"]["StorageUnit"],
+    )
+
+    # Replace storage units in network
+    replace_components(network, "StorageUnit", storage_units, storage_units_pnl)
 
 
 if __name__ == "__main__":
@@ -759,6 +874,13 @@ if __name__ == "__main__":
         clustering.network = nearest_shape(
             clustering.network, country_shapes, crs, tolerance=tolerance
         )
+
+    # Restore base carrier names after all aggregation
+    restore_base_carrier_names(clustering.network)
+
+    # Groupby carrier and bus for overnight simulation
+    if config["foresight"] == "overnight":
+        groupby_bus_carrier(clustering.network, aggregation_strategies)
 
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))

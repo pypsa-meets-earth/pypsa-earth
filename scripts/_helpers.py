@@ -1830,6 +1830,22 @@ def add_missing_carriers(n, carriers):
             n.add("Carrier", carrier)
 
 
+def get_base_carrier(carrier: str) -> str:
+    """
+    Extract base carrier from carrier_gy format.
+
+    Examples:
+        "solar-2020" -> "solar"
+        "offwind-ac-2020" -> "offwind-ac"
+        "offwind-dc" -> "offwind-dc"
+        "CCGT-2000" -> "CCGT"
+    """
+    parts = carrier.rsplit("-", 1)
+    if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
+        return parts[0]
+    return carrier
+
+
 def sanitize_carriers(n, config):
     """
     Sanitize the carrier information in a PyPSA Network object.
@@ -1862,20 +1878,27 @@ def sanitize_carriers(n, config):
             add_missing_carriers(n, c.df.carrier)
 
     carrier_i = n.carriers.index
-    nice_names = (
-        pd.Series(config["plotting"]["nice_names"])
-        .reindex(carrier_i)
-        .fillna(carrier_i.to_series())
-    )
+
+    # Get base carriers
+    base_carriers = carrier_i.to_series().apply(get_base_carrier)
+
+    # Map nice names from base carrier
+    nice_names_config = pd.Series(config["plotting"]["nice_names"])
+    nice_names = base_carriers.map(nice_names_config).fillna(carrier_i.to_series())
     n.carriers["nice_name"] = n.carriers.nice_name.where(
         n.carriers.nice_name != "", nice_names
     )
 
-    tech_colors = config["plotting"]["tech_colors"]
-    colors = pd.Series(tech_colors).reindex(carrier_i)
-    # try to fill missing colors with tech_colors after renaming
+    # Map colors from base carrier
+    tech_colors_config = pd.Series(config["plotting"]["tech_colors"])
+    colors = base_carriers.map(tech_colors_config)
+
+    # Try to fill missing colors with tech_colors after renaming
     missing_colors_i = colors[colors.isna()].index
-    colors[missing_colors_i] = missing_colors_i.map(rename_techs).map(tech_colors)
+    colors.loc[missing_colors_i] = (
+        base_carriers.loc[missing_colors_i].map(rename_techs).map(tech_colors_config)
+    )
+
     if colors.isna().any():
         missing_i = list(colors.index[colors.isna()])
         logger.warning(f"tech_colors for carriers {missing_i} not defined in config.")
