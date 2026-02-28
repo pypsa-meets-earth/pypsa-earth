@@ -21,7 +21,23 @@ logger = logging.getLogger(__name__)
 idx = pd.IndexSlice
 
 
-def add_brownfield(n, n_p, year):
+def add_brownfield(n: pypsa.Network, n_p: pypsa.Network, year: int) -> None:
+    """
+    Adds brownfield assets from the previous planning horizon to the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The new PyPSA network to which brownfield assets will be added.
+    n_p : pypsa.Network
+        The previous PyPSA network from which brownfield assets will be sourced.
+    year : int
+        The planning horizon year for which brownfield assets are being prepared.
+
+    Returns
+    -------
+    None
+    """
     logger.info(f"Preparing brownfield for the year {year}")
 
     # electric transmission grid set optimised capacities of previous as minimum
@@ -32,53 +48,34 @@ def add_brownfield(n, n_p, year):
     for c in n_p.iterate_components(["Link", "Generator", "Store"]):
         attr = "e" if c.name == "Store" else "p"
 
-        # first, remove generators, links and stores that track
-        # CO2 or global EU values since these are already in n
+        # Remove generators, links and stores that track global values since they exist in n
         n_p.mremove(c.name, c.df.index[c.df.lifetime == np.inf])
 
-        # remove assets whose build_year + lifetime < year
+        # Remove assets whose build_year + lifetime < year
         n_p.mremove(c.name, c.df.index[c.df.build_year + c.df.lifetime < year])
 
-        # remove assets if their optimized nominal capacity is lower than a threshold
-        # since CHP heat Link is proportional to CHP electric Link, make sure threshold is compatible
-        chp_heat = c.df.index[
-            (c.df[f"{attr}_nom_extendable"] & c.df.index.str.contains("urban central"))
-            & c.df.index.str.contains("CHP")
-            & c.df.index.str.contains("heat")
-        ]
+        # Remove assets that are not extendable since they already exist in n
+        n_p.mremove(c.name, c.df.index[~c.df[f"{attr}_nom_extendable"]])
 
+        # Remove assets if their optimized nominal capacity is lower than a threshold
         threshold = snakemake.params.threshold_capacity
-
-        if not chp_heat.empty:
-            threshold_chp_heat = (
-                threshold
-                * c.df.efficiency[chp_heat.str.replace("heat", "electric")].values
-                * c.df.p_nom_ratio[chp_heat.str.replace("heat", "electric")].values
-                / c.df.efficiency[chp_heat].values
-            )
-            n_p.mremove(
-                c.name,
-                chp_heat[c.df.loc[chp_heat, f"{attr}_nom_opt"] < threshold_chp_heat],
-            )
-
         n_p.mremove(
             c.name,
             c.df.index[
-                (c.df[f"{attr}_nom_extendable"] & ~c.df.index.isin(chp_heat))
-                & (c.df[f"{attr}_nom_opt"] < threshold)
+                (c.df[f"{attr}_nom_extendable"] & (c.df[f"{attr}_nom_opt"] < threshold))
             ],
         )
 
-        # copy over assets but fix their capacity
+        # Copy optimized assets from previous horizon to current and fix their capacity
         c.df[f"{attr}_nom"] = c.df[f"{attr}_nom_opt"]
         c.df[f"{attr}_nom_extendable"] = False
 
-        # remove assets if name already exist in the new network
+        # Remove assets if name already exist in the new network
         n_p.mremove(c.name, c.df.index.intersection(getattr(n, c.list_name).index))
 
         n.import_components_from_dataframe(c.df, c.name)
 
-        # copy time-dependent
+        # Copy time-dependent parameters of the optimized assets from previous horizon to current
         selection = n.component_attrs[c.name].type.str.contains(
             "series"
         ) & n.component_attrs[c.name].status.str.contains("Input")
@@ -124,7 +121,7 @@ def add_brownfield(n, n_p, year):
             n.links.loc[new_pipes, "p_nom_min"] = 0.0
 
 
-def disable_grid_expansion_if_limit_hit(n):
+def disable_grid_expansion_if_limit_hit(n: pypsa.Network) -> None:
     """
     Check if transmission expansion limit is already reached; then turn off.
 
@@ -134,6 +131,15 @@ def disable_grid_expansion_if_limit_hit(n):
     n.global_constraints. If so, the nominal capacities are set to the
     minimum and extendable is turned off; the corresponding global
     constraint is then dropped.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to check and adjust for transmission expansion limits.
+
+    Returns
+    -------
+    None
     """
     cols = {"cost": "capital_cost", "volume": "length"}
     for limit_type in ["cost", "volume"]:
