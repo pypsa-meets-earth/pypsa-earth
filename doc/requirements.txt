@@ -47,5 +47,5 @@ graphviz
 fake_useragent
 currencyconverter
 
-# DAG generation
-snakemake-minimal
+# DAG generation (snakemake 8+ requires Python 3.12)
+snakemake<8
