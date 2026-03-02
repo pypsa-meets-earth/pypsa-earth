@@ -19,4 +19,4 @@ This section provides automatically generated API documentation for all PyPSA-Ea
 | [Solving](solving.md) | Scripts for solving the optimization problem |
 | [Sector-Coupling](sector-coupling.md) | Scripts for sector-coupling features (heat, transport, industry) |
 | [Analysis & Utilities](utilities.md) | Helper scripts and analysis tools |
-| [Advanced](advanced.md) | Advanced utility scripts (Monte Carlo, data tools) |
+| [Monte Carlo](monte-carlo.md) | Monte Carlo simulation scripts |

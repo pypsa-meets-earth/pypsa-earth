@@ -92,7 +92,7 @@ There are multiple ways to get involved and learn more about our work:
 
 - [Contributing](community/contributing.md) - How to contribute to the project
 - [Project Structure](community/project-structure.md) - Credits and architecture
-- [Release Notes](community/release-notes.md) - Version history and changes
+- [Release Notes](release-notes.md) - Version history and changes
 - [Users List](community/users-list.md) - Who's using PyPSA-Earth
 - [Talks & Papers](community/talks-and-papers.md) - Publications and presentations
 - [Learning Materials](community/learning-materials.md) - Additional resources

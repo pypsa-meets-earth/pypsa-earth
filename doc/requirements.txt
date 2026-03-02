@@ -46,3 +46,6 @@ graphviz
 
 fake_useragent
 currencyconverter
+
+# DAG generation
+snakemake-minimal
