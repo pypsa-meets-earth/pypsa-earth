@@ -87,12 +87,12 @@ The lists below is an attempt to give the credits to the contributors, though it
 
 ### Outreach Team
 
-- Stuart James (VDMA, Germany)
-- Max Parzen (University of Edinburgh, United Kingdom)
-- Tosin George
-- Mousa Zerai (University of Edinburgh, United Kingdom)
-- Ilaria Capelli (EY, Italy)
-- Rebecca Grant (University of Edinburgh, United Kingdom)
+- Hazem Abdel-Khalek (OET)
+- Tosin George (OET)
+- Charlotte Heikendorf (OET)
+- Arizeo Salac (University of Pisa)
+- Margherita Capitani (University of Pisa)
+- Andreas Hernandez Denyer (OET)
 
 ### Advisor Team
 
