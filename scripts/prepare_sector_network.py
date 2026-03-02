@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 import logging
+import math
 import os
 import re
 from types import SimpleNamespace
@@ -12,7 +13,6 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import pypsa
-import math
 import pytz
 import ruamel.yaml
 import xarray as xr
