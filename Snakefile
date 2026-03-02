@@ -110,8 +110,7 @@ rule clean:
 
 rule solve_all_networks:
     input:
-        base_extended="networks/" + RDIR + "base_extended.nc",
-        networks=expand(
+        expand(
             "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             **config["scenario"],
         ),
@@ -311,7 +310,11 @@ rule base_network:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
     output:
-        "networks/" + RDIR + "base.nc",
+        branch(
+            config.get("transmission_projects",{}).get("enable"),
+            "networks/" + RDIR + "base_pre_ext.nc",
+            "networks/" + RDIR + "base.nc",
+        ),
     log:
         "logs/" + RDIR + "base_network.log",
     benchmark:
@@ -356,7 +359,7 @@ rule build_transmission_projects:
         line_factor=config["lines"]["length_factor"],
         s_max_pu=config["lines"]["s_max_pu"],
     input:
-        base_network="networks/" + RDIR + "base.nc",
+        base_network="networks/" + RDIR + "base_pre_ext.nc",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         region_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -389,7 +392,7 @@ rule add_transmission_projects:
         transmission_projects=config["transmission_projects"],
         s_max_pu=config["lines"]["s_max_pu"],
     input:
-        network="networks/" + RDIR + "base.nc",
+        network="networks/" + RDIR + "base_pre_ext.nc",
         transmission_projects=lambda w: (
             [
                 "resources/" + RDIR + "transmission_projects/new_buses.csv",
@@ -402,7 +405,7 @@ rule add_transmission_projects:
             else []
         ),
     output:
-        network="networks/" + RDIR + "base_extended.nc",
+        network="networks/" + RDIR + "base.nc",
     log:
         "logs/" + RDIR + "add_transmission_projects.log",
     benchmark:
@@ -424,7 +427,7 @@ rule build_bus_regions:
     input:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        base_network="networks/" + RDIR + "base_extended.nc",
+        base_network="networks/" + RDIR + "base.nc",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -586,7 +589,7 @@ rule build_demand_profiles:
         load_options=config["load_options"],
         countries=config["countries"],
     input:
-        base_network="networks/" + RDIR + "base_extended.nc",
+        base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         load=load_data_paths,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
@@ -662,7 +665,7 @@ rule build_powerplants:
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
     input:
-        base_network="networks/" + RDIR + "base_extended.nc",
+        base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
         custom_powerplants="data/custom_powerplants.csv",
         osm_powerplants=osm_powerplants_fn,
@@ -708,7 +711,7 @@ rule add_electricity:
             for attr, fn in d.items()
             if str(fn).startswith("data/")
         },
-        base_network="networks/" + RDIR + "base_extended.nc",
+        base_network="networks/" + RDIR + "base.nc",
         tech_costs=COSTS,
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
@@ -1354,7 +1357,6 @@ rule add_export:
     params:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        enable=config["export"]["enable"],
         store=config["export"]["store"],
         store_capital_costs=config["export"]["store_capital_costs"],
         export_profile=config["export"]["export_profile"],
