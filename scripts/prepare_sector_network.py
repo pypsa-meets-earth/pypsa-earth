@@ -12,6 +12,7 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import pypsa
+import math
 import pytz
 import ruamel.yaml
 import xarray as xr
@@ -940,6 +941,24 @@ def define_spatial(nodes, options):
 
 
 def add_biomass(n, costs, options, pop_layout):
+    """
+    Add biomass-related components to the PyPSA network.
+
+    This function adds various biomass-related components including biogas,
+    solid biomass, biomass EOP, biomass transport, and different
+    biomass conversion technologies (biogas to gas, CHP).
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network container object
+    costs : pd.DataFrame
+        DataFrame containing technology cost assumptions
+    options : dict
+        Dictionary of configuration options
+    pop_layout : pd.DataFrame
+        DataFrame containing population layout information
+    """
     logger.info("adding biomass")
 
     n.add("Carrier", "biogas")
@@ -989,7 +1008,7 @@ def add_biomass(n, costs, options, pop_layout):
             marginal_cost=costs.at["solid biomass", "fuel"],
             e_initial=biomass_pot_spatial,
         )
-    else:
+    elif math.isinf(biomass_pot):
         # No limits to solid biomass
         n.madd(
             "Generator",
@@ -1000,6 +1019,8 @@ def add_biomass(n, costs, options, pop_layout):
             marginal_cost=costs.at["solid biomass", "fuel"],
         )
         logger_biomass += "sources"
+    else:
+        logger_biomass = "No biomass sources added"
 
     biogas_pot = options["biogas_potential"]
     if biogas_pot:
@@ -1026,7 +1047,7 @@ def add_biomass(n, costs, options, pop_layout):
             marginal_cost=costs.at["biogas", "fuel"],
             e_initial=biogas_pot_spatial,
         )
-    else:
+    elif math.isinf(biogas_pot):
         # No limits to biogas
         n.madd(
             "Generator",
@@ -1037,6 +1058,8 @@ def add_biomass(n, costs, options, pop_layout):
             marginal_cost=costs.at["biogas", "fuel"],
         )
         logger_biogas += "sources"
+    else:
+        logger_biomass = "No biogas sources added"
 
     logger.info(logger_biomass)
     logger.info(logger_biogas)
