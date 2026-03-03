@@ -1421,7 +1421,7 @@ if __name__ == "__main__":
         geo_crs,
         country_shapes,
         EEZ_gpkg,
-        out_logging,
+        out_logging=out_logging,
         tolerance=tolerance,
         minarea=minarea,
         simplify_gadm=simplify_gadm,
