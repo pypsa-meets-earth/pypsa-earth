@@ -28,6 +28,12 @@ from retrieve_databundle_light import (
 )
 from pathlib import Path
 
+# Optional: Configure cached HTTP storage with custom settings
+# This extends the existing storage configuration (e.g., for HTTP)
+storage cached_http:
+    provider="cached-http",
+    cache="~/.cache/snakemake-pypsa-earth",  # Default location
+    max_concurrent_downloads=3,  # Download max 3 files at once
 
 HTTP = HTTPRemoteProvider()
 
