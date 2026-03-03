@@ -355,7 +355,7 @@ def eez(
     country_shapes,
     EEZ_gpkg,
     out_logging=False,
-    distance=0.01,
+    distance=0.0,
     minarea=0.01,
     tolerance=0.01,
     simplify_gadm=True,
@@ -1422,8 +1422,9 @@ if __name__ == "__main__":
         country_shapes,
         EEZ_gpkg,
         out_logging,
-        simplify_gadm,
-        tolerance,
+        tolerance=tolerance,
+        minarea=minarea,
+        simplify_gadm=simplify_gadm,
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
