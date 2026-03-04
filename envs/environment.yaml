@@ -21,7 +21,7 @@ dependencies:
 - xlrd
 - openpyxl
 - seaborn
-- snakemake-minimal<8
+- snakemake-minimal>9
 - snakemake-storage-plugin-cached-http
 - memory_profiler
 - ruamel.yaml<=0.17.26
