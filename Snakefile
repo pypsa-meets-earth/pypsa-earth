@@ -11,8 +11,6 @@ sys.path.append("./scripts")
 
 from shutil import copyfile, move
 
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
 from _helpers import (
     create_country_list,
     get_last_commit_message,
@@ -24,18 +22,17 @@ from _helpers import (
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
-    get_best_bundles_in_snakemake,
+    get_best_bundles_in_snakemake
 )
 from pathlib import Path
 
-# Optional: Configure cached HTTP storage with custom settings
+
 # This extends the existing storage configuration (e.g., for HTTP)
 storage cached_http:
     provider="cached-http",
     cache="~/.cache/snakemake-pypsa-earth",  # Default location
     max_concurrent_downloads=3,  # Download max 3 files at once
 
-HTTP = HTTPRemoteProvider()
 
 copy_default_files()
 
@@ -58,7 +55,6 @@ config["countries"] = create_country_list(config["countries"])
 config["scenario"]["unc"] = [
     f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
 ]
-
 
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
@@ -451,8 +447,8 @@ if config["enable"].get("retrieve_cost_data", True):
         params:
             version=config["costs"]["technology_data_version"],
         input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
+            storage.http(
+                f"http://raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
                 + "costs_{year}.csv",
                 keep_local=True,
             ),
