@@ -11,6 +11,6 @@ hydro_max_hours_default,h,float,"(optional, default 6) Default value of max_hour
 clip_min_inflow,MW,float,"To avoid too small values in the inflow time series, values below this threshold are set to zero."
 extendable, bool, "{True, False}", "True: In nodes where there is no hydro generation, adds a zero-capacity hydro generator so that hydro is considered for capacity expansion. It is done in the ``add_electricity`` rule."
 normalization,--,dict,"When specified, it describes how to normalize hydro time series to adhere to national statistics"
---method,--,str,"Data source used to rescale the hydro runoff; option 'hydro_capacities' to use the provided 'data/hydro_capacities.csv' or 'eia' for using the eia file"
+--method,--,str,"Data source used to rescale the hydro runoff; option 'hydro_capacities' to use the provided 'data/hydro_capacities.csv', 'eia' or 'irena' for using the eia or irena file"
 --year,--,year,"(optional) Specify the desired year to be used for normalization, the default value corresponds to the cutout weather year"
 multiplier,--,float,"Multiplier factor of the rescaling process (default 1.0)"
