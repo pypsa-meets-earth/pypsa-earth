@@ -456,23 +456,30 @@ def add_hydrogen(n, costs):
             else spatial.nodes + " H2"
         )
 
-        n.madd(
-            "Link",
-            spatial.nodes + " " + h2_tech,
-            bus0=params["bus0"],
-            bus1=bus1,
-            bus2=params.get("bus2", None),
-            bus3=params.get("bus3", None),
-            bus4=params.get("bus4", None),
-            p_nom_extendable=True,
-            carrier=h2_tech,
-            efficiency=params["efficiency"],
-            efficiency2=params.get("efficiency2", 1.0),
-            efficiency3=params.get("efficiency3", 1.0),
-            efficiency4=params.get("efficiency4", 1.0),
-            capital_cost=costs.at[params["cost_name"], "fixed"],
-            lifetime=costs.at[params["cost_name"], "lifetime"],
-        )
+        # Base parameters (always present)
+        link_kwargs = {
+            "bus0": params["bus0"],
+            "bus1": bus1,
+            "p_nom_extendable": True,
+            "carrier": h2_tech,
+            "efficiency": params["efficiency"],
+            "capital_cost": costs.at[params["cost_name"], "fixed"],
+            "lifetime": costs.at[params["cost_name"], "lifetime"],
+        }
+
+        # Optional parameters (only add if present)
+        for key in [
+            "bus2",
+            "bus3",
+            "bus4",
+            "efficiency2",
+            "efficiency3",
+            "efficiency4",
+        ]:
+            if key in params:
+                link_kwargs[key] = params[key]
+
+        n.madd("Link", spatial.nodes + " " + h2_tech, **link_kwargs)
 
     n.madd(
         "Link",
