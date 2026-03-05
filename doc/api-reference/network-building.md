@@ -18,8 +18,8 @@ Scripts for building, simplifying, and clustering the electricity network.
 
 ::: scripts.cluster_network
 
+::: scripts.augmented_line_connections
+
 ::: scripts.add_extra_components
 
 ::: scripts.prepare_network
-
-::: scripts.augmented_line_connections
