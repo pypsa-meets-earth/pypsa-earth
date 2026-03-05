@@ -86,7 +86,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger, override_component_attrs
+from _helpers import configure_logging, create_logger
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
@@ -316,7 +316,7 @@ def add_EQ_constraints(n, o, scaling=1e-1):
     to produce on average at least 70% of its consumption; EQ0.7 demands
     each node to produce on average at least 70% of its consumption.
     """
-    float_regex = "[0-9]*\.?[0-9]+"
+    float_regex = r"[0-9]*\.?[0-9]+"
     level = float(re.findall(float_regex, o)[0])
     if o[-1] == "c":
         ggrouper = n.generators.bus.map(n.buses.country)
@@ -701,7 +701,7 @@ def add_h2_network_cap(n, cap):
     h2_network_cap = n.model["Link-p_nom"]
     h2_network_cap_index = h2_network_cap.indexes["Link-ext"]
     subset_index = h2_network.index.intersection(h2_network_cap_index)
-    diff_index = h2_network_cap_index.difference(subset_index)
+    diff_index = h2_network.index.difference(subset_index)
     if len(diff_index) > 0:
         logger.warning(
             f"Impossible to set a limit for H2 pipelines extension for the following links: {diff_index}"
@@ -1040,7 +1040,7 @@ def extra_functionality(n, snapshots):
         add_operational_reserve_margin(n, snapshots, config)
     for o in opts:
         if "RES" in o:
-            res_share = float(re.findall("[0-9]*\.?[0-9]+$", o)[0])
+            res_share = float(re.findall(r"[0-9]*\.?[0-9]+$", o)[0])
             add_RES_constraints(n, res_share, config)
     for o in opts:
         if "EQ" in o:
@@ -1165,8 +1165,7 @@ if __name__ == "__main__":
 
     is_sector_coupled = "sopts" in snakemake.wildcards.keys()
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
 
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
         n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
