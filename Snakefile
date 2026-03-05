@@ -22,7 +22,7 @@ from _helpers import (
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
-    get_best_bundles_in_snakemake
+    get_best_bundles_in_snakemake,
 )
 from pathlib import Path
 
@@ -1093,12 +1093,12 @@ if not config["custom_data"]["gas_network"]:
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         output:
-            clustered_gas_network="resources/"
-            + SECDIR
-            + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             # TODO: Should be a own snakemake rule
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
             # gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
+            clustered_gas_network="resources/"
+            + SECDIR
+            + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
         script:
             "scripts/prepare_gas_network.py"
 
@@ -1466,6 +1466,7 @@ rule build_solar_thermal_profiles:
         solar_thermal_config=config["solar_thermal"],
         snapshots=config["snapshots"],
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1482,7 +1483,6 @@ rule build_solar_thermal_profiles:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         solar_thermal_total="resources/"
         + SECDIR
@@ -1509,13 +1509,13 @@ rule build_population_layouts:
     params:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
+        # default to first cutout found
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
         cutout="cutouts/"
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         pop_layout_total="resources/"
         + SECDIR
@@ -1549,6 +1549,7 @@ rule move_hardcoded_files_temp:
 
 rule build_clustered_population_layouts:
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1568,7 +1569,6 @@ rule build_clustered_population_layouts:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         clustered_pop_layout="resources/"
         + SECDIR
@@ -1592,6 +1592,7 @@ rule build_heat_demand:
     params:
         snapshots=config["snapshots"],
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1608,7 +1609,6 @@ rule build_heat_demand:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         heat_demand_urban="resources/"
         + SECDIR
@@ -1635,6 +1635,7 @@ rule build_temperature_profiles:
     params:
         snapshots=config["snapshots"],
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1651,7 +1652,6 @@ rule build_temperature_profiles:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         temp_soil_total="resources/"
         + SECDIR
@@ -2187,8 +2187,6 @@ if config["foresight"] == "myopic":
         output:
             network=RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            # config=RESDIR
-            # + "configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.yaml",
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         log:
