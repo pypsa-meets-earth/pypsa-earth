@@ -166,6 +166,11 @@ If you wish to generate lock-files for your platform, you can use the following 
    .. code-block:: bash
 
       $ conda-lock lock -p <your-platform> -k env -f envs/environment.yaml
+      $ conda-lock lock -f envs/environment.yaml -p linux-64 -p osx-64 -p osx-arm64 -p win-64 -k lock
+
+3. Render the lock files
+
+      $ conda-lock render --filename-template envs/{platform}.lock -k env -p osx-64 -p linux-64 -p osx-arm64 -p win-64
 
 For platform codes, refer to the `conda-lock documentation <https://conda.github.io/conda-lock/>`_ or use ``conda info`` to determine your platform.
 
