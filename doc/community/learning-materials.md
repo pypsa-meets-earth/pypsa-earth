@@ -47,7 +47,7 @@ For code collaboration we use GitHub. Which is a common source control tool that
 
 ## Snakemake and advanced changes
 
-Snakemake is our brain in PyPSA.
+Snakemake is an orchestration tool used to organise the workflow.
 It automates many tasks & keeps the code structure clean.
 Therefore, it is quite useful to learn if your task is to integrate features into PyPSA.
 We can recommend:
