@@ -73,8 +73,8 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
 wildcard_constraints:
-    simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+(m|flex)?|all|min",
+    simpl=r"[a-zA-Z0-9]*|all",
+    clusters=r"[0-9]+(m|flex)?|all|min",
     ll=r"(v|c|l)([0-9\.]+|opt|all)|all",
     opts=r"[-+a-zA-Z0-9\.]*",
     unc=r"[-+a-zA-Z0-9\.]*",
@@ -82,7 +82,7 @@ wildcard_constraints:
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     demand=r"[-+a-zA-Z0-9\.\s]*",
     h2export=r"[0-9]+(\.[0-9]+)?",
-    planning_horizons="20[2-9][0-9]|2100",
+    planning_horizons=r"20[2-9][0-9]|2100",
 
 
 if config["custom_rules"] is not []:
