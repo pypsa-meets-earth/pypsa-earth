@@ -67,7 +67,7 @@ nav:
       - Add Electricity: user-guide/rules-reference/create-network/add-electricity.md
       - Simplify Network: user-guide/rules-reference/create-network/simplify-network.md
       - Cluster Network: user-guide/rules-reference/create-network/cluster-network.md
-      - Augmented Line Connection: ...?   # file to add or line to remove
+      - Augmented Line Connection: '...?' # file to add or line to remove
       - Add Extra Components: user-guide/rules-reference/create-network/add-extra-components.md
       - Prepare Network: user-guide/rules-reference/create-network/prepare-network.md
     - Solving:
