@@ -67,14 +67,13 @@ nav:
       - Add Electricity: user-guide/rules-reference/create-network/add-electricity.md
       - Simplify Network: user-guide/rules-reference/create-network/simplify-network.md
       - Cluster Network: user-guide/rules-reference/create-network/cluster-network.md
+      - Augmented Line Connection: ...?   # file to add or line to remove
       - Add Extra Components: user-guide/rules-reference/create-network/add-extra-components.md
       - Prepare Network: user-guide/rules-reference/create-network/prepare-network.md
     - Solving:
       - Overview: user-guide/rules-reference/solving/index.md
       - Solve Network: user-guide/rules-reference/solving/solve-network.md
-
-- Utilities:
-  - Monte Carlo: utilities/monte-carlo.md
+    - Monte Carlo: utilities/monte-carlo.md
 
 - API Reference:
   - Overview: api-reference/index.md
