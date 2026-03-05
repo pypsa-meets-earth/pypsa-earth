@@ -17,6 +17,10 @@ The simplification `snakemake` rules prepare **approximations** of the full mode
 
 - **[cluster_network](cluster-network.md)** - Uses a clustering approach (e.g. [k-means](https://en.wikipedia.org/wiki/K-means_clustering)) to partition the network into a given number of zones and then reduce the network to a representation with one bus per zone.
 
+- **[alternative_clustering](alternative-clustering.md)** - Provides alternative algorithms and methods for network clustering when the default algorithms are not optimal for the studied region.
+
+- **[augmented_line_connections](augmented-line-connections.md)** - Reinforces or creates user-defined missing line connections to ensure the grid is fully connected and avoids isolated grid components.
+
 - **[add_extra_components](add-extra-components.md)** - Adds extra components to the model, such as storage.
 
 - **[prepare_network](prepare-network.md)** - Introduces optional constraints and requirements in the modelling, such as CO2 emissions, security margins, etc.

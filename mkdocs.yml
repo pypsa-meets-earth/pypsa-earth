@@ -31,23 +31,21 @@ nav:
 - Tutorials:
   - Electricity Model: tutorials/electricity-model.md
   - Sector-Coupled Model: tutorials/sector-coupled-model.md
-  - Examples: tutorials/examples.md
-
-- User Guide:
-  - Configuration: user-guide/configuration.md
-  - Wildcards: user-guide/wildcards.md
-  - Costs: user-guide/costs.md
-  - Structure: user-guide/structure.md
-  - Rules Overview: user-guide/rules-overview.md
-  - Optimization: user-guide/optimization.md
-  - Plotting: user-guide/plotting.md
-  - Data Workflow: user-guide/data-workflow.md
   - Model Customization:
     - General Modeling Guidelines: user-guide/model-customization.md
     - Basic Setup: user-guide/customization/basic-setup.md
     - Copernicus Data: user-guide/customization/copernicus-data.md
     - Validation: user-guide/customization/validation.md
     - Running Models: user-guide/customization/running-models.md
+  - Examples: tutorials/examples.md
+
+- User Guide:
+  - Structure: user-guide/structure.md
+  - Data Workflow: user-guide/data-workflow.md
+  - Configuration: user-guide/configuration.md
+  - Wildcards: user-guide/wildcards.md
+  - Costs: user-guide/costs.md
+  - Rules Overview: user-guide/rules-overview.md
   - Rules Reference:
     - Download & Filter:
       - Overview: user-guide/rules-reference/download-and-filter/index.md
@@ -67,13 +65,26 @@ nav:
       - Add Electricity: user-guide/rules-reference/create-network/add-electricity.md
       - Simplify Network: user-guide/rules-reference/create-network/simplify-network.md
       - Cluster Network: user-guide/rules-reference/create-network/cluster-network.md
-      - Augmented Line Connection: '...?' # file to add or line to remove
+      - Alternative Clustering: user-guide/rules-reference/create-network/alternative-clustering.md
+      - Augmented Line Connection: user-guide/rules-reference/create-network/augmented-line-connections.md
       - Add Extra Components: user-guide/rules-reference/create-network/add-extra-components.md
       - Prepare Network: user-guide/rules-reference/create-network/prepare-network.md
     - Solving:
       - Overview: user-guide/rules-reference/solving/index.md
       - Solve Network: user-guide/rules-reference/solving/solve-network.md
-    - Monte Carlo: utilities/monte-carlo.md
+- Educational Materials:
+  - Optimization: user-guide/optimization.md
+
+- Utilities:
+  - Monte Carlo: utilities/monte-carlo.md
+
+- Community & Resources:
+  - Contributing: community/contributing.md
+  - Project Structure: community/project-structure.md
+  - Users List: community/users-list.md
+  - Talks & Papers: community/talks-and-papers.md
+  - Learning Materials: community/learning-materials.md
+  - Software Hints: community/software-hints.md
 
 - API Reference:
   - Overview: api-reference/index.md
@@ -86,14 +97,6 @@ nav:
   - Analysis: api-reference/analysis.md
   - Monte Carlo: api-reference/monte-carlo.md
   - Utilities: api-reference/utilities.md
-
-- Community & Resources:
-  - Contributing: community/contributing.md
-  - Project Structure: community/project-structure.md
-  - Users List: community/users-list.md
-  - Talks & Papers: community/talks-and-papers.md
-  - Learning Materials: community/learning-materials.md
-  - Software Hints: community/software-hints.md
 
 - Release Notes: release-notes.md
 

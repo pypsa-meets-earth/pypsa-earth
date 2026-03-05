@@ -4,7 +4,6 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-
 # Setup Copernicus API
 
 To build custom cutouts, it is important to access the [Copernicus Climate Data Store](https://cds.climate.copernicus.eu).

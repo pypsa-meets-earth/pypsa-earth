@@ -66,34 +66,36 @@ There are multiple ways to get involved and learn more about our work:
 
 - [Electricity Model](tutorials/electricity-model.md) - Build an electricity-only model
 - [Sector-Coupled Model](tutorials/sector-coupled-model.md) - Create a multi-sector model
+- [Model Customization](user-guide/model-customization.md) - General Modeling Guidelines
 - [Examples](tutorials/examples.md) - Jupyter notebooks and use cases
 
 ### User Guide
 
+- [Structure](user-guide/structure.md) - Project structure and workflow
+- [Data Workflow](user-guide/data-workflow.md) - Data processing pipeline
 - [Configuration](user-guide/configuration.md) - Configure your model settings
 - [Wildcards](user-guide/wildcards.md) - Understand wildcard patterns
 - [Costs](user-guide/costs.md) - Technology cost assumptions
-- [Structure](user-guide/structure.md) - Project structure and workflow
 - [Rules Overview](user-guide/rules-overview.md) - Snakemake rules explained
-- [Optimization](user-guide/optimization.md) - Optimization theory and methods
-- [Plotting](user-guide/plotting.md) - Visualization and results
-- [Data Workflow](user-guide/data-workflow.md) - Data processing pipeline
-- [Model Customization](user-guide/model-customization.md) - Customize your model
+- [Rules Reference](user-guide/rules-reference/download-and-filter/index.md) - Detailed rule descriptions
 
-### Advanced
+### Educational Materials
+
+- [Optimization](user-guide/optimization.md) - Optimization theory and methods
+
+### Utilities
 
 - [Monte Carlo](utilities/monte-carlo.md) - Uncertainty quantification and sensitivity analysis
-
-### API Reference
-
-- [API Documentation](api-reference/index.md) - Complete API reference
 
 ### Community & Resources
 
 - [Contributing](community/contributing.md) - How to contribute to the project
 - [Project Structure](community/project-structure.md) - Credits and architecture
-- [Release Notes](release-notes.md) - Version history and changes
 - [Users List](community/users-list.md) - Who's using PyPSA-Earth
 - [Talks & Papers](community/talks-and-papers.md) - Publications and presentations
 - [Learning Materials](community/learning-materials.md) - Additional resources
 - [Software Hints](community/software-hints.md) - Tips and troubleshooting
+
+### API Reference
+
+- [API Documentation](api-reference/index.md) - Complete API reference

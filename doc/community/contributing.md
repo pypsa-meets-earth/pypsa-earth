@@ -83,7 +83,7 @@ Please, if you have problems with the documentation create an issue and let us k
 
 ### How to build it locally
 
-To create the documentation locally, you need [Sphinx](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html). It can be installed using specifications
+To create the documentation locally, you need `mkdocs`. It can be installed using specifications
 from `doc/requirements.txt`. First, we recommend creating a fresh conda environment and activate it:
 
 ```bash
@@ -135,5 +135,5 @@ A simple way to explore opportunities for collaboration is to join our meetings.
 * [List of meetings and times](https://github.com/pypsa-meets-earth/pypsa-earth#get-involved)
 
 * **Discord**
-    * Chat with the community, team up on features, exchange with developers, code in voice channels
-    * [Discord invitation link](https://discord.gg/AnuJBk23FU)
+  * Chat with the community, team up on features, exchange with developers, code in voice channels
+  * [Discord invitation link](https://discord.gg/AnuJBk23FU)

@@ -42,7 +42,6 @@ Abdel-Khalek et al., "PyPSA-Earth sector-coupled: A global open-source multi-ene
 
 ```bibtex
 @article{ABDELKHALEK2025125316,
-  author = {Hazem Abdel-Khalek and others},
   title = {PyPSA-Earth sector-coupled: A global open-source multi-energy system model showcased for hydrogen applications in countries of the Global South},
   journal = {Applied Energy},
   volume = {383},
@@ -53,6 +52,8 @@ Abdel-Khalek et al., "PyPSA-Earth sector-coupled: A global open-source multi-ene
   url = {https://www.sciencedirect.com/science/article/pii/S0306261925000467},
 }
 ```
+
+[(Linked to issue #1573)](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1573)
 
 ## PyPSA, PyPSA-Eur, PyPSA-Eur-Sec
 

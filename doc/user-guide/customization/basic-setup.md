@@ -4,16 +4,12 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-
-
-
-2. Basic customization
-
+# Basic Setup
 
 A good starting point to customize your model are settings of the default configuration file `config.default.yaml`. You may want to do a reserve copy of your current configuration file and then overwrite it by a default configuration:
 
 ```bash
-.../pypsa-earth (pypsa-earth) % cp config.default.yaml config.yaml
+cp config.default.yaml config.yaml
 ```
 
 ## Specify the country/region of interest
@@ -53,7 +49,7 @@ After initial run and successful generation of custom cutouts, `build_cutout` ca
     Additionally, if you encounter issues with failed `retrieve_databundle`, you can use the following script to debug it through the command line interface (CLI):
 
     ```bash
-    .../pypsa-earth (pypsa-earth) $ python scripts/non_workflow/databundle_cli.py
+    python scripts/non_workflow/databundle_cli.py
     ```
 
 ## Specify the weather year scope
@@ -90,11 +86,9 @@ It is possible to implement custom demand profiles. It can be done by creating a
 
 For example, to  `pypsa-earth/data/ssp2-2.6/2013_custom/`
 
-
 For example, to provide custom inputs for Nigeria, you can put the time-series into `Africa.csv` file and place the file into `pypsa-earth/data/ssp2-2.6/2013_custom/` folder. To make it fetched, you'll need to specify `weather_year: 2013_custom` under `load_options`.
 
 A format of the custom csv demand file should correspond to the csv files supplied with the model: there are `region_code`, `time`, `region_name` and `Electricity demand` columns, while a semicolon is used as a separator.
-
 
 ## Configure `atlite` section
 

@@ -4,7 +4,6 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-
 # Learning materials
 
 PyPSA meets Earth builds on several open-source packages. Below are the recommended sources for learning each one from the beginning.

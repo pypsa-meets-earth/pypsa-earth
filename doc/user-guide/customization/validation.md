@@ -13,13 +13,12 @@ To validate the data obtained with PyPSA-Earth, we recommend to go through the p
 It may be recommended to check the following quantities in the validation:
 
 1. **Inputs used by the model:**
-    - Network characteristics
-    - Substations
-    - Installed generation by type
-
+   - Network characteristics
+   - Substations
+   - Installed generation by type
 2. **Outputs of the simulation:**
-    - Demand
-    - Energy mix
+   - Demand
+   - Energy mix
 
 ## Where to Look for Reference Data
 

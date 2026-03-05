@@ -7,6 +7,7 @@ When to edit this script:
     - When a new top-level section is added to config.default.yaml
     - When a config section is renamed or removed
     - When a new subsection needs its own snippet file
+    (Note: This script should be updated when modifying the config structure, as guided by the PR template.)
 
 How it runs:
     - Automatically via the 'extract-config-snippets' pre-commit hook
