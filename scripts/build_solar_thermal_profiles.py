@@ -22,7 +22,7 @@ if __name__ == "__main__":
             "build_solar_thermal_profiles",
             simpl="",
             clusters="4",
-            planning_horizons="2050",
+            planning_horizons="2030",
         )
 
     config = snakemake.params.solar_thermal_config
