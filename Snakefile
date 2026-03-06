@@ -598,6 +598,7 @@ rule add_electricity:
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
+        nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:
         "networks/" + RDIR + "elec.nc",
     log:
@@ -1205,6 +1206,7 @@ rule prepare_sector_network:
                 + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             ),
         ),
+        nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
