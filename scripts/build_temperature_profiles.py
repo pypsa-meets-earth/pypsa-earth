@@ -21,7 +21,7 @@ if __name__ == "__main__":
             "build_temperature_profiles",
             simpl="",
             clusters="4",
-            planning_horizons="2050",
+            planning_horizons="2030",
         )
 
     time = pd.date_range(freq="h", **snakemake.params.snapshots)
