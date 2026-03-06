@@ -20,8 +20,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_clustered_population_layouts",
             simpl="",
-            clusters=1,
-            planning_horizons="2050",
+            clusters=4,
+            planning_horizons="2030",
         )
 
     cutout_path = (
