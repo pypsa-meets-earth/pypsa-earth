@@ -21,6 +21,7 @@ import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
@@ -1844,6 +1845,38 @@ def get_base_carrier(carrier: str) -> str:
     if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
         return parts[0]
     return carrier
+
+
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    # Remove year-tagged carriers
+    year_tagged_carriers = []
+    for carrier in n.carriers.index:
+        parts = carrier.rsplit("-", 1)
+        if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
+            year_tagged_carriers.append(carrier)
+
+    if len(year_tagged_carriers) > 0:
+        n.mremove("Carrier", year_tagged_carriers)
+        logger.info(f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}")
 
 
 def sanitize_carriers(n, config):
