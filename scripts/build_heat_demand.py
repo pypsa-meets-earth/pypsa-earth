@@ -19,7 +19,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_heat_demand", simpl="", clusters="1", planning_horizons="2050"
+            "build_heat_demand", simpl="", clusters="4", planning_horizons="2030"
         )
 
     time = pd.date_range(freq="h", **snakemake.params.snapshots)
