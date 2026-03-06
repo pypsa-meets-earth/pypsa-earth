@@ -446,9 +446,12 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
     )
 
 
-def get_grouping_year(build_year, grouping_years):
+def get_grouping_year(build_year: int, grouping_years: list) -> int:
     """
-    Map build_year to the nearest grouping year (rounded up).
+    Map build_year to the nearest grouping year bin.
+
+    Each build year is assigned to the first grouping year that is greater
+    than or equal to it (i.e. the right edge of its bin).
 
     Example:
         grouping_years = [1980, 2000, 2010, 2015, 2020]
@@ -537,7 +540,7 @@ def attach_wind_and_solar(
     technologies: set,
     extendable_carriers: dict,
     line_length_factor: float,
-):
+) -> None:
     """
     Add existing and extendable wind and solar generators to the network.
 
@@ -709,7 +712,7 @@ def attach_conventional_generators(
     renewable_carriers: set,
     conventional_config: list,
     conventional_inputs: dict,
-):
+) -> None:
     """
     Add existing conventional generators to the network and extendable conventional generators at all buses.
 
@@ -1062,9 +1065,24 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
         )
 
 
-def attach_existing_batteries(n, costs, ppl):
+def attach_existing_batteries(
+    n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
+) -> None:
     """
     Add existing battery storage units from powerplants.csv to the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    ppl : pd.DataFrame
+        Power plant DataFrame.
+
+    Returns
+    -------
+    None
     """
     batteries = ppl.query('carrier == "battery"')
     if batteries.empty:
@@ -1358,12 +1376,23 @@ def estimate_renewable_capacities_irena(
             ] * float(p_nom_max)
 
 
-def add_nice_carrier_names(n, config):
+def add_nice_carrier_names(n: pypsa.Network, config: dict) -> None:
     """
     Add nice names and colors to carriers.
 
     For existing carriers (e.g., "solar-2020"), uses the nice name and color
     from the base carrier (e.g., "solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    config : dict
+        The configuration dictionary containing plotting settings.
+
+    Returns
+    -------
+    None
     """
     carrier_i = n.carriers.index
 

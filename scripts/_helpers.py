@@ -1831,6 +1831,12 @@ def add_missing_carriers(n, carriers):
             n.add("Carrier", carrier)
 
 
+def _is_year_tagged(carrier: str) -> bool:
+    """Return True if carrier ends with a 4-digit year suffix (e.g. 'solar-2020')."""
+    parts = carrier.rsplit("-", 1)
+    return len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4
+
+
 def get_base_carrier(carrier: str) -> str:
     """
     Extract base carrier from carrier_gy format.
@@ -1841,9 +1847,8 @@ def get_base_carrier(carrier: str) -> str:
         "offwind-dc" -> "offwind-dc"
         "CCGT-2000" -> "CCGT"
     """
-    parts = carrier.rsplit("-", 1)
-    if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
-        return parts[0]
+    if _is_year_tagged(carrier):
+        return carrier.rsplit("-", 1)[0]
     return carrier
 
 
@@ -1868,11 +1873,7 @@ def restore_base_carrier_names(n: pypsa.Network) -> None:
     n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
 
     # Remove year-tagged carriers
-    year_tagged_carriers = []
-    for carrier in n.carriers.index:
-        parts = carrier.rsplit("-", 1)
-        if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
-            year_tagged_carriers.append(carrier)
+    year_tagged_carriers = [c for c in n.carriers.index if _is_year_tagged(c)]
 
     if len(year_tagged_carriers) > 0:
         n.mremove("Carrier", year_tagged_carriers)
