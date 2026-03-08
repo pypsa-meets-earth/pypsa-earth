@@ -185,6 +185,30 @@ databundles:
     output:
     - data/hydrobasins/hybas_world.shp
 
+  # IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators.
+  # Used in build_renewable_profiles.py to derive hydropower generation potentials.
+  # Original source: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
+  bundle_irena_statistics:
+    countries: [Earth]
+    tutorial: false
+    category: irena
+    destination: "data"
+    urls:
+      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
+    output:
+    - data/IRENA_Statistics_Extract_2025H2.xlsx
+
+  # TODO: make options in bundle_config for retrival regardless of tutorial
+  bundle_irena_statistics_tutorial:
+    countries: [Earth]
+    tutorial: true
+    category: irena
+    destination: "data"
+    urls:
+      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
+    output:
+    - data/IRENA_Statistics_Extract_2025H2.xlsx
+
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
     countries: [Earth]
