@@ -532,6 +532,49 @@ def aggregate_ppl_by_bus_carrier_year(ppl: pd.DataFrame) -> pd.DataFrame:
     return ppl_grouped
 
 
+def aggregate_inflow_by_group(
+    ppl: pd.DataFrame,
+    ppl_grouped: pd.DataFrame,
+    inflow_t: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Aggregate inflow time series by (bus, carrier, grouping_year) groups.
+
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Original (ungrouped) power plant DataFrame with columns: bus, carrier, grouping_year.
+    ppl_grouped : pd.DataFrame
+        Aggregated power plant DataFrame with columns: bus, carrier, carrier_gy.
+    inflow_t : pd.DataFrame
+        Inflow time series DataFrame with plant indices as columns.
+
+    Returns
+    -------
+    pd.DataFrame
+        Aggregated inflow time series with ppl_grouped indices as columns.
+    """
+    inflow_dict = {}
+    for idx in ppl_grouped.index:
+        bus = ppl_grouped.at[idx, "bus"]
+        carrier_gy = ppl_grouped.at[idx, "carrier_gy"]
+        grouping_year = int(carrier_gy.rsplit("-", 1)[1])
+        carrier = ppl_grouped.at[idx, "carrier"]
+
+        mask = (
+            (ppl["bus"] == bus)
+            & (ppl["carrier"] == carrier)
+            & (ppl["grouping_year"] == grouping_year)
+        )
+        original_plants = ppl[mask].index
+        valid_plants = original_plants[original_plants.isin(inflow_t.columns)]
+
+        if not valid_plants.empty:
+            inflow_dict[idx] = inflow_t[valid_plants].sum(axis=1)
+
+    return pd.DataFrame(inflow_dict, index=inflow_t.index)
+
+
 def attach_wind_and_solar(
     n: pypsa.Network,
     costs: pd.DataFrame,
@@ -830,7 +873,12 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
-def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> None:
+def attach_hydro(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame,
+    hydro_min_inflow_pu: float = 1.0,
+) -> None:
     """
     Add existing hydro powerplants to the network as Hydro Storage units, Run-Of-River generators, and Pumped Hydro storage units.
 
@@ -861,15 +909,6 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
         .rename(index=lambda s: str(s) + " hydro")
     )
 
-    # Current fix, NaN technologies set to ROR
-    if ppl.technology.isna().any():
-        n_nans = ppl.technology.isna().sum()
-        logger.warning(
-            f"Identified {n_nans} hydro powerplants with unknown technology.\n"
-            "Initialized to 'Run-Of-River'"
-        )
-        ppl.loc[ppl.technology.isna(), "technology"] = "Run-Of-River"
-
     # Map technology to carrier before aggregation
     tech_to_carrier = {
         "Run-Of-River": "ror",
@@ -884,8 +923,9 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
     ror = ppl_grouped[ppl_grouped["carrier"] == "ror"]
     phs = ppl_grouped[ppl_grouped["carrier"] == "PHS"]
     hydro = ppl_grouped[ppl_grouped["carrier"] == "hydro"]
+    tbd = ppl[ppl.technology.isna()]  # To be determined technologies
 
-    inflow_idx = ror.index.union(hydro.index)
+    inflow_idx = ror.index.union(hydro.index).union(tbd.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
@@ -894,12 +934,16 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants_idxs.empty:
                 # original total p_nom
-                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum()
+                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() + tbd.p_nom.sum()
 
                 ror = ror.loc[ror.index.intersection(found_plants.index)]
                 hydro = hydro.loc[hydro.index.intersection(found_plants.index)]
+                tbd = tbd.loc[tbd.index.intersection(found_plants.index)]
+
                 # loss of p_nom
-                loss_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() - total_p_nom
+                loss_p_nom = (
+                    ror.p_nom.sum() + hydro.p_nom.sum() + tbd.p_nom.sum() - total_p_nom
+                )
 
                 logger.warning(
                     f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants_idxs)}."
@@ -917,31 +961,44 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
                 )
 
                 # Aggregate inflow by (bus, carrier, grouping_year)
-                inflow_dict = {}
-                for idx in ppl_grouped.index:
-                    bus = ppl_grouped.at[idx, "bus"]
-                    carrier_gy = ppl_grouped.at[idx, "carrier_gy"]
-                    grouping_year = int(carrier_gy.rsplit("-", 1)[1])
-                    carrier = ppl_grouped.at[idx, "carrier"]
+                inflow_agg = aggregate_inflow_by_group(ppl, ppl_grouped, inflow_t)
 
-                    # Find original plants in this group
-                    mask = (
-                        (ppl["bus"] == bus)
-                        & (ppl["carrier"] == carrier)
-                        & (ppl["grouping_year"] == grouping_year)
-                    )
-                    original_plants = ppl[mask].index
-                    valid_plants = original_plants[
-                        original_plants.isin(inflow_t.columns)
-                    ]
+    # Heuristics for missing hydro technologies
+    if not tbd.empty:
+        inflow_pu_limit = inflow_t[tbd.index].mean() / tbd["p_nom"]  # Average MWh/MW
+        mask_reservoir = inflow_pu_limit >= hydro_min_inflow_pu
+        mask_ror = ~mask_reservoir
+        to_be_hydro = tbd[mask_reservoir]
+        to_be_ror = tbd[mask_ror]
 
-                    if not valid_plants.empty:
-                        inflow_dict[idx] = inflow_t[valid_plants].sum(axis=1)
+        # Aggregate to_be_ror and to_be_hydro by (bus, carrier, grouping_year)
+        to_be_hydro.loc[:, "carrier"] = "hydro"
+        to_be_ror.loc[:, "carrier"] = "ror"
+        to_be_ror_grouped = aggregate_ppl_by_bus_carrier_year(to_be_ror)
+        to_be_hydro_grouped = aggregate_ppl_by_bus_carrier_year(to_be_hydro)
+        inflow_agg_ror = aggregate_inflow_by_group(
+            to_be_ror, to_be_ror_grouped, inflow_t
+        )
+        inflow_agg_hydro = aggregate_inflow_by_group(
+            to_be_hydro, to_be_hydro_grouped, inflow_t
+        )
 
-                inflow_agg = pd.DataFrame(inflow_dict, index=inflow_t.index)
+        # Concatenate to existing ror and hydro dataframes
+        ror = pd.concat([ror, to_be_ror_grouped])
+        hydro = pd.concat([hydro, to_be_hydro_grouped])
+        inflow_agg = pd.concat([inflow_agg, inflow_agg_ror, inflow_agg_hydro], axis=1)
+
+        logger.info(
+            f"Identified {len(tbd)} hydro powerplants with unknown technology.\n"
+            f"Hydropower plants with energy-to-capacity ratio ≥ {hydro_min_inflow_pu} "
+            f"are classified as 'Reservoir'. The rest are 'Run-Of-River'.\n"
+            f"Reservoir: {mask_reservoir.sum()} \n"
+            f"Run-Of-River: {mask_ror.sum()}"
+        )
 
     # Add carriers with grouping year
-    for carrier_gy in ppl_grouped["carrier_gy"].unique():
+    all_grouped = pd.concat([ror, phs, hydro])
+    for carrier_gy in all_grouped["carrier_gy"].unique():
         if carrier_gy not in n.carriers.index:
             n.add("Carrier", carrier_gy, co2_emissions=0.0)
 
@@ -1025,13 +1082,12 @@ def attach_hydro(n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame) -> No
         missing_countries = pd.Index(hydro["country"].unique()).difference(
             max_hours_country.dropna().index
         )
+        hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
         if not missing_countries.empty:
             logger.warning(
-                "Assuming max_hours=6 for hydro reservoirs in the countries: {}".format(
-                    ", ".join(missing_countries)
-                )
+                f"Assuming max_hours={hydro_max_hours_default} for hydro reservoirs in the countries: "
+                "{}".format(", ".join(missing_countries))
             )
-        hydro_max_hours_default = c.get("hydro_max_hours_default", 6.0)
         hydro_max_hours = hydro.max_hours.where(
             hydro.max_hours > 0, hydro.country.map(max_hours_country)
         ).fillna(hydro_max_hours_default)
@@ -1488,7 +1544,9 @@ if __name__ == "__main__":
         extendable_carriers,
         snakemake.params.length_factor,
     )
-    attach_hydro(n, costs, ppl)
+    attach_hydro(
+        n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
+    )
     attach_existing_batteries(n, costs, ppl)
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):
