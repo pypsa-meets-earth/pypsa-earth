@@ -6,7 +6,6 @@ tutorial: true
 
 enable:
   retrieve_databundle: true
-  retrieve_databundle_sector: true
 
 run:
   name: sector
