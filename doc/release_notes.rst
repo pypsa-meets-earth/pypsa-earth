@@ -37,6 +37,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Bugfix creation of offshore regions: properly specify tolerance and options to eez `PR #1739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1739>`__
 
+* Use production version of Zenodo instead of the Zenodo sandbox `PR #1743 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1743`__
+
+* Fix stochastic bundle names causing rerun of workflow every time `PR #1746 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1746`__
+
 PyPSA-Earth 0.8.0
 =================
 
