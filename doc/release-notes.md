@@ -38,6 +38,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Use production version of Zenodo instead of the Zenodo sandbox [PR #1743](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1743)
 
+* Bugfix creation of offshore regions: properly specify tolerance and options to eez [PR #1739](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1739)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
