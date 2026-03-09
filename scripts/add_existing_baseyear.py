@@ -24,7 +24,6 @@ from _helpers import sanitize_carriers, sanitize_locations
 #     set_scenario_config,
 #     update_config_from_wildcards,
 # )
-# from add_electricity import sanitize_carriers
 from prepare_sector_network import define_spatial, prepare_costs  # , cluster_heat_buses
 
 logger = logging.getLogger(__name__)

@@ -21,6 +21,7 @@ import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
@@ -1830,6 +1831,12 @@ def add_missing_carriers(n, carriers):
             n.add("Carrier", carrier)
 
 
+def _is_year_tagged(carrier: str) -> bool:
+    """Return True if carrier ends with a 4-digit year suffix (e.g. 'solar-2020')."""
+    parts = carrier.rsplit("-", 1)
+    return len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4
+
+
 def get_base_carrier(carrier: str) -> str:
     """
     Extract base carrier from carrier_gy format.
@@ -1840,10 +1847,37 @@ def get_base_carrier(carrier: str) -> str:
         "offwind-dc" -> "offwind-dc"
         "CCGT-2000" -> "CCGT"
     """
-    parts = carrier.rsplit("-", 1)
-    if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4:
-        return parts[0]
+    if _is_year_tagged(carrier):
+        return carrier.rsplit("-", 1)[0]
     return carrier
+
+
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    # Remove year-tagged carriers
+    year_tagged_carriers = [c for c in n.carriers.index if _is_year_tagged(c)]
+
+    if len(year_tagged_carriers) > 0:
+        n.mremove("Carrier", year_tagged_carriers)
+        logger.info(f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}")
 
 
 def sanitize_carriers(n, config):
