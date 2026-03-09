@@ -350,22 +350,55 @@ def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
 
 
 def eez(
-    countries,
-    geo_crs,
-    country_shapes,
-    EEZ_gpkg,
-    out_logging=False,
-    distance=0.01,
-    minarea=0.01,
-    tolerance=0.01,
-    simplify_gadm=True,
-):
+    countries: list[str],
+    geo_crs: str,
+    country_shapes: gpd.GeoSeries | gpd.GeoDataFrame,
+    EEZ_gpkg: str,
+    out_logging: bool = False,
+    distance: float = 0.0,
+    minarea: float = 0.01,
+    tolerance: float = 0.01,
+    simplify_gadm: bool = True,
+) -> gpd.GeoDataFrame:
     """
-    Creates offshore shapes by buffer smooth countryshape (=offset country
-    shape) and differ that with the offshore shape which leads to for instance
-    a 100m non-build coastline.
-    """
+    Build offshore (EEZ) shapes for the requested countries.
 
+    The function loads EEZ geometries, unions them per country, and optionally
+    simplifies them. If ``distance`` is non-zero, the onshore country
+    shapes are buffered and subtracted from EEZ geometries to create an
+    "offshore-only" region (e.g. to enforce a non-build coastal strip).
+
+    Parameters
+    ----------
+    countries : list[str]
+        Two-letter ISO country codes to process (e.g. ``["DE", "FR"]``).
+    geo_crs : str
+        CRS used for geometric operations, passed to GeoPandas (e.g.
+        ``"EPSG:4326"``). Note: buffering distances depend on the CRS units.
+    country_shapes : geopandas.GeoSeries or geopandas.GeoDataFrame
+        Country geometries indexed by the same two-letter ISO codes. Must be in ``geo_crs``.
+    EEZ_gpkg : str
+        Path to the Marine Regions *World EEZ v11* geopackage.
+    out_logging : bool, default False
+        If True, emits progress information via the module logger.
+    distance : float, default 0.0
+        Buffer distance applied to ``country_shapes`` before subtraction from
+        the EEZ geometries. Units are CRS-dependent.
+    minarea : float, default 0.01
+        Minimum polygon area threshold used by the simplification routine.
+    tolerance : float, default 0.01
+        Tolerance passed to Shapely ``simplify`` via ``_simplify_polys``.
+    simplify_gadm : bool, default True
+        If True, simplify and validate geometries before and after the coastal
+        subtraction.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Offshore EEZ geometries indexed by country code (column ``name`` as
+        index, geometry column ``geometry``). Empty/invalid geometries are
+        removed.
+    """
     if out_logging:
         logger.info("Stage 2 of 5: Create offshore shapes")
 
@@ -1421,9 +1454,10 @@ if __name__ == "__main__":
         geo_crs,
         country_shapes,
         EEZ_gpkg,
-        out_logging,
-        simplify_gadm,
-        tolerance,
+        out_logging=out_logging,
+        tolerance=tolerance,
+        minarea=minarea,
+        simplify_gadm=simplify_gadm,
     )
 
     offshore_shapes.reset_index().to_file(snakemake.output.offshore_shapes)
