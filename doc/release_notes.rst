@@ -37,6 +37,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
 
+* Use production version of Zenodo instead of the Zenodo sandbox `PR #1743 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1743`__
+
 * Fix stochastic bundle names causing rerun of workflow every time `PR #1746 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1746`__
 
 PyPSA-Earth 0.8.0
