@@ -983,10 +983,31 @@ def attach_hydro(
             to_be_hydro, to_be_hydro_grouped, inflow_t
         )
 
-        # Concatenate to existing ror and hydro dataframes
-        ror = pd.concat([ror, to_be_ror_grouped])
-        hydro = pd.concat([hydro, to_be_hydro_grouped])
-        inflow_agg = pd.concat([inflow_agg, inflow_agg_ror, inflow_agg_hydro], axis=1)
+        # Concatenate to existing ror and hydro dataframes and re-aggregate
+        # to correctly merge any duplicate (bus, carrier_gy) groups
+        ror = aggregate_ppl_by_bus_carrier_year(
+            pd.concat(
+                [
+                    ppl[ppl["carrier"] == "ror"],  # original ungrouped ror plants
+                    to_be_ror,  # ungrouped tbd reclassified as ror
+                ]
+            )
+        )
+        hydro = aggregate_ppl_by_bus_carrier_year(
+            pd.concat(
+                [
+                    ppl[ppl["carrier"] == "hydro"],  # original ungrouped hydro plants
+                    to_be_hydro,  # ungrouped tbd reclassified as hydro
+                ]
+            )
+        )
+
+        # Merge inflow: sum overlapping columns, add new ones
+        inflow_agg = (
+            pd.concat([inflow_agg, inflow_agg_ror, inflow_agg_hydro], axis=1)
+            .groupby(level=0, axis=1)
+            .sum()
+        )
 
         logger.info(
             f"Identified {len(tbd)} hydro powerplants with unknown technology.\n"
