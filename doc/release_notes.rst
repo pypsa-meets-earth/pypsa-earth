@@ -78,6 +78,8 @@ PyPSA-Earth 0.8.0
 
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
 
+* Added integration with the OETC platform for cloud-based optimization `PR #1697 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1697>`__
+
 **Minor Changes and bug-fixing**
 
 * Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river `PR #1684 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1684>`__

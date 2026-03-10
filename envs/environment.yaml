@@ -16,6 +16,7 @@ dependencies:
 - dask
 - powerplantmatching>=0.8
 - earth-osm>=2.3.post1
+- linopy>=0.5.7
 
 # Dependencies of the workflow itself
 - xlrd

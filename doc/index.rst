@@ -106,6 +106,7 @@ Documentation
 * :doc:`custom_data`
 * :doc:`data_workflow`
 * :doc:`notebooks`
+* :doc:`oetc`
 
 .. toctree::
    :hidden:
@@ -121,6 +122,7 @@ Documentation
    optimization
    data_workflow
    notebooks
+   oetc
 
 **Configuration**
 
