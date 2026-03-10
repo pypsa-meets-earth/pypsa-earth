@@ -590,6 +590,7 @@ def clustering_for_n_clusters(
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
         clustering.network.lines["underwater_fraction"] = 0
 
+    # TODO: remove this code snippet after updating to PyPSA v1.1.0 (handled in PyPSA directly)
     # Remove zero-filled or NaN-filled time series for StorageUnit
     for attr in list(clustering.network.storage_units_t.keys()):
         df = clustering.network.storage_units_t[attr]
