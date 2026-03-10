@@ -40,6 +40,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Bugfix creation of offshore regions: properly specify tolerance and options to eez [PR #1739](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1739)
 
+* Include solar rooftops as carrier constrained by surface area [PR #1737](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1737)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
