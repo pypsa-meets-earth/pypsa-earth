@@ -37,6 +37,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
 
+* Fix clustering with gadm_layer_id 0 and 2 'PR #1714 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1714>`__
+
 * Bugfix creation of offshore regions: properly specify tolerance and options to eez `PR #1739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1739>`__
 
 * Use production version of Zenodo instead of the Zenodo sandbox `PR #1743 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1743`__
