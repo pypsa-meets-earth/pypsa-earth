@@ -85,6 +85,10 @@ wildcard_constraints:
     planning_horizons=r"20[2-9][0-9]|2100",
 
 
+include: "rules/common.smk"
+include: "rules/retrieve.smk"
+
+
 if config["custom_rules"] is not []:
     for rule in config["custom_rules"]:
 

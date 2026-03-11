@@ -33,6 +33,11 @@ enable:
   custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
 
 
+data:
+  hydrobasins:
+    source: build
+    version: latest
+
 
 custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
