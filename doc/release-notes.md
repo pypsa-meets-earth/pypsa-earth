@@ -24,7 +24,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Bump powerplantmatching to 0.8.0 [PR #1702](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702)
 
-* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files [PR #1705](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705) and [PR #1733](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1733)
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files [PR #1705](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705), [PR #1733](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1733), and [PR #1749](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1749)
 
 * Update steel GEM data to version 2024 and use backup link for GEM pipelines [PR #1708](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708)
 
