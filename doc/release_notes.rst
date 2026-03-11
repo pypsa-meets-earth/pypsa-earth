@@ -19,13 +19,17 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
 
+* Ensure connectivity of transformers in buses with several transformers `PR #1706 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1706>`__
+
 **Minor Changes and bug-fixing**
+
+* Include solar rooftops as carrier constrained by surface area `PR #1737 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1737>`__
 
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying `PR #1662 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662>`__
 
 * Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
 
-* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705>`__ and `PR #1733 https://github.com/pypsa-meets-earth/pypsa-earth/pull/1733>`__
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1705>`__ and `PR #1733 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1733>` `PR #1749 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1749>`__
 
 * Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
 
@@ -34,6 +38,14 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix missing bus warning for hydrogen due to pypsa version change `PR #1723 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723>`__
 
 * Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
+
+* Fix clustering with gadm_layer_id 0 and 2 'PR #1714 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1714>`__
+
+* Bugfix creation of offshore regions: properly specify tolerance and options to eez `PR #1739 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1739>`__
+
+* Use production version of Zenodo instead of the Zenodo sandbox `PR #1743 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1743`__
+
+* Fix stochastic bundle names causing rerun of workflow every time `PR #1746 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1746`__
 
 PyPSA-Earth 0.8.0
 =================
@@ -73,6 +85,10 @@ PyPSA-Earth 0.8.0
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation `PR #1610 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610>`__
 
 **Minor Changes and bug-fixing**
+
+* Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river `PR #1684 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1684>`__
+
+* Fix issues where gas and biomass powerplant capacity were not added in ``add_existing_baseyear.py``. Differentiate `urban central solid biomass CHP` with non-CHP `biomass` for historical capacity `PR #1678 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1678>`__
 
 * Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 
