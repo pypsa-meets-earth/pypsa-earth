@@ -169,8 +169,8 @@ def filter_gadm(
 def get_GADM_layer(
     country_list,
     layer_id,
-    geo_crs,
-    contended_flag,
+    geo_crs="EPSG:4326",
+    contended_flag="set_by_country",
     update=False,
     outlogging=False,
 ):

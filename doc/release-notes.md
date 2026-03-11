@@ -42,6 +42,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Include solar rooftops as carrier constrained by surface area [PR #1737](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1737)
 
+* Fix clustering with gadm_layer_id 0 and 2 [PR #1714](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1714)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**

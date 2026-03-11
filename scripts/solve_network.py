@@ -1168,9 +1168,10 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
-        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
-            snakemake.params.augmented_line_connection.get("min_expansion")
-        )
+        if not n.lines.empty:
+            n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
+                snakemake.params.augmented_line_connection.get("min_expansion")
+            )
 
     if (
         snakemake.config["custom_data"]["add_existing"]
