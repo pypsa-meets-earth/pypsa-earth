@@ -16,11 +16,11 @@
   --md-primary-fg-color: #3f51b5;
   --md-primary-fg-color--light: #757de8;
   --md-primary-fg-color--dark: #002984;
-  
+
   /* Spacing */
   --content-spacing: 1.5rem;
   --grid-gap: 1rem;
-  
+
   /* Borders and shadows */
   --border-radius: 4px;
   --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
@@ -190,11 +190,11 @@ table tr:hover {
   .grid-images {
     flex-direction: column;
   }
-  
+
   .grid-images img {
     width: 100%;
   }
-  
+
   .grid {
     grid-template-columns: 1fr;
   }
