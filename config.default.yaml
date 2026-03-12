@@ -37,6 +37,9 @@ data:
   hydrobasins:
     source: build
     version: latest
+  irena:
+    source: primary
+    version: latest
 
 
 custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
