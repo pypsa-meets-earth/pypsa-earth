@@ -12,5 +12,3 @@ Moreover, networks can be solved for another focus with the derivative rules `so
 ## Rules
 
 - **[solve_network](solve-network.md)** - Runs the optimization to solve the network for optimal dispatch and investment.
-
-- **[solve_operations_network](solve-operations-network.md)** - Runs dispatch-only optimization on an already solved network.
