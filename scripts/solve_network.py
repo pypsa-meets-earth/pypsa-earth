@@ -645,7 +645,7 @@ def add_land_use_constraint(n):
 def _add_land_use_constraint(n):
     # warning: this will miss existing offwind which is not classed AC-DC and has carrier 'offwind'
 
-    for carrier in ["solar", "onwind", "offwind-ac", "offwind-dc"]:
+    for carrier in ["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"]:
         existing = (
             n.generators.loc[n.generators.carrier == carrier, "p_nom"]
             .groupby(n.generators.bus.map(n.buses.location))
@@ -679,7 +679,7 @@ def _add_land_use_constraint_m(n):
     grouping_years = snakemake.config["existing_capacities"]["grouping_years"]
     current_horizon = snakemake.wildcards.planning_horizons
 
-    for carrier in ["solar", "onwind", "offwind-ac", "offwind-dc"]:
+    for carrier in ["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"]:
         existing = n.generators.loc[n.generators.carrier == carrier, "p_nom"]
         ind = list(
             set(
@@ -1183,9 +1183,10 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     if snakemake.params.augmented_line_connection.get("add_to_snakefile"):
-        n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
-            snakemake.params.augmented_line_connection.get("min_expansion")
-        )
+        if not n.lines.empty:
+            n.lines.loc[n.lines.index.str.contains("new"), "s_nom_min"] = (
+                snakemake.params.augmented_line_connection.get("min_expansion")
+            )
 
     if (
         snakemake.config["custom_data"]["add_existing"]
