@@ -138,11 +138,11 @@ def get_load_paths_gegis(ssp_parentfolder, config):
         load_paths.append(load_path)
         file_names.append(file_name)
 
-    logger.info(
-        f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
-        + f"Expected files: "
-        + "; ".join(file_names)
-    )
+    # logger.info(
+    #     f"Demand data folder: {load_dir}, load path is {load_paths}.\n"
+    #     + f"Expected files: "
+    #     + "; ".join(file_names)
+    # )
 
     return load_paths
 

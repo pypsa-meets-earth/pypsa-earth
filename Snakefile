@@ -11,8 +11,6 @@ sys.path.append("./scripts")
 
 from shutil import copyfile, move
 
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
 from _helpers import (
     create_country_list,
     get_last_commit_message,
@@ -29,7 +27,12 @@ from retrieve_databundle_light import (
 from pathlib import Path
 
 
-HTTP = HTTPRemoteProvider()
+# This extends the existing storage configuration (e.g., for HTTP)
+storage cached_http:
+    provider="cached-http",
+    cache="~/.cache/snakemake-pypsa-earth",  # Default location
+    max_concurrent_downloads=3,  # Download max 3 files at once
+
 
 copy_default_files()
 
@@ -53,7 +56,6 @@ config["scenario"]["unc"] = [
     f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
 ]
 
-
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
 CDIR = RDIR if not run.get("shared_cutouts") else ""
@@ -71,8 +73,8 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
 wildcard_constraints:
-    simpl="[a-zA-Z0-9]*|all",
-    clusters="[0-9]+(m|flex)?|all|min",
+    simpl=r"[a-zA-Z0-9]*|all",
+    clusters=r"[0-9]+(m|flex)?|all|min",
     ll=r"(v|c|l)([0-9\.]+|opt|all)|all",
     opts=r"[-+a-zA-Z0-9\.]*",
     unc=r"[-+a-zA-Z0-9\.]*",
@@ -80,7 +82,11 @@ wildcard_constraints:
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     demand=r"[-+a-zA-Z0-9\.\s]*",
     h2export=r"[0-9]+(\.[0-9]+)?",
-    planning_horizons="20[2-9][0-9]|2100",
+    planning_horizons=r"20[2-9][0-9]|2100",
+
+
+include: "rules/common.smk"
+include: "rules/retrieve.smk"
 
 
 if config["custom_rules"] is not []:
@@ -149,7 +155,6 @@ if config["enable"].get("retrieve_databundle", True):
     rule retrieve_databundle_light:
         params:
             bundles_to_download=bundles_to_download,
-            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand(
                 "{file}", file=datafiles_retrivedatabundle(config, bundles_to_download)
@@ -445,8 +450,8 @@ if config["enable"].get("retrieve_cost_data", True):
         params:
             version=config["costs"]["technology_data_version"],
         input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
+            storage.http(
+                f"http://raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
                 + "costs_{year}.csv",
                 keep_local=True,
             ),
@@ -492,6 +497,7 @@ HYDRO_PROFILES = {
     "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
     "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
     "powerplants": "resources/" + RDIR + "powerplants.csv",
+    "hydrobasins": "data/hydrobasins/hybas_world.shp",
 }
 
 
@@ -1091,12 +1097,12 @@ if not config["custom_data"]["gas_network"]:
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         output:
-            clustered_gas_network="resources/"
-            + SECDIR
-            + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             # TODO: Should be a own snakemake rule
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
             # gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
+            clustered_gas_network="resources/"
+            + SECDIR
+            + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
         script:
             "scripts/prepare_gas_network.py"
 
@@ -1464,6 +1470,7 @@ rule build_solar_thermal_profiles:
         solar_thermal_config=config["solar_thermal"],
         snapshots=config["snapshots"],
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1480,7 +1487,6 @@ rule build_solar_thermal_profiles:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         solar_thermal_total="resources/"
         + SECDIR
@@ -1507,13 +1513,13 @@ rule build_population_layouts:
     params:
         planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
+        # default to first cutout found
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
         cutout="cutouts/"
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         pop_layout_total="resources/"
         + SECDIR
@@ -1547,6 +1553,7 @@ rule move_hardcoded_files_temp:
 
 rule build_clustered_population_layouts:
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1566,7 +1573,6 @@ rule build_clustered_population_layouts:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         clustered_pop_layout="resources/"
         + SECDIR
@@ -1590,6 +1596,7 @@ rule build_heat_demand:
     params:
         snapshots=config["snapshots"],
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1606,7 +1613,6 @@ rule build_heat_demand:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         heat_demand_urban="resources/"
         + SECDIR
@@ -1633,6 +1639,7 @@ rule build_temperature_profiles:
     params:
         snapshots=config["snapshots"],
     input:
+        # default to first cutout found
         pop_layout_total="resources/"
         + SECDIR
         + "population_shares/pop_layout_total_{planning_horizons}.nc",
@@ -1649,7 +1656,6 @@ rule build_temperature_profiles:
         + CDIR
         + [c["cutout"] for _, c in config["renewable"].items()][0]
         + ".nc",
-        # default to first cutout found
     output:
         temp_soil_total="resources/"
         + SECDIR
@@ -2185,8 +2191,6 @@ if config["foresight"] == "myopic":
         output:
             network=RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-            # config=RESDIR
-            # + "configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.yaml",
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         log:

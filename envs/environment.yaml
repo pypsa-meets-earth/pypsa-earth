@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: CC0-1.0
 
 name: pypsa-earth
 channels:
@@ -10,7 +10,6 @@ channels:
 dependencies:
 - python>=3.10, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 - pip
-
 - pypsa>=0.25.1, <=0.30.3
 - atlite>=0.4.1
 - dask
@@ -21,16 +20,17 @@ dependencies:
 - xlrd
 - openpyxl
 - seaborn
-- snakemake-minimal<8
+- snakemake-minimal>=9,<10
+- snakemake-storage-plugin-cached-http<1
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
 - pyscipopt
 - lxml
 - numpy<2
-- pandas
-- geopandas>=1
-- fiona>=1.10
+- pandas<3
+- geopandas>=1, <2
+- fiona>=1.10,<2
 - xarray>=2023.11.0, <=2025.01.2
 - netcdf4
 - libgdal-netcdf

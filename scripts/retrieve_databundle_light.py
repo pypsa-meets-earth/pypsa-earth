@@ -456,70 +456,6 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     )
 
 
-def download_and_unzip_hydrobasins(
-    config, rootpath, hot_run=True, disable_progress=False
-):
-    """
-    download_and_unzip_basins(config, rootpath, dest_path, hot_run=True,
-    disable_progress=False)
-
-    Function to download and unzip the data for hydrobasins from HydroBASINS database
-    available via https://www.hydrosheds.org/products/hydrobasins
-
-    We are using data from the HydroSHEDS version 1 database
-    which is © World Wildlife Fund, Inc. (2006-2022) and has been used herein under license.
-    WWF has not evaluated our data pipeline and therefore gives no warranty regarding its
-    accuracy, completeness, currency or suitability for any particular purpose.
-    Portions of the HydroSHEDS v1 database incorporate data which are the intellectual property
-    rights of © USGS (2006-2008), NASA (2000-2005), ESRI (1992-1998), CIAT (2004-2006),
-    UNEP-WCMC (1993), WWF (2004), Commonwealth of Australia (2007), and Her Royal Majesty
-    and the British Crown and are used under license. The HydroSHEDS v1 database and
-    more information are available at https://www.hydrosheds.org.
-
-    Inputs
-    ------
-    config : Dict
-        Configuration data for the category to download
-    rootpath : str
-        Absolute path of the repository
-    hot_run : Bool (default True)
-        When true the data are downloaded
-        When false, the workflow is run without downloading and unzipping
-    disable_progress : Bool (default False)
-        When true the progress bar to download data is disabled
-
-    Outputs
-    -------
-    True when download is successful, False otherwise
-    """
-    resource = config["category"]
-    destination = os.path.join(BASE_DIR, config["destination"])
-    url_templ = config["urls"]["hydrobasins"]["base_url"]
-    suffix_list = config["urls"]["hydrobasins"]["suffixes"]
-
-    level_code = config["level_code"]
-    level_code = "{:02d}".format(int(level_code))
-
-    all_downloaded = True
-
-    for rg in suffix_list:
-        url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
-        file_path = os.path.join(destination, os.path.basename(url))
-
-        all_downloaded &= download_and_unpack(
-            url=url,
-            file_path=file_path,
-            resource=resource,
-            destination=destination,
-            headers={"User-agent": "Mozilla/5.0"},
-            hot_run=hot_run,
-            unzip=True,
-            disable_progress=disable_progress,
-        )
-
-    return all_downloaded
-
-
 def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
     """
     download_and_unzip_post(config, rootpath, dest_path, hot_run=True,
@@ -818,28 +754,9 @@ def datafiles_retrivedatabundle(config, bundles_to_download):
     return listoutputs
 
 
-def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
-    basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
-    output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
-
-    files_to_merge = [
-        "hybas_{0:s}_lev{1:02d}_v1c.shp".format(suffix, hydrobasins_level)
-        for suffix in config_hydrobasin["urls"]["hydrobasins"]["suffixes"]
-    ]
-    gpdf_list = [None] * len(files_to_merge)
-    logger.info("Merging hydrobasins files into: " + output_fl)
-    for i, f_name in tqdm(enumerate(files_to_merge)):
-        gpdf_list[i] = gpd.read_file(os.path.join(basins_path, f_name))
-    fl_merged = gpd.GeoDataFrame(pd.concat(gpdf_list)).drop_duplicates(
-        subset="HYBAS_ID", ignore_index=True
-    )
-    fl_merged.to_file(output_fl, driver="ESRI Shapefile")
-
-
 def retrieve_databundle(
     bundles_to_download,
     config_bundles,
-    hydrobasins_level,
     rootpath=".",
     disable_progress=False,
 ):
@@ -853,12 +770,6 @@ def retrieve_databundle(
     )
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
-
-    hydrobasin_bundles = [
-        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
-    ]
-    if len(hydrobasin_bundles) > 0:
-        config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
 
     # initialize downloaded and missing bundles
     downloaded_bundles = []
@@ -888,12 +799,6 @@ def retrieve_databundle(
 
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
-
-    if len(hydrobasin_bundles) > 0:
-        logger.info("Merging regional hydrobasins files into a global shapefile")
-        merge_hydrobasins_shape(
-            config_bundles[hydrobasin_bundles[0]], hydrobasins_level
-        )
 
     # log the downloaded and missing bundles
     logger.info(
@@ -928,14 +833,12 @@ if __name__ == "__main__":
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
     disable_progress = not config_enable["progress_bar"]
-    hydrobasins_level = snakemake.params["hydrobasins_level"]
 
     bundles_to_download = snakemake.params["bundles_to_download"]
 
     retrieve_databundle(
         bundles_to_download,
         config_bundles,
-        hydrobasins_level,
         rootpath=rootpath,
         disable_progress=disable_progress,
     )

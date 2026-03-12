@@ -45,6 +45,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix stochastic bundle names causing rerun of workflow every time `PR #1746 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1746`__
 
+* Update snakemake, replace HTTPRemote with Storage, and use snakemake_cached_http_plugin `PR #1741 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1741`__
+
+* Add hydrobasins to rule input for build_renewable_profiles `PR #xxxx <https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX`__
+
 PyPSA-Earth 0.8.0
 =================
 
