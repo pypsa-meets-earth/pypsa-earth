@@ -12,7 +12,7 @@ test:
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.custom.yaml
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml configs/scenarios/config.NG.yaml
 	snakemake solve_all_networks_monte -call --configfile config.tutorial.yaml test/config.monte_carlo.yaml
-	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.landlock.yaml
+	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.landlock.yaml --rerun-incomplete
 	snakemake -c4 solve_sector_networks --configfile config.tutorial.yaml test/config.sector.yaml
 	snakemake -c4 solve_sector_networks_myopic --configfile config.tutorial.yaml test/config.myopic.yaml
 	echo "All tests completed successfully."

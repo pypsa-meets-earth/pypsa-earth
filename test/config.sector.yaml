@@ -6,6 +6,7 @@ tutorial: true
 
 enable:
   retrieve_databundle: true
+  keep_existing_databundle: false # to retrieve cutouts for NG-BJ
 
 run:
   name: sector

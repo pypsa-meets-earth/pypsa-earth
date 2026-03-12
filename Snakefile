@@ -141,10 +141,9 @@ rule plot_all_summaries:
             ext=["png", "pdf"],
         ),
 
+bundles_to_download = get_best_bundles_in_snakemake(config)
 
-if config["enable"].get("retrieve_databundle", True):
-
-    bundles_to_download = get_best_bundles_in_snakemake(config)
+if config["enable"].get("retrieve_databundle", True) and bundles_to_download:
 
     rule retrieve_databundle_light:
         params:
