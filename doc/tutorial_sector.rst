@@ -45,14 +45,14 @@ Scenarios can be defined like for electricity-only studies, but with additional 
 
 .. note::
 
-    It is important to set the following flags ``retrieve_databundle`` and ``retrieve_databundle_sector``
+    It is important to set the following flags ``retrieve_databundle`` and ``keep_existing_databundle``
     to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
 
 .. code:: yaml
 
     enable:
       retrieve_databundle: true
-      retrieve_databundle_sector: true
+      keep_existing_databundle: true
 
 .. code:: yaml
 
@@ -349,14 +349,14 @@ in the ``test/config.test_myopic.yaml`` file.
 
 .. note::
 
-    It is important to set the following flags ``retrieve_databundle`` and ``retrieve_databundle_sector``
+    It is important to set the following flags ``retrieve_databundle`` and ``keep_existing_databundle``
     to ``false`` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
 
 .. code:: yaml
 
     enable:
       retrieve_databundle: true
-      retrieve_databundle_sector: true
+      keep_existing_databundle: true
 
 Scenarios can be defined like for electricity-only studies, but with additional
 wildcard options. For the myopic foresight mode, the ``{planning_horizons}`` wildcard

@@ -8,6 +8,9 @@ countries: ["BW"]
 run:
   name: "landlock"
 
+enable:
+  keep_existing_databundle: false # to retrieve cutouts for BW
+
 subregion:
   enable:
     simplify_network: true # activate subregion in simplify_network
