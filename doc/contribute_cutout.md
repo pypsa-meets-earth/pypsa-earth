@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+SPDX-License-Identifier: CC-BY-4.0 -->
+
 
 1. Build a cutout with build_cutout rule
    - snapshots correspond to the standard time frame
