@@ -527,7 +527,7 @@ Check if a string is contained in keys of a dictionary and is True
     has_fileld = field in config
     field_true = dict.get(filed, False)
 
-    return (has_fileld and field_true)    
+    return (has_fileld and field_true)
 
 
 if __name__ == "__main__":
@@ -702,10 +702,10 @@ if __name__ == "__main__":
 
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
-        if check_flag(config, "natura"):    
+        if check_flag(config, "natura"):
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
-        if check_flag(config, "copernicus"):     
+        if check_flag(config, "copernicus"):
             copernicus = config["copernicus"]
             excluder.add_raster(
                 paths.copernicus,
@@ -721,7 +721,7 @@ if __name__ == "__main__":
                     crs=COPERNICUS_CRS,
                 )
 
-        if check_flag(config, "max_depth"):              
+        if check_flag(config, "max_depth"):
             # lambda not supported for atlite + multiprocessing
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
@@ -730,11 +730,11 @@ if __name__ == "__main__":
                 paths.gebco, codes=func_depth, crs=GEBCO_CRS, nodata=-1000
             )
 
-        if check_flag(config, "min_shore_distance"):             
+        if check_flag(config, "min_shore_distance"):
             buffer = config["min_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer)
 
-        if check_flag(config, "max_shore_distance"):             
+        if check_flag(config, "max_shore_distance"):
             buffer = config["max_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 
