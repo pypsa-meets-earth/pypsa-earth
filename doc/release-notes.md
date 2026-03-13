@@ -44,6 +44,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix clustering with gadm_layer_id 0 and 2 [PR #1714](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1714)
 
+* Add hydrobasins to rule input for build_renewable_profiles [PR #1753](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1753)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
@@ -110,6 +112,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix shipping and aviation implementation in multi-country models [PR #1582](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582)
 
+* Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings [PR #1608](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608)
+
 * Add geojson output to build_osm_network [PR #1611](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611)
 
 * Add missing colors for energy carriers in the sector-coupled model [PR #1625](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1625)
@@ -163,6 +167,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Introduce US-specific cost configurations and update to `technology_data_version` v0.13.2 [PR #1448](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1448)
 
 * Add new hydrogen production technologies and reorganize existing structure [PR #1227](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1227)
+
+* Add all cutouts to sandbox zenodo [PR #1688](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1688)
 
 **Minor Changes and bug-fixing**
 
@@ -243,6 +249,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Avoid adding CO2 pipeline links when option is disabled [PR #1504](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1504)
 
 * Add possibility to overwrite cost attributes for sector model [PR #1567](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1567)
+
+* Update team description in the documentation [PR #1670](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1670)
 
 # PyPSA-Earth 0.6.0
 
