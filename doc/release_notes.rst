@@ -47,6 +47,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix stochastic bundle names causing rerun of workflow every time `PR #1746 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1746`__
 
+* Add hydrobasins to rule input for build_renewable_profiles `PR #1753 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1753`__
+
 PyPSA-Earth 0.8.0
 =================
 
