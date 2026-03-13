@@ -463,6 +463,9 @@ def prepare_costs(
         annuity_factor(v) * v["investment"] * Nyears
         for _, v in modified_costs.iterrows()
     ]
+    modified_costs["marginal_cost"] = (
+        modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
+    )
 
     modified_costs = calculate_cost_for_storage_units(
         modified_costs, max_hours, costs_name="fixed"

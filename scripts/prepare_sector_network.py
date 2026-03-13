@@ -1320,25 +1320,9 @@ def fetch_existing_battery_capacity_from_elec(n_elec):
     return bat.groupby("bus")["p_nom"].sum().to_dict()
 
 
-def add_storage(n, costs, existing_battery_capacity=None):
-    """Function to add battery storage to the sector network, including
-    carry-over of existing capacities from the electricity network."""
-    logger.info("Add battery storage")
-
-    n.add("Carrier", "battery")
-
-    n.madd(
-        "Bus",
-        spatial.nodes + " battery",
-        location=spatial.nodes,
-        carrier="battery",
-        x=n.buses.loc[list(spatial.nodes)].x.values,
-        y=n.buses.loc[list(spatial.nodes)].y.values,
-    )
-
-    # Existing battery capacity per AC node (MW) passed in
-    if existing_battery_capacity is None:
-        existing_battery_capacity = {}
+def include_existing_storage(n, elec_params, existing_battery_capacity=None):
+    """Function to include carry-over of existing capacities from the electricity network."""
+    logger.info("Include existing battery storage")
 
     total = float(sum(existing_battery_capacity.values()))
     nodes_with_cap = len([p for p in existing_battery_capacity.values() if p > 0])
@@ -1347,49 +1331,24 @@ def add_storage(n, costs, existing_battery_capacity=None):
     )
 
     # Use configured max_hours for battery duration
-    battery_duration = snakemake.params.electricity["max_hours"]["battery"]
+    battery_duration = elec_params["max_hours"]["battery"]
 
     # Per-node existing capacity (MW) aligned to spatial.nodes (AC buses)
-    p_nom_min = pd.Series(existing_battery_capacity).reindex(spatial.nodes).fillna(0.0)
+    p_nom_min = pd.Series(existing_battery_capacity)
     e_nom_min = p_nom_min * battery_duration  # MWh
 
-    n.madd(
-        "Store",
-        spatial.nodes + " battery",
-        bus=spatial.nodes + " battery",
-        e_cyclic=True,
-        e_nom_extendable=True,
-        e_nom_min=e_nom_min.values,
-        carrier="battery",
-        capital_cost=costs.at["battery storage", "fixed"],
-        lifetime=costs.at["battery storage", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery charger",
-        bus0=spatial.nodes,
-        bus1=spatial.nodes + " battery",
-        carrier="battery charger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        capital_cost=costs.at["battery inverter", "fixed"],
-        p_nom_extendable=True,
-        p_nom_min=p_nom_min.values,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery discharger",
-        bus0=spatial.nodes + " battery",
-        bus1=spatial.nodes,
-        carrier="battery discharger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        marginal_cost=options["marginal_cost_storage"],
-        p_nom_extendable=True,
-        p_nom_min=p_nom_min.values,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
+    if "battery" in elec_params["extendable_carriers"]["StorageUnit"]:
+        n.storage_units.loc[p_nom_min.index + " battery", "p_nom_min"] = (
+            p_nom_min.values
+        )
+    else:
+        n.stores.loc[e_nom_min.index + " battery", "e_nom_min"] = e_nom_min.values
+        n.links.loc[p_nom_min.index + " battery charger", "p_nom_min"] = (
+            p_nom_min.values
+        )
+        n.links.loc[p_nom_min.index + " battery discharger", "p_nom_min"] = (
+            p_nom_min.values
+        )
 
 
 def h2_hc_conversions(n, costs):
@@ -3309,7 +3268,12 @@ if __name__ == "__main__":
     add_hydrogen(n, costs)  # TODO add costs
 
     # Add storage using carried-over capacities
-    add_storage(n, costs, existing_battery_capacity=existing_batt)
+    if existing_batt:
+        include_existing_storage(
+            n,
+            elec_params=snakemake.params.electricity,
+            existing_battery_capacity=existing_batt,
+        )
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)

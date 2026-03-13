@@ -179,7 +179,6 @@ def attach_stores(
             e_nom_extendable=True,
             carrier=carrier,
             capital_cost=costs.at[lookup_store, cost_name],
-            marginal_cost=costs.at[lookup_store, "marginal_cost"],
             lifetime=costs.at[lookup_store, "lifetime"],
         )
 
