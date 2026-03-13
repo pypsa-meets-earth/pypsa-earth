@@ -5,13 +5,13 @@
    # full-scale cutout
    snapshots:
      start: "2013-01-01"
-     end: "2014-01-01" 
+     end: "2014-01-01"
    ```
 
    ```
    snapshots:
      start: "2013-03-1"
-     end: "2013-03-7"   
+     end: "2013-03-7"
    ```
 
    - population and GPD aren't added to the shapes
@@ -24,7 +24,7 @@
 
 3. Compress the cutout and upload a file:
    - use a standard name for the cutout file (cutout-2013-era5.nc for full-scale cutouts and cutout-2013-era5-tutorial.nc for tutorial and testing ones)
-   - use zip format for compression   
+   - use zip format for compression
    - do not include an enclosing folder into the archive
    - change the archive name to a meaningful one
 4. Create Zenodo record
@@ -43,4 +43,4 @@
         output: [cutouts/cutout-2013-era5-tutorial.nc]
         disable_by_opt:
           build_cutout: [all]
-    ```   
+    ```
