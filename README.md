@@ -59,7 +59,9 @@ The diagram below depicts one representative clustered node for the sector-coupl
 
 ## Livetracker. Most popular global models:
 
-[![Star History Chart](https://api.star-history.com/image?repos=pypsa-meets-earth/pypsa-earth%2COSeMOSYS/osemosys_global%2Cniclasmattsson/Supergrid%2CSGIModel/MUSE_OS%2Cetsap-TIMES/TIMES_model&type=date&legend=top-left)](https://www.star-history.com/?repos=pypsa-meets-earth%2Fpypsa-earth%2COSeMOSYS%2Fosemosys_global%2Cniclasmattsson%2FSupergrid%2CSGIModel%2FMUSE_OS%2Cetsap-TIMES%2FTIMES_model&type=date&legend=top-left)
+<a href="https://www.star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date">
+  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,SGIModel/MUSE_OS,etsap-TIMES/TIMES_model&type=Date&legend=top-left">
+</a>
 
 ## How to get involved
 
