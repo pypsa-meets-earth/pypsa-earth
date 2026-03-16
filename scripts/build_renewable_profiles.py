@@ -521,14 +521,12 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     return runoff
 
 
-def check_flag(dict: dict, field: str) -> bool:
+def check_flag(d: dict, field: str) -> bool:
     """
-    Check if a string is contained in keys of a dictionary and is True
+    Check if a string is contained in keys of a dictionary and is either True or non-boolean
     """
-    has_fileld = field in config
-    field_true = dict.get(filed, False)
-
-    return has_fileld and field_true
+    safe_field = d.get(field, False)
+    return (not isinstance(safe_field, bool)) or safe_field
 
 
 if __name__ == "__main__":
