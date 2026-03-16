@@ -139,7 +139,6 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
     busmap_by_greedy_modularity,
@@ -686,12 +685,9 @@ if __name__ == "__main__":
     else:
         line_length_factor = snakemake.params.length_factor
         Nyears = n.snapshot_weightings.objective.sum() / 8760
-        hvac_overhead_cost = load_costs(
-            snakemake.input.tech_costs,
-            snakemake.params.costs,
-            snakemake.params.electricity,
-            Nyears,
-        ).at["HVAC overhead", "capital_cost"]
+        hvac_overhead_cost = pd.read_csv(snakemake.input.tech_costs, index_col=0).at[
+            "HVAC overhead", "capital_cost"
+        ]
 
         def consense(x):
             v = x.iat[0]
