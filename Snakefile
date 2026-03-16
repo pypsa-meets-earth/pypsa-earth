@@ -1183,19 +1183,16 @@ rule prepare_sector_network:
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
-        **(
+        **branch(
+            config["custom_data"]["h2_underground"]
+            or config["sector"]["hydrogen"]["underground_storage"]["enabled"],
             {
-                "h2_cavern": (
-                    "data/hydrogen_salt_cavern_potentials.csv"
-                    if config["custom_data"]["h2_underground"]
-                    else "resources/"
-                    + RDIR
-                    + f"salt_cavern_potentials_s{{simpl}}_{{clusters}}.csv"
+                "h2_cavern": branch(
+                    config["custom_data"]["h2_underground"],
+                    "data/hydrogen_salt_cavern_potentials.csv",
+                    f"resources/{RDIR}salt_cavern_potentials_s{{simpl}}_{{clusters}}.csv",
                 )
-            }
-            if config["custom_data"]["h2_underground"]
-            or config["sector"]["hydrogen"]["underground_storage"]["enabled"]
-            else {}
+            },
         ),
         **branch(
             solar_rooftop_enable,
