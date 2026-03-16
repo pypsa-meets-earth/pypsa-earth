@@ -1,0 +1,12 @@
+Parameter,Unit,Values,Description
+hydrogen,,,
+-- temporal_matching,--,"One of {'hour', 'month', 'year', 'no_temporal_matching'}",Specifies the temporal matching method for hydrogen production.
+-- spatial_matching,bool,"{true, false}","Indicates whether spatial matching is applied for hydrogen production. Currently, only 'false' is supported."
+-- temporal_matching_carriers,--,"Any subset of {'csp', 'solar', 'onwind', 'offwind-ac', 'offwind-dc', 'ror', 'hydro'}",Defines a list of renewable energy carriers considered for temporal matching of hydrogen production.
+-- matching_technologies,--,"Any subset of {'H2 Electrolysis', 'Alkaline electrolyzer large', 'Alkaline electrolyzer medium', 'Alkaline electrolyzer small', 'PEM electrolyzer', 'SOEC'}",Defines a list of hydrogen production technologies considered for matching.
+-- additionality,bool,"{true, false}","If true, ensures renewable electricity is equal to the amount required for additional hydrogen export compared to the reference case without hydrogen export. Currently, only 'false' is supported."
+-- allowed_excess,p.u.,float,Defines the allowable excess renewable energy for hydrogen production.
+-- is_reference,bool,"{true, false}",Indicates whether the network is a reference case for additionality calculations. It is relavant only if ``additionality`` is true.
+-- remove_h2_load,bool,"{true, false}",Specifies whether to remove hydrogen load from the network in the reference case. It is relevant only if ``is_reference`` is true.
+-- path_to_ref,--,string,Path to the reference case network for additionality calculation. It is relevant only if ``addtionality`` is true and ``is_reference`` is false.
+-- re_country_load,bool,"{true, false}","If true, forces renewable electricity to match hydrogen export and country electricity load. If false, renewable electricity is only matched to hydrogen export. Currently, only 'false' is supported."

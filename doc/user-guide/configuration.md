@@ -283,6 +283,40 @@ Specifies the options for Monte Carlo sampling.
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
+## policy_config
+
+Specifies the options regarding energy policy, for example in relation to hydrogen exports.
+
+```yaml
+--8<-- "configtables/snippets/policy_config.yaml"
+```
+
+{{ read_csv('configtables/policy_config.csv') }}
+
+## demand_data
+
+Specifies sector-coupled related demand.
+
+```yaml
+--8<-- "configtables/snippets/demand_data.yaml"
+```
+
+{{ read_csv('configtables/demand_data.csv') }}
+
+## export
+
+Specifies the option related to hydrogen exports.
+
+```yaml
+--8<-- "configtables/snippets/export.yaml"
+```
+
+{{ read_csv('configtables/export.csv') }}
+
+## custom_data
+
+See custom_data.rst for more detail
+
 ## sector
 
 Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.

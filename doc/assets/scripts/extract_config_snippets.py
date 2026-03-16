@@ -104,6 +104,9 @@ def main():
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
         "plotting": ["plotting"],
+        "policy_config": ["policy_config"],
+        "demand_data": ["demand_data"],
+        "export": ["export"],
         "sector": ["sector"],
     }
 
