@@ -571,17 +571,6 @@ def add_hydrogen(n, costs):
 
                 h2_capital_cost = costs.at["hydrogen storage underground", "fixed"]
 
-                # n.add("Carrier", "H2 UHS")
-
-                # n.madd(
-                #     "Bus",
-                #     spatial.h2.nodes + " H2 UHS",
-                #     location=spatial.h2.nodes,
-                #     carrier="H2 UHS",
-                #     x=n.buses.loc[list(spatial.h2.nodes)].x.values,
-                #     y=n.buses.loc[list(spatial.h2.nodes)].y.values,
-                # )
-
                 n.madd(
                     "Store",
                     h2_caverns.index + " H2 UHS",
@@ -3141,13 +3130,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="24",
-            ll="copt",
-            opts="Co2L0.15",
-            planning_horizons="2050",
-            sopts="3H",
-            discountrate=0.094,
-            demand="NZ",
+            clusters="4",
+            ll="c1",
+            opts="Co2L4H",
+            planning_horizons="2030",
+            sopts="144H",
+            discountrate=0.071,
+            demand="AB",
         )
 
     # Load population layout
