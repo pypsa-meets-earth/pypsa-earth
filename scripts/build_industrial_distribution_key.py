@@ -98,9 +98,9 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_industrial_distribution_key",
-            clusters="94",
-            planning_horizons=2050,
-            demand="NZ",
+            clusters="4",
+            planning_horizons=2030,
+            demand="AB",
             simpl="",
         )
 

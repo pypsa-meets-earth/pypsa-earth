@@ -1378,11 +1378,10 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
                     gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
-            elif gdf_shapes[col][0][:2].isalpha():
-                if gdf_shapes[col][0][:3].isalpha():
-                    gdf_shapes[col] = gdf_shapes[col].apply(
-                        lambda name: three_2_two_digits_country(name[:3]) + name[3:]
-                    )
+            elif gdf_shapes[col][0][:2].isalpha() and gdf_shapes[col][0][:3].isalpha():
+                gdf_shapes[col] = gdf_shapes[col].apply(
+                    lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                )
             else:
                 gdf_shapes = get_GADM_layer([co], gadm_layer_id)
                 col = "GID_{}".format(gadm_layer_id)
