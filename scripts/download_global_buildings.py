@@ -6,6 +6,7 @@
 """
 This script handles the downloading and processing of global building data.
 """
+
 import os
 
 import country_converter as coco
