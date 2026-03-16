@@ -2221,17 +2221,17 @@ if config["foresight"] == "myopic":
                 **config["export"],
             ),
 
+if "geothermal" in config["electricity"]["extendable_carriers"]["Generator"]:
+    
+    rule build_geothermal_potentials:
+        input:
+            geothermal="data/geothermal_potential.csv",
+            regions="resources/" + RDIR + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
 
-rule build_geothermal_potentials:
-    input:
-        geothermal="data/geothermal_potential.csv",
-        regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson"
-
-    output:
-        #f"resources/"{RDIR}"bus_regions/geothermal_potentials_by_region.csv"
-        "resources/geothermal_potentials_by_region.csv"
-    script:
-        "scripts/build_geothermal_potentials.py"
+        output:
+            "resources/" + RDIR + "geothermal_potentials_by_region.csv"
+        script:
+            "scripts/build_geothermal_potentials.py"
 
 
 rule run_scenario:

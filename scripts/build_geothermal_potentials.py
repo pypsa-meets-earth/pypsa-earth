@@ -81,11 +81,11 @@ def geothermal_potential_by_region(cells, regions):
         joined.groupby("name")["potential_kw"]
         .sum()
         .div(1000) #umrechnung in mw
-
-        #.to_frame(name="potentail [MWel]") # in mw
+        .to_frame(name="potential [MWel]") # in mw
     )
-    potentials = potentials.reindex(regions["name"]).fillna(0)
-    potentials = potentials.to_frame(name="potential [MWel]")
+    
+    # potentials = potentials.reindex(regions["name"]).fillna(0)
+    # potentials = potentials.to_frame(name="potential [MWel]")
     potentials.index.name = "name"
     
 
