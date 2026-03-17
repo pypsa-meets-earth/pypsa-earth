@@ -225,33 +225,57 @@ Define and specify the `atlite.Cutout` used for calculating renewable potentials
 
 {{ read_csv('configtables/atlite.csv') }}
 
-### renewable
+## renewable
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
 #### onwind
 
+```yaml
+--8<-- "configtables/snippets/renewable_onwind.yaml"
+```
+
 {{ read_csv('configtables/onwind.csv') }}
 
 #### offwind-ac
+
+```yaml
+--8<-- "configtables/snippets/renewable_offwind-ac.yaml"
+```
 
 {{ read_csv('configtables/offwind-ac.csv') }}
 
 #### offwind-dc
 
+```yaml
+--8<-- "configtables/snippets/renewable_offwind-dc.yaml"
+```
+
 {{ read_csv('configtables/offwind-dc.csv') }}
 
 #### solar
 
+```yaml
+--8<-- "configtables/snippets/renewable_solar.yaml"
+```
+
 {{ read_csv('configtables/solar.csv') }}
 
 #### hydro
+
+```yaml
+--8<-- "configtables/snippets/renewable_hydro.yaml"
+```
 
 > **See `config.default.yaml` for the full configuration.**
 
 {{ read_csv('configtables/hydro.csv') }}
 
 #### csp
+
+```yaml
+--8<-- "configtables/snippets/renewable_csp.yaml"
+```
 
 > **See `config.default.yaml` for the full configuration.**
 
@@ -321,11 +345,77 @@ See custom_data.rst for more detail
 
 Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
 
+#### top-level
+
 ```yaml
---8<-- "configtables/snippets/sector.yaml"
+--8<-- "configtables/snippets/sector_toplevel.yaml"
 ```
 
-{{ read_csv('configtables/sector.csv') }}
+{{ read_csv('configtables/sector_toplevel.csv') }}
+
+#### heat sector
+
+```yaml
+--8<-- "configtables/snippets/sector_heat.yaml"
+```
+
+{{ read_csv('configtables/sector_heat.csv') }}
+
+#### land transport sector
+
+```yaml
+--8<-- "configtables/snippets/sector_land_transport.yaml"
+```
+
+{{ read_csv('configtables/sector_land_transport.csv') }}
+
+#### biomass sector
+
+```yaml
+--8<-- "configtables/snippets/sector_biomass.yaml"
+```
+
+{{ read_csv('configtables/sector_biomass.csv') }}
+
+#### electricity distribution grid
+
+```yaml
+--8<-- "configtables/snippets/sector_electricity_distribution_grid.yaml"
+```
+
+{{ read_csv('configtables/sector_electricity_distribution_grid.csv') }}
+
+#### shipping & aviation sector
+
+```yaml
+--8<-- "configtables/snippets/sector_shipping_aviation.yaml"
+```
+
+{{ read_csv('configtables/sector_shipping_aviation.csv') }}
+
+#### ccus & conversion options
+
+```yaml
+--8<-- "configtables/snippets/sector_ccus.yaml"
+```
+
+{{ read_csv('configtables/sector_ccus.csv') }}
+
+#### industry options
+
+```yaml
+--8<-- "configtables/snippets/sector_industry.yaml"
+```
+
+{{ read_csv('configtables/sector_industry.csv') }}
+
+#### powerplants options
+
+```yaml
+--8<-- "configtables/snippets/sector_powerplants.yaml"
+```
+
+{{ read_csv('configtables/sector_powerplants.csv') }}
 
 ## solving
 

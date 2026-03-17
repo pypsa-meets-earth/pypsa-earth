@@ -1,0 +1,20 @@
+Parameter,Unit,Values,Description
+district_heating,  ,  ,
+-- potential,float,"[0, 1]",Maximum fraction of urban demand which can be supplied by district heating
+-- progress,float/dict,"[0, 1] or {planning_horizons}: [0, 1]",Increase of today's district heating demand to potential maximum district heating share. Progress = 0 means today's district heating share. Progress = 1 means maximum fraction of urban demand is supplied by district heating.
+-- district_heating_loss,float,"[0, 1]",Share increase in district heat demand in urban central due to heat losses.
+reduce_space_heat_exogenously,bool,"{true, false}",Influence on space heating demand by a certain factor (applied before losses in district heating).
+reduce_space_heat_exogenously_factor,float/dict,"[0, 1] or {planning_horizons}: [0, 1]","A positive factor can mean renovation or demolition of a building. If the factor is negative, it can mean an increase in floor area, increased thermal comfort, population growth. The default factors are determined by the `Eurocalc Homes and buildings decarbonization scenario <http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221>`_."
+space_heat_share,float,"[0, 1]",Share of space heating from all heating. Remainder goes to water heating
+tes,bool,"{true, false}",Add option for storing thermal energy in large water pits associated with district heating systems and individual thermal energy storage (TES).
+tes_tau,,,
+-- decentral,days,,The duration of a decentralized TES thermal energy is depleted due to standing losses.
+-- central,days,,The duration of a centralized TES thermal energy is depleted due to standing losses.
+boilers,bool,"{true, false}",Add option for transforming gas into heat using gas boilers.
+oil_boilers,bool,"{true, false}",Add option for transforming oil into heat using boilers.
+chp,bool,"{true, false}",Add option for using Combined Heat and Power (CHP).
+micro_chp,bool,"{true, false}",Add option for using gas-fired Combined Heat and Power (CHP) for decentral areas.
+solar_thermal,bool,"{true, false}",Add option for using solar thermal to generate heat.
+heat_pump_sink_T,celcius,,The temperature heat sink used in heat pumps based on DTU / large area radiators. The value is conservatively high to cover hot water and space heating in poorly-insulated buildings.
+time_dep_hp_cop,bool,"{true, false}",Consider the time dependent coefficient of performance (COP) of the heat pump.
+solar_cf_correction,float,,The correction factor for the value provided by the solar thermal profile calculations.

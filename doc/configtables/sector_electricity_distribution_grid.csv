@@ -1,0 +1,16 @@
+Parameter,Unit,Values,Description
+electricity_distribution_grid,bool,"{true, false}",Add a simplified representation of the exchange capacity between transmission and distribution grid level through a link.
+solar_rooftop,--,--,
+-- enable,bool,"{true, false}",Add option for using solar rooftops to generate electricity in the distribution grid level.
+-- kW_per_m2,kW/m2,,Estimate the kW of PV that can be installed per square meter of rooftop.
+-- m2_per_person,m2/person,,"If `use_building_size` is False, estimate the size of rooftop per capita."
+-- use_building_size,bool,"{true, false}","If `True`, estimate the area where solar rooftops can be placed using global building datasets."
+-- install_ratio,dict,rooftop size: percentage of rooftop area,The usable solar rooftop area for buildings when considering that only a portion of each rooftop can be allocated for PV installation based on its size.
+-- tolerance,,,Maximum distance in kilometers for spatial join to find nearest country shapes.
+home_battery,bool,"{true, false}",Add option for using home batteries to store electricity in the distribution grid level.
+transmission_efficiency,--,--,
+-- electricity distribution grid,--,--,
+-- -- efficiency_static,float,"[0, 1]",Electricity distribution grid transmission efficiency.
+-- H2 pipeline,--,--,
+-- -- efficiency_per_1000km,1/1000km,,H2 pipeline transmission efficiency per 1000km
+-- -- compression_per_1000km,1/1000km,,H2 pipeline transmission compression demand per 1000km

@@ -639,7 +639,7 @@ sector:
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
   solar_cf_correction: 0.788457 # = >>>1/1.2683
 
-  # -------------------  LAND TRANSPORT SECTOR -------------------
+  # ------------------- LAND TRANSPORT SECTOR -------------------
 
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
   bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
@@ -710,14 +710,14 @@ sector:
       Co2L0.10: 0.80
       Co2L0.00: 0.88
 
-  # -------------------  BIOMASS SECTOR -------------------
+  # ------------------- BIOMASS SECTOR -------------------
 
   biomass_transport: true # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
   solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
   biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
 
-  # -------------------  ELECTRICITY DISTRIBUTION GRID -------------------
+  # ------------------- ELECTRICITY DISTRIBUTION GRID -------------------
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
   solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
@@ -744,7 +744,7 @@ sector:
       efficiency_per_1000km: 1
       compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
-  # -------------------  SHIPPING & AVIATION SECTOR -------------------
+  # ------------------- SHIPPING & AVIATION SECTOR -------------------
 
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
@@ -761,7 +761,7 @@ sector:
   airport_sizing_factor: 3
   international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
-  # -------------------  CCUS & CONVERSION OPTIONS -------------------
+  # ------------------- CCUS & CONVERSION OPTIONS -------------------
 
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
@@ -775,7 +775,7 @@ sector:
   fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
 
-  # -------------------  INDUSTRY OPTIONS -------------------
+  # ------------------- INDUSTRY OPTIONS -------------------
 
   industry_util_factor: 0.7
 
@@ -783,7 +783,7 @@ sector:
   efficiency_heat_biomass_to_elec: 0.9
   efficiency_heat_gas_to_elec: 0.9
 
-  # -------------------  POWERPLANTS OPTIONS -------------------
+  # ------------------- POWERPLANTS OPTIONS -------------------
 
   conventional_generation: # generator : carrier
     OCGT: gas

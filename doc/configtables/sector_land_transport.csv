@@ -1,0 +1,25 @@
+Parameter,Unit,Values,Description
+bev_plug_to_wheel_efficiency,kWh/km,,The distance traveled per energy used of battery electric vehicles (BEV). Default inputs are based on EPA estimation for Tesla Model S https://www.fueleconomy.gov/feg/.
+bev_charge_efficiency,float,"[0, 1]",Battery electric vehicles (BEV) charge and discharge efficiency.
+transport_heating_deadband_upper,float,,"The maximum temperature in the vehicle. At higher temperatures, the energy required for cooling in the vehicle increases."
+transport_heating_deadband_lower,float,,"The minimum temperature in the vehicle. At lower temperatures, the energy required for heating in the vehicle increases."
+ICE_lower_degree_factor,float,,Share increase in energy demand in internal combustion engine (ICE) for each degree difference between the cold environment and the minimum temperature.
+ICE_upper_degree_factor,float,,Share increase in energy demand in internal combustion engine (ICE) for each degree difference between the hot environment and the maximum temperature.
+EV_lower_degree_factor,float,,Share increase in energy demand in electric vehicles (EV) for each degree difference between the cold environment and the minimum temperature.
+EV_upper_degree_factor,float,,Share increase in energy demand in electric vehicles (EV) for each degree difference between the hot environment and the maximum temperature.
+bev_avail_max,float,"[0, 1]",The maximum share plugged-in availability for passenger electric vehicles.
+bev_avail_mean,float,"[0, 1]",The average share plugged-in availability for passenger electric vehicles.
+bev_dsm_restriction_value,float,,Adds a lower state of charge (SOC) limit for battery electric vehicles (BEV) to manage its own energy demand (DSM). Located in `prepare_transport_data.py <https://github.com/PyPSA/pypsa-earth/blob/master/scripts/prepare_transport_data.py>`_. Set to 0 for no restriction on BEV DSM.
+bev_dsm_restriction_time,float,,Time at which SOC of BEV has to be dsm_restriction_value.
+v2g,bool,"{true, false}","Allows feed-in to grid from EV battery. This is only enabled if BEV demand-side management is enabled, and the share of vehicles participating is V2G is given by `bev_availability`."
+bev_dsm,bool,"{true, false}",Add the option for battery electric vehicles (BEV) to participate in demand-side management (DSM).
+bev_energy,MWh/car,,The average size of battery electric vehicles (BEV) in MWh.
+bev_availability,float,,The share for battery electric vehicles (BEV) that are able to do demand side management (DSM).
+transport_fuel_cell_efficiency,float,"[0, 1]",The H2 conversion efficiencies of fuel cells in transport.
+transport_internal_combustion_efficiency,float,"[0, 1]",The oil conversion efficiencies of internal combustion engine (ICE) in transport.
+land_transport_fuel_cell_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",The share of vehicles that uses fuel cells in a given demand widlcard and given year.
+land_transport_electric_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",The share of vehicles that uses electric vehicles (EV) in a given demand wildcard and given year.
+dynamic_transport,--,--,
+-- enable,bool,"{true, false}","If 'True', then the BEV and FCEV shares are obtained depending on the 'Co2L'-wildcard (e.g. 'Co2L0.70: 0.10'). If 'False', then the shares are obtained depending on the 'demand' wildcard and 'planning_horizons' wildcard as listed below (e.g. 'DF_2050: 0.08')"
+-- land_transport_fuel_cell_share,float/dict,"[0, 1] or {opts}_{planning_horizons}: [0, 1]",The share of vehicles that uses fuel cells in a given Co2L widlcard and given year.
+-- land_transport_electric_share,float/dict,"[0, 1] or {opts}_{planning_horizons}: [0, 1]",The share of vehicles that uses electric vehicles (EV) in a given Co2L wildcard and given year.
