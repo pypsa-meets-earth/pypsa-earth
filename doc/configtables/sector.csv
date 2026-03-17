@@ -1,143 +1,141 @@
 Parameter,Unit,Values,Description
-**enable**,--,--,
--- heat,bool,"{true, false}",
--- biomass,bool,"{true, false}",
--- industry,bool,"{true, false}",
--- shipping,bool,"{true, false}",
--- aviation,bool,"{true, false}",
--- land_transport,bool,"{true, false}",
--- rail_transport,bool,"{true, false}",
--- agriculture,bool,"{true, false}",
--- residential,bool,"{true, false}",
--- services,bool,"{true, false}",
-,,,
-**gas**,--,--,
--- spatial_gas,bool,"{true, false}",
--- network,bool,"{true, false}",
--- network_data,--,"One of {'GGIT', 'IGGIELGN'}",
--- network_data_GGIT_status,--,"Any subset of {‘Construction’, ‘Operating’, ‘Idle’, ‘Shelved’, ‘Mothballed’, ‘Proposed’} ",
-,,,
-**hydrogen**,--,--,
--- network,bool,"{true, false}",
--- H2_retrofit_capacity_per_CH4,MW/CH4,,
--- network_limit,GWkm,,
--- network_routes,--,"One of {'gas', 'greenfield'}",
--- gas_network_repurposing,bool,"{true, false}",
--- underground_storage,bool,"{true, false}",
--- hydrogen_colors,bool,"{true, false}",
--- set_color_shares,bool,"{true, false}",
--- blue_share,float,"[0, 1]",
--- pink_share,float,"[0, 1]",
--- production_technologies,--,"Any subset of {‘H2 Electrolysis’,  'SMR', 'SMR CC', 'Alkaline electrolyzer large', 'Alkaline electrolyzer medium', 'Alkaline electrolyzer small', 'PEM electrolyzer', 'SOEC', 'Solid biomass steam reforming', 'Biomass gasification', 'Biomass gasification CC', 'Natural gas steam reforming', 'Natural gas steam reforming CC', 'Coal gasification', 'Coal gasification CC', 'Heavy oil partial oxidation'}",
-,,,
-**coal**,--,--,
--- spatial_coal,bool,"{true, false}",
--- shift_to_elec,bool,"{true, false}",
-,,,
-**lignite**,--,--,
--- spatial_lignite,bool,"{true, false}",
-,,,
-international_bunkers,bool,"{true, false}",
-,,,
-**oil**,--,--,
--- spatial_oil,bool,"{true, false}",
-,,,
-# HEAT SECTOR,--,--,
-district_heating,--,--,
--- potential,float,"[0, 1]",
--- progress,float/dict,"[0, 1] or {planning_horizons}: [0, 1]",
--- district_heating_loss,float,"[0, 1]",
-reduce_space_heat_exogenously,bool,"{true, false}",
-reduce_space_heat_exogenously_factor,float/dict,"[0, 1] or {planning_horizons}: [0, 1]",
-space_heat_share,float,"[0, 1]",
-tes,bool,"{true, false}",
+**enable**,  ,  ,Configuration for `sector` settings.
+-- heat,bool,"{true, false}",Flag to include heating sector.
+-- biomass,bool,"{true, false}",Flag to include biomass sector.
+-- industry,bool,"{true, false}",Flag to include industry sector.
+-- shipping,bool,"{true, false}",Flag to include shipping sector.
+-- aviation,bool,"{true, false}",Flag to include aviation sector.
+-- land_transport,bool,"{true, false}",Flag to include land transport sector.
+-- rail_transport,bool,"{true, false}",Flag to include rail transport sector.
+-- agriculture,bool,"{true, false}",Flag to include agriculture sector.
+-- residential,bool,"{true, false}",Flag to include residential sector.
+-- services,bool,"{true, false}",Flag to include service sector.
+  ,  ,  ,  
+**gas**,  ,  ,Configuration for `sector.gas` settings.
+-- spatial_gas,bool,"{true, false}",Add option to spatially resolve carrier representing gas (methane) supply.
+-- network,bool,"{true, false}",Currently not available for gas carriers.
+-- network_data,--,"One of {'GGIT', 'IGGIELGN'}",Specify which existing gas pipeline to use. Either from Global Gas Infrastructure Tracker (GGIT) or European Gas Infrastructure (IGGIELGN)
+-- network_data_GGIT_status,--,"Any subset of {‘Construction’, ‘Operating’, ‘Idle’, ‘Shelved’, ‘Mothballed’, ‘Proposed’} ",List of status to be included when retrieving gas infrastructure data.
+  ,  ,  ,  
+**hydrogen**,  ,  ,Configuration for `sector.hydrogen` settings.
+-- network,bool,"{true, false}",Add option for new hydrogen pipelines.
+-- H2_retrofit_capacity_per_CH4,MW/CH4,,Hydrogen transport capacity compared to natural gas capacity in retrofitted pipelines.
+-- network_limit,GWkm,,Add maximum hydrogen network capacity.
+-- network_routes,--,"One of {'gas', 'greenfield'}",Specify if either hydrogen network follows the topology of gas networks (gas) or closely resembles electrical transmission lines (greenfield).
+-- gas_network_repurposing,bool,"{true, false}",Specify if gas networks can be repurposed for hydrogen networks.
+-- underground_storage,bool,"{true, false}",Add options for storing hydrogen underground. Storage potential depends regionally.
+-- hydrogen_colors,bool,"{true, false}",Specify if hydrogen carriers are disaggregated based on their source.
+-- set_color_shares,bool,"{true, false}",Add option if hydogen sources must be derrived from specific sources.
+-- blue_share,float,"[0, 1]",Share of hydrogen derrived from gas with carbon capture.
+-- pink_share,float,"[0, 1]",Share of hydrogen derrived from nuclear.
+-- production_technologies,--,"Any subset of {‘H2 Electrolysis’,  'SMR', 'SMR CC', 'Alkaline electrolyzer large', 'Alkaline electrolyzer medium', 'Alkaline electrolyzer small', 'PEM electrolyzer', 'SOEC', 'Solid biomass steam reforming', 'Biomass gasification', 'Biomass gasification CC', 'Natural gas steam reforming', 'Natural gas steam reforming CC', 'Coal gasification', 'Coal gasification CC', 'Heavy oil partial oxidation'}",List of hydrogen production technologies that can be added.
+  ,  ,  ,  
+**coal**,  ,  ,  
+-- spatial_coal,bool,"{true, false}",Add option to spatially resolve carrier representing coal supply.
+-- shift_to_elec,bool,"{true, false}",Specify if sectoral coal consumption can be electrified.
+  ,  ,  ,  
+**lignite**,  ,  ,  
+-- spatial_lignite,bool,"{true, false}",Add option to spatially resolve carrier representing lignite supply.
+  ,  ,  ,  
+**oil**,  ,  ,
+-- spatial_oil,bool,"{true, false}",Add option to spatially resolve carrier representing oil supply.
+  ,  ,  ,  
+# HEAT SECTOR,  ,  ,  
+district_heating,  ,  ,  
+-- potential,float,"[0, 1]",Maximum fraction of urban demand which can be supplied by district heating
+-- progress,float/dict,"[0, 1] or {planning_horizons}: [0, 1]",Increase of today's district heating demand to potential maximum district heating share. Progress = 0 means today's district heating share. Progress = 1 means maximum fraction of urban demand is supplied by district heating.
+-- district_heating_loss,float,"[0, 1]",Share increase in district heat demand in urban central due to heat losses.
+reduce_space_heat_exogenously,bool,"{true, false}",Influence on space heating demand by a certain factor (applied before losses in district heating).
+reduce_space_heat_exogenously_factor,float/dict,"[0, 1] or {planning_horizons}: [0, 1]","A positive factor can mean renovation or demolition of a building. If the factor is negative, it can mean an increase in floor area, increased thermal comfort, population growth. The default factors are determined by the `Eurocalc Homes and buildings decarbonization scenario <http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221>`_."
+space_heat_share,float,"[0, 1]",Share of space heating from all heating. Remainder goes to water heating
+tes,bool,"{true, false}",Add option for storing thermal energy in large water pits associated with district heating systems and individual thermal energy storage (TES).
 tes_tau,,,
--- decentral,float,,
--- central,float,,
-boilers,bool,"{true, false}",
-oil_boilers,bool,"{true, false}",
-chp,bool,"{true, false}",
-micro_chp,bool,"{true, false}",
-solar_thermal,bool,"{true, false}",
-heat_pump_sink_T,celcius,,
-time_dep_hp_cop,bool,"{true, false}",
-solar_cf_correction,float,,
-,,,
-# LAND TRANSPORT SECTOR,--,--,
-bev_plug_to_wheel_efficiency,float,"[0, 1]",
-bev_charge_efficiency,float,"[0, 1]",
-transport_heating_deadband_upper,float,,
-transport_heating_deadband_lower,float,,
-ICE_lower_degree_factor,float,,
-ICE_upper_degree_factor,float,,
-EV_lower_degree_factor,float,,
-EV_upper_degree_factor,float,,
-bev_avail_max,float,"[0, 1]",
-bev_avail_mean,float,"[0, 1]",
-bev_dsm_restriction_value,float,,
-bev_dsm_restriction_time,float,,
-v2g,bool,"{true, false}",
-bev_dsm,bool,"{true, false}",
-bev_energy,MWh/car,,
-bev_availability,float,,
-transport_fuel_cell_efficiency,float,"[0, 1]",
-transport_internal_combustion_efficiency,float,"[0, 1]",
-land_transport_fuel_cell_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",
-land_transport_electric_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",
+-- decentral,days,,The duration of a decentralized TES thermal energy is depleted due to standing losses.
+-- central,days,,The duration of a centralized TES thermal energy is depleted due to standing losses.
+boilers,bool,"{true, false}",Add option for transforming gas into heat using gas boilers.
+oil_boilers,bool,"{true, false}",Add option for transforming oil into heat using boilers.
+chp,bool,"{true, false}",Add option for using Combined Heat and Power (CHP).
+micro_chp,bool,"{true, false}",Add option for using gas-fired Combined Heat and Power (CHP) for decentral areas.
+solar_thermal,bool,"{true, false}",Add option for using solar thermal to generate heat.
+heat_pump_sink_T,celcius,,The temperature heat sink used in heat pumps based on DTU / large area radiators. The value is conservatively high to cover hot water and space heating in poorly-insulated buildings.
+time_dep_hp_cop,bool,"{true, false}",Consider the time dependent coefficient of performance (COP) of the heat pump.
+solar_cf_correction,float,,The correction factor for the value provided by the solar thermal profile calculations.
+  ,  ,  ,  
+# LAND TRANSPORT SECTOR,  ,  ,  
+bev_plug_to_wheel_efficiency,kWh/km,,The distance traveled per energy used of battery electric vehicles (BEV). Default inputs are based on EPA estimation for Tesla Model S https://www.fueleconomy.gov/feg/.
+bev_charge_efficiency,float,"[0, 1]",Battery electric vehicles (BEV) charge and discharge efficiency.
+transport_heating_deadband_upper,float,,"The maximum temperature in the vehicle. At higher temperatures, the energy required for cooling in the vehicle increases."
+transport_heating_deadband_lower,float,,"The minimum temperature in the vehicle. At lower temperatures, the energy required for heating in the vehicle increases."
+ICE_lower_degree_factor,float,,Share increase in energy demand in internal combustion engine (ICE) for each degree difference between the cold environment and the minimum temperature.
+ICE_upper_degree_factor,float,,Share increase in energy demand in internal combustion engine (ICE) for each degree difference between the hot environment and the maximum temperature.
+EV_lower_degree_factor,float,,Share increase in energy demand in electric vehicles (EV) for each degree difference between the cold environment and the minimum temperature.
+EV_upper_degree_factor,float,,Share increase in energy demand in electric vehicles (EV) for each degree difference between the hot environment and the maximum temperature.
+bev_avail_max,float,"[0, 1]",The maximum share plugged-in availability for passenger electric vehicles.
+bev_avail_mean,float,"[0, 1]",The average share plugged-in availability for passenger electric vehicles.
+bev_dsm_restriction_value,float,,Adds a lower state of charge (SOC) limit for battery electric vehicles (BEV) to manage its own energy demand (DSM). Located in `prepare_transport_data.py <https://github.com/PyPSA/pypsa-earth/blob/master/scripts/prepare_transport_data.py>`_. Set to 0 for no restriction on BEV DSM.
+bev_dsm_restriction_time,float,,Time at which SOC of BEV has to be dsm_restriction_value.
+v2g,bool,"{true, false}","Allows feed-in to grid from EV battery. This is only enabled if BEV demand-side management is enabled, and the share of vehicles participating is V2G is given by `bev_availability`."
+bev_dsm,bool,"{true, false}",Add the option for battery electric vehicles (BEV) to participate in demand-side management (DSM).
+bev_energy,MWh/car,,The average size of battery electric vehicles (BEV) in MWh.
+bev_availability,float,,The share for battery electric vehicles (BEV) that are able to do demand side management (DSM).
+transport_fuel_cell_efficiency,float,"[0, 1]",The H2 conversion efficiencies of fuel cells in transport.
+transport_internal_combustion_efficiency,float,"[0, 1]",The oil conversion efficiencies of internal combustion engine (ICE) in transport.
+land_transport_fuel_cell_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",The share of vehicles that uses fuel cells in a given demand widlcard and given year.
+land_transport_electric_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",The share of vehicles that uses electric vehicles (EV) in a given demand wildcard and given year.
 dynamic_transport,--,--,
--- enable,bool,"{true, false}",
--- land_transport_fuel_cell_share,float/dict,"[0, 1] or {opts}_{planning_horizons}: [0, 1]",
--- land_transport_electric_share,float/dict,"[0, 1] or {opts}_{planning_horizons}: [0, 1]",
-,,,
-# BIOMASS SECTOR,--,--,
-biomass_transport,bool,"{true, false}",
-biomass_transport_default_cost,EUR/km/MWh,,
-solid_biomass_potential,TWh/a,,
-biogas_potential,TWh/a,,
-,,,
-# ELECTRICITY DISTRIBUTION GRID,--,--,
-electricity_distribution_grid,bool,"{true, false}",
-solar_rooftop,--,--,
--- enable,bool,"{true, false}",
--- kW_per_m2,,,
--- m2_per_person,,,
--- use_building_size,bool,"{true, false}",
--- install_ratio,,,
--- tolerance,,,
-home_battery,bool,"{true, false}",
-transmission_efficiency,--,--,
--- electricity distribution grid,--,--,
--- -- efficiency_static,float,"[0, 1]",
--- H2 pipeline,--,--,
--- -- efficiency_per_1000km,1/1000km,,
--- -- compression_per_1000km,1/1000km,,
-,,,
-# SHIPPING & AVIATION SECTOR,--,--,
-shipping_hydrogen_liquefaction,bool,"{true, false}",
-shipping_average_efficiency,float,"[0, 1]",
-shipping_hydrogen_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",
-airport_sizing_factor,float,,
-international_bunkers,bool,"{true, false}",
-,,,
-# CCUS & CONVERSION OPTIONS,--,--,
-co2_network,bool,"{true, false}",
-co2_sequestration_potential,MtCO2/a,,
-co2_sequestration_cost,EUR/tCO2,,
-methanation,bool,"{true, false}",
+-- enable,bool,"{true, false}","If 'True', then the BEV and FCEV shares are obtained depending on the 'Co2L'-wildcard (e.g. 'Co2L0.70: 0.10'). If 'False', then the shares are obtained depending on the 'demand' wildcard and 'planning_horizons' wildcard as listed below (e.g. 'DF_2050: 0.08')"
+-- land_transport_fuel_cell_share,float/dict,"[0, 1] or {opts}_{planning_horizons}: [0, 1]",The share of vehicles that uses fuel cells in a given Co2L widlcard and given year.
+-- land_transport_electric_share,float/dict,"[0, 1] or {opts}_{planning_horizons}: [0, 1]",The share of vehicles that uses electric vehicles (EV) in a given Co2L wildcard and given year.
+  ,  ,  ,  
+# BIOMASS SECTOR,  ,  ,  
+biomass_transport,bool,"{true, false}",Add option for transporting solid biomass between nodes.
+biomass_transport_default_cost,currency/km/MWh,,The cost of transporting one MWh of biomass per kilometer.
+solid_biomass_potential,TWh/a,,The solid biomass potential in the model per year and investment period.
+biogas_potential,TWh/a,,The biogas potential in the model per year and investment period.
+  ,  ,  ,  
+# ELECTRICITY DISTRIBUTION GRID,  ,  ,  
+electricity_distribution_grid,bool,"{true, false}",Add a simplified representation of the exchange capacity between transmission and distribution grid level through a link.
+solar_rooftop,--,--,  
+-- enable,bool,"{true, false}",Add option for using solar rooftops to generate electricity in the distribution grid level.
+-- kW_per_m2,kW/m2,,Estimate the kW of PV that can be installed per square meter of rooftop.
+-- m2_per_person,m2/person,,"If `use_building_size` is False, estimate the size of rooftop per capita."
+-- use_building_size,bool,"{true, false}","If `True`, estimate the area where solar rooftops can be placed using global building datasets."
+-- install_ratio,dict,rooftop size: percentage of rooftop area,The usable solar rooftop area for buildings when considering that only a portion of each rooftop can be allocated for PV installation based on its size.
+-- tolerance,,,Maximum distance in kilometers for spatial join to find nearest country shapes.
+home_battery,bool,"{true, false}",Add option for using home batteries to store electricity in the distribution grid level.
+transmission_efficiency,--,--,  
+-- electricity distribution grid,--,--,  
+-- -- efficiency_static,float,"[0, 1]",Electricity distribution grid transmission efficiency.
+-- H2 pipeline,--,--,  
+-- -- efficiency_per_1000km,1/1000km,,H2 pipeline transmission efficiency per 1000km
+-- -- compression_per_1000km,1/1000km,,H2 pipeline transmission compression demand per 1000km
+  ,  ,  ,  
+# SHIPPING & AVIATION SECTOR,  ,  ,  
+shipping_hydrogen_liquefaction,bool,"{true, false}",Whether to include liquefaction costs for hydrogen demand in shipping.
+shipping_average_efficiency,float,"[0, 1]",The efficiency of hydrogen-powered ships in the conversion of hydrogen to meet shipping needs (fuel cell).
+shipping_hydrogen_share,float/dict,"[0, 1] or {demand}_{planning_horizons}: [0, 1]",The share of ships powered by hydrogen in a given year.
+airport_sizing_factor,float,,Size of large airports relative to medium-sized airports.
+international_bunkers,bool,"{true, false}",Whether or not to count the emissions of international aviation and navigation
+  ,  ,  ,  
+# CCUS & CONVERSION OPTIONS,  ,  ,  
+co2_network,bool,"{true, false}",Add option for planning a new carbon dioxide transmission network.
+co2_sequestration_potential,MtCO2/a,,The potential of sequestering CO2 in the model per year and investment period.
+co2_sequestration_cost,currency/tCO2,,The cost of sequestering a ton of CO2 (currency/tCO2).
+methanation,bool,"{true, false}",Add option for transforming hydrogen and CO2 into methane using methanation.
 helmeth,bool,"{true, false}",
-dac,bool,"{true, false}",
-cc_fraction,float,"[0, 1]",
-cc,bool,"{true, false}",
-fischer_tropsch,bool,"{true, false}",
-min_part_load_fischer_tropsch,float,"[0, 1]",
-,,,
-# INDUSTRY OPTIONS,--,--,
-industry_util_factor,float,"[0, 1]",
-efficiency_heat_oil_to_elec,float,"[0, 1]",
-efficiency_heat_biomass_to_elec,float,"[0, 1]",
-efficiency_heat_gas_to_elec,float,"[0, 1]",
-,,,
-# POWERPLANTS OPTIONS,--,--,
-conventional_generation,dict,generator : carrier,
-keep_existing_capacities,bool,"{true, false}",
-marginal_cost_storage,float,,
+dac,bool,"{true, false}",Add option for Direct Air Capture (DAC).
+cc_fraction,float,"[0, 1]",The default fraction of CO2 captured with post-combustion capture.
+cc,bool,"{true, false}",Add option for carbon capture (CC).
+fischer_tropsch,bool,"{true, false}",Add option for converting H2 and CO2 into oil (Fischer Tropsch).
+min_part_load_fischer_tropsch,float,"[0, 1]",The minimum unit dispatch (`p_min_pu`) for the Fischer-Tropsch process.
+  ,  ,  ,  
+# INDUSTRY OPTIONS,  ,  ,  
+industry_util_factor,float,"[0, 1]",Industry utility fraction in generating process emission
+efficiency_heat_oil_to_elec,float,"[0, 1]",The heat efficiency of oil if that energy is supplied using electricity instead. Used to determine residential electricity.
+efficiency_heat_biomass_to_elec,float,"[0, 1]",The heat efficiency of biomass if that energy is supplied using electricity instead. Used to determine residential electricity.
+efficiency_heat_gas_to_elec,float,"[0, 1]",The heat efficiency of gas if that energy is supplied using electricity instead. Used to determine residential electricity.
+  ,  ,  ,  
+# POWERPLANTS OPTIONS,  ,  ,  
+conventional_generation,dict,generator : carrier,Add a more detailed description of conventional carriers. Any power generation requires the consumption of fuel from nodes representing that fuel.
+keep_existing_capacities,bool,"{true, false}",Add options to keep powerplant capacities previously assigned in add_electricity.
+marginal_cost_storage,currency/MW,,The default marginal cost of storage technologies.
