@@ -445,11 +445,11 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     file_path = os.path.join(destination, os.path.basename(url))
 
     unzip = config.get("unzip", False)
-
     download_and_unpack(
         url=url,
         file_path=file_path,
         resource=resource,
+        destination=destination,
         hot_run=hot_run,
         unzip=unzip,
         disable_progress=disable_progress,
@@ -775,7 +775,7 @@ def get_best_bundles(
                     + ", ".join(selection_bundles)
                 )
 
-    return bundles_to_download
+    return sorted(bundles_to_download)
 
 
 def get_best_bundles_in_snakemake(config, include_categories=[], exclude_categories=[]):
