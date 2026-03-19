@@ -10,13 +10,13 @@ Parameter,Unit,Values,Description
 -- agriculture,bool,"{true, false}",Flag to include agriculture sector.
 -- residential,bool,"{true, false}",Flag to include residential sector.
 -- services,bool,"{true, false}",Flag to include service sector.
-  ,  ,  ,"  "
+  ,  ,  ,.
 **gas**,  ,  ,Configuration for `sector.gas` settings.
 -- spatial_gas,bool,"{true, false}",Add option to spatially resolve carrier representing gas (methane) supply.
 -- network,bool,"{true, false}",Currently not available for gas carriers.
 -- network_data,--,"One of {'GGIT', 'IGGIELGN'}",Specify which existing gas pipeline to use. Either from Global Gas Infrastructure Tracker (GGIT) or European Gas Infrastructure (IGGIELGN)
 -- network_data_GGIT_status,--,"Any subset of {‘Construction’, ‘Operating’, ‘Idle’, ‘Shelved’, ‘Mothballed’, ‘Proposed’} ",List of status to be included when retrieving gas infrastructure data.
-  ,  ,  ,"  "
+  ,  ,  ,.
 **hydrogen**,  ,  ,Configuration for `sector.hydrogen` settings.
 -- network,bool,"{true, false}",Add option for new hydrogen pipelines.
 -- H2_retrofit_capacity_per_CH4,MW/CH4,,Hydrogen transport capacity compared to natural gas capacity in retrofitted pipelines.
@@ -29,13 +29,13 @@ Parameter,Unit,Values,Description
 -- blue_share,float,"[0, 1]",Share of hydrogen derrived from gas with carbon capture.
 -- pink_share,float,"[0, 1]",Share of hydrogen derrived from nuclear.
 -- production_technologies,--,"Any subset of {‘H2 Electrolysis’,  'SMR', 'SMR CC', 'Alkaline electrolyzer large', 'Alkaline electrolyzer medium', 'Alkaline electrolyzer small', 'PEM electrolyzer', 'SOEC', 'Solid biomass steam reforming', 'Biomass gasification', 'Biomass gasification CC', 'Natural gas steam reforming', 'Natural gas steam reforming CC', 'Coal gasification', 'Coal gasification CC', 'Heavy oil partial oxidation'}",List of hydrogen production technologies that can be added.
-  ,  ,  ,"  "
+  ,  ,  ,.
 **coal**,  ,  ,Configuration for `sector.coal` settings.
 -- spatial_coal,bool,"{true, false}",Add option to spatially resolve carrier representing coal supply.
 -- shift_to_elec,bool,"{true, false}",Specify if sectoral coal consumption can be electrified.
-  ,  ,  ,"  "
+  ,  ,  ,.
 **lignite**,  ,  ,Configuration for `sector.lignite` settings.
 -- spatial_lignite,bool,"{true, false}",Add option to spatially resolve carrier representing lignite supply.
-  ,  ,  ,"  "
+  ,  ,  ,.
 **oil**,  ,  ,Configuration for `sector.oil` settings.
 -- spatial_oil,bool,"{true, false}",Add option to spatially resolve carrier representing oil supply.

@@ -1,9 +1,9 @@
 Parameter,Unit,Values,Description
-**demand_data**,  ,  ,"  "
+**demand_data**,  ,  ,.
 update_data,bool,"{true, false}","If true, the workflow downloads the energy balances data saved in ``data/demand/unsd/data`` again."
 base_year,int,Any year (e.g. 2019),"Specifies the base year for energy balances data. Default year is 2019. If interested in a different year, please check presense of data for selected base year and country in ``data/demand/unsd/data``."
 other_industries,bool,"{true, false}",Determines whether to include unspecified industries. Note that some countries may have inflated numbers; review cautiously.
 aluminium_year,int,Any year between 2015 and 2022,Year of the aluminium production data specified in ``data/AL_production.csv``. Default year is 2019.
-,  ,  ,  ,"  "
-**fossil_reserves**,  ,  ,"  "
+,  ,  ,  ,.
+**fossil_reserves**,  ,  ,.
 oil,TWh,float,Specifies the total oil reserves in TWh per each bus.

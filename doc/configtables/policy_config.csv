@@ -1,5 +1,5 @@
 Parameter,Unit,Values,Description
-hydrogen,  ,  ,"  "
+hydrogen,  ,  ,.
 -- temporal_matching,--,"One of {'hour', 'month', 'year', 'no_temporal_matching'}",Specifies the temporal matching method for hydrogen production.
 -- spatial_matching,bool,"{true, false}","Indicates whether spatial matching is applied for hydrogen production. Currently, only 'false' is supported."
 -- temporal_matching_carriers,--,"Any subset of {'csp', 'solar', 'onwind', 'offwind-ac', 'offwind-dc', 'ror', 'hydro'}",Defines a list of renewable energy carriers considered for temporal matching of hydrogen production.
