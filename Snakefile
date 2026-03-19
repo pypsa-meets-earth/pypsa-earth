@@ -788,7 +788,7 @@ rule add_extra_components:
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs=COSTS,
-        geothermal_potential="resources/geothermal_potentials_by_region.csv"
+        geothermal_potential="resources/" + RDIR + "geothermal_potentials_elec_s{simpl}_{clusters}.csv"
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
@@ -2222,14 +2222,13 @@ if config["foresight"] == "myopic":
             ),
 
 if "geothermal" in config["electricity"]["extendable_carriers"]["Generator"]:
-    
     rule build_geothermal_potentials:
         input:
             geothermal="data/geothermal_potential.csv",
             regions="resources/" + RDIR + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson"
 
         output:
-            "resources/" + RDIR + "geothermal_potentials_by_region.csv"
+            "resources/" + RDIR + "geothermal_potentials_elec_s{simpl}_{clusters}.csv"
         script:
             "scripts/build_geothermal_potentials.py"
 
