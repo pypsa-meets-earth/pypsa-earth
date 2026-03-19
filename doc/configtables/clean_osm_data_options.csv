@@ -1,7 +1,7 @@
-,Unit,Values,Description
-names_by_shapes, bool, "{True, False}", "True: the country name is set based on the extended country shapes."
-threshold_voltage, V,, "Assets below the voltage threshold will not be considered (cable, line, generator, etc.)."
-tag_substation,, "{""transmission"", ""distribution""}", "Filters only substations with the corresponding tag (""transmission"" or ""distribution"")."
-add_line_endings, bool, "{True, False}", "True: line endings are added to the dataset of the substations."
-generator_name_method,, "{OSM, closest_city}", "Methodology to specify the name of generators. From OpenStreetMap (OSM) or named after the closest city (closest_city)."
-data_options,,"{OSM_only, custom_only, add_custom}, none", "Method for selecting which type of data is used for lines/cables/substations in the clean_osm_data script. Use OSM (OSM_only), customized (Custom_only), both data sets (add_custom) or none (none). "none" can be useful to ignore substation data from OSM and rely only on the ending buses of lines"
+Parameter,Unit,Values,Description
+names_by_shapes,bool,"{True, False}",True: the country name is set based on the extended country shapes.
+threshold_voltage,V,,"Assets below the voltage threshold will not be considered (cable, line, generator, etc.)."
+tag_substation,,"{transmission, distribution}",Filters only substations with the corresponding tag (transmission or distribution).
+add_line_endings,bool,"{True, False}",True: line endings are added to the dataset of the substations.
+generator_name_method,,"{OSM, closest_city}",Methodology to specify the name of generators. From OpenStreetMap (OSM) or named after the closest city (closest_city).
+data_options,,"{OSM_only, custom_only, add_custom}, none","Method for selecting which type of data is used for lines/cables/substations in the clean_osm_data script. Use OSM (OSM_only), customized (Custom_only), both data sets (add_custom) or none (none). ""none"" can be useful to ignore substation data from OSM and rely only on the ending buses of lines"
