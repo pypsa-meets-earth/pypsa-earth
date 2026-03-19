@@ -269,10 +269,7 @@ import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots(figsize=(8, 8))
 
-bus_sizes = (
-    n.generators.groupby(["bus", "carrier"])["p_nom_opt"].sum()
-    / 5e4
-)
+bus_sizes = n.generators.groupby(["bus", "carrier"])["p_nom_opt"].sum() / 5e4
 
 n.plot(
     ax=ax,
@@ -291,8 +288,7 @@ plt.savefig("my_network_map.png", dpi=150)
 import matplotlib.pyplot as plt
 
 gen = (
-    n.generators_t.p
-    .multiply(n.snapshot_weightings.generators, axis=0)
+    n.generators_t.p.multiply(n.snapshot_weightings.generators, axis=0)
     .sum()
     .groupby(n.generators.carrier)
     .sum()
@@ -315,11 +311,7 @@ import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots(figsize=(8, 8))
 
-loading = (
-    n.lines_t.p0.abs()
-    .divide(n.lines.s_nom, axis=1)
-    .mean()
-)
+loading = n.lines_t.p0.abs().divide(n.lines.s_nom, axis=1).mean()
 
 n.plot(
     ax=ax,
