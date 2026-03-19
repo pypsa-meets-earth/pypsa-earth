@@ -134,8 +134,8 @@ There are several formats for GADM IDs depending on the version, so before using
 ``bash
 snakemake -j 1 build_shapes
 
-``
-   The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
+!!! note
+    The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
 
 ## clean_osm_data_options
 
@@ -205,17 +205,29 @@ Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
 Specifies electricity line parameters.
 
+```yaml
+--8<-- "configtables/snippets/lines.yaml"
+```
+
 {{ read_csv('configtables/lines.csv') }}
 
 ## links
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .
 
+```yaml
+--8<-- "configtables/snippets/links.yaml"
+```
+
 {{ read_csv('configtables/links.csv') }}
 
 ## transformers
 
 Specifies transformers parameters and types.
+
+```yaml
+--8<-- "configtables/snippets/transformers.yaml"
+```
 
 {{ read_csv('configtables/transformers.csv') }}
 
@@ -304,6 +316,10 @@ Specifies the cost assumptions of the technologies considered. Cost information 
 ## monte_carlo
 
 Specifies the options for Monte Carlo sampling.
+
+```yaml
+--8<-- "configtables/snippets/monte_carlo.yaml"
+```
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
@@ -423,9 +439,17 @@ Specify linear power flow formulation and optimization solver settings.
 
 ### options
 
+```yaml
+--8<-- "configtables/snippets/solving_options.yaml"
+```
+
 {{ read_csv('configtables/solving-options.csv') }}
 
 ### solver
+
+```yaml
+--8<-- "configtables/snippets/solving_solver.yaml"
+```
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
