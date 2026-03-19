@@ -1,3 +1,9 @@
+<!-- SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors -->
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
+<!-- SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors -->
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Plotting & Summary Visualization
 
 Visualization is a central part of the PyPSA-Earth workflow. After solving a network, several built-in scripts let you generate geographic maps of the power system, produce aggregated cost and energy summaries, and explore results interactively via Jupyter notebooks. This page documents those tools, explains how to invoke them via Snakemake, and provides guidance on customizing outputs for your own analysis.
