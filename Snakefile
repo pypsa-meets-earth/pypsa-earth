@@ -18,6 +18,7 @@ from _helpers import (
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    update_cutout_config,
     BASE_DIR,
     branch,  # Remove if Snakemake >= 8.3.0
 )
@@ -53,6 +54,7 @@ config["scenario"]["unc"] = [
     f"m{i}" for i in range(config["monte_carlo"]["options"]["samples"])
 ]
 
+config = update_cutout_config(config)
 
 run = config.get("run", {})
 RDIR = run["name"] + "/" if run.get("name") else ""
@@ -345,33 +347,32 @@ rule build_bus_regions:
         "scripts/build_bus_regions.py"
 
 
-def terminate_if_cutout_exists(config=config):
+def check_cutout(w):
     """
     Check if any of the requested cutout files exist.
     If that's the case, terminate execution to avoid data loss.
     """
-    config_cutouts = [
-        d_value["cutout"] for tc, d_value in config["renewable"].items()
-    ] + list(config["atlite"]["cutouts"].keys())
+    cutout_fl = "cutouts/" + CDIR + f"{w.cutout}.nc"
 
-    for ct in set(config_cutouts):
-        cutout_fl = "cutouts/" + CDIR + ct + ".nc"
-        if os.path.exists(cutout_fl):
-            raise Exception(
-                "An option `build_cutout` is enabled, while a cutout file '"
-                + cutout_fl
-                + "' still exists and risks to be overwritten. If this is an intended behavior, please move or delete this file and re-run the rule. Otherwise, just disable the `build_cutout` and `retrieve_cutout` rule in the config file."
-            )
+    if os.path.exists(cutout_fl):
+        raise Exception(
+            f"An option `build_cutout` is enabled, while a cutout file '{cutout_fl}' "
+            "still exists and risks to be overwritten. If this is an intended behavior, "
+            "please move or delete this file and re-run the rule. Otherwise, just disable "
+            "the `build_cutout` rule in the config file."
+        )
+    
+    return []
 
 
 if config["enable"].get("build_cutout", False):
-    terminate_if_cutout_exists(config)
 
     rule build_cutout:
         params:
             snapshots=config["snapshots"],
             cutouts=config["atlite"]["cutouts"],
         input:
+            check=check_cutout,
             onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
             offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         output:

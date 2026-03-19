@@ -19,7 +19,7 @@ countries: ["NG", "BJ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
 
 enable:
-  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
@@ -266,10 +266,11 @@ atlite:
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
+  default: cutout-2013-era5
 
 renewable:
   onwind:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: Vestas_V112_3MW
@@ -296,7 +297,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -314,7 +315,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -333,7 +334,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: pv
       panel: CSi
@@ -354,7 +355,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: cutout-2013-era5
+    cutout: auto
     hydrobasins_level: 6
     resource:
       method: hydro
@@ -376,7 +377,7 @@ renewable:
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
     hydro_min_inflow_pu: 1.0 # [hour] A threshold of energy to power ratio to classify hydro powerplants as reservoirs in case type is missed
   csp:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: csp
       installation: SAM_solar_tower
