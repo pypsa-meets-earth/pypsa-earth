@@ -163,10 +163,11 @@ def normed(x):
 
 def weighting_for_country(n, x):
     conv_carriers = {"OCGT", "CCGT", "PHS", "hydro"}
-    gen = n.generators.loc[n.generators.carrier.isin(conv_carriers)].groupby(
+    conv_carriers_pattern = "|".join(conv_carriers)
+    gen = n.generators.loc[n.generators.carrier.str.contains(conv_carriers_pattern)].groupby(
         "bus"
     ).p_nom.sum().reindex(n.buses.index, fill_value=0.0) + n.storage_units.loc[
-        n.storage_units.carrier.isin(conv_carriers)
+        n.storage_units.carrier.str.contains(conv_carriers_pattern)
     ].groupby(
         "bus"
     ).p_nom.sum().reindex(
