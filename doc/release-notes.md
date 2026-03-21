@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add `auto` as an option when selecting cutouts in `renewables: {technology}: cutout:` which redirect the cutout name to `atlite: default:` [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying [PR #1662](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662)
 
 * Bump powerplantmatching to 0.8.0 [PR #1702](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702)

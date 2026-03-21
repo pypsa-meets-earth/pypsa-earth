@@ -347,7 +347,7 @@ rule build_bus_regions:
         "scripts/build_bus_regions.py"
 
 
-def check_cutout(w):
+def terminate_if_cutout_exists(w):
     """
     Check if any of the requested cutout files exist.
     If that's the case, terminate execution to avoid data loss.
@@ -372,7 +372,7 @@ if config["enable"].get("build_cutout", False):
             snapshots=config["snapshots"],
             cutouts=config["atlite"]["cutouts"],
         input:
-            check=check_cutout,
+            check=terminate_if_cutout_exists,
             onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
             offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         output:
