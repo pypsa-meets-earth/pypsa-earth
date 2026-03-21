@@ -15,11 +15,11 @@ https://pubs.usgs.gov/sir/2010/5090/
 """
 
 import os
+import shutil
 import zipfile
 from pathlib import Path
 
 import requests
-import shutil
 
 
 def download_file(url, dest):
@@ -68,5 +68,3 @@ if __name__ == "__main__":
 
     if not output_shp.exists():
         raise FileNotFoundError(f"Failed to create output: {output_shp}")
-
-

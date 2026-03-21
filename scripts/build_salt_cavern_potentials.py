@@ -64,9 +64,9 @@ def capsule_volume(diameter_m, height_m):
 
     where:
 
-    - `d` = diameter  
-    - `h` = total height  
-    - `(h − d)` = cylindrical height  
+    - `d` = diameter
+    - `h` = total height
+    - `(h − d)` = cylindrical height
     - two hemispheres together form a full sphere of diameter `d`
     """
     radius = diameter_m / 2
