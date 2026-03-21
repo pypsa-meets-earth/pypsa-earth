@@ -582,7 +582,7 @@ sector:
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage:
       enabled: true
-      # calculations based on https://doi.org/10.1016/j.ijhydene.2019.12.161
+      # calculations based on https://dx.doi.org/10.2139/ssrn.6307406
       min_area_km2: 13 # minimum area for kaverns in km2
       method: "surface" # surface or physics
       energy_density_MWh_per_m3: 0.336 # energy density varies in europe between 0.214 and 0.0458 MWh/m3
@@ -608,7 +608,6 @@ sector:
           50: 2500 # urban
           80: 200 # protected areas / water bodies
           100: 200 # natural protected areas
-      # physics calculations not based on https://doi.org/10.1016/j.ijhydene.2019.12.161
       rho_min: 5.0         # Minimum hydrogen density in kg/m³ (at low pressure, e.g. ~30 bar)
       rho_max: 42.0        # Maximum hydrogen density in kg/m³ (at high pressure, e.g. ~200–250 bar)
       theta_safety: 0.8    # Usable working gas fraction (portion of H₂ that can actually be withdrawn)
