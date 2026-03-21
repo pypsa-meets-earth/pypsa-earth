@@ -45,6 +45,13 @@ def add_brownfield(n: pypsa.Network, n_p: pypsa.Network, year: int) -> None:
     dc_i = n.links[n.links.carrier == "DC"].index
     n.links.loc[dc_i, "p_nom_min"] = n_p.links.loc[dc_i, "p_nom_opt"]
 
+    # Reset p_nom_min on extendable generators that was set from IRENA stats
+    # in add_electricity to prevent double-counting.
+    extendable_gens = n.generators.index[n.generators.p_nom_extendable]
+    if not extendable_gens.empty:
+        n.generators.loc[extendable_gens, "p_nom_min"] = 0.0
+        n.generators.loc[extendable_gens, "p_nom"] = 0.0
+
     for c in n_p.iterate_components(["Link", "Generator", "Store"]):
         attr = "e" if c.name == "Store" else "p"
 
