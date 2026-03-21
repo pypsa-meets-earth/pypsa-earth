@@ -1080,6 +1080,44 @@ rule prepare_transport_data_input:
         "scripts/prepare_transport_data_input.py"
 
 
+rule retrieve_potash_data:
+    output:
+        shp="data/potash_gis/PotashGIS/global_potash/Shapefiles/PotashTracts.shp",
+    params:
+        url="https://pubs.usgs.gov/sir/2010/5090/s/PotashGIS.zip",
+    script:
+        "scripts/retrieve_potash_data.py"
+
+
+if (
+    not config["custom_data"]["h2_underground"]
+    and config["sector"]["hydrogen"]["underground_storage"]["enabled"]
+):
+
+    rule build_salt_cavern_potentials:
+        input:
+            copernicus="data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif",
+            regions_onshore="resources/"
+            + RDIR
+            + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+            potash_shp="data/potash_gis/PotashGIS/global_potash/Shapefiles/PotashTracts.shp",
+        output:
+            h2_cavern="resources/"
+            + RDIR
+            + "salt_cavern_potentials_s{simpl}_{clusters}.csv",
+        params:
+            crs=config["crs"],
+            underground_storage=config["sector"]["hydrogen"]["underground_storage"],
+        threads: 1
+        resources:
+            mem_mb=2000,
+        script:
+            "scripts/build_salt_cavern_potentials.py"
+
+
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
@@ -1156,6 +1194,17 @@ rule prepare_sector_network:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
         **branch(
+            config["custom_data"]["h2_underground"]
+            or config["sector"]["hydrogen"]["underground_storage"]["enabled"],
+            {
+                "h2_cavern": branch(
+                    config["custom_data"]["h2_underground"],
+                    "data/hydrogen_salt_cavern_potentials.csv",
+                    f"resources/{RDIR}salt_cavern_potentials_s{{simpl}}_{{clusters}}.csv",
+                )
+            },
+        ),
+        **branch(
             solar_rooftop_enable,
             {
                 f"solar_rooftop_layout_{country}": "resources/"
@@ -1168,7 +1217,6 @@ rule prepare_sector_network:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
-        h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
             "resources/"
