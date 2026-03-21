@@ -361,7 +361,7 @@ def check_cutout(w):
             "please move or delete this file and re-run the rule. Otherwise, just disable "
             "the `build_cutout` rule in the config file."
         )
-    
+
     return []
 
 

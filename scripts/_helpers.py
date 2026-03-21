@@ -80,13 +80,13 @@ def update_cutout_config(config):
     `config["atlite"]["default"]`.
     """
     cutout_default = config["atlite"]["default"]
-    
+
     for tech in config["renewable"]:
         cutout_res = config["renewable"][tech]["cutout"]
 
         if cutout_res != "auto":
             continue
-        
+
         config["renewable"][tech]["cutout"] = cutout_default
 
     return config
