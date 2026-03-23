@@ -146,7 +146,7 @@ rule plot_all_summaries:
 
 if config["enable"].get("retrieve_databundle", True):
 
-    bundles_to_download = get_best_bundles_in_snakemake(config)
+    bundles_to_download = get_best_bundles_in_snakemake(config, exclude_categories=["cutouts"])
 
     rule retrieve_databundle_light:
         params:
@@ -351,12 +351,14 @@ def terminate_if_cutout_exists(w):
     """
     Check if any of the requested cutout files exist.
     If that's the case, terminate execution to avoid data loss.
+
+    Tutorial cutouts should be removed once they are no longer needed.
     """
     cutout_fl = "cutouts/" + CDIR + f"{w.cutout}.nc"
 
-    if os.path.exists(cutout_fl):
+    if os.path.exists(cutout_fl) and not config["tutorial"]:
         raise Exception(
-            f"An option `build_cutout` is enabled, while a cutout file '{cutout_fl}' "
+            f"An option `build_cutout` or `retrieve_cutout` is enabled, while a cutout file '{cutout_fl}' "
             "still exists and risks to be overwritten. If this is an intended behavior, "
             "please move or delete this file and re-run the rule. Otherwise, just disable "
             "the `build_cutout` rule in the config file."
@@ -386,6 +388,26 @@ if config["enable"].get("build_cutout", False):
             mem_mb=ATLITE_NPROCESSES * 1000,
         script:
             "scripts/build_cutout.py"
+
+
+if config["enable"].get("retrieve_cutout", False):
+
+    bundles_to_download = get_best_bundles_in_snakemake(config, include_categories=["cutouts"])
+
+    rule retrieve_cutout:
+        params:
+            bundles_to_download=bundles_to_download,
+            hydrobasins_level=[],
+        input:
+            check=terminate_if_cutout_exists,
+        output:
+            "cutouts/" + CDIR + "{cutout}.nc",
+        log:
+            "logs/" + RDIR + "retrieve_cutout/{cutout}.log",
+        benchmark:
+            "benchmarks/" + RDIR + "retrieve_cutout_{cutout}"
+        script:
+            "scripts/retrieve_databundle_light.py"
 
 
 if config["enable"].get("build_natura_raster", False):

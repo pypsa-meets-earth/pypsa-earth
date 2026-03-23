@@ -741,7 +741,7 @@ def get_best_bundles(
     )
     if include_categories:
         categories = [
-            category for category in categories if category in exclude_categories
+            category for category in categories if category in include_categories
         ]
 
     if exclude_categories:
@@ -940,9 +940,9 @@ if __name__ == "__main__":
         disable_progress=disable_progress,
     )
 
-    # if some files are still missing, reroute to command-line-interface
-    if any(
-        not os.path.isfile(file) if file != "data/landcover" else False
-        for file in snakemake.output
-    ):
-        os.system("python scripts/non_workflow/databundle_cli.py")
+    # # if some files are still missing, reroute to command-line-interface
+    # if any(
+    #     not os.path.isfile(file) if file != "data/landcover" else False
+    #     for file in snakemake.output
+    # ):
+    #     os.system("python scripts/non_workflow/databundle_cli.py")
