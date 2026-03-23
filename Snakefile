@@ -146,7 +146,9 @@ rule plot_all_summaries:
 
 if config["enable"].get("retrieve_databundle", True):
 
-    bundles_to_download = get_best_bundles_in_snakemake(config, exclude_categories=["cutouts"])
+    bundles_to_download = get_best_bundles_in_snakemake(
+        config, exclude_categories=["cutouts"]
+    )
 
     rule retrieve_databundle_light:
         params:
@@ -392,7 +394,9 @@ if config["enable"].get("build_cutout", False):
 
 if config["enable"].get("retrieve_cutout", False):
 
-    bundles_to_download = get_best_bundles_in_snakemake(config, include_categories=["cutouts"])
+    bundles_to_download = get_best_bundles_in_snakemake(
+        config, include_categories=["cutouts"]
+    )
 
     rule retrieve_cutout:
         params:
