@@ -445,7 +445,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     file_path = os.path.join(destination, os.path.basename(url))
 
     unzip = config.get("unzip", False)
-    download_and_unpack(
+    downloaded =  download_and_unpack(
         url=url,
         file_path=file_path,
         resource=resource,
@@ -454,6 +454,8 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
         unzip=unzip,
         disable_progress=disable_progress,
     )
+
+    return downloaded
 
 
 def download_and_unzip_hydrobasins(
