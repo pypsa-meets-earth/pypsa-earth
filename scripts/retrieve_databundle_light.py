@@ -926,12 +926,11 @@ def debug_using_databundle_cli(snakemake):
 
     Waits up to 150 seconds to account for delayed file availability.
     """
-    for t in range(1, 5):
+    for t in range(15, 61, 15):  # 15 -> 30 -> 45 -> 60
         if outputs_ready(snakemake.output):
             return
-        wait_time = t * 15
-        logger.warning(f"Waits {wait_time} seconds to account for delayed file availability.")
-        time.sleep(wait_time)
+        logger.warning(f"Waits {t} seconds to account for delayed file availability.")
+        time.sleep(t)
 
     snakemake_rule = {
         "rulename": snakemake.rule,
