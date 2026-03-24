@@ -926,12 +926,13 @@ def debug_using_databundle_cli(snakemake):
     If any outputs are missing, the function reroutes execution to a command-line interface script
     for debugging.
 
-    Waits up to 30 seconds to account for delayed file availability.
+    Waits up to 60 seconds to account for delayed file availability.
     """
-    for _ in range(6):
+    for _ in range(4):
         if outputs_ready():
             return
-        time.sleep(5)
+        logger.warning("Waits 15 seconds to account for delayed file availability.")
+        time.sleep(15)
 
     snakemake_rule = {
         "rulename": snakemake.rule,
