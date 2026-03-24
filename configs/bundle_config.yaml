@@ -108,10 +108,6 @@ databundles:
     tutorial: true
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [0.15, 1.35, 15.15, 14.55]
-      start: "2013-03-01"
-      end: "2013-03-06"
     urls:
       zenodo: https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
@@ -125,10 +121,6 @@ databundles:
     tutorial: true
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [19.35, -27.45, 29.85, -17.25]
-      start: "2013-03-01"
-      end: "2013-03-06"
     urls:
       zenodo: https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
@@ -142,10 +134,6 @@ databundles:
     tutorial: true
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [-14.25, 27.15, -0.45, 36.75]
-      start: "2013-03-01"
-      end: "2013-03-06"
     urls:
       zenodo: https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
@@ -158,10 +146,6 @@ databundles:
     countries: [KZ]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [45.75, 40.05, 88.05, 55.95]
-      start: "2013-01-01"
-      end: "2013-01-01"
     urls:
       zenodo: https://zenodo.org/records/18851102/files/bundle_tutorial_cutouts_KZ.zip?download=1
     output: [cutouts/cutout-2013-era5-tutorial.nc]
@@ -295,10 +279,6 @@ databundles:
     countries: [Africa]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [-19.65, -37.65, 67.65, 39.45]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       zenodo: https://sandbox.zenodo.org/records/323567/files/bundle_cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
@@ -326,10 +306,6 @@ databundles:
     countries: [NorthAmerica]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [-172.05, 1.35, -46.95, 73.95]
-      start: "2013-01-01"
-      end: "2014-01-01"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_northamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Ao_kuHssRaP1qLV-IEG91Hu7E04-nBZg/view?usp=drive_link
@@ -344,10 +320,6 @@ databundles:
     countries: [Europe]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [-31.95, 1.35, 60.15, 73.95]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_europe.zip?download=1
       gdrive: https://drive.google.com/file/d/1c2-8pChoxv4CDJW01vkPpggBSWHs9Mqi/view?usp=drive_link
@@ -362,10 +334,6 @@ databundles:
     countries: [Oceania]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [79.9761194, -49.95, 179.82388059, 19.95]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418864/files/bundle_cutouts_oceania.zip?download=1
       gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
@@ -391,10 +359,6 @@ databundles:
     countries: ["KVR", "WAS", "FEAR", "SEAR", "CASR", "SASR", "ASEAN", "MEAR"]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [24.7626804, -14.55, 158.2373296, 55.95]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418866/files/bundle_cutouts_asia.zip?download=1
       gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
@@ -420,10 +384,6 @@ databundles:
     countries: [SouthAmerica]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [-109.95, -60.45, -25.35, 17.25]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_southamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
@@ -437,10 +397,6 @@ databundles:
     countries: [WAS]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [24.75, 8.25, 64.05, 44.25]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_westasia.zip?download=1
       gdrive: https://drive.google.com/file/d/1as-fZS4Z70CfDf3bR4i9t9S5-5pBqURP/view?usp=sharing
@@ -454,10 +410,6 @@ databundles:
     countries: ["LT", "LV", "EE", "BY", "RU", "KZ", "MN", "GE"]
     category: cutouts
     destination: "cutouts"
-    metadata:
-      bounds: [19.05, 38.85, 178.95, 78.15]
-      start: "2013-01-01"
-      end: "2013-12-31"
     urls:
       gdrive: https://drive.google.com/file/d/11EzaAaP4eOPzhfKCkm0zZ6HOv-JpgZFd/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
