@@ -160,6 +160,7 @@ if __name__ == "__main__":
     )
 
     log_path = "logs/databundle_cli.yaml"
+    rootpath = "."
 
     # Load the rule from YAML if it exists, otherwise use default
     snakemake_rule = (

@@ -83,6 +83,7 @@ according to the following rules:
 import datetime as dt
 import os
 import re
+import time
 from zipfile import ZipFile
 
 import geopandas as gpd
@@ -910,16 +911,27 @@ def retrieve_databundle(
         )
 
 
+def outputs_ready():
+    """
+    Return True if all Snakemake output files exist
+    """
+    return all(
+        os.path.isfile(path) or path == "data/landcover" for path in snakemake.output
+    )
+
+
 def debug_using_databundle_cli(snakemake):
     """
     Checks if all Snakemake output files exist (ignoring "data/landcover") and exit if they do.
     If any outputs are missing, the function reroutes execution to a command-line interface script
     for debugging.
+
+    Waits up to 30 seconds to account for delayed file availability.
     """
-    if all(
-        os.path.isfile(file) or file == "data/landcover" for file in snakemake.output
-    ):
-        return
+    for _ in range(6):
+        if outputs_ready():
+            return
+        time.sleep(5)
 
     snakemake_rule = {
         "rulename": snakemake.rule,
