@@ -394,13 +394,13 @@ if config["enable"].get("build_cutout", False):
 
 if config["enable"].get("retrieve_cutout", False):
 
-    bundles_to_download = get_best_bundles_in_snakemake(
+    cutout_to_download = get_best_bundles_in_snakemake(
         config, include_categories=["cutouts"]
     )
 
     rule retrieve_cutout:
         params:
-            bundles_to_download=bundles_to_download,
+            bundles_to_download=cutout_to_download,
             hydrobasins_level=[],
         input:
             check=terminate_if_cutout_exists,

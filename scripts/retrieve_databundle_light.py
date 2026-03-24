@@ -908,6 +908,29 @@ def retrieve_databundle(
         )
 
 
+def debug_using_databundle_cli(snakemake):
+    """
+    Checks if all Snakemake output files exist (ignoring "data/landcover") and exit if they do.
+    If any outputs are missing, the function reroutes execution to a command-line interface script
+    for debugging.
+    """
+    if all(
+        os.path.isfile(file) or file == "data/landcover" for file in snakemake.output
+    ):
+        return
+
+    snakemake_rule = {
+        "rulename": snakemake.rule,
+        "params": {key: value for key, value in snakemake.params.items()},
+        **{key: value for key, value in snakemake.wildcards.items()},
+    }
+
+    with open("logs/databundle_cli.yaml", "w") as f:
+        yaml.dump(snakemake_rule, f)
+
+    os.system("python scripts/non_workflow/databundle_cli.py")
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
 
@@ -940,9 +963,4 @@ if __name__ == "__main__":
         disable_progress=disable_progress,
     )
 
-    # # if some files are still missing, reroute to command-line-interface
-    # if any(
-    #     not os.path.isfile(file) if file != "data/landcover" else False
-    #     for file in snakemake.output
-    # ):
-    #     os.system("python scripts/non_workflow/databundle_cli.py")
+    debug_using_databundle_cli(snakemake)
