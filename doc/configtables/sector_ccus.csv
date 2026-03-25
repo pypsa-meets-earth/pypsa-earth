@@ -3,7 +3,7 @@ co2_network,bool,"{true, false}",Add option for planning a new carbon dioxide tr
 co2_sequestration_potential,MtCO2/a,,The potential of sequestering CO2 in the model per year and investment period.
 co2_sequestration_cost,currency/tCO2,,The cost of sequestering a ton of CO2 (currency/tCO2).
 methanation,bool,"{true, false}",Add option for transforming hydrogen and CO2 into methane using methanation.
-helmeth,bool,"{true, false}",
+helmeth,bool,"{true, false}",Add option for transforming electricity and CO2 into methane using HELMETH (Integrated High-Temperature ELectrolysis and METHanation).
 dac,bool,"{true, false}",Add option for Direct Air Capture (DAC).
 cc_fraction,float,"[0, 1]",The default fraction of CO2 captured with post-combustion capture.
 cc,bool,"{true, false}",Add option for carbon capture (CC).

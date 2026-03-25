@@ -361,7 +361,7 @@ See custom_data.rst for more detail
 
 Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
 
-#### top-level
+### top-level
 
 ```yaml
 --8<-- "configtables/snippets/sector_toplevel.yaml"
@@ -369,7 +369,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_toplevel.csv') }}
 
-#### heat sector
+### heat sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_heat.yaml"
@@ -377,7 +377,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_heat.csv') }}
 
-#### land transport sector
+### land transport sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_land_transport.yaml"
@@ -385,7 +385,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_land_transport.csv') }}
 
-#### biomass sector
+### biomass sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_biomass.yaml"
@@ -393,7 +393,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_biomass.csv') }}
 
-#### electricity distribution grid
+### electricity distribution grid
 
 ```yaml
 --8<-- "configtables/snippets/sector_electricity_distribution_grid.yaml"
@@ -401,7 +401,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_electricity_distribution_grid.csv') }}
 
-#### shipping & aviation sector
+### shipping & aviation sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_shipping_aviation.yaml"
@@ -409,7 +409,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_shipping_aviation.csv') }}
 
-#### ccus & conversion options
+### ccus & conversion options
 
 ```yaml
 --8<-- "configtables/snippets/sector_ccus.yaml"
@@ -417,7 +417,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_ccus.csv') }}
 
-#### industry options
+### industry options
 
 ```yaml
 --8<-- "configtables/snippets/sector_industry.yaml"
@@ -425,7 +425,7 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_industry.csv') }}
 
-#### powerplants options
+### powerplants options
 
 ```yaml
 --8<-- "configtables/snippets/sector_powerplants.yaml"

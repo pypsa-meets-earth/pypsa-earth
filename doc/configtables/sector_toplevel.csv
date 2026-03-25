@@ -25,9 +25,9 @@ Parameter,Unit,Values,Description
 -- gas_network_repurposing,bool,"{true, false}",Specify if gas networks can be repurposed for hydrogen networks.
 -- underground_storage,bool,"{true, false}",Add options for storing hydrogen underground. Storage potential depends regionally.
 -- hydrogen_colors,bool,"{true, false}",Specify if hydrogen carriers are disaggregated based on their source.
--- set_color_shares,bool,"{true, false}",Add option if hydogen sources must be derrived from specific sources.
--- blue_share,float,"[0, 1]",Share of hydrogen derrived from gas with carbon capture.
--- pink_share,float,"[0, 1]",Share of hydrogen derrived from nuclear.
+-- set_color_shares,bool,"{true, false}",Add option if hydogen sources must be derived from specific sources.
+-- blue_share,float,"[0, 1]",Share of hydrogen derived from gas with carbon capture.
+-- pink_share,float,"[0, 1]",Share of hydrogen derived from nuclear.
 -- production_technologies,--,"Any subset of {‘H2 Electrolysis’,  'SMR', 'SMR CC', 'Alkaline electrolyzer large', 'Alkaline electrolyzer medium', 'Alkaline electrolyzer small', 'PEM electrolyzer', 'SOEC', 'Solid biomass steam reforming', 'Biomass gasification', 'Biomass gasification CC', 'Natural gas steam reforming', 'Natural gas steam reforming CC', 'Coal gasification', 'Coal gasification CC', 'Heavy oil partial oxidation'}",List of hydrogen production technologies that can be added.
   ,  ,  ,"  "
 **coal**,  ,  ,Configuration for `sector.coal` settings.

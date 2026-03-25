@@ -510,7 +510,7 @@ fossil_reserves:
 
 export:
   endogenous: false # If true, the export demand is endogenously determined by the model
-  endogenous_price: 400 # EUR/MWh # Market price, for wich the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
+  endogenous_price: 400 # EUR/MWh # Market price, for which the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   h2export: [10] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
