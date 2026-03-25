@@ -404,6 +404,7 @@ if config["enable"].get("retrieve_cutout", False):
             hydrobasins_level=[],
         input:
             check=terminate_if_cutout_exists,
+            onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         output:
             "cutouts/" + CDIR + "{cutout}.nc",
         log:

@@ -911,11 +911,11 @@ def retrieve_databundle(
         )
 
 
-def outputs_ready(output):
-    """
-    Return True if all Snakemake output files exist
-    """
-    return all(os.path.isfile(path) or path == "data/landcover" for path in output)
+# def outputs_ready(output):
+#     """
+#     Return True if all Snakemake output files exist
+#     """
+#     return all(os.path.isfile(path) or path == "data/landcover" for path in output)
 
 
 def debug_using_databundle_cli(snakemake):
@@ -926,11 +926,15 @@ def debug_using_databundle_cli(snakemake):
 
     Waits up to 150 seconds to account for delayed file availability.
     """
-    for t in range(15, 61, 15):  # 15 -> 30 -> 45 -> 60
-        if outputs_ready(snakemake.output):
-            return
-        logger.warning(f"Waits {t} seconds to account for delayed file availability.")
-        time.sleep(t)
+    # for t in range(15, 61, 15):  # 15 -> 30 -> 45 -> 60
+    #     if outputs_ready(snakemake.output):
+    #         return
+    #     logger.warning(f"Waits {t} seconds to account for delayed file availability.")
+    #     time.sleep(t)
+    if all(
+        os.path.isfile(path) or path == "data/landcover" for path in snakemake.output
+    ):
+        return
 
     snakemake_rule = {
         "rulename": snakemake.rule,
