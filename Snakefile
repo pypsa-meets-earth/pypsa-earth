@@ -517,6 +517,7 @@ HYDRO_PROFILES = {
     "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
     "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
     "powerplants": "resources/" + RDIR + "powerplants.csv",
+    "hydrobasins": "data/hydrobasins/hybas_world.shp",
 }
 
 
