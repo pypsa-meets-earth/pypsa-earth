@@ -16,7 +16,7 @@ foresight: overnight
 
 
 countries: ["NG", "BJ"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
 enable:
   retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
@@ -27,7 +27,7 @@ enable:
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # requires cds API key https://cds.climate.copernicus.eu/how-to-api
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   progress_bar: true # show progress bar during downloading routines and other long-running tasks
   custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
@@ -192,7 +192,7 @@ electricity:
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
 
-  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
     activate: false
     epsilon_load: 0.02 # share of total load
     epsilon_vres: 0.02 # share of total renewable supply
@@ -799,7 +799,7 @@ sector:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay https://doi.org/10.3389/fenrg.2015.00055)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
