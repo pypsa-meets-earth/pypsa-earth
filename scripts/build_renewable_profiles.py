@@ -218,7 +218,7 @@ GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
-def check_cutout_match(cutout, geodf):
+def check_cutout_match(cutout, regions):
     cutout_box = box(*cutout.bounds)
     region_box = box(*regions.total_bounds)
 
@@ -564,7 +564,7 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
 
-    check_cutout_match(cutout=cutout, geodf=regions)
+    check_cutout_match(cutout=cutout, regions=regions)
 
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country

@@ -362,8 +362,8 @@ def terminate_if_cutout_exists(w):
         raise Exception(
             f"An option `build_cutout` or `retrieve_cutout` is enabled, while a cutout file '{cutout_fl}' "
             "still exists and risks to be overwritten. If this is an intended behavior, "
-            "please move or delete this file and re-run the rule. Otherwise, just disable "
-            "the `build_cutout` rule in the config file."
+            "please move, rename or delete this file and re-run the rule. Otherwise, "
+            "just disable the `build_cutout` and `retrieve_cutout` rule in the config file."
         )
 
     return []
@@ -405,6 +405,7 @@ if config["enable"].get("retrieve_cutout", False):
         input:
             check=terminate_if_cutout_exists,
             onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+            offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         output:
             "cutouts/" + CDIR + "{cutout}.nc",
         log:

@@ -911,11 +911,26 @@ def retrieve_databundle(
         )
 
 
-# def outputs_ready(output):
-#     """
-#     Return True if all Snakemake output files exist
-#     """
-#     return all(os.path.isfile(path) or path == "data/landcover" for path in output)
+def check_retrieved_cutout_match(snakemake):
+    """
+    Validate that the retrieved cutout spatially matches the region.
+
+    Parameters
+    ----------
+    snakemake : snakemake.io.Snakemake
+        Snakemake object containing input and output file paths.
+    """
+    import atlite
+    from build_renewable_profiles import check_cutout_match
+
+    cutout = atlite.Cutout(snakemake.output[0])
+
+    onshore = gpd.read_file(snakemake.input.onshore_shapes)
+    offshore = gpd.read_file(snakemake.input.offshore_shapes)
+    regions = pd.concat([onshore, offshore])
+
+    check_cutout_match(cutout, regions)
+    logger.info("Retrieved cutout successfully matches the region")
 
 
 def debug_using_databundle_cli(snakemake):
@@ -924,13 +939,11 @@ def debug_using_databundle_cli(snakemake):
     If any outputs are missing, the function reroutes execution to a command-line interface script
     for debugging.
 
-    Waits up to 150 seconds to account for delayed file availability.
+    Parameters
+    ----------
+    snakemake : snakemake.io.Snakemake
+        Snakemake object containing output file paths.
     """
-    # for t in range(15, 61, 15):  # 15 -> 30 -> 45 -> 60
-    #     if outputs_ready(snakemake.output):
-    #         return
-    #     logger.warning(f"Waits {t} seconds to account for delayed file availability.")
-    #     time.sleep(t)
     if all(
         os.path.isfile(path) or path == "data/landcover" for path in snakemake.output
     ):
@@ -979,5 +992,8 @@ if __name__ == "__main__":
         rootpath=rootpath,
         disable_progress=disable_progress,
     )
+
+    if snakemake.input:
+        check_retrieved_cutout_match(snakemake)
 
     debug_using_databundle_cli(snakemake)
