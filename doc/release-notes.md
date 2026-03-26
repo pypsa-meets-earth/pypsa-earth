@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Convert dangling `custom_data.rst` to MkDocs Markdown and add Custom Data Integration page to the User Guide [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+
 * Restructure sector configuration and add sector documentation [PR #1760](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1760)
 
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying [PR #1662](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662)

@@ -1,0 +1,14 @@
+custom_data:
+  renewables: [] # ['csp', 'rooftop-solar', 'solar']
+  elec_demand: false
+  heat_demand: false
+  industry_demand: false
+  industry_database: false
+  transport_demand: false
+  water_costs: false
+  h2_underground: false
+  add_existing: false
+  custom_sectors: false
+  gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv"
+  export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
+  airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv"
