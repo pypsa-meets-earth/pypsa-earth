@@ -56,7 +56,7 @@ dependencies:
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
 
-- linopy<0.6, >=0.6.5  # latest linopy 0.6 has issues with scip in quadratic problems that prevents usage
+- linopy<0.6, >=0.6.5  # linopy 0.6.0-0.6.4 has a bug on scip on windows
 
 # Jupyter notebook requirement
 - ipykernel
