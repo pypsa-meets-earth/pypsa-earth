@@ -48,6 +48,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add hydrobasins to rule input for build_renewable_profiles [PR #1753](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1753)
 
+* Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
