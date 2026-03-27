@@ -521,6 +521,14 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     return runoff
 
 
+def check_flag(d: dict, field: str) -> bool:
+    """
+    Check if a string is contained in keys of a dictionary and is either True or non-boolean
+    """
+    safe_field = d.get(field, False)
+    return (not isinstance(safe_field, bool)) or safe_field
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -693,10 +701,10 @@ if __name__ == "__main__":
 
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
-        if "natura" in config and config["natura"]:
+        if check_flag(config, "natura"):
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
-        if "copernicus" in config and config["copernicus"]:
+        if check_flag(config, "copernicus"):
             copernicus = config["copernicus"]
             excluder.add_raster(
                 paths.copernicus,
@@ -712,7 +720,7 @@ if __name__ == "__main__":
                     crs=COPERNICUS_CRS,
                 )
 
-        if "max_depth" in config:
+        if check_flag(config, "max_depth"):
             # lambda not supported for atlite + multiprocessing
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
@@ -721,11 +729,11 @@ if __name__ == "__main__":
                 paths.gebco, codes=func_depth, crs=GEBCO_CRS, nodata=-1000
             )
 
-        if "min_shore_distance" in config:
+        if check_flag(config, "min_shore_distance"):
             buffer = config["min_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer)
 
-        if "max_shore_distance" in config:
+        if check_flag(config, "max_shore_distance"):
             buffer = config["max_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 
