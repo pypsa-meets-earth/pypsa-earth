@@ -1,5 +1,5 @@
   csp:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: csp
       installation: SAM_solar_tower

@@ -1,5 +1,5 @@
   solar:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: pv
       panel: CSi
