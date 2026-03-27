@@ -22,6 +22,7 @@ enable:
   retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cutout: true
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
@@ -130,11 +131,10 @@ build_shape_options:
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
 subregion:
-  enable:
-    simplify_network: true # activate subregion in simplify_network
-    cluster_network: false # activate subregion in cluster_network
+  method: false # method to define subregions, either "gadm" or "custom", false to not use subregions.
+  apply_on: ["simplify_network", "cluster_network"] # apply subregion on the simplify_network and/or cluster_network rule.
   define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
-  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  path_custom_shapes: false # provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
   tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
 
 clean_osm_data_options: # osm = OpenStreetMap
@@ -266,10 +266,11 @@ atlite:
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
+  default: cutout-2013-era5
 
 renewable:
   onwind:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: Vestas_V112_3MW
@@ -296,7 +297,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -314,7 +315,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -333,7 +334,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: pv
       panel: CSi
@@ -354,7 +355,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: cutout-2013-era5
+    cutout: auto
     hydrobasins_level: 6
     resource:
       method: hydro
@@ -376,7 +377,7 @@ renewable:
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
     hydro_min_inflow_pu: 1.0 # [hour] A threshold of energy to power ratio to classify hydro powerplants as reservoirs in case type is missed
   csp:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: csp
       installation: SAM_solar_tower
