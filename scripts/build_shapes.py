@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import requests
+import shapely
 import xarray as xr
 from _helpers import (
     BASE_DIR,
@@ -41,9 +42,19 @@ from tqdm import tqdm
 logger = create_logger(__name__)
 
 
-def get_GADM_filename(country_code):
+def get_GADM_filename(country_code: str) -> str:
     """
     Function to get the GADM filename given the country code.
+
+    Parameters
+    ----------
+    country_code : str
+        Two letter country codes of the downloaded files
+
+    Returns
+    -------
+    str
+        GADM filename corresponding to the country code
     """
     special_codes_GADM = {
         "XK": "XKO",  # kosovo
@@ -69,7 +80,9 @@ def get_GADM_filename(country_code):
         return f"gadm41_{two_2_three_digits_country(country_code)}"
 
 
-def download_GADM(country_code, update=False, out_logging=False):
+def download_GADM(
+    country_code: str, update: bool = False, out_logging: bool = False
+) -> tuple[str, str]:
     """
     Download gpkg file from GADM for a given country code.
 
@@ -82,7 +95,10 @@ def download_GADM(country_code, update=False, out_logging=False):
 
     Returns
     -------
-    gpkg file per country
+    GADM_inputfile_gpkg : str
+        Path of the downloaded gpkg file
+    GADM_filename : str
+        Name of the gpkg file per country
     """
     GADM_filename = get_GADM_filename(country_code)
     GADM_url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
@@ -123,12 +139,36 @@ def download_GADM(country_code, update=False, out_logging=False):
 
 
 def filter_gadm(
-    geodf,
-    layer,
-    cc,
-    contended_flag,
-    output_nonstd_to_csv=False,
-):
+    geodf: gpd.GeoDataFrame,
+    layer: int,
+    cc: str,
+    contended_flag: str,
+    output_nonstd_to_csv: bool = False,
+) -> gpd.GeoDataFrame:
+    """
+    Function to filter the GADM geodataframe according to the contented_flag option.
+
+    Parameters
+    ----------
+    geodf : gpd.GeoDataFrame
+        Geodataframe to filter
+    layer : int
+        Layer of the geodataframe to filter
+    cc : str
+        Country code to filter
+    contended_flag : str
+        Option to treat contended areas, i.e. areas that are not assigned to the country in the GADM layer
+        but are part of the country according to the country code (GID_0) of the geodataframe. The options are:
+        - "drop": drop contended areas from the geodataframe
+        - "set_by_country": set GID_0 of contended areas to the country code of the country (default)
+    output_nonstd_to_csv : bool
+        If True, outputs the non-standard rows to a csv file for debugging purposes (default False)
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Filtered GADM geodataframe
+    """
     # identify non standard geodf rows
     geodf_non_std = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].copy()
 
@@ -168,25 +208,41 @@ def filter_gadm(
 
 
 def get_GADM_layer(
-    country_list,
-    layer_id,
-    geo_crs="EPSG:4326",
-    contended_flag="set_by_country",
-    update=False,
-    outlogging=False,
-):
+    country_list: list[str],
+    layer_id: int,
+    geo_crs: str = "EPSG:4326",
+    contended_flag: str = "set_by_country",
+    update: bool = False,
+    outlogging: bool = False,
+) -> gpd.GeoDataFrame:
     """
     Function to retrieve a specific layer id of a geopackage for a selection of
     countries.
 
     Parameters
     ----------
-    country_list : str
+    country_list : list[str]
         List of the countries
     layer_id : int
         Layer to consider in the format GID_{layer_id}.
         When the requested layer_id is greater than the last available layer, then the last layer is selected.
         When a negative value is requested, then, the last layer is requested
+    geo_crs : str
+        CRS used for geographic projection, passed to GeoPandas (e.g. "EPSG:4326")
+    contended_flag : str
+        Option to treat contended areas, i.e. areas that are not assigned to the country in the GADM layer
+        but are part of the country according to the country code (GID_0) of the geodataframe. The options are:
+        - "drop": drop contended areas from the geodataframe
+        - "set_by_country": set GID_0 of contended areas to the country code of the country (default)
+    update : bool
+        Update = true, forces re-download of files
+    outlogging : bool
+        If True, emits progress information via the module logger.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Geodataframe with the requested GADM layer for the selected countries
     """
     # initialization of the geoDataFrame
     geodf_list = []
@@ -245,8 +301,32 @@ def get_GADM_layer(
     return geodf_GADM
 
 
-def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
-    "Function to simplify the shape polygons"
+def _simplify_polys(
+    polys: gpd.GeoDataFrame,
+    minarea: float = 0.01,
+    tolerance: float = 0.01,
+    filterremote: bool = False,
+) -> gpd.GeoDataFrame:
+    """
+    Function to simplify the shape polygons
+
+    Parameters
+    ----------
+    polys : gpd.GeoDataFrame
+        Geodataframe with the polygons to simplify
+    minarea : float
+        Minimum area of the polygons to keep (default 0.01)
+    tolerance : float
+        Tolerance for the simplification (default 0.01)
+    filterremote : bool
+        If True, filters out polygons that are remote from the main polygon (default False).
+        Remote is defined as having a distance from the main polygon larger than the main polygon length.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Geodataframe with the simplified polygons
+    """
     if isinstance(polys, MultiPolygon):
         polys = sorted(polys.geoms, key=attrgetter("area"), reverse=True)
         mainpoly = polys[0]
@@ -265,15 +345,39 @@ def _simplify_polys(polys, minarea=0.01, tolerance=0.01, filterremote=False):
 
 
 def countries(
-    countries,
-    geo_crs,
-    contended_flag,
-    update=False,
-    out_logging=False,
-    tolerance=0.01,
-    minarea=0.01,
-):
-    "Create country shapes"
+    countries: list[str],
+    geo_crs: str,
+    contended_flag: str,
+    update: bool = False,
+    out_logging: bool = False,
+    tolerance: float = 0.01,
+    minarea: float = 0.01,
+) -> gpd.GeoSeries:
+    """
+    Create country shapes
+
+    Parameters
+    ----------
+    countries : list[str]
+        List of the countries
+    geo_crs : str
+        CRS used for geographic projection, passed to GeoPandas (e.g. "EPSG:4326")
+    contended_flag : str
+        Flag indicating whether to include contended areas
+    update : bool
+        Update = true, forces re-download of files
+    out_logging : bool
+        If True, emits progress information via the module logger.
+    tolerance : float
+        Tolerance for the simplification (default 0.01)
+    minarea : float
+        Minimum area of the polygons to keep (default 0.01)
+
+    Returns
+    -------
+    gpd.GeoSeries
+        Geoseries with the country shapes
+    """
 
     if out_logging:
         logger.info("Stage 1 of 5: Create country shapes")
@@ -304,7 +408,31 @@ def countries(
     return ret_df
 
 
-def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0.02):
+def country_cover(
+    country_shapes: gpd.GeoSeries,
+    eez_shapes: gpd.GeoSeries = None,
+    out_logging: bool = False,
+    distance: float = 0.02,
+) -> gpd.GeoSeries:
+    """
+    Create a continent shape by merging the country shapes and the EEZ shapes (if provided) with a buffer.
+
+    Parameters
+    ----------
+    country_shapes : gpd.GeoSeries
+        Geoseries with the country shapes
+    eez_shapes : gpd.GeoSeries, optional
+        Geoseries with the EEZ shapes
+    out_logging : bool
+        If True, emits progress information via the module logger.
+    distance : float
+        Distance for the buffer (default 0.02)
+
+    Returns
+    -------
+    gpd.GeoSeries
+        Geoseries with the continent shape
+    """
     if out_logging:
         logger.info("Stage 3 of 5: Merge country shapes to create continent shape")
 
@@ -318,12 +446,28 @@ def country_cover(country_shapes, eez_shapes=None, out_logging=False, distance=0
     return africa_shape
 
 
-def load_EEZ(countries_codes, geo_crs, EEZ_gpkg="./data/eez/eez_v11.gpkg"):
+def load_EEZ(
+    countries_codes: list[str], geo_crs: str, EEZ_gpkg: str = "./data/eez/eez_v11.gpkg"
+) -> gpd.GeoDataFrame:
     """
     Function to load the database of the Exclusive Economic Zones.
 
     The dataset shall be downloaded independently by the user (see
     guide) or together with pypsa-earth package.
+
+    Parameters
+    ----------
+    countries_codes : list[str]
+        List of two-letter ISO country codes.
+    geo_crs : str
+        CRS used for geographic projection, passed to GeoPandas (e.g. "EPSG:4326").
+    EEZ_gpkg : str, default "./data/eez/eez_v11.gpkg"
+        Path to the Marine Regions *World EEZ v11* geopackage.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        GeoDataFrame with the EEZ geometries.
     """
     if not os.path.exists(EEZ_gpkg):
         raise Exception(
@@ -374,8 +518,8 @@ def eez(
     countries : list[str]
         Two-letter ISO country codes to process (e.g. ``["DE", "FR"]``).
     geo_crs : str
-        CRS used for geometric operations, passed to GeoPandas (e.g.
-        ``"EPSG:4326"``). Note: buffering distances depend on the CRS units.
+        CRS used for geographic projection, passed to GeoPandas (e.g."EPSG:4326").
+        Note: buffering distances depend on the CRS units.
     country_shapes : geopandas.GeoSeries or geopandas.GeoDataFrame
         Country geometries indexed by the same two-letter ISO codes. Must be in ``geo_crs``.
     EEZ_gpkg : str
@@ -446,13 +590,13 @@ def eez(
 
 
 def download_WorldPop(
-    country_code,
-    worldpop_method,
-    year=2020,
-    update=False,
-    out_logging=False,
-    size_min=300,
-):
+    country_code: str,
+    worldpop_method: str,
+    year: int = 2020,
+    update: bool = False,
+    out_logging: bool = False,
+    size_min: int = 300,
+) -> tuple[str, str]:
     """
     Download Worldpop using either the standard method or the API method.
 
@@ -469,6 +613,13 @@ def download_WorldPop(
         Update = true, forces re-download of files
     size_min : int
         Minimum size of each file to download
+
+    Returns
+    -------
+    WorldPop_inputfile : str
+        Path of the file
+    WorldPop_filename : str
+        Name of the file
     """
     if worldpop_method == "api":
         return download_WorldPop_API(country_code, year, update, out_logging, size_min)
@@ -480,12 +631,12 @@ def download_WorldPop(
 
 
 def download_WorldPop_standard(
-    country_code,
-    year=2020,
-    update=False,
-    out_logging=False,
-    size_min=300,
-):
+    country_code: str,
+    year: int = 2020,
+    update: bool = False,
+    out_logging: bool = False,
+    size_min: int = 300,
+) -> tuple[str, str]:
     """
     Download tiff file for each country code using the standard method from
     worldpop datastore with 1kmx1km resolution.
@@ -501,6 +652,7 @@ def download_WorldPop_standard(
         Update = true, forces re-download of files
     size_min : int
         Minimum size of each file to download
+
     Returns
     -------
     WorldPop_inputfile : str
@@ -550,8 +702,12 @@ def download_WorldPop_standard(
 
 
 def download_WorldPop_API(
-    country_code, year=2020, update=False, out_logging=False, size_min=300
-):
+    country_code: str,
+    year: int = 2020,
+    update: bool = False,
+    out_logging: bool = False,
+    size_min: int = 300,
+) -> tuple[str, str]:
     """
     Download tiff file for each country code using the api method from worldpop
     API with 100mx100m resolution.
@@ -567,6 +723,7 @@ def download_WorldPop_API(
         Update = true, forces re-download of files
     size_min : int
         Minimum size of each file to download
+
     Returns
     -------
     WorldPop_inputfile : str
@@ -602,10 +759,28 @@ def download_WorldPop_API(
     return WorldPop_inputfile, WorldPop_filename
 
 
-def convert_GDP(name_file_nc, year=2015, out_logging=False):
+def convert_GDP(
+    name_file_nc: str, year: int = 2015, out_logging: bool = False
+) -> tuple[str, str]:
     """
     Function to convert the nc database of the GDP to tif, based on the work at https://doi.org/10.1038/sdata.2018.4.
     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
+
+    Parameters
+    ----------
+    name_file_nc : str
+        Name of the nc file containing the GDP data (e.g. "GDP_PPP_1990_2015_5arcmin_v2.nc")
+    year : int
+        Year of the data to convert
+    out_logging : bool
+        If True, emits progress information via the module logger.
+
+    Returns
+    -------
+    GDP_tif : str
+        Path of the converted tif file
+    name_file_tif : str
+        Name of the converted tif file
     """
 
     if out_logging:
@@ -646,14 +821,32 @@ def convert_GDP(name_file_nc, year=2015, out_logging=False):
 
 
 def load_GDP(
-    year=2015,
-    update=False,
-    out_logging=False,
-    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-):
+    year: int = 2015,
+    update: bool = False,
+    out_logging: bool = False,
+    name_file_nc: str = "GDP_PPP_1990_2015_5arcmin_v2.nc",
+) -> tuple[str, str]:
     """
     Function to load the database of the GDP, based on the work at https://doi.org/10.1038/sdata.2018.4.
     The dataset shall be downloaded independently by the user (see guide) or together with pypsa-earth package.
+
+    Parameters
+    ----------
+    year : int
+        Year of the data to load
+    update : bool
+        Update = true, forces re-download of files
+    out_logging : bool
+        If True, emits progress information via the module logger.
+    name_file_nc : str
+        Name of the nc file containing the GDP data (e.g. "GDP_PPP_1990_2015_5arcmin_v2.nc")
+
+    Returns
+    -------
+    GDP_tif : str
+        Path of the converted tif file
+    name_file_tif : str
+        Name of the converted tif file
     """
 
     if out_logging:
@@ -673,8 +866,26 @@ def load_GDP(
     return GDP_tif, name_file_tif
 
 
-def generalized_mask(src, geom, **kwargs):
-    "Generalize mask function to account for Polygon and MultiPolygon"
+def generalized_mask(
+    src: rasterio.io.DatasetReader, geom: shapely.geometry.base.BaseGeometry, **kwargs
+) -> rasterio.io.DatasetReader:
+    """
+    Generalize mask function to account for Polygon and MultiPolygon
+
+    Parameters
+    ----------
+    src : rasterio.io.DatasetReader
+        Rasterio dataset reader object
+    geom : shapely.geometry.base.BaseGeometry
+        Geometry to mask the raster with. Can be a Polygon or a MultiPolygon.
+    **kwargs : dict
+        Additional keyword arguments to pass to rasterio.mask.mask function.
+
+    Returns
+    -------
+    rasterio.io.DatasetReader
+        Masked rasterio dataset reader object
+    """
     if geom.geom_type == "Polygon":
         return mask(src, [geom], **kwargs)
     elif geom.geom_type == "MultiPolygon":
@@ -683,15 +894,29 @@ def generalized_mask(src, geom, **kwargs):
         return mask(src, geom, **kwargs)
 
 
-def _sum_raster_over_mask(shape, img):
+def _sum_raster_over_mask(
+    shape: shapely.geometry.base.BaseGeometry, img: rasterio.io.DatasetReader
+) -> float:
     """
     Function to sum the raster value within a shape.
+
+    The raster is masked using the provided geometry, and all pixels touched
+    by the geometry boundary are included (`all_touched=True`). This approach
+    slightly overestimates the result, as boundary pixels are fully counted,
+    but it significantly reduces computational cost.
+
+    Parameters
+    ----------
+    shape : shapely.geometry.base.BaseGeometry
+        Geometry to mask the raster with. Can be a Polygon or a MultiPolygon.
+    img : rasterio.io.DatasetReader
+        Rasterio dataset reader object
+
+    Returns
+    -------
+    float
+        Sum of the raster values within the shape
     """
-    # select the desired area of the raster corresponding to each polygon
-    # Approximation: the population is measured including the pixels
-    #   where the border of the shape lays. This leads to slightly overestimate
-    #   the output, but the error is limited and it enables halving the
-    #   computational time
     out_image, out_transform = generalized_mask(
         img, shape, all_touched=True, invert=False, nodata=0.0
     )
@@ -704,25 +929,25 @@ def _sum_raster_over_mask(shape, img):
 
 
 def add_gdp_data(
-    df_gadm,
-    year=2020,
-    update=False,
-    out_logging=False,
-    name_file_nc="GDP_PPP_1990_2015_5arcmin_v2.nc",
-    nprocesses=2,
-    disable_progressbar=False,
-):
+    df_gadm: gpd.GeoDataFrame,
+    year: int = 2020,
+    update: bool = False,
+    out_logging: bool = False,
+    name_file_nc: str = "GDP_PPP_1990_2015_5arcmin_v2.nc",
+    nprocesses: int = 2,
+    disable_progressbar: bool = False,
+) -> gpd.GeoDataFrame:
     """
     Function to add gdp data to arbitrary number of shapes in a country.
 
-    Inputs:
-    -------
+    Parameters
+    ----------
     df_gadm: Geodataframe with one Multipolygon per row
         - Essential column ["country", "geometry"]
         - Non-essential column ["GADM_ID"]
 
-    Outputs:
-    --------
+    Returns
+    -------
     df_gadm: Geodataframe with one Multipolygon per row
         - Same columns as input
         - Includes a new column ["gdp"]
@@ -748,7 +973,25 @@ def add_gdp_data(
     return df_gadm
 
 
-def _init_process_pop(df_gadm_, df_tasks_, dict_worldpop_file_locations_):
+def _init_process_pop(
+    df_gadm_: gpd.GeoDataFrame,
+    df_tasks_: pd.DataFrame,
+    dict_worldpop_file_locations_: dict,
+) -> None:
+    """
+    Initialize the global variables for the population processing function.
+    This function is called by the multiprocessing Pool to set up the global variables
+    for the population processing function.
+
+    Parameters
+    ----------
+    df_gadm_: gpd.GeoDataFrame
+        GeoDataFrame containing the administrative boundaries
+    df_tasks_: pd.DataFrame
+        DataFrame containing the tasks for population processing
+    dict_worldpop_file_locations_: dict
+        Dictionary mapping country codes to worldpop file locations
+    """
     global df_gadm, df_tasks
     df_gadm, df_tasks = df_gadm_, df_tasks_
 
@@ -756,19 +999,21 @@ def _init_process_pop(df_gadm_, df_tasks_, dict_worldpop_file_locations_):
     dict_worldpop_file_locations = dict_worldpop_file_locations_
 
 
-def process_function_population(row_id):
+def process_function_population(row_id: int) -> pd.DataFrame:
     """
     Function that reads the task from df_tasks and executes all the methods.
 
     to obtain population values for the specified region
 
-    Inputs:
-    -------
-        row_id: integer which indicates a specific row of df_tasks
+    Parameters
+    ----------
+    row_id: int
+        integer which indicates a specific row of df_tasks
 
-    Outputs:
-    --------
-        windowed_pop_count: Dataframe containing "GADM_ID" and "pop" columns
+    Returns
+    -------
+    windowed_pop_count: pd.DataFrame
+        Dataframe containing "GADM_ID" and "pop" columns
         It represents the amount of population per region (GADM_ID),
         for the settings given by the row in df_tasks
     """
@@ -808,19 +1053,25 @@ def process_function_population(row_id):
     return windowed_pop_count
 
 
-def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
+def get_worldpop_val_xy(
+    WorldPop_inputfile: str, window_dimensions: tuple
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Function to extract data from .tif input file.
 
-    Inputs:
-    -------
-        WorldPop_inputfile: file location of worldpop file
-        window_dimensions: dimensions of window used when reading file
+    Parameters
+    ----------
+    WorldPop_inputfile: str
+        file location of worldpop file
+    window_dimensions: tuple
+        dimensions of window used when reading file
 
-    Outputs:
-    --------
-        np_pop_valid: array filled with values for each nonzero pixel in the worldpop file
-        np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
+    Returns
+    -------
+    np_pop_valid: np.ndarray
+        array filled with values for each nonzero pixel in the worldpop file
+    np_pop_xy: np.ndarray
+        array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
     """
     col_offset, row_offset, width, height = window_dimensions
 
@@ -853,25 +1104,35 @@ def get_worldpop_val_xy(WorldPop_inputfile, window_dimensions):
 
 
 def compute_geomask_region(
-    country_rows, affine_transform, window_dimensions, latlong_topleft, latlong_botright
-):
+    country_rows: gpd.GeoDataFrame,
+    affine_transform: rasterio.transform.Affine,
+    window_dimensions: tuple,
+    latlong_topleft: list,
+    latlong_botright: list,
+) -> tuple[np.ndarray, pd.DataFrame]:
     """
     Function to mask geometries into np_map_ID using an incrementing counter.
 
-    Inputs:
-    -------
-        country_rows: geoDataFrame filled with geometries and their GADM_ID
-        affine_transform: affine transform of current window
-        window_dimensions: dimensions of window used when reading file
-        latlong_topleft: [latitude, longitude] of top left corner of the window
-        latlong_botright: [latitude, longitude] of bottom right corner of the window
+    Parameters
+    ----------
+    country_rows: gpd.GeoDataFrame
+        geoDataFrame filled with geometries and their GADM_ID
+    affine_transform: rasterio.transform.Affine
+        affine transform of current window
+    window_dimensions: tuple
+        dimensions of window used when reading file
+    latlong_topleft: list
+        [latitude, longitude] of top left corner of the window
+    latlong_botright: list
+        [latitude, longitude] of bottom right corner of the window
 
-    Outputs:
-    --------
-        np_map_ID.astype("H"): np_map_ID contains an ID for each location (undefined is 0)
-            dimensions are taken from window_dimensions, .astype("H") for memory savings
-        id_result:
-            DataFrame of the mapping from id (from counter) to GADM_ID
+    Returns
+    -------
+    np_map_ID.astype("H"): np.ndarray
+        np_map_ID contains an ID for each location (undefined is 0)
+        dimensions are taken from window_dimensions, .astype("H") for memory savings
+    id_result: pd.DataFrame
+        DataFrame of the mapping from id (from counter) to GADM_ID
     """
     col_offset, row_offset, x_axis_len, y_axis_len = window_dimensions
 
@@ -926,23 +1187,33 @@ def compute_geomask_region(
     return np_map_ID.astype("H"), id_result
 
 
-def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
+def sum_values_using_geomask(
+    np_pop_val: np.ndarray,
+    np_pop_xy: np.ndarray,
+    region_geomask: np.ndarray,
+    id_mapping: pd.DataFrame,
+) -> pd.DataFrame:
     """
     Function that sums all the population values in np_pop_val into the correct
     GADM_ID It uses np_pop_xy to access the key stored in region_geomask[x][y]
 
     The relation of this key to GADM_ID is stored in id_mapping
 
-    Inputs:
-    -------
-        np_pop_val: array filled with values for each nonzero pixel in the worldpop file
-        np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
-        region_geomask: array with dimensions of window, values are keys that map to GADM_ID using id_mapping
-        id_mapping: Dataframe that contains mappings of region_geomask values to GADM_IDs
+    Parameters
+    ----------
+    np_pop_val: np.ndarray
+        array filled with values for each nonzero pixel in the worldpop file
+    np_pop_xy: np.ndarray
+        array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
+    region_geomask: np.ndarray
+        array with dimensions of window, values are keys that map to GADM_ID using id_mapping
+    id_mapping: pd.DataFrame
+        Dataframe that contains mappings of region_geomask values to GADM_IDs
 
-    Outputs:
-    --------
-        df_pop_count: Dataframe with columns
+    Returns
+    -------
+    df_pop_count: pd.DataFrame
+        Dataframe with columns
             - "GADM_ID"
             - "pop" containing population of GADM_ID region
     """
@@ -975,25 +1246,35 @@ def sum_values_using_geomask(np_pop_val, np_pop_xy, region_geomask, id_mapping):
 
 @njit
 def loop_and_extact_val_x_y(
-    np_pop_count, np_pop_val, np_pop_xy, region_geomask, dict_id
-):
+    np_pop_count: np.ndarray,
+    np_pop_val: np.ndarray,
+    np_pop_xy: np.ndarray,
+    region_geomask: np.ndarray,
+    dict_id: dict,
+) -> np.ndarray:
     """
     Function that will be compiled using @njit (numba) It takes all the
     population values from np_pop_val and stores them in np_pop_count.
 
     where each location in np_pop_count is mapped to a GADM_ID through dict_id (id_mapping by extension)
 
-    Inputs:
-    -------
-        np_pop_count: np.zeros array, which will store population counts
-        np_pop_val: array filled with values for each nonzero pixel in the worldpop file
-        np_pop_xy: array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
-        region_geomask: array with dimensions of window, values are keys that map to GADM_ID using id_mapping
-        dict_id: numba typed.dict containing id_mapping.index -> location in np_pop_count
+    Parameters
+    ----------
+    np_pop_count: np.ndarray
+        np.zeros array, which will store population counts
+    np_pop_val: np.ndarray
+        array filled with values for each nonzero pixel in the worldpop file
+    np_pop_xy: np.ndarray
+        array with [x,y] coordinates of the corresponding nonzero values in np_pop_valid
+    region_geomask: np.ndarray
+        array with dimensions of window, values are keys that map to GADM_ID using id_mapping
+    dict_id: dict
+        numba typed.dict containing id_mapping.index -> location in np_pop_count
 
-    Outputs:
-    --------
-        np_pop_count: np.array containing population counts
+    Returns
+    -------
+    np_pop_count: np.ndarray
+        np.array containing population counts
     """
     # Loop the population data
     for i in range(len(np_pop_val)):
@@ -1010,21 +1291,27 @@ def loop_and_extact_val_x_y(
 
 
 def calculate_transform_and_coords_for_window(
-    current_transform, window_dimensions, original_window=False
-):
+    current_transform: rasterio.transform.Affine,
+    window_dimensions: tuple,
+    original_window=False,
+) -> list:
     """
     Function which calculates the [lat,long] corners of the window given
     window_dimensions, if not(original_window) it also changes the affine
     transform to match the window.
 
-    Inputs:
-    -------
-        - current_transform: affine transform of source image
-        - window_dimensions: dimensions of window used when reading file
-        - original_window: boolean to track if window covers entire country
+    Parameters
+    ----------
+    current_transform: rasterio.transform.Affine
+        affine transform of source image
+    window_dimensions: tuple
+        dimensions of window used when reading file
+    original_window: bool
+        boolean to track if window covers entire country
 
-    Outputs:
-    --------
+    Returns
+    -------
+    list
         A list of: [
             adjusted_transform: affine transform adjusted to window
             coordinate_topleft: [latitude, longitude] of top left corner of the window
@@ -1065,20 +1352,26 @@ def calculate_transform_and_coords_for_window(
     return [adjusted_transform, coordinate_topleft, coordinate_botright]
 
 
-def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
+def generate_df_tasks(
+    c_code: str, mem_read_limit_per_process: int, WorldPop_inputfile: str
+) -> pd.DataFrame:
     """
     Function to generate a list of tasks based on the memory constraints.
 
     One task represents a single window of the image
 
-    Inputs:
-    -------
-        c_code: country code
-        mem_read_limit_per_process: memory limit for src.read() operation
-        WorldPop_inputfile: file location of worldpop file
+    Parameters
+    ----------
+    c_code: str
+        country code
+    mem_read_limit_per_process: int
+        memory limit for src.read() operation
+    WorldPop_inputfile: str
+        file location of worldpop file
 
-    Outputs:
-    --------
+    Returns
+    -------
+    pd.DataFrame
         Dataframe of task_list
     """
     task_list = []
@@ -1151,16 +1444,16 @@ def generate_df_tasks(c_code, mem_read_limit_per_process, WorldPop_inputfile):
 
 
 def add_population_data(
-    df_gadm,
-    country_codes,
-    worldpop_method,
-    year=2020,
-    update=False,
-    out_logging=False,
-    mem_read_limit_per_process=1024,
-    nprocesses=2,
-    disable_progressbar=False,
-):
+    df_gadm: gpd.GeoDataFrame,
+    country_codes: list,
+    worldpop_method: str,
+    year: int = 2020,
+    update: bool = False,
+    out_logging: bool = False,
+    mem_read_limit_per_process: int = 1024,
+    nprocesses: int = 2,
+    disable_progressbar: bool = False,
+) -> gpd.GeoDataFrame:
     """
     Function to add population data to arbitrary number of shapes in a country.
     It loads data from WorldPop raster files where each pixel represents the
@@ -1179,15 +1472,33 @@ def add_population_data(
     3. Execute all tasks by summing the values of the pixels mapped into each GADM shape.
        Parallelization applies in this task.
 
-    Inputs:
-    -------
-    df_gadm: Geodataframe with one Multipolygon per row
+    Parameters
+    ----------
+    df_gadm: gpd.GeoDataFrame
+        Geodataframe with one Multipolygon per row
         - Essential column ["country", "geometry"]
         - Non-essential column ["GADM_ID"]
+    country_codes: list
+        List of country codes to download and process
+    worldpop_method: str
+        Method to download worldpop data, either "api" or "ftp"
+    year: int
+        Year of the data to download
+    update: bool
+        Update = true, forces re-download of files
+    out_logging: bool
+        If True, emits progress information via the module logger.
+    mem_read_limit_per_process: int
+        Memory limit for src.read() operation in MB, used to determine window size
+    nprocesses: int
+        Number of processes to use for parallelization, default is 2
+    disable_progressbar: bool
+        If True, disables the progress bar, default is False
 
-    Outputs:
-    --------
-    df_gadm: Geodataframe with one Multipolygon per row
+    Returns
+    -------
+    df_gadm: gpd.GeoDataFrame
+        Geodataframe with one Multipolygon per row
         - Same columns as input
         - Includes a new column ["pop"]
     """
@@ -1276,21 +1587,64 @@ def add_population_data(
 
 
 def gadm(
-    worldpop_method,
-    gdp_method,
-    countries,
-    geo_crs,
-    contended_flag,
-    mem_mb,
-    layer_id=2,
-    update=False,
-    out_logging=False,
-    year=2020,
-    nprocesses=None,
-    simplify_gadm=True,
-    tolerance=0.01,
-    minarea=0.01,
-):
+    worldpop_method: str,
+    gdp_method: str,
+    countries: list,
+    geo_crs: str,
+    contended_flag: bool,
+    mem_mb: int,
+    layer_id: int = 2,
+    update: bool = False,
+    out_logging: bool = False,
+    year: int = 2020,
+    nprocesses: int = None,
+    simplify_gadm: bool = True,
+    tolerance: float = 0.01,
+    minarea: float = 0.01,
+) -> gpd.GeoDataFrame:
+    """
+    Function to create a GeoDataFrame with GADM shapes and population and gdp data.
+
+    Parameters
+    ----------
+    worldpop_method: str
+        Method to download worldpop data, either "api" or "ftp"
+    gdp_method: str
+        Method to download gdp data, either "api" or "ftp"
+    countries: list
+        List of country codes to download and process
+    geo_crs: str
+        CRS used for geographic projection, passed to GeoPandas
+    contended_flag: bool
+        If True, includes contended territories in the GADM layer, which may have overlapping geometries.
+        If False, contended territories are excluded.
+    mem_mb: int
+        Memory limit in megabytes for processing WorldPop data, used to determine window size for population data processing
+    layer_id: int
+        GADM layer ID to download, default is 2 (admin level 2)
+    update: bool
+        Update = true, forces re-download of files
+    out_logging: bool
+        If True, emits progress information via the module logger.
+    year: int
+        Year of the data to download
+    nprocesses: int
+        Number of processes to use for parallelization, default is None (uses os.cpu_count())
+    simplify_gadm: bool
+        If True, simplifies the geometries in the GADM GeoDataFrame to reduce file size and speed up processing, default is True
+    tolerance: float
+        Tolerance parameter for geometry simplification, default is 0.01 (units depend on the CRS of the geometries)
+    minarea: float
+        Minimum area threshold for geometry simplification, geometries smaller than this area will be removed after simplification,
+        default is 0.01 (units depend on the CRS of the geometries)
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        GeoDataFrame with one Multipolygon per row, indexed by "GADM_ID"
+        - Essential columns: ["country", "geometry"]
+        - Optional columns: ["gdp", "pop"] (if gdp_method and worldpop_method are not False, respectively)
+    """
     if out_logging:
         logger.info("Stage 3 of 5: Creation GADM GeoDataFrame")
 
@@ -1352,7 +1706,9 @@ def gadm(
     return df_gadm
 
 
-def crop_country(gadm_shapes, subregion_config):
+def crop_country(
+    gadm_shapes: gpd.GeoDataFrame, subregion_config: dict[str, list[str]]
+) -> gpd.GeoDataFrame:
     """
     Merge GADM administrative units into custom subregions and aggregate remaining units at the country level,
     returning combined geometries.
@@ -1424,10 +1780,10 @@ def crop_country(gadm_shapes, subregion_config):
 
 
 def generate_points_every_km(
-    gdf,
-    distance_crs="EPSG:3857",
-    interval_km=100,
-):
+    gdf: gpd.GeoDataFrame,
+    distance_crs: str = "EPSG:3857",
+    interval_km: float = 100,
+) -> gpd.GeoDataFrame:
     """
     Generate perimeter points for each Polygon/MultiPolygon in a GeoDataFrame
 
@@ -1528,9 +1884,27 @@ def generate_points_every_km(
     return points_gdf
 
 
-def determine_subregion_country(subregion_shapes, country_shapes, distance_crs):
+def determine_subregion_country(
+    subregion_shapes: gpd.GeoDataFrame,
+    country_shapes: gpd.GeoDataFrame,
+    distance_crs: str,
+) -> dict[str, str]:
     """
     Assign each subregion to the country with which it has the largest spatial overlap.
+
+    Parameters
+    ----------
+    subregion_shapes : GeoDataFrame
+        GeoDataFrame indexed by subregion name containing onshore geometries with a defined CRS.
+    country_shapes : GeoDataFrame
+        GeoDataFrame of country geometries used to determine which country each subregion belongs to, with a defined CRS.
+    distance_crs : str
+        Projected CRS used for accurate area calculations, passed to GeoPandas for area computation.
+
+    Returns
+    -------
+    dict[str, str]
+        Mapping of subregion name to country name, where each subregion is assigned to the country with which it has the largest spatial overlap.
     """
     intersections = gpd.overlay(
         subregion_shapes.reset_index(),
@@ -1547,11 +1921,11 @@ def determine_subregion_country(subregion_shapes, country_shapes, distance_crs):
 
 
 def crop_offshore(
-    subregion_shapes,
-    country_shapes,
-    offshore_shapes,
-    distance_crs="EPSG:3857",
-):
+    subregion_shapes: gpd.GeoDataFrame,
+    country_shapes: gpd.GeoDataFrame,
+    offshore_shapes: gpd.GeoDataFrame,
+    distance_crs: str = "EPSG:3857",
+) -> gpd.GeoDataFrame:
     """
     Split offshore (EEZ) geometries among subregions of the same country,
     assigning each subregion a portion of the country's offshore area.

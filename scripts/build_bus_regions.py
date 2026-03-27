@@ -45,31 +45,42 @@ Description
 import os
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging, create_logger, nearest_shape
+from scipy.spatial import Voronoi
+from shapely.geometry import Polygon
 
 logger = create_logger(__name__)
 
 
-def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
+def custom_voronoi_partition_pts(
+    points: np.ndarray,
+    outline: Polygon,
+    add_bounds_shape: bool = True,
+    multiplier: int = 5,
+) -> np.ndarray:
     """
     Compute the polygons of a voronoi partition of `points` within the polygon
     `outline`
 
-    Attributes
+    Parameters
     ----------
-    points : Nx2 - ndarray[dtype=float]
+    points :
+        Nx2 - ndarray[dtype=float]
     outline : Polygon
+        Shapely Polygon defining the outline within which to compute the Voronoi partition.
+    add_bounds_shape : bool, optional
+        Whether to add bounding points to ensure all Voronoi cells are bounded, by default True
+    multiplier : int, optional
+        Multiplier for the bounding box size when adding bounding points, by default 5
 
     Returns
     -------
-    polygons : N - ndarray[dtype=Polygon|MultiPolygon]
+    polygons_arr : ndarray[dtype=Polygon|MultiPolygon]
+        Array of Voronoi polygons corresponding to each point in `points`, clipped to the `outline` polygon.
     """
-
-    import numpy as np
-    from scipy.spatial import Voronoi
-    from shapely.geometry import Polygon
 
     points = np.asarray(points)
 
@@ -126,8 +137,32 @@ def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multipl
 
 
 def get_gadm_shape(
-    onshore_buses, gadm_shapes, geo_crs="EPSG:4326", metric_crs="EPSG:3857"
-):
+    onshore_buses: pd.DataFrame,
+    gadm_shapes: gpd.GeoDataFrame,
+    geo_crs: str = "EPSG:4326",
+    metric_crs: str = "EPSG:3857",
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Get the GADM shape for each bus by finding the nearest GADM shape to each bus.
+
+    Parameters
+    ----------
+    onshore_buses: pd.DataFrame
+        DataFrame containing the onshore buses with columns ["x", "y"]
+    gadm_shapes: gpd.GeoDataFrame
+        GeoDataFrame containing the GADM shapes with a geometry column
+    geo_crs : str
+        CRS used for geographic projection, passed to GeoPandas (e.g. "EPSG:4326")
+    metric_crs : str
+        CRS used for distance projection, passed to GeoPandas (e.g. "EPSG:3857")
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        A tuple containing two arrays:
+        - An array of geometries corresponding to the GADM shapes for each bus.
+        - An array of indices corresponding to the GADM shape IDs for each bus.
+    """
     geo_regions = gpd.GeoDataFrame(
         onshore_buses[["x", "y"]],
         geometry=gpd.points_from_xy(onshore_buses["x"], onshore_buses["y"]),
