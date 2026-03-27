@@ -71,6 +71,27 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
         )
 
 
+def update_cutout_config(config):
+    """
+    Update renewable cutout settings in the configuration.
+
+    This function replaces any `"auto"` cutout entries in the
+    `config["renewables"]` section with the default cutout specified in
+    `config["atlite"]["default"]`.
+    """
+    cutout_default = config["atlite"]["default"]
+
+    for tech in config["renewable"]:
+        cutout_res = config["renewable"][tech]["cutout"]
+
+        if cutout_res != "auto":
+            continue
+
+        config["renewable"][tech]["cutout"] = cutout_default
+
+    return config
+
+
 def handle_exception(exc_type, exc_value, exc_traceback):
     """
     Customise errors traceback.

@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add the rule `retrieve_cutout` using the same script from `retrieve_databundle_light`. The `bundle_to_download` excludes cutouts while `cutout_to_download` include only cutouts. The retrieved cutouts are then verified to ensure their total bounds match the outputs from `build_shapes`. The config `enable: retrieve_cutout` allows users to switch off this rule after retrieval. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+
 * Use IRENA statistics for 2023 to normalize countries hydropower generation data [PR #1681](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681)
 
 * Drop use of override_components that is no longer needed in newer PyPSA versions [PR #1699](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699)
@@ -19,6 +21,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Ensure connectivity of transformers in buses with several transformers [PR #1706](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1706)
 
 **Minor Changes and bug-fixing**
+
+* Add `auto` as an option in renewable cutout selection, which directs to the cutout defined in `atlite: default`. This is executed using the function `update_cutout_config(config)`. Furthermore, improve `terminate_if_cutout_exist(w)` to be based purely on wildcards of the cutouts name that are to be downloaded. This is applied to both `build_cutout` and `retrieve_cutout`. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+
+* Send information from `retrieve_databundle_light.py` to `databundle_cli.py` using a temporary yaml file to make missing files consistent. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
 * Restructure sector configuration and add sector documentation [PR #1760](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1760)
 
