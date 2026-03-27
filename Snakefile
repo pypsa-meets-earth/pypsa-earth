@@ -276,6 +276,7 @@ rule build_shapes:
         africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
+        subregion_offshore="resources/" + RDIR + "shapes/subregion_offshore.geojson",
     log:
         "logs/" + RDIR + "build_shapes.log",
     benchmark:
@@ -285,6 +286,31 @@ rule build_shapes:
         mem_mb=3096,
     script:
         "scripts/build_shapes.py"
+
+
+def retrieve_subregion(script_name):
+    """
+    Select whether scripts related to subregions should be retrieved.
+    """
+    subregion_config = config.get("subregion", {"method": False, "apply_on": []})
+
+    if script_name not in subregion_config["apply_on"]:
+        return {}
+
+    method = subregion_config["method"]
+
+    if method == "gadm":
+        subregion_shapes = "resources/" + RDIR + "shapes/subregion_shapes.geojson"
+    elif method == "custom":
+        subregion_shapes = subregion_config["path_custom_shapes"]
+    else:
+        return {}
+
+    return {
+        "subregion_shapes": subregion_shapes,
+        "subregion_offshore": "resources/" + RDIR + "shapes/subregion_offshore.geojson",
+        "original_shapes": "resources/" + RDIR + "shapes/country_shapes.geojson",
+    }
 
 
 rule base_network:
@@ -327,6 +353,7 @@ rule build_bus_regions:
         crs=config["crs"],
         countries=config["countries"],
     input:
+        **retrieve_subregion("cluster_network"),
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
         base_network="networks/" + RDIR + "base.nc",
@@ -654,14 +681,12 @@ rule simplify_network:
         config_lines=config["lines"],
         config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
-        subregion=config["subregion"],
     input:
+        **retrieve_subregion("simplify_network"),
         network="networks/" + RDIR + "elec.nc",
         tech_costs=COSTS,
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
-        country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
-        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         regions_onshore="resources/"
@@ -698,8 +723,8 @@ rule cluster_network:
         cluster_options=config["cluster_options"],
         focus_weights=config.get("focus_weights", None),
         custom_busmap=config["enable"].get("custom_busmap", False),
-        subregion=config["subregion"],
     input:
+        **retrieve_subregion("cluster_network"),
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         regions_onshore="resources/"
@@ -720,7 +745,6 @@ rule cluster_network:
             else []
         ),
         tech_costs=COSTS,
-        subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
     output:
         network=branch(
             config["augmented_line_connection"].get("add_to_snakefile", False) == True,

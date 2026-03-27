@@ -26,6 +26,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Send information from `retrieve_databundle_light.py` to `databundle_cli.py` using a temporary yaml file to make missing files consistent. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
+* Streamline subregions implementation, subdivide EEZs for subregions for ``build_bus_regions`` [PR #1730](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1730)
+
 * Restructure sector configuration and add sector documentation [PR #1760](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1760)
 
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying [PR #1662](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662)
