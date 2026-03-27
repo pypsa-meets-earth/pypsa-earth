@@ -22,6 +22,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Streamline subregions implementation, subdivide EEZs for subregions for ``build_bus_regions`` [PR #1730](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1730)
 
+* Restructure sector configuration and add sector documentation [PR #1760](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1760)
+
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying [PR #1662](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662)
 
 * Bump powerplantmatching to 0.8.0 [PR #1702](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702)
