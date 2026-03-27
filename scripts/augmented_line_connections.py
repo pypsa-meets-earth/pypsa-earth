@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     #  add new lines to the network
     if "HVDC" in list(line_type_option):
-        n.madd(
+        n.add(
             "Link",
             new_long_lines.index,
             suffix=" DC",
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         )
 
     if "HVAC" in list(line_type_option):
-        n.madd(
+        n.add(
             "Line",
             new_kedge_lines.index,
             suffix=" AC",
