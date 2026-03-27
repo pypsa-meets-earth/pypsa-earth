@@ -19,15 +19,7 @@ Relevant Settings
         aggregation_strategies:
 
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
+        output_currency:
 
     lines:
         length_factor:

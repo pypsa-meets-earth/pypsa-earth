@@ -21,12 +21,11 @@ Relevant Settings
 
 .. code:: yaml
 
+    links:
+
+    lines:
+
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
         emission_prices:
 
     electricity:

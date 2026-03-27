@@ -11,17 +11,11 @@ Relevant Settings
 -----------------
 .. code:: yaml
 
-    costs:
-        USD2013_to_EUR2013:
-        discountrate:
-        marginal_cost:
-        capital_cost:
-    electricity:
-        max_hours:
+    scenario:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`costs_cf`, :ref:`electricity_cf`
+    :ref:`toplevel_cf`
 
 Inputs
 ------

@@ -14,19 +14,7 @@ Relevant Settings
 .. code:: yaml
 
     costs:
-        year:
-        technology_data_version:
-        discountrate:
         output_currency:
-        country_specific_data:
-        cost_scenario:
-        financial_case:
-        output_currency:
-        default_exchange_rate:
-        future_exchange_rate_strategy:
-        custom_future_exchange_rate:
-        rooftop_share:
-        emission_prices:
 
     electricity:
         max_hours:
