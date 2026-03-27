@@ -353,6 +353,9 @@ if __name__ == "__main__":
         ppl_query
     )  # add carriers from own powerplant files
 
+    # define unique index
+    ppl = ppl.reset_index(drop=True)
+
     cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]
 
     for c in countries_codes:
