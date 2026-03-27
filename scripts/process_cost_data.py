@@ -19,11 +19,23 @@ logger = logging.getLogger(__name__)
 
 
 # PYPSA-EARTH-SEC
-def annuity(n, r):
+def annuity(n: float | pd.Series, r: float | pd.Series) -> float | pd.Series:
     """
     Calculate the annuity factor for an asset with lifetime n years and.
 
     discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
+
+    parameters
+    ----------
+    n : int or pd.Series
+        Lifetime of the asset in years.
+    r : float or pd.Series
+        Discount rate (e.g. 0.05 for 5%).
+
+    Returns
+    -------
+    float or pd.Series
+        Annuity factor, i.e. the ratio of fixed annualized cost to initial investment.
     """
 
     if isinstance(r, pd.Series):
@@ -51,7 +63,7 @@ def get_yearly_currency_exchange_rate(
     _currency_conversion_cache: dict = None,
     future_exchange_rate_strategy: str = "reference",  # "reference", "latest", "custom"
     custom_future_exchange_rate: float = None,
-):
+) -> float:
     """
     Returns the average currency exchange rate for the global reference_year.
 
@@ -71,6 +83,11 @@ def get_yearly_currency_exchange_rate(
         "custom" (use custom_future_exchange_rate).
     custom_future_exchange_rate : float, optional
         Custom exchange rate if strategy is "custom".
+
+    Returns
+    -------
+    float
+        Average exchange rate for the specified year and currency pair.
     """
     if _currency_conversion_cache is None:
         _currency_conversion_cache = {}
@@ -129,15 +146,35 @@ def get_yearly_currency_exchange_rate(
 
 
 def build_currency_conversion_cache(
-    df,
-    output_currency,
-    default_exchange_rate=None,
+    df: pd.DataFrame,
+    output_currency: str,
+    default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "reference",
     custom_future_exchange_rate: float = None,
-):
+) -> dict:
     """
     Builds a cache of exchange rates for all unique (currency, output_currency) pairs,
     always using the module-level reference_year.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing a 'unit' column with currency information (e.g. "EUR/MW").
+    output_currency : str
+        Desired output currency (e.g. "USD").
+    default_exchange_rate : float, optional
+        Fallback value if no rate data is found for a currency pair.
+    future_exchange_rate_strategy : str
+        "reference" (use TECH_DATA_REFERENCE_YEAR),
+        "latest" (use most recent available year),
+        "custom" (use custom_future_exchange_rate).
+    custom_future_exchange_rate : float, optional
+        Custom exchange rate if strategy is "custom".
+
+    Returns
+    -------
+    dict
+        Cache mapping (initial_currency, output_currency, year) to exchange rate.
     """
     currency_list = currency_converter.currencies
     unique_currencies = {
@@ -169,11 +206,27 @@ def build_currency_conversion_cache(
     return _currency_conversion_cache
 
 
-def apply_currency_conversion(cost_dataframe, output_currency, cache):
+def apply_currency_conversion(
+    cost_dataframe: pd.DataFrame, output_currency: str, cache: dict
+) -> pd.DataFrame:
     """
     Applies exchange rates from the cache to convert all cost values and units.
 
     All rows are assumed to be in `*_reference_year` already (e.g. EUR_2020).
+
+    Parameters
+    ----------
+    cost_dataframe : pd.DataFrame
+        DataFrame containing a 'unit' column with currency information (e.g. "EUR/MW") and a 'value' column with cost values.
+    output_currency : str
+        Desired output currency (e.g. "USD").
+    cache : dict
+        Cache mapping (initial_currency, output_currency, year) to exchange rate, as built by `build_currency_conversion_cache`.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with converted 'value' and 'unit' columns.
     """
     currency_list = currency_converter.currencies
 
@@ -203,9 +256,27 @@ def apply_currency_conversion(cost_dataframe, output_currency, cache):
     return cost_dataframe
 
 
-def load_costs(tech_costs, config, max_hours, Nyears=1):
+def load_costs(
+    tech_costs: str, config: dict, max_hours: int, Nyears: float | int = 1
+) -> pd.DataFrame:
     """
-    Set all asset costs and other parameters.
+    Set all asset costs and other parameters. Used only in the electricity sector workflow.
+
+    Parameters
+    ----------
+    tech_costs : str
+        Path to the CSV file containing technology cost data.
+    config : dict
+        Configuration dictionary containing cost scenario, financial case, output currency, fill values, and any overwrites for specific attributes.
+    max_hours : dict
+        Dictionary specifying the maximum hours of storage for storage technologies (e.g. {"battery": 4, "H2": 168}).
+    Nyears : float or int, optional
+        Share of years represented by the model time steps (default is 1, representing one full year).
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame indexed by technology with columns for capital_cost, marginal_cost, co2_emissions, and any other relevant parameters.
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
@@ -328,12 +399,41 @@ def prepare_costs(
     default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "latest",
     custom_future_exchange_rate: float = None,
-):
+) -> pd.DataFrame:
     """
     Loads and processes cost data, converting units and currency to a common format.
 
     Applies currency conversion, fills missing values, and computes fixed annualized costs.
     Always uses the module-level reference_year.
+
+    Used only in the sector-coupling workflow.
+
+    Parameters
+    ----------
+    cost_file : str
+        Path to the CSV file containing cost data with columns for 'technology', 'parameter', 'value', 'unit', and optionally 'scenario' and 'financial_case'.
+    config : dict
+        Configuration dictionary containing cost scenario, financial case, and any overwrites for specific attributes.
+    output_currency : str
+        Desired output currency for all cost values (e.g. "USD").
+    fill_values : dict
+        Dictionary specifying fill values for missing cost parameters (e.g. {"FOM": 0, "VOM": 0}).
+    Nyears : int or float, optional
+        Share of years represented by the model time steps (default is 1, representing one full year).
+    default_exchange_rate : float, optional
+        Fallback exchange rate if no data is available for a currency pair.
+    future_exchange_rate_strategy : str
+        Strategy for handling exchange rates when the reference year is in the future relative to available data:
+        "reference" (use TECH_DATA_REFERENCE_YEAR),
+        "latest" (use most recent available year),
+        "custom" (use custom_future_exchange_rate).
+    custom_future_exchange_rate : float, optional
+        Custom exchange rate to use if future_exchange_rate_strategy is "custom".
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame indexed by technology with columns for fixed (annualized capital cost), marginal_cost, co2_emissions, and any other relevant parameters.
     """
     costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
 

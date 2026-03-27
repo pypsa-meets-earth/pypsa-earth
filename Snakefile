@@ -588,7 +588,7 @@ rule build_powerplants:
 rule add_electricity:
     params:
         countries=config["countries"],
-        costs=config["costs"],
+        output_currency=config["costs"]["output_currency"],
         conventional=config.get("conventional", {}),
         electricity=config["electricity"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
@@ -825,7 +825,7 @@ rule prepare_network:
         lines=config["lines"],
         s_max_pu=config["lines"]["s_max_pu"],
         electricity=config["electricity"],
-        costs=config["costs"],
+        emission_prices=config["costs"]["emission_prices"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
@@ -1155,7 +1155,6 @@ HEAT = {
 
 rule prepare_sector_network:
     params:
-        costs=config["costs"],
         electricity=config["electricity"],
         fossil_reserves=config["fossil_reserves"],
         h2_underground=config["custom_data"]["h2_underground"],
@@ -1825,7 +1824,6 @@ rule plot_summary:
 rule plot_network:
     params:
         electricity=config["electricity"],
-        costs=config["costs"],
         plotting=config["plotting"],
     input:
         network="results/"
