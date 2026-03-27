@@ -46,6 +46,7 @@ nav:
   - Wildcards: user-guide/wildcards.md
   - Costs: user-guide/costs.md
   - Rules Overview: user-guide/rules-overview.md
+  - Plotting & Visualization: user-guide/plotting.md
   - Rules Reference:
     - Download & Filter:
       - Overview: user-guide/rules-reference/download-and-filter/index.md
