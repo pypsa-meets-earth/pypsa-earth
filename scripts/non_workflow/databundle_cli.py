@@ -2,6 +2,12 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+This script provides a command-line interface (CLI) for checking the status of files in a databundle and retrieving missing files.
+It uses the `rich` library to display markdown and tables in the console, making it easier for users to understand which files are missing and how to retrieve them.
+The script checks the configuration of the databundles, identifies missing files, and offers options for retrieving them either automatically or manually.
+It also allows users to update the checklist after retrieving files to ensure that all necessary data is available for their snakemake workflow.
+"""
 import os
 import sys
 import textwrap
@@ -19,7 +25,22 @@ from rich.markdown import Markdown
 from rich.table import Table
 
 
-def console_markdown(markdown, lvl=1):
+def console_markdown(markdown: str, lvl: int = 1) -> None:
+    """
+    Print markdown text to the console with optional indentation.
+
+    Parameters
+    ----------
+    markdown : str
+        The markdown text to be printed.
+    lvl : int
+        The level of indentation (number of times to dedent the markdown text). Default is 1.
+
+    Returns
+    -------
+    None
+        The function prints the markdown text to the console and does not return anything.
+    """
 
     console = Console()
     for i in range(lvl):
@@ -29,7 +50,22 @@ def console_markdown(markdown, lvl=1):
     return console.print(md)
 
 
-def console_table(dataframe, table_kw={}):
+def console_table(dataframe: pd.DataFrame, table_kw: dict = {}) -> None:
+    """
+    Print a DataFrame as a rich table in the console.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The DataFrame to be printed as a table.
+    table_kw : dict
+        Keyword arguments for customizing the table appearance.
+
+    Returns
+    -------
+    None
+         The function prints the table to the console and does not return anything.
+    """
     df = dataframe.reset_index()
 
     # Initialize the console
@@ -54,7 +90,22 @@ def console_table(dataframe, table_kw={}):
     return console.print(table)
 
 
-def databundle_check(bundles_to_download, config):
+def databundle_check(bundles_to_download: list, config_databundles: dict) -> list:
+    """
+    Check the status of the files in the databundle and print a checklist to the console.
+
+    Parameters
+    ----------
+    bundles_to_download : list
+        A list of databundle names to check.
+    config_databundles : dict
+        A dictionary containing the configuration for each databundle.
+
+    Returns
+    -------
+    list
+        A list of missing databundle names.
+    """
 
     df_file = pd.DataFrame()
 

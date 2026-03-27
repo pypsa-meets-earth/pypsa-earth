@@ -97,13 +97,27 @@ from _helpers import (
     create_logger,
     progress_retrieve,
 )
+from snakemake.script import Snakemake
 from tqdm import tqdm
 
 logger = create_logger(__name__)
 
 
-def load_databundle_config(config):
-    "Load databundle configurations from path file or dictionary"
+def load_databundle_config(config: dict | str) -> dict:
+    """
+    Load databundle configurations from path file or dictionary
+
+    Parameters
+    ----------
+    config : dict or str
+        Configuration data for the databundles,
+        either as a dictionary or as a path to a yaml file containing the configuration.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the configuration for each databundle.
+    """
 
     if type(config) is str:
         with open(config) as file:
@@ -120,26 +134,28 @@ def load_databundle_config(config):
     return config
 
 
-def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_zenodo(
+    config: dict, rootpath: str, hot_run: bool = True, disable_progress: bool = False
+) -> bool:
     """
     download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download and unzip the data from zenodo
 
-    Inputs
-    ------
-    config : Dict
+    Parameters
+    ----------
+    config : dict
         Configuration data for the category to download
     rootpath : str
         Absolute path of the repository
-    hot_run : Bool (default True)
+    hot_run : bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
-    disable_progress : Bool (default False)
+    disable_progress : bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -165,15 +181,17 @@ def download_and_unzip_zenodo(config, rootpath, hot_run=True, disable_progress=F
     return True
 
 
-def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_gdrive(
+    config: dict, rootpath: str, hot_run=True, disable_progress=False
+) -> bool:
     """
     download_and_unzip_gdrive(config, rootpath, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download and unzip the data from google drive
 
-    Inputs
-    ------
+    Parameters
+    ----------
     config : Dict
         Configuration data for the category to download
     rootpath : str
@@ -184,7 +202,7 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
     disable_progress : Bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -239,16 +257,16 @@ def download_and_unzip_gdrive(config, rootpath, hot_run=True, disable_progress=F
 
 
 def download_and_unzip_protectedplanet(
-    config, rootpath, attempts=3, hot_run=True, disable_progress=False
-):
+    config: dict, rootpath: str, attempts=3, hot_run=True, disable_progress=False
+) -> bool:
     """
     download_and_unzip_protectedplanet(config, rootpath, dest_path,
     hot_run=True, disable_progress=False)
 
     Function to download and unzip the data by category from protectedplanet
 
-    Inputs
-    ------
+    Parameters
+    ----------
     config : Dict
         Configuration data for the category to download
     rootpath : str
@@ -262,7 +280,7 @@ def download_and_unzip_protectedplanet(
     disable_progress : Bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -364,30 +382,30 @@ def download_and_unzip_protectedplanet(
 
 
 def download_and_unpack(
-    url,
-    file_path,
-    resource,
-    destination,
-    headers=None,
-    hot_run=True,
-    unzip=True,
-    disable_progress=False,
-):
+    url: str,
+    file_path: str,
+    resource: str,
+    destination: str,
+    headers: dict = None,
+    hot_run: bool = True,
+    unzip: bool = True,
+    disable_progress: bool = False,
+) -> bool:
     """
     download_and_unpack( url, file_path, resource, destination, headers=None,
     hot_run=True, unzip=True, disable_progress=False)
 
     A helper function to encapsulate retrieval and unzip
 
-    Inputs
-    ------
+    Parameters
+    ----------
     hot_run : Bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
     disable_progress : Bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -415,7 +433,9 @@ def download_and_unpack(
             return False
 
 
-def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_direct(
+    config: dict, rootpath: str, hot_run=True, disable_progress=False
+) -> bool:
     """
     download_and_unzip_direct(config, rootpath, dest_path, hot_run=True,
     disable_progress=False)
@@ -423,8 +443,8 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     Function to download the data by category from a direct url with no processing.
     If in the configuration file the unzip is specified True, then the downloaded data is unzipped.
 
-    Inputs
-    ------
+    Parameters
+    ----------
     config : Dict
         Configuration data for the category to download
     rootpath : str
@@ -435,7 +455,7 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
     disable_progress : Bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -460,8 +480,8 @@ def download_and_unzip_direct(config, rootpath, hot_run=True, disable_progress=F
 
 
 def download_and_unzip_hydrobasins(
-    config, rootpath, hot_run=True, disable_progress=False
-):
+    config: dict, rootpath: str, hot_run=True, disable_progress=False
+) -> bool:
     """
     download_and_unzip_basins(config, rootpath, dest_path, hot_run=True,
     disable_progress=False)
@@ -479,8 +499,8 @@ def download_and_unzip_hydrobasins(
     and the British Crown and are used under license. The HydroSHEDS v1 database and
     more information are available at https://www.hydrosheds.org.
 
-    Inputs
-    ------
+    Parameters
+    ----------
     config : Dict
         Configuration data for the category to download
     rootpath : str
@@ -491,7 +511,7 @@ def download_and_unzip_hydrobasins(
     disable_progress : Bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -523,26 +543,28 @@ def download_and_unzip_hydrobasins(
     return all_downloaded
 
 
-def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=False):
+def download_and_unzip_post(
+    config: dict, rootpath: str, hot_run=True, disable_progress=False
+) -> bool:
     """
     download_and_unzip_post(config, rootpath, dest_path, hot_run=True,
     disable_progress=False)
 
     Function to download the data by category from a post request.
 
-    Inputs
-    ------
-    config : Dict
+    Parameters
+    ----------
+    config : dict
         Configuration data for the category to download
     rootpath : str
         Absolute path of the repository
-    hot_run : Bool (default True)
+    hot_run : bool (default True)
         When true the data are downloaded
         When false, the workflow is run without downloading and unzipping
-    disable_progress : Bool (default False)
+    disable_progress : bool (default False)
         When true the progress bar to download data is disabled
 
-    Outputs
+    Returns
     -------
     True when download is successful, False otherwise
     """
@@ -585,14 +607,21 @@ def download_and_unzip_post(config, rootpath, hot_run=True, disable_progress=Fal
     return True
 
 
-def _check_disabled_by_opt(config_bundle, config_enable):
+def _check_disabled_by_opt(config_bundle: dict, config_enable: dict) -> list:
     """
     Checks if the configbundle has conflicts with the enable configuration.
 
+    Parameters
+    ----------
+    config_bundles : dict
+        Dictionary of configurations for all available bundles
+    config_enable : dict
+        Dictionary of the enabled/disabled scripts
+
     Returns
     -------
-    disabled : Bool
-        True when the bundle is completely disabled
+    list
+        List of disabled outputs
     """
 
     disabled_outs = []
@@ -621,8 +650,12 @@ def _check_disabled_by_opt(config_bundle, config_enable):
 
 
 def get_best_bundles_by_category(
-    country_list, category, config_bundles, tutorial, config_enable
-):
+    country_list: list,
+    category: str,
+    config_bundles: dict,
+    tutorial: bool,
+    config_enable: dict,
+) -> list:
     """
     get_best_bundles_by_category(country_list, category, config_bundles,
     tutorial)
@@ -637,22 +670,22 @@ def get_best_bundles_by_category(
     the bundles matching more countries are first selected and more bundles
     are added until all countries are matched or no more bundles are available
 
-    Inputs
-    ------
+    Parameters
+    ----------
     country_list : list
         List of country codes for the countries to download
     category : str
         Category of the data to download
-    config_bundles : Dict
+    config_bundles : dict
         Dictionary of configurations for all available bundles
-    tutorial : Bool
+    tutorial : bool
         Whether data for tutorial shall be downloaded
     config_enable : dict
         Dictionary of the enabled/disabled scripts
 
-    Outputs
+    Returns
     -------
-    returned_bundles : list
+    list
         List of bundles to download
     """
     # dictionary with the number of match by configuration for tutorial/non-tutorial configurations
@@ -697,13 +730,13 @@ def get_best_bundles_by_category(
 
 
 def get_best_bundles(
-    countries,
-    config_bundles,
-    tutorial,
-    config_enable,
-    include_categories=[],
-    exclude_categories=[],
-):
+    countries: list,
+    config_bundles: dict,
+    tutorial: bool,
+    config_enable: dict,
+    include_categories: list = [],
+    exclude_categories: list = [],
+) -> list:
     """
     get_best_bundles(countries, category, config_bundles, tutorial)
 
@@ -720,21 +753,24 @@ def get_best_bundles(
       the bundles matching more countries are first selected and more bundles
       are added until all countries are matched or no more bundles are available
 
-    Inputs
-    ------
+    Parameters
+    ----------
     countries : list
         List of country codes for the countries to download
-    config_bundles : Dict
+    config_bundles : dict
         Dictionary of configurations for all available bundles
-    tutorial : Bool
+    tutorial : bool
         Whether data for tutorial shall be downloaded
     config_enable : dict
         Dictionary of the enabled/disabled scripts
-    exclude_category : List
-        (Optional) Lists of config bundle categories to exclude
-    Outputs
+    include_categories : list
+        (Optional) Lists of config bundle categories to include; when empty
+    exclude_categories : list
+        (Optional) Lists of config bundle categories to exclude; when empty
+
+    Returns
     -------
-    returned_bundles : list
+    list
         List of bundles to download
     """
 
@@ -781,7 +817,26 @@ def get_best_bundles(
     return sorted(bundles_to_download)
 
 
-def get_best_bundles_in_snakemake(config, include_categories=[], exclude_categories=[]):
+def get_best_bundles_in_snakemake(
+    config: dict, include_categories: list = [], exclude_categories: list = []
+) -> list:
+    """
+    Function to get the best bundles to download in snakemake, given the configuration file and the categories to include/exclude.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration for the data bundles
+    include_categories : list
+        (Optional) Lists of config bundle categories to include; when empty
+    exclude_categories : list
+        (Optional) Lists of config bundle categories to exclude; when empty
+
+    Returns
+    -------
+    list
+        List of bundles to download
+    """
     tutorial = config["tutorial"]
     countries = config["countries"]
     config_enable = config["enable"]
@@ -800,10 +855,22 @@ def get_best_bundles_in_snakemake(config, include_categories=[], exclude_categor
     return bundles_to_download
 
 
-def datafiles_retrivedatabundle(config, bundles_to_download):
+def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list:
     """
     Function to get the output files from the bundles, given the target
     countries, tutorial settings, etc.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary for the data bundles
+    bundles_to_download : list
+        List of bundles to download
+
+    Returns
+    -------
+    list
+        List of output files from the bundles to download
     """
 
     listoutputs = list(
@@ -821,7 +888,7 @@ def datafiles_retrivedatabundle(config, bundles_to_download):
     return listoutputs
 
 
-def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
+def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> None:
     basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
     output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 
@@ -840,12 +907,34 @@ def merge_hydrobasins_shape(config_hydrobasin, hydrobasins_level):
 
 
 def retrieve_databundle(
-    bundles_to_download,
-    config_bundles,
-    hydrobasins_level,
-    rootpath=".",
-    disable_progress=False,
-):
+    bundles_to_download: list,
+    config_bundles: dict,
+    hydrobasins_level: int,
+    rootpath: str = ".",
+    disable_progress: bool = False,
+) -> None:
+    """
+    Retrieve the specified databundles and unzip them.
+    Also provides warning messages in case of download failure and logs the successfully downloaded bundles.
+
+    Parameters
+    ----------
+    bundles_to_download : list
+        A list of databundle names to download.
+    config_bundles : dict
+        A dictionary containing the configuration for each databundle.
+    hydrobasins_level : int
+        The level of hydrobasins to retrieve.
+    rootpath : str
+        The root path for the downloaded files.
+    disable_progress : bool
+        Whether to disable the progress bar.
+
+    Returns
+    -------
+    None
+        The function downloads and unzips the databundles and does not return anything.
+    """
 
     logger.warning(
         "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
@@ -911,7 +1000,7 @@ def retrieve_databundle(
         )
 
 
-def check_retrieved_cutout_match(snakemake):
+def check_retrieved_cutout_match(snakemake: Snakemake) -> None:
     """
     Validate that the retrieved cutout spatially matches the region.
 
@@ -919,6 +1008,11 @@ def check_retrieved_cutout_match(snakemake):
     ----------
     snakemake : snakemake.io.Snakemake
         Snakemake object containing input and output file paths.
+
+    Returns
+    -------
+    None
+        The function checks if the retrieved cutout matches the region and logs the result.
     """
     import atlite
     from build_renewable_profiles import check_cutout_match
@@ -933,7 +1027,7 @@ def check_retrieved_cutout_match(snakemake):
     logger.info("Retrieved cutout successfully matches the region")
 
 
-def debug_using_databundle_cli(snakemake):
+def debug_using_databundle_cli(snakemake: Snakemake) -> None:
     """
     Checks if all Snakemake output files exist (ignoring "data/landcover") and exit if they do.
     If any outputs are missing, the function reroutes execution to a command-line interface script
@@ -943,6 +1037,11 @@ def debug_using_databundle_cli(snakemake):
     ----------
     snakemake : snakemake.io.Snakemake
         Snakemake object containing output file paths.
+
+    Returns
+    -------
+    None
+        The function checks for the existence of output files and reroutes to a CLI script if any are missing.
     """
     if all(
         os.path.isfile(path) or path == "data/landcover" for path in snakemake.output
