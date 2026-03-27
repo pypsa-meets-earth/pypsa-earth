@@ -2086,10 +2086,10 @@ if __name__ == "__main__":
     save_to_geojson(gadm_shapes, out.gadm_shapes)
 
     subregion_config = snakemake.params.subregion
-    define_by_gadm = subregion_config.get("define_by_gadm")
-    custom_path = subregion_config.get("path_custom_shapes")
+    subregion_method = subregion_config.get("method")
 
-    if define_by_gadm:
+    if subregion_method == "gadm":
+        define_by_gadm = subregion_config["define_by_gadm"]
         subregion_shapes = crop_country(gadm_shapes, define_by_gadm)
 
     else:
@@ -2101,7 +2101,8 @@ if __name__ == "__main__":
 
     save_to_geojson(subregion_shapes, out.subregion_shapes)
 
-    if custom_path:
+    if subregion_method == "custom":
+        custom_path = subregion_config["path_custom_shapes"]
         subregion_shapes = gpd.read_file(custom_path, geometry="geometry").set_index(
             "name"
         )

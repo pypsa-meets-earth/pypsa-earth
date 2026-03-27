@@ -288,14 +288,16 @@ def retrieve_subregion(script_name):
     """
     Select whether scripts related to subregions should be retrieved.
     """
-    subregion_config = config.get("subregion", {})
+    subregion_config = config.get("subregion", {"method": False, "apply_on": []})
 
-    if not subregion_config.get("enable", {}).get(script_name):
+    if script_name not in subregion_config["apply_on"]:
         return {}
 
-    if subregion_config.get("define_by_gadm"):
+    method = subregion_config["method"]
+
+    if method == "gadm":
         subregion_shapes = "resources/" + RDIR + "shapes/subregion_shapes.geojson"
-    elif subregion_config.get("path_custom_shapes"):
+    elif method == "custom":
         subregion_shapes = subregion_config["path_custom_shapes"]
     else:
         return {}
