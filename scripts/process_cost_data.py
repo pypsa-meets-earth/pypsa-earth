@@ -7,8 +7,8 @@
 """
 Prepare and process default cost data to fit PyPSA input requirements (capital costs / fixed annualized costs, marginal costs).
 
-The technology cost data is loaded from a CSV file, filtered by scenario and financial case, 
-and then processed to compute fixed annualized costs and marginal costs for each technology. 
+The technology cost data is loaded from a CSV file, filtered by scenario and financial case,
+and then processed to compute fixed annualized costs and marginal costs for each technology.
 Currency conversion is applied to ensure all costs are in a common output currency, using exchange rates for a specified reference year.
 
 The output differs dependind on the wildcard {scope}:
