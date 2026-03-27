@@ -134,8 +134,8 @@ There are several formats for GADM IDs depending on the version, so before using
 ``bash
 snakemake -j 1 build_shapes
 
-``
-   The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
+!!! note
+    The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
 
 ## clean_osm_data_options
 
@@ -205,17 +205,29 @@ Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
 Specifies electricity line parameters.
 
+```yaml
+--8<-- "configtables/snippets/lines.yaml"
+```
+
 {{ read_csv('configtables/lines.csv') }}
 
 ## links
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .
 
+```yaml
+--8<-- "configtables/snippets/links.yaml"
+```
+
 {{ read_csv('configtables/links.csv') }}
 
 ## transformers
 
 Specifies transformers parameters and types.
+
+```yaml
+--8<-- "configtables/snippets/transformers.yaml"
+```
 
 {{ read_csv('configtables/transformers.csv') }}
 
@@ -225,33 +237,57 @@ Define and specify the `atlite.Cutout` used for calculating renewable potentials
 
 {{ read_csv('configtables/atlite.csv') }}
 
-### renewable
+## renewable
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
 #### onwind
 
+```yaml
+--8<-- "configtables/snippets/renewable_onwind.yaml"
+```
+
 {{ read_csv('configtables/onwind.csv') }}
 
 #### offwind-ac
+
+```yaml
+--8<-- "configtables/snippets/renewable_offwind-ac.yaml"
+```
 
 {{ read_csv('configtables/offwind-ac.csv') }}
 
 #### offwind-dc
 
+```yaml
+--8<-- "configtables/snippets/renewable_offwind-dc.yaml"
+```
+
 {{ read_csv('configtables/offwind-dc.csv') }}
 
 #### solar
 
+```yaml
+--8<-- "configtables/snippets/renewable_solar.yaml"
+```
+
 {{ read_csv('configtables/solar.csv') }}
 
 #### hydro
+
+```yaml
+--8<-- "configtables/snippets/renewable_hydro.yaml"
+```
 
 > **See `config.default.yaml` for the full configuration.**
 
 {{ read_csv('configtables/hydro.csv') }}
 
 #### csp
+
+```yaml
+--8<-- "configtables/snippets/renewable_csp.yaml"
+```
 
 > **See `config.default.yaml` for the full configuration.**
 
@@ -281,17 +317,121 @@ Specifies the cost assumptions of the technologies considered. Cost information 
 
 Specifies the options for Monte Carlo sampling.
 
+```yaml
+--8<-- "configtables/snippets/monte_carlo.yaml"
+```
+
 {{ read_csv('configtables/monte-carlo.csv') }}
+
+## policy_config
+
+Specifies the options regarding energy policy, for example in relation to hydrogen exports.
+
+```yaml
+--8<-- "configtables/snippets/policy_config.yaml"
+```
+
+{{ read_csv('configtables/policy_config.csv') }}
+
+## demand_data
+
+Specifies sector-coupled related demand.
+
+```yaml
+--8<-- "configtables/snippets/demand_data.yaml"
+```
+
+{{ read_csv('configtables/demand_data.csv') }}
+
+## export
+
+Specifies the option related to hydrogen exports.
+
+```yaml
+--8<-- "configtables/snippets/export.yaml"
+```
+
+{{ read_csv('configtables/export.csv') }}
+
+## custom_data
+
+See custom_data.rst for more detail
 
 ## sector
 
 Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
 
+### top-level
+
 ```yaml
---8<-- "configtables/snippets/sector.yaml"
+--8<-- "configtables/snippets/sector_toplevel.yaml"
 ```
 
-{{ read_csv('configtables/sector.csv') }}
+{{ read_csv('configtables/sector_toplevel.csv') }}
+
+### heat sector
+
+```yaml
+--8<-- "configtables/snippets/sector_heat.yaml"
+```
+
+{{ read_csv('configtables/sector_heat.csv') }}
+
+### land transport sector
+
+```yaml
+--8<-- "configtables/snippets/sector_land_transport.yaml"
+```
+
+{{ read_csv('configtables/sector_land_transport.csv') }}
+
+### biomass sector
+
+```yaml
+--8<-- "configtables/snippets/sector_biomass.yaml"
+```
+
+{{ read_csv('configtables/sector_biomass.csv') }}
+
+### electricity distribution grid
+
+```yaml
+--8<-- "configtables/snippets/sector_electricity_distribution_grid.yaml"
+```
+
+{{ read_csv('configtables/sector_electricity_distribution_grid.csv') }}
+
+### shipping & aviation sector
+
+```yaml
+--8<-- "configtables/snippets/sector_shipping_aviation.yaml"
+```
+
+{{ read_csv('configtables/sector_shipping_aviation.csv') }}
+
+### ccus & conversion options
+
+```yaml
+--8<-- "configtables/snippets/sector_ccus.yaml"
+```
+
+{{ read_csv('configtables/sector_ccus.csv') }}
+
+### industry options
+
+```yaml
+--8<-- "configtables/snippets/sector_industry.yaml"
+```
+
+{{ read_csv('configtables/sector_industry.csv') }}
+
+### powerplants options
+
+```yaml
+--8<-- "configtables/snippets/sector_powerplants.yaml"
+```
+
+{{ read_csv('configtables/sector_powerplants.csv') }}
 
 ## solving
 
@@ -299,9 +439,17 @@ Specify linear power flow formulation and optimization solver settings.
 
 ### options
 
+```yaml
+--8<-- "configtables/snippets/solving_options.yaml"
+```
+
 {{ read_csv('configtables/solving-options.csv') }}
 
 ### solver
+
+```yaml
+--8<-- "configtables/snippets/solving_solver.yaml"
+```
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
