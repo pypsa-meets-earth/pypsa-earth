@@ -9,6 +9,7 @@ import calendar
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -1879,12 +1880,53 @@ def restore_base_carrier_names(n: pypsa.Network) -> None:
     # Restore base carrier names for storage units
     n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
 
-    # Remove year-tagged carriers
-    year_tagged_carriers = [c for c in n.carriers.index if _is_year_tagged(c)]
+    logger.info("Restored base carrier names")
 
-    if len(year_tagged_carriers) > 0:
-        n.mremove("Carrier", year_tagged_carriers)
-        logger.info(f"Removed year-tagged carriers: {', '.join(year_tagged_carriers)}")
+
+def add_year_suffix_to_carriers(n: pypsa.Network) -> None:
+    """
+    Extract year suffix from component names and append to carrier names.
+
+    This is necessary for clustering to distinguish between generators/storage
+    of the same technology but different vintage years.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Original network to modify carrier names in-place.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Component name: "NG0 0 coal-1990"
+    Original carrier: "coal"
+    Modified carrier: "coal-1990"
+    """
+    for component in ["Generator", "StorageUnit"]:
+        df = n.df(component)
+
+        if df.empty or "carrier" not in df.columns:
+            continue
+
+        # Extract year suffix from index using regex
+        # Pattern matches: base_name-YYYY at the end of the string
+        pattern = r"-(\d{4})$"
+
+        year_suffix = df.index.str.extract(pattern, expand=False)
+
+        # Only modify carriers where year suffix was found
+        has_year = year_suffix.notna()
+
+        if has_year.any():
+            df.loc[has_year, "carrier"] = (
+                df.loc[has_year, "carrier"] + "-" + year_suffix[has_year]
+            )
+
+    # Add year suffixes to carriers for proper clustering of different vintage years
+    logger.info("Added year suffixes to carrier names for clustering")
 
 
 def sanitize_carriers(n, config):

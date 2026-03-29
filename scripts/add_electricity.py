@@ -672,19 +672,6 @@ def attach_wind_and_solar(
                 # Aggregate existing generators by (bus, carrier, grouping_year)
                 existing_grouped = aggregate_ppl_by_bus_carrier_year(existing)
 
-                # Add carrier with grouping year
-                for carrier_gy in existing_grouped["carrier_gy"].unique():
-                    if carrier_gy not in n.carriers.index:
-                        n.add(
-                            "Carrier",
-                            carrier_gy,
-                            co2_emissions=(
-                                n.carriers.at[tech, "co2_emissions"]
-                                if tech in n.carriers.index
-                                else 0.0
-                            ),
-                        )
-
                 # Get p_max_pu for each existing generator's bus
                 existing_p_max_pu = p_max_pu[existing_grouped["bus"].values]
                 existing_p_max_pu.columns = existing_grouped.index
@@ -693,7 +680,7 @@ def attach_wind_and_solar(
                     "Generator",
                     existing_grouped.index,
                     bus=existing_grouped["bus"],
-                    carrier=existing_grouped["carrier_gy"],
+                    carrier=existing_grouped["carrier"],
                     p_nom=existing_grouped["p_nom"],
                     p_nom_extendable=False,
                     p_nom_min=existing_grouped["p_nom"],
@@ -797,16 +784,6 @@ def attach_conventional_generators(
     # Aggregate power plants by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
 
-    # Add carriers with grouping year
-    for carrier_gy in ppl_grouped["carrier_gy"].unique():
-        base_carrier = carrier_gy.rsplit("-", 1)[0]
-        if carrier_gy not in n.carriers.index:
-            n.add(
-                "Carrier",
-                carrier_gy,
-                co2_emissions=n.carriers.at[base_carrier, "co2_emissions"],
-            )
-
     logger.info(
         "Adding {} existing generators with capacities [GW] \n{}".format(
             len(ppl), ppl.groupby("carrier").p_nom.sum().div(1e3).round(2)
@@ -816,7 +793,7 @@ def attach_conventional_generators(
     n.madd(
         "Generator",
         ppl_grouped["bus"] + " " + ppl_grouped["carrier_gy"],
-        carrier=ppl_grouped["carrier_gy"],
+        carrier=ppl_grouped["carrier"],
         bus=ppl_grouped["bus"],
         p_nom=ppl_grouped["p_nom"],
         p_nom_extendable=False,
@@ -1017,17 +994,11 @@ def attach_hydro(
             f"Run-Of-River: {mask_ror.sum()}"
         )
 
-    # Add carriers with grouping year
-    all_grouped = pd.concat([ror, phs, hydro])
-    for carrier_gy in all_grouped["carrier_gy"].unique():
-        if carrier_gy not in n.carriers.index:
-            n.add("Carrier", carrier_gy, co2_emissions=0.0)
-
     if "ror" in carriers and not ror.empty:
         n.madd(
             "Generator",
             ror.index,
-            carrier=ror["carrier_gy"],
+            carrier=ror["carrier"],
             bus=ror["bus"],
             p_nom=ror["p_nom"],
             p_nom_extendable=False,
@@ -1054,7 +1025,7 @@ def attach_hydro(
         n.madd(
             "StorageUnit",
             phs.index,
-            carrier=phs["carrier_gy"],
+            carrier=phs["carrier"],
             bus=phs["bus"],
             p_nom=phs["p_nom"],
             p_nom_extendable=False,
@@ -1116,7 +1087,7 @@ def attach_hydro(
         n.madd(
             "StorageUnit",
             hydro.index,
-            carrier=hydro["carrier_gy"],
+            carrier=hydro["carrier"],
             bus=hydro["bus"],
             p_nom=hydro["p_nom"],
             p_nom_extendable=False,
@@ -1171,18 +1142,13 @@ def attach_existing_batteries(
     # Aggregate batteries by (bus, carrier, grouping_year)
     batteries_grouped = aggregate_ppl_by_bus_carrier_year(batteries)
 
-    # Add carriers with grouping year
-    for carrier_gy in batteries_grouped["carrier_gy"].unique():
-        if carrier_gy not in n.carriers.index:
-            n.add("Carrier", carrier_gy, co2_emissions=0.0)
-
     max_hours = snakemake.params.electricity["max_hours"]["battery"]
 
     n.madd(
         "StorageUnit",
         batteries_grouped.index,
         bus=batteries_grouped["bus"],
-        carrier=batteries_grouped["carrier_gy"],
+        carrier=batteries_grouped["carrier"],
         p_nom=batteries_grouped["p_nom"],
         p_nom_extendable=False,
         p_nom_min=batteries_grouped["p_nom"],
@@ -1366,14 +1332,13 @@ def estimate_renewable_capacities_irena(
             countries, fill_value=0.0
         )
 
-        # Get base carrier for each generator
-        base_carriers = n.generators["carrier"].apply(get_base_carrier)
-
         # Separate existing and extendable generators
         existing_i = n.generators[
-            base_carriers.isin(techs) & (n.generators["carrier"] != base_carriers)
+            n.generators["carrier"].isin(techs) & (~n.generators["p_nom_extendable"])
         ].index
-        extendable_i = n.generators[n.generators["carrier"].isin(techs)].index
+        extendable_i = n.generators[
+            n.generators["carrier"].isin(techs) & n.generators["p_nom_extendable"]
+        ].index
 
         # Calculate existing capacities per country
         existing_capacity_per_country = (
@@ -1457,9 +1422,6 @@ def add_nice_carrier_names(n: pypsa.Network, config: dict) -> None:
     """
     Add nice names and colors to carriers.
 
-    For existing carriers (e.g., "solar-2020"), uses the nice name and color
-    from the base carrier (e.g., "solar").
-
     Parameters
     ----------
     n : pypsa.Network
@@ -1472,20 +1434,13 @@ def add_nice_carrier_names(n: pypsa.Network, config: dict) -> None:
     None
     """
     carrier_i = n.carriers.index
-
-    # Get base carriers (handles "solar-2020" -> "solar")
-    base_carriers = carrier_i.to_series().apply(get_base_carrier)
-
-    # Map nice names from base carrier
-    nice_names_config = pd.Series(config["plotting"]["nice_names"])
-    nice_names = base_carriers.map(nice_names_config).fillna(
-        carrier_i.to_series().str.title()
+    nice_names = (
+        pd.Series(config["plotting"]["nice_names"])
+        .reindex(carrier_i)
+        .fillna(carrier_i.to_series().str.title())
     )
     n.carriers["nice_name"] = nice_names
-
-    # Map colors from base carrier
-    colors_config = pd.Series(config["plotting"]["tech_colors"])
-    colors = base_carriers.map(colors_config)
+    colors = pd.Series(config["plotting"]["tech_colors"]).reindex(carrier_i)
 
     if colors.isna().any():
         missing_i = list(colors.index[colors.isna()])

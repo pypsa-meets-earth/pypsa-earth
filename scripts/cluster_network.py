@@ -132,6 +132,7 @@ import pandas as pd
 import pypsa
 from _helpers import (
     REGION_COLS,
+    add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
     locate_bus,
@@ -703,6 +704,9 @@ if __name__ == "__main__":
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
 
     n = pypsa.Network(inputs.network)
+
+    # Add year suffix to carrier names for clustering
+    add_year_suffix_to_carriers(n)
 
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]

@@ -94,9 +94,11 @@ import pandas as pd
 import pypsa
 import scipy as sp
 from _helpers import (
+    add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
     nearest_shape,
+    restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
 )
@@ -1053,6 +1055,9 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
+    # Add year suffix to carrier names for clustering
+    add_year_suffix_to_carriers(n)
+
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetype = snakemake.params.config_lines["ac_types"][base_voltage]
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
@@ -1250,6 +1255,9 @@ if __name__ == "__main__":
         logger.info("Deactivate subregion classificaition")
         country_shapes = snakemake.input.country_shapes
         n = nearest_shape(n, country_shapes, crs, tolerance=tolerance)
+
+    # Restore base carrier names (remove year suffixes) before saving
+    restore_base_carrier_names(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
