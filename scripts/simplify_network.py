@@ -19,15 +19,7 @@ Relevant Settings
         aggregation_strategies:
 
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
+        output_currency:
 
     lines:
         length_factor:
@@ -102,7 +94,6 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregateoneport,
@@ -312,7 +303,7 @@ def _aggregate_and_move_components(
         n,
         connection_costs_to_bus,
         snakemake.output,
-        snakemake.params.costs["output_currency"],
+        snakemake.params.output_currency,
     )
 
     generator_strategies = aggregation_strategies["generators"]
@@ -1087,12 +1078,7 @@ if __name__ == "__main__":
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 
-    technology_costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
-    )
+    technology_costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
     n, simplify_links_map = simplify_links(
         n,
@@ -1209,24 +1195,11 @@ if __name__ == "__main__":
     update_p_nom_max(n)
 
     # Option for subregion
-    subregion_config = snakemake.params.subregion
-    if subregion_config["enable"]["simplify_network"]:
-        if subregion_config["define_by_gadm"]:
-            logger.info("Activate subregion classificaition based on GADM")
-            subregion_shapes = snakemake.input.subregion_shapes
-        elif subregion_config["path_custom_shapes"]:
-            logger.info("Activate subregion classificaition based on custom shapes")
-            subregion_shapes = subregion_config["path_custom_shapes"]
-        else:
-            logger.warning("Although enabled, no subregion classificaition is selected")
-            subregion_shapes = False
-
-        if subregion_shapes:
-            crs = snakemake.params.crs
-            tolerance = subregion_config["tolerance"]
-            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
-    else:
-        subregion_shapes = False
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = snakemake.params.crs
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
 
     p_threshold_drop_isolated = cluster_config.get("p_threshold_drop_isolated", False)
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
@@ -1253,8 +1226,8 @@ if __name__ == "__main__":
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
-        country_shapes = snakemake.input.country_shapes
-        n = nearest_shape(n, country_shapes, crs, tolerance=tolerance)
+        original_shapes = snakemake.input.original_shapes
+        n = nearest_shape(n, original_shapes, crs, tolerance=tolerance)
 
     # Restore base carrier names (remove year suffixes) before saving
     restore_base_carrier_names(n)
