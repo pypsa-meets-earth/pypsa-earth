@@ -795,8 +795,8 @@ def attach_hydro(
         inflow_pu_limit = inflow_t[tbd.index].mean() / tbd["p_nom"]  # Average MWh/MW
         mask_reservoir = inflow_pu_limit >= hydro_min_inflow_pu
         mask_ror = ~mask_reservoir
-        to_be_hydro = tbd[mask_reservoir]
-        to_be_ror = tbd[mask_ror]
+        to_be_hydro = tbd[mask_reservoir].copy()
+        to_be_ror = tbd[mask_ror].copy()
 
         # Aggregate to_be_ror and to_be_hydro by (bus, carrier, grouping_year)
         to_be_hydro.loc[:, "carrier"] = "hydro"
