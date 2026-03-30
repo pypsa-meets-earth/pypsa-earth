@@ -87,7 +87,6 @@ import xarray as xr
 from _helpers import (
     configure_logging,
     create_logger,
-    get_base_carrier,
     read_csv_nafix,
     sanitize_carriers,
     sanitize_locations,

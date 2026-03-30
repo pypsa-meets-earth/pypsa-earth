@@ -1711,26 +1711,22 @@ def sanitize_carriers(n, config):
             add_missing_carriers(n, c.df.carrier)
 
     carrier_i = n.carriers.index
+    nice_names = (
+        pd.Series(config["plotting"]["nice_names"])
+        .reindex(carrier_i)
+        .fillna(carrier_i.to_series())
+    )
 
-    # Get base carriers
-    base_carriers = carrier_i.to_series().apply(get_base_carrier)
-
-    # Map nice names from base carrier
-    nice_names_config = pd.Series(config["plotting"]["nice_names"])
-    nice_names = base_carriers.map(nice_names_config).fillna(carrier_i.to_series())
     n.carriers["nice_name"] = n.carriers.nice_name.where(
         n.carriers.nice_name != "", nice_names
     )
 
-    # Map colors from base carrier
-    tech_colors_config = pd.Series(config["plotting"]["tech_colors"])
-    colors = base_carriers.map(tech_colors_config)
+    tech_colors = config["plotting"]["tech_colors"]
+    colors = pd.Series(tech_colors).reindex(carrier_i)
 
     # Try to fill missing colors with tech_colors after renaming
     missing_colors_i = colors[colors.isna()].index
-    colors.loc[missing_colors_i] = (
-        base_carriers.loc[missing_colors_i].map(rename_techs).map(tech_colors_config)
-    )
+    colors[missing_colors_i] = missing_colors_i.map(rename_techs).map(tech_colors)
 
     if colors.isna().any():
         missing_i = list(colors.index[colors.isna()])
