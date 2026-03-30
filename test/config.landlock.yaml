@@ -9,9 +9,7 @@ run:
   name: "landlock"
 
 subregion:
-  enable:
-    simplify_network: true # activate subregion in simplify_network
-    cluster_network: true # activate subregion in cluster_network
+  method: "gadm" # method to define subregions, either "gadm" or "custom", false to not use subregions.
   define_by_gadm:
     Central: [BW.3]
 

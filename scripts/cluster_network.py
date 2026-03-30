@@ -132,6 +132,7 @@ import pandas as pd
 import pypsa
 from _helpers import (
     REGION_COLS,
+    add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
     locate_bus,
@@ -140,7 +141,6 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
     aggregateoneport,
@@ -704,6 +704,9 @@ if __name__ == "__main__":
 
     n = pypsa.Network(inputs.network)
 
+    # Add year suffix to carrier names for clustering
+    add_year_suffix_to_carriers(n)
+
     alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
     distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
@@ -728,24 +731,11 @@ if __name__ == "__main__":
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
 
     # Option for subregion
-    subregion_config = snakemake.params.subregion
-    if subregion_config["enable"]["cluster_network"]:
-        if subregion_config["define_by_gadm"]:
-            logger.info("Activate subregion classificaition based on GADM")
-            subregion_shapes = snakemake.input.subregion_shapes
-        elif subregion_config["path_custom_shapes"]:
-            logger.info("Activate subregion classificaition based on custom shapes")
-            subregion_shapes = subregion_config["path_custom_shapes"]
-        else:
-            logger.warning("Although enabled, no subregion classificaition is selected")
-            subregion_shapes = False
-
-        if subregion_shapes:
-            crs = snakemake.params.crs
-            tolerance = subregion_config["tolerance"]
-            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
-    else:
-        subregion_shapes = False
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = snakemake.params.crs
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
 
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
@@ -773,12 +763,9 @@ if __name__ == "__main__":
     else:
         line_length_factor = snakemake.params.length_factor
         Nyears = n.snapshot_weightings.objective.sum() / 8760
-        hvac_overhead_cost = load_costs(
-            snakemake.input.tech_costs,
-            snakemake.params.costs,
-            snakemake.params.electricity,
-            Nyears,
-        ).at["HVAC overhead", "capital_cost"]
+        hvac_overhead_cost = pd.read_csv(snakemake.input.tech_costs, index_col=0).at[
+            "HVAC overhead", "capital_cost"
+        ]
 
         def consense(x):
             v = x.iat[0]
@@ -842,9 +829,9 @@ if __name__ == "__main__":
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
-        country_shapes = snakemake.input.country_shapes
+        original_shapes = snakemake.input.original_shapes
         clustering.network = nearest_shape(
-            clustering.network, country_shapes, crs, tolerance=tolerance
+            clustering.network, original_shapes, crs, tolerance=tolerance
         )
 
     # Restore base carrier names after all aggregation

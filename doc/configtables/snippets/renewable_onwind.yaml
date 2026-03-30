@@ -1,5 +1,5 @@
   onwind:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: Vestas_V112_3MW
