@@ -19,15 +19,7 @@ Relevant Settings
         aggregation_strategies:
 
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
+        output_currency:
 
     lines:
         length_factor:
@@ -100,7 +92,6 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregateoneport,
@@ -285,7 +276,7 @@ def _aggregate_and_move_components(
         n,
         connection_costs_to_bus,
         snakemake.output,
-        snakemake.params.costs["output_currency"],
+        snakemake.params.output_currency,
     )
 
     generator_strategies = aggregation_strategies["generators"]
@@ -1021,12 +1012,7 @@ if __name__ == "__main__":
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 
-    technology_costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
-    )
+    technology_costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
     n, simplify_links_map = simplify_links(
         n,
