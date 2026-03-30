@@ -1880,6 +1880,7 @@ def generate_points_every_km(
         geometry="geometry",
         crs=geo_crs,
     )
+    points_gdf.index.name = "points"
 
     return points_gdf
 
@@ -1948,7 +1949,7 @@ def crop_offshore(
         either equal to the full country offshore area (single subregion) or Voronoi-partitioned among multiple subregions.
     """
 
-    from build_bus_regions import custom_voronoi_partition_pts
+    from build_bus_regions import voronoi
 
     # Determine country for each subregion
     subregion_dict = determine_subregion_country(
@@ -1987,12 +1988,7 @@ def crop_offshore(
 
             coords = points_gdf.geometry.get_coordinates()[["x", "y"]]
 
-            voronoi_geoms = custom_voronoi_partition_pts(
-                coords,
-                outline,
-                add_bounds_shape=True,
-                multiplier=5,
-            )
+            voronoi_geoms = voronoi(coords, outline)
 
             points_gdf = points_gdf.copy()
             points_gdf["geometry"] = voronoi_geoms
