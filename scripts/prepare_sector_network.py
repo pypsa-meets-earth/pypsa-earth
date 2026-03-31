@@ -22,7 +22,6 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
-    prepare_costs,
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
@@ -3226,16 +3225,7 @@ if __name__ == "__main__":
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
     # Prepare the costs dataframe
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+    costs = pd.read_csv(snakemake.input.costs, index_col=0)
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
