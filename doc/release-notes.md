@@ -60,6 +60,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Make checking the need for exclusion rasters more explicit [PR #1755](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1755)
 
+* Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
 
 # PyPSA-Earth 0.8.0
 
