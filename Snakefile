@@ -29,7 +29,6 @@ from retrieve_databundle_light import (
 )
 from pathlib import Path
 
-
 HTTP = HTTPRemoteProvider()
 
 copy_default_files()
@@ -146,9 +145,6 @@ if config["enable"].get("retrieve_databundle", True):
     )
 
     rule retrieve_databundle_light:
-        params:
-            bundles_to_download=bundles_to_download,
-            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand(
                 "{file}", file=datafiles_retrivedatabundle(config, bundles_to_download)
@@ -158,6 +154,9 @@ if config["enable"].get("retrieve_databundle", True):
             "logs/" + RDIR + "retrieve_databundle.log",
         benchmark:
             "benchmarks/" + RDIR + "retrieve_databundle_light"
+        params:
+            bundles_to_download=bundles_to_download,
+            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         script:
             "scripts/retrieve_databundle_light.py"
 
@@ -165,10 +164,10 @@ if config["enable"].get("retrieve_databundle", True):
 if config["enable"].get("download_global_buildings", True):
 
     rule download_global_buildings:
-        params:
-            crs=config["crs"],
         output:
             "data/global_buildings/{country}_global_buildings_raw.parquet",
+        params:
+            crs=config["crs"],
         script:
             "scripts/download_global_buildings.py"
 
@@ -176,8 +175,6 @@ if config["enable"].get("download_global_buildings", True):
 if config["enable"].get("download_osm_data", True):
 
     rule download_osm_data:
-        params:
-            countries=config["countries"],
         output:
             cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
             generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
@@ -188,14 +185,13 @@ if config["enable"].get("download_osm_data", True):
             "logs/" + RDIR + "download_osm_data.log",
         benchmark:
             "benchmarks/" + RDIR + "download_osm_data"
+        params:
+            countries=config["countries"],
         script:
             "scripts/download_osm_data.py"
 
 
 rule clean_osm_data:
-    params:
-        crs=config["crs"],
-        clean_osm_data_options=config["clean_osm_data_options"],
     input:
         cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
@@ -213,15 +209,14 @@ rule clean_osm_data:
         "logs/" + RDIR + "clean_osm_data.log",
     benchmark:
         "benchmarks/" + RDIR + "clean_osm_data"
+    params:
+        crs=config["crs"],
+        clean_osm_data_options=config["clean_osm_data_options"],
     script:
         "scripts/clean_osm_data.py"
 
 
 rule build_osm_network:
-    params:
-        build_osm_network=config.get("build_osm_network", {}),
-        countries=config["countries"],
-        crs=config["crs"],
     input:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         lines="resources/" + RDIR + "osm/clean/all_clean_lines.geojson",
@@ -248,16 +243,15 @@ rule build_osm_network:
         "logs/" + RDIR + "build_osm_network.log",
     benchmark:
         "benchmarks/" + RDIR + "build_osm_network"
+    params:
+        build_osm_network=config.get("build_osm_network", {}),
+        countries=config["countries"],
+        crs=config["crs"],
     script:
         "scripts/build_osm_network.py"
 
 
 rule build_shapes:
-    params:
-        build_shape_options=config["build_shape_options"],
-        crs=config["crs"],
-        countries=config["countries"],
-        subregion=config["subregion"],
     input:
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
@@ -279,6 +273,11 @@ rule build_shapes:
     threads: 1
     resources:
         mem_mb=3096,
+    params:
+        build_shape_options=config["build_shape_options"],
+        crs=config["crs"],
+        countries=config["countries"],
+        subregion=config["subregion"],
     script:
         "scripts/build_shapes.py"
 
@@ -309,15 +308,6 @@ def retrieve_subregion(script_name):
 
 
 rule base_network:
-    params:
-        voltages=config["electricity"]["voltages"],
-        transformers=config["transformers"],
-        snapshots=config["snapshots"],
-        links=config["links"],
-        lines=config["lines"],
-        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-        countries=config["countries"],
-        base_network=config["base_network"],
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
@@ -338,15 +328,20 @@ rule base_network:
     threads: 1
     resources:
         mem_mb=500,
+    params:
+        voltages=config["electricity"]["voltages"],
+        transformers=config["transformers"],
+        snapshots=config["snapshots"],
+        links=config["links"],
+        lines=config["lines"],
+        hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+        countries=config["countries"],
+        base_network=config["base_network"],
     script:
         "scripts/base_network.py"
 
 
 rule build_bus_regions:
-    params:
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        crs=config["crs"],
-        countries=config["countries"],
     input:
         **retrieve_subregion("cluster_network"),
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -367,6 +362,10 @@ rule build_bus_regions:
     threads: 1
     resources:
         mem_mb=1000,
+    params:
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        crs=config["crs"],
+        countries=config["countries"],
     script:
         "scripts/build_bus_regions.py"
 
@@ -394,9 +393,6 @@ def terminate_if_cutout_exists(w):
 if config["enable"].get("build_cutout", False):
 
     rule build_cutout:
-        params:
-            snapshots=config["snapshots"],
-            cutouts=config["atlite"]["cutouts"],
         input:
             check=terminate_if_cutout_exists,
             onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -410,6 +406,9 @@ if config["enable"].get("build_cutout", False):
         threads: ATLITE_NPROCESSES
         resources:
             mem_mb=ATLITE_NPROCESSES * 1000,
+        params:
+            snapshots=config["snapshots"],
+            cutouts=config["atlite"]["cutouts"],
         script:
             "scripts/build_cutout.py"
 
@@ -421,9 +420,6 @@ if config["enable"].get("retrieve_cutout", False):
     )
 
     rule retrieve_cutout:
-        params:
-            bundles_to_download=cutout_to_download,
-            hydrobasins_level=[],
         input:
             check=terminate_if_cutout_exists,
             onshore_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -434,6 +430,9 @@ if config["enable"].get("retrieve_cutout", False):
             "logs/" + RDIR + "retrieve_cutout/{cutout}.log",
         benchmark:
             "benchmarks/" + RDIR + "retrieve_cutout_{cutout}"
+        params:
+            bundles_to_download=cutout_to_download,
+            hydrobasins_level=[],
         script:
             "scripts/retrieve_databundle_light.py"
 
@@ -441,10 +440,6 @@ if config["enable"].get("retrieve_cutout", False):
 if config["enable"].get("build_natura_raster", False):
 
     rule build_natura_raster:
-        params:
-            area_crs=config["crs"]["area_crs"],
-            natura=config["natura"],
-            disable_progress=not config["enable"]["progress_bar"],
         input:
             shapefiles_land="data/landcover",
             cutouts=expand(
@@ -459,6 +454,10 @@ if config["enable"].get("build_natura_raster", False):
             "logs/" + RDIR + "build_natura_raster.log",
         benchmark:
             "benchmarks/" + RDIR + "build_natura_raster"
+        params:
+            area_crs=config["crs"]["area_crs"],
+            natura=config["natura"],
+            disable_progress=not config["enable"]["progress_bar"],
         script:
             "scripts/build_natura_raster.py"
 
@@ -493,8 +492,6 @@ else:
 if config["enable"].get("retrieve_cost_data", True):
 
     rule retrieve_cost_data:
-        params:
-            version=config["costs"]["technology_data_version"],
         input:
             HTTP.remote(
                 f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
@@ -507,14 +504,13 @@ if config["enable"].get("retrieve_cost_data", True):
             "logs/" + RDIR + "retrieve_cost_data_{year}.log",
         resources:
             mem_mb=5000,
+        params:
+            version=config["costs"]["technology_data_version"],
         run:
             move(input[0], output[0])
 
 
 rule process_cost_data:
-    params:
-        costs=config["costs"],
-        max_hours=config["electricity"]["max_hours"],
     input:
         network="networks/" + RDIR + "base.nc",
         costs=branch(
@@ -531,15 +527,14 @@ rule process_cost_data:
     threads: 1
     resources:
         mem_mb=4000,
+    params:
+        costs=config["costs"],
+        max_hours=config["electricity"]["max_hours"],
     script:
         "scripts/process_cost_data.py"
 
 
 rule build_demand_profiles:
-    params:
-        snapshots=config["snapshots"],
-        load_options=config["load_options"],
-        countries=config["countries"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
@@ -558,6 +553,10 @@ rule build_demand_profiles:
     threads: 1
     resources:
         mem_mb=3000,
+    params:
+        snapshots=config["snapshots"],
+        load_options=config["load_options"],
+        countries=config["countries"],
     script:
         "scripts/build_demand_profiles.py"
 
@@ -576,11 +575,6 @@ def inputs_hydro(w):
 
 
 rule build_renewable_profiles:
-    params:
-        crs=config["crs"],
-        renewable=config["renewable"],
-        countries=config["countries"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
     input:
         unpack(inputs_hydro),
         natura="resources/" + RDIR + "natura.tiff",
@@ -606,17 +600,16 @@ rule build_renewable_profiles:
     threads: ATLITE_NPROCESSES
     resources:
         mem_mb=ATLITE_NPROCESSES * 5000,
+    params:
+        crs=config["crs"],
+        renewable=config["renewable"],
+        countries=config["countries"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
     script:
         "scripts/build_renewable_profiles.py"
 
 
 rule build_powerplants:
-    params:
-        geo_crs=config["crs"]["geo_crs"],
-        countries=config["countries"],
-        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        powerplants_filter=config["electricity"]["powerplants_filter"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
@@ -637,19 +630,17 @@ rule build_powerplants:
     threads: 1
     resources:
         mem_mb=500,
+    params:
+        geo_crs=config["crs"]["geo_crs"],
+        countries=config["countries"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        powerplants_filter=config["electricity"]["powerplants_filter"],
     script:
         "scripts/build_powerplants.py"
 
 
 rule add_electricity:
-    params:
-        countries=config["countries"],
-        output_currency=config["costs"]["output_currency"],
-        conventional=config.get("conventional", {}),
-        electricity=config["electricity"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        renewable=config["renewable"],
-        length_factor=config["lines"]["length_factor"],
     input:
         **{
             f"profile_{tech}": "resources/"
@@ -683,23 +674,19 @@ rule add_electricity:
     threads: 1
     resources:
         mem_mb=3000,
+    params:
+        countries=config["countries"],
+        output_currency=config["costs"]["output_currency"],
+        conventional=config.get("conventional", {}),
+        electricity=config["electricity"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        renewable=config["renewable"],
+        length_factor=config["lines"]["length_factor"],
     script:
         "scripts/add_electricity.py"
 
 
 rule simplify_network:
-    params:
-        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
-        renewable=config["renewable"],
-        crs=config["crs"],
-        cluster_options=config["cluster_options"],
-        countries=config["countries"],
-        build_shape_options=config["build_shape_options"],
-        electricity=config["electricity"],
-        output_currency=config["costs"]["output_currency"],
-        config_lines=config["lines"],
-        config_links=config["links"],
-        focus_weights=config.get("focus_weights", None),
     input:
         **retrieve_subregion("simplify_network"),
         network="networks/" + RDIR + "elec.nc",
@@ -725,22 +712,23 @@ rule simplify_network:
     threads: 1
     resources:
         mem_mb=4000,
+    params:
+        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
+        renewable=config["renewable"],
+        crs=config["crs"],
+        cluster_options=config["cluster_options"],
+        countries=config["countries"],
+        build_shape_options=config["build_shape_options"],
+        electricity=config["electricity"],
+        output_currency=config["costs"]["output_currency"],
+        config_lines=config["lines"],
+        config_links=config["links"],
+        focus_weights=config.get("focus_weights", None),
     script:
         "scripts/simplify_network.py"
 
 
 rule cluster_network:
-    params:
-        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
-        build_shape_options=config["build_shape_options"],
-        electricity=config["electricity"],
-        length_factor=config["lines"]["length_factor"],
-        renewable=config["renewable"],
-        crs=config["crs"],
-        countries=config["countries"],
-        cluster_options=config["cluster_options"],
-        focus_weights=config.get("focus_weights", None),
-        custom_busmap=config["enable"].get("custom_busmap", False),
     input:
         **retrieve_subregion("cluster_network"),
         network="networks/" + RDIR + "elec_s{simpl}.nc",
@@ -784,6 +772,17 @@ rule cluster_network:
     threads: 1
     resources:
         mem_mb=3000,
+    params:
+        aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
+        build_shape_options=config["build_shape_options"],
+        electricity=config["electricity"],
+        length_factor=config["lines"]["length_factor"],
+        renewable=config["renewable"],
+        crs=config["crs"],
+        countries=config["countries"],
+        cluster_options=config["cluster_options"],
+        focus_weights=config.get("focus_weights", None),
+        custom_busmap=config["enable"].get("custom_busmap", False),
     script:
         "scripts/cluster_network.py"
 
@@ -804,9 +803,6 @@ else:
 
 
 rule cluster_global_buildings:
-    params:
-        **solar_rooftop_params,
-        crs=config["crs"],
     input:
         country_buildings="data/global_buildings/{country}_global_buildings_raw.parquet",
         regions_onshore="resources/"
@@ -819,6 +815,9 @@ rule cluster_global_buildings:
             + RDIR
             + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv",
         ),
+    params:
+        **solar_rooftop_params,
+        crs=config["crs"],
     script:
         "scripts/cluster_global_buildings.py"
 
@@ -826,11 +825,6 @@ rule cluster_global_buildings:
 if config["augmented_line_connection"].get("add_to_snakefile") == True:
 
     rule augmented_line_connections:
-        params:
-            lines=config["lines"],
-            augmented_line_connection=config["augmented_line_connection"],
-            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
-            electricity=config["electricity"],
         input:
             tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
@@ -849,13 +843,16 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
         threads: 1
         resources:
             mem_mb=3000,
+        params:
+            lines=config["lines"],
+            augmented_line_connection=config["augmented_line_connection"],
+            hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
+            electricity=config["electricity"],
         script:
             "scripts/augmented_line_connections.py"
 
 
 rule add_extra_components:
-    params:
-        transmission_efficiency=config["sector"]["transmission_efficiency"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
@@ -868,17 +865,13 @@ rule add_extra_components:
     threads: 1
     resources:
         mem_mb=3000,
+    params:
+        transmission_efficiency=config["sector"]["transmission_efficiency"],
     script:
         "scripts/add_extra_components.py"
 
 
 rule prepare_network:
-    params:
-        links=config["links"],
-        lines=config["lines"],
-        s_max_pu=config["lines"]["s_max_pu"],
-        electricity=config["electricity"],
-        emission_prices=config["costs"]["emission_prices"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
@@ -895,6 +888,12 @@ rule prepare_network:
     threads: 1
     resources:
         mem_mb=4000,
+    params:
+        links=config["links"],
+        lines=config["lines"],
+        s_max_pu=config["lines"]["s_max_pu"],
+        electricity=config["electricity"],
+        emission_prices=config["costs"]["emission_prices"],
     script:
         "scripts/prepare_network.py"
 
@@ -926,10 +925,6 @@ def memory(w):
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 
     rule solve_network:
-        params:
-            solving=config["solving"],
-            augmented_line_connection=config["augmented_line_connection"],
-            policy_config=config["policy_config"],
         input:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
@@ -950,11 +945,15 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
             )
+        shadow:
+            "copy-minimal" if os.name == "nt" else "shallow"
         threads: 20
         resources:
             mem=memory,
-        shadow:
-            "copy-minimal" if os.name == "nt" else "shallow"
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         script:
             "scripts/solve_network.py"
 
@@ -962,8 +961,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
 
     rule monte_carlo:
-        params:
-            monte_carlo=config["monte_carlo"],
         input:
             "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         output:
@@ -981,6 +978,8 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         threads: 1
         resources:
             mem_mb=4000,
+        params:
+            monte_carlo=config["monte_carlo"],
         script:
             "scripts/monte_carlo.py"
 
@@ -994,10 +993,6 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             ),
 
     rule solve_network:
-        params:
-            solving=config["solving"],
-            augmented_line_connection=config["augmented_line_connection"],
-            policy_config=config["policy_config"],
         input:
             network="networks/"
             + RDIR
@@ -1025,11 +1020,15 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
                 + RDIR
                 + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
             )
+        shadow:
+            "copy-minimal" if os.name == "nt" else "shallow"
         threads: 20
         resources:
             mem_mb=memory,
-        shadow:
-            "copy-minimal" if os.name == "nt" else "shallow"
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         script:
             "scripts/solve_network.py"
 
@@ -1062,9 +1061,6 @@ def input_make_summary(w):
 
 
 rule make_summary:
-    params:
-        ll=config["scenario"]["ll"],
-        scenario=config["scenario"],
     input:
         input_make_summary,
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
@@ -1078,6 +1074,9 @@ rule make_summary:
         "logs/"
         + RDIR
         + "make_summary/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.log",
+    params:
+        ll=config["scenario"]["ll"],
+        scenario=config["scenario"],
     script:
         "scripts/make_summary.py"
 
@@ -1115,21 +1114,21 @@ rule solve_sector_networks:
 
 
 rule prepare_ports:
-    params:
-        custom_export=config["custom_data"]["export_ports"],
     output:
         ports="resources/" + SECDIR + "ports.csv",
         export_ports="resources/" + SECDIR + "export_ports.csv",
+    params:
+        custom_export=config["custom_data"]["export_ports"],
     script:
         "scripts/prepare_ports.py"
 
 
 rule prepare_airports:
+    output:
+        ports="resources/" + SECDIR + "airports.csv",
     params:
         airport_sizing_factor=config["sector"]["airport_sizing_factor"],
         airport_custom_data=config["custom_data"]["airports"],
-    output:
-        ports="resources/" + SECDIR + "airports.csv",
     script:
         "scripts/prepare_airports.py"
 
@@ -1151,10 +1150,6 @@ rule prepare_transport_data_input:
 if not config["custom_data"]["gas_network"]:
 
     rule prepare_gas_network:
-        params:
-            gas_config=config["sector"]["gas"],
-            alternative_clustering=config["cluster_options"]["alternative_clustering"],
-            custom_gas_network=config["custom_data"]["gas_network"],
         input:
             regions_onshore="resources/"
             + RDIR
@@ -1166,6 +1161,10 @@ if not config["custom_data"]["gas_network"]:
             # TODO: Should be a own snakemake rule
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
             # gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
+        params:
+            gas_config=config["sector"]["gas"],
+            alternative_clustering=config["cluster_options"]["alternative_clustering"],
+            custom_gas_network=config["custom_data"]["gas_network"],
         script:
             "scripts/prepare_gas_network.py"
 
@@ -1207,18 +1206,6 @@ HEAT = {
 
 
 rule prepare_sector_network:
-    params:
-        electricity=config["electricity"],
-        fossil_reserves=config["fossil_reserves"],
-        h2_underground=config["custom_data"]["h2_underground"],
-        countries=config["countries"],
-        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        h2_policy=config["policy_config"]["hydrogen"],
-        sector_options=config["sector"],
-        foresight=config["foresight"],
-        water_costs=config["custom_data"]["water_costs"],
-        co2_budget=config["co2_budget"],
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
@@ -1276,38 +1263,41 @@ rule prepare_sector_network:
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
-    threads: 1
-    resources:
-        mem_mb=2000,
     benchmark:
         (
             RESDIR
             + "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}"
         )
+    threads: 1
+    resources:
+        mem_mb=2000,
+    params:
+        electricity=config["electricity"],
+        fossil_reserves=config["fossil_reserves"],
+        h2_underground=config["custom_data"]["h2_underground"],
+        countries=config["countries"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        h2_policy=config["policy_config"]["hydrogen"],
+        sector_options=config["sector"],
+        foresight=config["foresight"],
+        water_costs=config["custom_data"]["water_costs"],
+        co2_budget=config["co2_budget"],
     script:
         "scripts/prepare_sector_network.py"
 
 
 rule build_ship_profile:
+    output:
+        ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
     params:
         snapshots=config["snapshots"],
         ship_opts=config["export"]["ship"],
-    output:
-        ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
     script:
         "scripts/build_ship_profile.py"
 
 
 rule add_export:
-    params:
-        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        store=config["export"]["store"],
-        store_capital_costs=config["export"]["store_capital_costs"],
-        export_profile=config["export"]["export_profile"],
-        export_endogenous=config["export"]["endogenous"],
-        endogenous_price=config["export"]["endogenous_price"],
-        snapshots=config["snapshots"],
     input:
         export_ports="resources/" + SECDIR + "export_ports.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
@@ -1320,15 +1310,20 @@ rule add_export:
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+    params:
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        store=config["export"]["store"],
+        store_capital_costs=config["export"]["store_capital_costs"],
+        export_profile=config["export"]["export_profile"],
+        export_endogenous=config["export"]["endogenous"],
+        endogenous_price=config["export"]["endogenous_price"],
+        snapshots=config["snapshots"],
     script:
         "scripts/add_export.py"
 
 
 rule override_respot:
-    params:
-        run=run["name"],
-        custom_data=config["custom_data"],
-        countries=config["countries"],
     input:
         **{
             f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": "resources/"
@@ -1353,6 +1348,10 @@ rule override_respot:
     output:
         RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
+    params:
+        run=run["name"],
+        custom_data=config["custom_data"],
+        countries=config["countries"],
     script:
         "scripts/override_respot.py"
 
@@ -1391,8 +1390,6 @@ rule prepare_transport_data:
 
 
 rule build_cop_profiles:
-    params:
-        heat_pump_sink_T=config["sector"]["heat_pump_sink_T"],
     input:
         temp_soil_total="resources/"
         + SECDIR
@@ -1431,14 +1428,16 @@ rule build_cop_profiles:
         cop_air_urban="resources/"
         + SECDIR
         + "cops/cop_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-    resources:
-        mem_mb=20000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "build_cop_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
+    resources:
+        mem_mb=20000,
+    params:
+        heat_pump_sink_T=config["sector"]["heat_pump_sink_T"],
     script:
         "scripts/build_cop_profiles.py"
 
@@ -1492,26 +1491,22 @@ rule prepare_heat_data:
 
 
 rule build_base_energy_totals:
+    input:
+        unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
+    output:
+        energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
+        unsd_export_path=directory("data/demand/unsd/data/"),
     params:
         space_heat_share=config["sector"]["space_heat_share"],
         update_data=config["demand_data"]["update_data"],
         base_year=config["demand_data"]["base_year"],
         countries=config["countries"],
         shift_coal_to_elec=config["sector"]["coal"]["shift_to_elec"],
-    input:
-        unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
-    output:
-        energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
-        unsd_export_path=directory("data/demand/unsd/data/"),
     script:
         "scripts/build_base_energy_totals.py"
 
 
 rule prepare_energy_totals:
-    params:
-        countries=config["countries"],
-        base_year=config["demand_data"]["base_year"],
-        sector_options=config["sector"],
     input:
         unsd_paths="resources/" + SECDIR + "energy_totals_base.csv",
         efficiency_gains_cagr="data/demand/efficiency_gains_cagr.csv",
@@ -1522,14 +1517,15 @@ rule prepare_energy_totals:
         energy_totals="resources/"
         + SECDIR
         + "energy_totals_{demand}_{planning_horizons}.csv",
+    params:
+        countries=config["countries"],
+        base_year=config["demand_data"]["base_year"],
+        sector_options=config["sector"],
     script:
         "scripts/prepare_energy_totals.py"
 
 
 rule build_solar_thermal_profiles:
-    params:
-        solar_thermal_config=config["solar_thermal"],
-        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/"
         + SECDIR
@@ -1558,21 +1554,22 @@ rule build_solar_thermal_profiles:
         solar_thermal_rural="resources/"
         + SECDIR
         + "demand/heat/solar_thermal_rural_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-    resources:
-        mem_mb=20000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "build_solar_thermal_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
+    resources:
+        mem_mb=20000,
+    params:
+        solar_thermal_config=config["solar_thermal"],
+        snapshots=config["snapshots"],
     script:
         "scripts/build_solar_thermal_profiles.py"
 
 
 rule build_population_layouts:
-    params:
-        planning_horizons=config["scenario"]["planning_horizons"][0],
     input:
         nuts3_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
@@ -1594,11 +1591,13 @@ rule build_population_layouts:
         gdp_layout="resources/"
         + SECDIR
         + "gdp_shares/gdp_layout_{planning_horizons}.nc",
-    resources:
-        mem_mb=20000,
     benchmark:
         ("benchmarks/" + SECDIR + "build_population_layouts_{planning_horizons}")
     threads: 8
+    resources:
+        mem_mb=20000,
+    params:
+        planning_horizons=config["scenario"]["planning_horizons"][0],
     script:
         "scripts/build_population_layouts.py"
 
@@ -1641,21 +1640,19 @@ rule build_clustered_population_layouts:
         clustered_gdp_layout="resources/"
         + SECDIR
         + "gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-    resources:
-        mem_mb=10000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "build_clustered_population_layouts/s{simpl}_{clusters}_{planning_horizons}"
         )
+    resources:
+        mem_mb=10000,
     script:
         "scripts/build_clustered_population_layouts.py"
 
 
 rule build_heat_demand:
-    params:
-        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/"
         + SECDIR
@@ -1684,21 +1681,21 @@ rule build_heat_demand:
         heat_demand_total="resources/"
         + SECDIR
         + "demand/heat/heat_demand_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-    resources:
-        mem_mb=20000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "build_heat_demand/s{simpl}_{clusters}_{planning_horizons}"
         )
+    resources:
+        mem_mb=20000,
+    params:
+        snapshots=config["snapshots"],
     script:
         "scripts/build_heat_demand.py"
 
 
 rule build_temperature_profiles:
-    params:
-        snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/"
         + SECDIR
@@ -1736,30 +1733,32 @@ rule build_temperature_profiles:
         temp_air_urban="resources/"
         + SECDIR
         + "temperatures/temp_air_urban_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
-    resources:
-        mem_mb=20000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "build_temperature_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
+    resources:
+        mem_mb=20000,
+    params:
+        snapshots=config["snapshots"],
     script:
         "scripts/build_temperature_profiles.py"
 
 
 rule copy_config:
-    params:
-        summary_dir=config["summary_dir"],
-        run=run,
     output:
         folder=directory(SDIR + "configs"),
         config=SDIR + "configs/config.yaml",
+    benchmark:
+        SDIR + "benchmarks/copy_config"
     threads: 1
     resources:
         mem_mb=1000,
-    benchmark:
-        SDIR + "benchmarks/copy_config"
+    params:
+        summary_dir=config["summary_dir"],
+        run=run,
     script:
         "scripts/copy_config.py"
 
@@ -1767,10 +1766,6 @@ rule copy_config:
 if config["foresight"] == "overnight":
 
     rule solve_sector_network:
-        params:
-            solving=config["solving"],
-            augmented_line_connection=config["augmented_line_connection"],
-            policy_config=config["policy_config"],
         input:
             # network=RESDIR
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
@@ -1782,8 +1777,6 @@ if config["foresight"] == "overnight":
         output:
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-        shadow:
-            "copy-minimal" if os.name == "nt" else "shallow"
         log:
             solver="logs/"
             + SECDIR
@@ -1794,28 +1787,25 @@ if config["foresight"] == "overnight":
             memory="logs/"
             + SECDIR
             + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
-        threads: 25
-        resources:
-            mem_mb=config["solving"]["mem"],
         benchmark:
             (
                 RESDIR
                 + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
             )
+        shadow:
+            "copy-minimal" if os.name == "nt" else "shallow"
+        threads: 25
+        resources:
+            mem_mb=config["solving"]["mem"],
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         script:
             "scripts/solve_network.py"
 
 
 rule make_sector_summary:
-    params:
-        planning_horizons=config["scenario"]["planning_horizons"],
-        results_dir=config["results_dir"],
-        summary_dir=config["summary_dir"],
-        run=run["name"],
-        scenario_config=config["scenario"],
-        costs_config=config["costs"],
-        h2export_qty=config["export"]["h2export"],
-        foresight=config["foresight"],
     input:
         networks=expand(
             RESDIR
@@ -1848,11 +1838,20 @@ rule make_sector_summary:
         market_values=SDIR + "csvs/market_values.csv",
         price_statistics=SDIR + "csvs/price_statistics.csv",
         metrics=SDIR + "csvs/metrics.csv",
+    benchmark:
+        SDIR + "benchmarks/make_summary"
     threads: 2
     resources:
         mem_mb=10000,
-    benchmark:
-        SDIR + "benchmarks/make_summary"
+    params:
+        planning_horizons=config["scenario"]["planning_horizons"],
+        results_dir=config["results_dir"],
+        summary_dir=config["summary_dir"],
+        run=run["name"],
+        scenario_config=config["scenario"],
+        costs_config=config["costs"],
+        h2export_qty=config["export"]["h2export"],
+        foresight=config["foresight"],
     script:
         "scripts/make_summary.py"
 
@@ -1875,9 +1874,6 @@ rule plot_summary:
 
 
 rule plot_network:
-    params:
-        electricity=config["electricity"],
-        plotting=config["plotting"],
     input:
         network="results/"
         + RDIR
@@ -1895,20 +1891,23 @@ rule plot_network:
         "logs/"
         + RDIR
         + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
+    params:
+        electricity=config["electricity"],
+        plotting=config["plotting"],
     script:
         "scripts/plot_network.py"
 
 
 rule make_statistics:
+    output:
+        stats="results/" + RDIR + "stats.csv",
+    threads: 1
     params:
         countries=config["countries"],
         renewable_carriers=config["electricity"]["renewable_carriers"],
         renewable=config["renewable"],
         crs=config["crs"],
         scenario=config["scenario"],
-    output:
-        stats="results/" + RDIR + "stats.csv",
-    threads: 1
     script:
         "scripts/make_statistics.py"
 
@@ -1920,14 +1919,14 @@ rule plot_sector_network:
     output:
         map=RESDIR
         + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
-    threads: 2
-    resources:
-        mem_mb=10000,
     benchmark:
         (
             RESDIR
             + "benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
+    threads: 2
+    resources:
+        mem_mb=10000,
     script:
         "scripts/plot_network.py"
 
@@ -1941,11 +1940,11 @@ rule plot_sector_summary:
         costs=SDIR + "graphs/costs.pdf",
         energy=SDIR + "graphs/energy.pdf",
         balances=SDIR + "graphs/balances-energy.pdf",
+    benchmark:
+        SDIR + "benchmarks/plot_summary"
     threads: 2
     resources:
         mem_mb=10000,
-    benchmark:
-        SDIR + "benchmarks/plot_summary"
     script:
         "scripts/plot_summary.py"
 
@@ -1958,32 +1957,27 @@ rule build_industrial_database:
 
 
 rule prepare_db:
-    params:
-        tech_colors=config["plotting"]["tech_colors"],
     input:
         network=RESDIR
         + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     output:
         db=RESDIR
         + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.csv",
-    threads: 2
-    resources:
-        mem_mb=10000,
     benchmark:
         (
             RESDIR
             + "benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         )
+    threads: 2
+    resources:
+        mem_mb=10000,
+    params:
+        tech_colors=config["plotting"]["tech_colors"],
     script:
         "scripts/prepare_db.py"
 
 
 rule build_industrial_distribution_key:  #default data
-    params:
-        countries=config["countries"],
-        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        industry_database=config["custom_data"]["industry_database"],
     input:
         regions_onshore="resources/"
         + RDIR
@@ -2002,24 +1996,25 @@ rule build_industrial_distribution_key:  #default data
         industrial_distribution_key="resources/"
         + SECDIR
         + "demand/industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-    threads: 1
-    resources:
-        mem_mb=1000,
     benchmark:
         (
             "benchmarks/"
             + RDIR
             + "build_industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}"
         )
+    threads: 1
+    resources:
+        mem_mb=1000,
+    params:
+        countries=config["countries"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        industry_database=config["custom_data"]["industry_database"],
     script:
         "scripts/build_industrial_distribution_key.py"
 
 
 rule build_base_industry_totals:  #default data
-    params:
-        base_year=config["demand_data"]["base_year"],
-        countries=config["countries"],
-        other_industries=config["demand_data"]["other_industries"],
     input:
         #os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
         #industrial_production_per_country="data/industrial_production_per_country.csv",
@@ -2030,26 +2025,24 @@ rule build_base_industry_totals:  #default data
         base_industry_totals="resources/"
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
-    threads: 1
-    resources:
-        mem_mb=1000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "build_base_industry_totals_{planning_horizons}_{demand}"
         )
+    threads: 1
+    resources:
+        mem_mb=1000,
+    params:
+        base_year=config["demand_data"]["base_year"],
+        countries=config["countries"],
+        other_industries=config["demand_data"]["other_industries"],
     script:
         "scripts/build_base_industry_totals.py"
 
 
 rule build_industry_demand:  #default data
-    params:
-        countries=config["countries"],
-        industry_demand=config["custom_data"]["industry_demand"],
-        base_year=config["demand_data"]["base_year"],
-        industry_util_factor=config["sector"]["industry_util_factor"],
-        aluminium_year=config["demand_data"]["aluminium_year"],
     input:
         industrial_distribution_key="resources/"
         + SECDIR
@@ -2066,24 +2059,26 @@ rule build_industry_demand:  #default data
         industrial_energy_demand_per_node="resources/"
         + SECDIR
         + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv",
-    threads: 1
-    resources:
-        mem_mb=1000,
     benchmark:
         (
             "benchmarks/"
             + SECDIR
             + "industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv"
         )
+    threads: 1
+    resources:
+        mem_mb=1000,
+    params:
+        countries=config["countries"],
+        industry_demand=config["custom_data"]["industry_demand"],
+        base_year=config["demand_data"]["base_year"],
+        industry_util_factor=config["sector"]["industry_util_factor"],
+        aluminium_year=config["demand_data"]["aluminium_year"],
     script:
         "scripts/build_industry_demand.py"
 
 
 rule build_existing_heating_distribution:
-    params:
-        baseyear=config["scenario"]["planning_horizons"][0],
-        sector=config["sector"],
-        existing_capacities=config["existing_capacities"],
     input:
         existing_heating="data/existing_infrastructure/existing_heating_raw.csv",
         clustered_pop_layout="resources/"
@@ -2100,15 +2095,19 @@ rule build_existing_heating_distribution:
         existing_heating_distribution="resources/"
         + SECDIR
         + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
-    threads: 1
-    resources:
-        mem_mb=2000,
     log:
         RESDIR
         + "logs/build_existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.log",
     benchmark:
         RESDIR
-        +"benchmarks/build_existing_heating_distribution/{demand}_s{simpl}_{clusters}_{planning_horizons}"
+        + "benchmarks/build_existing_heating_distribution/{demand}_s{simpl}_{clusters}_{planning_horizons}"
+    threads: 1
+    resources:
+        mem_mb=2000,
+    params:
+        baseyear=config["scenario"]["planning_horizons"][0],
+        sector=config["sector"],
+        existing_capacities=config["existing_capacities"],
     script:
         "scripts/build_existing_heating_distribution.py"
 
@@ -2128,11 +2127,6 @@ if config["foresight"] == "myopic":
     }
 
     rule add_existing_baseyear:
-        params:
-            baseyear=config["scenario"]["planning_horizons"][0],
-            sector=config["sector"],
-            existing_capacities=config["existing_capacities"],
-            costs=config["costs"],
         input:
             **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR
@@ -2149,6 +2143,12 @@ if config["foresight"] == "myopic":
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        log:
+            RESDIR
+            + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
+        benchmark:
+            RESDIR
+            + "benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
         wildcard_constraints:
             # TODO: The first planning_horizon needs to be aligned across scenarios
             # snakemake does not support passing functions to wildcard_constraints
@@ -2157,12 +2157,11 @@ if config["foresight"] == "myopic":
         threads: 1
         resources:
             mem_mb=2000,
-        log:
-            RESDIR
-            + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
-        benchmark:
-            RESDIR
-            +"benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+        params:
+            baseyear=config["scenario"]["planning_horizons"][0],
+            sector=config["sector"],
+            existing_capacities=config["existing_capacities"],
+            costs=config["costs"],
         script:
             "scripts/add_existing_baseyear.py"
 
@@ -2188,15 +2187,6 @@ if config["foresight"] == "myopic":
         )
 
     rule add_brownfield:
-        params:
-            H2_retrofit=config["sector"]["hydrogen"],
-            H2_retrofit_capacity_per_CH4=config["sector"]["hydrogen"][
-                "H2_retrofit_capacity_per_CH4"
-            ],
-            threshold_capacity=config["existing_capacities"]["threshold_capacity"],
-            snapshots=config["snapshots"],
-            # drop_leap_day=config["enable"]["drop_leap_day"],
-            carriers=config["electricity"]["renewable_carriers"],
         input:
             # unpack(input_profile_tech_brownfield),
             simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
@@ -2216,9 +2206,6 @@ if config["foresight"] == "myopic":
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
-        threads: 4
-        resources:
-            mem_mb=10000,
         log:
             RESDIR
             + "logs/add_brownfield_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
@@ -2227,21 +2214,24 @@ if config["foresight"] == "myopic":
                 RESDIR
                 + "benchmarks/add_brownfield/elec_s{simpl}_ec_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
             )
+        threads: 4
+        resources:
+            mem_mb=10000,
+        params:
+            H2_retrofit=config["sector"]["hydrogen"],
+            H2_retrofit_capacity_per_CH4=config["sector"]["hydrogen"][
+                "H2_retrofit_capacity_per_CH4"
+            ],
+            threshold_capacity=config["existing_capacities"]["threshold_capacity"],
+            snapshots=config["snapshots"],
+            # drop_leap_day=config["enable"]["drop_leap_day"],
+            carriers=config["electricity"]["renewable_carriers"],
         script:
             "./scripts/add_brownfield.py"
 
     ruleorder: add_existing_baseyear > add_brownfield
 
     rule solve_network_myopic:
-        params:
-            solving=config["solving"],
-            foresight=config["foresight"],
-            planning_horizons=config["scenario"]["planning_horizons"],
-            co2_sequestration_potential=config["scenario"].get(
-                "co2_sequestration_potential", 200
-            ),
-            augmented_line_connection=config["augmented_line_connection"],
-            policy_config=config["policy_config"],
         input:
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
@@ -2253,8 +2243,6 @@ if config["foresight"] == "myopic":
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
             # config=RESDIR
             # + "configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.yaml",
-        shadow:
-            "copy-minimal" if os.name == "nt" else "shallow"
         log:
             solver="logs/"
             + SECDIR
@@ -2265,14 +2253,25 @@ if config["foresight"] == "myopic":
             memory="logs/"
             + SECDIR
             + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
-        threads: 25
-        resources:
-            mem_mb=config["solving"]["mem"],
         benchmark:
             (
                 RESDIR
                 + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
             )
+        shadow:
+            "copy-minimal" if os.name == "nt" else "shallow"
+        threads: 25
+        resources:
+            mem_mb=config["solving"]["mem"],
+        params:
+            solving=config["solving"],
+            foresight=config["foresight"],
+            planning_horizons=config["scenario"]["planning_horizons"],
+            co2_sequestration_potential=config["scenario"].get(
+                "co2_sequestration_potential", 200
+            ),
+            augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
         script:
             "./scripts/solve_network.py"
 
