@@ -1087,14 +1087,21 @@ if not config["custom_data"]["gas_network"]:
             gas_config=config["sector"]["gas"],
             alternative_clustering=config["cluster_options"]["alternative_clustering"],
             custom_gas_network=config["custom_data"]["gas_network"],
+            hydrogen_config=config["sector"]["hydrogen"],
         input:
             regions_onshore="resources/"
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            regions_offshore="resources/"
+            + RDIR
+            + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
         output:
             clustered_gas_network="resources/"
             + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
+            h2_pipeline_import_nodes="resources/" 
+            + SECDIR 
+            + "gas_networks/h2_pipeline_import_nodes_elec_s{simpl}_{clusters}.csv",
             # TODO: Should be a own snakemake rule
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
             # gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
@@ -1230,6 +1237,28 @@ rule build_ship_profile:
     script:
         "scripts/build_ship_profile.py"
 
+
+rule prepare_import:
+    params:
+        imports_config=config["imports"],
+        alternative_clustering=config["cluster_options"]["alternative_clustering"],
+        gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
+    input:
+        regions_onshore="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        h2_pipeline_import_nodes="resources/"
+        + SECDIR
+        + "gas_networks/h2_pipeline_import_nodes_elec_s{simpl}_{clusters}.csv",
+        export_ports="resources/"
+        + SECDIR
+        + "export_ports.csv",
+    output:
+        h2_import_nodes="resources/"
+        + SECDIR
+        + "h2_import_nodes_elec_s{simpl}_{clusters}.csv",
+    script:
+        "scripts/prepare_import.py"
 
 rule add_export:
     params:
