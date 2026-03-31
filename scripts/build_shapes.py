@@ -1325,9 +1325,10 @@ def gadm(
         lambda x: x if x.find(".") == 0 else "." + x
     )
     df_gadm.set_index("GADM_ID", inplace=True)
-    if df_gadm.index.duplicated().any():
-        all_duplicated = df_gadm.index.duplicated(keep=False).sum()
-        list_duplicated = df_gadm.index[df_gadm.index.duplicated(keep=False)].unique()
+    idx_duplicated = df_gadm.index.duplicated(keep=False)
+    if idx_duplicated.any():
+        all_duplicated = idx_duplicated.sum()
+        list_duplicated = df_gadm.index[idx_duplicated].unique()
         n_duplicated = df_gadm.index.duplicated(keep="first").sum()
         logger.warning(
             f"Duplicated GADM_ID found, dissolving {all_duplicated} geometries with the same GADM_ID into {n_duplicated} shapes: {list_duplicated}"
