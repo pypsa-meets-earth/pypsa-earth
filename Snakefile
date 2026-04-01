@@ -1260,6 +1260,21 @@ rule prepare_import:
     script:
         "scripts/prepare_import.py"
 
+
+rule add_import:
+    params:
+        imports_config=config["imports"],
+    input:
+        network=RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        h2_import_nodes="resources/" + SECDIR + "h2_import_nodes_elec_s{simpl}_{clusters}.csv",
+    output:
+        RESDIR
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_import.nc",
+    script:
+        "scripts/add_import.py"
+
+
 rule add_export:
     params:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],

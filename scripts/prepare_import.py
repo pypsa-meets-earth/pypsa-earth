@@ -7,9 +7,7 @@ Prepare import nodes.
 """
 
 import logging
-import os
 from os import path
-import zipfile
 from pathlib import Path
 
 import fiona
@@ -17,21 +15,11 @@ import geopandas as gpd
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import pandas as pd
-from _helpers import (
-    BASE_DIR,
-    content_retrieve,
-    progress_retrieve,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
-    locate_bus, 
-)
-from build_shapes import gadm
-from matplotlib.lines import Line2D
-from pyproj import CRS
 from pypsa.geo import haversine_pts
 from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
+
 
 logger = logging.getLogger(__name__)
 
@@ -147,11 +135,12 @@ def load_ports(path):
     return ports
 
 
-def get_remaining_port_budget(pipeline_p_nom_total):
+def get_remaining_port_budget(pipeline_p_nom_max_total):
     """
     Remaining port budget after subtracting fixed pipeline import capacity.
     """
     import_limit = snakemake.params.imports_config["limit"]
+    import_limit = float(import_limit) * 1e6 / 8760  # Convert from TWh/a to MW
 
     if import_limit is None:
         raise ValueError(
@@ -159,19 +148,18 @@ def get_remaining_port_budget(pipeline_p_nom_total):
             "snakemake.params.imports_config['limit']"
         )
 
-    import_limit = float(import_limit)
-    pipeline_p_nom_total = float(pipeline_p_nom_total)
+    pipeline_p_nom_max_total = float(pipeline_p_nom_max_total)
 
     if import_limit < 0:
         raise ValueError("Import limit must be non-negative.")
 
-    if pipeline_p_nom_total < 0:
-        raise ValueError("pipeline_p_nom_total must be non-negative.")
+    if pipeline_p_nom_max_total < 0:
+        raise ValueError("pipeline_p_nom_max_total must be non-negative.")
 
-    return max(import_limit - pipeline_p_nom_total, 0.0)
+    return max(import_limit - pipeline_p_nom_max_total, 0.0)
 
 
-def assign_port_p_nom(ports, pipeline_p_nom_total):
+def assign_port_p_nom(ports, pipeline_p_nom_max_total):
     """
     Assign maximum port-based H2 import capacity to ports.
 
@@ -183,7 +171,7 @@ def assign_port_p_nom(ports, pipeline_p_nom_total):
     ----------
     ports : pandas.DataFrame
         Ports dataframe with at least the column ``fraction``.
-    pipeline_p_nom_total : float
+    pipeline_p_nom_max_total : float
         Total existing pipeline-based import capacity.
 
     Returns
@@ -210,7 +198,7 @@ def assign_port_p_nom(ports, pipeline_p_nom_total):
             f"{invalid.to_string(index=False)}"
         )
 
-    port_budget = get_remaining_port_budget(pipeline_p_nom_total)
+    port_budget = get_remaining_port_budget(pipeline_p_nom_max_total)
 
     fraction_sum = ports["fraction"].sum()
     if fraction_sum <= 0:
@@ -315,7 +303,7 @@ def map_import_locations_to_nodes(df, regions_or_buses):
     )
  
  
-def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_total, tol=1e-6):
+def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_max_total, tol=1e-6):
     """
     Aggregate pipeline and port-based H2 import capacities by model node.
 
@@ -338,7 +326,7 @@ def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_total, tol=1e-6
         Aggregated import capacities per node with columns:
         - bus
         - country
-        - p_nom_pipeline
+        - p_nom_max_pipeline
         - p_nom_max_port
         - p_nom_max_total
     """
@@ -363,7 +351,7 @@ def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_total, tol=1e-6
         pipelines.copy()
         .groupby("bus", as_index=False)["p_nom"]
         .sum()
-        .rename(columns={"p_nom": "p_nom_pipeline"})
+        .rename(columns={"p_nom": "p_nom_max_pipeline"})
     )
 
     port_agg = (
@@ -374,7 +362,7 @@ def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_total, tol=1e-6
     )
 
     # final safety cap after node aggregation
-    port_budget = get_remaining_port_budget(pipeline_p_nom_total)
+    port_budget = get_remaining_port_budget(pipeline_p_nom_max_total)
 
     if not port_agg.empty:
         total_port = port_agg["p_nom_max_port"].sum()
@@ -398,7 +386,7 @@ def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_total, tol=1e-6
         how="outer",
     ).fillna(0.0)
 
-    df["p_nom_max_total"] = df["p_nom_pipeline"] + df["p_nom_max_port"]
+    df["p_nom_max_total"] = df["p_nom_max_pipeline"] + df["p_nom_max_port"]
     df = df.sort_values("bus").reset_index(drop=True)
 
     return df
@@ -420,7 +408,7 @@ if __name__ == "__main__":
     else:
         pipelines = pd.DataFrame(columns=["bus", "country", "p_nom"])
 
-    pipeline_p_nom_total = pd.to_numeric(
+    pipeline_p_nom_max_total = pd.to_numeric(
         pipelines.get("p_nom", pd.Series(dtype=float)),
         errors="coerce",
     ).fillna(0.0).sum()
@@ -435,14 +423,14 @@ if __name__ == "__main__":
         )
 
         # then distribute remaining budget only across valid mapped ports
-        ports = assign_port_p_nom(ports, pipeline_p_nom_total)
+        ports = assign_port_p_nom(ports, pipeline_p_nom_max_total)
     else:
         ports = pd.DataFrame(columns=["bus", "country", "fraction", "p_nom_max"])
 
     h2_import_nodes = aggregate_h2_import_by_node(
         pipelines,
         ports,
-        pipeline_p_nom_total,
+        pipeline_p_nom_max_total,
     )
 
     h2_import_nodes.to_csv(
