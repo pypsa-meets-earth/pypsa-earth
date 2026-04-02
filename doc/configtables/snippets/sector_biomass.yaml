@@ -2,6 +2,6 @@
 
   biomass_transport: true # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
-  biomass_default_carrier: "solid biomass"
+  biomass_default_carrier: "solid biomass" # Can be either "solid biomass" or "biomass"
   solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
   biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
