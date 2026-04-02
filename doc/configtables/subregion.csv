@@ -1,7 +1,6 @@
 Parameter,Unit,Values,Description
-enable,  ,  ,"  "
--- simplify_network,bool,"{True, False}","Enables subregion definitions in ``simplify_network``, allowing network simplification functions to drop or merge nodes based on subregions rather than just countries."
--- cluster_network,bool,"{True, False}","Enables subregion definitions in ``cluster_network``, allowing ``focus_weights`` to set clustering focus based on subregion names."
-define_by_gadm,Str: list, {subregion_name}: [GADM IDs],Specifies the names of subregions and its GADM IDs as a list
-path_custom_shapes,-,path,(optional) Specifies the subregion based on a custom shapes
+method,,"{gadm, custom , false}","""method to define subregions, either ""gadm"" or ""custom"", false to not use subregions""".
+apply_on,list,"Any subset of {simplify_network, cluster_network}",Enables subregion definitions in specific rules. ``simplify_network`` allows network simplification functions to drop or merge nodes based on subregions rather than just countries. ``cluster_network`` allows ``focus_weights`` to set clustering focus based on subregion names.
+define_by_gadm,Str: list,{subregion_name}: [GADM IDs],Specifies the names of subregions and its GADM IDs as a list
+path_custom_shapes,-,path,Specifies the subregion based on a custom shapes
 tolerance,km,int,Buffer distance for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
