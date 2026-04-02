@@ -1981,6 +1981,13 @@ def crop_offshore(
 
             coords = points_gdf.geometry.get_coordinates()[["x", "y"]]
 
+            if len(coords) > 1000:
+                logger.warning(
+                    f"Voronoi partitioning for {country} with {len(coords)} points may be slow. "
+                    "Consider increasing the `interval_km` parameter to reduce the number of points, "
+                    "or set `build_shape_options: simplify_gadm:` as True."
+                )
+
             voronoi_geoms = voronoi(coords, outline)
 
             points_gdf = points_gdf.copy()

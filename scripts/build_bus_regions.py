@@ -50,7 +50,6 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import REGION_COLS, configure_logging, create_logger, nearest_shape
-from shapely import points
 from shapely.geometry import Polygon
 
 logger = create_logger(__name__)
