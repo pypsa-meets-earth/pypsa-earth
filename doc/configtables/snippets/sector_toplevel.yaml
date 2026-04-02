@@ -1,0 +1,41 @@
+sector:
+  enable:
+    heat: true
+    biomass: true
+    industry: true
+    shipping: true
+    aviation: true
+    land_transport: true
+    rail_transport: true
+    agriculture: true
+    residential: true
+    services: true
+
+  gas:
+    spatial_gas: true # ALWAYS TRUE
+    network: false # ALWAYS FALSE for now (NOT USED)
+    network_data: GGIT # Global dataset -> 'GGIT' , European dataset -> 'IGGIELGN'
+    network_data_GGIT_status: ["Construction", "Operating", "Idle", "Shelved", "Mothballed", "Proposed"]
+
+  hydrogen:
+    network: true
+    H2_retrofit_capacity_per_CH4: 0.6
+    network_limit: 2000 #GWkm
+    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
+    gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
+    underground_storage: false
+    hydrogen_colors: false
+    set_color_shares: false
+    blue_share: 0.40
+    pink_share: 0.05
+    production_technologies: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"] a list of H2 production technologies that can be added
+
+  coal:
+    spatial_coal: true
+    shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
+
+  lignite:
+    spatial_lignite: false
+
+  oil:
+    spatial_oil: true
