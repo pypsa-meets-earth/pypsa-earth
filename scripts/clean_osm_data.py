@@ -57,10 +57,10 @@ def prepare_substation_df(df_all_buses):
 
     # Initialize columns to default value
     df_all_buses["dc"] = False
-    
+
     if "under_construction" in df_all_buses.columns:
-        df_all_buses["under_construction"] = (
-            df_all_buses["under_construction"].fillna(False)
+        df_all_buses["under_construction"] = df_all_buses["under_construction"].fillna(
+            False
         )
     else:
         df_all_buses["under_construction"] = False
@@ -1030,9 +1030,7 @@ def clean_data(
 
         # add line endings if option is enabled
         if add_line_endings:
-            df_all_buses = add_line_endings_tosubstations(
-                df_all_buses, df_all_lines
-            )
+            df_all_buses = add_line_endings_tosubstations(df_all_buses, df_all_lines)
 
         # drop substations with nan geometry
         df_all_buses.dropna(subset=["geometry"], axis=0, inplace=True)
