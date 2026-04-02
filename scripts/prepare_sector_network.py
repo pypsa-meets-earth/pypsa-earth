@@ -879,6 +879,8 @@ def add_biomass(n, costs, options, pop_layout):
     solid biomass, biomass EOP, biomass transport, and different
     biomass conversion technologies (biogas to gas, CHP).
 
+    NOTE: when biomass is enabled, biomass based carriers are converted into solid biomass.
+
     Parameters
     ----------
     n : pypsa.Network
@@ -891,33 +893,38 @@ def add_biomass(n, costs, options, pop_layout):
         DataFrame containing population layout information
     """
     logger.info("adding biomass")
+    biomass_default = options["biomass_default_carrier"]
 
     n.add("Carrier", "biogas")
-    n.add("Carrier", "solid biomass")
+    n.add("Carrier", "solid biomass") if biomass_source == "solid biomass" else None
 
     n.madd(
         "Bus", spatial.gas.biogas, location=spatial.biomass.locations, carrier="biogas"
     )
 
-    n.madd(
-        "Bus",
-        spatial.biomass.nodes,
-        location=spatial.biomass.locations,
-        carrier="solid biomass",
-    )
-
-    # Drop existing biomass sources in favor of the options below
-    drop_gen = n.generators[n.generators.carrier == "biomass"].index
-    n.mremove("Generator", drop_gen)
+    # Update biomass components to use the default biomass carrier
+    biomass_source = n.generators[n.generators.bus.isin(spatial.biomass.nodes)].index
+    n.buses.loc[spatial.biomass.nodes, "carrier"] = biomass_default
+    n.generators.loc[biomass_source, "carrier"] = biomass_default
+    n.generators.loc[biomass_source, "marginal_cost"] = costs.at[
+        biomass_default, "fuel"
+    ]
 
     # Write loggers
-    logger_biomass = "Adding global biomass "
+    logger_biomass = f"Adding global {biomass_default} "
     logger_biogas = "Adding global biogas "
 
     biomass_pot = options["solid_biomass_potential"]
-    if biomass_pot:
+    if math.isinf(biomass_pot):
+        # No limits to solid biomass.
+        logger_biomass += "sources"
+
+    elif biomass_pot:
         # Set limits to the use of solid biomass
         logger_biomass += f"potential of {biomass_pot} TWh/a"
+
+        # remove infinite biomass source
+        n.mremove("Generator", biomass_source)
 
         if len(spatial.biomass.nodes) > 1:
             logger_biomass += ", distributed based on population"
@@ -934,27 +941,27 @@ def add_biomass(n, costs, options, pop_layout):
             "Store",
             spatial.biomass.nodes,
             bus=spatial.biomass.nodes,
-            carrier="solid biomass",
+            carrier=biomass_default,
             e_nom=biomass_pot_spatial,
-            marginal_cost=costs.at["solid biomass", "fuel"],
+            marginal_cost=costs.at[biomass_default, "fuel"],
             e_initial=biomass_pot_spatial,
         )
-    elif math.isinf(biomass_pot):
-        # No limits to solid biomass
-        n.madd(
-            "Generator",
-            spatial.biomass.nodes,
-            bus=spatial.biomass.nodes,
-            p_nom_extendable=True,
-            carrier="solid biomass",
-            marginal_cost=costs.at["solid biomass", "fuel"],
-        )
-        logger_biomass += "sources"
     else:
         logger_biomass = "No biomass sources added"
 
     biogas_pot = options["biogas_potential"]
-    if biogas_pot:
+    if math.isinf(biogas_pot):
+        logger_biogas += "sources"
+        # No limits to biogas
+        n.madd(
+            "Generator",
+            spatial.gas.biogas,
+            bus=spatial.gas.biogas,
+            p_nom_extendable=True,
+            carrier="biogas",
+            marginal_cost=costs.at["biogas", "fuel"],
+        )
+    elif biogas_pot:
         # Set limits to the use of biogas
         logger_biogas += f"potential of {biogas_pot} TWh/a"
 
@@ -978,17 +985,6 @@ def add_biomass(n, costs, options, pop_layout):
             marginal_cost=costs.at["biogas", "fuel"],
             e_initial=biogas_pot_spatial,
         )
-    elif math.isinf(biogas_pot):
-        # No limits to biogas
-        n.madd(
-            "Generator",
-            spatial.gas.biogas,
-            bus=spatial.gas.biogas,
-            p_nom_extendable=True,
-            carrier="biogas",
-            marginal_cost=costs.at["biogas", "fuel"],
-        )
-        logger_biogas += "sources"
     else:
         logger_biomass = "No biogas sources added"
 
