@@ -44,23 +44,21 @@ import numpy as np
 import pandas as pd
 import pypsa
 from _helpers import (
-    STORE_LOOKUP,
     configure_logging,
     create_logger,
     lossy_bidirectional_links,
     set_length_based_efficiency,
 )
-from add_electricity import (
-    _add_missing_carriers_from_costs,
-    add_nice_carrier_names,
-)
+from add_electricity import add_nice_carrier_names
 
 idx = pd.IndexSlice
 
 logger = create_logger(__name__)
 
 
-def get_available_storage_carriers(n, carriers, include_H2=False):
+def get_available_storage_carriers(
+    n: pypsa.Network, carriers: list, storage_techs: dict
+) -> list:
     """
     Filter and register available storage carriers from a given list.
 
@@ -68,21 +66,17 @@ def get_available_storage_carriers(n, carriers, include_H2=False):
     ----------
     n : pypsa.Network
         The PyPSA network object to which valid storage carriers will be added.
-
     carriers : list of str
         A list of carrier names to filter and potentially register as storage technologies.
+    storage_techs : dict
+        A dictionary mapping storage carriers to their respective technology parameters.
 
     Returns
     -------
     list of str
         A list of storage carriers that are both implemented and available in the network.
-
-    Notes
-    -----
-    Hydrogen-related carriers (e.g., "H2", "H2 tank", "H2 underground") are
-    currently excluded from the returned list, even if implemented.
     """
-    implemented = set(STORE_LOOKUP.keys())
+    implemented = set(storage_techs.keys())
     input_carriers = set(carriers)
 
     not_implemented = input_carriers - implemented
@@ -91,10 +85,7 @@ def get_available_storage_carriers(n, carriers, include_H2=False):
             f"The following carriers are not implemented as storage technologies in PyPSA-Eur: {sorted(not_implemented)}"
         )
 
-    # Define carriers to exclude (e.g. handled differently elsewhere)
-
-    excluded = set() if include_H2 else {"H2", "H2 underground"}
-    available_carriers = sorted((input_carriers & implemented) - excluded)
+    available_carriers = sorted(input_carriers & implemented)
 
     # Add any missing carriers to the network
     missing_carriers = [c for c in available_carriers if c not in n.carriers.index]
@@ -109,9 +100,8 @@ def attach_stores(
     costs: pd.DataFrame,
     buses_i: list,
     carriers: list,
-    include_H2: bool = False,
-    cost_name: str = "capital_cost",
-):
+    storage_techs: dict,
+) -> None:
     """
     Attach stores to the network.
 
@@ -125,16 +115,16 @@ def attach_stores(
         List of high voltage electricity buses.
     carriers : list
         List of extendable energy carriers.
-    include_H2 : bool
-        select if hydrogen technologies is included or not.
-    cost_name : str
-        Name of the column in the costs DataFrame that represents the capital cost.
+    storage_techs : dict
+        A dictionary mapping storage carriers to their respective technology parameters.
     """
-    available_carriers = get_available_storage_carriers(n, carriers, include_H2)
+    available_carriers = get_available_storage_carriers(n, carriers, storage_techs)
+    n.madd("Carrier", available_carriers)
+
     for carrier in available_carriers:
         roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
 
-        lookup = STORE_LOOKUP[carrier]
+        lookup = storage_techs[carrier]
         lookup_store = lookup["store"]
         if "bicharger" in lookup:
             lookup_charge = lookup_discharge = lookup["bicharger"]
@@ -164,9 +154,11 @@ def attach_stores(
             e_cyclic=True,
             e_nom_extendable=True,
             carrier=carrier,
-            capital_cost=costs.at[lookup_store, cost_name],
+            capital_cost=costs.at[lookup_store, "capital_cost"],
             lifetime=costs.at[lookup_store, "lifetime"],
         )
+
+        n.madd("Carrier", [f"{carrier} {charge_name}", f"{carrier} {discharge_name}"])
 
         n.madd(
             "Link",
@@ -176,7 +168,8 @@ def attach_stores(
             bus1=bus_names,
             carrier=f"{carrier} {charge_name.lower()}",
             efficiency=costs.at[lookup_charge, "efficiency"] ** roundtrip_correction,
-            capital_cost=costs.at[lookup_charge, cost_name],
+            capital_cost=costs.at[lookup_charge, "capital_cost"],
+            marginal_cost=costs.at[lookup_charge, "marginal_cost"],
             p_nom_extendable=True,
             lifetime=costs.at[lookup_charge, "lifetime"],
         )
@@ -189,6 +182,8 @@ def attach_stores(
             bus1=buses_i,
             carrier=f"{carrier} {discharge_name.lower()}",
             efficiency=costs.at[lookup_discharge, "efficiency"] ** roundtrip_correction,
+            capital_cost=costs.at[lookup_discharge, "capital_cost"],
+            marginal_cost=costs.at[lookup_discharge, "marginal_cost"],
             p_nom_extendable=True,
             lifetime=costs.at[lookup_discharge, "lifetime"],
         )
@@ -205,9 +200,8 @@ def attach_storageunits(
     buses_i: list,
     carriers: list,
     max_hours: dict,
-    include_H2: bool = False,
-    cost_name: str = "capital_cost",
-):
+    storage_techs: dict,
+) -> None:
     """
     Attach storage units to the network.
 
@@ -223,12 +217,12 @@ def attach_storageunits(
         List of extendable energy carriers.
     max_hours : dict
         Dictionary of maximum hours for storage units.
-    include_H2 : bool
-        select if hydrogen technologies is included or not.
-    cost_name : str
-        Name of the column in the costs DataFrame that represents the capital cost.
+    storage_techs : dict
+        A dictionary mapping storage carriers to their respective technology parameters.
     """
-    available_carriers = get_available_storage_carriers(n, carriers, include_H2)
+    available_carriers = get_available_storage_carriers(n, carriers, storage_techs)
+    n.madd("Carrier", available_carriers)
+
     for carrier in available_carriers:
         max_hour = max_hours.get(carrier)
         if max_hour is None:
@@ -237,7 +231,7 @@ def attach_storageunits(
 
         roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
 
-        lookup = STORE_LOOKUP[carrier]
+        lookup = storage_techs[carrier]
         if "bicharger" in lookup:
             lookup_charge = lookup_discharge = lookup["bicharger"]
         else:
@@ -250,7 +244,7 @@ def attach_storageunits(
             bus=buses_i,
             carrier=carrier,
             p_nom_extendable=True,
-            capital_cost=costs.at[carrier, cost_name],
+            capital_cost=costs.at[carrier, "capital_cost"],
             marginal_cost=costs.at[carrier, "marginal_cost"],
             efficiency_store=costs.at[lookup_charge, "efficiency"]
             ** roundtrip_correction,
@@ -270,7 +264,7 @@ def attach_storageunits(
 def attach_advance_csp(
     n: pypsa.Network,
     costs: pd.DataFrame,
-):
+) -> None:
     """
     Attach advance CHP to the network.
 
@@ -323,8 +317,27 @@ def attach_advance_csp(
     )
 
 
-def attach_hydrogen_pipelines(n, costs, config, transmission_efficiency):
-    elec_opts = config["electricity"]
+def attach_hydrogen_pipelines(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    electricity: dict,
+    transmission_efficiency: float,
+) -> None:
+    """
+    Attach hydrogen pipelines to the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to attach the hydrogen pipelines to.
+    costs : pd.DataFrame
+        DataFrame containing the cost data.
+    electricity : dict
+        Dictionary containing the electricity parameters.
+    transmission_efficiency : float
+        The efficiency of the hydrogen transmission.
+    """
+    elec_opts = electricity
     ext_carriers = elec_opts["extendable_carriers"]
     as_stores = ext_carriers.get("Store", [])
 
@@ -380,7 +393,8 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     transmission_efficiency = snakemake.params.transmission_efficiency
-    config = snakemake.config
+    electricity = snakemake.params.electricity
+    storage_techs = snakemake.params.storage_techs
 
     costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
@@ -389,25 +403,25 @@ if __name__ == "__main__":
         n,
         costs,
         buses_i,
-        config["electricity"]["extendable_carriers"]["Store"],
-        include_H2=True,
+        electricity["extendable_carriers"]["Store"],
+        storage_techs,
     )
 
     attach_storageunits(
         n,
         costs,
         buses_i,
-        config["electricity"]["extendable_carriers"]["StorageUnit"],
-        config["electricity"]["max_hours"],
-        include_H2=True,
+        electricity["extendable_carriers"]["StorageUnit"],
+        electricity["max_hours"],
+        storage_techs,
     )
 
-    if ("csp" in config["electricity"]["renewable_carriers"]) and (
-        config["renewable"]["csp"]["csp_model"] == "advanced"
+    if ("csp" in electricity["renewable_carriers"]) and (
+        snakemake.params.csp_model == "advanced"
     ):
         attach_advance_csp(n, costs)
 
-    attach_hydrogen_pipelines(n, costs, config, transmission_efficiency)
+    attach_hydrogen_pipelines(n, costs, electricity, transmission_efficiency)
 
     add_nice_carrier_names(n, config=snakemake.config)
 

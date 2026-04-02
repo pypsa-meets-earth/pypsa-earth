@@ -46,7 +46,6 @@ import logging
 
 import pandas as pd
 import pypsa
-from _helpers import STORE_LOOKUP
 from currency_converter import CurrencyConverter
 
 currency_converter = CurrencyConverter(
@@ -298,6 +297,7 @@ def apply_currency_conversion(
 def calculate_cost_for_storage_units(
     costs: pd.DataFrame,
     max_hours: dict,
+    storage_techs: dict,
     costs_name: str = "capital_cost",
 ):
     """
@@ -311,6 +311,8 @@ def calculate_cost_for_storage_units(
         DataFrame containing the cost data.
     max_hours : dict
         Dictionary of maximum hours for storage units.
+    storage_techs : dict, optional
+        A dictionary mapping storage carriers to their respective technology parameters.
     cost_name : str
         Name of the column in the costs DataFrame that represents the capital cost.
     """
@@ -334,7 +336,7 @@ def calculate_cost_for_storage_units(
     mod_costs_i = costs.index
     missing_store = []
     for k, v in max_hours.items():
-        tech = STORE_LOOKUP[k]
+        tech = storage_techs.get(k)
         store = tech.get("store") if tech.get("store") in mod_costs_i else None
         bicharger = (
             tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
@@ -372,7 +374,11 @@ def calculate_cost_for_storage_units(
 
 
 def load_costs(
-    tech_costs: str, config: dict, max_hours: int, Nyears: float | int = 1
+    tech_costs: str,
+    config: dict,
+    max_hours: int,
+    Nyears: float | int = 1,
+    storage_techs: dict = {},
 ) -> pd.DataFrame:
     """
     Set all asset costs and other parameters. Used only in the electricity sector workflow.
@@ -387,6 +393,8 @@ def load_costs(
         Dictionary specifying the maximum hours of storage for storage technologies (e.g. {"battery": 4, "H2": 168}).
     Nyears : float or int, optional
         Share of years represented by the model time steps (default is 1, representing one full year).
+    storage_techs : dict, optional
+        A dictionary mapping storage carriers to their respective technology parameters.
 
     Returns
     -------
@@ -474,7 +482,7 @@ def load_costs(
     costs.loc["csp"] = costs.loc["csp-tower"]
 
     costs = calculate_cost_for_storage_units(
-        costs, max_hours, costs_name="capital_cost"
+        costs, max_hours, storage_techs, costs_name="capital_cost"
     )
 
     for attr in ("marginal_cost", "capital_cost"):
@@ -499,6 +507,7 @@ def prepare_costs(
     future_exchange_rate_strategy: str = "latest",
     custom_future_exchange_rate: float = None,
     max_hours: dict = {},
+    storage_techs: dict = {},
 ) -> pd.DataFrame:
     """
     Loads and processes cost data, converting units and currency to a common format.
@@ -529,6 +538,8 @@ def prepare_costs(
         "custom" (use custom_future_exchange_rate).
     custom_future_exchange_rate : float, optional
         Custom exchange rate to use if future_exchange_rate_strategy is "custom".
+    storage_techs : dict, optional
+        A dictionary mapping storage carriers to their respective technology parameters.
 
     Returns
     -------
@@ -606,7 +617,7 @@ def prepare_costs(
     )
 
     modified_costs = calculate_cost_for_storage_units(
-        modified_costs, max_hours, costs_name="fixed"
+        modified_costs, max_hours, storage_techs, costs_name="fixed"
     )
 
     return modified_costs
@@ -627,6 +638,7 @@ if __name__ == "__main__":
             snakemake.params.costs,
             snakemake.params.max_hours,
             Nyears,
+            snakemake.params.storage_techs,
         )
 
     if snakemake.wildcards.scope == "sec":
@@ -640,6 +652,7 @@ if __name__ == "__main__":
             snakemake.params.costs["future_exchange_rate_strategy"],
             snakemake.params.costs["custom_future_exchange_rate"],
             snakemake.params.max_hours,
+            snakemake.params.storage_techs,
         )
 
     costs.to_csv(snakemake.output[0])
