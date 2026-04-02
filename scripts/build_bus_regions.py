@@ -171,7 +171,8 @@ if __name__ == "__main__":
     ]
 
     # Option for subregion
-    if inputs.get("subregion_shapes"):
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
         crs = {"geo_crs": geo_crs, "distance_crs": metric_crs}
         tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
         n = nearest_shape(n, country_shapes_fn, crs, tolerance=tolerance)
@@ -278,6 +279,16 @@ if __name__ == "__main__":
             logger.warning(
                 f"The number of remaining of buses are less than the number of administrative clusters suggested!"
             )
+
+    if subregion_shapes:
+        logger.info("Deactivate subregion classificaition")
+        original_shapes = snakemake.input.original_shapes
+        n = nearest_shape(n, original_shapes, crs, tolerance=tolerance)
+
+        onshore_regions["country"] = onshore_regions.name.map(n.buses.country)
+        if offshore_regions:
+            for offshore_region in offshore_regions:
+                offshore_region["country"] = offshore_region.name.map(n.buses.country)
 
     onshore_regions = pd.concat([onshore_regions], ignore_index=True).to_file(
         snakemake.output.regions_onshore
