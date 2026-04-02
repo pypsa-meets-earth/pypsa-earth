@@ -650,11 +650,13 @@ rule add_electricity:
     params:
         countries=config["countries"],
         output_currency=config["costs"]["output_currency"],
+        fill_values=config["costs"]["fill_values"],
         conventional=config.get("conventional", {}),
         electricity=config["electricity"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
+        existing_capacities=config["existing_capacities"],
     input:
         **{
             f"profile_{tech}": "resources/"

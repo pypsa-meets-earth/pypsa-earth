@@ -9,6 +9,7 @@ import calendar
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -21,6 +22,7 @@ import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
@@ -1587,6 +1589,96 @@ def add_missing_carriers(n, carriers):
             n.add("Carrier", carrier)
 
 
+def _is_year_tagged(carrier: str) -> bool:
+    """Return True if carrier ends with a 4-digit year suffix (e.g. 'solar-2020')."""
+    parts = carrier.rsplit("-", 1)
+    return len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4
+
+
+def get_base_carrier(carrier: str) -> str:
+    """
+    Extract base carrier from carrier_gy format.
+
+    Examples:
+        "solar-2020" -> "solar"
+        "offwind-ac-2020" -> "offwind-ac"
+        "offwind-dc" -> "offwind-dc"
+        "CCGT-2000" -> "CCGT"
+    """
+    if _is_year_tagged(carrier):
+        return carrier.rsplit("-", 1)[0]
+    return carrier
+
+
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    logger.info("Restored base carrier names")
+
+
+def add_year_suffix_to_carriers(n: pypsa.Network) -> None:
+    """
+    Extract year suffix from component names and append to carrier names.
+
+    This is necessary for clustering to distinguish between generators/storage
+    of the same technology but different vintage years.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Original network to modify carrier names in-place.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Component name: "NG0 0 coal-1990"
+    Original carrier: "coal"
+    Modified carrier: "coal-1990"
+    """
+    for component in ["Generator", "StorageUnit"]:
+        df = n.df(component)
+
+        if df.empty or "carrier" not in df.columns:
+            continue
+
+        # Extract year suffix from index using regex
+        # Pattern matches: base_name-YYYY at the end of the string
+        pattern = r"-(\d{4})$"
+
+        year_suffix = df.index.str.extract(pattern, expand=False)
+
+        # Only modify carriers where year suffix was found
+        has_year = year_suffix.notna()
+
+        if has_year.any():
+            df.loc[has_year, "carrier"] = (
+                df.loc[has_year, "carrier"] + "-" + year_suffix[has_year]
+            )
+
+    # Add year suffixes to carriers for proper clustering of different vintage years
+    logger.info("Added year suffixes to carrier names for clustering")
+
+
 def sanitize_carriers(n, config):
     """
     Sanitize the carrier information in a PyPSA Network object.
@@ -1624,15 +1716,18 @@ def sanitize_carriers(n, config):
         .reindex(carrier_i)
         .fillna(carrier_i.to_series())
     )
+
     n.carriers["nice_name"] = n.carriers.nice_name.where(
         n.carriers.nice_name != "", nice_names
     )
 
     tech_colors = config["plotting"]["tech_colors"]
     colors = pd.Series(tech_colors).reindex(carrier_i)
-    # try to fill missing colors with tech_colors after renaming
+
+    # Try to fill missing colors with tech_colors after renaming
     missing_colors_i = colors[colors.isna()].index
     colors[missing_colors_i] = missing_colors_i.map(rename_techs).map(tech_colors)
+
     if colors.isna().any():
         missing_i = list(colors.index[colors.isna()])
         logger.warning(f"tech_colors for carriers {missing_i} not defined in config.")
