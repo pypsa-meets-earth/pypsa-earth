@@ -964,11 +964,11 @@ def attach_hydro(
 
 
 def attach_existing_batteries(
-    n: pypsa.Network, 
-    costs: pd.DataFrame, 
-    ppl: pd.DataFrame, 
-    extendable_carriers: dict, 
-    max_hours: float
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame,
+    extendable_carriers: dict,
+    max_hours: float,
 ) -> None:
     """
     Add existing battery storage units from powerplants.csv to the network.
@@ -1059,7 +1059,6 @@ def attach_existing_batteries(
             lifetime=costs.at["battery inverter", "lifetime"],
             build_year=batteries_grouped["build_year"].values,
         )
-
 
     else:
         battery_def = "StorageUnit"
@@ -1439,11 +1438,11 @@ if __name__ == "__main__":
         n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
     )
     attach_existing_batteries(
-        n, 
-        costs, 
-        ppl, 
-        extendable_carriers, 
-        snakemake.params.electricity["max_hours"]["battery"]
+        n,
+        costs,
+        ppl,
+        extendable_carriers,
+        snakemake.params.electricity["max_hours"]["battery"],
     )
 
     if snakemake.params.electricity.get("estimate_renewable_capacities"):

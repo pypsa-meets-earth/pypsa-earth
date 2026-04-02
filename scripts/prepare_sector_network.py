@@ -28,8 +28,8 @@ from _helpers import (
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
-# from add_extra_components import attach_storageunits, attach_stores
 from prepare_network import add_co2limit
+
 # from prepare_transport_data import prepare_transport_data
 
 logger = logging.getLogger(__name__)
@@ -3289,7 +3289,6 @@ if __name__ == "__main__":
 
     # Convert conventional generators to links
     convert_conventional_generators_to_links(n, costs)
-
 
     # # remove H2 and storage technologies added in elec-only model
     # extendable_carriers = snakemake.params.electricity["extendable_carriers"]
