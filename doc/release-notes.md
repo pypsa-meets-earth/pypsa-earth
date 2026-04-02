@@ -28,6 +28,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add options to use custom shapes for offshore subregions [PR #1769](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1769)
+
 * Add `auto` as an option in renewable cutout selection, which directs to the cutout defined in `atlite: default`. This is executed using the function `update_cutout_config(config)`. Furthermore, improve `terminate_if_cutout_exist(w)` to be based purely on wildcards of the cutouts name that are to be downloaded. This is applied to both `build_cutout` and `retrieve_cutout`. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
 * Send information from `retrieve_databundle_light.py` to `databundle_cli.py` using a temporary yaml file to make missing files consistent. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
