@@ -455,7 +455,7 @@ Specify linear power flow formulation and optimization solver settings.
 
 # storage_tech
 
-Specifies storage technologies mapping. Specifies storage technologies mapping. Each storage carrier can either be defined either as Stores or StorageUnit. 
+Specifies storage technologies mapping. Specifies storage technologies mapping. Each storage carrier can either be defined either as Stores or StorageUnit.
 When defined as Store, the storage component have its own bus and and a charging and discharge links, each component has its own cost and efficiencies.
 When defined as StorageUnit, the storage componen are merged into one with the cost combined together and is dependent on the max_hours.
 
