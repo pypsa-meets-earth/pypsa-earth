@@ -39,7 +39,7 @@ bak
 benchmarks/
 backup*
 cutouts/
-data/
+data/*
 dask-worker-space/
 img/
 logs/
@@ -57,6 +57,7 @@ doc/_build
 sample_pypsa_eur
 test/tmp/
 playground/
+!data/nuclear_p_max_pu.csv
 
 # Specific configuration files
 configs/scenarios/config.*.yaml
