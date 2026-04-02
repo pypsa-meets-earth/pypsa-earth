@@ -21,12 +21,11 @@ Relevant Settings
 
 .. code:: yaml
 
+    links:
+
+    lines:
+
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
         emission_prices:
 
     electricity:
@@ -432,7 +431,7 @@ if __name__ == "__main__":
                 add_emission_prices(n, dict(co2=float(m[0])))
             else:
                 logger.info("Setting emission prices according to config value.")
-                add_emission_prices(n, snakemake.params.costs["emission_prices"])
+                add_emission_prices(n, snakemake.params.emission_prices)
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]

@@ -12,25 +12,11 @@ Relevant Settings
 
 .. code:: yaml
 
-    costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
-        marginal_cost:
-        capital_cost:
-        extendable_carriers:
-            StorageUnit:
-            Store:
+    sector:
+        transmission_efficiency:
 
 .. seealso::
-    Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
-    :ref:`electricity_cf`
+    Documentation of the configuration file ``config.yaml`` at :ref:`sector_cf`
 
 Inputs
 ------

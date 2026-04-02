@@ -14,7 +14,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
 
+* Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
+
 * Migrate all cost data processing to ``process_cost_data.py`` [PR #1719](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1719)
+
+* Add the rule `retrieve_cutout` using the same script from `retrieve_databundle_light`. The `bundle_to_download` excludes cutouts while `cutout_to_download` include only cutouts. The retrieved cutouts are then verified to ensure their total bounds match the outputs from `build_shapes`. The config `enable: retrieve_cutout` allows users to switch off this rule after retrieval. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
 * Use IRENA statistics for 2023 to normalize countries hydropower generation data [PR #1681](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681)
 
@@ -23,6 +27,14 @@ This part of documentation collects descriptive release notes to capture the mai
 * Ensure connectivity of transformers in buses with several transformers [PR #1706](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1706)
 
 **Minor Changes and bug-fixing**
+
+* Add `auto` as an option in renewable cutout selection, which directs to the cutout defined in `atlite: default`. This is executed using the function `update_cutout_config(config)`. Furthermore, improve `terminate_if_cutout_exist(w)` to be based purely on wildcards of the cutouts name that are to be downloaded. This is applied to both `build_cutout` and `retrieve_cutout`. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+
+* Send information from `retrieve_databundle_light.py` to `databundle_cli.py` using a temporary yaml file to make missing files consistent. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+
+* Streamline subregions implementation, subdivide EEZs for subregions for ``build_bus_regions`` [PR #1730](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1730)
+
+* Restructure sector configuration and add sector documentation [PR #1760](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1760)
 
 * Use bus_regions instead of downloading gadm regions again in prepare_gas_network to avoid mismatches in case of simplifying [PR #1662](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1662)
 
@@ -49,6 +61,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix clustering with gadm_layer_id 0 and 2 [PR #1714](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1714)
 
 * Add hydrobasins to rule input for build_renewable_profiles [PR #1753](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1753)
+
+* Make checking the need for exclusion rasters more explicit [PR #1755](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1755)
+
+* Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
 
 # PyPSA-Earth 0.8.0
 
