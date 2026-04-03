@@ -613,7 +613,7 @@ def fill_circuits(df):
                 for (vc, vf) in zip(row["cables"], row["tag_frequency"])
             ]
         )
-    
+
     df.loc[df_match_by_cables.index, "circuits"] = df_match_by_cables.apply(
         _filter_cables, axis=1
     ).astype("float64")
