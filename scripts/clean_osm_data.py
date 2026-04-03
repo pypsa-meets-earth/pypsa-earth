@@ -616,7 +616,7 @@ def fill_circuits(df):
 
     df.loc[df_match_by_cables.index, "circuits"] = df_match_by_cables.apply(
         _filter_cables, axis=1
-    )
+    ).astype("float64")
 
     # length of cables elements is larger than frequency; the last cable data are merged to match
     df_merge_by_cables = df[to_fill_merge][["tag_frequency", "cables"]].copy()
