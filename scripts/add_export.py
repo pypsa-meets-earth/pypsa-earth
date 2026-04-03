@@ -182,7 +182,7 @@ def create_export_profile():
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
     sel_export = export_profile[n.snapshots]
     pu_profile_export = sel_export / (1e-6 + sel_export.sum())
-    export_profile = pu_profile_export * export_profile.sum() * len(n.snapshots) / 8760
+    export_profile = pu_profile_export * export_profile.sum()
 
     # revise logger msg
     export_type = snakemake.params.export_profile
