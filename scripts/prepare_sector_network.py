@@ -25,11 +25,8 @@ from _helpers import (
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
 )
 from prepare_network import add_co2limit
-from prepare_transport_data import prepare_transport_data
 
 logger = logging.getLogger(__name__)
 
@@ -1231,150 +1228,6 @@ def add_aviation(n, cost, energy_totals, airports_fn):
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
-    )
-
-
-def add_storage(n: pypsa.Network, costs: pd.DataFrame) -> None:
-    """
-    Function to add battery storage to the sector network, including
-    carry-over of existing capacities from the electricity network.
-
-    This function performs the following steps:
-    1. Retrieves existing battery storage units from the electricity network, if available.
-    2. Removes existing battery storage units and stores from the electricity network to avoid double counting.
-    3. Adds a new "battery" carrier to the network.
-    4. Adds new battery storage units and corresponding charger/discharger links for each node in the spatial network, using the existing capacities as a starting point.
-    5. Configures the new battery storage units to be extendable for future capacity additions
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        The PyPSA network to which battery storage will be added.
-    costs : pd.DataFrame
-        A DataFrame containing cost parameters for the battery storage technologies.
-
-    Returns
-    -------
-    None
-    """
-    # Get existing battery capacities from electricity network if available
-    existing_batteries = n.storage_units[n.storage_units.carrier == "battery"].copy()
-
-    # Remove existing battery storage units and stores from the electricity network to avoid double counting
-    remove_carrier_related_components(n, carriers_to_drop=["battery"])
-
-    logger.info("Add battery storage")
-
-    n.add("Carrier", "battery")
-
-    n.madd(
-        "Bus",
-        spatial.nodes + " battery",
-        location=spatial.nodes,
-        carrier="battery",
-        x=n.buses.loc[list(spatial.nodes)].x.values,
-        y=n.buses.loc[list(spatial.nodes)].y.values,
-    )
-
-    if not existing_batteries.empty:
-        total_cap = existing_batteries["p_nom"].sum() / 1e3
-        n_units = len(existing_batteries)
-        logger.info(
-            f"Battery carry-over from electricity-only network: {total_cap:.2f} GW, {n_units} units"
-        )
-    else:
-        logger.info("No existing batteries found in electricity-only network")
-
-    # Use configured max_hours for battery duration
-    default_max_hours = snakemake.params.electricity["max_hours"]["battery"]
-
-    if not existing_batteries.empty:
-        # Convert each battery StorageUnit to a Store and Link in the sector network, carrying over capacities
-        max_hours = existing_batteries.get("max_hours", default_max_hours)
-        e_nom = existing_batteries["p_nom"] * max_hours
-
-        # Add Stores for existing battery energy capacity
-        n.madd(
-            "Store",
-            existing_batteries.index,
-            bus=existing_batteries["bus"] + " battery",
-            e_cyclic=True,
-            e_nom_extendable=False,
-            e_nom=e_nom,
-            carrier="battery",
-            capital_cost=costs.at["battery storage", "fixed"],
-            build_year=existing_batteries["build_year"],
-            lifetime=existing_batteries["lifetime"],
-        )
-
-        # Add charger Links for existing battery power capacity
-        n.madd(
-            "Link",
-            existing_batteries.index.map(
-                lambda x: x.replace(" battery", " battery charger")
-            ),
-            bus0=existing_batteries["bus"].values,
-            bus1=(existing_batteries["bus"] + " battery").values,
-            p_nom=existing_batteries["p_nom"].values,
-            p_nom_extendable=False,
-            carrier="battery charger",
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            capital_cost=costs.at["battery inverter", "fixed"],
-            lifetime=costs.at["battery inverter", "lifetime"],
-            build_year=existing_batteries["build_year"].values,
-        )
-
-        # Add discharger Links for existing battery power capacity
-        n.madd(
-            "Link",
-            existing_batteries.index.map(
-                lambda x: x.replace(" battery", " battery discharger")
-            ),
-            bus0=(existing_batteries["bus"] + " battery").values,
-            bus1=existing_batteries["bus"].values,
-            p_nom=existing_batteries["p_nom"].values,
-            p_nom_extendable=False,
-            carrier="battery discharger",
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            marginal_cost=options["marginal_cost_storage"],
-            lifetime=costs.at["battery inverter", "lifetime"],
-            build_year=existing_batteries["build_year"].values,
-        )
-
-    # Add extendable batteries at all nodes (for new capacity additions)
-    n.madd(
-        "Store",
-        spatial.nodes + " battery",
-        bus=spatial.nodes + " battery",
-        e_cyclic=True,
-        e_nom_extendable=True,
-        carrier="battery",
-        capital_cost=costs.at["battery storage", "fixed"],
-        lifetime=costs.at["battery storage", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery charger",
-        bus0=spatial.nodes,
-        bus1=spatial.nodes + " battery",
-        carrier="battery charger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        capital_cost=costs.at["battery inverter", "fixed"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery discharger",
-        bus0=spatial.nodes + " battery",
-        bus1=spatial.nodes,
-        carrier="battery discharger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        marginal_cost=options["marginal_cost_storage"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
     )
 
 
@@ -3291,9 +3144,6 @@ if __name__ == "__main__":
 
     # Add hydrogen related technologies
     add_hydrogen(n, costs)
-
-    # Add storage using carried-over capacities
-    add_storage(n, costs)
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)

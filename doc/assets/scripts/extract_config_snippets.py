@@ -93,6 +93,7 @@ def main():
         "monte_carlo": ["monte_carlo"],
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
+        "storage_techs": ["storage_techs"],
         "plotting": ["plotting"],
         "policy_config": ["policy_config"],
         "demand_data": ["demand_data"],
