@@ -527,6 +527,11 @@ def base_network(
     n.import_components_from_dataframe(transformers, "Transformer")
     n.import_components_from_dataframe(converters, "Link")
 
+    n.lines["num_parallel"] = n.lines["num_parallel"].where(
+        ~n.lines["under_construction"], 0.0
+    )
+    n.lines.drop(columns="under_construction", inplace=True, errors="ignore")
+
     _set_lines_s_nom_from_linetypes(n)
 
     _set_countries_and_substations(inputs, base_network_config, countries_config, n)
