@@ -2086,6 +2086,20 @@ rule build_industry_demand:  #default data
         "scripts/build_industry_demand.py"
 
 
+rule build_ammonia_production:
+    output:
+        ammonia_production="resources/" + SECDIR + "demand/ammonia_production.csv",
+    threads: 1
+    resources:
+        mem_mb=1000,
+    log:
+        RESDIR + "logs/build_ammonia_production.log",
+    benchmark:
+        RESDIR + "benchmarks/build_ammonia_production"
+    script:
+        "scripts/build_ammonia_production.py"
+
+
 rule build_existing_heating_distribution:
     params:
         baseyear=config["scenario"]["planning_horizons"][0],
