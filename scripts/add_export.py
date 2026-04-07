@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, prepare_costs
+from _helpers import locate_bus
 
 logger = logging.getLogger(__name__)
 
@@ -221,16 +221,7 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+    costs = pd.read_csv(snakemake.input.costs, index_col=0)
 
     # get hydrogen export buses/ports
     hydrogen_buses_ports = select_ports(n)

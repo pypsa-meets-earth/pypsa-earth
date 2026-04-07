@@ -43,91 +43,88 @@ Description
 -----------
 """
 import os
+import warnings
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import REGION_COLS, configure_logging, create_logger
+from _helpers import REGION_COLS, configure_logging, create_logger, nearest_shape
+from shapely.geometry import Polygon
 
 logger = create_logger(__name__)
 
 
-def custom_voronoi_partition_pts(points, outline, add_bounds_shape=True, multiplier=5):
+def voronoi(
+    points: pd.DataFrame,
+    outline: Polygon,
+    geo_crs: str = "EPSG:4326",
+) -> gpd.GeoSeries:
     """
-    Compute the polygons of a voronoi partition of `points` within the polygon
-    `outline`
+    Create Voronoi polygons from a set of points within an outline.
 
-    Attributes
+    Parameters
     ----------
-    points : Nx2 - ndarray[dtype=float]
+    points : pd.DataFrame
+         DataFrame containing the coordinates of the points with columns ["x", "y"] and index
     outline : Polygon
+        Shapely Polygon defining the outline within which to compute the Voronoi partition.
+    geo_crs : str
+        CRS used for geographic projection, passed to GeoPandas (e.g. "EPSG:4326")
 
     Returns
     -------
-    polygons : N - ndarray[dtype=Polygon|MultiPolygon]
+    gpd.GeoSeries
+        GeoSeries of Voronoi polygons corresponding to each point in `points`, clipped to the `outline` polygon.
     """
 
-    import numpy as np
-    from scipy.spatial import Voronoi
-    from shapely.geometry import Polygon
+    pts = gpd.GeoSeries(
+        gpd.points_from_xy(points.x, points.y),
+        index=points.index,
+        crs=geo_crs,
+    )
+    voronoi = pts.voronoi_polygons(extend_to=outline).clip(outline)
 
-    points = np.asarray(points)
+    # can be removed with shapely 2.1 where order is preserved
+    # https://github.com/shapely/shapely/issues/2020
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        pts = gpd.GeoDataFrame(geometry=pts)
+        voronoi = gpd.GeoDataFrame(geometry=voronoi)
+        joined = gpd.sjoin_nearest(pts, voronoi, how="right")
 
-    polygons_arr = []
+    gdf = joined.dissolve(by=points.index.name).reindex(points.index).squeeze()
 
-    if len(points) == 1:
-        polygons_arr = [outline]
-    else:
-        xmin, ymin = np.amin(points, axis=0)
-        xmax, ymax = np.amax(points, axis=0)
-
-        if add_bounds_shape:
-            # check bounds of the shape
-            minx_o, miny_o, maxx_o, maxy_o = outline.boundary.bounds
-            xmin = min(xmin, minx_o)
-            ymin = min(ymin, miny_o)
-            xmax = min(xmax, maxx_o)
-            ymax = min(ymax, maxy_o)
-
-        xspan = xmax - xmin
-        yspan = ymax - ymin
-
-        # to avoid any network positions outside all Voronoi cells, append
-        # the corners of a rectangle framing these points
-        vcells = Voronoi(
-            np.vstack(
-                (
-                    points,
-                    [
-                        [xmin - multiplier * xspan, ymin - multiplier * yspan],
-                        [xmin - multiplier * xspan, ymax + multiplier * yspan],
-                        [xmax + multiplier * xspan, ymin - multiplier * yspan],
-                        [xmax + multiplier * xspan, ymax + multiplier * yspan],
-                    ],
-                )
-            )
-        )
-
-        polygons_arr = np.empty((len(points),), "object")
-        for i in range(len(points)):
-            poly = Polygon(vcells.vertices[vcells.regions[vcells.point_region[i]]])
-
-            if not poly.is_valid:
-                poly = poly.buffer(0)
-
-            if not outline.is_valid:
-                outline = outline.buffer(0)
-
-            poly = poly.intersection(outline)
-
-            polygons_arr[i] = poly
-
-    return polygons_arr
+    return gdf
 
 
 def get_gadm_shape(
-    onshore_buses, gadm_shapes, geo_crs="EPSG:4326", metric_crs="EPSG:3857"
-):
+    onshore_buses: pd.DataFrame,
+    gadm_shapes: gpd.GeoDataFrame,
+    geo_crs: str = "EPSG:4326",
+    metric_crs: str = "EPSG:3857",
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Get the GADM shape for each bus by finding the nearest GADM shape to each bus.
+
+    Parameters
+    ----------
+    onshore_buses: pd.DataFrame
+        DataFrame containing the onshore buses with columns ["x", "y"]
+    gadm_shapes: gpd.GeoDataFrame
+        GeoDataFrame containing the GADM shapes with a geometry column
+    geo_crs : str
+        CRS used for geographic projection, passed to GeoPandas (e.g. "EPSG:4326")
+    metric_crs : str
+        CRS used for distance projection, passed to GeoPandas (e.g. "EPSG:3857")
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        A tuple containing two arrays:
+        - An array of geometries corresponding to the GADM shapes for each bus.
+        - An array of indices corresponding to the GADM shape IDs for each bus.
+    """
     geo_regions = gpd.GeoDataFrame(
         onshore_buses[["x", "y"]],
         geometry=gpd.points_from_xy(onshore_buses["x"], onshore_buses["y"]),
@@ -154,24 +151,34 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
+    inputs = snakemake.input
+    country_shapes_fn = inputs.get("subregion_shapes") or inputs.country_shapes
+    offshore_shapes_fn = inputs.get("subregion_offshore") or inputs.offshore_shapes
     countries = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
     metric_crs = snakemake.params.crs["distance_crs"]
 
-    n = pypsa.Network(snakemake.input.base_network)
+    n = pypsa.Network(inputs.base_network)
 
-    country_shapes = gpd.read_file(snakemake.input.country_shapes).set_index("name")[
-        "geometry"
-    ]
+    country_shapes = gpd.read_file(country_shapes_fn).set_index("name")["geometry"]
 
-    offshore_shapes = gpd.read_file(snakemake.input.offshore_shapes)
+    offshore_shapes = gpd.read_file(offshore_shapes_fn)
 
     offshore_shapes = offshore_shapes.reindex(columns=REGION_COLS).set_index("name")[
         "geometry"
     ]
 
-    gadm_shapes = gpd.read_file(snakemake.input.gadm_shapes).set_index("GADM_ID")
+    # Option for subregion
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = {"geo_crs": geo_crs, "distance_crs": metric_crs}
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, country_shapes_fn, crs, tolerance=tolerance)
+
+        countries = list(country_shapes.index)
+
+    gadm_shapes = gpd.read_file(inputs.gadm_shapes).set_index("GADM_ID")
 
     onshore_regions = []
     offshore_regions = []
@@ -193,9 +200,7 @@ if __name__ == "__main__":
                 metric_crs,
             )
         else:
-            onshore_geometry = custom_voronoi_partition_pts(
-                onshore_locs.values, onshore_shape
-            )
+            onshore_geometry = voronoi(onshore_locs, onshore_shape)
             shape_id = 0  # Not used
 
         temp_region = gpd.GeoDataFrame(
@@ -227,9 +232,7 @@ if __name__ == "__main__":
         else:
             offshore_locs = n.buses.loc[c_b & n.buses.substation_off, ["x", "y"]]
             shape_id = 0  # Not used
-            offshore_geometry = custom_voronoi_partition_pts(
-                offshore_locs.values, offshore_shape
-            )
+            offshore_geometry = voronoi(offshore_locs, offshore_shape)
             offshore_regions_c = gpd.GeoDataFrame(
                 {
                     "name": offshore_locs.index,
@@ -275,6 +278,16 @@ if __name__ == "__main__":
             logger.warning(
                 f"The number of remaining of buses are less than the number of administrative clusters suggested!"
             )
+
+    if subregion_shapes:
+        logger.info("Deactivate subregion classificaition")
+        original_shapes = snakemake.input.original_shapes
+        n = nearest_shape(n, original_shapes, crs, tolerance=tolerance)
+
+        onshore_regions["country"] = onshore_regions.name.map(n.buses.country)
+        if offshore_regions:
+            for offshore_region in offshore_regions:
+                offshore_region["country"] = offshore_region.name.map(n.buses.country)
 
     onshore_regions = pd.concat([onshore_regions], ignore_index=True).to_file(
         snakemake.output.regions_onshore

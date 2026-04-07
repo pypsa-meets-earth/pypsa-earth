@@ -16,18 +16,19 @@ foresight: overnight
 
 
 countries: ["NG", "BJ"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/configuration.html#top-level-configuration
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
 enable:
   retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cutout: true
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # requires cds API key https://cds.climate.copernicus.eu/how-to-api
   # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
   progress_bar: true # show progress bar during downloading routines and other long-running tasks
   custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
@@ -112,6 +113,12 @@ cluster_options:
       ramp_limit_up: max
       ramp_limit_down: max
       efficiency: mean
+      build_year: mean
+      lifetime: mean
+    one_ports: # storage units and loads
+      StorageUnit:
+        build_year: mean
+        lifetime: mean
   focus_weights: false # When a value specified, set the share of nodes allocated to each country
     # country: share
 
@@ -130,11 +137,11 @@ build_shape_options:
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
 subregion:
-  enable:
-    simplify_network: true # activate subregion in simplify_network
-    cluster_network: false # activate subregion in cluster_network
+  method: false # method to define subregions, either "gadm" or "custom", false to not use subregions.
+  apply_on: ["simplify_network", "cluster_network"] # apply subregion on the simplify_network and/or cluster_network rule.
   define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
-  path_custom_shapes: false # (optional) provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  path_custom_shapes: false # provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  path_custom_offshore: false # (optional) provide the specific absolute path of the custom offshore file e.g. (...\data\custom_offshore.geojson)
   tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
 
 clean_osm_data_options: # osm = OpenStreetMap
@@ -192,7 +199,7 @@ electricity:
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
 
-  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
     activate: false
     epsilon_load: 0.02 # share of total load
     epsilon_vres: 0.02 # share of total renewable supply
@@ -266,10 +273,11 @@ atlite:
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
+  default: cutout-2013-era5
 
 renewable:
   onwind:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: Vestas_V112_3MW
@@ -296,7 +304,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-ac:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -314,7 +322,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   offwind-dc:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore
@@ -333,7 +341,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   solar:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: pv
       panel: CSi
@@ -354,7 +362,7 @@ renewable:
     clip_p_max_pu: 1.e-2
     extendable: true
   hydro:
-    cutout: cutout-2013-era5
+    cutout: auto
     hydrobasins_level: 6
     resource:
       method: hydro
@@ -374,8 +382,9 @@ renewable:
      # the technology-year for policy-determined changes (installed capacity is changing quickly)
       year: 2023 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+    hydro_min_inflow_pu: 1.0 # [hour] A threshold of energy to power ratio to classify hydro powerplants as reservoirs in case type is missed
   csp:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: csp
       installation: SAM_solar_tower
@@ -509,7 +518,7 @@ fossil_reserves:
 
 export:
   endogenous: false # If true, the export demand is endogenously determined by the model
-  endogenous_price: 400 # EUR/MWh # Market price, for wich the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
+  endogenous_price: 400 # EUR/MWh # Market price, for which the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
   h2export: [10] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
@@ -573,6 +582,7 @@ sector:
     network: false # ALWAYS FALSE for now (NOT USED)
     network_data: GGIT # Global dataset -> 'GGIT' , European dataset -> 'IGGIELGN'
     network_data_GGIT_status: ["Construction", "Operating", "Idle", "Shelved", "Mothballed", "Proposed"]
+
   hydrogen:
     network: true
     H2_retrofit_capacity_per_CH4: 0.6
@@ -589,13 +599,14 @@ sector:
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
+
   lignite:
     spatial_lignite: false
 
-  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
-
   oil:
     spatial_oil: true
+
+  # ------------------- HEAT SECTOR -------------------
 
   district_heating:
     potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
@@ -621,6 +632,7 @@ sector:
   # 2040: 0.16
   # 2045: 0.21
   # 2050: 0.29
+  space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
 
   tes: true
   tes_tau: # 180 day time constant for centralised, 3 day for decentralised
@@ -634,6 +646,9 @@ sector:
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
   solar_cf_correction: 0.788457 # = >>>1/1.2683
+
+  # ------------------- LAND TRANSPORT SECTOR -------------------
+
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
   bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
   transport_heating_deadband_upper: 20.
@@ -652,16 +667,65 @@ sector:
   bev_availability: 0.5 #How many cars do smart charging
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
-  industry_util_factor: 0.7
+
+  land_transport_fuel_cell_share: # 1 means all FCEVs HERE
+    BU_2030: 0.00
+    AP_2030: 0.004
+    NZ_2030: 0.02
+    DF_2030: 0.01
+    AB_2030: 0.01
+    BU_2050: 0.00
+    AP_2050: 0.06
+    NZ_2050: 0.28
+    DF_2050: 0.08
+  land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
+    BU_2030: 0.00
+    AP_2030: 0.075
+    NZ_2030: 0.13
+    DF_2030: 0.01
+    AB_2030: 0.01
+    BU_2050: 0.00
+    AP_2050: 0.42
+    NZ_2050: 0.68
+    DF_2050: 0.011
+
+  dynamic_transport:
+    enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
+    land_transport_fuel_cell_share:
+      Co2L2.0: 0.01
+      Co2L1.0: 0.01
+      Co2L0.90: 0.01
+      Co2L0.80: 0.01
+      Co2L0.70: 0.01
+      Co2L0.60: 0.01
+      Co2L0.50: 0.01
+      Co2L0.40: 0.01
+      Co2L0.30: 0.01
+      Co2L0.20: 0.01
+      Co2L0.10: 0.01
+      Co2L0.00: 0.01
+    land_transport_electric_share:
+      Co2L2.0: 0.00
+      Co2L1.0: 0.01
+      Co2L0.90: 0.03
+      Co2L0.80: 0.06
+      Co2L0.70: 0.10
+      Co2L0.60: 0.17
+      Co2L0.50: 0.27
+      Co2L0.40: 0.40
+      Co2L0.30: 0.55
+      Co2L0.20: 0.69
+      Co2L0.10: 0.80
+      Co2L0.00: 0.88
+
+  # ------------------- BIOMASS SECTOR -------------------
 
   biomass_transport: true # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
   solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
   biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
 
-  efficiency_heat_oil_to_elec: 0.9
-  efficiency_heat_biomass_to_elec: 0.9
-  efficiency_heat_gas_to_elec: 0.9
+  # ------------------- ELECTRICITY DISTRIBUTION GRID -------------------
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
   solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
@@ -688,63 +752,10 @@ sector:
       efficiency_per_1000km: 1
       compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
-  dynamic_transport:
-    enable: false # If "True", then the BEV and FCEV shares are obtained depending on the "Co2L"-wildcard (e.g. "Co2L0.70: 0.10"). If "False", then the shares are obtained depending on the "demand" wildcard and "planning_horizons" wildcard as listed below (e.g. "DF_2050: 0.08")
-    land_transport_electric_share:
-      Co2L2.0: 0.00
-      Co2L1.0: 0.01
-      Co2L0.90: 0.03
-      Co2L0.80: 0.06
-      Co2L0.70: 0.10
-      Co2L0.60: 0.17
-      Co2L0.50: 0.27
-      Co2L0.40: 0.40
-      Co2L0.30: 0.55
-      Co2L0.20: 0.69
-      Co2L0.10: 0.80
-      Co2L0.00: 0.88
-    land_transport_fuel_cell_share:
-      Co2L2.0: 0.01
-      Co2L1.0: 0.01
-      Co2L0.90: 0.01
-      Co2L0.80: 0.01
-      Co2L0.70: 0.01
-      Co2L0.60: 0.01
-      Co2L0.50: 0.01
-      Co2L0.40: 0.01
-      Co2L0.30: 0.01
-      Co2L0.20: 0.01
-      Co2L0.10: 0.01
-      Co2L0.00: 0.01
+  # ------------------- SHIPPING & AVIATION SECTOR -------------------
 
-  land_transport_fuel_cell_share: # 1 means all FCEVs HERE
-    BU_2030: 0.00
-    AP_2030: 0.004
-    NZ_2030: 0.02
-    DF_2030: 0.01
-    AB_2030: 0.01
-    BU_2050: 0.00
-    AP_2050: 0.06
-    NZ_2050: 0.28
-    DF_2050: 0.08
-
-  land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
-    BU_2030: 0.00
-    AP_2030: 0.075
-    NZ_2030: 0.13
-    DF_2030: 0.01
-    AB_2030: 0.01
-    BU_2050: 0.00
-    AP_2050: 0.42
-    NZ_2050: 0.68
-    DF_2050: 0.011
-
-  co2_network: true
-  co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
-  co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
   shipping_hydrogen_liquefaction: false
   shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
-
   shipping_hydrogen_share: #1.0
     BU_2030: 0.00
     AP_2030: 0.00
@@ -755,19 +766,32 @@ sector:
     AP_2050: 0.25
     NZ_2050: 0.36
     DF_2050: 0.12
+  airport_sizing_factor: 3
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
 
-  h2_cavern: true
-  marginal_cost_storage: 0
+  # ------------------- CCUS & CONVERSION OPTIONS -------------------
+
+  co2_network: true
+  co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
+  co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
+
   methanation: true
   helmeth: true
   dac: true
   cc_fraction: 0.9
   cc: true
-  space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
-  airport_sizing_factor: 3
-
   fischer_tropsch: true
   min_part_load_fischer_tropsch: 0.9
+
+  # ------------------- INDUSTRY OPTIONS -------------------
+
+  industry_util_factor: 0.7
+
+  efficiency_heat_oil_to_elec: 0.9
+  efficiency_heat_biomass_to_elec: 0.9
+  efficiency_heat_gas_to_elec: 0.9
+
+  # ------------------- POWERPLANTS OPTIONS -------------------
 
   conventional_generation: # generator : carrier
     OCGT: gas
@@ -778,10 +802,12 @@ sector:
     biomass: biomass
   keep_existing_capacities: false
 
+  marginal_cost_storage: 0
+
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay http://journal.frontiersin.org/article/10.3389/fenrg.2015.00055/full)
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay https://doi.org/10.3389/fenrg.2015.00055)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6

@@ -28,7 +28,7 @@ hydro:
 electricity:
   hvdc_as_lines: true  # should HVDC lines be modeled as `Line` or as `Link` component?
 
-  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
     activate: true
 
   extendable_carriers:
