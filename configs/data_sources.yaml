@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+
+data_sources:
+  ammonia:
+    primary: "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/myb1-2023-nitro-ERT.xlsx"
+    archive: "https://data.pypsa.org/workflows/eur/nitrogen_statistics/2023/myb1-2023-nitro-ERT.xlsx"
+  us_cities:
+    primary: "https://simplemaps.com/static/data/us-cities/1.93/basic/simplemaps_uscities_basicv1.93.zip"
