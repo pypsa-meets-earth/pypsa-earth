@@ -1959,6 +1959,8 @@ rule plot_sector_summary:
 
 
 rule build_industrial_database:
+    input:
+        ammonia_plants="data/industry/ammonia_plants.csv",
     output:
         industrial_database="data/industrial_database.csv",
     script:
@@ -2092,10 +2094,10 @@ rule build_ammonia_production:
         ammonia_sources=config["data_sources"]["ammonia"],
         us_cities_source=config["data_sources"]["us_cities"],
     input:
-        eu_ammonia_plants="data/ammonia_plants_eu.csv",
+        eu_ammonia_plants="data/industry/ammonia_plants_eu.csv",
     output:
         ammonia_production="resources/" + SECDIR + "demand/ammonia_production.csv",
-        ammonia_plants="data/ammonia_plants.csv",
+        ammonia_plants="data/industry/ammonia_plants.csv",
     threads: 1
     resources:
         mem_mb=1000,
