@@ -13,7 +13,6 @@ Custom data can be used to replace or supplement the default datasets provided b
 
 - Power grids and lines
 - Power plants
-- Electricity demand
 - Heat demand
 - Industry demand and databases
 - Transport demand
@@ -22,7 +21,6 @@ Custom data can be used to replace or supplement the default datasets provided b
 - Gas networks
 - Export ports
 - Airports
-- Renewable energy sources (e.g., CSP, rooftop solar, solar PV)
 
 !!! note
     All custom data can remain private if desired. Users are not required to share their data publicly.
@@ -33,8 +31,6 @@ The `config.default.yaml` file controls which custom data options are enabled. E
 
 ```yaml
 custom_data:
-  renewables: []
-  elec_demand: false
   heat_demand: false
   industry_demand: false
   industry_database: false
@@ -56,7 +52,6 @@ custom_data:
 | Export ports                  | `data/custom/export_ports.csv`         |
 | Airports                      | `data/custom/airports.csv`             |
 | Powerplants                   | `data/custom_powerplants.csv`          |
-| Demand/Renewables Time Series | `.nc` files compatible with GEGIS/atlite modules |
 
 !!! note
     Custom datasets should follow the filename conventions specified by PyPSA-Earth to ensure proper integration. See the [demand section](https://pypsa-earth.readthedocs.io/en/latest/customization_basic1.html#use-custom-demand-data) for details.
@@ -73,6 +68,8 @@ For guidance on sourcing data, refer to the following table:
 
 !!! note
     This table is continuously updated to include new global and country-level datasets.
+
+The [PyPSA-Earth Status](https://pypsa-earth-status.readthedocs.io/en/latest/user-guide/user-guide/) stream is also a valuable resource for sourcing and validating custom data. It provides up-to-date information on available datasets and can be used to cross-check custom inputs against known reference values.
 
 ## Best Practices
 
