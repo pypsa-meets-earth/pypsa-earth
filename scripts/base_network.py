@@ -527,6 +527,7 @@ def base_network(
     n.import_components_from_dataframe(transformers, "Transformer")
     n.import_components_from_dataframe(converters, "Link")
 
+    # greenfield capacity expansion is represented with null capacity using num_parallel==0
     n.lines["num_parallel"] = n.lines["num_parallel"].where(
         ~n.lines["under_construction"], 0.0
     )
