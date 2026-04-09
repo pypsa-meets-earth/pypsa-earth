@@ -1,5 +1,5 @@
   hydro:
-    cutout: cutout-2013-era5
+    cutout: auto
     hydrobasins_level: 6
     resource:
       method: hydro

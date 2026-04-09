@@ -144,6 +144,7 @@ databundles:
   # Cutout of Kazakhstan for CI test of pypsa-kz-data repo, only 5 MB
   bundle_cutouts_test_KZ:
     countries: [KZ]
+    tutorial: true
     category: cutouts
     destination: "cutouts"
     urls:
