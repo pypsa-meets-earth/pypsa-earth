@@ -744,13 +744,15 @@ def attach_hydro(
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
     invalid_techs = ppl.loc[~ppl.technology.isin(tech_to_carrier.keys())]
-    
+
     # Current fix, NaN technologies set to ROR
     if not invalid_techs.empty:
         n_invalid = invalid_techs.shape[0]
         inv_tech_list = invalid_techs["technology"].unique()
         logger.warning(
-            f"Identified {n_invalid} hydro powerplants with unknown technology: " + "; ".join({inv_tech_list}) + "\n"
+            f"Identified {n_invalid} hydro powerplants with unknown technology: "
+            + "; ".join({inv_tech_list})
+            + "\n"
             "Initialized to 'Run-Of-River'"
         )
         ppl.loc[invalid_techs.index, "technology"] = "Run-Of-River"
