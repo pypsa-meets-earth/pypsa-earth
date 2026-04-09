@@ -28,6 +28,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Enhance CI test for myopic optimization (`test/config.myopic.yaml`) by including additional horizon [PR #1776](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1776)
+
 * Add options to use custom shapes for offshore subregions [PR #1769](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1769)
 
 * In `cluster_network`, replace custom voronoi polygon calculation function with Geopandas `gdf.voronoi_polygons` method [PR #1771](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1771)
