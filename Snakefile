@@ -38,6 +38,7 @@ copy_default_files()
 configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
+configfile: "configs/data_sources.yaml"
 configfile: "config.yaml"
 
 
@@ -1958,6 +1959,8 @@ rule plot_sector_summary:
 
 
 rule build_industrial_database:
+    input:
+        ammonia_plants="data/industry/ammonia_plants.csv",
     output:
         industrial_database="data/industrial_database.csv",
     script:
@@ -2057,6 +2060,9 @@ rule build_industry_demand:  #default data
         base_year=config["demand_data"]["base_year"],
         industry_util_factor=config["sector"]["industry_util_factor"],
         aluminium_year=config["demand_data"]["aluminium_year"],
+        ammonia_gas_mwh_per_t=config["sector"]["ammonia"]["gas_MWh_per_tNH3"],
+        ammonia_elec_mwh_per_t=config["sector"]["ammonia"]["elec_MWh_per_tNH3"],
+        ammonia_year=config["sector"]["ammonia"]["production_year"],
     input:
         industrial_distribution_key="resources/"
         + SECDIR
@@ -2067,6 +2073,7 @@ rule build_industry_demand:  #default data
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
         industrial_database="data/industrial_database.csv",
+        ammonia_production="data/industry/ammonia_production.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
@@ -2084,6 +2091,26 @@ rule build_industry_demand:  #default data
         )
     script:
         "scripts/build_industry_demand.py"
+
+
+rule build_ammonia_production:
+    params:
+        ammonia_sources=config["data_sources"]["ammonia"],
+        us_cities_source=config["data_sources"]["us_cities"],
+    input:
+        eu_ammonia_plants="data/industry/ammonia_plants_eu.csv",
+    output:
+        ammonia_production="data/industry/ammonia_production.csv",
+        ammonia_plants="data/industry/ammonia_plants.csv",
+    threads: 1
+    resources:
+        mem_mb=1000,
+    log:
+        RESDIR + "logs/build_ammonia_production.log",
+    benchmark:
+        RESDIR + "benchmarks/build_ammonia_production"
+    script:
+        "scripts/build_ammonia_production.py"
 
 
 rule build_existing_heating_distribution:

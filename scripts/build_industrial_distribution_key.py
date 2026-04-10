@@ -86,6 +86,7 @@ def match_technology(df):
         "HVC": "chemical and petrochemical",
         "Paper": "paper pulp and print",
         "Aluminium": "non-ferrous metals",
+        "Haber-Bosch": "ammonia",
     }
 
     df["industry"] = df["technology"].map(industry_mapping)

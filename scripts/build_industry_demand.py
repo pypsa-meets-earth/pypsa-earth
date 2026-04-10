@@ -13,7 +13,7 @@ import os
 from itertools import product
 
 import pandas as pd
-from _helpers import BASE_DIR, mock_snakemake, read_csv_nafix
+from _helpers import BASE_DIR, get_conv_factors, mock_snakemake, read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -157,6 +157,7 @@ if __name__ == "__main__":
             "wood and wood products",
             "textile and leather",
             "construction",
+            "ammonia",
             "other",
         ]
 
@@ -198,6 +199,7 @@ if __name__ == "__main__":
                 "Cement": "non-metallic minerals",
                 "HVC": "chemical and petrochemical",
                 "Paper": "paper pulp and print",
+                "Haber-Bosch": "ammonia",
             }
 
             df["industry"] = df["technology"].map(industry_mapping)
@@ -289,12 +291,53 @@ if __name__ == "__main__":
                 pass
         industry_base_totals = industry_base_totals.sort_index()
 
+        # Remove ammonia from chemical and petrochemical and add as separate industry with gas and electricity demand and process emissions, based on production data and energy/emission factors
+        ammonia_gas_mwh_per_t = snakemake.params.ammonia_gas_mwh_per_t
+        ammonia_elec_mwh_per_t = snakemake.params.ammonia_elec_mwh_per_t
+        ammonia_lhv_mwh_per_t = (
+            get_conv_factors("industry")["ammonia"] * 1e3
+        )  # TWh/kton → MWh/t
+
+        ammonia_prod = read_csv_nafix(snakemake.input.ammonia_production, index_col=0)
+        ammonia_production_year = str(snakemake.params.ammonia_year)
+
+        # Initialise ammonia column to 0
+        industry_base_totals["ammonia"] = 0.0
+
+        for country in countries:
+            if country not in ammonia_prod.index:
+                continue
+
+            prod_kton = ammonia_prod.at[country, ammonia_production_year]
+            if pd.isna(prod_kton) or prod_kton == 0:
+                continue
+
+            gas_mwh = prod_kton * 1000 * ammonia_gas_mwh_per_t
+            elec_mwh = prod_kton * 1000 * ammonia_elec_mwh_per_t
+            nh3_mwh = prod_kton * 1000 * ammonia_lhv_mwh_per_t
+
+            # Zero-initialise the full row first to avoid NaN in other industry columns
+            industry_base_totals.loc[(country, "ammonia"), :] = 0.0
+
+            # NH3 output as ammonia carrier; process emissions handled explicitly in prepare_sector_network
+            industry_base_totals.loc[(country, "ammonia"), "ammonia"] = nh3_mwh
+
+            # Subtract gas and electricity feedstock from chemical and petrochemical (clip at 0)
+            for carrier, value in [("gas", gas_mwh), ("electricity", elec_mwh)]:
+                current = industry_base_totals.loc[
+                    (country, carrier), "chemical and petrochemical"
+                ]
+                industry_base_totals.loc[
+                    (country, carrier), "chemical and petrochemical"
+                ] = max(0.0, current - value)
+
         all_carriers = [
             "electricity",
             "gas",
             "coal",
             "oil",
             "hydrogen",
+            "ammonia",
             "biomass",
             "low-temperature heat",
         ]

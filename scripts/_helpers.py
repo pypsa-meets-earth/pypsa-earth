@@ -1249,6 +1249,7 @@ def get_conv_factors(sector):
             "Ethane": 0.01289,
             "Oil shale": 0.00247,
             "Other kerosene": 0.01216,
+            "ammonia": 0.00517,  # MWh (LHV) per tonne NH3 = 0.00517 TWh/kton
         }
     return fuels_conv_toTWh
 
