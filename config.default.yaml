@@ -606,6 +606,13 @@ sector:
   oil:
     spatial_oil: true
 
+  ammonia:
+    enable: true
+    production_year: 2019 # 2019 - 2023 are available
+    gas_MWh_per_tNH3: 10.17  # MWh natural gas per tNH3 (feedstock + fuel, SMR-based Haber-Bosch)
+    elec_MWh_per_tNH3: 0.15  # MWh electricity per tNH3 (SMR-based Haber-Bosch)
+    co2_t_per_tNH3: 1.87     # tCO2 per tNH3 (SMR-based process emissions)
+
   # ------------------- HEAT SECTOR -------------------
 
   district_heating:
