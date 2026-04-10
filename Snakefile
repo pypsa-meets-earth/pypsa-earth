@@ -2096,7 +2096,7 @@ rule build_ammonia_production:
     input:
         eu_ammonia_plants="data/industry/ammonia_plants_eu.csv",
     output:
-        ammonia_production="resources/" + SECDIR + "demand/ammonia_production.csv",
+        ammonia_production="data/industry/ammonia_production.csv",
         ammonia_plants="data/industry/ammonia_plants.csv",
     threads: 1
     resources:
