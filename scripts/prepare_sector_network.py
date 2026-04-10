@@ -1942,6 +1942,34 @@ def add_ammonia(
         lifetime=costs.at["Haber-Bosch", "lifetime"],
     )
 
+    # Ammonia cracker (NH3 to H2)
+    n.madd(
+        "Link",
+        spatial.nodes,
+        suffix=" ammonia cracker",
+        bus0=spatial.ammonia.nodes,
+        bus1=spatial.nodes + " H2",
+        carrier="ammonia cracker",
+        p_nom_extendable=True,
+        efficiency=1 / costs.at["Ammonia cracker", "ammonia-input"],
+        capital_cost=costs.at["Ammonia cracker", "fixed"]
+        / costs.at["Ammonia cracker", "ammonia-input"],  # costs are per MWh_H2
+        lifetime=costs.at["Ammonia cracker", "lifetime"],
+    )
+
+    # Ammonia liquid storage (incl. liquefaction)
+    n.madd(
+        "Store",
+        spatial.ammonia.nodes,
+        suffix=" ammonia store",
+        bus=spatial.ammonia.nodes,
+        carrier="ammonia store",
+        e_nom_extendable=True,
+        e_cyclic=True,
+        capital_cost=costs.at["NH3 (l) storage tank incl. liquefaction", "fixed"],
+        lifetime=costs.at["NH3 (l) storage tank incl. liquefaction", "lifetime"],
+    )
+
 
 def get(item, investment_year=None):
     """
