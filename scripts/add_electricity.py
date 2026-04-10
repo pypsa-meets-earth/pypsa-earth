@@ -743,6 +743,20 @@ def attach_hydro(
         "Reservoir": "hydro",
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
+    invalid_techs = ppl.loc[~ppl.technology.isin(tech_to_carrier.keys())]
+
+    # Current fix, NaN technologies set to ROR
+    if not invalid_techs.empty:
+        n_invalid = invalid_techs.shape[0]
+        inv_tech_list = invalid_techs["technology"].unique()
+        logger.warning(
+            f"Identified {n_invalid} hydro powerplants with unknown technology: "
+            + "; ".join({inv_tech_list})
+            + "\n"
+            "Initialized to 'Run-Of-River'"
+        )
+        ppl.loc[invalid_techs.index, "technology"] = "Run-Of-River"
+        ppl.loc[invalid_techs.index, "carrier"] = "ror"
 
     # Aggregate by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -750,13 +764,14 @@ def attach_hydro(
     ror = ppl_grouped[ppl_grouped["carrier"] == "ror"]
     phs = ppl_grouped[ppl_grouped["carrier"] == "PHS"]
     hydro = ppl_grouped[ppl_grouped["carrier"] == "hydro"]
+
     tbd = ppl[ppl.technology.isna()]  # To be determined technologies
 
     inflow_idx = ror.index.union(hydro.index).union(tbd.index)
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
-            missing_plants_idxs = ppl.index.difference(found_plants.index)
+            missing_plants_idxs = inflow_idx.difference(found_plants.index)
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants_idxs.empty:
@@ -871,7 +886,10 @@ def attach_hydro(
     if "PHS" in carriers and not phs.empty:
         # fill missing max hours to config value and
         # assume no natural inflow due to lack of data
-        phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
+        phs["max_hours"] = phs.max_hours.where(
+            ~phs.max_hours.isna() & (phs.max_hours > 0),
+            c["PHS_max_hours"],
+        )
         n.madd(
             "StorageUnit",
             phs.index,

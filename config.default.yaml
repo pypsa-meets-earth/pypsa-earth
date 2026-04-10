@@ -381,7 +381,10 @@ renewable:
      # use the weather year for weather-dominated variations (installed capacity is changing slowly)
      # the technology-year for policy-determined changes (installed capacity is changing quickly)
       year: 2023 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
-    multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
+      quantile_ror: 0.9 # quantile of the inflow distribution beyond which inflow values are clipped for run-of-river plants
+      quantile_reservoir: 1. # quantile of the inflow distribution beyond which inflow values are clipped for reservoir plants
+      multiplier: 1.0 # multiplier applied to the normalization factor, can be used to adjust the overall hydro potential after normalization
+    correction_factor: 1. # correction factor applied to the inflows; default 1.0
     hydro_min_inflow_pu: 1.0 # [hour] A threshold of energy to power ratio to classify hydro powerplants as reservoirs in case type is missed
   csp:
     cutout: auto
