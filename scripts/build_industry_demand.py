@@ -316,6 +316,9 @@ if __name__ == "__main__":
             elec_mwh = prod_kton * 1000 * ammonia_elec_mwh_per_t
             nh3_mwh = prod_kton * 1000 * ammonia_lhv_mwh_per_t
 
+            # Zero-initialise the full row first to avoid NaN in other industry columns
+            industry_base_totals.loc[(country, "ammonia"), :] = 0.0
+
             # NH3 output as ammonia carrier; process emissions handled explicitly in prepare_sector_network
             industry_base_totals.loc[(country, "ammonia"), "ammonia"] = nh3_mwh
 
