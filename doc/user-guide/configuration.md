@@ -355,7 +355,13 @@ Specifies the option related to hydrogen exports.
 
 ## custom_data
 
-See custom_data.rst for more detail
+Specifies which custom datasets are used to replace or supplement the default model data. For full details see [Custom Data Integration](custom-data.md).
+
+```yaml
+--8<-- "configtables/snippets/custom_data.yaml"
+```
+
+{{ read_csv('configtables/custom_data.csv') }}
 
 ## sector
 
