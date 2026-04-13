@@ -28,6 +28,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update biomass transport cost for Australia [PR #1784](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1784)
+
 * Convert dangling `custom_data.rst` to MkDocs Markdown and add Custom Data Integration page to the User Guide [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
 * Enhance CI test for myopic optimization (`test/config.myopic.yaml`) by including additional horizon [PR #1776](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1776)
