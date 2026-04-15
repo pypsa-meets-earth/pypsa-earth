@@ -656,6 +656,21 @@ def _add_land_use_constraint(n):
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 
+    # Where land use constraint reduces p_nom_max below p_nom / p_nom_min,
+    # cap both down to p_nom_max to remain feasible.
+    # This happens when existing capacity already exceeds the land use budget.
+    violating = n.generators.p_nom_min > n.generators.p_nom_max
+    if violating.any():
+        logger.warning(
+            f"Land use constraint reduced p_nom_max below p_nom/p_nom_min for "
+            f"{violating.sum()} generators. Capping p_nom and p_nom_min to p_nom_max:\n"
+            f"{n.generators.index[violating].tolist()}"
+        )
+        n.generators.loc[violating, "p_nom_min"] = n.generators.loc[
+            violating, "p_nom_max"
+        ]
+        n.generators.loc[violating, "p_nom"] = n.generators.loc[violating, "p_nom_max"]
+
 
 def _add_land_use_constraint_m(n):
     # if generators clustering is lower than network clustering, land_use accounting is at generators clusters

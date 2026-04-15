@@ -286,24 +286,29 @@ rule build_shapes:
 def retrieve_subregion(script_name):
     """
     Select whether scripts related to subregions should be retrieved.
+
+    Offshore subregion shapes can be generated from subregion shapes, or provided as a separate custom file.
     """
-    subregion_config = config.get("subregion", {"method": False, "apply_on": []})
+    subregion_config = config.get("subregion", {"apply_on": []})
 
     if script_name not in subregion_config["apply_on"]:
         return {}
 
     method = subregion_config["method"]
+    subregion_offshore = "resources/" + RDIR + "shapes/offshore_shapes.geojson"
 
     if method == "gadm":
         subregion_shapes = "resources/" + RDIR + "shapes/subregion_shapes.geojson"
     elif method == "custom":
         subregion_shapes = subregion_config["path_custom_shapes"]
+        if subregion_config["path_custom_offshore"]:
+            subregion_offshore = subregion_config["path_custom_offshore"]
     else:
         return {}
 
     return {
         "subregion_shapes": subregion_shapes,
-        "subregion_offshore": "resources/" + RDIR + "shapes/subregion_offshore.geojson",
+        "subregion_offshore": subregion_offshore,
         "original_shapes": "resources/" + RDIR + "shapes/country_shapes.geojson",
     }
 
@@ -645,11 +650,13 @@ rule add_electricity:
     params:
         countries=config["countries"],
         output_currency=config["costs"]["output_currency"],
+        fill_values=config["costs"]["fill_values"],
         conventional=config.get("conventional", {}),
         electricity=config["electricity"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
+        existing_capacities=config["existing_capacities"],
     input:
         **{
             f"profile_{tech}": "resources/"
