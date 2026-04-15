@@ -711,7 +711,7 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
 
     factors = nuclear_p_max_pu.set_index("country")["factor"].div(100.0)
 
-    gens = n.generators.query("carrier == 'nuclear'")
+    gens = n.generators[n.generators.carrier.str.startswith("nuclear", na=False)]
     if gens.empty:
         logger.info("No nuclear generators found: skipping nuclear p_max_pu limits.")
         return
