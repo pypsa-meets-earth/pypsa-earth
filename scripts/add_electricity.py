@@ -424,6 +424,73 @@ def aggregate_inflow_by_group(
 
     return pd.DataFrame(inflow_dict, index=inflow_t.index)
 
+def get_irena_targets_for_carrier(
+    carrier: str,
+    estimate_renewable_capacities_config: dict,
+    countries: list,
+) -> pd.Series:
+    """
+    Return IRENA installed capacity targets for a given carrier as a Series
+    indexed by country (MW).
+
+    The data source and configuration are the same as in
+    estimate_renewable_capacities_irena.
+    Offshore wind is mapped entirely to offwind-ac.
+    """
+    if not estimate_renewable_capacities_config:
+        return pd.Series(dtype=float)
+
+    stats = estimate_renewable_capacities_config.get("stats")
+    year = estimate_renewable_capacities_config.get("year")
+    tech_map = estimate_renewable_capacities_config.get("technology_mapping", {})
+
+    if not stats or stats != "irena":
+        return pd.Series(dtype=float)
+
+    if not countries or not tech_map:
+        return pd.Series(dtype=float)
+
+    # Read IRENASTAT exactly as in the legacy implementation
+    capacities = pm.data.IRENASTAT().powerplant.convert_country_to_alpha2()
+
+    missing = list(set(countries).difference(capacities.Country.unique()))
+    if missing:
+        logger.info(
+            f"The countries {missing} are not provided in the IRENA stats and hence not scaled"
+        )
+
+    capacities = capacities.query(
+        "Year == @year and Technology in @tech_map.keys() and Country in @countries"
+    )
+
+    if capacities.empty:
+        return pd.Series(0.0, index=countries)
+
+    capacities = capacities.groupby(["Technology", "Country"]).Capacity.sum()
+
+    targets = pd.Series(0.0, index=countries, dtype=float)
+
+    for ppm_technology, techs in tech_map.items():
+        # Offshore is entirely mapped to offwind-ac
+        mapped_techs = [
+            "offwind-ac" if tech == "offwind-dc" else tech for tech in techs
+        ]
+
+        if carrier not in mapped_techs:
+            continue
+
+        if ppm_technology not in capacities.index.get_level_values(0):
+            logger.info(
+                f"technology {ppm_technology} is not provided by {stats} and therefore not estimated"
+            )
+            continue
+
+        targets = targets.add(
+            capacities.loc[ppm_technology].reindex(countries, fill_value=0.0),
+            fill_value=0.0,
+        )
+
+    return targets
 
 def attach_wind_and_solar(
     n: pypsa.Network,
@@ -451,7 +518,8 @@ def attach_wind_and_solar(
     df.loc[df.technology == "Offshore", "carrier"] = "offwind-ac"
     df.loc[df.technology == "Onshore", "carrier"] = "onwind"
 
-    irena_targets = snakemake.params.electricity.get("irena_targets", {})
+    estimate_cfg = snakemake.params.electricity.get("estimate_renewable_capacities", {})
+    countries = snakemake.params.countries
 
     for carrier in carriers:
         if carrier == "hydro":
@@ -485,7 +553,7 @@ def attach_wind_and_solar(
                     "Added connection cost of {:0.0f}-{:0.0f} {}/MW/a to {}".format(
                         connection_cost.min(),
                         connection_cost.max(),
-                        snakemake.params.output_currency,
+                        snakemake.params.costs["output_currency"],
                         carrier,
                     )
                 )
@@ -500,8 +568,13 @@ def attach_wind_and_solar(
                 missing = ppl_carrier[~ppl_carrier.bus.isin(n.buses.index)].copy()
 
                 if not missing.empty:
-                    bus_coords = n.buses[["x", "y"]]
+                    bus_coords = n.buses.loc[ds.indexes["bus"], ["x", "y"]]
+
+                    reassigned = 0
                     for _, row in missing.iterrows():
+                        if pd.isna(row.lon) or pd.isna(row.lat):
+                            continue
+
                         dist = (bus_coords.x - row.lon) ** 2 + (
                             bus_coords.y - row.lat
                         ) ** 2
@@ -509,10 +582,12 @@ def attach_wind_and_solar(
                         valid = pd.concat(
                             [valid, pd.DataFrame([row])], ignore_index=False
                         )
+                        reassigned += 1
 
-                    logger.info(
-                        f"{carrier}: reassigned {len(missing)} plants without valid bus."
-                    )
+                    if reassigned > 0:
+                        logger.info(
+                            f"{carrier}: reassigned {reassigned} plants without valid bus."
+                        )
 
                 caps_existing = (
                     valid.groupby("bus")["p_nom"]
@@ -529,12 +604,19 @@ def attach_wind_and_solar(
             # Gap filling using IRENA
             caps_final = caps_existing.copy()
 
-            if carrier in irena_targets:
-                targets = irena_targets[carrier]  # Series country -> MW
+            targets = get_irena_targets_for_carrier(
+                carrier=carrier,
+                estimate_renewable_capacities_config=estimate_cfg,
+                countries=countries,
+            )
 
+            if not targets.empty:
                 buses_country = n.buses.loc[ds.indexes["bus"], "country"]
                 existing_by_country = caps_existing.groupby(buses_country).sum()
-                gap_by_country = (targets - existing_by_country).clip(lower=0.0)
+                gap_by_country = (
+                    targets.sub(existing_by_country, fill_value=0.0)
+                    .clip(lower=0.0)
+                )
 
                 if gap_by_country.sum() > 0:
                     for country, gap in gap_by_country.items():
@@ -543,16 +625,24 @@ def attach_wind_and_solar(
 
                         buses_c = buses_country[buses_country == country].index
                         if len(buses_c) == 0:
+                            logger.warning(
+                                f"{carrier}: no buses found for country {country}, "
+                                f"cannot redistribute {gap/1e3:.2f} GW from IRENA."
+                            )
                             continue
 
                         add_per_bus = gap / len(buses_c)
                         caps_final.loc[buses_c] += add_per_bus
 
+                existing_total = caps_existing.sum()
+                target_total = targets.sum()
+                gap_total = caps_final.sum() - caps_existing.sum()
+
                 logger.info(
-                    f"{carrier}: existing {existing_by_country.sum()/1e3:.2f} GW, "
-                    f"IRENA target {targets.sum()/1e3:.2f} GW, "
-                    f"gap filled {(caps_final.sum()-caps_existing.sum())/1e3:.2f} GW "
-                    f"({100*(caps_final.sum()-caps_existing.sum())/max(targets.sum(), 1):.1f}%)."
+                    f"{carrier}: existing from powerplants = {existing_total/1e3:.2f} GW, "
+                    f"IRENA target = {target_total/1e3:.2f} GW, "
+                    f"gap filled = {gap_total/1e3:.2f} GW "
+                    f"({100 * gap_total / max(target_total, 1):.1f}% of total)."
                 )
 
             # Add generators
