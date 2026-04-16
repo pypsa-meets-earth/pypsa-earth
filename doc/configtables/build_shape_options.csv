@@ -1,4 +1,4 @@
-,Unit,Values,Description,,,,
+Parameter,Unit,Values,Description,,,,
 gadm_layer_id,,"""{0",1,"2}""","""GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country",1: region/county-like,"2: municipality-like."""
 simplify_gadm,bool,"{True, False}",True: shape polygons are simplified else no,,,,
 simplify_tolerance,float,>= 0,Specifies tolerance limit when simplifying GADM shapes. A higher value indicates more simplification,,,,

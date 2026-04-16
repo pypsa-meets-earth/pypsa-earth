@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 natura_size, string, "{countries, cutout, global}", "Select which regions to include in the natura raster. Either include all selected countries (counties), the entire cutout (cutout) or the entire globe (global)."
 natura_resolution, int,, "[m] Grid resolution of the natura output data."
 window_size, int,, "[bytes] Size of the shifting rasterization window. The required RAM scales with window_size^2"

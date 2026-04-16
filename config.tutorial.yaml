@@ -11,6 +11,7 @@ countries: ["NG", "BJ"]
 enable:
   retrieve_databundle: true
   retrieve_databundle_sector: true
+  retrieve_cutout: true
   build_natura_raster: true
   progress_bar: false
 
@@ -38,28 +39,12 @@ electricity:
 
 
 atlite:
-  nprocesses: 4
-  cutouts:
-    # use 'base' to determine geographical bounds and time span from config
-    # base:
-    # module: era5
-    cutout-2013-era5-tutorial: {}
+  default: cutout-2013-era5-tutorial
 
 renewable:
-  onwind:
-    cutout: cutout-2013-era5-tutorial
-  offwind-ac:
-    cutout: cutout-2013-era5-tutorial
-  offwind-dc:
-    cutout: cutout-2013-era5-tutorial
-  solar:
-    cutout: cutout-2013-era5-tutorial
   hydro:
-    cutout: cutout-2013-era5-tutorial
     hydrobasins_level: 4
     hydro_max_hours: "energy_capacity_totals_by_country"
-  csp:
-    cutout: cutout-2013-era5-tutorial
 
 
 solving:
