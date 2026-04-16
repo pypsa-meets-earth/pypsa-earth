@@ -424,6 +424,7 @@ def aggregate_inflow_by_group(
 
     return pd.DataFrame(inflow_dict, index=inflow_t.index)
 
+
 def get_irena_targets_for_carrier(
     carrier: str,
     estimate_renewable_capacities_config: dict,
@@ -491,6 +492,7 @@ def get_irena_targets_for_carrier(
         )
 
     return targets
+
 
 def attach_wind_and_solar(
     n: pypsa.Network,
@@ -613,9 +615,8 @@ def attach_wind_and_solar(
             if not targets.empty:
                 buses_country = n.buses.loc[ds.indexes["bus"], "country"]
                 existing_by_country = caps_existing.groupby(buses_country).sum()
-                gap_by_country = (
-                    targets.sub(existing_by_country, fill_value=0.0)
-                    .clip(lower=0.0)
+                gap_by_country = targets.sub(existing_by_country, fill_value=0.0).clip(
+                    lower=0.0
                 )
 
                 if gap_by_country.sum() > 0:
