@@ -680,7 +680,7 @@ def attach_wind_and_solar(
                 bus=ds.indexes["bus"],
                 carrier=carrier,
                 p_nom=caps_final,
-                p_nom_min=caps_final,
+                p_nom_min=caps_existing,
                 p_nom_extendable=carrier in extendable_carriers["Generator"],
                 p_nom_max=p_nom_max,
                 p_max_pu=p_max_pu,
