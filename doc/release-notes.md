@@ -30,6 +30,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Include country-specific nuclear `p_max_pu` values based on IAEA dataset [PR #1718](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1718)
+
 * Included critical step in the documentation to confirm Terms and Conditions on Copernicus portal to allow for unrestricted use of API. [PR #1785](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1785)
 
 * Update biomass transport cost for Australia [PR #1784](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1784)

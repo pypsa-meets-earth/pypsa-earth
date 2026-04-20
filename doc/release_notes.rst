@@ -34,6 +34,14 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
 
+* Include country-specific nuclear `p_max_pu` values based on IAEA dataset `PR #1718 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1718>`__
+
+* Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
+
 PyPSA-Earth 0.8.0
 =================
 
@@ -98,6 +106,7 @@ PyPSA-Earth 0.8.0
 * Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
 
 * Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings `PR #1608 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608>`__
+ main
 
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 
