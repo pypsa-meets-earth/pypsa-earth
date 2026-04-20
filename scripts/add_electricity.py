@@ -511,6 +511,27 @@ def attach_wind_and_solar(
     redistributed uniformly across buses within each country.
 
     Offshore wind is treated entirely as offwind-ac.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    ppl : pd.DataFrame
+        Power plant DataFrame.
+    input_files : dict
+        Snakemake input object containing renewable profile files.
+    carriers : set
+        Set of renewable carriers to be added.
+    extendable_carriers : dict
+        Dictionary of extendable carriers for different component types.
+    line_length_factor : float
+        Factor to adjust line lengths for connection cost calculations.
+
+    Returns
+    -------
+    None
     """
     _add_missing_carriers_from_costs(n, costs, carriers)
 
