@@ -668,10 +668,13 @@ def attach_wind_and_solar(
                 )
 
             # Add generators
-            planning_horizon = getattr(snakemake.wildcards, "planning_horizons", None)
             suffix = " " + carrier
-            if planning_horizon is not None:
-                suffix += f"-{planning_horizon}"
+
+            renewable_lifetime = (
+                costs.at["offwind", "lifetime"]
+                if supcarrier == "offwind"
+                else costs.at[carrier, "lifetime"]
+            )
 
             n.madd(
                 "Generator",
@@ -688,6 +691,7 @@ def attach_wind_and_solar(
                 marginal_cost=costs.at[supcarrier, "marginal_cost"],
                 capital_cost=capital_cost,
                 efficiency=costs.at[supcarrier, "efficiency"],
+                lifetime=renewable_lifetime,
             )
 
 
