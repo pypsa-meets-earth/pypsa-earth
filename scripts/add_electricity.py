@@ -434,8 +434,8 @@ def get_irena_targets_for_carrier(
     Return IRENA installed capacity targets for a given carrier as a Series
     indexed by country (MW).
 
-    The data source and configuration are the same as in
-    estimate_renewable_capacities_irena.
+    The function reads IRENASTAT installed capacity data using the existing
+    `estimate_renewable_capacities` configuration.
     Offshore wind is mapped entirely to offwind-ac.
     """
     if not estimate_renewable_capacities_config:
