@@ -1531,12 +1531,6 @@ if __name__ == "__main__":
         pd.read_csv(snakemake.input.nuclear_p_max_pu),
     )
 
-    if snakemake.params.electricity.get("estimate_renewable_capacities"):
-        logger.info(
-            "Skipping legacy IRENA capacity estimation for wind and solar: "
-            "handled directly in attach_wind_and_solar."
-        )
-
     update_p_nom_max(n)
     add_nice_carrier_names(n, snakemake.config)
 
