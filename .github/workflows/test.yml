@@ -57,7 +57,7 @@ jobs:
           echo "env_file=${{ matrix.env_file }}" >> $GITHUB_ENV
         fi
 
-    - uses: conda-incubator/setup-miniconda@v3
+    - uses: conda-incubator/setup-miniconda@v4
       with:
         miniforge-version: latest
         activate-environment: pypsa-earth
