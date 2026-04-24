@@ -768,24 +768,25 @@ def attach_conventional_generators(
         renewable_carriers
     )
 
-    for carrier in extendable_conventional:
-        carrier_buses = ppl[ppl.carrier == carrier]["bus"].unique()
-        n.madd(
-            "Generator",
-            carrier_buses,
-            suffix=" " + carrier,
-            carrier=carrier,
-            bus=carrier_buses,
-            p_nom_extendable=True,
-            efficiency=costs.at[carrier, "efficiency"],
-            marginal_cost=costs.at[carrier, "marginal_cost"],
-            capital_cost=costs.at[carrier, "capital_cost"],
-            lifetime=costs.at[carrier, "lifetime"],
-        )
+    if extendable_conventional:
+        for carrier in extendable_conventional:
+            carrier_buses = ppl[ppl.carrier == carrier]["bus"].unique()
+            n.madd(
+                "Generator",
+                carrier_buses,
+                suffix=" " + carrier,
+                carrier=carrier,
+                bus=carrier_buses,
+                p_nom_extendable=True,
+                efficiency=costs.at[carrier, "efficiency"],
+                marginal_cost=costs.at[carrier, "marginal_cost"],
+                capital_cost=costs.at[carrier, "capital_cost"],
+                lifetime=costs.at[carrier, "lifetime"],
+            )
 
-    logger.info(
-        f"Added extendable {extendable_conventional} generators at {len(carrier_buses)} buses."
-    )
+        logger.info(f"Added extendable {extendable_conventional} generators.")
+    else:
+        logger.info("No extendable conventional generators configured.")
 
     for carrier in conventional_config:
         # Generators with technology affected
