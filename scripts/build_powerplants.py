@@ -342,7 +342,7 @@ if __name__ == "__main__":
         ppl = (
             pm.powerplants(from_url=False, update=True, config_update=config)
             .powerplant.fill_missing_decommissioning_years()
-            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .query("Country in @countries_names")
             .powerplant.convert_country_to_alpha2()
             .pipe(replace_natural_gas_technology)
         )

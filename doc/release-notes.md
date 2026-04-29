@@ -14,6 +14,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
 
+* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
+
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
 
 * Migrate all cost data processing to ``process_cost_data.py`` [PR #1719](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1719)
@@ -29,6 +31,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Enable green-field capacity expansion of custom lines under construction [PR #1778](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1778)
 
 **Minor Changes and bug-fixing**
+
+* Avoid crash in add_electricity when no extendable generators are configured [PR #1794](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1794)
 
 * Include country-specific nuclear `p_max_pu` values based on IAEA dataset [PR #1718](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1718)
 
