@@ -7,9 +7,6 @@ name: Update reference objectives
 on:
   workflow_dispatch:
 
-env:
-  BASE_ENV: envs/environment.yaml
-
 jobs:
   run-tests-and-extract:
     name: Run tests and extract objectives
@@ -32,30 +29,23 @@ jobs:
         conda-remove-defaults: true
 
     - name: Cache Conda env
+      id: cache-env
       uses: actions/cache@v5
       with:
         path: ${{ env.CONDA }}/envs
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('envs/linux-64.lock.yaml') }}
-      id: cache-env
 
     - name: Update environment
       if: steps.cache-env.outputs.cache-hit != 'true'
       run: conda env update -n pypsa-earth -f envs/linux-64.lock.yaml
 
-    - name: Conda list
-      run: conda list
-
-    - name: Run Test
+    - name: Run tests
       run: make test
 
     - name: Extract objectives and build updated reference CSV
-      run: |2
-
+      run: |
         shopt -s nullglob
-
         LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
-        echo "Extracting the objective values from the logs"
-        echo "Solver log files: ${LOG_FILES[*]}"
         OBJ_FOUND=$(
           awk '/INFO:__main__:Objective function: /{
                  sub(/\r$/, "");
@@ -63,18 +53,11 @@ jobs:
                  print FILENAME ":" $0
                }' "${LOG_FILES[@]}" || true
         )
-
         shopt -u nullglob
 
-        if [ -z "$OBJ_FOUND" ]; then
-          echo "Objective not found."
-          exit 1
-        fi
+        [ -z "$OBJ_FOUND" ] && { echo "No objective values found."; exit 1; }
 
-        echo "Objective values found:"
-        echo "$OBJ_FOUND"
-
-        # Write SPDX header and column names to the output file
+        # REUSE-IgnoreStart
         {
           printf "# -*- coding: utf-8 -*-\n"
           printf "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors\n"
@@ -82,29 +65,19 @@ jobs:
           printf "# SPDX-License-Identifier: CC-BY-4.0\n"
           printf "folder,file,objective\n"
         } > updated_obj_ref.csv
+        # REUSE-IgnoreEnd
 
         while IFS= read -r line; do
           FILE=$(echo "$line" | cut -d: -f1)
           VALUE=$(echo "$line" | cut -d: -f2-)
           BASENAME=$(basename "$FILE")
-
-          # The enclosing folder contains the name of the run
           FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
-
-          if [[ "$FILE" == ./logs/solve_network/* ]]; then
-            FOLDER="default"
-          fi
-
+          [[ "$FILE" == ./logs/solve_network/* ]] && FOLDER="default"
           VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN { printf "%.2f\n", v }')
-
           printf "%s,%s,%s\n" "$FOLDER" "$BASENAME" "$VALUE_RAW" >> updated_obj_ref.csv
-
         done <<< "$OBJ_FOUND"
 
-        echo "Updated reference CSV:"
-        cat updated_obj_ref.csv
-
-    - name: Upload updated reference CSV artifact
+    - name: Upload updated reference CSV
       uses: actions/upload-artifact@v7
       with:
         name: updated-ref-objectives
@@ -121,12 +94,12 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
-    - name: Download updated reference CSV artifact
+    - name: Download updated reference CSV
       uses: actions/download-artifact@v8
       with:
         name: updated-ref-objectives
 
-    - name: Move updated CSV to correct location
+    - name: Move CSV to correct location
       run: mv updated_obj_ref.csv test/utils/obj_ref.csv
 
     - name: Create Pull Request
