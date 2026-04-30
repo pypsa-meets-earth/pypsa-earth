@@ -627,10 +627,10 @@ def cluster_regions(busmaps, inputs, output):
 def replace_components(n, c, df, pnl):
     n.remove(c, n.df(c).index)
 
-    n.import_components_from_dataframe(df, c)
+    n.add(c, df.index, **df)
     for attr, df in pnl.items():
         if not df.empty:
-            n.import_series_from_dataframe(df, c, attr)
+            n._import_series_from_df(df, c, attr)
 
 
 def groupby_bus_carrier(
