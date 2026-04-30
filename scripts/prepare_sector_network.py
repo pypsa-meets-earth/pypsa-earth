@@ -3132,7 +3132,7 @@ def convert_conventional_generators_to_links(
 
     # Remove generators
     logger.info(f"Removing {len(conventional_generators)} conventional generators")
-    n.mremove("Generator", conventional_generators.index)
+    n.remove("Generator", conventional_generators.index)
 
     # Remove carrier definitions for technology carriers (not fuel carriers)
     carriers_to_remove = pd.Index(conventionals.keys()).intersection(n.carriers.index)
