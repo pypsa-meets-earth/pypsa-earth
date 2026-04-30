@@ -527,6 +527,12 @@ def base_network(
     n.add("Transformer", transformers.index, **transformers)
     n.add("Link", converters.index, **converters)
 
+    # greenfield capacity expansion is represented with null capacity using num_parallel==0
+    n.lines["num_parallel"] = n.lines["num_parallel"].where(
+        ~n.lines["under_construction"], 0.0
+    )
+    n.lines.drop(columns="under_construction", inplace=True, errors="ignore")
+
     _set_lines_s_nom_from_linetypes(n)
 
     _set_countries_and_substations(inputs, base_network_config, countries_config, n)

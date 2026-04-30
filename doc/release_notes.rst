@@ -12,12 +12,11 @@ Upcoming release
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
 
 * Use IRENA statistics for 2023 to normalize countries hydropower generation data `PR #1681 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681>`__
 
 * Drop use of override_components that is no longer needed in newer PyPSA versions `PR #1699 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699>`__
-
-* Ensure connectivity of transformers in buses with several transformers `PR #1706 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1706>`__
 
 **Minor Changes and bug-fixing**
 
@@ -34,6 +33,14 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix missing bus warning for hydrogen due to pypsa version change `PR #1723 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723>`__
 
 * Fix warning in of H2 pipeline extension in solve_network `PR #1732 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732`__
+
+* Include country-specific nuclear `p_max_pu` values based on IAEA dataset `PR #1718 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1718>`__
+
+* Bump powerplantmatching to 0.8.0 `PR #1702 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update reference values of the objective function in validator workflow and adjust format of the objective outputs in csv files `PR #1705 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1702>`__
+
+* Update steel GEM data to version 2024 and use backup link for GEM pipelines `PR #1708 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1708>`__
 
 PyPSA-Earth 0.8.0
 =================
@@ -74,10 +81,6 @@ PyPSA-Earth 0.8.0
 
 **Minor Changes and bug-fixing**
 
-* Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river `PR #1684 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1684>`__
-
-* Fix issues where gas and biomass powerplant capacity were not added in ``add_existing_baseyear.py``. Differentiate `urban central solid biomass CHP` with non-CHP `biomass` for historical capacity `PR #1678 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1678>`__
-
 * Avoid creating duplicate conventional generators by setting `keep_existing_capacities` to `false`. Convert CCGT as links in `prepare_sector_network` `PR #1630 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1630>`__
 
 * Refine load shedding capacity calculation to use bus-specific maximum loads instead of fixed large values, improving solver performance and numeric stability. Rename load shedding generator carrier to 'load shedding' (now) instead of just 'load' (previously) `PR #1581 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1581>`__
@@ -103,6 +106,7 @@ PyPSA-Earth 0.8.0
 * Fix shipping and aviation implementation in multi-country models `PR #1582 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1582>`__
 
 * Increase robustness of geometry management by merging MultiLineStrings and adding tolerance in splitting linestrings `PR #1608 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1608>`__
+ main
 
 * Add geojson output to build_osm_network `PR #1611 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1611>`__
 

@@ -4,8 +4,8 @@
 
 version: 2
 
-sphinx:
-  configuration: doc/conf.py
+mkdocs:
+  configuration: mkdocs.yml
 
 build:
   os: ubuntu-22.04
@@ -13,6 +13,12 @@ build:
     python: "3.11"
   apt_packages:
   - graphviz
+
+  jobs:
+    pre_system_dependencies:
+    - git fetch --unshallow   # Needed to get version tags
+    pre_install:
+    - pip install mkdocs-material
 
 python:
   install:

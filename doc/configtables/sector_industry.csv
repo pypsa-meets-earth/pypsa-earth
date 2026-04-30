@@ -1,0 +1,5 @@
+Parameter,Unit,Values,Description
+industry_util_factor,float,"[0, 1]",Industry utility fraction in generating process emission
+efficiency_heat_oil_to_elec,float,"[0, 1]",The heat efficiency of oil if that energy is supplied using electricity instead. Used to determine residential electricity.
+efficiency_heat_biomass_to_elec,float,"[0, 1]",The heat efficiency of biomass if that energy is supplied using electricity instead. Used to determine residential electricity.
+efficiency_heat_gas_to_elec,float,"[0, 1]",The heat efficiency of gas if that energy is supplied using electricity instead. Used to determine residential electricity.
