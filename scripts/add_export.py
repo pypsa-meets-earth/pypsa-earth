@@ -194,14 +194,14 @@ if __name__ == "__main__":
             "add_export",
             simpl="",
             clusters="4",
-            ll="copt",
-            opts="CCL-Co2L-24h",
+            ll="c1",
+            opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144h",
             discountrate="0.071",
             demand="AB",
             h2export="120",
-            configfile="test/config.sector.yaml",
+            # configfile="test/config.test1.yaml",
         )
 
     n = pypsa.Network(snakemake.input.network)
