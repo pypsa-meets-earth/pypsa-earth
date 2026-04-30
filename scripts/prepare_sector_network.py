@@ -3158,7 +3158,7 @@ def convert_conventional_generators_to_links(
         fuel_buses = fuel_carrier_df.loc[carrier_gens["bus"], "nodes"]
 
         # Add generators as links
-        n.madd(
+        n.add(
             "Link",
             carrier_gens.index,
             bus0=fuel_buses.values,

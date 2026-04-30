@@ -771,7 +771,7 @@ def attach_conventional_generators(
     if extendable_conventional:
         for carrier in extendable_conventional:
             carrier_buses = ppl[ppl.carrier == carrier]["bus"].unique()
-            n.madd(
+            n.add(
                 "Generator",
                 carrier_buses,
                 suffix=" " + carrier,
@@ -1147,7 +1147,7 @@ def attach_existing_batteries(
 
     max_hours = snakemake.params.electricity["max_hours"]["battery"]
 
-    n.madd(
+    n.add(
         "StorageUnit",
         batteries_grouped.index,
         bus=batteries_grouped["bus"],
