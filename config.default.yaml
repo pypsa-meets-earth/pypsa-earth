@@ -530,8 +530,6 @@ export:
     unload_time: 24 # hours for 48h see Hampp2021
 
 custom_data:
-  # renewables: [] # ['csp', 'rooftop-solar', 'solar']
-  # elec_demand: false
   heat_demand: false
   industry_demand: false
   industry_database: false
