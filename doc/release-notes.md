@@ -78,6 +78,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
 
+* Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
