@@ -66,6 +66,12 @@ from shapely.validation import make_valid
 logger = create_logger(__name__)
 
 
+def normed(s):
+    if s.sum() == 0:
+        return s
+    return s / s.sum()
+
+
 def get_gegis_regions(countries):
     """
     Get the GEGIS region from the config file.
@@ -273,6 +279,13 @@ def build_demand_profiles(
             # (refer to vresutils.load._upsampling_weights)
             # TODO: require adjustment for Africa
             factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
+            if factors.sum() == 0:
+                logger.warning(
+                    f"Upsampling factors for {cntry} are all zero, returning uniform distribution across {len(factors)} shapes."
+                )
+                factors = pd.Series(
+                    np.ones(len(factors)) / len(factors), index=factors.index
+                )
             return pd.DataFrame(
                 factors.values * l.values[:, np.newaxis],
                 index=l.index,

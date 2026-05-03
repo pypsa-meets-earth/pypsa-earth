@@ -81,7 +81,6 @@ if __name__ == "__main__":
         [
             "Year",
             "Economy Label",
-            "Absolute value in thousands",
             "Urban population as percentage of total population",
         ]
     ]
@@ -98,6 +97,12 @@ if __name__ == "__main__":
 
     # Drop isos that were not found:
     df = df.loc[df["country"] != "not found"]
+
+    # Drop region names where country column contains list of countries
+    df = df.loc[df.country.apply(lambda x: isinstance(x, str)), :]
+
+    # Reduce the data to one value for the urban percent per country and year
+    df = df.groupby(["country", "Year"], as_index=False).mean(numeric_only=True)
 
     df = df.set_index("country")
 

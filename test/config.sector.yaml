@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: 0.6.0
 tutorial: true
 
 enable:
@@ -11,13 +10,14 @@ enable:
 
 run:
   name: sector
+  sector_name: "sector" # use this to keep track of sector scenario runs
   shared_cutouts: true
 
 scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [4]
-  opts: [Co2L-24h]
+  opts: [CCL-Co2L-24h]
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
   sopts:
@@ -29,6 +29,9 @@ countries: ["NG", "BJ"]
 
 
 electricity:
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: test/utils/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false
   extendable_carriers:
     Store: [H2]
     Link: [H2 pipeline]
@@ -51,8 +54,14 @@ existing_capacities:
   - oil
   - uranium
 
+policy_config:
+  hydrogen:
+    temporal_matching: "hour"
+
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+  solar_rooftop:
+    use_building_size: true
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"

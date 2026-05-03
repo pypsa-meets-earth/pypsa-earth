@@ -60,7 +60,9 @@ def download_number_of_vehicles():
         )
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
+        logger.warning(
+            f"Failed to read the file. Falling back on hard-coded data. \nError: {e}"
+        )
         return pd.DataFrame()
 
     vehicles_gho = vehicles_gho.rename(
@@ -89,7 +91,8 @@ def download_number_of_vehicles():
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
 
     vehicles_wiki.rename(
-        columns={"Location": "Country", "Vehicles": "number cars"}, inplace=True
+        columns={"Region": "Country", "Road motor vehicles": "number cars"},
+        inplace=True,
     )
 
     vehicles_wiki = add_iso2_country_code(vehicles_wiki)

@@ -18,22 +18,23 @@ from _helpers import (
     save_to_geojson,
     to_csv_nafix,
 )
+from shapely.ops import linemerge
 
 logger = create_logger(__name__)
 
 
-def prepare_substation_df(df_all_substations):
+def prepare_substation_df(df_all_buses):
     """
     Prepare raw substations dataframe to the structure compatible with PyPSA-
     Eur.
 
     Parameters
     ----------
-    df_all_substations : dataframe
+    df_all_buses : dataframe
         Raw substations dataframe as downloaded from OpenStreetMap
     """
     # Modify the naming of the DataFrame columns to adapt to the PyPSA-Eur-like format
-    df_all_substations = df_all_substations.rename(
+    df_all_buses = df_all_buses.rename(
         columns={
             "id": "bus_id",
             "tags.voltage": "voltage",
@@ -48,15 +49,21 @@ def prepare_substation_df(df_all_substations):
     )
 
     # Convert polygons to points
-    df_all_substations["geometry"] = df_all_substations["geometry"].centroid
+    df_all_buses["geometry"] = df_all_buses["geometry"].centroid
 
     # Add longitude (lon) and latitude (lat) coordinates in the dataset
-    df_all_substations["lon"] = df_all_substations["geometry"].x
-    df_all_substations["lat"] = df_all_substations["geometry"].y
+    df_all_buses["lon"] = df_all_buses["geometry"].x
+    df_all_buses["lat"] = df_all_buses["geometry"].y
 
     # Initialize columns to default value
-    df_all_substations["dc"] = False
-    df_all_substations["under_construction"] = False
+    df_all_buses["dc"] = False
+
+    if "under_construction" in df_all_buses.columns:
+        df_all_buses["under_construction"] = df_all_buses["under_construction"].fillna(
+            False
+        )
+    else:
+        df_all_buses["under_construction"] = False
 
     # Rearrange columns
     clist = [
@@ -76,17 +83,17 @@ def prepare_substation_df(df_all_substations):
 
     # Check. If column is not in df create an empty one.
     for c in clist:
-        if c not in df_all_substations:
-            df_all_substations[c] = np.nan
+        if c not in df_all_buses:
+            df_all_buses[c] = np.nan
 
-    df_all_substations.drop(
-        df_all_substations.columns[~df_all_substations.columns.isin(clist)],
+    df_all_buses.drop(
+        df_all_buses.columns[~df_all_buses.columns.isin(clist)],
         axis=1,
         inplace=True,
         errors="ignore",
     )
 
-    return df_all_substations
+    return df_all_buses
 
 
 def add_line_endings_tosubstations(substations, lines):
@@ -256,14 +263,14 @@ def filter_circuits(df, min_value_circuit=0.1):
     return df
 
 
-def finalize_substation_types(df_all_substations):
+def finalize_substation_types(df_all_buses):
     """
     Specify bus_id and voltage columns as integer.
     """
-    df_all_substations["bus_id"] = df_all_substations["bus_id"].astype(int)
-    df_all_substations["voltage"] = df_all_substations["voltage"].astype(int)
+    df_all_buses["bus_id"] = df_all_buses["bus_id"].astype(int)
+    df_all_buses["voltage"] = df_all_buses["voltage"].astype(int)
 
-    return df_all_substations
+    return df_all_buses
 
 
 def prepare_lines_df(df_lines):
@@ -342,6 +349,8 @@ def clean_frequency(df, default_frequency="50"):
         "16.67": "16.7",
         "50;50;16.716.7": "50;50;16.7;16.7",
         "50;16.7?": "50;16.7",
+        "50.0": "50",
+        "60.0": "60",
         # "24 kHz": "24000",
     }
 
@@ -406,12 +415,23 @@ def clean_circuits(df):
         "1.": "1",
     }
 
-    # note: no string conversion here! it is performed later on
+    # note: no string conversion for all entries in clean_circuits! it is performed later on
     df["circuits"] = (
         df["circuits"]
         .replace(repl_circuits)
         .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
     )
+
+    # Convert numbers in different dtypes to string while preserving NaN or other strings.
+    is_numeric = ~pd.to_numeric(df["circuits"], errors="coerce").isna()
+    df["circuits"] = df["circuits"].mask(is_numeric, df["circuits"].astype(str))
+
+    # Report non-numeric and non-NaN values, which should be added to repl_circuits.
+    if df.loc[~is_numeric, "circuits"].notna().any():
+        logger.warning(
+            "Non-numeric and non-NaN values found in circuits column, consider replacement: "
+            + str(df.loc[~is_numeric, "circuits"].unique())
+        )
 
     return df
 
@@ -443,9 +463,22 @@ def clean_cables(df):
         "line": "1",
     }
 
-    df["cables"] = df["cables"].map(
-        lambda x: x.replace(" ", "") if isinstance(x, str) else x
+    df["cables"] = (
+        df["cables"]
+        .replace(repl_cables)
+        .map(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
     )
+
+    # Convert numbers in different dtypes to string while preserving NaN or other strings.
+    is_numeric = ~pd.to_numeric(df["cables"], errors="coerce").isna()
+    df["cables"] = df["cables"].mask(is_numeric, df["cables"].astype(str))
+
+    # Report non-numeric and non-NaN values, which should be added to repl_cables.
+    if df.loc[~is_numeric, "cables"].notna().any():
+        logger.warning(
+            "Non-numeric and non-NaN values found in cables column, consider replacement: "
+            + str(df.loc[~is_numeric, "cables"].unique())
+        )
 
     return df
 
@@ -557,14 +590,9 @@ def fill_circuits(df):
             return ret_def
 
     # cables requirement for circuits calculation
-    cables_req = {
-        "50": 3,
-        "60": 3,
-        "16.7": 2,
-        "0": 2,
-    }
+    cables_req = {"50": 3, "60": 3, "16.7": 2, "0": 2}
 
-    def _basic_cables(f_val, cables_req=cables_req, def_circ=2):
+    def _basic_cables(f_val, cables_req=cables_req, def_circ=3):
         return cables_req[f_val] if f_val in cables_req.keys() else def_circ
 
     len_f, len_c, isna_c, len_cab, isna_cab = _get_circuits_status(df)
@@ -707,8 +735,10 @@ def integrate_lines_df(df_all_lines, distance_crs):
     fill_circuits(df)
 
     # Add under construction info
-    # Default = False. No more information available atm
-    df["under_construction"] = False
+    if "under_construction" in df.columns:
+        df["under_construction"] = df["under_construction"].fillna(False)
+    else:
+        df["under_construction"] = False
 
     # Add underground flag to check whether the line (cable) is underground
     # Simplified. If tag_type cable then underground is True
@@ -729,8 +759,17 @@ def filter_lines_by_geometry(df_all_lines):
     # drop None geometries
     df_all_lines.dropna(subset=["geometry"], axis=0, inplace=True)
 
-    # remove lines represented as Polygons
-    df_all_lines = df_all_lines[df_all_lines.geometry.geom_type == "LineString"]
+    idx_mls = df_all_lines.geometry.geom_type == "MultiLineString"
+    for idx, row in df_all_lines[idx_mls].iterrows():
+        df_all_lines.loc[idx, "geometry"] = linemerge(row.geometry)
+
+    df_drop = df_all_lines[df_all_lines.geometry.geom_type != "LineString"]
+    if not df_drop.empty:
+        # remove lines represented as Polygons or multilinestrings
+        logger.warning(
+            f"Dropping {len(df_drop)} lines with unexpected geometry types:\n{df_drop} "
+        )
+        df_all_lines.drop(df_drop.index, axis=0, inplace=True)
 
     return df_all_lines
 
@@ -871,6 +910,10 @@ def load_network_data(network_asset, data_options):
         loaded_df2 = gpd.read_file(custom_path)
         loaded_df = pd.concat([loaded_df1, loaded_df2], ignore_index=True)
 
+    elif cleaning_data_options == "none":
+        loaded_df1 = gpd.read_file(input_files[network_asset])
+        loaded_df = gpd.GeoDataFrame(columns=loaded_df1.columns, crs=loaded_df1.crs)
+
     else:
         if cleaning_data_options != "OSM_only":
             logger.warning(
@@ -966,60 +1009,58 @@ def clean_data(
     logger.info("Process OSM substations")
 
     if os.path.getsize(input_files["substations"]) > 0:
-        df_all_substations = load_network_data("substations", data_options)
+        df_all_buses = load_network_data("substations", data_options)
 
         # prepare dataset for substations
-        df_all_substations = prepare_substation_df(df_all_substations)
+        df_all_buses = prepare_substation_df(df_all_buses)
 
         # filter substations by tag
         if tag_substation:  # if the string is not empty check it
-            df_all_substations = df_all_substations[
-                df_all_substations["tag_substation"] == tag_substation
+            df_all_buses = df_all_buses[
+                df_all_buses["tag_substation"] == tag_substation
             ]
 
         # clean voltage and make sure it is string
-        df_all_substations = clean_voltage(df_all_substations)
+        df_all_buses = clean_voltage(df_all_buses)
 
-        df_all_substations = gpd.GeoDataFrame(
-            split_cells(pd.DataFrame(df_all_substations)),
-            crs=df_all_substations.crs,
+        df_all_buses = gpd.GeoDataFrame(
+            split_cells(pd.DataFrame(df_all_buses)),
+            crs=df_all_buses.crs,
         )
 
         # add line endings if option is enabled
         if add_line_endings:
-            df_all_substations = add_line_endings_tosubstations(
-                df_all_substations, df_all_lines
-            )
+            df_all_buses = add_line_endings_tosubstations(df_all_buses, df_all_lines)
 
         # drop substations with nan geometry
-        df_all_substations.dropna(subset=["geometry"], axis=0, inplace=True)
+        df_all_buses.dropna(subset=["geometry"], axis=0, inplace=True)
 
         # filter substation by voltage
-        df_all_substations = filter_voltage(df_all_substations, threshold_voltage)
+        df_all_buses = filter_voltage(df_all_buses, threshold_voltage)
 
         # finalize dataframe types
-        df_all_substations = finalize_substation_types(df_all_substations)
+        df_all_buses = finalize_substation_types(df_all_buses)
 
         # save to geojson file
-        df_all_substations = gpd.GeoDataFrame(df_all_substations, geometry="geometry")
+        df_all_buses = gpd.GeoDataFrame(df_all_buses, geometry="geometry")
 
         if names_by_shapes:
             # set the country name by the shape
             logger.info("Setting substations country name using the GADM shapes")
-            df_all_substations = set_countryname_by_shape(
-                df_all_substations,
+            df_all_buses = set_countryname_by_shape(
+                df_all_buses,
                 ext_country_shapes,
             )
 
         # set unique bus ids
-        df_all_substations = set_unique_id(df_all_substations, "bus_id")
+        df_all_buses = set_unique_id(df_all_buses, "bus_id")
     else:
         logger.info("No OSM substations")
-        df_all_substations = gpd.GeoDataFrame()
+        df_all_buses = gpd.GeoDataFrame()
 
     # save substations output
     logger.info("Saving substations output")
-    save_to_geojson(df_all_substations, output_files["substations"])
+    save_to_geojson(df_all_buses, output_files["substations"])
 
     # ----------- GENERATORS -----------
 

@@ -13,7 +13,7 @@ WORKDIR /pypsa-earth
 
 COPY ./envs ./temp
 
-RUN conda env create -n pypsa-earth -f temp/linux-pinned.yaml
+RUN conda env create -n pypsa-earth -f temp/linux-64.lock.yaml
 
 RUN conda init bash
 

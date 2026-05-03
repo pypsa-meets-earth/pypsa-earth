@@ -15,11 +15,12 @@ from _helpers import (
     create_logger,
     read_geojson,
     read_osm_config,
+    save_to_geojson,
     to_csv_nafix,
 )
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.ops import linemerge, nearest_points, split
+from shapely.ops import linemerge, nearest_points, snap, split
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
 
@@ -38,7 +39,19 @@ LINES_COLUMNS = [
     "length",
     "dc",
     "geometry",
-    "bounds",
+    "under_construction",
+]
+CONVERTERS_COLUMNS = [
+    "converter_id",
+    "bus0",
+    "bus1",
+    "geometry",
+]
+TRANSFORMERS_COLUMNS = [
+    "line_id",
+    "bus0",
+    "bus1",
+    "geometry",
 ]
 
 
@@ -195,7 +208,7 @@ def merge_stations_same_station_id(
                     bus_row["dc"].all(),  # "dc"
                     # bus_row["dc"].all(),  # "dc"
                     "|".join(bus_row["symbol"].unique()),  # "symbol"
-                    bus_row["under_construction"].any(),  # "under_construction"
+                    bus_row["under_construction"].all(),  # "under_construction"
                     "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
                     bus_row["tag_area"].sum(),  # "tag_area"
                     lon_bus,  # "lon"
@@ -284,8 +297,6 @@ def get_transformers(buses, lines):
                         f"transf_{g_name}_{id}",  # "line_id"
                         g_value["bus_id"].iloc[id],  # "bus0"
                         g_value["bus_id"].iloc[id + 1],  # "bus1"
-                        g_value.voltage.iloc[id],  # "voltage_bus0"
-                        g_value.voltage.iloc[id + 1],  # "voltage_bus0"
                         g_value.country.iloc[id],  # "country"
                         geom_trans,  # "geometry"
                     ]
@@ -296,8 +307,6 @@ def get_transformers(buses, lines):
         "line_id",
         "bus0",
         "bus1",
-        "voltage_bus0",
-        "voltage_bus1",
         "country",
         "geometry",
     ]
@@ -306,8 +315,6 @@ def get_transformers(buses, lines):
     if not df_transformers.empty:
         init_index = 0 if lines.empty else lines.index[-1] + 1
         df_transformers.set_index(init_index + df_transformers.index, inplace=True)
-    # update line endings
-    df_transformers = line_endings_to_bus_conversion(df_transformers)
 
     return df_transformers
 
@@ -502,6 +509,7 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     # drop lines starting and ending in the same node
     lines.drop(lines[lines["bus0"] == lines["bus1"]].index, inplace=True)
+
     # update line endings
     lines = line_endings_to_bus_conversion(lines)
 
@@ -606,7 +614,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         for point in nearest_points_list:
             # Split the line at the current point
             # The split function returns a GeometryCollection, so we need to convert it to a list
-            split_lines = split(split_line[-1], point)
+            split_lines = split(snap(split_line[-1], point, 1e-9), point)
             split_line = split_line[:-1] + list(split_lines.geoms)
 
         # convert the split line to a multilinestring
@@ -732,7 +740,6 @@ def built_network(
     countries_config,
     geo_crs,
     distance_crs,
-    lines_cols_standard,
     force_ac=False,
 ):
     logger.info("Stage 1/5: Read input data")
@@ -797,17 +804,23 @@ def built_network(
     if not os.path.exists(outputs["lines"]):
         os.makedirs(os.path.dirname(outputs["lines"]), exist_ok=True)
 
-    lines = lines[lines_cols_standard]
+    lines = lines[LINES_COLUMNS]
+    converters = converters[CONVERTERS_COLUMNS]
+    transformers = transformers[TRANSFORMERS_COLUMNS]
 
-    to_csv_nafix(lines, outputs["lines"])  # Generate CSV
-    to_csv_nafix(converters, outputs["converters"])  # Generate CSV
-    to_csv_nafix(transformers, outputs["transformers"])  # Generate CSV
+    to_csv_nafix(lines, outputs["lines"])
+    save_to_geojson(lines, outputs["lines_geo"])
+    to_csv_nafix(converters, outputs["converters"])
+    save_to_geojson(converters, outputs["converters_geo"])
+    to_csv_nafix(transformers, outputs["transformers"])
+    save_to_geojson(transformers, outputs["transformers_geo"])
 
     # create clean directory if not already exist
     if not os.path.exists(outputs["substations"]):
         os.makedirs(os.path.dirname(outputs["substations"]), exist_ok=True)
-    # Generate CSV
+
     to_csv_nafix(buses, outputs["substations"])
+    save_to_geojson(buses, outputs["substations_geo"])
 
     return None
 
@@ -834,6 +847,5 @@ if __name__ == "__main__":
         countries,
         geo_crs,
         distance_crs,
-        lines_cols_standard=LINES_COLUMNS,
         force_ac=force_ac,
     )

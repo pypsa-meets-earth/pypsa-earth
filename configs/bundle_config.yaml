@@ -36,15 +36,27 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/145504/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
-      gdrive: https://drive.google.com/file/d/12K03Epx3O9o-IQLh9afzCQyT-nMKWM3P/view?usp=drive_link
+      zenodo: https://zenodo.org/records/18851102/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1XnTP6bZoVl5kFjZQlAcmjNXgazOHtFqX/view?usp=drive_link
     output:
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/gadm/gadm41_NGA/gadm41_NGA.gpkg  # needed in build_shapes
     - data/gadm/gadm41_BEN/gadm41_BEN.gpkg  # needed in build_shapes
     - data/gadm/gadm36_NGA/gadm36_NGA.gpkg  # needed in sector-coupled model
     - data/gadm/gadm36_BEN/gadm36_BEN.gpkg  # needed in sector-coupled model
+
+  # tutorial bundle specific for Nigeria and Benin only (TODO: merge with above)
+  bundle_tutorial_NGBJ_global_buildings:
+    countries: [NG, BJ]
+    tutorial: true
+    category: global_buildings
+    destination: "data"
+    urls:
+      gdrive: https://drive.google.com/file/d/1nnseF1A740Gp0IaryeCQ8IRcEF91-aUe/view?usp=drive_link
+    output:
+    - data/global_buildings/NG_global_buildings_raw.parquet  # needed in cluster_global_buildings
+    - data/global_buildings/BJ_global_buildings_raw.parquet  # needed in cluster_global_buildings
 
   # tutorial bundle specific for Botswana only
   bundle_tutorial_BW:
@@ -53,10 +65,10 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/145504/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
-      gdrive: https://drive.google.com/file/d/1YbbYGs1NsSsZYqNX1g1Jo-iJzt5m-81c/view?usp=drive_link
+      zenodo: https://zenodo.org/records/18851102/files/bundle_tutorial_BW_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1AEmlgBO-6uY_MA4rzmaRJcQ-xE1Z4uHx/view?usp=drive_link
     output:
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/gadm/gadm41_BWA/gadm41_BWA.gpkg  # needed in build_shapes
     - data/gadm/gadm36_BWA/gadm36_BWA.gpkg  # needed in sector-coupled model
@@ -68,11 +80,13 @@ databundles:
     category: data
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_MA.zip?download=1
-      gdrive: https://drive.google.com/file/d/1VGzE8ZJHAvAQ9X44QNSX4rH3QF7Yi37D/view?usp=drive_link
+      zenodo: https://zenodo.org/records/18851102/files/bundle_tutorial_data_MA.zip?download=1
+      gdrive: https://drive.google.com/file/d/1cUei9vH3LzIYfqltaGTaRWCX6J24f1c0/view?usp=drive_link
     output:
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    - data/gadm/gadm41_MAR/gadm41_MAR.gpkg  # needed in build_shapes
+    - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
   # load tutorial hydrobasins bundle for Africa only
   bundle_tutorial_hydrobasins:
@@ -95,7 +109,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
+      zenodo: https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_NGBJ.zip?download=1
       gdrive: https://drive.google.com/file/d/1xnomHdXf_c5STrf7jtDiuRlN2zW0FSVC/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -108,7 +122,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_BW.zip?download=1
+      zenodo: https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_BW.zip?download=1
       gdrive: https://drive.google.com/file/d/1DDQAtnIDM0FNC3vCldfHeH__IpTbyIJt/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -121,7 +135,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_cutouts_tutorial_MA.zip?download=1
+      zenodo: https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_MA.zip?download=1
       gdrive: https://drive.google.com/file/d/1j5v2f4E756jmDMa707QvdNJq3xM4bYUk/view?usp=drive_link
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
@@ -130,10 +144,11 @@ databundles:
   # Cutout of Kazakhstan for CI test of pypsa-kz-data repo, only 5 MB
   bundle_cutouts_test_KZ:
     countries: [KZ]
+    tutorial: true
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/69756/files/bundle_tutorial_cutouts_KZ.zip?download=1
+      zenodo: https://zenodo.org/records/18851102/files/bundle_tutorial_cutouts_KZ.zip?download=1
     output: [cutouts/cutout-2013-era5-tutorial.nc]
     disable_by_opt:
       build_cutout: [all]
@@ -145,7 +160,7 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/3853/files/tutorial_data_general.zip?download=1
+      zenodo: https://zenodo.org/records/18851102/files/tutorial_data_general.zip?download=1
       gdrive: https://drive.google.com/file/d/1nRLrs_kP0qVl-IHC4BFLjpoKa3HLk2Py/view
     output:
     - data/eez/eez_v11.gpkg
@@ -171,17 +186,41 @@ databundles:
     output:
     - data/hydrobasins/hybas_world.shp
 
+  # IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators.
+  # Used in build_renewable_profiles.py to derive hydropower generation potentials.
+  # Original source: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
+  bundle_irena_statistics:
+    countries: [Earth]
+    tutorial: false
+    category: irena
+    destination: "data"
+    urls:
+      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
+    output:
+    - data/IRENA_Statistics_Extract_2025H2.xlsx
+
+  # TODO: make options in bundle_config for retrival regardless of tutorial
+  bundle_irena_statistics_tutorial:
+    countries: [Earth]
+    tutorial: true
+    category: irena
+    destination: "data"
+    urls:
+      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
+    output:
+    - data/IRENA_Statistics_Extract_2025H2.xlsx
+
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
     countries: [Earth]
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_data_earth.zip?download=1
-      gdrive: https://drive.google.com/file/d/1zU4VRRBDVIVqoykhK9lnOAr60unVm_x2/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1
+      gdrive: https://drive.google.com/file/d/1P4uMY464lgcp--8fAEYIJbKeNmHdg1Re/view?usp=drive_link
     output:
     - data/eez/eez_v11.gpkg
-    - data/gebco/GEBCO_2021_TID.nc
+    - data/gebco/GEBCO_2025_sub_ice.nc
     - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/ssp2-2.6/2030/era5_2013/Asia.nc
@@ -196,7 +235,7 @@ databundles:
     category: natura
     destination: "data/natura/"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/natura_wpda_CC0.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323567/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
     - data/natura/natura.tiff
@@ -242,7 +281,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/13539/files/bundle_cutouts_africa.zip?download=1
+      zenodo: https://sandbox.zenodo.org/records/323567/files/bundle_cutouts_africa.zip?download=1
       gdrive: https://drive.google.com/file/d/1WHv5Dm1GtrDZj-AxJZd3T-NMIBXty3eV/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -263,13 +302,14 @@ databundles:
 
   # cutouts bundle of the cutouts folder for the North American continent
   # Coordinate bounds: [long -172 to -47, lat 1.5-74]
-  # Size about 25 GB (zipped)
+  # Size about 27 GB (zipped)
   bundle_cutouts_northamerica:
     countries: [NorthAmerica]
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/1W0rEa7SrAUjqREycKSbl1dkylj_-xmpT/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_northamerica.zip?download=1
+      gdrive: https://drive.google.com/file/d/1Ao_kuHssRaP1qLV-IEG91Hu7E04-nBZg/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
@@ -282,7 +322,8 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      gdrive: https://drive.google.com/file/d/17QS7qkuCiyj95Pr-ZQRl3qgp5CQE6HTy/view?usp=drive_link
+      zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_europe.zip?download=1
+      gdrive: https://drive.google.com/file/d/1c2-8pChoxv4CDJW01vkPpggBSWHs9Mqi/view?usp=drive_link
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
@@ -295,6 +336,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418864/files/bundle_cutouts_oceania.zip?download=1
       gdrive: https://drive.google.com/file/d/1R8ELkXmW8jBBUFWRY0sbf-T14SJl4EUY/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -319,7 +361,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/418866/files/bundle_cutouts_asia.zip?download=1
       gdrive: https://drive.google.com/file/d/11-Ax9tVks7oPjrZwG5v3C0x4OmMT_Pv8/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -344,7 +386,7 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
-      # zenodo:
+      zenodo: https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_southamerica.zip?download=1
       gdrive: https://drive.google.com/file/d/1Jeu2Vzoq4mNDUKSvIviN8HqSFx5gl61b/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
@@ -357,7 +399,20 @@ databundles:
     category: cutouts
     destination: "cutouts"
     urls:
+      zenodo: https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_westasia.zip?download=1
       gdrive: https://drive.google.com/file/d/1as-fZS4Z70CfDf3bR4i9t9S5-5pBqURP/view?usp=sharing
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # cutouts bundle of the cutouts folder for North Eurasia
+  # Size about 19.6 GB (zipped)
+  bundle_cutouts_northeurasia:
+    countries: ["LT", "LV", "EE", "BY", "RU", "KZ", "MN", "GE"]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      gdrive: https://drive.google.com/file/d/11EzaAaP4eOPzhfKCkm0zZ6HOv-JpgZFd/view?usp=sharing
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]

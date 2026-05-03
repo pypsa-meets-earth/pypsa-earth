@@ -12,7 +12,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from _helpers import mock_snakemake, override_component_attrs
+from _helpers import mock_snakemake
 
 
 def override_values(tech, year, dr):
@@ -82,8 +82,7 @@ if __name__ == "__main__":
             demand="AB",
         )
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
     m = n.copy()
     if snakemake.params.custom_data["renewables"]:
         buses = list(n.buses[n.buses.carrier == "AC"].index)
