@@ -826,6 +826,9 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
 
 def add_chp_constraints(n):
+    if n.links.empty:
+        return
+
     electric_bool = (
         n.links.index.str.contains("urban central")
         & n.links.index.str.contains("CHP")
