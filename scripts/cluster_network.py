@@ -149,7 +149,6 @@ from pypsa.clustering.spatial import (
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from shapely.geometry import Point
 
 idx = pd.IndexSlice
