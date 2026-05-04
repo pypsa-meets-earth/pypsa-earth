@@ -137,10 +137,10 @@ from _helpers import (
     create_logger,
     locate_bus,
     nearest_shape,
+    read_csv_nafix,
     restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
-    read_csv_nafix,
 )
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
@@ -796,7 +796,9 @@ if __name__ == "__main__":
 
         custom_busmap = snakemake.params.custom_busmap
         if custom_busmap:
-            busmap = read_csv_nafix(snakemake.input.custom_busmap, index_col=0).squeeze()
+            busmap = read_csv_nafix(
+                snakemake.input.custom_busmap, index_col=0
+            ).squeeze()
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
             custom_busmap = busmap
