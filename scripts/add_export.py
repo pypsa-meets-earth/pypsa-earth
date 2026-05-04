@@ -178,9 +178,14 @@ def create_export_profile():
 
     # revise logger msg
     export_type = snakemake.params.export_profile
-    logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} with total demand {round(export_profile.mean()*8760/1e6, ndigits=0)} method and resampled to {len(n.snapshots)} snapshots."
-    )
+
+    annual_export = export_profile.mean() * 8760
+    msg = f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} with total demand {round(annual_export/1e6, ndigits=0)} method and resampled to {len(n.snapshots)} snapshots."
+
+    if np.abs(export_h2 - annual_export) / 1e6 > 0.001:
+        raise ValueError(msg)
+    else:
+        logger.info(msg)
 
     return export_profile
 
