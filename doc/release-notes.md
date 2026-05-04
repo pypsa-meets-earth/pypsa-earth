@@ -32,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add unit testing scaffolding (`pytest`) and tests for `add_chp_constraints` and `add_battery_constraints` [#1203](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1203)
+
 * Add config parameter `enable_electricity_connection_cost`, which adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network [PR #1810](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1810)
 
 * Avoid crash in `add_chp_constraints` when the network has no links, supporting operational models without brownfield/expandable batteries, pumped storage, or DC links [PR #1750](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1750)

@@ -39,6 +39,7 @@ dependencies:
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
+- pytest
 - matplotlib
 - reverse-geocode
 - country_converter
