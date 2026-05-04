@@ -5,6 +5,7 @@
 
 # -*- coding: utf-8 -*-
 
+import os
 import pathlib
 import sys
 
@@ -15,7 +16,6 @@ sys.path.append("./scripts")
 
 from test.conftest import get_config_dict
 
-from _helpers import get_path
 from base_network import (
     _get_linetype_by_voltage,
     _get_linetypes_config,
@@ -289,7 +289,7 @@ def test_load_buses_from_osm(tmpdir):
     """
     Verify what returned by _load_buses_from_osm.
     """
-    file_path = get_path(tmpdir, "buses_exercise.csv")
+    file_path = os.path.join(tmpdir, "buses_exercise.csv")
     df_buses_input.to_csv(file_path)
     df_buses_output = _load_buses_from_osm(file_path)
     df_buses_comparison = df_buses_output.compare(df_buses_reference)
@@ -301,7 +301,7 @@ def test_load_lines_from_osm(tmpdir):
     """
     Verify what returned by _load_lines_from_osm.
     """
-    file_path = get_path(tmpdir, "lines_exercise.csv")
+    file_path = os.path.join(tmpdir, "lines_exercise.csv")
     df_lines_input.to_csv(file_path)
     df_lines_output = _load_lines_from_osm(file_path)
     df_lines_comparison = df_lines_output.compare(df_lines_reference)
@@ -313,7 +313,7 @@ def test_load_transformers_from_osm(tmpdir):
     """
     Verify what returned by _load_transformers_from_osm.
     """
-    file_path = get_path(tmpdir, "transformers_exercise.csv")
+    file_path = os.path.join(tmpdir, "transformers_exercise.csv")
     df_transformers_input.to_csv(file_path, index=False)
     df_transformers_output = _load_transformers_from_osm(file_path)
     df_transformers_comparison = df_transformers_output.compare(
@@ -327,7 +327,7 @@ def test_load_converters_from_osm(tmpdir):
     """
     Verify what returned by _load_converters_from_osm.
     """
-    file_path = get_path(tmpdir, "converters_exercise.csv")
+    file_path = os.path.join(tmpdir, "converters_exercise.csv")
     df_converters_input.to_csv(file_path, index=False)
     df_converters_output = _load_converters_from_osm(file_path)
     df_converters_comparison = df_converters_output.compare(df_converters_reference)
@@ -400,7 +400,7 @@ def test_set_electrical_parameters_lines(get_config_dict, tmpdir):
     Verify what returned by _set_electrical_parameters_lines.
     """
     config_dict = get_config_dict
-    file_path = get_path(tmpdir, "lines_exercise.csv")
+    file_path = os.path.join(tmpdir, "lines_exercise.csv")
     df_lines_input.to_csv(file_path)
     df_lines_output = _load_lines_from_osm(file_path).reset_index(drop=True)
     df_lines_output_ac = df_lines_output[
@@ -427,7 +427,7 @@ def test_set_electrical_parameters_links(get_config_dict, tmpdir):
     Verify what returned by _set_electrical_parameters_links.
     """
     config_dict = get_config_dict
-    file_path = get_path(tmpdir, "lines_exercise.csv")
+    file_path = os.path.join(tmpdir, "lines_exercise.csv")
     df_lines_input.to_csv(file_path)
     df_lines_output = _load_lines_from_osm(file_path).reset_index(drop=True)
     df_lines_output_dc = df_lines_output[
@@ -452,7 +452,7 @@ def test_set_electrical_parameters_transformers(get_config_dict, tmpdir):
     Verify what returned by _set_electrical_parameters_transformers.
     """
     config_dict = get_config_dict
-    file_path = get_path(tmpdir, "transformers_exercise.csv")
+    file_path = os.path.join(tmpdir, "transformers_exercise.csv")
     df_transformers_input.to_csv(file_path, index=False)
     df_transformers_output = _load_transformers_from_osm(file_path)
     df_transformers_parameters = _set_electrical_parameters_transformers(
@@ -474,7 +474,7 @@ def test_set_electrical_parameters_converters(get_config_dict, tmpdir):
     Verify what returned by _set_electrical_parameters_converters.
     """
     config_dict = get_config_dict
-    file_path = get_path(tmpdir, "converters_exercise.csv")
+    file_path = os.path.join(tmpdir, "converters_exercise.csv")
     df_converters_input.to_csv(file_path, index=False)
     df_converters_output = _load_converters_from_osm(file_path)
     df_converters_parameters = _set_electrical_parameters_converters(

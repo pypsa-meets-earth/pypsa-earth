@@ -36,12 +36,12 @@ def get_temp_folder(tmpdir):
 
 @pytest.fixture(scope="function")
 def get_power_network_scigrid_de():
-    return pypsa.examples.scigrid_de(from_master=True)
+    return pypsa.examples.scigrid_de()
 
 
 @pytest.fixture(scope="function")
 def get_power_network_ac_dc_meshed():
-    return pypsa.examples.ac_dc_meshed(from_master=True)
+    return pypsa.examples.ac_dc_meshed()
 
 
 @pytest.fixture(scope="function")

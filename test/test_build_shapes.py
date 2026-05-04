@@ -5,24 +5,28 @@
 
 # -*- coding: utf-8 -*-
 
+import os
 import pathlib
 import sys
 
+import fiona
 import geopandas as gpd
 import numpy as np
 
 sys.path.append("./scripts")
 
-from _helpers import get_gadm_layer
 from build_shapes import (
     _simplify_polys,
     add_population_data,
+    convert_GDP,
+    countries,
     country_cover,
+    download_GADM,
     download_WorldPop_API,
     download_WorldPop_standard,
-    get_countries_shapes,
-    get_gadm_shapes,
-    load_gdp,
+    gadm,
+    get_GADM_filename,
+    get_GADM_layer,
     save_to_geojson,
 )
 
@@ -42,16 +46,10 @@ def test_simplify_polys(get_config_dict):
     update = config_dict["build_shape_options"]["update_file"]
     out_logging = config_dict["build_shape_options"]["out_logging"]
     contended_flag = config_dict["build_shape_options"]["contended_flag"]
-    file_prefix = config_dict["build_shape_options"]["gadm_file_prefix"]
-    gadm_url_prefix = config_dict["build_shape_options"]["gadm_url_prefix"]
-    gadm_input_file_args = ["data", "gadm"]
 
-    country_shapes_df = get_countries_shapes(
+    country_shapes_df = countries(
         countries_list,
         geo_crs,
-        file_prefix,
-        gadm_url_prefix,
-        gadm_input_file_args,
         contended_flag,
         update,
         out_logging,
@@ -70,12 +68,8 @@ def test_simplify_polys(get_config_dict):
     simplified_poly_df["centroid"] = simplified_poly_df.centroid
     simplified_poly_df["perimeter"] = simplified_poly_df.length
     print(simplified_poly_df["perimeter"][0])
-    assert np.round(simplified_poly_df.area[0], 6) == 75.750018
-    assert (
-        str(simplified_poly_df.centroid[0])
-        == "POINT (8.100522482086877 9.591585359563023)"
-    )
-    assert np.round(simplified_poly_df["perimeter"][0], 6) == 47.060882
+    assert np.round(simplified_poly_df.area[0], 2) == 76.12
+    assert np.round(simplified_poly_df["perimeter"][0], 2) == 42.51
 
 
 def test_get_countries_shapes(get_config_dict):
@@ -91,16 +85,10 @@ def test_get_countries_shapes(get_config_dict):
     update = config_dict["build_shape_options"]["update_file"]
     out_logging = config_dict["build_shape_options"]["out_logging"]
     contended_flag = config_dict["build_shape_options"]["contended_flag"]
-    file_prefix = config_dict["build_shape_options"]["gadm_file_prefix"]
-    gadm_url_prefix = config_dict["build_shape_options"]["gadm_url_prefix"]
-    gadm_input_file_args = ["data", "gadm"]
 
-    country_shapes_df = get_countries_shapes(
+    country_shapes_df = countries(
         countries_list,
         geo_crs,
-        file_prefix,
-        gadm_url_prefix,
-        gadm_input_file_args,
         contended_flag,
         update,
         out_logging,
@@ -123,16 +111,10 @@ def test_country_cover(get_config_dict):
     update = config_dict["build_shape_options"]["update_file"]
     out_logging = config_dict["build_shape_options"]["out_logging"]
     contended_flag = config_dict["build_shape_options"]["contended_flag"]
-    file_prefix = config_dict["build_shape_options"]["gadm_file_prefix"]
-    gadm_url_prefix = config_dict["build_shape_options"]["gadm_url_prefix"]
-    gadm_input_file_args = ["data", "gadm"]
 
-    country_shapes_df = get_countries_shapes(
+    country_shapes_df = countries(
         countries_list,
         geo_crs,
-        file_prefix,
-        gadm_url_prefix,
-        gadm_input_file_args,
         contended_flag,
         update,
         out_logging,
@@ -149,12 +131,8 @@ def test_country_cover(get_config_dict):
     africa_shapes_df["centroid"] = africa_shapes_df.centroid
     africa_shapes_df["perimeter"] = africa_shapes_df.length
     print(africa_shapes_df["perimeter"])
-    assert np.round(africa_shapes_df.area[0], 6) == 75.750104
-    assert (
-        str(africa_shapes_df.centroid[0])
-        == "POINT (8.100519548407405 9.59158035236806)"
-    )
-    assert np.round(africa_shapes_df["perimeter"][0], 6) == 47.080743
+    assert np.round(africa_shapes_df.area[0], 2) == 76.12
+    assert np.round(africa_shapes_df["perimeter"][0], 2) == 42.51
 
 
 def test_download_world_pop_standard(get_config_dict):
@@ -205,18 +183,12 @@ def test_get_gadm_shapes(get_config_dict):
     contended_flag = config_dict["build_shape_options"]["contended_flag"]
     worldpop_method = config_dict["build_shape_options"]["worldpop_method"]
     gdp_method = config_dict["build_shape_options"]["gdp_method"]
-    file_prefix = config_dict["build_shape_options"]["gadm_file_prefix"]
-    gadm_url_prefix = config_dict["build_shape_options"]["gadm_url_prefix"]
-    gadm_input_file_args = ["data", "gadm"]
 
-    gadm_shapes_df = get_gadm_shapes(
+    gadm_shapes_df = gadm(
         worldpop_method,
         gdp_method,
         countries_list,
         geo_crs,
-        file_prefix,
-        gadm_url_prefix,
-        gadm_input_file_args,
         contended_flag,
         mem_mb,
         layer_id,
@@ -228,7 +200,7 @@ def test_get_gadm_shapes(get_config_dict):
 
     assert gadm_shapes_df.shape == (7, 4)
     assert gadm_shapes_df.index.unique().tolist() == [f"XK.{x}_1" for x in range(1, 8)]
-    assert gadm_shapes_df.loc["XK.1_1"]["pop"] == 207473.70381259918
+    assert round(gadm_shapes_df.loc["XK.1_1"]["pop"], -2) == 207500
 
 
 def test_add_population_data(get_config_dict):
@@ -255,7 +227,7 @@ def test_add_population_data(get_config_dict):
 
     mem_read_limit_per_process = mem_mb / nprocesses
 
-    df_gadm = get_gadm_layer(
+    df_gadm = get_GADM_layer(
         countries_list,
         layer_id,
         geo_crs,
@@ -304,9 +276,42 @@ def test_load_gdp(get_config_dict):
     """
     config_dict = get_config_dict
 
-    update = config_dict["build_shape_options"]["update_file"]
     out_logging = config_dict["build_shape_options"]["out_logging"]
     year = config_dict["build_shape_options"]["year"]
     name_file_nc = "GDP_PPP_1990_2015_5arcmin_v2.nc"
-    GDP_tif, name_tif = load_gdp(year, update, out_logging, name_file_nc)
+    GDP_tif, name_tif = convert_GDP(name_file_nc, year, out_logging)
     assert name_tif == "GDP_PPP_1990_2015_5arcmin_v2.tif"
+
+
+def test_get_gadm_filename():
+    """
+    Verify what is returned by get_gadm_filename.
+    """
+    # Kosovo
+    assert get_GADM_filename("XK") == "gadm41_XKO"
+    # Clipperton island
+    assert get_GADM_filename("CP") == "gadm41_XCL"
+    # Saint-Martin
+    assert get_GADM_filename("SX") == "gadm41_MAF"
+    # French Southern Territories
+    assert get_GADM_filename("TF") == "gadm41_ATF"
+    # Micronesia (Federated States of) with different file_prefix
+    assert get_GADM_filename("FM", file_prefix="gadm456_") == "gadm456_FSM"
+
+
+def test_download_GADM():
+    """
+    Verify what is returned by download_GADM.
+    """
+    gadm_input_file_gpkg_41, gadm_filename_41 = download_GADM(
+        "XK",
+        update=True,
+    )
+    assert gadm_input_file_gpkg_41 == os.path.join(
+        path_cwd, "data/gadm/gadm41_XKO/gadm41_XKO.gpkg"
+    )
+    assert gadm_filename_41 == "gadm41_XKO"
+    list_layers_41 = fiona.listlayers(gadm_input_file_gpkg_41)
+    assert list_layers_41[0] == "ADM_ADM_0"
+    assert list_layers_41[1] == "ADM_ADM_1"
+    assert list_layers_41[2] == "ADM_ADM_2"

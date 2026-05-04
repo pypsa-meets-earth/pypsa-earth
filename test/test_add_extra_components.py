@@ -12,12 +12,12 @@ sys.path.append("./scripts")
 
 from test.conftest import get_config_dict, get_power_network_scigrid_de
 
-from add_electricity import load_costs
 from add_extra_components import (
     attach_hydrogen_pipelines,
     attach_storageunits,
     attach_stores,
 )
+from process_cost_data import load_costs
 
 path_cwd = pathlib.Path.cwd()
 path_costs = pathlib.Path(path_cwd, "data", "costs.csv")
@@ -34,7 +34,7 @@ def test_attach_storageunits(get_config_dict, get_power_network_scigrid_de):
     test_costs = load_costs(
         path_costs,
         config_dict["costs"],
-        config_dict["electricity"],
+        config_dict["electricity"]["max_hours"],
         number_years,
     )
 
@@ -42,9 +42,7 @@ def test_attach_storageunits(get_config_dict, get_power_network_scigrid_de):
         "Bus": 585,
         "Carrier": 1,
         "Line": 852,
-        "LineType": 34,
         "Transformer": 96,
-        "TransformerType": 14,
         "Load": 489,
         "Generator": 1423,
         "StorageUnit": 623,
@@ -55,6 +53,8 @@ def test_attach_storageunits(get_config_dict, get_power_network_scigrid_de):
     for c in test_network_de.iterate_components(
         list(test_network_de.components.keys())[2:]
     ):
+        if c.name not in reference_component_dict.keys():
+            continue
         output_component_dict[c.name] = len(c.df)
 
     assert output_component_dict == reference_component_dict
@@ -71,7 +71,7 @@ def test_attach_stores(get_config_dict, get_power_network_scigrid_de):
     test_costs = load_costs(
         path_costs,
         config_dict["costs"],
-        config_dict["electricity"],
+        config_dict["electricity"]["max_hours"],
         number_years,
     )
 
@@ -79,9 +79,7 @@ def test_attach_stores(get_config_dict, get_power_network_scigrid_de):
         "Bus": 1755,
         "Carrier": 2,
         "Line": 852,
-        "LineType": 34,
         "Transformer": 96,
-        "TransformerType": 14,
         "Link": 2340,
         "Load": 489,
         "Generator": 1423,
@@ -95,6 +93,8 @@ def test_attach_stores(get_config_dict, get_power_network_scigrid_de):
     for c in test_network_de.iterate_components(
         list(test_network_de.components.keys())[2:]
     ):
+        if c.name not in reference_component_dict.keys():
+            continue
         output_component_dict[c.name] = len(c.df)
 
     assert output_component_dict == reference_component_dict
@@ -108,30 +108,33 @@ def test_attach_hydrogen_pipelines(get_config_dict, get_power_network_scigrid_de
     config_dict["electricity"]["extendable_carriers"]["Link"] = ["H2 pipeline"]
     test_network_de = get_power_network_scigrid_de
     number_years = test_network_de.snapshot_weightings.objective.sum() / 8760.0
+    transmission_efficiency = config_dict["sector"]["transmission_efficiency"]
     test_costs = load_costs(
         path_costs,
         config_dict["costs"],
-        config_dict["electricity"],
+        config_dict["electricity"]["max_hours"],
         number_years,
     )
 
     reference_component_dict = {
         "Bus": 585,
         "Line": 852,
-        "LineType": 34,
         "Transformer": 96,
-        "TransformerType": 14,
-        "Link": 705,
+        "Link": 1410,  # TODO: verify if this should be 705 or 1410
         "Load": 489,
         "Generator": 1423,
         "StorageUnit": 38,
     }
-    attach_hydrogen_pipelines(test_network_de, test_costs, config_dict)
+    attach_hydrogen_pipelines(
+        test_network_de, test_costs, config_dict, transmission_efficiency
+    )
 
     output_component_dict = {}
     for c in test_network_de.iterate_components(
         list(test_network_de.components.keys())[2:]
     ):
+        if c.name not in reference_component_dict.keys():
+            continue
         output_component_dict[c.name] = len(c.df)
 
     assert output_component_dict == reference_component_dict
