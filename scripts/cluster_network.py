@@ -157,6 +157,10 @@ idx = pd.IndexSlice
 logger = create_logger(__name__)
 
 
+def normed(x):
+    return (x / x.sum()).fillna(0.0)
+
+
 def weighting_for_country(n, x):
     conv_carriers = {"OCGT", "CCGT", "PHS", "hydro"}
     conv_carriers_pattern = "|".join(conv_carriers)

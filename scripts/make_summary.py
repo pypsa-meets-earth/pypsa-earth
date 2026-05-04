@@ -515,7 +515,7 @@ def make_summaries(networks_dict, inputs, country="all"):
 
 
 def to_csv(dfs, dir):
-    build_directory(dir, just_parent_directory=False)
+    os.makedirs(dir, exist_ok=True)
     for key, df in dfs.items():
         df.to_csv(os.path.join(dir, f"{key}.csv"))
 

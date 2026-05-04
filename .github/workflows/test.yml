@@ -79,7 +79,7 @@ jobs:
       run: conda list
 
     - name: Run Test
-      run: make test
+      run: make checks
 
     - name: Upload artifacts
       if: always()

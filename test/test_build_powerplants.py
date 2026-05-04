@@ -9,6 +9,7 @@ import pathlib
 import sys
 
 import pandas as pd
+import pytest
 import yaml
 
 sys.path.append("./scripts")
@@ -98,7 +99,11 @@ def test_replace_natural_gas_technology():
     assert comparison_df.empty
 
 
-def test_add_power_plants(get_config_dict):
+@pytest.mark.parametrize(
+    "strategy,expected",
+    [("replace", (4, 19)), ("false", (34, 18)), ("merge", (38, 20))],
+)
+def test_add_power_plants(get_config_dict, strategy, expected):
     """
     Verify what returned by add_power_plants.
     """
@@ -113,29 +118,12 @@ def test_add_power_plants(get_config_dict):
 
     config_dict["countries"] = ["NG"]
 
-    # replace
-    config_dict["electricity"]["custom_powerplants"] = "replace"
-    powerplants_assignment_strategy = config_dict["electricity"]["custom_powerplants"]
+    powerplants_assignment_strategy = strategy
     if isinstance(ppl_query, str):
         power_plants_config["main_query"] = ppl_query
     countries_names = ["Nigeria"]
     power_plants_config["target_countries"] = countries_names
-    ppl_replace = add_power_plants(
-        custom_powerplants_file_path,
-        power_plants_config,
-        powerplants_assignment_strategy,
-        countries_names,
-    )
-    assert ppl_replace.shape == (4, 19)
-
-    # false
-    config_dict["electricity"]["custom_powerplants"] = "false"
-    powerplants_assignment_strategy = config_dict["electricity"]["custom_powerplants"]
-    if isinstance(ppl_query, str):
-        power_plants_config["main_query"] = ppl_query
-    countries_names = ["Nigeria"]
-    power_plants_config["target_countries"] = countries_names
-    ppl_false = add_power_plants(
+    ppl = add_power_plants(
         custom_powerplants_file_path,
         power_plants_config,
         powerplants_assignment_strategy,
@@ -143,23 +131,5 @@ def test_add_power_plants(get_config_dict):
     )
     # The number of powerplants returned by powerplantmatching
     # may vary depending on the version of powerplantmatching
-    # The numbers below refer to version 0.15.5
-    assert ppl_false.shape == (31, 18)
-
-    # merge
-    config_dict["electricity"]["custom_powerplants"] = "merge"
-    powerplants_assignment_strategy = config_dict["electricity"]["custom_powerplants"]
-    if isinstance(ppl_query, str):
-        power_plants_config["main_query"] = ppl_query
-    countries_names = ["Nigeria"]
-    power_plants_config["target_countries"] = countries_names
-    ppl_merge = add_power_plants(
-        custom_powerplants_file_path,
-        power_plants_config,
-        powerplants_assignment_strategy,
-        countries_names,
-    )
-    # The number of powerplants returned by powerplantmatching
-    # may vary depending on the version of powerplantmatching
-    # The numbers below refer to version 0.15.5
-    assert ppl_merge.shape == (35, 20)
+    # The numbers below refer to version 0.6.0
+    assert ppl.shape == expected

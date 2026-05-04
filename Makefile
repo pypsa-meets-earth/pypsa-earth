@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-.PHONY: test setup clean
+.PHONY: checks tests setup clean
 
-test:
+tests:
 	set -e
 	# this runs the tutorial config applying a run name on top
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.tutorial.test.yaml
@@ -16,6 +16,9 @@ test:
 	snakemake -c4 solve_sector_networks --configfile config.tutorial.yaml test/config.sector.yaml
 	snakemake -c4 solve_sector_networks_myopic --configfile config.tutorial.yaml test/config.myopic.yaml
 	echo "All tests completed successfully."
+
+checks: tests
+	pytest test
 
 setup:
 	# Add setup commands here

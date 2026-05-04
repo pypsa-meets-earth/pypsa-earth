@@ -1088,14 +1088,14 @@ def download_GADM(country_code, update=False, out_logging=False):
                 f"Stage 4/4: {GADM_filename} of country {two_digits_2_name_country(country_code)} does not exist, downloading to {GADM_inputfile_zip}"
             )
         #  create data/osm directory
-        build_directory(gadm_input_file_zip)
+        os.makedirs(os.path.dirname(GADM_inputfile_zip), exist_ok=True)
 
         with requests.get(GADM_url, stream=True) as r:
             with open(GADM_inputfile_zip, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-        with zipfile.ZipFile(gadm_input_file_zip, "r") as zip_ref:
-            zip_ref.extractall(get_dirname_path(gadm_input_file_zip))
+        with zipfile.ZipFile(GADM_inputfile_zip, "r") as zip_ref:
+            zip_ref.extractall(os.path.dirname(GADM_inputfile_zip))
 
     return GADM_inputfile_gpkg, GADM_filename
 
@@ -1190,11 +1190,8 @@ def locate_bus(
 
         df.loc[gdf_merged.index, col_out] = gdf_merged[col]
 
-    for component, list_name in components.list_name.items():
-        fn = f"{directory}/{list_name}.csv"
-        if is_file_path(fn):
-            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
-            attrs[component] = overrides.combine_first(attrs[component])
+    if dropnull:
+        df = df[df[col_out].notnull()]
 
     return df
 
