@@ -303,7 +303,7 @@ def test_download_GADM():
         update=True,
     )
     assert gadm_input_file_gpkg_41 == os.path.join(
-        path_cwd, "data/gadm/gadm41_XKO/gadm41_XKO.gpkg"
+        path_cwd, "data", "gadm", "gadm41_XKO", "gadm41_XKO.gpkg"
     )
     assert gadm_filename_41 == "gadm41_XKO"
     list_layers_41 = fiona.listlayers(gadm_input_file_gpkg_41)
