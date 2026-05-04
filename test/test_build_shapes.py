@@ -40,7 +40,7 @@ def test_simplify_polys(get_config_dict):
 
     config_dict = get_config_dict
 
-    countries_list = ["NG"]
+    countries_list = ["BJ"]
     geo_crs = config_dict["crs"]["geo_crs"]
 
     update = config_dict["build_shape_options"]["update_file"]
@@ -68,8 +68,8 @@ def test_simplify_polys(get_config_dict):
     simplified_poly_df["centroid"] = simplified_poly_df.centroid
     simplified_poly_df["perimeter"] = simplified_poly_df.length
     print(simplified_poly_df["perimeter"][0])
-    assert np.round(simplified_poly_df.area[0], 2) == 75.75
-    assert np.round(simplified_poly_df["perimeter"][0], 2) == 42.51
+    assert np.round(simplified_poly_df.area[0], 2) == 9.86
+    assert np.round(simplified_poly_df["perimeter"][0], 2) == 18.04
 
 
 def test_get_countries_shapes(get_config_dict):
@@ -105,7 +105,7 @@ def test_country_cover(get_config_dict):
 
     config_dict = get_config_dict
 
-    countries_list = ["NG"]
+    countries_list = ["BJ"]
     geo_crs = config_dict["crs"]["geo_crs"]
 
     update = config_dict["build_shape_options"]["update_file"]
@@ -131,8 +131,8 @@ def test_country_cover(get_config_dict):
     africa_shapes_df["centroid"] = africa_shapes_df.centroid
     africa_shapes_df["perimeter"] = africa_shapes_df.length
     print(africa_shapes_df["perimeter"])
-    assert np.round(africa_shapes_df.area[0], 2) == 75.75
-    assert np.round(africa_shapes_df["perimeter"][0], 2) == 42.51
+    assert np.round(africa_shapes_df.area[0], 2) == 9.86
+    assert np.round(africa_shapes_df["perimeter"][0], 2) == 18.04
 
 
 def test_download_world_pop_standard(get_config_dict):
@@ -145,13 +145,13 @@ def test_download_world_pop_standard(get_config_dict):
     out_logging_val = config_dict["build_shape_options"]["out_logging"]
 
     world_pop_input_file, world_pop_file_name = download_WorldPop_standard(
-        "NG",
+        "BJ",
         year=2020,
         update=update_val,
         out_logging=out_logging_val,
         size_min=300,
     )
-    assert world_pop_file_name == "nga_ppp_2020_UNadj_constrained.tif"
+    assert world_pop_file_name == "ben_ppp_2020_UNadj_constrained.tif"
 
 
 def test_download_world_pop_api():
@@ -159,9 +159,9 @@ def test_download_world_pop_api():
     Verify what is returned by download_WorldPop_API.
     """
     world_pop_input_file, world_pop_file_name = download_WorldPop_API(
-        "NG", year=2020, size_min=300
+        "BJ", year=2020, size_min=300
     )
-    assert world_pop_file_name == "nga_ppp_2020_UNadj_constrained.tif"
+    assert world_pop_file_name == "ben_ppp_2020_UNadj_constrained.tif"
 
 
 def test_get_gadm_shapes(get_config_dict):
