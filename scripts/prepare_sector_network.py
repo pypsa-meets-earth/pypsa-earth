@@ -1718,7 +1718,7 @@ def add_industry(
             suffix=" H2 for industry",
             bus=spatial.nodes + " H2",
             carrier="H2 for industry",
-            p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
+            p_set=industrial_demand["hydrogen"] / 8760,
         )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -1742,7 +1742,7 @@ def add_industry(
         n.loads.loc[spatial.nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
         # - industrial_demand["process emission from feedstock"].sum()
-        # / 8760
+        / 8760
     )
 
     n.add(
@@ -2066,8 +2066,7 @@ def add_land_transport(
         co2 = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].sum().sum()
-            / 8760
+            * transport[spatial.nodes].mean().sum()
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -2753,7 +2752,7 @@ def add_residential(n, costs, energy_totals):
     )
 
     # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
+    co2 = p_set_oil.mean().sum() * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -2780,8 +2779,7 @@ def add_residential(n, costs, energy_totals):
         p_set=p_set_gas,
     )
 
-    # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
+    co2 = p_set_gas.mean().sum() * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3221,12 +3219,13 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            ll="copt",
+            opts="CCL-Co2L-24h",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="144h",
             discountrate=0.071,
             demand="AB",
+            configfile="test/config.sector.yaml",
         )
 
     # Load population layout
