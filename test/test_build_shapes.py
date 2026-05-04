@@ -221,9 +221,6 @@ def test_add_population_data(get_config_dict):
     nprocesses = config_dict["build_shape_options"]["nprocesses"]
     contended_flag = config_dict["build_shape_options"]["contended_flag"]
     worldpop_method = config_dict["build_shape_options"]["worldpop_method"]
-    file_prefix = config_dict["build_shape_options"]["gadm_file_prefix"]
-    gadm_url_prefix = config_dict["build_shape_options"]["gadm_url_prefix"]
-    gadm_input_file_args = ["data", "gadm"]
 
     mem_read_limit_per_process = mem_mb / nprocesses
 
@@ -231,9 +228,6 @@ def test_add_population_data(get_config_dict):
         countries_list,
         layer_id,
         geo_crs,
-        file_prefix,
-        gadm_url_prefix,
-        gadm_input_file_args,
         contended_flag,
         update,
         out_logging,
@@ -296,7 +290,7 @@ def test_get_gadm_filename():
     # French Southern Territories
     assert get_GADM_filename("TF") == "gadm41_ATF"
     # Micronesia (Federated States of) with different file_prefix
-    assert get_GADM_filename("FM", file_prefix="gadm456_") == "gadm456_FSM"
+    assert get_GADM_filename("US") == "gadm41_USA"
 
 
 def test_download_GADM():
