@@ -78,7 +78,7 @@ jobs:
           if [[ "$FILE" == ./logs/solve_network/* ]]; then
             FOLDER="default"
           fi
-          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN { printf "%.2f\n", v / 1e6 }')
+          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN { printf "%.2f\n", v }')
           printf "%s,%s,%s\n" "$FOLDER" "$BASENAME" "$VALUE_RAW" >> updated_obj_ref.csv
         done <<< "$OBJ_FOUND"
 
