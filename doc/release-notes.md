@@ -30,6 +30,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Avoid crash in `add_chp_constraints` when the network has no links, supporting operational models without brownfield/expandable batteries, pumped storage, or DC links [#1750](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1750)
+
 * Avoid crash in add_electricity when no extendable generators are configured [PR #1794](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1794)
 
 * Include country-specific nuclear `p_max_pu` values based on IAEA dataset [PR #1718](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1718)
