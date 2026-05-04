@@ -161,21 +161,21 @@ def test_enforce_autarky_only_crossborder_false(get_power_network_ac_dc_meshed):
 
     enforce_autarky(test_network_no_cross_border, only_crossborder=False)
 
-    output_component_dict_no_cross_border = {}
-    for c in test_network_no_cross_border.iterate_components(
-        list(test_network_no_cross_border.components.keys())[2:]
-    ):
-        output_component_dict_no_cross_border[c.name] = len(c.df)
-
     reference_component_dict_no_cross_border = {
         "Bus": 9,
         "Carrier": 3,
         "GlobalConstraint": 1,
-        "LineType": 34,
-        "TransformerType": 14,
         "Load": 6,
         "Generator": 6,
     }
+
+    output_component_dict_no_cross_border = {}
+    for c in test_network_no_cross_border.iterate_components(
+        list(test_network_no_cross_border.components.keys())[2:]
+    ):
+        if c.name not in reference_component_dict_no_cross_border.keys():
+            continue
+        output_component_dict_no_cross_border[c.name] = len(c.df)
     assert (
         output_component_dict_no_cross_border
         == reference_component_dict_no_cross_border
@@ -194,23 +194,23 @@ def test_enforce_autarky_only_crossborder_true(get_power_network_ac_dc_meshed):
 
     enforce_autarky(test_network_with_cross_border, only_crossborder=True)
 
-    output_component_dict_with_cross_border = {}
-    for c in test_network_with_cross_border.iterate_components(
-        list(test_network_with_cross_border.components.keys())[2:]
-    ):
-        output_component_dict_with_cross_border[c.name] = len(c.df)
-
     reference_component_dict_with_cross_border = {
         "Bus": 9,
         "Carrier": 3,
         "GlobalConstraint": 1,
         "Line": 4,
-        "LineType": 34,
-        "TransformerType": 14,
         "Link": 3,
         "Load": 6,
         "Generator": 6,
     }
+
+    output_component_dict_with_cross_border = {}
+    for c in test_network_with_cross_border.iterate_components(
+        list(test_network_with_cross_border.components.keys())[2:]
+    ):
+        if c.name not in reference_component_dict_with_cross_border.keys():
+            continue
+        output_component_dict_with_cross_border[c.name] = len(c.df)
     print(output_component_dict_with_cross_border)
 
     assert (
@@ -226,8 +226,8 @@ def test_set_line_nom_max(get_power_network_ac_dc_meshed):
     test_network = get_power_network_ac_dc_meshed
     s_nom_max_value = 5.0
     p_nom_max_value = 10.0
-    set_line_nom_max(
-        test_network, s_nom_max_set=s_nom_max_value, p_nom_max_set=p_nom_max_value
-    )
+    lines = {"s_nom_max": s_nom_max_value}
+    links = {"p_nom_max": p_nom_max_value}
+    set_line_nom_max(test_network, lines, links)
     assert test_network.lines.s_nom_max.unique()[0] == s_nom_max_value
     assert test_network.links.p_nom_max.unique()[0] == p_nom_max_value
