@@ -55,7 +55,10 @@ jobs:
         )
         shopt -u nullglob
 
-        [ -z "$OBJ_FOUND" ] && { echo "No objective values found."; exit 1; }
+        if [ -z "$OBJ_FOUND" ]; then
+          echo "Objective not found."
+          exit 1
+        fi
 
         # REUSE-IgnoreStart
         {
@@ -72,8 +75,10 @@ jobs:
           VALUE=$(echo "$line" | cut -d: -f2-)
           BASENAME=$(basename "$FILE")
           FOLDER=$(echo "$FILE" | sed -E 's|.*/logs/([^/]+)/solve_network/.*|\1|')
-          [[ "$FILE" == ./logs/solve_network/* ]] && FOLDER="default"
-          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN { printf "%.2f\n", v }')
+          if [[ "$FILE" == ./logs/solve_network/* ]]; then
+            FOLDER="default"
+          fi
+          VALUE_RAW=$(awk -v v="$VALUE" 'BEGIN { printf "%.2f\n", v / 1e6 }')
           printf "%s,%s,%s\n" "$FOLDER" "$BASENAME" "$VALUE_RAW" >> updated_obj_ref.csv
         done <<< "$OBJ_FOUND"
 
