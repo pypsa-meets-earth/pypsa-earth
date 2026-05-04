@@ -78,8 +78,11 @@ jobs:
     - name: Conda list
       run: conda list
 
+    - name: Run unit tests
+      run: make unit_tests
+
     - name: Run Test
-      run: make checks
+      run: make workflow_tests
 
     - name: Upload artifacts
       if: always()

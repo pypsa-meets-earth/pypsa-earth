@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-.PHONY: checks tests setup clean
+.PHONY: unit_tests workflow_tests test setup clean
 
-tests:
+workflow_tests:
 	set -e
 	# this runs the tutorial config applying a run name on top
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.tutorial.test.yaml
@@ -17,8 +17,11 @@ tests:
 	snakemake -c4 solve_sector_networks_myopic --configfile config.tutorial.yaml test/config.myopic.yaml
 	echo "All tests completed successfully."
 
-checks: tests
+unit_tests:
 	pytest test
+
+test: workflow_tests
+	echo "All tests completed successfully."
 
 setup:
 	# Add setup commands here
