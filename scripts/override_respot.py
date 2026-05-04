@@ -12,18 +12,18 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from _helpers import mock_snakemake
+from _helpers import mock_snakemake, read_csv_nafix
 
 
 def override_values(tech, year, dr):
-    custom_res_t = pd.read_csv(
+    custom_res_t = read_csv_nafix(
         snakemake.input["custom_res_pot_{0}_{1}_{2}".format(tech, year, dr)],
         index_col=0,
         parse_dates=True,
     ).filter(buses, axis=1)
 
     custom_res = (
-        pd.read_csv(
+        read_csv_nafix(
             snakemake.input["custom_res_ins_{0}_{1}_{2}".format(tech, year, dr)],
             index_col=0,
         )
@@ -43,8 +43,8 @@ def override_values(tech, year, dr):
         n_name = snakemake.input.network.split("/")[-1].replace(
             n.config["scenario"]["clusters"], ""
         )
-        df = pd.read_csv(directory + "/res_caps_" + n_name, index_col=0)
-        # df = pd.read_csv(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
+        df = read_csv_nafix(directory + "/res_caps_" + n_name, index_col=0)
+        # df = read_csv_nafix(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
         existing_res = df.loc[tech]
         existing_res.index = existing_res.index.str.apply(lambda x: x + tech)
     else:
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     m = n.copy()
     if snakemake.params.custom_data["renewables"]:
         buses = list(n.buses[n.buses.carrier == "AC"].index)
-        energy_totals = pd.read_csv(snakemake.input.energy_totals, index_col=0)
+        energy_totals = read_csv_nafix(snakemake.input.energy_totals, index_col=0)
         countries = snakemake.params.countries
         if snakemake.params.custom_data["renewables"]:
             techs = snakemake.params.custom_data["renewables"]

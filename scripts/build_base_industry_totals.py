@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
-        (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
+        (read_csv_nafix(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
     )
 
     # Split 'Commodity', 'Transaction' column to two

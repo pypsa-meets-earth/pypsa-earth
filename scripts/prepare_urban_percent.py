@@ -8,6 +8,7 @@ import country_converter as coco
 import pandas as pd
 import py7zr
 import requests
+from _helpers import read_csv_nafix
 
 # from _helpers import configure_logging
 
@@ -54,7 +55,7 @@ def download_urban_percent():
         csv_filename = os.path.splitext(filename)[
             0
         ]  # Remove the .7z extension to get the CSV filename
-        urban_percent_orig = pd.read_csv(csv_filename)
+        urban_percent_orig = read_csv_nafix(csv_filename)
 
         print("Urban percent CSV file read successfully:")
 

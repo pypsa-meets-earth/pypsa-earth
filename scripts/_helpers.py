@@ -49,6 +49,8 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
+COPERNICUS_CRS = "EPSG:4326"  # projection for Copernicus data, used by atlite. "EPSG:4326" is the standard used by OSM and google maps
+
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
@@ -696,7 +698,10 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if os.stat(file).st_size > 0:
+    if isinstance(file, str) and (file.startswith("http://") or file.startswith("https://")):
+        return pd.read_csv(file, **kwargs)
+        
+    if os.path.exists(file) and os.stat(file).st_size > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()

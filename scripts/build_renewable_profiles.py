@@ -202,7 +202,7 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import BASE_DIR, configure_logging, create_logger, read_csv_nafix, COPERNICUS_CRS
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
@@ -213,7 +213,6 @@ cc = coco.CountryConverter()
 logger = create_logger(__name__)
 
 
-COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
@@ -240,7 +239,9 @@ def check_cutout_match(cutout, regions):
 
 def get_eia_annual_hydro_generation(fn, countries):
     # in billion kWh/a = TWh/a
-    df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df = read_csv_nafix(fn, skiprows=1, index_col=1, na_values=[" ", "--"])
+    df = df.apply(pd.to_numeric, errors="coerce")
+    df = df.iloc[1:, 1:]
     df.index = df.index.str.strip()
 
     df.loc["Germany"] = df.filter(like="Germany", axis=0).astype(float).sum()
@@ -298,7 +299,7 @@ def get_irena_annual_hydro_generation(fn, countries):
 
 def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
-        pd.read_csv(
+        read_csv_nafix(
             fn,
             comment="#",
             keep_default_na=False,
@@ -549,6 +550,7 @@ if __name__ == "__main__":
     # crs
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
+    copernicus_crs = COPERNICUS_CRS
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -710,14 +712,14 @@ if __name__ == "__main__":
                 paths.copernicus,
                 codes=copernicus["grid_codes"],
                 invert=True,
-                crs=COPERNICUS_CRS,
+                crs=copernicus_crs,
             )
             if "distance" in copernicus and config["copernicus"]["distance"] > 0:
                 excluder.add_raster(
                     paths.copernicus,
                     codes=copernicus["distance_grid_codes"],
                     buffer=copernicus["distance"],
-                    crs=COPERNICUS_CRS,
+                    crs=copernicus_crs,
                 )
 
         if check_flag(config, "max_depth"):

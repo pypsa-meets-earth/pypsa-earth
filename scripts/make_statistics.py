@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import create_logger, mock_snakemake, to_csv_nafix
+from _helpers import create_logger, mock_snakemake, to_csv_nafix, read_csv_nafix
 from build_test_configs import create_test_config
 from shapely.validation import make_valid
 
@@ -76,7 +76,7 @@ def generate_scenario_by_country(
     clean_country_list = create_country_list(country_list)
 
     # file available from https://worldpopulationreview.com/country-rankings/landlocked-countries
-    df_landlocked = pd.read_csv("landlocked.csv")
+    df_landlocked = read_csv_nafix("landlocked.csv")
     df_landlocked["countries"] = df_landlocked.cca2.map(three_2_two_digits_country)
 
     n_clusters = {
@@ -502,7 +502,7 @@ def add_computational_stats(df, snakemake, column_name=None):
         if not Path(snakemake.benchmark).is_file():
             return df
 
-        bench_data = pd.read_csv(snakemake.benchmark, delimiter="\t")
+        bench_data = read_csv_nafix(snakemake.benchmark, delimiter="\t")
 
         comp_data = bench_data[["s", "mean_load", "max_vms"]].iloc[0].values
 

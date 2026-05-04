@@ -22,6 +22,7 @@ from _helpers import (
     cycling_shift,
     locate_bus,
     mock_snakemake,
+    read_csv_nafix,
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
@@ -428,7 +429,7 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
 
     if snakemake.params.sector_options["hydrogen"]["underground_storage"]:
         if snakemake.params.h2_underground:
-            custom_cavern = pd.read_csv(
+            custom_cavern = read_csv_nafix(
                 os.path.join(
                     BASE_DIR,
                     "data/custom/h2_underground_{0}_{1}.csv".format(
@@ -495,7 +496,7 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             )
 
         else:
-            h2_salt_cavern_potential = pd.read_csv(
+            h2_salt_cavern_potential = read_csv_nafix(
                 snakemake.input.h2_cavern, index_col=0
             ).squeeze()
             h2_cavern_ct = h2_salt_cavern_potential[~h2_salt_cavern_potential.isna()]
@@ -648,7 +649,7 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
 
     # Add H2 Links:
     if snakemake.params.sector_options["hydrogen"]["network"]:
-        h2_links = pd.read_csv(snakemake.input.pipelines)
+        h2_links = read_csv_nafix(snakemake.input.pipelines)
 
         # Order buses to detect equal pairs for bidirectional pipelines
         # buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
@@ -954,7 +955,7 @@ def add_biomass(n, costs):
 
     if options["biomass_transport"]:
         # TODO add biomass transport costs
-        transport_costs = pd.read_csv(
+        transport_costs = read_csv_nafix(
             snakemake.input.biomass_transport_costs,
             index_col=0,
             keep_default_na=False,
@@ -1176,7 +1177,7 @@ def add_aviation(n, cost, energy_totals, airports_fn):
 
     aviation_demand = energy_totals.loc[countries, all_aviation].sum(axis=1)
 
-    airports = pd.read_csv(airports_fn, keep_default_na=False)
+    airports = read_csv_nafix(airports_fn, keep_default_na=False)
     airports = airports[airports.country.isin(countries)]
 
     gadm_layer_id = snakemake.params.gadm_layer_id
@@ -1418,7 +1419,7 @@ def h2_hc_conversions(n, costs):
 
 
 def add_shipping(n, costs, energy_totals, ports_fn):
-    ports = pd.read_csv(ports_fn, index_col=None, keep_default_na=False).squeeze()
+    ports = read_csv_nafix(ports_fn, index_col=None, keep_default_na=False).squeeze()
     ports = ports[ports.country.isin(countries)]
 
     gadm_layer_id = snakemake.params.gadm_layer_id
@@ -1575,7 +1576,7 @@ def add_industry(
     logger.info("adding industrial demand")
 
     # Load industry demand data
-    industrial_demand = pd.read_csv(
+    industrial_demand = read_csv_nafix(
         industrial_demand_fn, index_col=0, header=0
     )  # * 1e6
 
@@ -1903,13 +1904,13 @@ def add_land_transport(
     """
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    transport = pd.read_csv(transport_fn, index_col=0, parse_dates=True).reindex(
+    transport = read_csv_nafix(transport_fn, index_col=0, parse_dates=True).reindex(
         columns=spatial.nodes, fill_value=0.0
     )
 
-    avail_profile = pd.read_csv(avail_profile_fn, index_col=0, parse_dates=True)
-    dsm_profile = pd.read_csv(dsm_profile_fn, index_col=0, parse_dates=True)
-    nodal_transport_data = pd.read_csv(nodal_transport_data_fn, index_col=0)
+    avail_profile = read_csv_nafix(avail_profile_fn, index_col=0, parse_dates=True)
+    dsm_profile = read_csv_nafix(dsm_profile_fn, index_col=0, parse_dates=True)
+    nodal_transport_data = read_csv_nafix(nodal_transport_data_fn, index_col=0)
     # TODO nodal_transport_data only includes no. of cars, change name to something descriptive?
     # TODO options?
 
@@ -2135,21 +2136,21 @@ def add_heat(
     district_heat_share_fn,
 ):
     # Load data required for heat sector
-    heat_demand = pd.read_csv(
+    heat_demand = read_csv_nafix(
         heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
     ).fillna(0)
     # Solar thermal availability profiles
-    solar_thermal = pd.read_csv(solar_thermal_fn, index_col=0, parse_dates=True)
+    solar_thermal = read_csv_nafix(solar_thermal_fn, index_col=0, parse_dates=True)
     # Ground-sourced heatpump coefficient of performance
-    gshp_cop = pd.read_csv(gshp_cop_fn, index_col=0, parse_dates=True)
+    gshp_cop = read_csv_nafix(gshp_cop_fn, index_col=0, parse_dates=True)
     # Air-sourced heatpump coefficient of performance
-    ashp_cop = pd.read_csv(
+    ashp_cop = read_csv_nafix(
         ashp_cop_fn, index_col=0, parse_dates=True
     )  # only needed with heat dep. hp cop allowed from config
     # TODO add option heat_dep_hp_cop to the config
 
     # Share of district heating at each node
-    district_heat_share = pd.read_csv(district_heat_share_fn, index_col=0)
+    district_heat_share = read_csv_nafix(district_heat_share_fn, index_col=0)
     # TODO options?
     # TODO pop_layout?
 
@@ -2585,7 +2586,7 @@ def add_services(n, costs, energy_totals):
 
 
 def add_agriculture(n, costs, nodal_energy_totals_fn):
-    nodal_energy_totals = pd.read_csv(
+    nodal_energy_totals = read_csv_nafix(
         nodal_energy_totals_fn,
         index_col=0,
         keep_default_na=False,
@@ -2898,7 +2899,7 @@ def add_electricity_distribution_grid(n, costs):
 
             solar_rooftop_layout = pd.concat(
                 [
-                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    read_csv_nafix(snakemake.input[fn], index_col=0)
                     for fn in snakemake.input.keys()
                     if "solar_rooftop_layout" in fn
                 ]
@@ -3035,7 +3036,7 @@ def add_co2_budget(n, co2_budget, investment_year, elec_opts):
 
 def add_custom_water_cost(n):
     for country in countries:
-        water_costs = pd.read_csv(
+        water_costs = read_csv_nafix(
             os.path.join(
                 BASE_DIR,
                 "resources/custom_data/{}_water_costs.csv".format(country),
@@ -3059,7 +3060,7 @@ def add_custom_water_cost(n):
 
 
 def add_rail_transport(n, costs, nodal_energy_totals_fn):
-    nodal_energy_totals = pd.read_csv(
+    nodal_energy_totals = read_csv_nafix(
         nodal_energy_totals_fn,
         index_col=0,
         keep_default_na=False,
@@ -3230,7 +3231,7 @@ if __name__ == "__main__":
         )
 
     # Load population layout
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
+    pop_layout = read_csv_nafix(snakemake.input.clustered_pop_layout, index_col=0)
 
     # Load all sector wildcards
     options = snakemake.params.sector_options
@@ -3266,14 +3267,14 @@ if __name__ == "__main__":
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
     # Prepare the costs dataframe
-    costs = pd.read_csv(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
 
     # TODO logging
 
-    energy_totals = pd.read_csv(
+    energy_totals = read_csv_nafix(
         snakemake.input.energy_totals,
         index_col=0,
         keep_default_na=False,

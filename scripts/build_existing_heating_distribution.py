@@ -44,6 +44,7 @@ import os
 import country_converter as coco
 import numpy as np
 import pandas as pd
+from _helpers import read_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ def build_existing_heating():
     # data is for buildings only (i.e. NOT district heating) and represents the year 2012
     # TODO start from original file
 
-    existing_heating = pd.read_csv(
+    existing_heating = read_csv_nafix(
         snakemake.input.existing_heating, index_col=0, header=0
     )
 
@@ -86,7 +87,7 @@ def build_existing_heating():
     existing_heating.drop(["coal boiler"], axis=1, inplace=True)
 
     # distribute technologies to nodes by population
-    pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
+    pop_layout = read_csv_nafix(snakemake.input.clustered_pop_layout, index_col=0)
 
     # fill missing rows
     missing_countries = list(set(pop_layout.ct.unique()) - set(existing_heating.index))
@@ -101,10 +102,10 @@ def build_existing_heating():
     nodal_heating.index = pop_layout.index
     nodal_heating = nodal_heating.multiply(pop_layout.fraction, axis=0)
 
-    district_heat_info = pd.read_csv(snakemake.input.district_heat_share, index_col=0)
+    district_heat_info = read_csv_nafix(snakemake.input.district_heat_share, index_col=0)
     urban_fraction = pop_layout["fraction"]
 
-    energy_layout = pd.read_csv(
+    energy_layout = read_csv_nafix(
         snakemake.input.clustered_pop_energy_layout, index_col=0
     )
 
