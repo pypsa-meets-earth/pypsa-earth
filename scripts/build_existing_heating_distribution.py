@@ -102,7 +102,9 @@ def build_existing_heating():
     nodal_heating.index = pop_layout.index
     nodal_heating = nodal_heating.multiply(pop_layout.fraction, axis=0)
 
-    district_heat_info = read_csv_nafix(snakemake.input.district_heat_share, index_col=0)
+    district_heat_info = read_csv_nafix(
+        snakemake.input.district_heat_share, index_col=0
+    )
     urban_fraction = pop_layout["fraction"]
 
     energy_layout = read_csv_nafix(
