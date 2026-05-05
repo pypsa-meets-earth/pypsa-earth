@@ -3380,7 +3380,7 @@ if __name__ == "__main__":
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)
 
-    if options.get("electricity_grid_connection", False):
+    if options.get("enable_electricity_connection_cost", False):
         add_electricity_grid_connection(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
