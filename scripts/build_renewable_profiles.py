@@ -204,7 +204,6 @@ import progressbar as pgb
 import xarray as xr
 from _helpers import (
     BASE_DIR,
-    COPERNICUS_CRS,
     configure_logging,
     create_logger,
     read_csv_nafix,
@@ -215,6 +214,8 @@ from pypsa.geo import haversine
 from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
+
+COPERNICUS_CRS = "EPSG:4326"
 
 logger = create_logger(__name__)
 
