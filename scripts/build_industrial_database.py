@@ -503,7 +503,7 @@ def create_ammonia_db(ammonia_plants_file: str) -> pd.DataFrame:
         ['country', 'y', 'x', 'location', 'technology', 'capacity', 'unit', 'quality', 'ID'].
     """
     # Load ammonia plants data
-    df_ammonia = pd.read_csv(ammonia_plants_file)
+    df_ammonia = read_csv_nafix(ammonia_plants_file)
 
     # Set location to plant name
     df_ammonia["location"] = df_ammonia["plant"]
