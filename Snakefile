@@ -1961,9 +1961,9 @@ rule plot_sector_summary:
 
 rule build_industrial_database:
     input:
-        ammonia_plants="data/industry/ammonia_plants.csv",
+        ammonia_plants="resources/ammonia_plants.csv",
     output:
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
     script:
         "scripts/build_industrial_database.py"
 
@@ -2005,7 +2005,7 @@ rule build_industrial_distribution_key:  #default data
         clustered_gdp_layout="resources/"
         + SECDIR
         + "gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
@@ -2074,8 +2074,8 @@ rule build_industry_demand:  #default data
         base_industry_totals="resources/"
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
-        industrial_database="data/industrial_database.csv",
-        ammonia_production="data/industry/ammonia_production.csv",
+        industrial_database="resources/industrial_database.csv",
+        ammonia_production="resources/ammonia_production.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
@@ -2100,10 +2100,10 @@ rule build_ammonia_production:
         ammonia_sources=config["data_sources"]["ammonia"],
         us_cities_source=config["data_sources"]["us_cities"],
     input:
-        eu_ammonia_plants="data/industry/ammonia_plants_eu.csv",
+        eu_ammonia_plants="data/industry/ammonia_plants.csv",
     output:
-        ammonia_production="data/industry/ammonia_production.csv",
-        ammonia_plants="data/industry/ammonia_plants.csv",
+        ammonia_production="resources/ammonia_production.csv",
+        ammonia_plants="resources/ammonia_plants.csv",
     threads: 1
     resources:
         mem_mb=1000,
