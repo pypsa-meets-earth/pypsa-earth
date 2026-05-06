@@ -28,6 +28,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Enable green-field capacity expansion of custom lines under construction [PR #1778](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1778)
 
+* Remove unused override_respot [PR #1805](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1805)
+
 **Minor Changes and bug-fixing**
 
 * Add config parameter `enable_electricity_connection_cost`, which adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network [#1810](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1810)
