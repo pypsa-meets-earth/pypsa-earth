@@ -1799,21 +1799,6 @@ def add_industry(
         if n.loads_t.p_set.columns.intersection(loads_i).empty:
             continue
 
-    # if not snakemake.config["custom_data"]["elec_demand"]:
-    #     # if electricity demand is provided by pypsa-earth, the electricity used
-    #     # in industry is included, and need to be removed from the default elec
-    #     # demand here, and added as "industry electricity"
-    #     factor = (
-    #         1
-    #         - industrial_demand.loc[loads_i, "current electricity"].sum()
-    #         / n.loads_t.p_set[loads_i].sum().sum()
-    #     )
-    #     n.loads_t.p_set[loads_i] *= factor
-    #     industrial_elec = industrial_demand["current electricity"].apply(
-    #         lambda frac: frac / 8760
-    #     )
-
-    # else:
     industrial_elec = industrial_demand["electricity"] / 8760
 
     n.madd(
