@@ -61,16 +61,18 @@ jobs:
           exit 1
         fi
 
-        # Add REUSE headers and CSV header to the output file
+        # Add REUSE headers to the output file
         # REUSE-IgnoreStart
         {
           printf "# -*- coding: utf-8 -*-\n"
           printf "# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors\n"
           printf "#\n"
           printf "# SPDX-License-Identifier: CC-BY-4.0\n"
-          printf "folder,file,objective\n"
         } > updated_obj_ref.csv
         # REUSE-IgnoreEnd
+
+        # Add the CSV header to the output file
+        printf "folder,file,objective\n" >> updated_obj_ref.csv
 
         # Loop over log files, extract objective values, and write value to CSV
         while IFS= read -r line; do
