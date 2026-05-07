@@ -536,8 +536,6 @@ export:
     unload_time: 24 # hours for 48h see Hampp2021
 
 custom_data:
-  renewables: [] # ['csp', 'rooftop-solar', 'solar']
-  elec_demand: false
   heat_demand: false
   industry_demand: false
   industry_database: false
@@ -734,6 +732,7 @@ sector:
   # ------------------- ELECTRICITY DISTRIBUTION GRID -------------------
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
+  enable_electricity_connection_cost: false # adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network.
   solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
     enable: true
     kW_per_m2: 0.1
