@@ -1101,17 +1101,6 @@ rule prepare_sector_networks:
         ),
 
 
-rule override_res_all_nets:
-    input:
-        expand(
-            RESDIR
-            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
-            **config["scenario"],
-            **config["costs"],
-            **config["export"],
-        ),
-
-
 rule solve_sector_networks:
     input:
         expand(
@@ -1241,8 +1230,7 @@ rule prepare_sector_network:
                 for country in config["countries"]
             },
         ),
-        network=RESDIR
-        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals=branch(
@@ -1331,39 +1319,6 @@ rule add_export:
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
     script:
         "scripts/add_export.py"
-
-
-rule override_respot:
-    params:
-        run=run["name"],
-        custom_data=config["custom_data"],
-        countries=config["countries"],
-    input:
-        **{
-            f"custom_res_pot_{tech}_{planning_horizons}_{discountrate}": "resources/"
-            + SECDIR
-            + f"custom_renewables/{tech}_{planning_horizons}_{discountrate}_potential.csv"
-            for tech in config["custom_data"]["renewables"]
-            for discountrate in config["costs"]["discountrate"]
-            for planning_horizons in config["scenario"]["planning_horizons"]
-        },
-        **{
-            f"custom_res_ins_{tech}_{planning_horizons}_{discountrate}": "resources/"
-            + SECDIR
-            + f"custom_renewables/{tech}_{planning_horizons}_{discountrate}_installable.csv"
-            for tech in config["custom_data"]["renewables"]
-            for discountrate in config["costs"]["discountrate"]
-            for planning_horizons in config["scenario"]["planning_horizons"]
-        },
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        energy_totals="resources/"
-        + SECDIR
-        + "energy_totals_{demand}_{planning_horizons}.csv",
-    output:
-        RESDIR
-        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_presec.nc",
-    script:
-        "scripts/override_respot.py"
 
 
 rule prepare_transport_data:
