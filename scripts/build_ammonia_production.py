@@ -12,12 +12,9 @@ Description
 This functions takes data from the `Minerals Yearbook <https://www.usgs.gov/centers/national-minerals-information-center/nitrogen-statistics-and-information>`_
  (July 2024) published by the US Geological Survey (USGS) and the National Minerals Information Center and extracts the annual ammonia production per country in ktonN/a. The data is converted to ktonNH3/a.
 """
-import zipfile
-from io import BytesIO
-
 import country_converter as coco
 import pandas as pd
-from _helpers import configure_logging, content_retrieve, create_logger, to_csv_nafix
+from _helpers import configure_logging, create_logger, read_csv_nafix, to_csv_nafix
 
 logger = create_logger(__name__)
 
@@ -79,31 +76,6 @@ def extract_state(location: str) -> str | None:
     if len(parts) > 1:
         return parts[1][:2].upper()
     return None
-
-
-def download_ammonia_production_data(ammonia_sources: dict) -> bytes:
-    """
-    Download ammonia production data from the USGS website, with a fallback to an archived version if the primary source is unavailable.
-    Parameters
-    ----------
-    ammonia_sources : dict
-        Dictionary containing the URLs for the primary and archive sources.
-    Returns
-    -------
-    bytes
-        The content of the downloaded ammonia production data.
-    """
-    # Download ammonia production data - try primary source, fallback to mirror if needed
-    logger.info("Downloading ammonia production data from USGS...")
-    try:
-        url = ammonia_sources["primary"]
-        content = content_retrieve(url)
-    except Exception:
-        logger.warning("Primary source failed, trying fallback mirror...")
-        url = ammonia_sources["archive"]
-        content = content_retrieve(url)
-
-    return content
 
 
 def extract_country_level_production(content: bytes) -> pd.DataFrame:
@@ -193,56 +165,23 @@ def extract_us_plant_data(content: bytes, us_cities: pd.DataFrame) -> pd.DataFra
     return us_plants
 
 
-def load_us_cities_data(us_cities_source: dict) -> pd.DataFrame:
+def extract_plant_data(ammonia_plants_path: str) -> pd.DataFrame:
     """
-    Load US cities data from a ZIP file containing CSV.
+    Extract ammonia plant data from a provided CSV file.
 
     Parameters
     ----------
-    us_cities_source : dict
-        Dictionary containing the URL to the US cities ZIP file.
+    ammonia_plants_path : str
+        Path to the CSV file containing ammonia plant data.
 
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing US cities with columns: city, state_id, lat, lng, population, etc.
+        A DataFrame containing the ammonia plant data with columns: location, capacity, x, y, country, etc.
     """
-    # Download the ZIP file
-    zip_content = content_retrieve(us_cities_source["primary"])
-
-    # Extract and read the CSV from the ZIP
-    with zipfile.ZipFile(zip_content) as z:
-        # Get the CSV filename (usually 'uscities.csv' or similar)
-        csv_filename = [f for f in z.namelist() if f.endswith(".csv")][0]
-
-        with z.open(csv_filename) as csv_file:
-            us_cities = pd.read_csv(csv_file, encoding="utf-8")
-
-    logger.info(f"Loaded {len(us_cities)} US cities")
-
-    # Lowercase city names for matching
-    us_cities["city"] = us_cities["city"].str.lower()
-
-    return us_cities
-
-
-def extract_eu_plant_data(eu_ammonia_plants_path: str) -> pd.DataFrame:
-    """
-    Extract EU ammonia plant data from a provided CSV file.
-
-    Parameters
-    ----------
-    eu_ammonia_plants_path : str
-        Path to the CSV file containing EU ammonia plant data.
-
-    Returns
-    -------
-    pd.DataFrame
-        A DataFrame containing the EU ammonia plant data with columns: location, capacity, x, y, country, etc.
-    """
-    # Load European plants from provided CSV
-    eu_plants = pd.read_csv(eu_ammonia_plants_path)
-    eu_plants = eu_plants.rename(
+    # Load plants from provided CSV
+    ammonia_plants = read_csv_nafix(ammonia_plants_path)
+    ammonia_plants = ammonia_plants.rename(
         columns={
             "Latitude": "y",
             "Longitude": "x",
@@ -253,35 +192,35 @@ def extract_eu_plant_data(eu_ammonia_plants_path: str) -> pd.DataFrame:
 
     # Convert country names to ISO2 codes
     cc = coco.CountryConverter()
-    eu_plants["country"] = cc.convert(eu_plants["Country"], to="ISO2")
+    ammonia_plants["country"] = cc.convert(ammonia_plants["Country"], to="ISO2")
 
     # Select relevant columns and set index
-    eu_plants = eu_plants[["plant", "capacity", "x", "y", "country"]]
-    eu_plants.index.name = "ktonNH3/a"
+    ammonia_plants = ammonia_plants[["plant", "capacity", "x", "y", "country"]]
+    ammonia_plants.index.name = "ktonNH3/a"
 
-    return eu_plants
+    return ammonia_plants
 
 
 def combine_ammonia_plants(
-    us_plants: pd.DataFrame, eu_plants: pd.DataFrame
+    plants: pd.DataFrame, us_plants: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Combine US and EU ammonia plant data into a single DataFrame.
+    Combine custom and US ammonia plant data into a single DataFrame.
 
     Parameters
     ----------
+    plants : pd.DataFrame
+        DataFrame containing custom ammonia plant data.
     us_plants : pd.DataFrame
         DataFrame containing US ammonia plant data.
-    eu_plants : pd.DataFrame
-        DataFrame containing EU ammonia plant data.
 
     Returns
     -------
     pd.DataFrame
-        A combined DataFrame containing ammonia plant data for both US and EU.
+        A combined DataFrame containing ammonia plant data for both US and custom plants.
     """
-    # Combine US and EU plant data
-    ammonia_plants = pd.concat([us_plants, eu_plants], ignore_index=True)
+    # Combine US and custom plant data
+    ammonia_plants = pd.concat([plants, us_plants], ignore_index=True)
 
     # Drop rows with missing capacity
     ammonia_plants = ammonia_plants.dropna(subset=["capacity"])
@@ -297,31 +236,26 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    # Load parameters
-    ammonia_sources = snakemake.params.ammonia_sources
-    us_cities_source = snakemake.params.us_cities_source
-
     # Load inputs
-    eu_ammonia_plants_path = snakemake.input.eu_ammonia_plants
-
-    # Download ammonia production dataset
-    content = download_ammonia_production_data(ammonia_sources)
+    ammonia_plants_path = snakemake.input.ammonia_plants
+    us_cities_path = snakemake.input.us_cities
+    usgs_ammonia_dataset_path = snakemake.input.usgs_ammonia_dataset
 
     # Extract country-level production totals
-    ammonia_totals = extract_country_level_production(content)
+    ammonia_totals = extract_country_level_production(usgs_ammonia_dataset_path)
+
+    # Extract ammonia plant data
+    ammonia_plants = extract_plant_data(ammonia_plants_path)
 
     # Load US cities data
-    us_cities = load_us_cities_data(us_cities_source)
+    us_cities = read_csv_nafix(us_cities_path)
 
     # Extract US plant data
-    us_ammonia_plants = extract_us_plant_data(content, us_cities)
-
-    # Extract EU plant data
-    eu_ammonia_plants = extract_eu_plant_data(eu_ammonia_plants_path)
+    us_ammonia_plants = extract_us_plant_data(usgs_ammonia_dataset_path, us_cities)
 
     # Combine ammonia plants data
-    ammonia_plants = combine_ammonia_plants(us_ammonia_plants, eu_ammonia_plants)
+    combined_ammonia_plants = combine_ammonia_plants(ammonia_plants, us_ammonia_plants)
 
     # Save the results
     to_csv_nafix(ammonia_totals, snakemake.output.ammonia_production)
-    to_csv_nafix(ammonia_plants, snakemake.output.ammonia_plants, index=False)
+    to_csv_nafix(combined_ammonia_plants, snakemake.output.ammonia_plants, index=False)

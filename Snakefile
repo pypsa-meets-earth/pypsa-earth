@@ -2095,12 +2095,25 @@ rule build_industry_demand:  #default data
         "scripts/build_industry_demand.py"
 
 
+rule retrieve_us_cities_dataset:
+    output:
+        us_cities="data/industry/us_cities.csv",
+    script:
+        "scripts/retrieve_us_cities_dataset.py"
+
+
+rule retrieve_ammonia_dataset:
+    output:
+        usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
+    script:
+        "scripts/retrieve_ammonia_dataset.py"
+
+
 rule build_ammonia_production:
-    params:
-        ammonia_sources=config["data_sources"]["ammonia"],
-        us_cities_source=config["data_sources"]["us_cities"],
     input:
-        eu_ammonia_plants="data/industry/ammonia_plants.csv",
+        ammonia_plants="data/industry/ammonia_plants.csv",
+        us_cities="data/industry/us_cities.csv",
+        usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
     output:
         ammonia_production="resources/ammonia_production.csv",
         ammonia_plants="resources/ammonia_plants.csv",
