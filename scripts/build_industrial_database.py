@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import pycountry
 import requests
-from _helpers import content_retrieve
+from _helpers import content_retrieve, read_csv_nafix
 from geopy.geocoders import Nominatim
 
 

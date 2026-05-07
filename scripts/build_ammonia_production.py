@@ -17,7 +17,7 @@ from io import BytesIO
 
 import country_converter as coco
 import pandas as pd
-from _helpers import configure_logging, content_retrieve, create_logger
+from _helpers import configure_logging, content_retrieve, create_logger, to_csv_nafix
 
 logger = create_logger(__name__)
 
@@ -323,5 +323,5 @@ if __name__ == "__main__":
     ammonia_plants = combine_ammonia_plants(us_ammonia_plants, eu_ammonia_plants)
 
     # Save the results
-    ammonia_totals.to_csv(snakemake.output.ammonia_production)
-    ammonia_plants.to_csv(snakemake.output.ammonia_plants, index=False)
+    to_csv_nafix(ammonia_totals, snakemake.output.ammonia_production)
+    to_csv_nafix(ammonia_plants, snakemake.output.ammonia_plants, index=False)

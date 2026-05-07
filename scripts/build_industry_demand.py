@@ -333,6 +333,12 @@ if __name__ == "__main__":
                     current = industry_base_totals.loc[
                         (country, carrier), "chemical and petrochemical"
                     ]
+                    if value > current:
+                        _logger.warning(
+                            f"Ammonia {carrier} demand ({value:.2f} MWh) exceeds "
+                            f"chemical and petrochemical {carrier} total ({current:.2f} MWh) "
+                            f"for {country}. Clipping to 0; energy totals are not preserved."
+                        )
                     industry_base_totals.loc[
                         (country, carrier), "chemical and petrochemical"
                     ] = max(0.0, current - value)
