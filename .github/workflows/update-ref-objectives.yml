@@ -44,6 +44,7 @@ jobs:
 
     - name: Extract objectives and build updated reference CSV
       run: |
+        # Collect log files where to search for objective values
         shopt -s nullglob
         LOG_FILES=(./logs/solve_network/*_python.log ./logs/*/solve_network/*_python.log)
         OBJ_FOUND=$(
@@ -60,6 +61,7 @@ jobs:
           exit 1
         fi
 
+        # Add REUSE headers and CSV header to the output file
         # REUSE-IgnoreStart
         {
           printf "# -*- coding: utf-8 -*-\n"
@@ -70,6 +72,7 @@ jobs:
         } > updated_obj_ref.csv
         # REUSE-IgnoreEnd
 
+        # Loop over log files, extract objective values, and write value to CSV
         while IFS= read -r line; do
           FILE=$(echo "$line" | cut -d: -f1)
           VALUE=$(echo "$line" | cut -d: -f2-)
