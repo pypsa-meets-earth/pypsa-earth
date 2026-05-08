@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 run:
-  name: tutorial.test
-  sector_name: tutorial
+  name: test
+  sector_name: test
   base_config: config.tutorial.yaml  # base configuration file
   shared_cutouts: true
