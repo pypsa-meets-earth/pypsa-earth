@@ -7,6 +7,7 @@ countries: ["BW"]
 
 run:
   name: "landlock"
+  shared_cutouts: false
 
 subregion:
   method: "gadm" # method to define subregions, either "gadm" or "custom", false to not use subregions.
