@@ -15,8 +15,8 @@ by
 
 ## Development Status: **Under Development**
 
-[![Test workflows](https://github.com/open-energy-transition/pypsa-zambia/actions/workflows/test.yml/badge.svg)](https://github.com/open-energy-transition/pypsa-zambia/actions/workflows/test.yml)
-[![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
+[![Test workflows](https://github.com/open-energy-transition/pypsa-zambia/actions/workflows/test_zambia.yml/badge.svg)](https://github.com/open-energy-transition/pypsa-zambia/actions/workflows/test_zambia.yml)
+[![Documentation Status](https://readthedocs.org/projects/pypsa-zambia/badge/?version=latest)](https://pypsa-zambia.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/open-energy-transition/pypsa-zambia)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![REUSE status](https://api.reuse.software/badge/github.com/open-energy-transition/pypsa-zambia)](https://api.reuse.software/info/github.com/open-energy-transition/pypsa-zambia)
@@ -119,7 +119,7 @@ A set of notebooks which provides ingights on outputs of the model and ways to a
 
 ## Documentation
 
-Specific documentation for PyPSA-Zambia is under development. General documentation for PyPSA-Earth is available [here](https://pypsa-earth.readthedocs.io/en/latest/index.html) and can be used to get information on installation and customisation procedures, design of the model and philosophy of the workflow, as well as to access tutorial and support materials.
+Specific documentation for PyPSA-Zambia is under development [here](https://pypsa-zambia.readthedocs.io/en/latest/index.html). General documentation for PyPSA-Earth is available [here](https://pypsa-earth.readthedocs.io/en/latest/index.html) and can be used to get information on installation and customisation procedures, design of the model and philosophy of the workflow, as well as to access tutorial and support materials.
 
 ## Collaborators
 
