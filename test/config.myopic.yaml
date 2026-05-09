@@ -50,6 +50,15 @@ export:
   h2export: [120] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
   export_profile: "ship" # use "ship" or "constant". Only considered, if ["export"]["endogenous"] is set to false
 
+electricity:
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: test/utils/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false
+  extendable_carriers:
+    Store: [H2]
+    Link: [H2 pipeline]
+
+  co2limit: 7.75e+7
 
 existing_capacities:
   grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]
