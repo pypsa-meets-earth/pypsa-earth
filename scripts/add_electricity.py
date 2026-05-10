@@ -107,6 +107,7 @@ from _helpers import (
     update_p_nom_max,
 )
 from powerplantmatching.export import map_country_bus
+from utility_custom_features import disaggregate_plants, map_buses_from_coords
 
 idx = pd.IndexSlice
 
@@ -454,18 +455,23 @@ def attach_conventional_generators(
     renewable_carriers,
     conventional_config,
     conventional_inputs,
+    disaggregate_flag=False,
 ):
     carriers = set(conventional_carriers) | (
         set(extendable_carriers["Generator"]) - set(renewable_carriers)
     )
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    ppl = (
-        ppl.query("carrier in @carriers")
-        .join(costs, on="carrier", rsuffix="_r")
-        .rename(index=lambda s: "C" + str(s))
-    )
-    ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
+    if disaggregate_flag:
+        ppl = ppl.query("carrier in @carriers").join(costs, on="carrier", rsuffix="_r")
+        disaggregate_plants(n, ppl, name_fallback="plant", geo_crs=geo_crs)
+    else:
+        ppl = (
+            ppl.query("carrier in @carriers")
+            .join(costs, on="carrier", rsuffix="_r")
+            .rename(index=lambda s: "C" + str(s))
+        )
+        ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
 
     logger.info(
         "Adding {} generators with capacities [GW] \n{}".format(
@@ -508,7 +514,13 @@ def attach_conventional_generators(
                 n.generators.loc[idx, attr] = values
 
 
-def attach_hydro(n, costs, ppl, hydro_min_inflow_pu=1):
+def attach_hydro(
+    n,
+    costs,
+    ppl,
+    hydro_min_inflow_pu=1,
+    disaggregate_flag=False,
+):
     if "hydro" not in snakemake.params.renewable:
         return
     c = snakemake.params.renewable["hydro"]
@@ -516,12 +528,20 @@ def attach_hydro(n, costs, ppl, hydro_min_inflow_pu=1):
 
     _add_missing_carriers_from_costs(n, costs, carriers)
 
-    ppl = (
-        ppl.query('carrier == "hydro"')
-        .assign(ppl_id=lambda df: df.index)
-        .reset_index(drop=True)
-        .rename(index=lambda s: str(s) + " hydro")
-    )
+    if disaggregate_flag:
+        ppl = (
+            ppl.query('carrier == "hydro"')
+            .assign(ppl_id=lambda df: df.index)
+            .reset_index(drop=True)
+        )
+        disaggregate_plants(n, ppl, name_fallback="hydro", geo_crs=geo_crs)
+    else:
+        ppl = (
+            ppl.query('carrier == "hydro"')
+            .assign(ppl_id=lambda df: df.index)
+            .reset_index(drop=True)
+            .rename(index=lambda s: str(s) + " hydro")
+        )
 
     ror = ppl.query('technology == "Run-Of-River"')
     phs = ppl.query('technology == "Pumped Storage"')
@@ -904,6 +924,10 @@ if __name__ == "__main__":
 
     # Snakemake imports:
     demand_profiles = snakemake.input["demand_profiles"]
+    disaggregate_flag = snakemake.params.electricity.get(
+        "disaggregate_powerplants", False
+    )
+    geo_crs = snakemake.config.get("crs", {}).get("geo_crs", "EPSG:4326")
 
     costs = load_costs(
         snakemake.input.tech_costs,
@@ -912,6 +936,13 @@ if __name__ == "__main__":
         Nyears,
     )
     ppl = load_powerplants(snakemake.input.powerplants)
+    if disaggregate_flag:
+        raw_ppl = read_csv_nafix(
+            snakemake.input.powerplants, index_col=0, dtype={"bus": "str"}
+        )
+        name_col = next((c for c in raw_ppl.columns if c.lower() == "name"), None)
+        if name_col:
+            ppl["name"] = raw_ppl[name_col]
     if "renewable_carriers" in snakemake.params.electricity:
         renewable_carriers = set(snakemake.params.electricity["renewable_carriers"])
     else:
@@ -945,6 +976,7 @@ if __name__ == "__main__":
         renewable_carriers,
         snakemake.params.conventional,
         conventional_inputs,
+        disaggregate_flag=disaggregate_flag,
     )
     attach_wind_and_solar(
         n,
@@ -956,7 +988,11 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(
-        n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
+        n,
+        costs,
+        ppl,
+        snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"],
+        disaggregate_flag=disaggregate_flag,
     )
     attach_existing_batteries(n, costs, ppl)
 

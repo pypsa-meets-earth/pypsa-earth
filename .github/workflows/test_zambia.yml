@@ -103,7 +103,11 @@ jobs:
 
     - name: Run Zambia Dispatch Test
       if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-      run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm_dispatch.yaml
+      run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm.dispatch.yaml
+
+    - name: Run Zambia PPDisaggregation Dispatch Test
+      if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm.disagg.yaml
 
     # Example on how to create a new test
     # - name: Run Zambia Capacity Expansion Test

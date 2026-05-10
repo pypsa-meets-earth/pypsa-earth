@@ -27,6 +27,12 @@ This part of documentation collects descriptive release notes to capture the mai
 
 ### Minor Changes and bug-fixing
 
+# PyPSA-Zambia upcoming release
+
+## New Features and Major Changes
+* Add powerplants disaggregation feature [PR #153](https://github.com/open-energy-transition/pypsa-zambia/pull/153)
+## Minor Changes and bug-fixing
+
 
 # PyPSA-Zambia v0.2
 

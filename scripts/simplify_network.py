@@ -109,6 +109,11 @@ from pypsa.clustering.spatial import (
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
+from utility_custom_features import (
+    busmap_keeps_topology,
+    restore_excluded_components,
+    save_excluded_components,
+)
 
 sys.settrace
 
@@ -273,6 +278,10 @@ def _aggregate_and_move_components(
     aggregation_strategies=dict(),
     exclude_carriers=None,
 ):
+    if busmap_keeps_topology(busmap):
+        logger.info("No bus merging → keep all power plants separate")
+        return
+
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
 
@@ -289,7 +298,10 @@ def _aggregate_and_move_components(
     )
 
     generator_strategies = aggregation_strategies["generators"]
-
+    if disaggregate_flag:
+        excl_gens, excl_gens_pnl = save_excluded_components(
+            n, "Generator", busmap, exclude_carriers
+        )
     carriers = set(n.generators.carrier) - set(exclude_carriers)
     generators, generators_pnl = aggregateoneport(
         n,
@@ -300,10 +312,22 @@ def _aggregate_and_move_components(
     )
 
     replace_components(n, "Generator", generators, generators_pnl)
-
+    if disaggregate_flag:
+        restore_excluded_components(n, "Generator", excl_gens, excl_gens_pnl)
     for one_port in aggregate_one_ports:
-        df, pnl = aggregateoneport(n, busmap, component=one_port)
-        replace_components(n, one_port, df, pnl)
+        if one_port == "StorageUnit" and disaggregate_flag:
+            excl_sus, excl_sus_pnl = save_excluded_components(
+                n, "StorageUnit", busmap, exclude_carriers
+            )
+            su_carriers = set(n.storage_units.carrier) - set(exclude_carriers)
+            df, pnl = aggregateoneport(
+                n, busmap, component=one_port, carriers=su_carriers
+            )
+            replace_components(n, one_port, df, pnl)
+            restore_excluded_components(n, "StorageUnit", excl_sus, excl_sus_pnl)
+        else:
+            df, pnl = aggregateoneport(n, busmap, component=one_port)
+            replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
     n.mremove("Bus", buses_to_del)
@@ -999,6 +1023,7 @@ if __name__ == "__main__":
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
     aggregation_strategies = snakemake.params.aggregation_strategies
+    disaggregate_flag = snakemake.params.disaggregate_flag
 
     # Aggregation strategies must be set for all columns
     update_config_dictionary(

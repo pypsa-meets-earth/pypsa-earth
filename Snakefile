@@ -761,6 +761,7 @@ rule add_electricity:
 rule simplify_network:
     params:
         aggregation_strategies=config["cluster_options"]["aggregation_strategies"],
+        disaggregate_flag=config["electricity"].get("disaggregate_powerplants", False),
         renewable=config["renewable"],
         crs=config["crs"],
         cluster_options=config["cluster_options"],

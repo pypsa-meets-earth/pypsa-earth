@@ -16,7 +16,7 @@ enable:
 scenario:
   simpl: [""]
   ll: ["v1.0"]
-  clusters: [10]
+  clusters: ["all"]
   opts: [Co2L-3h]
 
 snapshots:
@@ -87,6 +87,7 @@ electricity:
 
   powerplants_filter: (DateOut >= 2024 or DateOut != DateOut) and (DateIn <= 2024 or DateIn != DateIn)
   custom_powerplants: replace # set to "merge" or "replace" if you have a custom_powerplants.csv for Zambia
+  disaggregate_powerplants: true # to enable disaggregation also in simplify_network, a set of excluded carries must be specified
 
   conventional_carriers: [oil, OCGT, CCGT, coal, geothermal, biomass]
   renewable_carriers: [solar, onwind, hydro]
@@ -102,7 +103,7 @@ lines:
     66.: "ACSR Wolf 66.0"
     132.: "ACSR Panther 132.0"
     220.: "ACSR Zebra 220.0"
-    330.: "ACSR Zebra 2-bundle 330.0"
+    330.: "ACSR Bison 330.0"
 costs:
   year: 2025
   marginal_cost: # EUR/MWh — IRP Table 5 (Zambia 2023), converted at 0.7532 EUR/USD
@@ -120,7 +121,7 @@ costs:
 
 cluster_options:
   simplify_network:
-    exclude_carriers: []
+    exclude_carriers: [coal, oil, hydro, ror, PHS, biomass]  # used to customise simplification, required when disaggregate_powerplants is true to prevent named plants from being re-aggregated in simplify_network
 
 
 sector:
@@ -132,6 +133,7 @@ sector:
     aviation: false
     land_transport: false
     rail_transport: false
+
     agriculture: false
     residential: false
     services: false

@@ -11,6 +11,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
+from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from rasterio.features import rasterize
 from rasterio.mask import mask
 from rasterio.transform import from_bounds
@@ -162,7 +163,149 @@ def load_custom_line_types(line_types: str) -> pd.DataFrame:
 def add_custom_line_types(n, custom_line_types):
     """merge custom line_types into the pypsa network"""
     n.line_types = pd.concat([n.line_types, custom_line_types], axis=0)
+    n.line_types = n.line_types[~n.line_types.index.duplicated(keep="last")]
     return n
+
+
+def map_buses_from_coords(
+    n, df, buses_df=None, distance_crs="EPSG:20935", geo_crs="EPSG:4326"
+):
+    """Find the nearest bus for each row in df using lat/lon.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network whose buses are used for geo-matching.
+    df : pd.DataFrame
+        Power plant table. Must contain ``lat`` and ``lon`` columns.
+    buses_df : pd.DataFrame or None, optional
+        Candidate buses for geo-matching. Defaults to all buses in ``n``.
+    distance_crs : str, optional
+        Geographic CRS used to measure distances.
+    geo_crs : str, optional
+        Geographic CRS used to construct GeoDataFrames before reprojection.
+    """
+    candidates = n.buses if buses_df is None else buses_df
+    bus_points = gpd.GeoDataFrame(
+        index=candidates.index,
+        geometry=gpd.points_from_xy(candidates["x"], candidates["y"]),
+        crs=geo_crs,
+    ).to_crs(distance_crs)
+    plant_points = gpd.GeoDataFrame(
+        index=df.index,
+        geometry=gpd.points_from_xy(df["lon"], df["lat"]),
+        crs=geo_crs,
+    ).to_crs(distance_crs)
+
+    return plant_points.geometry.apply(
+        lambda plant: bus_points.geometry.distance(plant).idxmin()
+    )
+
+
+def disaggregate_plants(
+    n, df, name_fallback="plant", buses_df=None, geo_crs="EPSG:4326"
+):
+    """Rename df rows to real plant names and assign each to its nearest bus.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network whose buses are used for geo-matching.
+    df : pd.DataFrame
+        Power plant table. Must contain ``lat`` and ``lon`` columns.
+        If a ``name`` column is present, its values are used as the plant name
+        prefix in the new index; otherwise ``name_fallback`` is used.
+    name_fallback : str, optional
+        Prefix used in the new index when a plant has no name (default: "plant").
+        E.g. ``name_fallback="hydro"`` produces index entries like ``"hydro-3"``.
+    buses_df : pd.DataFrame or None, optional
+        Candidate buses for geo-matching. Defaults to all buses in ``n``.
+    geo_crs : str, optional
+        Geographic CRS used to construct GeoDataFrames before reprojection
+        (default: ``"EPSG:4326"``). Should match ``config["crs"]["geo_crs"]``.
+    """
+    new_names = []
+    for i in df.index:
+        if "name" in df.columns:
+            plant_name = df.loc[i, "name"]
+            if plant_name is not None and str(plant_name).strip() != "":
+                new_name = str(plant_name) + "-" + str(i)
+            else:
+                new_name = name_fallback + "-" + str(i)
+        else:
+            new_name = name_fallback + "-" + str(i)
+        new_names.append(new_name)
+    df.index = new_names
+    df["bus"] = map_buses_from_coords(n, df, buses_df=buses_df, geo_crs=geo_crs)
+    return df
+
+
+def save_excluded_components(n, component, busmap, exclude_carriers):
+    """
+    Save components we want to protect from aggregation.
+
+    Works for any component type: "Generator", "Load", "StorageUnit", etc.
+    Pulls out matching rows, remaps their buses, and saves their time-series.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network containing the components to save.
+    component : str
+        Component type to filter, e.g. ``"Generator"`` or ``"StorageUnit"``.
+    busmap : pd.Series
+        Maps old bus names to new bus names (as produced by clustering).
+    exclude_carriers : list of str
+        Carriers whose components should be saved and excluded from aggregation.
+
+    Returns
+    -------
+    saved : pd.DataFrame
+        Static component table for the excluded components, with buses remapped.
+    saved_timeseries : dict of str -> pd.DataFrame
+        Time-varying attributes (e.g. ``p_max_pu``) for the excluded components.
+        Empty dict if none exist.
+    """
+    if not exclude_carriers:
+        return pd.DataFrame(), {}
+    component_table = n.df(component)
+    if "carrier" not in component_table.columns:
+        return pd.DataFrame(), {}
+    is_excluded = component_table.carrier.isin(exclude_carriers)
+    if not is_excluded.any():
+        return pd.DataFrame(), {}
+    saved = component_table[is_excluded].copy()
+    saved["bus"] = saved["bus"].replace(busmap)
+    list_name = n.components[component]["list_name"]
+    ts_container = getattr(n, list_name + "_t")
+    saved_timeseries = {}
+    for attr in ts_container:
+        ts_data = getattr(ts_container, attr)
+        if ts_data.empty:
+            continue
+        cols = ts_data.columns.intersection(saved.index)
+        if not cols.empty:
+            saved_timeseries[attr] = ts_data[cols]
+    return saved, saved_timeseries
+
+
+def restore_excluded_components(n, component, saved_components, saved_timeseries):
+    """
+    Put protected components back into the network after aggregation
+    """
+    if saved_components.empty:
+        return
+    import_components_from_dataframe(n, saved_components, component)
+    for attr, data in saved_timeseries.items():
+        if not data.empty:
+            import_series_from_dataframe(n, data, component, attr)
+
+
+def busmap_keeps_topology(busmap):
+    """
+    Check if every bus maps to itself.
+    """
+    return (busmap.index == busmap.values).all()
 
 
 def add_mining_data(df_gadm, mining_raster_path):
