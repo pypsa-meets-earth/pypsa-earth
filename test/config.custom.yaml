@@ -4,11 +4,14 @@
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
 run:
-  name: "custom"
+  name: "test"
   shared_cutouts: true # set to true to share the default cutout(s) across runs
   base_config: config.tutorial.yaml  # base configuration file
 
 download_osm_data_nprocesses: 4
+
+scenario:
+  clusters: [5]
 
 enable:
   retrieve_cost_data: false
