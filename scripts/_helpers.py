@@ -713,6 +713,46 @@ def to_csv_nafix(df, path, **kwargs):
             pass
 
 
+def add_transform_iso3(
+    df: pd.DataFrame,
+    source: str = "Entity code",
+    target: str = "name_short",
+    output: str = "region_name",
+) -> pd.DataFrame:
+    """
+    Transform a column containing ISO3 codes into another country-code or country-name
+    format and store the result in a new column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame.
+    source : str
+        Name of the column in ``df`` containing country names.
+    target : str
+        Target format as expected by ``cc.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
+    output : str
+        Name of a new output column of ``df`` to keep converted region names.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        DataFrame with an additional column containing the converted region names.
+
+    """
+    # cc.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = cc.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
+
+
 def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists

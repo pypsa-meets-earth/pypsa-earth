@@ -53,6 +53,7 @@ import scipy.sparse as sparse
 import xarray as xr
 from _helpers import (
     BASE_DIR,
+    add_transform_iso3,
     configure_logging,
     create_logger,
     progress_retrieve,
@@ -63,6 +64,7 @@ from shapely.prepared import prep
 from shapely.validation import make_valid
 
 logger = create_logger(__name__)
+
 
 def normed(s):
     if s.sum() == 0:
@@ -219,46 +221,6 @@ def compose_gegis_load(
     gegis_load = gegis_load.loc[gegis_load.region_code.isin(countries)]
 
     return gegis_load
-
-
-def add_transform_iso3(
-    df: pd.DataFrame,
-    source: str = "Entity code",
-    target: str = "name_short",
-    output: str = "region_name",
-) -> pd.DataFrame:
-    """
-    Transform a column containing ISO3 codes into another country-code or country-name
-    format and store the result in a new column.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input DataFrame.
-    source : str
-        Name of the column in ``df`` containing country names.
-    target : str
-        Target format as expected by ``cc.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
-    output : str
-        Name of a new output column of ``df`` to keep converted region names.
-
-    Returns
-    -------
-    df : pd.DataFrame
-        DataFrame with an additional column containing the converted region names.
-
-    """
-    # cc.convert is pretty slow when being applied over the whole column directly
-    cats = df[source].astype("category").cat.categories
-    target_codes = cc.convert(names=cats.tolist(), to=target)
-
-    if isinstance(target_codes, str):
-        target_codes = [target_codes]
-
-    country_name_mapping = dict(zip(cats, target_codes))
-    df[output] = df[source].map(country_name_mapping)
-
-    return df
 
 
 def read_demcast_load(
