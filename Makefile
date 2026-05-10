@@ -6,8 +6,8 @@
 
 test:
 	set -e
-	# this runs test scenario in configs/scenarios/config.tutorial.test.yaml
-	snakemake run_all_scenarios -call
+	# this runs test scenario in configs/scenarios/config.test.yaml
+	snakemake solve_all_networks -call --configfile config.tutorial.yaml configs/scenarios/config.test.yaml
 	# add custom config to tutorial config
 	snakemake solve_all_networks_monte -call --configfile config.tutorial.yaml test/config.monte_carlo.yaml
 	snakemake -c4 solve_sector_networks --configfile config.tutorial.yaml test/config.sector.yaml
