@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-.PHONY: test setup clean
+.PHONY: test setup clean pytest
 
 test:
 	set -e
@@ -30,3 +30,6 @@ clean:
 	snakemake -j1 solve_sector_networks --delete-all-output --configfile test/config.sector.yaml
 	snakemake -j1 solve_sector_networks_myopic --delete-all-output --configfile config.tutorial.yaml test/config.myopic.yaml
 	echo "Clean-up complete."
+
+pytest:
+	pytest test/ -v

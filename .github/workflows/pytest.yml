@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+name: Unit tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: conda-incubator/setup-miniconda@v4
+      with:
+        miniforge-version: latest
+        activate-environment: pypsa-earth
+        channel-priority: strict
+        conda-remove-defaults: true
+
+    - name: Cache Conda env
+      uses: actions/cache@v5
+      with:
+        path: ${{ env.CONDA }}/envs
+        key: conda-pytest-${{ runner.os }}-${{ hashFiles('envs/linux-64.lock.yaml') }}
+      id: cache-env
+
+    - name: Update environment
+      if: steps.cache-env.outputs.cache-hit != 'true'
+      run: conda env update -n pypsa-earth -f envs/linux-64.lock.yaml
+
+    - name: Run pytest
+      run: make pytest
