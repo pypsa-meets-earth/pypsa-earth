@@ -730,7 +730,7 @@ def add_transform_iso3(
     source : str
         Name of the column in ``df`` containing country names.
     target : str
-        Target format as expected by ``cc.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
+        Target format as expected by ``coco.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
     output : str
         Name of a new output column of ``df`` to keep converted region names.
 
@@ -740,9 +740,9 @@ def add_transform_iso3(
         DataFrame with an additional column containing the converted region names.
 
     """
-    # cc.convert is pretty slow when being applied over the whole column directly
+    # coco.convert is pretty slow when being applied over the whole column directly
     cats = df[source].astype("category").cat.categories
-    target_codes = cc.convert(names=cats.tolist(), to=target)
+    target_codes = coco.convert(names=cats.tolist(), to=target)
 
     if isinstance(target_codes, str):
         target_codes = [target_codes]

@@ -44,7 +44,7 @@ import os
 import os.path
 from itertools import product
 
-import country_converter as cc
+import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -259,7 +259,7 @@ def read_demcast_load(
         columns={"Forecast load (MW)": "Electricity demand"}
     )
 
-    countries_iso3 = cc.convert(names=countries, to="ISO3")
+    countries_iso3 = coco.convert(names=countries, to="ISO3")
     if isinstance(countries_iso3, str):
         countries_iso3 = [countries_iso3]
 
