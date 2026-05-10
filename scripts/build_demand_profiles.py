@@ -64,12 +64,6 @@ from shapely.validation import make_valid
 
 logger = create_logger(__name__)
 
-# Needed for messaging to facilitate back-ward compartibiilty
-DEMCAST_URL = (
-    "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
-)
-
-
 def normed(s):
     if s.sum() == 0:
         return s
