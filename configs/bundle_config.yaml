@@ -417,6 +417,43 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # national-level cutouts for Africa
+  # 0.5 GB
+  bundle_cutouts_africa_zm:
+    countries: [ZM]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470328/files/bundle_cutouts_zm_2013.zip?download=1
+      gdrive: https://drive.google.com/file/d/1gTKSQFCCw3BK3AIuRL0AQKTU9airIxW8/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # national-level cutouts for South America
+  # 0.7 GB
+  bundle_cutouts_bo:
+    countries: [BO]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_bo.zip?download=1
+      gdrive: https://drive.google.com/file/d/1G_Pu0ahhYhQtlNffb-wsXc4yRH_17mhv/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+  # 1.3 GB
+  bundle_cutouts_co:
+    countries: [CO]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_co.zip?download=1
+      gdrive: https://drive.google.com/file/d/1m4aANSNEqo0z0I-K5H8XMKiQvXxd3N5R/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
   # data bundle containing the protected data for the whole world
   bundle_landcover_earth:
     countries: [Earth]
