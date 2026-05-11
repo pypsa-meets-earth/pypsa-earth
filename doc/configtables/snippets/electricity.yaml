@@ -18,13 +18,19 @@ electricity:
 
   max_hours:
     battery: 6
+    "li-ion": 6
+    lfp: 6
+    vanadium: 10
+    lair: 12
+    pair: 24
+    "iron-air": 100
     H2: 168
 
   extendable_carriers:
       # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
           # from the Generator list below, as these offshore wind technologies require coastline access.
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
-    StorageUnit: [] # battery, H2
+    StorageUnit: [] # battery, H2, li-ion, vanadium, lfp, lair, pair, iron-air
     Store: [battery, H2]
     Link: [] # H2 pipeline
 

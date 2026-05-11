@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
+
 * Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
 
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)

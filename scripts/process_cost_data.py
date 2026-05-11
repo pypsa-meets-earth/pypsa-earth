@@ -294,8 +294,91 @@ def apply_currency_conversion(
     return cost_dataframe
 
 
+def calculate_cost_for_storage_units(
+    costs: pd.DataFrame,
+    max_hours: dict,
+    storage_techs: dict,
+    costs_name: str = "capital_cost",
+):
+    """
+    Calculate the capital/fixed costs for storage as defined by storage units.
+
+    Storage units consolidate their charging, discharging, and storage costs into a single combined value.
+
+    Parameters
+    ----------
+    costs : pd.DataFrame
+        DataFrame containing the cost data.
+    max_hours : dict
+        Dictionary of maximum hours for storage units.
+    storage_techs : dict, optional
+        A dictionary mapping storage carriers to their respective technology parameters.
+    cost_name : str
+        Name of the column in the costs DataFrame that represents the capital cost.
+    """
+
+    def costs_for_storage(
+        store, link1=None, link2=None, max_hours=1.0, costs_name="capital_cost"
+    ):
+        capital_cost = max_hours * store[costs_name]
+        if link1 is not None:
+            capital_cost += link1[costs_name]
+        if link2 is not None:
+            capital_cost += link2[costs_name]
+        return pd.Series(
+            {
+                costs_name: capital_cost,
+                "marginal_cost": 0.0,
+                "CO2 intensity": 0.0,
+            }
+        )
+
+    mod_costs_i = costs.index
+    missing_store = []
+    for k, v in max_hours.items():
+        tech = storage_techs.get(k)
+        store = tech.get("store") if tech.get("store") in mod_costs_i else None
+        bicharger = (
+            tech.get("bicharger") if tech.get("bicharger") in mod_costs_i else None
+        )
+        charger = tech.get("charger") if tech.get("charger") in mod_costs_i else None
+        discharger = (
+            tech.get("discharger") if tech.get("discharger") in mod_costs_i else None
+        )
+        if bicharger:
+            costs.loc[k] = costs_for_storage(
+                costs.loc[store],
+                costs.loc[bicharger],
+                max_hours=v,
+                costs_name=costs_name,
+            )
+        elif store:
+            costs.loc[k] = costs_for_storage(
+                costs.loc[store],
+                costs.loc[charger] if charger else None,
+                costs.loc[discharger] if discharger else None,
+                max_hours=v,
+                costs_name=costs_name,
+            )
+        else:
+            missing_store += [k]
+
+    if missing_store:
+        logger.warning(
+            f"No cost data on:\n - "
+            + "\n - ".join(missing_store)
+            + "\nPlease enable retrieve_cost_data if this storage technology is used"
+        )
+
+    return costs
+
+
 def load_costs(
-    tech_costs: str, config: dict, max_hours: int, Nyears: float | int = 1
+    tech_costs: str,
+    config: dict,
+    max_hours: int,
+    Nyears: float | int = 1,
+    storage_techs: dict = {},
 ) -> pd.DataFrame:
     """
     Set all asset costs and other parameters. Used only in the electricity sector workflow.
@@ -310,6 +393,8 @@ def load_costs(
         Dictionary specifying the maximum hours of storage for storage technologies (e.g. {"battery": 4, "H2": 168}).
     Nyears : float or int, optional
         Share of years represented by the model time steps (default is 1, representing one full year).
+    storage_techs : dict, optional
+        A dictionary mapping storage carriers to their respective technology parameters.
 
     Returns
     -------
@@ -396,24 +481,8 @@ def load_costs(
     )
     costs.loc["csp"] = costs.loc["csp-tower"]
 
-    def costs_for_storage(store, link1, link2=None, max_hours=1.0):
-        capital_cost = link1["capital_cost"] + max_hours * store["capital_cost"]
-        if link2 is not None:
-            capital_cost += link2["capital_cost"]
-        return pd.Series(
-            dict(capital_cost=capital_cost, marginal_cost=0.0, co2_emissions=0.0)
-        )
-
-    costs.loc["battery"] = costs_for_storage(
-        costs.loc["battery storage"],
-        costs.loc["battery inverter"],
-        max_hours=max_hours["battery"],
-    )
-    costs.loc["H2"] = costs_for_storage(
-        costs.loc["hydrogen storage tank"],
-        costs.loc["fuel cell"],
-        costs.loc["electrolysis"],
-        max_hours=max_hours["H2"],
+    costs = calculate_cost_for_storage_units(
+        costs, max_hours, storage_techs, costs_name="capital_cost"
     )
 
     for attr in ("marginal_cost", "capital_cost"):
@@ -437,6 +506,8 @@ def prepare_costs(
     default_exchange_rate: float = None,
     future_exchange_rate_strategy: str = "latest",
     custom_future_exchange_rate: float = None,
+    max_hours: dict = {},
+    storage_techs: dict = {},
 ) -> pd.DataFrame:
     """
     Loads and processes cost data, converting units and currency to a common format.
@@ -467,6 +538,8 @@ def prepare_costs(
         "custom" (use custom_future_exchange_rate).
     custom_future_exchange_rate : float, optional
         Custom exchange rate to use if future_exchange_rate_strategy is "custom".
+    storage_techs : dict, optional
+        A dictionary mapping storage carriers to their respective technology parameters.
 
     Returns
     -------
@@ -539,6 +612,13 @@ def prepare_costs(
         annuity_factor(v) * v["investment"] * Nyears
         for _, v in modified_costs.iterrows()
     ]
+    modified_costs["marginal_cost"] = (
+        modified_costs["VOM"] + modified_costs["fuel"] / modified_costs["efficiency"]
+    )
+
+    modified_costs = calculate_cost_for_storage_units(
+        modified_costs, max_hours, storage_techs, costs_name="fixed"
+    )
 
     return modified_costs
 
@@ -558,6 +638,7 @@ if __name__ == "__main__":
             snakemake.params.costs,
             snakemake.params.max_hours,
             Nyears,
+            snakemake.params.storage_techs,
         )
 
     if snakemake.wildcards.scope == "sec":
@@ -570,6 +651,8 @@ if __name__ == "__main__":
             snakemake.params.costs["default_exchange_rate"],
             snakemake.params.costs["future_exchange_rate_strategy"],
             snakemake.params.costs["custom_future_exchange_rate"],
+            snakemake.params.max_hours,
+            snakemake.params.storage_techs,
         )
 
     costs.to_csv(snakemake.output[0])
