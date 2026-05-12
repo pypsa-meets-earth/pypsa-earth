@@ -882,6 +882,8 @@ def attach_hydro(
     -------
     None
     """
+
+
 def attach_hydro(
     n,
     costs,
