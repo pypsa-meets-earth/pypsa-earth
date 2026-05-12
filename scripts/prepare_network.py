@@ -71,7 +71,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import update_transmission_costs
 from utility_custom_features import (
     add_custom_line_types,
     add_interconnectors,
