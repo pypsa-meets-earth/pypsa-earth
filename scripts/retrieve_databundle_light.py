@@ -909,7 +909,7 @@ def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> 
 def retrieve_databundle(
     bundles_to_download: list,
     config_bundles: dict,
-    hydrobasins_level: int,
+    # hydrobasins_level: int,
     rootpath: str = ".",
     disable_progress: bool = False,
 ) -> None:
