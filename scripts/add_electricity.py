@@ -107,7 +107,7 @@ from _helpers import (
     update_p_nom_max,
 )
 from powerplantmatching.export import map_country_bus
-from utility_custom_features import disaggregate_plants, map_buses_from_coords
+from utility_custom_features import disaggregate_plants
 
 idx = pd.IndexSlice
 
