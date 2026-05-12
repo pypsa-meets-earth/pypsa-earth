@@ -735,7 +735,7 @@ def get_best_bundles(
     tutorial: bool,
     config_enable: dict,
     include_categories: list = [],
-    exclude_categories: list = [],
+    exclude_categories: list = ["hydrobasins"],
 ) -> list:
     """
     get_best_bundles(countries, category, config_bundles, tutorial)
