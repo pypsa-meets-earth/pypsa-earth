@@ -369,6 +369,7 @@ if config["load_options"]["zambia_demand_distribution"]:
             africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
             gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
             subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
+            subregion_offshore="resources/" + RDIR + "shapes/subregion_offshore.geojson",
         log:
             "logs/" + RDIR + "build_shapes.log",
         benchmark:
