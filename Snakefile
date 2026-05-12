@@ -38,7 +38,6 @@ copy_default_files()
 configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
-configfile: "configs/data_sources.yaml"
 configfile: "config.yaml"
 
 
