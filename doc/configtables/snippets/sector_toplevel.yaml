@@ -29,6 +29,7 @@ sector:
       # calculations based on https://dx.doi.org/10.2139/ssrn.6307406
       min_area_km2: 13 # minimum area for kaverns in km2
       method: "surface" # surface or physics
+      technical_realization_factor: 3.5e-5
       energy_density_MWh_per_m3: 0.336 # energy density varies in europe between 0.214 and 0.0458 MWh/m3
       cavern_height_bedded_m: 120
       cavern_diameter_bedded_m: 84
