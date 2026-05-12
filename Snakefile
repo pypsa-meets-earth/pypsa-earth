@@ -1037,7 +1037,7 @@ rule prepare_network:
         emission_prices=config["costs"]["emission_prices"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
-        tech_costs=COSTS, # TODO upstream version tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
         power_pool_countries="data/sapp_countries.csv",
         power_pool_links="data/sapp_links.csv",
         substations="data/zm_substations.csv",
