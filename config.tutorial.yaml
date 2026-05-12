@@ -15,6 +15,17 @@ enable:
   build_natura_raster: true
   progress_bar: false
 
+data:
+  hydrobasins:
+    source: tutorial
+    version: latest
+  irena:
+    source: primary
+    version: latest
+  landcover:
+    source: primary
+    version: Mar2026
+
 scenario:
   clusters: [6]
   opts: [Co2L-4H]
@@ -39,15 +50,38 @@ electricity:
 
 
 atlite:
-  default: cutout-2013-era5-tutorial
+  nprocesses: 4
+  cutouts:
+    # use 'base' to determine geographical bounds and time span from config
+    # base:
+    # module: era5
+    zm-2013-tutorial-era5: {}
 
 renewable:
+  onwind:
+    cutout: zm-2013-tutorial-era5
+  offwind-ac:
+    cutout: zm-2013-tutorial-era5
+  offwind-dc:
+    cutout: zm-2013-tutorial-era5
+  solar:
+    cutout: zm-2013-tutorial-era5
   hydro:
+    cutout: zm-2013-tutorial-era5
     hydrobasins_level: 4
     hydro_max_hours: "energy_capacity_totals_by_country"
+  csp:
+    cutout: zm-2013-tutorial-era5
 
 
 solving:
   solver:
     name: glpk
     options: glpk-default
+validation:
+  interconnectors:
+    enable: true
+    download_data: true
+  custom_powerplants:
+    enable: true
+    download_data: true

@@ -1,4 +1,4 @@
-name: Test workflows
+name: Test Zambia Workflows
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
   pull_request:
     branches:
     - main
-  schedule:
-  - cron: "0 5 * * TUE"
+  workflow_dispatch:
 
 # Cancel any in-progress runs when a new run is triggered
 concurrency:
@@ -52,8 +51,7 @@ jobs:
             - 'Snakefile'
             - 'configs/**'
             - 'envs/**'
-            - '.github/workflows/test.yml'
-            - '.github/workflows/zambia.yml'
+            - '.github/workflows/test_zambia.yml'
             - 'config.*yaml'
             - 'test/**'
 
@@ -103,12 +101,21 @@ jobs:
       if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: conda list
 
-    - name: Run Test
+    - name: Run Zambia Dispatch Test
       if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-      run: make test
+      run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm.dispatch.yaml
+
+    - name: Run Zambia PPDisaggregation Dispatch Test
+      if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm.disagg.yaml
+
+    # Example on how to create a new test
+    # - name: Run Zambia Capacity Expansion Test
+    #   if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    #   run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm_cap_exp.yaml
 
     - name: Upload artifacts
-      if: always()
+      if: always() && (steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
       uses: actions/upload-artifact@v7
       with:
         name: results-${{ matrix.os }}
@@ -116,6 +123,7 @@ jobs:
           logs
           .snakemake/log
           results
+        include-hidden-files: true
         retention-days: 3
 
         # - name: Test plotting and summaries

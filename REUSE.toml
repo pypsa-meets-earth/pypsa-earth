@@ -8,7 +8,7 @@ SPDX-PackageSupplier = "The PyPSA-Earth and PyPSA-Eur Authors <pypsameetsearth@g
 SPDX-PackageDownloadLocation = "https://github.com/pypsa-meets-earth/pypsa-earth"
 
 [[annotations]]
-path = "doc/data.csv"
+path = "doc/data_inventory.csv"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
 SPDX-License-Identifier = "CC-BY-4.0"

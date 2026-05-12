@@ -6,12 +6,12 @@ labels: bug
 assignees: ''
 ---
 
-<!-- Please do not post usage questions here. Ask them on the Q&A at the discussion tab on GitHub: https://github.com/pypsa-meets-earth/pypsa-earth/discussions/categories/q-a -->
+<!-- Please do not post usage questions here. Ask them on the Q&A at the discussion tab on GitHub: https://github.com/open-energy-transition/pypsa-zambia/discussions/categories/q-a -->
 
 ## Checklist
 
-- [ ] I am using the current [`main`](https://github.com/pypsa-meets-earth/pypsa-earth/tree/main) branch or the latest [release](https://github.com/pypsa-meets-earth/pypsa-earth/releases). Please indicate.
-- [ ] I am running on an up-to-date [`pypsa-earth` environment](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/envs/environment.yaml). Update via `conda env update -f envs/environment.yaml`.
+- [ ] I am using the current [`main`](https://github.com/open-energy-transition/pypsa-zambia/tree/main) branch or the latest [release](https://github.com/open-energy-transition/pypsa-zambia/releases). Please indicate.
+- [ ] I am running on an up-to-date [`pypsa-earth` environment](https://github.com/open-energy-transition/pypsa-zambia/blob/main/envs/environment.yaml). Update via `conda env update -f envs/environment.yaml`.
 
 ## Describe the Bug
 

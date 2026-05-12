@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: Contributors to PyPSA-Earth
+# SPDX-FileCopyrightText: Open Energy Transition gGmbH
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["ZM"]
+
+snapshots:
+  start: "2013-01-01"
+  end: "2013-01-08"
+  inclusive: "left" # end is not inclusive
+
+# a dedicated run folder needed to store shapes without pop and GDP data
+run:
+  name: "ZM_cutout" # use this to keep track of runs with different settings
+  sector_name: "ZM_cutout" # use this to keep track of sector scenario runs
+  shared_cutouts: true # set to true to share the default cutout(s) across runs
+  # Note: value false requires build_cutout to be enabled
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
+
+enable:
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle_sector: false
+  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+  build_cutout: true
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/api-how-to
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+  progress_bar: true # show progress bar during downloading routines and other long-running tasks
+  custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
+
+build_shape_options:
+  nprocesses: 3 # number of processes to be used in build_shapes
+  worldpop_method: false # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster,
+  # false (not "false") no pop addition to shape which is useful when generating only cutout
+  gdp_method: false # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
+
+atlite:
+  nprocesses: 4
+  cutouts:
+    zm-2013-tutorial-era5:
+      module: era5
+      dx: 0.3 # cutout resolution
+      dy: 0.3 # cutout resolution
+      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
+      # y: [33., 72]    # manual set cutout range
+      # # if we want to be adventurous (not sure it's worth)
+      # features: ["temperature", "influx_toa", "influx_direct", "runoff", "roughness", "height", "albedo"]

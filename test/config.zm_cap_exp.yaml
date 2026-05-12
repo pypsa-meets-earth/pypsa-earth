@@ -1,0 +1,128 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+### CHANGES TO CONFIG.TUTORIAL.YAML ###
+run:
+  name: "zm_cap_exp"
+  shared_cutouts: true
+  base_config: config.tutorial.yaml  # base configuration file
+# enable:
+#   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
+#   retrieve_databundle_sector: false
+#   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+#   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
+#   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+#   build_cutout: false
+scenario:
+  simpl: [""]
+  ll: ["v1.0"]
+  clusters: [10]
+  opts: [Co2L-3h]
+
+snapshots:
+  start: "2013-01-01"
+  end: "2013-01-08"
+  inclusive: "left" # end is not inclusive
+countries: ["ZM"]
+
+download_osm_data_nprocesses: 4
+
+load_options:
+  ssp: "ssp2-2.6"
+  weather_year: 2013
+  prediction_year: 2030
+  scale: 0.74  # scaled the model demand by a factor of 14.4/19.34 to match the national value
+
+electricity:
+  extendable_carriers:
+    Generator: [solar, onwind, OCGT]
+    StorageUnit: []
+    Store: [battery, H2]
+    Link: []
+
+  automatic_emission: false
+  automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
+
+  powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  custom_powerplants: merge # set to "merge" or "replace" if you have a custom_powerplants.csv for Zambia
+
+  conventional_carriers: [oil, OCGT, CCGT, coal, geothermal, biomass]
+  renewable_carriers: [solar, onwind, hydro]
+
+  estimate_renewable_capacities:
+    stats: false # wind and solar generation provided by the custom powerplants file
+  operational_reserve:
+    activate: false
+lines:
+  s_max_pu: 0.7
+  s_nom_extendable: false
+  s_nom_max: .inf
+  s_nom_max_min: -.inf
+
+costs:
+  year: 2025
+
+cluster_options:
+  simplify_network:
+    exclude_carriers: []
+
+# Exclude Copernicus and GEBCO rasters
+# as there are no regional datasets for therm yet
+renewable:
+  onwind:
+    natura: false
+    copernicus: false
+    max_depth: false
+    min_shore_distance: false
+    max_shore_distance: false
+  offwind-ac:
+    natura: false
+    copernicus: false
+    max_depth: false
+    min_shore_distance: false
+    max_shore_distance: false
+  offwind-dc:
+    natura: false
+    copernicus: false
+    max_depth: false
+    min_shore_distance: false
+    max_shore_distance: false
+  solar:
+    natura: false
+    copernicus: false
+    max_depth: false
+    min_shore_distance: false
+    max_shore_distance: false
+  csp:
+    natura: false
+    copernicus: false
+    max_depth: false
+    min_shore_distance: false
+    max_shore_distance: false
+
+sector:
+  enable:
+    heat: false
+    biomass: false
+    industry: true
+    shipping: false
+    aviation: false
+    land_transport: false
+    rail_transport: false
+    agriculture: false
+    residential: false
+    services: false
+  chp: false
+
+solving:
+  solver:
+    name: highs
+    options: highs-default
+validation:
+  interconnectors:
+    enable: true
+    download_data: true
+  custom_powerplants:
+    enable: true
+    download_data: true

@@ -88,20 +88,6 @@ databundles:
     - data/gadm/gadm41_MAR/gadm41_MAR.gpkg  # needed in build_shapes
     - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
-  # load tutorial hydrobasins bundle for Africa only
-  bundle_tutorial_hydrobasins:
-    countries: [Africa]
-    tutorial: true
-    category: hydrobasins
-    destination: "data/hydrobasins"
-    urls:
-      hydrobasins:
-        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
-        suffixes: ["af"]
-    unzip: true
-    output:
-    - data/hydrobasins/hybas_world.shp
-
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
     countries: [NG, BJ]
@@ -153,6 +139,31 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # Cutout of Zambia for CI test of pypsa-zambia (10 MB)
+  bundle_cutouts_test_ZM:
+    countries: [ZM]
+    tutorial: true
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/469893/files/bundle_cutouts_tutorial_ZM.zip?download=1
+    output: [cutouts/zm-2013-tutorial-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+# TODO Replace NG&BJ data with ZM data once available
+  bundle_tutorial_ZM_fake:
+    countries: [ZM]
+    tutorial: true
+    category: data
+    destination: "data"
+    urls:
+      zenodo: https://zenodo.org/records/18851102/files/bundle_tutorial_NGBJ_with_gadmlike.zip?download=1
+      gdrive: https://drive.google.com/file/d/1XnTP6bZoVl5kFjZQlAcmjNXgazOHtFqX/view?usp=drive_link
+    output:
+    - data/gebco/GEBCO_2025_sub_ice.nc
+    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+
   # tutorial bundle for all African countries
   bundle_tutorial_data_common:
     countries: [Africa]
@@ -171,44 +182,6 @@ databundles:
     - data/ssp2-2.6/2030/era5_2013/SouthAmerica.nc
     - data/ssp2-2.6/2030/era5_2013/Oceania.nc
     - data/landcover/world_protected_area/protected_areas_tutorial.shp
-
-  # global data for hydrobasins
-  bundle_hydrobasins:
-    countries: [Earth]
-    tutorial: false
-    category: hydrobasins
-    destination: "data/hydrobasins"
-    urls:
-      hydrobasins:
-        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
-        suffixes: ["af", "ar", "as", "au", "eu", "gr", "na", "sa", "si"]
-    unzip: true
-    output:
-    - data/hydrobasins/hybas_world.shp
-
-  # IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators.
-  # Used in build_renewable_profiles.py to derive hydropower generation potentials.
-  # Original source: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
-  bundle_irena_statistics:
-    countries: [Earth]
-    tutorial: false
-    category: irena
-    destination: "data"
-    urls:
-      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
-    output:
-    - data/IRENA_Statistics_Extract_2025H2.xlsx
-
-  # TODO: make options in bundle_config for retrival regardless of tutorial
-  bundle_irena_statistics_tutorial:
-    countries: [Earth]
-    tutorial: true
-    category: irena
-    destination: "data"
-    urls:
-      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
-    output:
-    - data/IRENA_Statistics_Extract_2025H2.xlsx
 
   # data bundle containing the data of the data folder common to all regions of the world
   bundle_data_earth:
@@ -417,14 +390,30 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
-  # data bundle containing the protected data for the whole world
-  bundle_landcover_earth:
-    countries: [Earth]
-    category: landcover
-    destination: "data/landcover/world_protected_areas"
+  # national-level cutouts for Africa
+  # 0.5 GB
+  bundle_cutouts_africa_zm:
+    countries: [ZM]
+    category: cutouts
+    destination: "cutouts"
     urls:
-      protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
-    output: [data/landcover/world_protected_areas/*]
+      zenodo: https://sandbox.zenodo.org/records/470328/files/bundle_cutouts_zm_2013.zip?download=1
+      gdrive: https://drive.google.com/file/d/1gTKSQFCCw3BK3AIuRL0AQKTU9airIxW8/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # 0.5 GB
+  bundle_cutouts_africa_zm-2024:
+    countries: [ZM-2024]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470328/files/bundle_cutouts_zm_2024.zip?download=1
+      gdrive: https://drive.google.com/file/d/1Fv-dNk4ZonEKEEMU94U-HHo-hiAp_ZLd/view?usp=drive_link
+    output: [cutouts/cutout-2024-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
 
     # # Backup tutorial bundles with no gadm-like data; for reference:
     # # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1258

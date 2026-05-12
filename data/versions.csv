@@ -1,0 +1,5 @@
+dataset,version,source,tags,region,added,note,url
+hydrobasins,v1.c,build,latest supported,af ar as au eu gr na sa si,2014-07-01,Global watershed boundaries,data.hydrosheds.org/file/hydrobasins/standard
+irena,2025H2,primary,latest supported,earth,2024-06-01,IRENA Renewable Energy Capacity Statistics,github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
+landcover,Mar2026,primary,latest supported,earth,2020-04-07,ESA WorldCover 2020,d1gam3xoknrgr2.cloudfront.net/current/WDPA_Mar2026_Public_shp.zip
+hydrobasins,v1.c,tutorial,latest supported,af,2014-07-01,Global watershed boundaries,data.hydrosheds.org/file/hydrobasins/standard

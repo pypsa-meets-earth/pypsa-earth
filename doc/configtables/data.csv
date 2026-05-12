@@ -1,0 +1,10 @@
+Parameter,Unit,Values,Description
+hydrobasins,
+-- source,,"{build, tutorial}", Specifies the source of the hydrobasins dataset
+-- version,,"{latest, v1.c}", Specifies the version of the dataset to use. Should match the available values in the versions.csv file
+irena,
+-- source,,"{primary}", Specifies the source of the irena dataset
+-- version,,"{latest}", Specifies the version of the dataset. Should match the available values in the versions.csv file
+landcover,
+-- source,,"{primary}", Specifies the source of the landcover dataset
+-- version,,"{latest, Mar2026}", Specifies the version of the dataset to use. Should match the available values in the versions.csv file

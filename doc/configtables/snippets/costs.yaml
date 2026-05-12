@@ -21,11 +21,18 @@ costs:
     lifetime: 25
     CO2 intensity: 0
     discount rate: 0.07
-  marginal_cost: # EUR/MWh
-    solar: 0.01
-    onwind: 0.015
+  marginal_cost: # EUR/MWh — IRP Table 9 (Zambia 2023), converted at 0.7532 EUR/USD
+    solar: 0
+    onwind: 0
     offwind: 0.015
-    hydro: 0.
+    hydro: 1.05
+    ror: 0.
+    coal: 72.92
+    oil: 4.23
+    geothermal: 0.87
+    biomass: 4.14
+    nuclear: 3.46
+    csp: 0.
     H2: 0.
     electrolysis: 0.
     fuel cell: 0.

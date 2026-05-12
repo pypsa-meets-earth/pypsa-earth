@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-site_name: PyPSA-Earth Documentation
-site_url: https://pypsa-earth.readthedocs.io
-repo_url: https://github.com/pypsa-meets-earth/pypsa-earth
-repo_name: pypsa-earth
+site_name: PyPSA-Zambia Documentation
+site_url: https://pypsa-zambia.readthedocs.io
+repo_url: https://github.com/open-energy-transition/pypsa-zambia
+repo_name: pypsa-zambia
 edit_uri: edit/main/doc/
 
 # Documentation directory

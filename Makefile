@@ -2,7 +2,14 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-.PHONY: test setup clean
+.PHONY: test setup clean zambia_test zambia_clean
+
+zambia_test:
+	set -e
+	snakemake -c4 solve_all_networks --configfile config.tutorial.yaml test/config.zm_dispatch.yaml
+
+zambia_clean:
+	snakemake -c4 solve_all_networks --delete-all-output --configfile config.tutorial.yaml test/config.zm_dispatch.yaml
 
 test:
 	set -e

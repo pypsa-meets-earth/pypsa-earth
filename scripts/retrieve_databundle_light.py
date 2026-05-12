@@ -946,12 +946,6 @@ def retrieve_databundle(
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
-    hydrobasin_bundles = [
-        b_name for b_name in bundles_to_download if "hydrobasins" in b_name
-    ]
-    if len(hydrobasin_bundles) > 0:
-        config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
-
     # initialize downloaded and missing bundles
     downloaded_bundles = []
 
@@ -980,12 +974,6 @@ def retrieve_databundle(
 
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
-
-    if len(hydrobasin_bundles) > 0:
-        logger.info("Merging regional hydrobasins files into a global shapefile")
-        merge_hydrobasins_shape(
-            config_bundles[hydrobasin_bundles[0]], hydrobasins_level
-        )
 
     # log the downloaded and missing bundles
     logger.info(
@@ -1080,14 +1068,12 @@ if __name__ == "__main__":
     # load databundle configuration
     config_bundles = load_databundle_config(snakemake.config["databundles"])
     disable_progress = not config_enable["progress_bar"]
-    hydrobasins_level = snakemake.params["hydrobasins_level"]
 
     bundles_to_download = snakemake.params["bundles_to_download"]
 
     retrieve_databundle(
         bundles_to_download,
         config_bundles,
-        hydrobasins_level,
         rootpath=rootpath,
         disable_progress=disable_progress,
     )

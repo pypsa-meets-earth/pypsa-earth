@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Contributors to PyPSA-Earth
+# SPDX-FileCopyrightText: Open Energy Transition gGmbH
+#
+# SPDX-License-Identifier: CC0-1.0
+
+base_config: configs/validation_dispatch_zambia.yaml
+
+run:
+  name: dispatch_baseline
+  allow_scenario_failure: false

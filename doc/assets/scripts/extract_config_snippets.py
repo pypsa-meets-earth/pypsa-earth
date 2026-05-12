@@ -17,8 +17,6 @@ How it runs:
 import re
 from pathlib import Path
 
-import yaml
-
 
 def extract_yaml_section(yaml_content, section_key, subsection=None):
     """

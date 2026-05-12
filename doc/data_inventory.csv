@@ -1,0 +1,4 @@
+"Short name","Long name","Description","Owner","Link to website","License"
+Hydrobasins,HydroBASINS database,"Data from the HydroSHEDS version 1 database which is © World Wildlife Fund Inc. (2006-2022)",World Wildlife Fund,"https://www.hydrosheds.org/","CC BY-SA 4.0"
+IRENA,IRENA Renewable Energy Capacity Statistics,"IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators",IRENA,,
+Landcover,ESA WorldCover 2020,"Global land cover data from the European Space Agency (ESA) WorldCover 2020 project",ESA,"https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_Mar2026_Public_shp.zip","CC BY-SA 4.0"

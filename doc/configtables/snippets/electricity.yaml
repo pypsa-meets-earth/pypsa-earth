@@ -1,6 +1,6 @@
 electricity:
-  base_voltage: 380.
-  voltages: [132., 220., 300., 380., 500., 750.]
+  base_voltage: 330.
+  voltages: [66., 88., 132., 220., 330.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
   agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)

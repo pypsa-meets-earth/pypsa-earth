@@ -9,7 +9,6 @@ Creates the network topology from a OpenStreetMap.
 
 Relevant Settings
 -----------------
-
 .. code:: yaml
 
     snapshots:
@@ -67,6 +66,7 @@ import shapely.prepared
 import shapely.wkt
 from _helpers import configure_logging, create_logger, read_csv_nafix
 from shapely.ops import unary_union
+from utility_custom_features import add_custom_line_types, load_custom_line_types
 
 logger = create_logger(__name__)
 
@@ -533,6 +533,10 @@ def base_network(
     )
     n.lines.drop(columns="under_construction", inplace=True, errors="ignore")
 
+    # TODO Remove adding custom line types once they will be incorporated into a currently used PyPSA version
+    custom_line_types = load_custom_line_types(inputs.line_types)
+    n = add_custom_line_types(n, custom_line_types)
+    
     _set_lines_s_nom_from_linetypes(n)
 
     _set_countries_and_substations(inputs, base_network_config, countries_config, n)
