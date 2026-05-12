@@ -154,6 +154,8 @@ if config["enable"].get("retrieve_databundle", True):
     rule retrieve_databundle_light:
         params:
             bundles_to_download=bundles_to_download,
+            # TODO fix legacy input
+            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
         output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
             expand(
                 "{file}", file=datafiles_retrivedatabundle(config, bundles_to_download)
