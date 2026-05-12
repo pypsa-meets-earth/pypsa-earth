@@ -32,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add CI to update reference objective values [PR #1811](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1811)
+
 * Fix `UnboundLocalError` and back-pressure RHS leak in `add_chp_constraints` [#1814](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1814)
 
 * Add config parameter `enable_electricity_connection_cost`, which adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network [PR #1810](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1810)
