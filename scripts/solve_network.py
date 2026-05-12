@@ -826,6 +826,9 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
 
 def add_chp_constraints(n):
+    if n.links.empty:
+        return
+
     electric_bool = (
         n.links.index.str.contains("urban central")
         & n.links.index.str.contains("CHP")
@@ -879,7 +882,7 @@ def add_chp_constraints(n):
             p.loc[:, heat] * (n.links.efficiency[heat] * n.links.c_b[electric].values)
             - p.loc[:, electric] * n.links.efficiency[electric]
         )
-        n.model.add_constraints(lhs <= rhs, name="chplink-backpressure")
+        n.model.add_constraints(lhs <= 0, name="chplink-backpressure")
 
 
 def add_co2_sequestration_limit(n, sns):

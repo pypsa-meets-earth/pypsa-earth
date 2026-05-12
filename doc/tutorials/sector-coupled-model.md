@@ -115,7 +115,6 @@ clean_osm_data1
 cluster_network   1
 copy_config   1
 download_osm_data 1
-override_respot   1
 prepare_airports  1
 prepare_energy_totals 1
 prepare_gas_network   1
@@ -131,7 +130,7 @@ retrieve_databundle_light 1
 simplify_network  1
 solve_sector_network  1
 solve_sector_networks 1
-total46
+total45
 ```
 
 ## Myopic Foresight Scenarios
@@ -232,7 +231,6 @@ clean_osm_data 1
 cluster_network1
 copy_config1
 download_osm_data  1
-override_respot1
 prepare_airports   1
 prepare_energy_totals  1
 prepare_gas_network1
@@ -248,7 +246,7 @@ retrieve_databundle_light  1
 simplify_network   1
 solve_all_networks_myopic  1
 solve_network_myopic   1
-total 49
+total 48
 ```
 
 ## Scaling-Up

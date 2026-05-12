@@ -80,7 +80,7 @@ def update_cutout_config(config):
     Update renewable cutout settings in the configuration.
 
     This function replaces any `"auto"` cutout entries in the
-    `config["renewables"]` section with the default cutout specified in
+    `config["renewable"]` section with the default cutout specified in
     `config["atlite"]["default"]`.
     """
     cutout_default = config["atlite"]["default"]
