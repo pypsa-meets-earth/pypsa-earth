@@ -701,7 +701,7 @@ def attach_conventional_generators(
     renewable_carriers: set,
     conventional_config: list,
     conventional_inputs: dict,
-    disaggregate_flag=False: bool,    
+    disaggregate_flag: bool = False,
 ) -> None:
     """
     Add existing conventional generators to the network and extendable conventional generators at all buses.
