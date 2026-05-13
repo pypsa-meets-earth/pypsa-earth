@@ -30,6 +30,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove unused override_respot [PR #1805](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1805)
 
+* Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
+
 **Minor Changes and bug-fixing**
 
 * Add config parameter `enable_electricity_connection_cost`, which adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network [PR #1810](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1810)
