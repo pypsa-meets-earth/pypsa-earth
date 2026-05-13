@@ -10,7 +10,7 @@ electricity:
   automatic_emission: false
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
 
-  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
     activate: false
     epsilon_load: 0.02 # share of total load
     epsilon_vres: 0.02 # share of total renewable supply

@@ -45,6 +45,7 @@ nav:
   - Configuration: user-guide/configuration.md
   - Wildcards: user-guide/wildcards.md
   - Costs: user-guide/costs.md
+  - Custom Data Integration: user-guide/custom-data.md
   - Rules Overview: user-guide/rules-overview.md
   - Rules Reference:
     - Download & Filter:

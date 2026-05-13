@@ -21,12 +21,11 @@ Relevant Settings
 
 .. code:: yaml
 
+    links:
+
+    lines:
+
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
         emission_prices:
 
     electricity:
@@ -72,7 +71,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import update_transmission_costs
 from utility_custom_features import (
     add_custom_line_types,
     add_interconnectors,
@@ -356,12 +355,7 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
-    )
+    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
     # TODO Remove adding custom line types once they will be incorporated into a currently used PyPSA version
     custom_line_types = load_custom_line_types(snakemake.input.line_types)
     n = add_custom_line_types(n, custom_line_types)
@@ -446,7 +440,7 @@ if __name__ == "__main__":
                 add_emission_prices(n, dict(co2=float(m[0])))
             else:
                 logger.info("Setting emission prices according to config value.")
-                add_emission_prices(n, snakemake.params.costs["emission_prices"])
+                add_emission_prices(n, snakemake.params.emission_prices)
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]

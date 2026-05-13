@@ -527,9 +527,16 @@ def base_network(
     n.import_components_from_dataframe(transformers, "Transformer")
     n.import_components_from_dataframe(converters, "Link")
 
+    # greenfield capacity expansion is represented with null capacity using num_parallel==0
+    n.lines["num_parallel"] = n.lines["num_parallel"].where(
+        ~n.lines["under_construction"], 0.0
+    )
+    n.lines.drop(columns="under_construction", inplace=True, errors="ignore")
+
     # TODO Remove adding custom line types once they will be incorporated into a currently used PyPSA version
     custom_line_types = load_custom_line_types(inputs.line_types)
     n = add_custom_line_types(n, custom_line_types)
+
     _set_lines_s_nom_from_linetypes(n)
 
     _set_countries_and_substations(inputs, base_network_config, countries_config, n)

@@ -253,14 +253,21 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/virio-andreyana">
+                    <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
+                    <br />
+                    <sub><b>virio-andreyana</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/doneachh">
                     <img src="https://avatars.githubusercontent.com/u/132910766?v=4" width="100;" alt="doneachh"/>
                     <br />
                     <sub><b>doneachh</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/danielelerede-oet">
                     <img src="https://avatars.githubusercontent.com/u/175011591?v=4" width="100;" alt="danielelerede-oet"/>
@@ -280,13 +287,6 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <img src="https://avatars.githubusercontent.com/u/167071962?v=4" width="100;" alt="finozzifa"/>
                     <br />
                     <sub><b>finozzifa</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/virio-andreyana">
-                    <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
-                    <br />
-                    <sub><b>virio-andreyana</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -401,10 +401,17 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/carlosfv92">
-                    <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
+                <a href="https://github.com/arizeosalac">
+                    <img src="https://avatars.githubusercontent.com/u/177637669?v=4" width="100;" alt="arizeosalac"/>
                     <br />
-                    <sub><b>carlosfv92</b></sub>
+                    <sub><b>arizeosalac</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/willu47">
+                    <img src="https://avatars.githubusercontent.com/u/3727919?v=4" width="100;" alt="willu47"/>
+                    <br />
+                    <sub><b>willu47</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -415,40 +422,10 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/arizeosalac">
-                    <img src="https://avatars.githubusercontent.com/u/177637669?v=4" width="100;" alt="arizeosalac"/>
+                <a href="https://github.com/carlosfv92">
+                    <img src="https://avatars.githubusercontent.com/u/103258059?v=4" width="100;" alt="carlosfv92"/>
                     <br />
-                    <sub><b>arizeosalac</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/AlexanderMeisinger">
-                    <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
-                    <br />
-                    <sub><b>AlexanderMeisinger</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/asolavi">
-                    <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
-                    <br />
-                    <sub><b>asolavi</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/rajesh-ieg">
-                    <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
-                    <br />
-                    <sub><b>rajesh-ieg</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/LucieRC">
-                    <img src="https://avatars.githubusercontent.com/u/104382956?v=4" width="100;" alt="LucieRC"/>
-                    <br />
-                    <sub><b>LucieRC</b></sub>
+                    <sub><b>carlosfv92</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -458,11 +435,41 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>choiHenry</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/LucieRC">
+                    <img src="https://avatars.githubusercontent.com/u/104382956?v=4" width="100;" alt="LucieRC"/>
+                    <br />
+                    <sub><b>LucieRC</b></sub>
+                </a>
+            </td>
             <td align="center">
                 <a href="https://github.com/gianvicolux">
                     <img src="https://avatars.githubusercontent.com/u/123154558?v=4" width="100;" alt="gianvicolux"/>
                     <br />
                     <sub><b>gianvicolux</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/rajesh-ieg">
+                    <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
+                    <br />
+                    <sub><b>rajesh-ieg</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/asolavi">
+                    <img src="https://avatars.githubusercontent.com/u/131155817?v=4" width="100;" alt="asolavi"/>
+                    <br />
+                    <sub><b>asolavi</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/AlexanderMeisinger">
+                    <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
+                    <br />
+                    <sub><b>AlexanderMeisinger</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -479,6 +486,13 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <img src="https://avatars.githubusercontent.com/u/144870279?v=4" width="100;" alt="milyas009"/>
                     <br />
                     <sub><b>milyas009</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Mwiche96">
+                    <img src="https://avatars.githubusercontent.com/u/101918223?v=4" width="100;" alt="Mwiche96"/>
+                    <br />
+                    <sub><b>Mwiche96</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -509,6 +523,8 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>siddharth-krishna</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/squoilin">
                     <img src="https://avatars.githubusercontent.com/u/4547840?v=4" width="100;" alt="squoilin"/>
@@ -523,8 +539,6 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>juli-a-ko</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/ollie-bell">
                     <img src="https://avatars.githubusercontent.com/u/56110893?v=4" width="100;" alt="ollie-bell"/>
@@ -553,6 +567,8 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>jome1</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/jessLryan">
                     <img src="https://avatars.githubusercontent.com/u/122939887?v=4" width="100;" alt="jessLryan"/>
@@ -567,13 +583,11 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>jarry7</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
-                <a href="https://github.com/huyhoang-mike">
-                    <img src="https://avatars.githubusercontent.com/u/109945762?v=4" width="100;" alt="huyhoang-mike"/>
+                <a href="https://github.com/JanTautorus">
+                    <img src="https://avatars.githubusercontent.com/u/157734880?v=4" width="100;" alt="JanTautorus"/>
                     <br />
-                    <sub><b>huyhoang-mike</b></sub>
+                    <sub><b>JanTautorus</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -583,8 +597,6 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>huyhoang-mike</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/HanaElattar">
                     <img src="https://avatars.githubusercontent.com/u/87770004?v=4" width="100;" alt="HanaElattar"/>
@@ -599,6 +611,8 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>Vamsipriya22</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/flacombe">
                     <img src="https://avatars.githubusercontent.com/u/5690599?v=4" width="100;" alt="flacombe"/>
@@ -620,8 +634,6 @@ Specific documentation for PyPSA-Zambia is under development [here](https://pyps
                     <sub><b>AndreCNF</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/AlessandroPampado99">
                     <img src="https://avatars.githubusercontent.com/u/156424082?v=4" width="100;" alt="AlessandroPampado99"/>

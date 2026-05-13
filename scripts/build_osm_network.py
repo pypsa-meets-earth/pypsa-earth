@@ -39,6 +39,7 @@ LINES_COLUMNS = [
     "length",
     "dc",
     "geometry",
+    "under_construction",
 ]
 CONVERTERS_COLUMNS = [
     "converter_id",
@@ -207,7 +208,7 @@ def merge_stations_same_station_id(
                     bus_row["dc"].all(),  # "dc"
                     # bus_row["dc"].all(),  # "dc"
                     "|".join(bus_row["symbol"].unique()),  # "symbol"
-                    bus_row["under_construction"].any(),  # "under_construction"
+                    bus_row["under_construction"].all(),  # "under_construction"
                     "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
                     bus_row["tag_area"].sum(),  # "tag_area"
                     lon_bus,  # "lon"
