@@ -80,6 +80,17 @@ def add_carrier_buses(n, carrier, nodes=None):
     )
 
 
+def add_electricity_grid_connection(n, costs):
+    carriers = ["onwind", "solar"]
+
+    gens = n.generators.index[n.generators.carrier.isin(carriers)]
+
+    n.generators.loc[gens, "capital_cost"] += costs.at[
+        "electricity grid connection", "fixed"
+    ]
+    logger.info("Added electricity grid connection costs for solar and wind generators")
+
+
 def H2_liquid_fossil_conversions(n, costs):
     """
     Function to add conversions between H2 and liquid fossil Carrier and bus is
@@ -3354,6 +3365,9 @@ if __name__ == "__main__":
 
     if options.get("electricity_distribution_grid", False):
         add_electricity_distribution_grid(n, costs)
+
+    if options.get("enable_electricity_connection_cost", False):
+        add_electricity_grid_connection(n, costs)
 
     sopts = snakemake.wildcards.sopts.split("-")
 
