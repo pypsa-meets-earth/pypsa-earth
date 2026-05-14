@@ -76,6 +76,7 @@ There are multiple ways to get involved and learn more about our work:
 - [Configuration](user-guide/configuration.md) - Configure your model settings
 - [Wildcards](user-guide/wildcards.md) - Understand wildcard patterns
 - [Costs](user-guide/costs.md) - Technology cost assumptions
+- [Custom Data Integration](user-guide/custom-data.md) - Integrate custom datasets into the model
 - [Rules Overview](user-guide/rules-overview.md) - Snakemake rules explained
 - [Rules Reference](user-guide/rules-reference/download-and-filter/index.md) - Detailed rule descriptions
 

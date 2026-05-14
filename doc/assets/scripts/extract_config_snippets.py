@@ -64,17 +64,7 @@ def main():
 
     # Mapping of snippet files to config sections
     sections = {
-        "toplevel": [
-            "version",
-            "tutorial",
-            "logging",
-            "results_dir",
-            "summary_dir",
-            "foresight",
-            "countries",
-            "enable",
-            "custom_rules",
-        ],
+        "toplevel": {"start": "version:", "end": "run:"},
         "run": ["run"],
         "scenario": ["scenario"],
         "snapshots": ["snapshots"],
@@ -104,19 +94,57 @@ def main():
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
         "plotting": ["plotting"],
-        "sector": ["sector"],
+        "policy_config": ["policy_config"],
+        "demand_data": ["demand_data"],
+        "export": ["export"],
+        "sector_toplevel": {
+            "start": "sector:",
+            "end": "# ------------------- HEAT SECTOR",
+        },
+        "sector_heat": {
+            "start": "# ------------------- HEAT SECTOR",
+            "end": "# ------------------- LAND TRANSPORT SECTOR",
+        },
+        "sector_land_transport": {
+            "start": "# ------------------- LAND TRANSPORT SECTOR",
+            "end": "# ------------------- BIOMASS SECTOR",
+        },
+        "sector_biomass": {
+            "start": "# ------------------- BIOMASS SECTOR",
+            "end": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
+        },
+        "sector_electricity_distribution_grid": {
+            "start": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
+            "end": "# ------------------- SHIPPING & AVIATION SECTOR",
+        },
+        "sector_shipping_aviation": {
+            "start": "# ------------------- SHIPPING & AVIATION SECTOR",
+            "end": "# ------------------- CCUS & CONVERSION OPTIONS",
+        },
+        "sector_ccus": {
+            "start": "# ------------------- CCUS & CONVERSION OPTIONS",
+            "end": "# ------------------- INDUSTRY OPTIONS",
+        },
+        "sector_industry": {
+            "start": "# ------------------- INDUSTRY OPTIONS",
+            "end": "# ------------------- POWERPLANTS OPTIONS",
+        },
+        "sector_powerplants": {
+            "start": "# ------------------- POWERPLANTS OPTIONS",
+            "end": "solving:",
+        },
     }
 
     for snippet_name, keys in sections.items():
-        if snippet_name == "toplevel":
-            # Special handling for toplevel - extract from 'version:' up to 'run:'
+        if "start" in keys and "end" in keys:
+            # Special handling - extract from "start" up to "end"
             lines = config_content.split("\n")
             start_idx = None
             end_idx = None
             for i, line in enumerate(lines):
-                if line.strip().startswith("version:"):
+                if line.strip().startswith(keys["start"]):
                     start_idx = i
-                if start_idx is not None and line.strip().startswith("run:"):
+                if start_idx is not None and line.strip().startswith(keys["end"]):
                     end_idx = i
                     break
 
