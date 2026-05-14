@@ -12,6 +12,7 @@ python = ">=3.10,<3.12"  # 3.12 has weird issues with snakemake https://github.c
 pip = "*"
 
 pypsa = ">=0.25.1,<=0.30.3"
+linopy = "<0.6"
 atlite = ">=0.4.1"
 dask = "*"
 powerplantmatching = ">=0.8"
@@ -70,6 +71,7 @@ contextily = "*"
 
 # Default solver for tests (required for CI)
 glpk = "*"
+highs = "*"
 gurobi = "*"
 
 # Command Line Interface
