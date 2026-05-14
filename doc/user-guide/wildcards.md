@@ -85,10 +85,9 @@ It may hold multiple triggers separated by `-`, i.e. `Co2L-3H` contains the
 
 ## The `{country}` wildcard
 
-The rules `make_summary` and `plot_summary` (generating summaries of all or a subselection
-of the solved networks) as well as `plot_p_nom_map` (for plotting the cumulative
-generation potentials for renewable technologies) can be narrowed to
-individual countries using the `{country}` wildcard.
+The rules `make_summary` and `plot_summary`, which generate summaries of all or
+a subselection of solved networks, can be narrowed to individual countries
+using the `{country}` wildcard.
 
 If `country=all`, then the rule acts on the network for all countries
 defined in `config.yaml`. If otherwise `country=DE` or another 2-letter
@@ -97,7 +96,7 @@ for the rule. For example to get a summary of the energy generated
 in Germany (in the solution for Europe) use:
 
 ```bash
-snakemake -j 1 results/summaries/elec_s_all_lall_Co2L-3H_DE
+snakemake -j 1 "results/summaries/elec_s_all_ec_lall_Co2L-3H_DE"
 ```
 
 ## The `{cutout}` wildcard
@@ -113,9 +112,8 @@ series and potentials using the rule `build_renewable_profiles`.
 It can take the values `onwind`, `offwind-ac`, `offwind-dc`, and `solar` but **not** `hydro`
 (since hydroelectric plant profiles are created by a different rule).
 
-The wildcard can moreover be used to create technology specific figures and summaries.
-For instance `{technology}` can be used to plot regionally disaggregated potentials
-with the rule `plot_p_nom_max`.
+The wildcard is also used throughout the workflow to parameterize renewable
+profile generation and related technology-specific outputs.
 
 ## The `{attr}` wildcard
 
@@ -126,9 +124,8 @@ currently only supports plotting of `p_nom`.
 
 ## The `{ext}` wildcard
 
-The `{ext}` wildcard specifies the file type of the figures the
-rule `plot_network`, `plot_summary`, and `plot_p_nom_max` produce.
-Typical examples are `pdf` and `png`. The list of supported file
+The `{ext}` wildcard specifies the file type of the figures produced by
+`plot_network` and `plot_summary`. Typical examples are `pdf` and `png`. The list of supported file
 formats depends on the used backend. To query the supported file types on your system, issue:
 
 ```python
