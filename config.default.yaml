@@ -44,7 +44,12 @@ data:
   landcover:
     source: primary
     version: Mar2026
-
+  hydro_profile:
+    source: primary
+    version: v1.0
+  natura_earth:
+    source: tutorial
+    version: v1.0
 
 custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
@@ -376,6 +381,7 @@ renewable:
     extendable: true
   hydro:
     cutout: auto
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
     hydrobasins_level: 6
     resource:
       method: hydro

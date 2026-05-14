@@ -390,7 +390,7 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
-  # national-level cutouts for Africa
+  # national-level cutouts for Zambia
   # 0.5 GB
   bundle_cutouts_africa_zm:
     countries: [ZM]
@@ -414,6 +414,38 @@ databundles:
     output: [cutouts/cutout-2024-era5.nc]
     disable_by_opt:
       build_cutout: [all]
+
+  # custom inflow profile for Zambia
+  # hydro_profile_full_zm:
+  #   countries: [ZM]
+  #   tutorial: false
+  #   category: hydro
+  #   destination: "cutouts/hydro"
+  #   urls:
+  #     direct: https://sandbox.zenodo.org/records/493174/files/glofas_profile_2013.nc
+  #   unzip: false
+  #   output: [cutouts/hydro/glofas_profile_2013.nc]
+
+  # hydro_profile_tutorial_zm:
+  #   countries: [ZM]
+  #   tutorial: true
+  #   category: hydro
+  #   destination: "cutouts/hydro"
+  #   urls:
+  #     direct: https://sandbox.zenodo.org/records/493174/files/glofas_profile_2013_tutorial.nc
+  #   unzip: false
+  #   output: [cutouts/hydro/glofas_profile_2013_tutorial.nc]
+
+  bundle_natura_earth_tutorial:
+    countries: [Earth]
+    tutorial: true
+    category: natura
+    destination: "data/natura/"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/323567/files/natura_wpda_CC0.zip?download=1
+      gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
+    output:
+    - data/natura/natura.tiff
 
     # # Backup tutorial bundles with no gadm-like data; for reference:
     # # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1258

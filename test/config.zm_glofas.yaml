@@ -4,16 +4,10 @@
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
 run:
-  name: "zm_cap_exp"
+  name: "zm_glofas"
   shared_cutouts: true
   base_config: config.tutorial.yaml  # base configuration file
-# enable:
-#   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
-#   retrieve_databundle_sector: false
-#   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-#   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
-#   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
-#   build_cutout: false
+
 scenario:
   simpl: [""]
   ll: ["v1.0"]
@@ -26,6 +20,10 @@ snapshots:
   inclusive: "left" # end is not inclusive
 countries: ["ZM"]
 
+enable:
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+  retrieve_databundle: true
+
 download_osm_data_nprocesses: 4
 
 load_options:
@@ -36,9 +34,9 @@ load_options:
 
 electricity:
   extendable_carriers:
-    Generator: [solar, onwind, OCGT]
+    Generator: []
     StorageUnit: []
-    Store: [battery, H2]
+    Store: []
     Link: []
 
   automatic_emission: false
@@ -68,7 +66,7 @@ cluster_options:
     exclude_carriers: []
 
 # Exclude Copernicus and GEBCO rasters
-# as there are no regional datasets for therm yet
+# as there are no regional datasets for them yet
 renewable:
   onwind:
     natura: false
@@ -94,6 +92,14 @@ renewable:
     max_depth: false
     min_shore_distance: false
     max_shore_distance: false
+  hydro:
+    source: custom # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
+    path: cutouts/hydro/glofas_profile_2013_tutorial.nc
+    extendable: false
+    normalization:
+      method: irena
+      year: 2013
+    multiplier: 0.65
   csp:
     natura: false
     copernicus: false

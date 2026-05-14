@@ -7,13 +7,7 @@ run:
   name: "zm_dispatch"
   shared_cutouts: true
   base_config: config.tutorial.yaml  # base configuration file
-# enable:
-#   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
-#   retrieve_databundle_sector: false
-#   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-#   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
-#   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
-#   build_cutout: false
+
 scenario:
   simpl: [""]
   ll: ["v1.0"]
@@ -25,6 +19,9 @@ snapshots:
   end: "2013-01-08"
   inclusive: "left" # end is not inclusive
 countries: ["ZM"]
+
+enable:
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
 
 download_osm_data_nprocesses: 4
 
@@ -45,7 +42,7 @@ electricity:
   automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
 
   powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
-  custom_powerplants: merge # set to "merge" or "replace" if you have a custom_powerplants.csv for Zambia
+  custom_powerplants: replace # set to "merge" or "replace" if you have a custom_powerplants.csv for Zambia
   disaggregate_powerplants: false
 
   conventional_carriers: [oil, OCGT, CCGT, coal, geothermal, biomass]
@@ -95,6 +92,13 @@ renewable:
     max_depth: false
     min_shore_distance: false
     max_shore_distance: false
+  hydro:
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
+    extendable: false
+    normalization:
+      method: irena
+      year: 2013
+    multiplier: 0.65
   csp:
     natura: false
     copernicus: false

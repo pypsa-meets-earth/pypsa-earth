@@ -109,6 +109,10 @@ jobs:
       if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm.disagg.yaml
 
+    - name: Run GloFAS Integration Test
+      if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      run: snakemake -j 1 solve_all_networks --configfile config.tutorial.yaml test/config.zm_glofas.yaml
+
     # Example on how to create a new test
     # - name: Run Zambia Capacity Expansion Test
     #   if: steps.filter.outputs.src == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

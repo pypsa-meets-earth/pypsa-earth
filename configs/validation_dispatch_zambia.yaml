@@ -53,7 +53,7 @@ renewable:
     correction_factor: 0.854337
     extendable: false
   hydro:
-    cutout: cutout-2013-era5
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
     extendable: false
     normalization:
       method: irena

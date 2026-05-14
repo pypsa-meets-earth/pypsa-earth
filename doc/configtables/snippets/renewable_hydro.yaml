@@ -1,5 +1,6 @@
   hydro:
     cutout: auto
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
     hydrobasins_level: 6
     resource:
       method: hydro
