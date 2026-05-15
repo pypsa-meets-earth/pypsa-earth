@@ -106,6 +106,17 @@ lines:
     330.: "ACSR Bison 330.0"
 costs:
   year: 2025
+  investment: # EUR/MW — IRP Table 5 (Zambia 2023), converted at 0.7532 EUR/USD
+    hydro: 2862160       # 3.800 mUSD/MW — Hydro Storage
+    ror: 965602          # 1.282 mUSD/MW — Hydro Run-of-River
+    coal: 807430         # 1.072 mUSD/MW — Coal Thermal
+    geothermal: 1205120  # 1.600 mUSD/MW — Geothermal
+    biomass: 474516      # 0.630 mUSD/MW — Biomass
+    solar-utility: 756966  # 1.005 mUSD/MW — Solar PV (utility-scale)
+    onwind: 969368       # 1.287 mUSD/MW — Wind Onshore
+    nuclear: 4865672     # 6.460 mUSD/MW — Nuclear
+    csp-tower: 4973380   # 6.603 mUSD/MW — Solar CSP
+    oil: 506904          # 0.673 mUSD/MW — Mixed Fuel
   marginal_cost: # EUR/MWh — IRP Table 5 (Zambia 2023), converted at 0.7532 EUR/USD
     solar: 0
     onwind: 0
