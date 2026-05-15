@@ -100,6 +100,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
 
+* Add unit testing [PR #1811](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1811) by leveraging on past work [PR 1083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1083), [PR 1209](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1209) and [test branches](https://github.com/ekatef/pypsa-earth/tree/unit_testing_draft)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**

@@ -78,8 +78,17 @@ jobs:
     - name: Conda list
       run: conda list
 
+    # TODO: Add linting. Requires add flake8 to the environment and fixing issues
+    # - name: Lint with flake8
+    #   run: |
+    #     # stop the build if there are Python syntax errors or undefined names
+    #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Run unit tests
+      run: make unit_tests
+
     - name: Run Test
-      run: make test
+      run: make workflow_tests
 
     - name: Upload artifacts
       if: always()
