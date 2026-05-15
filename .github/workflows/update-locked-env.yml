@@ -68,22 +68,44 @@ jobs:
         done
 
 
-    - name: Upload artifacts
+    - name: Upload conda lockfile artifacts
       uses: actions/upload-artifact@v7
       with:
         name: lockfiles
         path: envs/*.lock.yaml
+
+    - name: Update pixi.lock
+      uses: prefix-dev/setup-pixi@v0.8.3
+      with:
+        pixi-version: latest
+        run-install: false
+
+    - name: Run pixi update
+      run: pixi update
+
+    - name: Upload pixi lockfile artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: pixi-lockfile
+        path: pixi.lock
 
   create-pull-request:
     needs: update-locked-environment
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Download all artifacts
+
+    - name: Download conda lockfile artifacts
       uses: actions/download-artifact@v8
       with:
         name: lockfiles
         path: envs/
+
+    - name: Download pixi lockfile artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: pixi-lockfile
+        path: .
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v8
@@ -94,7 +116,7 @@ jobs:
         body: |
           Automatically generated PR to update locked environment files for Windows, macOS, and Linux.
 
-          These files were generated using conda-lock for improved dependency resolution and reproducibility.
+          These files were generated using conda-lock for improved dependency resolution and reproducibility. The `pixi.lock` file was also updated using `pixi update` to keep both package managers in sync.
 
           **Note: Check before merging this PR that the updated environment are tested by choosing one of the following options: (1) by performing a local testing or (2) by checking that the locked files are used in the CI. Note that the CI log has the step `Use base env file if it was changed` that reports what environment has been used for the run.**
         commit-message: "Update locked environment files for all platforms"

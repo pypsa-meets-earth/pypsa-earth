@@ -111,6 +111,14 @@ There are multiple ways to get involved and learn more about our work:
 
    .../pypsa-earth % mamba env create -f envs/{{your operating system}}64.lock.yaml
    ```
+
+   Alternatively, you can use [pixi](https://pixi.prefix.dev/latest/) for faster and simpler dependency management (no separate lock files per OS):
+
+   ```bash
+   # install pixi: https://pixi.prefix.dev/latest/#installation
+   .../pypsa-earth % pixi install
+   .../pypsa-earth % pixi shell  # opens a shell with all dependencies available
+   ```
 3. (optional) In step 2, three solvers are installed: HiGHs, glpk and gurobi. HiGHs is the recommended open-source solver. Gurobi is generally faster, but requires a license for full functionality, which is [freely available to academics](https://www.gurobi.com/features/academic-named-user-license/) (see instructions website).
 
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
