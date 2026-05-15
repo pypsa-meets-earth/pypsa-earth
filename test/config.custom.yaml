@@ -13,6 +13,11 @@ download_osm_data_nprocesses: 4
 enable:
   retrieve_cost_data: false
 
+load_options:
+  source: "demcast" # "demcast" or "gegis"
+  weather_year: 2013 # Weather year of the load profile
+  scale: 1 # scales all load time-series, i.e. 2 = doubles load
+
 augmented_line_connection:
   add_to_snakefile: true  # If True, includes this rule to the workflow
   new_line_type: ["HVAC", "HVDC"]  # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
