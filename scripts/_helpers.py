@@ -9,6 +9,7 @@ import calendar
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -21,12 +22,11 @@ import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
-from pypsa.components import component_attrs, components
-from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,27 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
             f"Please update 'config.yaml' according to 'config.default.yaml.'\n\r"
             "If issues persist, consider to update the environment to the latest version."
         )
+
+
+def update_cutout_config(config):
+    """
+    Update renewable cutout settings in the configuration.
+
+    This function replaces any `"auto"` cutout entries in the
+    `config["renewable"]` section with the default cutout specified in
+    `config["atlite"]["default"]`.
+    """
+    cutout_default = config["atlite"]["default"]
+
+    for tech in config["renewable"]:
+        cutout_res = config["renewable"][tech]["cutout"]
+
+        if cutout_res != "auto":
+            continue
+
+        config["renewable"][tech]["cutout"] = cutout_default
+
+    return config
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -209,102 +230,10 @@ def configure_logging(snakemake, skip_handlers=False):
     logging.basicConfig(**kwargs, force=True)
 
 
-def load_network(import_name=None, custom_components=None):
-    """
-    Helper for importing a pypsa.Network with additional custom components.
-
-    Parameters
-    ----------
-    import_name : str
-        As in pypsa.Network(import_name)
-    custom_components : dict
-        Dictionary listing custom components.
-        For using ``snakemake.params.override_components"]``
-        in ``config.yaml`` define:
-
-        .. code:: yaml
-
-            override_components:
-                ShadowPrice:
-                    component: ["shadow_prices","Shadow price for a global constraint.",np.nan]
-                    attributes:
-                    name: ["string","n/a","n/a","Unique name","Input (required)"]
-                    value: ["float","n/a",0.,"shadow value","Output"]
-
-    Returns
-    -------
-    pypsa.Network
-    """
-    import pypsa
-
-    try:
-        from pypsa.descriptors import Dict
-    except:
-        from pypsa.definitions.structures import Dict  # from pypsa version v0.31
-
-    override_components = None
-    override_component_attrs = None
-
-    if custom_components is not None:
-        override_components = pypsa.components.components.copy()
-        override_component_attrs = Dict(
-            {k: v.copy() for k, v in pypsa.components.component_attrs.items()}
-        )
-        for k, v in custom_components.items():
-            override_components.loc[k] = v["component"]
-            override_component_attrs[k] = pd.DataFrame(
-                columns=["type", "unit", "default", "description", "status"]
-            )
-            for attr, val in v["attributes"].items():
-                override_component_attrs[k].loc[attr] = val
-
-    return pypsa.Network(
-        import_name=import_name,
-        override_components=override_components,
-        override_component_attrs=override_component_attrs,
-    )
-
-
 def pdbcast(v, h):
     return pd.DataFrame(
         v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
     )
-
-
-def load_network_for_plots(
-    fn, tech_costs, cost_config, elec_config, combine_hydro_ps=True
-):
-    import pypsa
-    from add_electricity import load_costs, update_transmission_costs
-
-    n = pypsa.Network(fn)
-
-    n.loads["carrier"] = n.loads.bus.map(n.buses.carrier) + " load"
-    n.stores["carrier"] = n.stores.bus.map(n.buses.carrier)
-
-    n.links["carrier"] = (
-        n.links.bus0.map(n.buses.carrier) + "-" + n.links.bus1.map(n.buses.carrier)
-    )
-    n.lines["carrier"] = "AC line"
-    n.transformers["carrier"] = "AC transformer"
-
-    n.lines["s_nom"] = n.lines["s_nom_min"]
-    n.links["p_nom"] = n.links["p_nom_min"]
-
-    if combine_hydro_ps:
-        n.storage_units.loc[
-            n.storage_units.carrier.isin({"PHS", "hydro"}), "carrier"
-        ] = "hydro+PHS"
-
-    # if the carrier was not set on the heat storage units
-    # bus_carrier = n.storage_units.bus.map(n.buses.carrier)
-    # n.storage_units.loc[bus_carrier == "heat","carrier"] = "water tanks"
-
-    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(tech_costs, cost_config, elec_config, Nyears)
-    update_transmission_costs(n, costs)
-
-    return n
 
 
 def update_p_nom_max(n):
@@ -784,6 +713,46 @@ def to_csv_nafix(df, path, **kwargs):
             pass
 
 
+def add_transform_iso3(
+    df: pd.DataFrame,
+    source: str = "Entity code",
+    target: str = "name_short",
+    output: str = "region_name",
+) -> pd.DataFrame:
+    """
+    Transform a column containing ISO3 codes into another country-code or country-name
+    format and store the result in a new column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame.
+    source : str
+        Name of the column in ``df`` containing country names.
+    target : str
+        Target format as expected by ``coco.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
+    output : str
+        Name of a new output column of ``df`` to keep converted region names.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        DataFrame with an additional column containing the converted region names.
+
+    """
+    # coco.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = coco.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
+
+
 def save_to_geojson(df, fn):
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
@@ -948,124 +917,6 @@ def update_config_dictionary(
     return config_dict
 
 
-# PYPSA-EARTH-SEC
-def annuity(n, r):
-    """
-    Calculate the annuity factor for an asset with lifetime n years and.
-
-    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
-    """
-
-    if isinstance(r, pd.Series):
-        return pd.Series(1 / n, index=r.index).where(
-            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
-        )
-    elif r > 0:
-        return r / (1.0 - 1.0 / (1.0 + r) ** n)
-    else:
-        return 1 / n
-
-
-def get_yearly_currency_exchange_average(
-    initial_currency: str,
-    output_currency: str,
-    year: int,
-    default_exchange_rate: float = None,
-):
-    if calendar.isleap(year):
-        days_per_year = 366
-    else:
-        days_per_year = 365
-    currency_exchange_rate = 0.0
-    initial_date = datetime(year, 1, 1)
-    for day_index in range(days_per_year):
-        date_to_use = initial_date + timedelta(days=day_index)
-        try:
-            rate = currency_converter.convert(
-                1, initial_currency, output_currency, date_to_use
-            )
-        except Exception:
-            if default_exchange_rate is not None:
-                rate = default_exchange_rate
-            else:
-                raise  # fails if no default value is found
-        currency_exchange_rate += rate
-
-    currency_exchange_rate /= days_per_year
-    return currency_exchange_rate
-
-
-def convert_currency_and_unit(
-    cost_dataframe, output_currency: str, default_exchange_rate: float = None
-):
-    currency_list = currency_converter.currencies
-    cost_dataframe["value"] = cost_dataframe.apply(
-        lambda x: (
-            x["value"]
-            * get_yearly_currency_exchange_average(
-                x["unit"][0:3],
-                output_currency,
-                int(x["currency_year"]),
-                default_exchange_rate,
-            )
-            if x["unit"][0:3] in currency_list
-            else x["value"]
-        ),
-        axis=1,
-    )
-    cost_dataframe["unit"] = cost_dataframe.apply(
-        lambda x: (
-            x["unit"].replace(x["unit"][0:3], output_currency)
-            if x["unit"][0:3] in currency_list
-            else x["unit"]
-        ),
-        axis=1,
-    )
-    return cost_dataframe
-
-
-def prepare_costs(
-    cost_file: str,
-    output_currency: str,
-    fill_values: dict,
-    Nyears: float | int = 1,
-    default_exchange_rate: float = None,
-):
-    # set all asset costs and other parameters
-    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
-
-    # correct units to MW and EUR
-    costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-
-    if default_exchange_rate is not None:
-        logger.warning(
-            f"Using default exchange rate {default_exchange_rate} instead of actual rates for currency conversion to {output_currency}."
-        )
-
-    modified_costs = convert_currency_and_unit(
-        costs, output_currency, default_exchange_rate
-    )
-
-    # min_count=1 is important to generate NaNs which are then filled by fillna
-    modified_costs = (
-        modified_costs.loc[:, "value"]
-        .unstack(level=1)
-        .groupby("technology")
-        .sum(min_count=1)
-    )
-    modified_costs = modified_costs.fillna(fill_values)
-
-    def annuity_factor(v):
-        return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
-
-    modified_costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears
-        for i, v in modified_costs.iterrows()
-    ]
-
-    return modified_costs
-
-
 def create_network_topology(
     n, prefix, like="ac", connector=" <-> ", bidirectional=True
 ):
@@ -1196,34 +1047,6 @@ def cycling_shift(df, steps=1):
     return df
 
 
-def override_component_attrs(directory):
-    """Tell PyPSA that links can have multiple outputs by
-    overriding the component_attrs. This can be done for
-    as many buses as you need with format busi for i = 2,3,4,5,....
-    See https://pypsa.org/doc/components.html#link-with-multiple-outputs-or-inputs
-
-    Parameters
-    ----------
-    directory : string
-        Folder where component attributes to override are stored
-        analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
-
-    Returns
-    -------
-    Dictionary of overridden component attributes.
-    """
-
-    attrs = {k: v.copy() for k, v in component_attrs.items()}
-
-    for component, list_name in components.list_name.items():
-        fn = f"{directory}/{list_name}.csv"
-        if os.path.isfile(fn):
-            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
-            attrs[component] = overrides.combine_first(attrs[component])
-
-    return attrs
-
-
 def get_country(target, **keys):
     """
     Function to convert country codes using pycountry.
@@ -1345,9 +1168,16 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
                     gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
-        else:
-            gdf_shapes = get_GADM_layer(co, gadm_layer_id)
-            col = "GID_{}".format(gadm_layer_id)
+            elif gdf_shapes[col][0][:2].isalpha() and gdf_shapes[col][0][:3].isalpha():
+                gdf_shapes[col] = gdf_shapes[col].apply(
+                    lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                )
+            else:
+                gdf_shapes = get_GADM_layer([co], gadm_layer_id)
+                col = "GID_{}".format(gadm_layer_id)
+                gdf_shapes[col] = gdf_shapes[col].apply(
+                    lambda name: three_2_two_digits_country(name[:3]) + name[3:]
+                )
     gdf_shapes = gdf_shapes[gdf_shapes[col].str.contains(co)]
     return gdf_shapes, col
 
@@ -1647,3 +1477,308 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         """
         # set the required compression demand
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
+
+
+def nearest_shape(n, path_shapes, crs, tolerance=100):
+    """
+    Reassigns buses in the network `n` to the nearest country shape based on coordinates.
+
+    Parameters
+    ----------
+    n: pypsa network
+    path_shapes: str
+        path to shapefile with geometries and 'name' column
+    crs: str
+        dict with keys 'geo_crs' and 'distance_crs' (e.g., EPSG codes or proj strings)
+    tolerance: int, optional
+        distance (in km) for assigning a shape to a bus (The default tolerance is 100 km)
+
+    Returns
+    -------
+    pypsa network with modified 'country' column in n.buses
+
+    """
+
+    from pyproj import Transformer
+    from shapely.geometry import Point
+
+    # Load and reproject country shapes
+    shapes = gpd.read_file(path_shapes).set_index("name")["geometry"]
+    shapes = shapes.to_crs(crs["distance_crs"])
+
+    # Create transformer once (from geo_crs to distance_crs)
+    transformer = Transformer.from_crs(
+        crs["geo_crs"], crs["distance_crs"], always_xy=True
+    )
+
+    for i in n.buses.index:
+        # Original coordinates
+        x, y = n.buses.loc[i, "x"], n.buses.loc[i, "y"]
+
+        # Transform point directly
+        x_proj, y_proj = transformer.transform(x, y)
+        point_proj = Point(x_proj, y_proj)
+
+        # Check containment
+        contains = shapes.contains(point_proj)
+        if contains.any():
+            n.buses.loc[i, "country"] = contains[contains].index[0]
+        else:
+            distances = shapes.distance(point_proj).sort_values()
+            if distances.iloc[0] < tolerance * 1e3:
+                n.buses.loc[i, "country"] = distances.index[0]
+            else:
+                logger.warning(
+                    f"The bus {i} is {distances.iloc[0]:.2f} meters away from {distances.index[0]} — unassigned."
+                )
+
+    return n
+
+
+def branch(condition, then, otherwise=None):
+    """
+    This is a placeholder function that exists in Snakemake versions > 8.3.0.
+    It can be removed once Snakemake is updated to a compatible version.
+    """
+    if condition:
+        return then
+
+    if otherwise is None:
+        if isinstance(then, dict):
+            return {}
+        elif isinstance(then, str):
+            return []
+        else:
+            return None
+
+    return otherwise
+
+
+def rename_techs(label):
+    prefix_to_remove = [
+        "residential ",
+        "services ",
+        "urban ",
+        "rural ",
+        "central ",
+        "decentral ",
+    ]
+
+    rename_if_contains = [
+        "CHP",
+        "gas boiler",
+        "biogas",
+        "solar thermal",
+        "air heat pump",
+        "ground heat pump",
+        "resistive heater",
+        "Fischer-Tropsch",
+    ]
+
+    rename_if_contains_dict = {
+        "water tanks": "hot water storage",
+        "retrofitting": "building retrofitting",
+        "H2": "H2",
+        "battery": "battery storage",
+        "CCS": "CCS",
+    }
+
+    rename = {
+        "solar": "solar PV",
+        "Sabatier": "methanation",
+        "offwind": "offshore wind",
+        "offwind-ac": "offshore wind (AC)",
+        "offwind-dc": "offshore wind (DC)",
+        "onwind": "onshore wind",
+        "ror": "hydroelectricity",
+        "hydro": "hydroelectricity",
+        "PHS": "hydroelectricity",
+        "co2 Store": "DAC",
+        "co2 stored": "CO2 sequestration",
+        "AC": "transmission lines",
+        "DC": "transmission lines",
+        "B2B": "transmission lines",
+    }
+
+    for ptr in prefix_to_remove:
+        if label[: len(ptr)] == ptr:
+            label = label[len(ptr) :]
+
+    for rif in rename_if_contains:
+        if rif in label:
+            label = rif
+
+    for old, new in rename_if_contains_dict.items():
+        if old in label:
+            label = new
+
+    for old, new in rename.items():
+        if old == label:
+            label = new
+    return label
+
+
+def add_missing_carriers(n, carriers):
+    """
+    Function to add missing carriers to the network without raising errors.
+    """
+    valid_carriers = {c for c in carriers if isinstance(c, str) and c.strip() != ""}
+    missing_carriers = valid_carriers - set(n.carriers.index)
+    if len(missing_carriers) > 0:
+        for carrier in missing_carriers:
+            n.add("Carrier", carrier)
+
+
+def _is_year_tagged(carrier: str) -> bool:
+    """Return True if carrier ends with a 4-digit year suffix (e.g. 'solar-2020')."""
+    parts = carrier.rsplit("-", 1)
+    return len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4
+
+
+def get_base_carrier(carrier: str) -> str:
+    """
+    Extract base carrier from carrier_gy format.
+
+    Examples:
+        "solar-2020" -> "solar"
+        "offwind-ac-2020" -> "offwind-ac"
+        "offwind-dc" -> "offwind-dc"
+        "CCGT-2000" -> "CCGT"
+    """
+    if _is_year_tagged(carrier):
+        return carrier.rsplit("-", 1)[0]
+    return carrier
+
+
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    logger.info("Restored base carrier names")
+
+
+def add_year_suffix_to_carriers(n: pypsa.Network) -> None:
+    """
+    Extract year suffix from component names and append to carrier names.
+
+    This is necessary for clustering to distinguish between generators/storage
+    of the same technology but different vintage years.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Original network to modify carrier names in-place.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Component name: "NG0 0 coal-1990"
+    Original carrier: "coal"
+    Modified carrier: "coal-1990"
+    """
+    for component in ["Generator", "StorageUnit"]:
+        df = n.df(component)
+
+        if df.empty or "carrier" not in df.columns:
+            continue
+
+        # Extract year suffix from index using regex
+        # Pattern matches: base_name-YYYY at the end of the string
+        pattern = r"-(\d{4})$"
+
+        year_suffix = df.index.str.extract(pattern, expand=False)
+
+        # Only modify carriers where year suffix was found
+        has_year = year_suffix.notna()
+
+        if has_year.any():
+            df.loc[has_year, "carrier"] = (
+                df.loc[has_year, "carrier"] + "-" + year_suffix[has_year]
+            )
+
+    # Add year suffixes to carriers for proper clustering of different vintage years
+    logger.info("Added year suffixes to carrier names for clustering")
+
+
+def sanitize_carriers(n, config):
+    """
+    Sanitize the carrier information in a PyPSA Network object.
+
+    The function ensures that all unique carrier names are present in the network's
+    carriers attribute, and adds nice names and colors for each carrier according
+    to the provided configuration dictionary.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        A PyPSA Network object that represents an electrical power system.
+    config : dict
+        A dictionary containing configuration information, specifically the
+        "plotting" key with "nice_names" and "tech_colors" keys for carriers.
+
+    Returns
+    -------
+    None
+        The function modifies the 'n' PyPSA Network object in-place, updating the
+        carriers attribute with nice names and colors.
+
+    Warnings
+    --------
+    Raises a warning if any carrier's "tech_colors" are not defined in the config dictionary.
+    """
+
+    for c in n.iterate_components():
+        if "carrier" in c.df:
+            add_missing_carriers(n, c.df.carrier)
+
+    carrier_i = n.carriers.index
+    nice_names = (
+        pd.Series(config["plotting"]["nice_names"])
+        .reindex(carrier_i)
+        .fillna(carrier_i.to_series())
+    )
+
+    n.carriers["nice_name"] = n.carriers.nice_name.where(
+        n.carriers.nice_name != "", nice_names
+    )
+
+    tech_colors = config["plotting"]["tech_colors"]
+    colors = pd.Series(tech_colors).reindex(carrier_i)
+
+    # Try to fill missing colors with tech_colors after renaming
+    missing_colors_i = colors[colors.isna()].index
+    colors[missing_colors_i] = missing_colors_i.map(rename_techs).map(tech_colors)
+
+    if colors.isna().any():
+        missing_i = list(colors.index[colors.isna()])
+        logger.warning(f"tech_colors for carriers {missing_i} not defined in config.")
+    n.carriers["color"] = n.carriers.color.where(n.carriers.color != "", colors)
+
+
+def sanitize_locations(n):
+    if "location" in n.buses.columns:
+        n.buses["x"] = n.buses.x.where(n.buses.x != 0, n.buses.location.map(n.buses.x))
+        n.buses["y"] = n.buses.y.where(n.buses.y != 0, n.buses.location.map(n.buses.y))
+        n.buses["country"] = n.buses.country.where(
+            n.buses.country.ne("") & n.buses.country.notnull(),
+            n.buses.location.map(n.buses.country),
+        )

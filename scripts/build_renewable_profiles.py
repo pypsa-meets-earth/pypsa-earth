@@ -218,7 +218,7 @@ GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
-def check_cutout_match(cutout, geodf):
+def check_cutout_match(cutout, regions):
     cutout_box = box(*cutout.bounds)
     region_box = box(*regions.total_bounds)
 
@@ -243,7 +243,7 @@ def get_eia_annual_hydro_generation(fn, countries):
     df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
     df.index = df.index.str.strip()
 
-    df.loc["Germany"] = df.filter(like="Germany", axis=0).sum()
+    df.loc["Germany"] = df.filter(like="Germany", axis=0).astype(float).sum()
     df.loc["Serbia"] += df.loc["Kosovo"]
     df = df.loc[~df.index.str.contains("Former")]
     df.drop(["World", "Germany, West", "Germany, East"], inplace=True)
@@ -251,8 +251,47 @@ def get_eia_annual_hydro_generation(fn, countries):
     df.index = cc.convert(df.index, to="iso2")
     df.index.name = "countries"
 
-    df = df.T[countries] * 1e6  # in MWh/a
+    df = df.T[countries].astype(float) * 1e6  # in MWh/a
     df.index = df.index.astype(int)
+
+    return df
+
+
+def get_irena_annual_hydro_generation(fn, countries):
+    """
+    Load annual renewable hydropower generation data from the IRENA Country sheet.
+    Convert ISO3 country codes to ISO2 and annual generation from GWh to MWh.
+
+    Original source:
+    https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
+
+    Note
+    ----
+    IRENA energy statistics dataset is available for non-commercial use only.
+    Users are responsible for ensuring compliance with the dataset’s licensing terms.
+    """
+    df = pd.read_excel(fn, sheet_name="Country")
+
+    iso3_to_iso2 = {coco.convert(names=name, to="ISO3"): name for name in countries}
+
+    df = (
+        df.query(
+            "Technology == 'Renewable hydropower' "
+            "and `Producer Type` != 'All types' "
+            "and `ISO3 code` in @iso3_to_iso2"
+        )
+        .assign(countries=df["ISO3 code"].replace(iso3_to_iso2))
+        .groupby(["countries", "Year"])["Electricity Generation (GWh)"]
+        .sum()
+        .unstack("countries")
+        .fillna(0)
+        .mul(1e3)
+    )
+
+    missing_countries = set(countries) - set(df.columns)
+
+    for c in missing_countries:
+        df[c] = 0.0
 
     return df
 
@@ -482,6 +521,14 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     return runoff
 
 
+def check_flag(d: dict, field: str) -> bool:
+    """
+    Check if a string is contained in keys of a dictionary and is either True or non-boolean
+    """
+    safe_field = d.get(field, False)
+    return (not isinstance(safe_field, bool)) or safe_field
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -525,7 +572,7 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
 
-    check_cutout_match(cutout=cutout, geodf=regions)
+    check_cutout_match(cutout=cutout, regions=regions)
 
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
@@ -542,7 +589,7 @@ if __name__ == "__main__":
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
         resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
-        ppls = load_powerplants(snakemake.input.powerplants)
+        ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
@@ -595,7 +642,7 @@ if __name__ == "__main__":
                 method = normalization["method"]
                 norm_year = normalization.get("year", int(inflow.time[0].dt.year))
                 if method == "hydro_capacities":
-                    path_hydro_capacities = snakemake.input.hydro_capacities
+                    path_hydro_capacities = paths.hydro_capacities
                     normalize_using_yearly = (
                         get_hydro_capacities_annual_hydro_generation(
                             path_hydro_capacities, countries, norm_year
@@ -603,9 +650,15 @@ if __name__ == "__main__":
                     )
 
                 elif method == "eia":
-                    path_eia_stats = snakemake.input.eia_hydro_generation
+                    path_eia_stats = paths.eia_hydro_generation
                     normalize_using_yearly = get_eia_annual_hydro_generation(
                         path_eia_stats, countries
+                    )
+
+                elif method == "irena":
+                    path_irena_stats = paths.irena_stats
+                    normalize_using_yearly = get_irena_annual_hydro_generation(
+                        path_irena_stats, countries
                     )
 
                 inflow = rescale_hydro(
@@ -648,10 +701,10 @@ if __name__ == "__main__":
 
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
-        if "natura" in config and config["natura"]:
+        if check_flag(config, "natura"):
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
-        if "copernicus" in config and config["copernicus"]:
+        if check_flag(config, "copernicus"):
             copernicus = config["copernicus"]
             excluder.add_raster(
                 paths.copernicus,
@@ -667,7 +720,7 @@ if __name__ == "__main__":
                     crs=COPERNICUS_CRS,
                 )
 
-        if "max_depth" in config:
+        if check_flag(config, "max_depth"):
             # lambda not supported for atlite + multiprocessing
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
@@ -676,11 +729,11 @@ if __name__ == "__main__":
                 paths.gebco, codes=func_depth, crs=GEBCO_CRS, nodata=-1000
             )
 
-        if "min_shore_distance" in config:
+        if check_flag(config, "min_shore_distance"):
             buffer = config["min_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer)
 
-        if "max_shore_distance" in config:
+        if check_flag(config, "max_shore_distance"):
             buffer = config["max_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 

@@ -12,25 +12,11 @@ Relevant Settings
 
 .. code:: yaml
 
-    costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
-        marginal_cost:
-        capital_cost:
-        extendable_carriers:
-            StorageUnit:
-            Store:
+    sector:
+        transmission_efficiency:
 
 .. seealso::
-    Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
-    :ref:`electricity_cf`
+    Documentation of the configuration file ``config.yaml`` at :ref:`sector_cf`
 
 Inputs
 ------
@@ -61,13 +47,11 @@ from _helpers import (
     configure_logging,
     create_logger,
     lossy_bidirectional_links,
-    override_component_attrs,
     set_length_based_efficiency,
 )
 from add_electricity import (
     _add_missing_carriers_from_costs,
     add_nice_carrier_names,
-    load_costs,
 )
 
 idx = pd.IndexSlice
@@ -285,18 +269,12 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
+    n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     transmission_efficiency = snakemake.params.transmission_efficiency
     config = snakemake.config
 
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        config["costs"],
-        config["electricity"],
-        Nyears,
-    )
+    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
     attach_storageunits(n, costs, config)
     attach_stores(n, costs, config)

@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+run:
+  name: tutorial
+  sector_name: "tutorial"
+
+load_options:
+  source: "demcast"

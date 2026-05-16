@@ -3,16 +3,29 @@
 # SPDX-License-Identifier: CC0-1.0
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
-version: 0.6.0
-
 countries: ["BW"]
 
+run:
+  name: "landlock"
+
 subregion:
+  method: "gadm" # method to define subregions, either "gadm" or "custom", false to not use subregions.
   define_by_gadm:
     Central: [BW.3]
 
+focus_weights:
+  BW: 0.7
+  Central: 0.3
+
 electricity:
+  extendable_carriers:
+    Generator: [solar, onwind, OCGT]
   renewable_carriers: [solar, csp, onwind, hydro]
 
 build_osm_network:
   force_ac: true  # When true, it forces all components (lines and substation) to be AC-only
+
+cluster_options:
+  simplify_network:
+    p_threshold_drop_isolated: 1
+    p_threshold_merge_isolated: false

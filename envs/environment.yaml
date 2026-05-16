@@ -8,13 +8,13 @@ channels:
 - bioconda
 - gurobi
 dependencies:
-- python>=3.8, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
+- python>=3.10, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 - pip
 
-- pypsa>=0.25, <=0.30.3
+- pypsa>=0.25.1, <=0.30.3
 - atlite>=0.4.1
 - dask
-- powerplantmatching>=0.5.19  # due to this https://github.com/PyPSA/powerplantmatching/pull/202
+- powerplantmatching>=0.8
 - earth-osm>=2.3.post1
 
 # Dependencies of the workflow itself
@@ -33,8 +33,9 @@ dependencies:
 - fiona>=1.10
 - xarray>=2023.11.0, <=2025.01.2
 - netcdf4
+- libgdal-netcdf
 - networkx
-- scipy
+- scipy<1.16
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
