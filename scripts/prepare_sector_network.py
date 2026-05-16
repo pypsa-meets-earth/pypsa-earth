@@ -2283,7 +2283,7 @@ def add_heat(
                 h_nodes[name] + f" {name} water tanks charger",
                 bus0=h_nodes[name] + f" {name} heat",
                 bus1=h_nodes[name] + f" {name} water tanks",
-                efficiency=costs.at["water tank charger", "efficiency"],
+                efficiency= 1.0, #costs.at["water tank charger", "efficiency"],
                 carrier=name + " water tanks charger",
                 p_nom_extendable=True,
             )
@@ -2294,7 +2294,7 @@ def add_heat(
                 bus0=h_nodes[name] + f" {name} water tanks",
                 bus1=h_nodes[name] + f" {name} heat",
                 carrier=name + " water tanks discharger",
-                efficiency=costs.at["water tank discharger", "efficiency"],
+                efficiency= 1.0, #costs.at["water tank discharger", "efficiency"],
                 p_nom_extendable=True,
             )
 
@@ -3246,6 +3246,7 @@ def add_enhanced_geothermal(
     egs_config,
     costs_config,
     egs_capacity_factors=None,
+    egs_cost_factor=None,
 ):
     """
     Add Enhanced Geothermal Systems (EGS) to pypsa-earth using region-aggregated input.
@@ -3269,6 +3270,7 @@ def add_enhanced_geothermal(
             - flexible
             - max_hours
             - max_boost
+            - cost_factor
     costs_config : dict
         Global costs config, used for discount rate.
     egs_capacity_factors : str or pathlib.Path, optional
@@ -3317,6 +3319,16 @@ def add_enhanced_geothermal(
 
     efficiency_orc = costs.at["organic rankine cycle", "electricity-input"]
     efficiency_dh = costs.at["geothermal", "district heat-input"]
+
+    egs_cost_factor = float(egs_config.get("cost_factor", 1.0))
+
+    if not np.isfinite(egs_cost_factor) or egs_cost_factor <= 0:
+        raise ValueError(
+            f"sector.enhanced_geothermal.cost_factor must be a positive number, "
+            f"got {egs_cost_factor}."
+        )
+
+    logger.info(f"Applying EGS cost factor: {egs_cost_factor}")
     
 
     # CAPEX from your build_egs_potentials script is EUR/GW_el -> convert to EUR/MW_el
@@ -3416,7 +3428,7 @@ def add_enhanced_geothermal(
             )
 
         p_nom_max_th = row["p_nom_max"] / efficiency_orc
-        capital_cost_th = row["capital_cost"] * efficiency_orc
+        capital_cost_th = row["capital_cost"] * efficiency_orc * egs_cost_factor
 
         if egs_config.get("var_cf", True):
             bus_eta = efficiency[bus].reindex(n.snapshots).astype(float)
@@ -3443,7 +3455,7 @@ def add_enhanced_geothermal(
             bus1=bus,
             p_nom_extendable=True,
             carrier="geothermal organic rankine cycle",
-            capital_cost=orc_capital_cost * efficiency_orc,
+            capital_cost=orc_capital_cost * efficiency_orc * egs_cost_factor,
             efficiency=efficiency_orc,
             lifetime=orc_lt,
         )
@@ -3461,6 +3473,7 @@ def add_enhanced_geothermal(
                     * efficiency_orc
                     * costs.at["geothermal", "district heat surcharge"]
                     / 100.0
+                    * egs_cost_factor
                 ),
                 efficiency=efficiency_dh,
                 p_nom_extendable=True,

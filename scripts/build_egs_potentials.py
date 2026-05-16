@@ -74,8 +74,6 @@ logger = create_logger(__name__)
 
 
 CRF = 0.09 # calculated with 0.08 interest rate see Franzmann et al.
-CAPEX_TO_OPEX = 0.02 #assumtion that 2% of Capex = Opex see Franzmann et al.
-HOURS = 8760.0
 
 
 def read_network_regions(network_regions_file):
@@ -208,10 +206,10 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
     df['LCOE_EUR_per_MWh'] = df['LCOE_Eur_per_kWh'] * 1000.0
 
     # Energy produced per year in MWh
-    df['Leistung_MWh'] = df['PowerSust_MW'] * HOURS
+    df['Leistung_MWh'] = df['PowerSust_MW'] * 8760.0
 
     # Annualized CAPEX-like quantity, then converted to EUR/GW
-    capex = (df['LCOE_EUR_per_MWh'] * df['Leistung_MWh']) / (CRF + CAPEX_TO_OPEX)
+    capex = (df['LCOE_EUR_per_MWh'] * df['Leistung_MWh']) / (CRF + 0.02) #assumtion that 2% of Capex = Opex see Franzmann et al.
 
     df['PowerSust'] = df['PowerSust_MW'] / 1000.0  # MW -> GW
     df['CAPEX'] = capex / df['PowerSust']  # EUR/GW
