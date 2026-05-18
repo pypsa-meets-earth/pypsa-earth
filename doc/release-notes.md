@@ -100,6 +100,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
 
+* Bug fixes in sector network for time series scaling [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
