@@ -78,7 +78,7 @@ def update_cutout_config(config):
     Update renewable cutout settings in the configuration.
 
     This function replaces any `"auto"` cutout entries in the
-    `config["renewables"]` section with the default cutout specified in
+    `config["renewable"]` section with the default cutout specified in
     `config["atlite"]["default"]`.
     """
     cutout_default = config["atlite"]["default"]
@@ -711,6 +711,46 @@ def to_csv_nafix(df, path, **kwargs):
     else:
         with open(path, "w") as fp:
             pass
+
+
+def add_transform_iso3(
+    df: pd.DataFrame,
+    source: str = "Entity code",
+    target: str = "name_short",
+    output: str = "region_name",
+) -> pd.DataFrame:
+    """
+    Transform a column containing ISO3 codes into another country-code or country-name
+    format and store the result in a new column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame.
+    source : str
+        Name of the column in ``df`` containing country names.
+    target : str
+        Target format as expected by ``coco.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
+    output : str
+        Name of a new output column of ``df`` to keep converted region names.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        DataFrame with an additional column containing the converted region names.
+
+    """
+    # coco.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = coco.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
 
 
 def save_to_geojson(df, fn):
