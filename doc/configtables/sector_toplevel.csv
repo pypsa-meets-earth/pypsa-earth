@@ -39,3 +39,10 @@ Parameter,Unit,Values,Description
   ,  ,  ,"  "
 **oil**,  ,  ,Configuration for `sector.oil` settings.
 -- spatial_oil,bool,"{true, false}",Add option to spatially resolve carrier representing oil supply.
+  ,  ,  ,"  "
+**ammonia**,  ,  ,Configuration for `sector.ammonia` settings.
+-- enable,bool,"{true, false}",Flag to include conventional Haber-Bosch ammonia production in the industry sector.
+-- production_year,int,"[2019, 2023]",Year of ammonia production statistics used to scale nodal demand (data available 2019–2023).
+-- gas_MWh_per_tNH3,MWh/t,,Natural gas consumption per tonne of NH3 (feedstock + fuel for SMR-based Haber-Bosch route).
+-- elec_MWh_per_tNH3,MWh/t,,Electricity consumption per tonne of NH3 (SMR-based Haber-Bosch route).
+-- co2_t_per_tNH3,tCO2/t,,CO2 emissions per tonne of NH3 (SMR-based process emissions).
