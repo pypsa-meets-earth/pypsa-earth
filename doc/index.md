@@ -1,21 +1,36 @@
 <!--
-SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+SPDX-FileCopyrightText:  PyPSA-Earth, PyPSA-Zambia and PyPSA-Eur Authors
 
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-# Welcome to the PyPSA-Earth documentation
+# Welcome to the PyPSA-Zambia documentation
 
-[![GitHub release](https://img.shields.io/github/v/release/pypsa-meets-earth/pypsa-earth?include_prereleases)](https://github.com/pypsa-meets-earth/pypsa-earth/releases)
-[![CI](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml/badge.svg)](https://github.com/pypsa-meets-earth/pypsa-earth/actions/workflows/test.yml)
-[![Documentation Status](https://readthedocs.org/projects/pypsa-earth/badge/?version=latest)](https://pypsa-earth.readthedocs.io/en/latest/?badge=latest)
-[![GitHub repo size](https://img.shields.io/github/repo-size/pypsa-meets-earth/pypsa-earth)](https://github.com/pypsa-meets-earth/pypsa-earth)
+[![GitHub release](https://img.shields.io/github/v/release/open-energy-transition/pypsa-zambia?include_prereleases)](https://github.com/open-energy-transition/pypsa-zambia/releases)
+[![CI](https://github.com/open-energy-transition/pypsa-zambia/actions/workflows/test.yml/badge.svg)](https://github.com/open-energy-transition/pypsa-zambia/actions/workflows/test.yml)
+[![Documentation Status](https://readthedocs.org/projects/pypsa-zambia/badge/?version=latest)](https://pypsa-zambia.readthedocs.io/en/latest/?badge=latest)
+[![GitHub repo size](https://img.shields.io/github/repo-size/open-energy-transition/pypsa-zambia)](https://github.com/open-energy-transition/pypsa-zambia)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![REUSE status](https://api.reuse.software/badge/github.com/pypsa/pypsa-eur)](https://api.reuse.software/info/github.com/pypsa/pypsa-eur)
+[![REUSE status](https://api.reuse.software/badge/github.com/open-energy-transition/pypsa-zambia)](https://api.reuse.software/info/github.com/open-energy-transition/pypsa-zambia)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/pypsa-meets-earth/pypsa-earth/main.svg)](https://results.pre-commit.ci/latest/github/pypsa-meets-earth/pypsa-earth/main)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/open-energy-transition/pypsa-zambia/main.svg)](https://results.pre-commit.ci/latest/github/open-energy-transition/pypsa-zambia/main)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=flat&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz)
+
+## Open Tools to Improve Grid Planning and Operation in Africa
+
+Zambia’s national electricity utility ZESCO and the non-profit Open Energy Transition are developing an open-source energy modelling tool
+aimed at improving data-driven power system planning in Zambia. The project will support the national grid operators and utilities in adopting transparent, climate-resilient planning approaches while strengthening local technical capacity.
+
+Open Energy Transition are developing this customized energy system model based on PyPSA (Python for Power System Analysis), tailored to the Zambian energy system and designed with scaling potential for other African utilities. Tool development will be guided by local insights to ensure the resulting solutions are practical, accessible, and trusted by those who rely on them. Other partners include Association of Power Utilities in Africa (APUA), the Zambian Ministry of Energy, and academic partners.
+
+The collaboration will run for 36 months. Initial concept development began in Q4 2025 and is now in implementation.
+The project is funded by the Quadrature Climate Foundation.
+
+As Africa’s electricity systems expand rapidly, planning decisions made today will shape reliability, affordability, and emissions for decades. Zambia is an ideal pilot country as energy shocks and multi-day blackouts have highlighted the urgent need for resilient energy planning. Meanwhile, the African Continental Master Plan depends on local capacity to develop national plans.
+
+The open-source modelling framework PyPSA is particularly well suited to this context. It is cost-efficient, transparent, and reproducible – ideal to tackle the complexity of modern energy systems and the move towards a just and sustainable energy transition.
+
 
 ## Motivation
 

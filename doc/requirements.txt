@@ -38,6 +38,7 @@ gitpython
 
 chaospy
 numba
+pandas
 ruamel.yaml<=0.17.26
 earth-osm>=2.3.post1
 reverse-geocode

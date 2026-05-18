@@ -76,3 +76,5 @@ screenlog*
 !data/demand/unsd/paths/Energy_Statistics_Database.xlsx
 site/
 doc/img/gen_*.svg
+Zambia_validation.ipynb
+regression_pypsa_zambia.ipynb

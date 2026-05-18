@@ -6,6 +6,8 @@
 
 exclude: ^(LICENSES)
 
+ci:
+  autofix_prs: false
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -111,3 +113,15 @@ repos:
     language: system
     files: ^config\.default\.yaml$
     pass_filenames: false
+
+# Auto-update data inventory when data/versions.csv changes
+- repo: local
+  hooks:
+  - id: update-data-inventory
+    name: Update date inventory
+    entry: python3 doc/assets/scripts/update_data_inventory.py
+    language: python
+    additional_dependencies:
+    - pandas
+    # files: data/versions.csv
+    # pass_filenames: false

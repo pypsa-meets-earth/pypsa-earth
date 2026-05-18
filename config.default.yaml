@@ -34,6 +34,22 @@ enable:
   custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
 
 
+data:
+  hydrobasins:
+    source: build
+    version: latest
+  irena:
+    source: primary
+    version: latest
+  landcover:
+    source: primary
+    version: Mar2026
+  hydro_profile:
+    source: primary
+    version: v1.0
+  natura_earth:
+    source: tutorial
+    version: v1.0
 
 custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
 
@@ -178,6 +194,10 @@ load_options:
   weather_year: 2013 # Weather year of the load profile
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
+  demand_weights:
+    mining: 0.76
+    gdp: 0.24
+  zambia_demand_distribution: false # if true, distributes load using mining and GDP rasters (Zambia-specific)
 
 co2_budget:
   enable: false
@@ -193,8 +213,8 @@ co2_budget:
     2050: 0.1
 
 electricity:
-  base_voltage: 380.
-  voltages: [132., 220., 300., 380., 500., 750.]
+  base_voltage: 330.
+  voltages: [66., 88., 132., 220., 330.]
   co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
   co2base: 1.487e+9 # European default, adjustment to Africa necessary
   agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
@@ -241,12 +261,10 @@ electricity:
 
 lines:
   ac_types:
-    132.: "243-AL1/39-ST1A 20.0"
-    220.: "Al/St 240/40 2-bundle 220.0"
-    300.: "Al/St 240/40 3-bundle 300.0"
-    380.: "Al/St 240/40 4-bundle 380.0"
-    500.: "Al/St 240/40 4-bundle 380.0"
-    750.: "Al/St 560/50 4-bundle 750.0"
+    66.: "ACSR Wolf 66.0"
+    132.: "ACSR Panther 132.0"
+    220.: "ACSR Zebra 220.0"
+    330.: "ACSR Zebra 2-bundle 330.0"
   dc_types:
     500.: "HVDC XLPE 1000"
   s_max_pu: 0.7
@@ -368,6 +386,7 @@ renewable:
     extendable: true
   hydro:
     cutout: auto
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
     hydrobasins_level: 6
     resource:
       method: hydro
@@ -434,11 +453,18 @@ costs:
     lifetime: 25
     CO2 intensity: 0
     discount rate: 0.07
-  marginal_cost: # EUR/MWh
-    solar: 0.01
-    onwind: 0.015
+  marginal_cost: # EUR/MWh — IRP Table 9 (Zambia 2023), converted at 0.7532 EUR/USD
+    solar: 0
+    onwind: 0
     offwind: 0.015
-    hydro: 0.
+    hydro: 1.05
+    ror: 0.
+    coal: 72.92
+    oil: 4.23
+    geothermal: 0.87
+    biomass: 4.14
+    nuclear: 3.46
+    csp: 0.
     H2: 0.
     electrolysis: 0.
     fuel cell: 0.
@@ -1118,3 +1144,14 @@ plotting:
     H2: H2
     lines: Transmission Lines
     ror: Run of River
+validation:
+  interconnectors:
+    enable: false
+    download_data: false
+  custom_powerplants:
+    enable: false
+    download_data: false
+  line_types:
+    download_data: false
+  mining_data:
+    download_data: false
