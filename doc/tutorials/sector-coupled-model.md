@@ -33,12 +33,12 @@ Documentation for all options is currently being updated in [config](../user-gui
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options.
 
-It is important to set the following flags `retrieve_databundle` and `retrieve_databundle_sector` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
+It is important to set the following flags `retrieve_databundle` and `keep_existing_databundle` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
 
 ```yaml
 enable:
   retrieve_databundle: true
-  retrieve_databundle_sector: true
+  keep_existing_databundle: true
 ```
 
 ```yaml
@@ -145,12 +145,12 @@ foresight: myopic
 ```
 
 !!! note
- It is important to set the following flag `retrieve_databundle` and `retrieve_databundle_sector` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
+ It is important to set the following flag `retrieve_databundle` and `keep_existing_databundle` to `false` after the first run to prevent unnecessary re-downloads, as the files only need to be downloaded once.
 
  ```yaml
  enable:
  retrieve_databundle: true
- retrieve_databundle_sector: true
+ keep_existing_databundle: true
  ```
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options. For the myopic foresight mode, the `{planning_horizons}` wildcard defines the sequence of investment horizons.

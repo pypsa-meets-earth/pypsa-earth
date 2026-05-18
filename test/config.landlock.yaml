@@ -8,6 +8,9 @@ countries: ["BW"]
 run:
   name: "landlock"
 
+enable:
+  keep_existing_databundle: false # to retrieve cutouts for BW
+
 subregion:
   method: "gadm" # method to define subregions, either "gadm" or "custom", false to not use subregions.
   define_by_gadm:

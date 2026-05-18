@@ -10,7 +10,6 @@ summary_dir: results/
 
 enable:
   retrieve_databundle: true
-  retrieve_databundle_sector: true
 
 run:
   name: "myopic" # use this to keep track of runs with different settings

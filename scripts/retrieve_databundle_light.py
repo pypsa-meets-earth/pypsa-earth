@@ -814,6 +814,15 @@ def get_best_bundles(
     return sorted(bundles_to_download)
 
 
+def bundle_exists(config, bundle):
+    """
+    Check whether all files for a given data bundle already exist locally.
+    """
+    files = datafiles_retrivedatabundle(config, [bundle])
+    exists = all(os.path.exists(f) for f in files)
+    return exists
+
+
 def get_best_bundles_in_snakemake(
     config: dict, include_categories: list = [], exclude_categories: list = []
 ) -> list:
@@ -848,6 +857,11 @@ def get_best_bundles_in_snakemake(
         include_categories=include_categories,
         exclude_categories=exclude_categories,
     )
+
+    if config["enable"]["keep_existing_databundle"]:
+        bundles_to_download = [
+            b for b in bundles_to_download if not bundle_exists(config, b)
+        ]
 
     return bundles_to_download
 
