@@ -16,7 +16,6 @@ Possible improvements:
 - Select port buses automatically (with both voronoi and gadm clustering). Use data/ports.csv?
 """
 
-
 import logging
 
 import geopandas as gpd
