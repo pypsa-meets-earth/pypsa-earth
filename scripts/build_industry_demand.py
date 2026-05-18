@@ -68,7 +68,7 @@ if __name__ == "__main__":
             )
         )
 
-        industry_demand = pd.read_csv(
+        industry_demand = read_csv_nafix(
             os.path.join(
                 BASE_DIR,
                 "data/custom/industry_demand_{0}_{1}.csv".format(
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         )
         keys_path = snakemake.input.industrial_distribution_key
 
-        dist_keys = pd.read_csv(
+        dist_keys = read_csv_nafix(
             keys_path, index_col=0, keep_default_na=False, na_values=[""]
         )
         production_base = pd.DataFrame(
@@ -137,7 +137,7 @@ if __name__ == "__main__":
         # Load distribution keys
         keys_path = snakemake.input.industrial_distribution_key
 
-        dist_keys = pd.read_csv(
+        dist_keys = read_csv_nafix(
             keys_path, index_col=0, keep_default_na=False, na_values=[""]
         )
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         mlv_index = pd.MultiIndex.from_product([countries, level_2nd])
         industry_base_totals = industry_base_totals.reindex(mlv_index, fill_value=0)
 
-        geo_locs = pd.read_csv(
+        geo_locs = read_csv_nafix(
             snakemake.input.industrial_database,
             sep=",",
             header=0,
