@@ -379,8 +379,8 @@ def build_demand_profiles(
     def upsample(cntry, group):
         # TODO Cross-check resolution of merge conflicts
         """Distributes load in country according to predictors (e.g. mining energy demand, population and GDP)"""
-        #l = el_load.loc[el_load.region_code == cntry]["Electricity demand"]        
-        l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
+        l = el_load.loc[el_load.region_code == cntry]["Electricity demand"]        
+        #l = gegis_load.loc[gegis_load.region_code == cntry]["Electricity demand"]
         if len(group) == 1:
             return pd.DataFrame({group.index[0]: l})
         else:
