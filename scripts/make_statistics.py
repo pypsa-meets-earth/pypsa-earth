@@ -23,6 +23,7 @@ Outputs
 -------
 This rule creates a dataframe containing in the columns the relevant statistics for the current run.
 """
+
 import os
 from pathlib import Path
 
