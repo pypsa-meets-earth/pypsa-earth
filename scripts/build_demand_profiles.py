@@ -373,7 +373,7 @@ def build_demand_profiles(
 
     demand_weights = snakemake.params.load_options["demand_weights"]
     w_gdp = demand_weights["gdp"]
-    w_mining = demand_weights["mining"]
+    w_mining = demand_weights.get("mining", 0.0)
     w_pop = demand_weights.get("pop", 0.0)
 
     def upsample(cntry, group):
@@ -392,15 +392,21 @@ def build_demand_profiles(
             pop_n = pd.Series(
                 transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
             )
-            mining_n = pd.Series(
-                transfer.dot(shapes_cntry["mining"].fillna(0.0).values),
-                index=group.index,
-            )
-            factors = normed(
-                w_mining * normed(mining_n)
-                + w_pop * normed(pop_n)
-                + w_gdp * normed(gdp_n)
-            )
+            if "mining" in shapes_cntry.columns:
+                mining_n = pd.Series(
+                    transfer.dot(shapes_cntry["mining"].fillna(0.0).values),
+                    index=group.index,
+                )
+                factors = normed(
+                    w_mining * normed(mining_n)
+                    + w_pop * normed(pop_n)
+                    + w_gdp * normed(gdp_n)
+                )
+            else:
+                factors = normed(
+                    + w_pop * normed(pop_n)
+                    + w_gdp * normed(gdp_n)
+                )    
             if factors.sum() == 0:
                 logger.warning(
                     f"Upsampling factors for {cntry} are all zero, returning uniform distribution across {len(factors)} shapes."
