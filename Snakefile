@@ -148,7 +148,7 @@ if config["enable"].get("retrieve_databundle", True):
 
     # Exclude categories which are implemented in retrieve rules (retrieve.smk)
     bundles_to_download = get_best_bundles_in_snakemake(
-        config, exclude_categories=["natura", "hydrobasins", "cutouts"]
+        config, exclude_categories=["natura", "hydrobasins", "cutouts", "irena"]
     )
 
     rule retrieve_databundle_light:
