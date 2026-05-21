@@ -160,8 +160,7 @@ if __name__ == "__main__":
         gadm_clustering,
     ).set_index("gadm_" + str(gadm_layer_id))
 
-    if gadm_clustering:
-        region_names = regions["name"].astype(str)
+    region_names = regions["name"].astype(str)
 
     if region_names.str.endswith("_AC").any():
         industrial_database.index = industrial_database.index.astype(str) + "_AC"
