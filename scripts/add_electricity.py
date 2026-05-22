@@ -771,7 +771,7 @@ def attach_hydro(
     if not inflow_idx.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
             found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
-            missing_plants_idxs = inflow_idx.difference(found_plants.index)
+            missing_plants_idxs = ppl.index.difference(found_plants.index)
 
             # if missing time series are found, notify the user and exclude missing hydro plants
             if not missing_plants_idxs.empty:
