@@ -6,7 +6,7 @@
 run:
   name: "zm_glofas"
   shared_cutouts: true
-  base_config: config.tutorial.yaml  # base configuration file
+  base_config: config.zm.tutorial.yaml  # base for run_all_scenarios
 
 scenario:
   simpl: [""]

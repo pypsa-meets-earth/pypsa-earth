@@ -6,7 +6,7 @@
 run:
   name: "zm_dispatch"
   shared_cutouts: true
-  base_config: config.tutorial.yaml  # base configuration file
+  base_config: config.zm.tutorial.yaml  # base for run_all_scenarios
 
 scenario:
   simpl: [""]
@@ -44,6 +44,7 @@ electricity:
   powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
   custom_powerplants: replace # set to "merge" or "replace" if you have a custom_powerplants.csv for Zambia
   disaggregate_powerplants: false
+
 
   conventional_carriers: [oil, OCGT, CCGT, coal, geothermal, biomass]
   renewable_carriers: [solar, onwind, hydro]

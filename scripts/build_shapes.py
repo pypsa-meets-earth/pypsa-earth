@@ -2082,7 +2082,7 @@ if __name__ == "__main__":
         simplify_gadm=simplify_gadm,
         tolerance=tolerance,
         minarea=minarea,
-        mining_raster_path=snakemake.input.mining_raster,
+        mining_raster_path=snakemake.input.get("mining_raster", None),
     )
 
     save_to_geojson(gadm_shapes, out.gadm_shapes)

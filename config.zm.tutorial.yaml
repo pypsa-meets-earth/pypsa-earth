@@ -6,14 +6,12 @@ version: 0.8.0
 tutorial: true
 
 
-countries: ["NG", "BJ"]
+countries: ["ZM"]
 
 enable:
   retrieve_databundle: true
   retrieve_databundle_sector: true
-  retrieve_cutout: true
-  # TODO get back building natura raster
-  build_natura_raster: false
+  build_natura_raster: true
   progress_bar: false
 
 data:
@@ -56,43 +54,35 @@ atlite:
     # use 'base' to determine geographical bounds and time span from config
     # base:
     # module: era5
-    cutout-2013-era5-tutorial: {}
+    zm-2013-tutorial-era5: {}
 
+# Cutout definitions are needed to re-write those defined
+# in config.tuturial.yaml (needs fixing in the upstream)
 renewable:
   onwind:
-    cutout: cutout-2013-era5-tutorial
+    cutout: zm-2013-tutorial-era5
   offwind-ac:
-    cutout: cutout-2013-era5-tutorial
+    cutout: zm-2013-tutorial-era5
   offwind-dc:
-    cutout: cutout-2013-era5-tutorial
+    cutout: zm-2013-tutorial-era5
   solar:
-    cutout: cutout-2013-era5-tutorial
+    cutout: zm-2013-tutorial-era5
   hydro:
-    cutout: cutout-2013-era5-tutorial
+    cutout: zm-2013-tutorial-era5
     hydrobasins_level: 4
     hydro_max_hours: "energy_capacity_totals_by_country"
   csp:
-    cutout: cutout-2013-era5-tutorial
+    cutout: zm-2013-tutorial-era5
 
 
 solving:
   solver:
     name: glpk
     options: glpk-default
-
-# Zambia-specific parameters --------------------------------------------------
-
 validation:
   interconnectors:
-    enable: false
-    download_data: false
+    enable: true
+    download_data: true
   custom_powerplants:
-    enable: false
-    download_data: false
-  line_types:
-    download_data: false
-  mining_data:
-    download_data: false
-
-load_options:
-  zambia_demand_distribution: false # if true, distributes load using mining and GDP rasters (Zambia-specific)
+    enable: true
+    download_data: true
