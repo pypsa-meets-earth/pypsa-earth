@@ -1144,6 +1144,9 @@ plotting:
     H2: H2
     lines: Transmission Lines
     ror: Run of River
+
+# Zambia-specific parameters --------------------------------------------------
+
 validation:
   interconnectors:
     enable: false

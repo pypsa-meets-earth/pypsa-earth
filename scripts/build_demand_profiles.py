@@ -385,6 +385,11 @@ def build_demand_profiles(
             return pd.DataFrame({group.index[0]: l})
         else:
             shapes_cntry = shapes.loc[shapes.country == cntry]
+
+            # quick-and-dirty fix to run the standard workflow
+            if not "mining" in shapes_cntry.columns:
+                shapes_cntry["mining"] = 0.0
+
             transfer = shapes_to_shapes(group, shapes_cntry.geometry).T.tocsr()
             gdp_n = pd.Series(
                 transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
