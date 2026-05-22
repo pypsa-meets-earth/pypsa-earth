@@ -46,6 +46,12 @@ The **blocks** represent the individual rules which are required to create the f
     ```
     using [Graphviz](https://graphviz.org/)
 
+## Data Management System
+
+PyPSA-Earth has a comprehensive set of pre-compiled datasets which provides all the inputs needed to build and run an energy system model for any country of the world. A specification of modelling-ready databundles is available in `configs/bundle_config.yaml`.
+
+The datasets are available for various spatial scales, from global to national ones and can be extracted at an initial stage of running the model as described in `Installation` section. A data management system `retrieve_databundle_light` selects the databundles which matches best settings defined in the configuration file and extracts them automatically.
+
 ## Folder structure
 
 The content in this package is organized in folders as described below; for more details, please see the documentation.
