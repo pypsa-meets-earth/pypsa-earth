@@ -425,7 +425,9 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, ref_year, q_ror, q_res
             coords={"plant": plants.index},
         )
 
-        reservoir_buses = plants.query("technology == 'Reservoir'").index
+        reservoir_buses = plants.query(
+            "technology not in ['Run-of-River', 'Pumped Storage']"
+        ).index  # Note: this implicitly induce the unknown hydro technologies to be considered as reservoirs
         ror_buses = plants.index.intersection(reservoir_buses)
 
         mask_reservoirs = runoff["plant"].isin(reservoir_buses)
