@@ -743,20 +743,6 @@ def attach_hydro(
         "Reservoir": "hydro",
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
-    invalid_techs = ppl.loc[~ppl.technology.isin(tech_to_carrier.keys())]
-
-    # Current fix, NaN technologies set to ROR
-    if not invalid_techs.empty:
-        n_invalid = invalid_techs.shape[0]
-        inv_tech_list = invalid_techs["technology"].unique()
-        logger.warning(
-            f"Identified {n_invalid} hydro powerplants with unknown technology: "
-            + "; ".join({inv_tech_list})
-            + "\n"
-            "Initialized to 'Run-Of-River'"
-        )
-        ppl.loc[invalid_techs.index, "technology"] = "Run-Of-River"
-        ppl.loc[invalid_techs.index, "carrier"] = "ror"
 
     # Aggregate by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -765,7 +751,9 @@ def attach_hydro(
     phs = ppl_grouped[ppl_grouped["carrier"] == "PHS"]
     hydro = ppl_grouped[ppl_grouped["carrier"] == "hydro"]
 
-    tbd = ppl[ppl.technology.isna()]  # To be determined technologies
+    tbd = ppl[
+        ~ppl.technology.isin(tech_to_carrier.keys())
+    ]  # To be determined technologies
 
     inflow_idx = ror.index.union(hydro.index).union(tbd.index)
     if not inflow_idx.empty:
