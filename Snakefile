@@ -66,7 +66,6 @@ SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
-load_data_paths = get_load_paths_gegis("data", config)
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -149,7 +148,7 @@ if config["enable"].get("retrieve_databundle", True):
 
     # Exclude categories which are implemented in retrieve rules (retrieve.smk)
     bundles_to_download = get_best_bundles_in_snakemake(
-        config, exclude_categories=["natura", "hydrobasins", "cutouts"]
+        config, exclude_categories=["natura", "hydrobasins", "cutouts", "irena"]
     )
 
     rule retrieve_databundle_light:
@@ -588,7 +587,11 @@ rule build_demand_profiles:
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
-        load=load_data_paths,
+        load=branch(
+            config["load_options"].get("source", "gegis") in ["gegis", "ssp"],
+            get_load_paths_gegis("data", config),
+            "data/demand/forecasts_on_historical_period.parquet",
+        ),
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/

@@ -7,6 +7,7 @@ run:
   name: "validation_dispatch_zambia_2024"
   shared_cutouts: true
 enable:
+  retrieve_cutout: false
   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: false
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv

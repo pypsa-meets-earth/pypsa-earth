@@ -184,10 +184,15 @@ base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network
 
+# DemandCast and GEGIS are two available options
+# DemandCast covers 2000-2024
+# GEGIS dataset provides data for 2011, 2013, 2018
+# Details and comparison are provided in
+# https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
 load_options:
-  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
-  weather_year: 2013 # Load scenarios available with different weather year (different renewable potentials)
-  prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
+  source: "gegis" # "demcast" or "gegis"
+  weather_year: 2013 # Weather year of the load profile
+  prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
   demand_weights:
     mining: 0.76
