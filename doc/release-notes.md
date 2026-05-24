@@ -12,7 +12,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
+* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population [PR #1622](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622)
 
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
 
@@ -30,7 +30,15 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove unused override_respot [PR #1805](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1805)
 
+* Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
+
 **Minor Changes and bug-fixing**
+
+* Avoid crash in `build_osm_network` when merging substations with the same `station_id` if `tag_substation` or `symbol` contains missing OSM metadata [PR #1818](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1818)
+
+* Add CI to update reference objective values [PR #1811](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1811)
+
+* Fix `UnboundLocalError` and back-pressure RHS leak in `add_chp_constraints` [#1814](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1814)
 
 * Add config parameter `enable_electricity_connection_cost`, which adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network [PR #1810](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1810)
 
