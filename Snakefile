@@ -23,6 +23,7 @@ from _helpers import (
     branch,  # Remove if Snakemake >= 8.3.0
 )
 from build_demand_profiles import get_load_paths_gegis
+from check_config_consistency import write_config_consistency_report
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
@@ -64,6 +65,14 @@ SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
+
+config_issues = write_config_consistency_report(
+    config,
+    "results/" + RDIR + "config_consistency.yaml",
+)
+
+for issue in config_issues:
+    print(f"[config {issue['level']}] {issue['check']}: {issue['message']}")
 
 
 wildcard_constraints:
