@@ -5,45 +5,90 @@
 
 # -*- coding: utf-8 -*-
 """
-Converts vectordata or known as shapefiles (i.e. used for geopandas/shapely) to our cutout rasters. The `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_ on protected areas is aggregated to all cutout regions.
+Builds a rasterized Natura and environmental exclusion mask from vector geometries.
+The geometries are sourced from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_
+and filtered for the required regions.
 
 Relevant Settings
 -----------------
 
 .. code:: yaml
 
+    countries:
+
+    enable:
+        build_natura_raster:
+        progress_bar:
+
+    crs:
+        area_crs:
+
+    natura:
+        natura_size:
+        natura_resolution:
+        window_size:
+        buffer_size:
+
     renewable:
         {technology}:
             cutout:
 
-.. seealso::
-    Documentation of the configuration file ``config.yaml`` at
-    :ref:`renewable_cf`
-
 Inputs
 ------
 
-- ``data/landcover/world_protected_areas/*.shp``: shapefiles representing the world protected areas, such as the `World Database of Protected Areas (WDPA) <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_.
-
-    .. image:: /img/natura.png
-        :width: 33 %
+- ``data/landcover/world_protected_areas/*.shp``: Vectorized shapefiles representing the world protected areas from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_.
+- ``cutouts/{CDIR}/{cutout}.nc``: Atlite cutout specified in ``renewable: {technology}: cutout`` for each technology. The cutout(s) are used to determine geographic coverage and resolution alignment.
+- ``resources/{RDIR}/shapes/country_shapes.geojson``: Onshore country geometries used to determine the spatial extent of the rasterization.
+- ``resources/{RDIR}/shapes/offshore_shapes.geojson``: Offshore regions associated with the selected countries.
 
 Outputs
 -------
 
-- ``resources/natura/natura.tiff``: Rasterized version of the world protected areas, such as `WDPA <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_ natural protection areas to reduce computation times.
-
-    .. image:: /img/natura.png
-        :width: 33 %
+- ``resources/{RDIR}/natura.tiff``: Rasterized version of the world protected areas.
 
 Description
 -----------
-To operate the script you need all input files.
+The rule :mod:`build_natura_raster` converts large collections of vector-based
+environmental exclusion geometries into a rasterized binary mask containing:
 
-This script collects all shapefiles available in the folder `data/landcover/*` describing regions of protected areas,
-merges them to one shapefile, and create a rasterized version of the region, that covers the region described by the cutout.
-The output is a raster file with the name `natura.tiff` in the folder `resources/natura/`.
+- ``1`` for raster cells intersecting exclusion geometries, and
+- ``0`` elsewhere.
+
+First, the rule determines the spatial extent of the rasterization which is configured through
+``natura: natura_size`` and can be based on:
+
+- the full global extent,
+- the combined extent of all configured renewable technology cutouts
+  (``renewable: {technology}: cutout``), or
+- the combined extent of all selected country (``countries``) and their offshore regions.
+
+In case of the ``countries`` extent, the country and offshore geometries are reprojected into (``crs: area_crs``).
+Additionally, a buffer (``natura: buffer_size``) is applied to the geometries to ensure that all regions of interest
+are fully included in the rasterization.
+
+The rasterization is performed as follows:
+
+- an empty GeoTIFF is created using the extent determined above and a grid
+  resolution defined by ``natura: natura_resolution``,
+- the extent is split into smaller windows with a maximum width and height of ``natura: window_size``,
+- each input ``.shp`` file is processed independently and rasterized window by window.
+
+This windowed processing strategy reduces memory usage and allows
+the rule to run efficiently on standard compute environments.
+
+Notes
+-----
+This script only runs in the current PyPSA-Earth workflow if ``enable: build_natura_raster`` is ``true``.
+Otherwise, the workflow will use the general ``data/natura/natura.tiff`` file, which is copied using the rule :mod:`copy_defaultnatura_tiff`.
+
+There are two main differences between the two options, the data source and the license:
+- The rule :mod:`build_natura_raster` uses data from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_
+  which is generally more up-to-date. However, the `Protected Planet License <https://www.protectedplanet.net/en/legal>`_
+  is less permissive and might not be applicable for your use case.
+- The rule :mod:`copy_defaultnatura_tiff` uses data from `Harvard Dataverse Protected areas (WDPA) <https://doi.org/10.7910/DVN/XIV9BL>`_,
+  which was last updated in 2022. This dataset is licensed under the `CC0 1.0 license <https://creativecommons.org/publicdomain/zero/1.0/>`_.
 """
+
 import os
 
 import atlite
@@ -64,14 +109,52 @@ logger = create_logger(__name__)
 CUTOUT_CRS = "EPSG:4326"
 
 
-def get_relevant_regions(country_shapes, offshore_shapes, natura_crs, buffer):
+def get_relevant_regions(
+    country_shapes: str,
+    offshore_shapes: str,
+    natura_crs: str,
+    buffer: float,
+):
     """
-    Merge the country_shapes and the offshore_shapes into one GeoDataFrame.
-    Additionally add a buffer to ensure all relevant regions are included.
+    Load and merge country and offshore regions into a unified geometry.
+
+    The resulting geometry is buffered to ensure all relevant nearby regions
+    are included.
+
+    Parameters
+    ----------
+    country_shapes : str
+        Path to the vector file containing the country geometries.
+    offshore_shapes : str
+        Path to the vector file containing the offshore geometries.
+    natura_crs : str
+        Coordinate reference system used for all geometries.
+    buffer : float
+        Buffer distance applied to both country and offshore geometries.
+        Units are determined by `natura_crs`.
 
     Returns
     -------
-    regions : GeoDataFrame with a unified "multipolygon"
+    geopandas.GeoDataFrame
+        GeoDataFrame containing a single merged geometry representing the
+        buffered union of all country and offshore regions.
+
+    Notes
+    -----
+    Both input datasets are reprojected to `natura_crs` before merging.
+
+    Examples
+    --------
+    >>> regions = get_relevant_regions(
+    ...     "resources/shapes/country_shapes.geojson",
+    ...     "resources/shapes/offshore_shapes.geojson",
+    ...     "ESRI:54009",
+    ...     10000,
+    ... )
+    >>> len(regions)
+    1
+    >>> regions.crs.to_string()
+    "ESRI:54009"
     """
 
     # unify the country_shapes and offshore_shapes to select the regions of interest
@@ -91,9 +174,34 @@ def get_relevant_regions(country_shapes, offshore_shapes, natura_crs, buffer):
     return regions
 
 
-def get_fileshapes(list_paths, accepted_formats=(".shp",)):
-    "Function to parse the list of paths to include shapes included in folders, if any"
+def get_fileshapes(
+    list_paths: list[str],
+    accepted_formats: str | tuple[str, ...] = (".shp",),
+) -> list[str]:
+    """
+    Function to parse the list of paths and identify the ones with one of the accepted file formats.
 
+    Parameters
+    ----------
+    list_paths : list[str]
+        List of paths to check.
+    accepted_formats : str | tuple[str, ...], optional
+        File format(s) to accepted. If a string is provided, only that extension is accepted.
+        If a tuple is provided, any of the extensions are accepted. Default is (".shp",).
+
+    Returns
+    -------
+    list[str]
+        List of all paths which are of one of the accepted formats.
+
+    Examples
+    --------
+    >>> paths = ["shape_file.shp", "shape_index.shi"]
+    >>> get_fileshapes(paths)
+    ["shape_file.shp"]
+    >>> get_fileshapes(paths, ".shi")
+    ["shape_index.shi"]
+    """
     list_fileshapes = []
     for lf in list_paths:
         if os.path.isdir(lf):  # if it is a folder, then list all shapes files contained
@@ -111,36 +219,86 @@ def get_fileshapes(list_paths, accepted_formats=(".shp",)):
     return list_fileshapes
 
 
-def determine_region_xXyY(cutout_name, regions, natura_size, out_logging):
+def determine_region_xXyY(
+    cutout_name: str,
+    regions: gpd.GeoDataFrame | None,
+    natura_size: str,
+    out_logging: bool,
+):
     """
-    Determine the bounds of the analyzed regions depending on the natura_size parameter.
-    "global" includes the entire world, "cutout" the extend of the cutout, and
-    "countries" only includes the bounds of the requested countries and their offshore regions.
+    Determine the bounds of the analyzed regions.
+
+    Parameters
+    ----------
+    cutout_name : str
+        Path of the cutout file.
+    regions : gpd.GeoDataFrame | None
+        GeoDataFrame containing the analyzed regions.
+        Required if natura_size is "countries", otherwise ignored.
+    natura_size : str
+        Flag to determine which region should be used.
+        "global" includes the entire world, "cutout" the extent of the cutout, and
+        "countries" only includes the bounds of the requested countries and their offshore regions.
+    out_logging : bool
+        If True, emits progress information via the module logger.
 
     Returns
     -------
-    cutout_xXyY : List including the bounds
+    list[float]
+        Bounding box of the region in the format:
+        [min_lon, max_lon, min_lat, max_lat].
+
+    Examples
+    --------
+    >>> cutout_path = "cutouts/cutout-2013-era5.nc"
+    >>> regions = None
+
+    Global extent:
+    >>> determine_region_xXyY(cutout_path, regions, "global", False)
+    [-180, 180, -90, 90]
+
+    Cutout extent:
+    >>> determine_region_xXyY(cutout_path, regions, "cutout", False)
+    [-19.8, 67.8, -37.8, 39.6]
+
+    Countries extent:
+    >>> import geopandas as gpd
+    >>> from shapely.geometry import Polygon
+    >>>
+    >>> regions = gpd.GeoDataFrame(
+    ...     geometry=[Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])],
+    ...     crs="EPSG:4326",
+    ... )
+    >>> determine_region_xXyY(cutout_path, regions, "countries", False)
+    [0.0, 10.0, 0.0, 10.0]
     """
 
     if out_logging:
         logger.info("Stage 1/5: Determine cutout boundaries")
 
+    # identify the cell size of the cutout
     cutout = atlite.Cutout(cutout_name)
     assert cutout.crs == CUTOUT_CRS
     dx, dy = cutout.dx, cutout.dy
 
+    # identify the extent of the analyzed region
     match natura_size:
         case "global":
             return [-180, 180, -90, 90]
         case "cutout":
             x, X, y, Y = cutout.extent
         case "countries":
+            if regions is None:
+                raise ValueError(
+                    "Must provide regions when natura_size is 'countries', instead provided None."
+                )
             x, y, X, Y = regions.to_crs(CUTOUT_CRS).total_bounds
         case _:
             raise ValueError(
                 f"Provided an unknown value for the parameter 'natura_size': {natura_size}"
             )
 
+    # ensure all cells are fully included and that the bounds remain within the latitude and longitude range
     cutout_xXyY = [
         np.clip(x - dx / 2.0, -180, 180),
         np.clip(X + dx / 2.0, -180, 180),
@@ -150,25 +308,99 @@ def determine_region_xXyY(cutout_name, regions, natura_size, out_logging):
     return cutout_xXyY
 
 
-def get_transform_and_shape(bounds, res, out_logging):
-    if out_logging:
-        logger.info("Stage 2/5: Get transform and shape")
-    left, bottom = [(b // res) * res for b in bounds[:2]]
-    right, top = [(b // res + 1) * res for b in bounds[2:]]
-    # "latitude, longitude" coordinates order
-    shape = int((top - bottom) // res), int((right - left) // res)
-    transform = rio.Affine(res, 0, left, 0, -res, top)
-    return transform, shape
-
-
-def decide_bigtiff_flag(out_shape, dtype="uint8", safety_factor=1.1):
+def get_transform_and_shape(
+    bounds: list[float],
+    res: float,
+    out_logging: bool,
+) -> tuple[rio.Affine, tuple[int, int]]:
     """
-    Decide whether BIGTIFF should be "YES" or "NO" based on raster shape.
-    BIGTIFF is required for filesizes larger than 4 GB.
+    Compute an affine transform and raster shape from spatial bounds and resolution.
+
+    Parameters
+    ----------
+    bounds : list[float]
+        Bounding box in the format:
+        [min_lon, min_lat, max_lon, max_lat].
+    res : float
+        Spatial resolution of the grid (in coordinate units, e.g. degrees).
+    out_logging : bool
+        If True, emits progress information via the module logger.
 
     Returns
     -------
-    str: "YES" if the estimated size is larger than 4 GB, else "NO".
+    transform : rio.Affine
+        Affine transform mapping raster indices (row, col) to spatial coordinates.
+    shape : tuple[int, int]
+        Raster shape as (n_lat, n_lon), corresponding to (rows, cols).
+
+    Examples
+    --------
+    >>> import rasterio as rio
+    >>>
+    >>> # [min_lon, min_lat, max_lon, max_lat]
+    >>> bounds = [0.0, 50.0, 3.0, 52.0]
+    >>> res = 1.0
+    >>>
+    >>> transform, shape = get_transform_and_shape(bounds, res, False)
+    >>> shape
+    (2, 3)
+    >>> transform
+    Affine(1.0, 0.0, 0.0,
+       0.0, -1.0, 52.0)
+    """
+    if out_logging:
+        logger.info("Stage 2/5: Get transform and shape")
+
+    # snap the bounds to the nearest grid
+    left, bottom = [(b // res) * res for b in bounds[:2]]
+    right, top = [(b // res + 1) * res for b in bounds[2:]]
+
+    # identify the shape of the raster as "latitude, longitude"
+    shape = int((top - bottom) // res), int((right - left) // res)
+    # prepare the affine transform to map raster indices (row, col) to spatial coordinates
+    transform = rio.Affine(res, 0, left, 0, -res, top)
+
+    return transform, shape
+
+
+def decide_bigtiff_flag(
+    out_shape: tuple[int, int],
+    dtype: str = "uint8",
+    safety_factor: float = 1.1,
+):
+    """
+    Decide whether a raster requires BIGTIFF storage based on raster shape.
+
+    BIGTIFF is required for GeoTIFF files larger than approximately 4 GB.
+
+    Parameters
+    ----------
+    out_shape : tuple[int, int]
+        Raster shape as (n_rows, n_cols).
+    dtype : str, optional
+        Data type of the raster values. Default is "uint8".
+    safety_factor : float, optional
+        Multiplicative buffer applied to the estimated size to account for
+        metadata, compression inefficiencies, and file overhead. Default is 1.1.
+
+    Returns
+    -------
+    str
+        "YES" if the estimated size is larger than the BIGTIFF threshold,
+        otherwise "NO".
+
+    Notes
+    -----
+    The size estimate is computed as:
+
+        n_rows * n_cols * bytes_per_pixel * safety_factor
+
+    The BIGTIFF threshold is fixed at 4,000,000,000 bytes (~4 GB).
+
+    Examples
+    --------
+    >>> decide_bigtiff_flag((100, 100), dtype="uint8")
+    "NO"
     """
 
     tiff_size = 4_000_000_000
