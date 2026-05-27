@@ -21,7 +21,12 @@ snapshots:
 countries: ["ZM"]
 
 enable:
+  retrieve_cutout: false # retrieve_era5_cutout rule handles this for ZM
   build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+
+atlite:
+  cutouts:
+    cutout-2013-era5: {}
 
 download_osm_data_nprocesses: 4
 
@@ -70,30 +75,35 @@ cluster_options:
 # as there are no regional datasets for therm yet
 renewable:
   onwind:
+    cutout: cutout-2013-era5
     natura: false
     copernicus: false
     max_depth: false
     min_shore_distance: false
     max_shore_distance: false
   offwind-ac:
+    cutout: cutout-2013-era5
     natura: false
     copernicus: false
     max_depth: false
     min_shore_distance: false
     max_shore_distance: false
   offwind-dc:
+    cutout: cutout-2013-era5
     natura: false
     copernicus: false
     max_depth: false
     min_shore_distance: false
     max_shore_distance: false
   solar:
+    cutout: cutout-2013-era5
     natura: false
     copernicus: false
     max_depth: false
     min_shore_distance: false
     max_shore_distance: false
   hydro:
+    cutout: cutout-2013-era5
     source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
     extendable: false
     normalization:
@@ -101,6 +111,7 @@ renewable:
       year: 2013
     multiplier: 0.65
   csp:
+    cutout: cutout-2013-era5
     natura: false
     copernicus: false
     max_depth: false

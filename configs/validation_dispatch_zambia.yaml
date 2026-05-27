@@ -26,6 +26,7 @@ snapshots:
   inclusive: "left" # end is not inclusive
 countries: ["ZM"]
 
+
 atlite:
   nprocesses: 4
   cutouts:

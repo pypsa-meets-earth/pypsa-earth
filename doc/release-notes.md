@@ -16,6 +16,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Ability to use custom hydro inflow data in the workflow [PR #178](https://github.com/open-energy-transition/pypsa-zambia/pull/178)
 
+* Ability to specify cutout retrieval by year for specified years via config file [PR #219](https://github.com/open-energy-transition/pypsa-zambia/pull/218)
+
 ### Minor Changes and bug-fixing
 
 

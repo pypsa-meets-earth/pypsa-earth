@@ -27,7 +27,6 @@ from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
 )
-
 from scripts.utility_custom_features import load_mining_data, build_mining_raster
 
 from pathlib import Path

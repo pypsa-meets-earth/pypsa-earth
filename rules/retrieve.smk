@@ -329,3 +329,29 @@ if (NATURA_EARTH_DATASET := dataset_version("natura_earth", config))["source"] i
         run:
             unpack_archive(str(input["natura_zip"]), output["unzip"])
             copy2(os.path.join(output["tiff"]), output["shp"])
+
+
+if (ERA5_CUTOUT := dataset_version("cutout-era5", config))["source"] in [
+    "primary",
+    "tutorial",
+]:
+    year = int(float(ERA5_CUTOUT["year"]))
+    region = ERA5_CUTOUT["region"]
+
+    rule retrieve_era5_cutout:
+        message:
+            f"Retrieving ERA5 cutout for region {region} ({year})"
+        input:
+            cutout=HTTP.remote(
+                ERA5_CUTOUT["url"],
+                keep_local=True,
+                additional_request_string="?download=1",
+            ),
+        output:
+            f"cutouts/{CDIR}cutout-{year}-era5.nc",
+        log:
+            f"logs/{RDIR}retrieve_era5_cutout.log",
+        benchmark:
+            f"benchmarks/{RDIR}retrieve_era5_cutout"
+        run:
+            copy2(str(input[0]), output[0])
