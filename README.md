@@ -177,6 +177,8 @@ After checking out the tag, the model can be run as usual. Please make sure to u
 
 The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
 
+For the API reference, including sector-coupled scripts documentation, see: [API Reference](https://pypsa-earth.readthedocs.io/en/latest/api-reference/index.html).
+
 ## Collaborators
 
 <!-- https://github.com/marketplace/actions/contribute-list -->
