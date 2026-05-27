@@ -57,6 +57,8 @@ The diagram below depicts one representative clustered node for the sector-coupl
   <img src="https://ars.els-cdn.com/content/image/1-s2.0-S0306261925000467-gr5_lrg.jpg" width=75%>
 </p>
 
+Building sector-coupled networks involves additional snakemake rules for energy demand, heat, transport, industry, hydrogen, and gas infrastructure. For details, see the [sector-coupled model tutorial](https://pypsa-earth.readthedocs.io/en/latest/tutorials/sector-coupled-model.html) and the [sector-coupling API reference](https://pypsa-earth.readthedocs.io/en/latest/api-reference/sector-coupling.html).
+
 ## Livetracker. Most popular global models:
 
 [![Star History Chart](https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,EnergySystemsModellingLab/MUSE_OS,etsap-TIMES/TIMES_model&type=Date&legend=top-left)](https://www.star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&EnergySystemsModellingLab/MUSE_OS&etsap-TIMES/TIMES_model&Date)
