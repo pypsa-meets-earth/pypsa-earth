@@ -1015,11 +1015,18 @@ def check_retrieved_cutout_match(snakemake: Snakemake) -> None:
     from build_renewable_profiles import check_cutout_match
 
     cutout_output_fl = snakemake.output[0]
+    configured_bundle_outputs = [
+        output
+        for bundle in snakemake.params.bundles_to_download
+        for output in snakemake.config["databundles"][bundle].get("output", [])
+    ]
 
     if not os.path.isfile(cutout_output_fl):
         raise FileNotFoundError(
             f"A target cutout file '{cutout_output_fl}' was not extracted. "
-            f"Expected it from cutout bundle(s): {', '.join(map(str, snakemake.params.bundles_to_download))}"
+            f"The downloaded bundle is {', '.join(map(str, snakemake.params.bundles_to_download))}"
+            f"Configured bundle output(s): "
+            f"{', '.join(configured_bundle_outputs)}"
         )
 
     cutout = atlite.Cutout(cutout_output_fl)
