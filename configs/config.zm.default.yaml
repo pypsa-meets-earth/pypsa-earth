@@ -1,0 +1,167 @@
+# SPDX-FileCopyrightText: Contributors to PyPSA-Earth
+# SPDX-FileCopyrightText: Open Energy Transition gGmbH
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: "zambia_default"
+  shared_cutouts: true
+enable:
+  retrieve_cutout: false
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle_sector: false
+  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+  build_cutout: false
+scenario:
+  simpl: [""]
+  ll: ["v1.0"]
+  clusters: ["all"]
+  opts: [Co2L-3h]
+
+snapshots:
+  start: "2013-01-01"
+  end: "2014-01-01"
+  inclusive: "left" # end is not inclusive
+countries: ["ZM"]
+
+atlite:
+  nprocesses: 4
+  cutouts:
+    cutout-2013-era5:
+      module: era5
+      dx: 0.3
+      dy: 0.3
+      time: ["2013-01-01", "2014-01-01"]
+      x: [21.5, 33.7]
+      y: [-18.8, -7.8]
+
+
+renewable:
+  onwind:
+    cutout: cutout-2013-era5
+    correction_factor: 0.93
+    extendable: false
+  offwind-ac:
+    cutout: cutout-2013-era5
+    extendable: false
+  offwind-dc:
+    cutout: cutout-2013-era5
+    extendable: false
+  solar:
+    cutout: cutout-2013-era5
+    correction_factor: 0.854337
+    extendable: false
+  hydro:
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
+    extendable: false
+    normalization:
+      method: irena
+      year: 2013
+    multiplier: 0.65
+  csp:
+    cutout: cutout-2013-era5
+    extendable: false
+
+
+load_options:
+  ssp: "ssp2-2.6"
+  weather_year: 2013
+  prediction_year: 2030
+  scale: 0.85  # scaled the model demand by a factor of 14.4/19.34 to match the national value
+  demand_weights:
+    mining: 0.76
+    gdp: 0.24
+  zambia_demand_distribution: true
+
+
+electricity:
+  extendable_carriers:
+    Generator: []
+    StorageUnit: []
+    Store: []
+    Link: []
+
+  automatic_emission: false
+  automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
+
+  powerplants_filter: (DateOut >= 2024 or DateOut != DateOut) and (DateIn <= 2024 or DateIn != DateIn)
+  custom_powerplants: replace # set to "merge" or "replace" if you have a custom_powerplants.csv for Zambia
+  disaggregate_powerplants: true # to enable disaggregation also in simplify_network, a set of excluded carries must be specified
+
+  conventional_carriers: [oil, OCGT, CCGT, coal, geothermal, biomass]
+  renewable_carriers: [solar, onwind, hydro]
+
+  estimate_renewable_capacities:
+    stats: false # wind and solar generation provided by the custom powerplants file
+  operational_reserve:
+    activate: false
+lines:
+  s_max_pu: 0.7
+  s_nom_extendable: false
+  ac_types:
+    66.: "ACSR Wolf 66.0"
+    132.: "ACSR Panther 132.0"
+    220.: "ACSR Zebra 220.0"
+    330.: "ACSR Bison 330.0"
+costs:
+  year: 2025
+  investment: # EUR/MW — IRP Table 5 (Zambia 2023), converted at 0.7532 EUR/USD
+    hydro: 2862160       # 3.800 mUSD/MW — Hydro Storage
+    ror: 965602          # 1.282 mUSD/MW — Hydro Run-of-River
+    coal: 807430         # 1.072 mUSD/MW — Coal Thermal
+    geothermal: 1205120  # 1.600 mUSD/MW — Geothermal
+    biomass: 474516      # 0.630 mUSD/MW — Biomass
+    solar-utility: 756966  # 1.005 mUSD/MW — Solar PV (utility-scale)
+    onwind: 969368       # 1.287 mUSD/MW — Wind Onshore
+    nuclear: 4865672     # 6.460 mUSD/MW — Nuclear
+    csp-tower: 4973380   # 6.603 mUSD/MW — Solar CSP
+    oil: 506904          # 0.673 mUSD/MW — Mixed Fuel
+  marginal_cost: # EUR/MWh — IRP Table 5 (Zambia 2023), converted at 0.7532 EUR/USD
+    solar: 0
+    onwind: 0
+    offwind: 0.015
+    hydro: 1.05
+    ror: 0.
+    coal: 72.92
+    oil: 4.23
+    geothermal: 0.87
+    biomass: 4.14
+    nuclear: 3.46
+    csp: 0.
+
+cluster_options:
+  simplify_network:
+    exclude_carriers: [coal, oil, hydro, ror, PHS, biomass]  # used to customise simplification, required when disaggregate_powerplants is true to prevent named plants from being re-aggregated in simplify_network
+
+
+sector:
+  enable:
+    heat: false
+    biomass: false
+    industry: true
+    shipping: false
+    aviation: false
+    land_transport: false
+    rail_transport: false
+
+    agriculture: false
+    residential: false
+    services: false
+  chp: false
+solving:
+  solver:
+    name: highs
+    options: highs-default
+validation:
+  interconnectors:
+    enable: true
+    download_data: true
+  custom_powerplants:
+    enable: true
+    download_data: true
+  line_types:
+    download_data: true
+  mining_data:
+    download_data: true

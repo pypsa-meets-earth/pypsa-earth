@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: Contributors to PyPSA-Earth
+# SPDX-FileCopyrightText: Open Energy Transition gGmbH
+#
+# SPDX-License-Identifier: CC0-1.0
+
+run:
+  name: "cap_exp_zambia_2025"
+  shared_cutouts: true
+
+enable:
+  retrieve_databundle: false
+  build_natura_raster: false
+
+scenario:
+  simpl: [""]
+  ll: ["copt"]
+  clusters: ["10"]
+  opts: [3h]
+
+electricity:
+  extendable_carriers:
+    Generator: ["solar"]
+    StorageUnit: []
+    Store: []
+    Link: []
+
+  automatic_emission: false
+  automatic_emission_base_year: 1990
+
+  powerplants_filter: (DateOut >= 2025 or DateOut != DateOut) and (DateIn <= 2025 or DateIn != DateIn)
+  custom_powerplants: replace
+
+renewable:
+  hydro:
+    multiplier: 0.65
+
+solving:
+  options:
+    load_shedding: true
+
+load_options:
+  demand_weights:
+    mining: 0.76
+    gdp: 0.24
+  zambia_demand_distribution: true
+costs:
+  marginal_cost:
+    coal: 0.0
+    oil: 4.23
