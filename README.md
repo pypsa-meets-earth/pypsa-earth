@@ -177,6 +177,8 @@ After checking out the tag, the model can be run as usual. Please make sure to u
 
 The documentation is available here: [documentation](https://pypsa-earth.readthedocs.io/en/latest/index.html).
 
+For details on the sector-coupled model configuration, see the [configuration tables](https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration.html#sector) documentation, which includes options for heating, transport, industry, biomass, shipping, aviation, CCUS, and more.
+
 ## Collaborators
 
 <!-- https://github.com/marketplace/actions/contribute-list -->
