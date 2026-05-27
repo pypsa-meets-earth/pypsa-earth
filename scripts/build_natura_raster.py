@@ -82,6 +82,7 @@ This script only runs in the current PyPSA-Earth workflow if ``enable: build_nat
 Otherwise, the workflow will use the general ``data/natura/natura.tiff`` file, which is copied using the rule :mod:`copy_defaultnatura_tiff`.
 
 There are two main differences between the two options, the data source and the license:
+
 - The rule :mod:`build_natura_raster` uses data from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_
   which is generally more up-to-date. However, the `Protected Planet License <https://www.protectedplanet.net/en/legal>`_
   is less permissive and might not be applicable for your use case.
