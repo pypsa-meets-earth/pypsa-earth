@@ -6,8 +6,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import yaml
 
+import yaml
 
 GEGIS_YEARS = [2013, 2015, 2018]
 DEMCAST_YEARS = list(range(1999, 2025))

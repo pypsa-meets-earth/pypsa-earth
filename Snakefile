@@ -23,7 +23,7 @@ from _helpers import (
     branch,  # Remove if Snakemake >= 8.3.0
 )
 from build_demand_profiles import get_load_paths_gegis
-from check_config_consistency import write_config_consistency_report
+from _helpers_config import write_config_consistency_report
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
