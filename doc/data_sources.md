@@ -8,9 +8,6 @@ SPDX-License-Identifier: CC-BY-4.0
 
 PyPSA-Zambia is compiled from a variety of data sources.
 
-<!-- The following table provides an overview of the data sources used in PyPSA-Zambia.
-Different licenses apply to the data sources. -->
-
 ## Data Versioning {#managing_data_versions}
 
 Many of the data sources used in PyPSA-Zambia are updated regularly. To
@@ -23,8 +20,7 @@ for the repository under `https://data.pypsa.org`. -->
 **Note**
 
 For users, selection and control over which data sources to use is
-managed through the configuration file. See `data_cf`{.interpreted-text
-role="ref"} for details. In most cases you just wanna stick with the
+managed through the configuration file. See [data](../user-guide/configuration/#data) for details. In most cases you just wanna stick with the
 latest archive version. Reproducibility is given even when using the
 `latest` tag via the `versions.csv`, which is version controlled.
 
@@ -42,6 +38,8 @@ dataset with the following columns:
  from other data) or `tutorial` (shortened versions of original datasets intended to be used for testing).
 - `tags`: Space-separated tags like `latest`, `supported` or
     `deprecated`.
+- `region`: An optional comma-separated list of ISO two-letter code, or non-standard name for the regions represented in the dataset
+- `year`: An optional integer e.g. `2023` for the year of data represented in the dataset
 - `added`: The date when this entry was added to the registry.
 - `note`: Optional notes about the dataset or version.
 - `url`: The download URL for the data.
@@ -59,7 +57,7 @@ this case, the corresponding `archive` entries do not mirror the same
 version but represent snapshots taken at specific points in time from
 that primary source.
 
-### Adding a new version of a dataset
+### Adding a new *version* of a dataset
 
 If you notice that a data source has been updated and want to add the
 new version to PyPSA-Zambia:
@@ -103,6 +101,9 @@ Maintainers of the repository will create the corresponding `archive`
 entry after reviewing your contribution.
 
 
-# Data inventory
+## Data inventory
+
+The following table provides an overview of the data sources used in PyPSA-Zambia.
+Different licenses apply to the data sources.
 
 {{ read_csv('data_inventory.csv') }}

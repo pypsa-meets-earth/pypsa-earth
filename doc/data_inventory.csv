@@ -1,7 +1,7 @@
 Short name,Long name,Description,Owner,Link to website,License
-Hydrobasins,HydroBASINS database,Data from the HydroSHEDS version 1 database which is © World Wildlife Fund Inc. (2006-2022),World Wildlife Fund,https://www.hydrosheds.org/,WWF license
-IRENA,IRENA Renewable Energy Capacity Statistics,"IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators",IRENA,,
-Landcover,ESA WorldCover 2020,Global land cover data from the European Space Agency (ESA) WorldCover 2020 project,ESA,https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_Mar2026_Public_shp.zip,CC BY-SA 4.0
-hydro_profile,GloFAS-based inflow profile,Time-series of inflow for locations of powerplants build from GloFAS data,,sandbox.zenodo.org/records/493174/files/glofas_profile_2013.nc,
-natura_earth,Raster of protected areas calculated using WDPA 2020. Data for the calculation of an indicator of the comprehensiveness of conservation of useful wild plants. Data in Brief,Harvard Dataverse,sandbox.zenodo.org/records/323567/files/natura_wpda_CC0.zip,CC0 1.0,
-cutout-era5,cutout-{year}-era5,Cutout file for varying years for the country Zambia built using the ERA5 dataset.,,,CC0 4.0
+hydrobasins,HydroBASINS database,Data from the HydroSHEDS version 1 database which is © World Wildlife Fund Inc. (2006-2022),World Wildlife Fund,https://www.hydrosheds.org/,WWF license
+irena,IRENA Renewable Energy Capacity Statistics,"IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators",IRENA,https://www.irena.org/,Unknown
+landcover,ESA WorldCover 2020,Global land cover data from the European Space Agency (ESA) WorldCover 2020 project,ESA,https://esa-worldcover.org/en,CC-BY-SA 4.0
+hydro_profile,Global Floor Awareness System based inflow profile,Time-series of inflow for locations of powerplants build from GloFAS data,Copernicus Emergency Management Service,https://global-flood.emergency.copernicus.eu/react,CC-BY 4.0
+natura_earth,World Database on Protected Areas (WDPA),Raster of protected areas calculated using WDPA 2020. Data for the calculation of an indicator of the comprehensiveness of conservation of useful wild plants. Data in Brief,Harvard Dataverse,https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA,CC0-1.0
+cutout-era5,ERA5 Cutouts for Zambia,Cutout file for varying years for the country Zambia built using the ERA5 dataset.,Copernicus Emergency Management Service,https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels,CC-BY 4.0

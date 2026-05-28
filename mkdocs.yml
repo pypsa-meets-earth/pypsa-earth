@@ -46,6 +46,7 @@ nav:
   - Wildcards: user-guide/wildcards.md
   - Costs: user-guide/costs.md
   - Custom Data Integration: user-guide/custom-data.md
+  - Data Versioning: data_sources.md
   - Rules Overview: user-guide/rules-overview.md
   - Rules Reference:
     - Download & Filter:

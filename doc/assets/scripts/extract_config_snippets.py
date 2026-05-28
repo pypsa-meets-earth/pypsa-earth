@@ -67,6 +67,7 @@ def main():
         "scenario": ["scenario"],
         "snapshots": ["snapshots"],
         "crs": ["crs"],
+        "data": ["data"],
         "augmented_line_connection": ["augmented_line_connection"],
         "cluster_options": ["cluster_options"],
         "build_shape_options": ["build_shape_options"],

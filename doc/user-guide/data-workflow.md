@@ -42,7 +42,7 @@ The climate data processing is provided by [atlite](https://atlite.readthedocs.i
 
 There are a number datasets applied in PyPSA-Earth to build a realistic model. Original datasets are stored in the `data/` folder. Currently we are using the following resources.
 
-### Environmental
+### Environment data
 
 * **copernicus** contains the raw data on the land covering as available from the Copernicus database.
 
@@ -62,7 +62,7 @@ These data are used in the `build_renewable_profiles` rule. [GEBCO](https://www.
 
 * **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. The `landcover` dataset was used to generate a `natura.tiff` raster. Nowadays the pre-compiled `natura.tiff` raster has global coverage, so there is no need to re-calculate it locally to being able run the modeling workflow.
 
-### Economical
+### Economic data
 
 * **costs.csv** file contains the default costs of the technologies along with their typical lifetime and efficiency values. The dataset is intended to give a starting point for running the model while regional adjustments may be needed.
 
@@ -72,11 +72,11 @@ These data are used in the `build_renewable_profiles` rule. [GEBCO](https://www.
 
 * **WorldPop** raster dataset of the population by arc as automatically by `build_shapes` rule from WorldPop
 
-### Technological
+### Technology data
 
 * **eia_hydro_annual_generation.csv** contains data on total energy production of existing plants as reported per country by the open US Energy Information Administration [EIA platforms](https://www.eia.gov/international/data/world). Is used to calibrate the runoff time series are obtained from the global reanalysis data.
 
-### 4. Pre-calculated datasets
+## 4. Pre-calculated datasets
 
 There are some datasets which were prepared to ensure smooth run of the model. However, they may (and, in some cases, must) be replaced by custom ones.
 
