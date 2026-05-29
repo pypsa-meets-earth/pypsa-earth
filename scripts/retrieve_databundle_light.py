@@ -1025,7 +1025,7 @@ def check_retrieved_cutout_match(snakemake: Snakemake) -> None:
         raise FileNotFoundError(
             f"A target cutout file '{cutout_output_fl}' was not extracted. "
             f"The downloaded bundle is {', '.join(map(str, snakemake.params.bundles_to_download))}"
-            f"Configured bundle output(s): "
+            f"Expected bundle output(s): "
             f"{', '.join(configured_bundle_outputs)}"
         )
 
