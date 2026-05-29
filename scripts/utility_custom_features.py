@@ -22,6 +22,49 @@ from shapely.ops import transform as shapely_transform
 logger = logging.getLogger(__name__)
 
 
+def add_biomass_potential(n, biomass_gdf, costs, geo_crs):
+    """Add extendable biomass generators to Zambian buses.
+
+    biomass_gdf comes from biomass.geojson which has province shapes
+    and biomass_mw capacity already merged into one file.
+    Each bus gets an equal share of its province's total biomass capacity.
+    If a bus already has a biomass generator (e.g. added earlier because
+    biomass is in extendable_carriers), we just update its p_nom_max
+    instead of adding a duplicate.
+    """
+    zm_buses = n.buses[n.buses.country == "ZM"]
+    zm_bus_points = gpd.GeoDataFrame(
+        zm_buses,
+        geometry=gpd.points_from_xy(zm_buses.x, zm_buses.y),
+        crs=geo_crs,
+    )
+    biomass_gdf = biomass_gdf.to_crs(geo_crs)
+    buses_with_biomass = zm_bus_points.sjoin(
+        biomass_gdf[["biomass_mw", "geometry"]], how="left"
+    ).dropna(subset=["biomass_mw"])
+    buses_per_province = buses_with_biomass["index_right"].value_counts()
+    bus_count = buses_with_biomass["index_right"].map(buses_per_province)
+    p_nom_max = buses_with_biomass["biomass_mw"] / bus_count
+    already_exists = (p_nom_max.index + " biomass").isin(n.generators.index)
+    buses_to_update = p_nom_max.index[already_exists]
+    buses_to_add = p_nom_max.index[~already_exists]
+    n.generators.loc[buses_to_update + " biomass", "p_nom_max"] = p_nom_max[
+        buses_to_update
+    ].values
+    n.madd(
+        "Generator",
+        buses_to_add,
+        suffix=" biomass",
+        bus=buses_to_add,
+        carrier="biomass",
+        p_nom=0.0,
+        p_nom_extendable=True,
+        p_nom_max=p_nom_max[buses_to_add],
+        capital_cost=costs.at["biomass", "capital_cost"],
+        marginal_cost=costs.at["biomass", "marginal_cost"],
+    )
+
+
 def annual_gwh_to_average_mw(energy_gwh, hours_per_year=8760):
     """Convert annual energy in GWh to average power in MW."""
     return energy_gwh * 1000 / hours_per_year

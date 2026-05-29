@@ -35,6 +35,9 @@ enable:
 
 
 data:
+  zm-biomass:
+    source: primary
+    version: v1.0
   cutout-era5:
     source: primary
     version: v1.0
@@ -1161,4 +1164,6 @@ validation:
   line_types:
     download_data: false
   mining_data:
+    download_data: false
+  biomass:
     download_data: false

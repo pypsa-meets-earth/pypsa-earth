@@ -126,3 +126,5 @@ validation:
   custom_powerplants:
     enable: true
     download_data: true
+  biomass:
+    download_data: false

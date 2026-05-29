@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 ### New Features and Major Changes
 
+* Enable expansion of biomass generators considering realistic regional values of biomass potential [PR #220](https://github.com/open-energy-transition/pypsa-zambia/pull/220)
+
 ### Minor Changes and bug-fixing
 
 * Added link to data versioning in docs, and tidied up the links and licenses in the data inventory [PR #233](https://github.com/open-energy-transition/pypsa-zambia/pull/233)

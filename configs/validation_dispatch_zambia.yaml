@@ -166,3 +166,5 @@ validation:
     download_data: true
   mining_data:
     download_data: true
+  biomass:
+    download_data: true

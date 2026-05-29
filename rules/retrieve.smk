@@ -355,3 +355,23 @@ if (ERA5_CUTOUT := dataset_version("cutout-era5", config))["source"] in [
             f"benchmarks/{RDIR}retrieve_era5_cutout"
         run:
             copy2(str(input[0]), output[0])
+
+
+if (ZM_BIOMASS := dataset_version("zm-biomass", config))["source"] in [
+    "primary",
+    "tutorial",
+]:
+
+    rule download_biomass_data:
+        input:
+            url=HTTP.remote(
+                "https://sandbox.zenodo.org/records/505798/files/biomass.geojson",
+                keep_local=True,
+                additional_request_string="?download=1",
+            ),
+        output:
+            "data/biomass.geojson",
+        log:
+            "logs/download_biomass_data.log",
+        run:
+            copyfile(str(input["url"]), output[0])

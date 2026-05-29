@@ -708,56 +708,102 @@ rule build_powerplants:
         "scripts/build_powerplants.py"
 
 
-rule add_electricity:
-    params:
-        countries=config["countries"],
-        output_currency=config["costs"]["output_currency"],
-        fill_values=config["costs"]["fill_values"],
-        conventional=config.get("conventional", {}),
-        electricity=config["electricity"],
-        alternative_clustering=config["cluster_options"]["alternative_clustering"],
-        renewable=config["renewable"],
-        length_factor=config["lines"]["length_factor"],
-        existing_capacities=config["existing_capacities"],
-    input:
-        **{
-            f"profile_{tech}": (
-                # config["renewable"][tech]["path"]
-                f"data/hydro_profiles/glofas_profile.nc"
-                if config["renewable"][tech].get("source", "era5") == "custom"
-                else f"resources/{RDIR}renewable_profiles/profile_{tech}.nc"
-            )
-            for tech in config["renewable"]
-            if tech in config["electricity"]["renewable_carriers"]
-        },
-        **{
-            f"conventional_{carrier}_{attr}": fn
-            for carrier, d in config.get("conventional", {None: {}}).items()
-            for attr, fn in d.items()
-            if str(fn).startswith("data/")
-        },
-        base_network="networks/" + RDIR + "base.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
-        powerplants="resources/" + RDIR + "powerplants.csv",
-        #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
-        #using this line instead of the following will test updated gadm shapes for MA.
-        #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
-        #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
-        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        hydro_capacities="data/hydro_capacities.csv",
-        demand_profiles="resources/" + RDIR + "demand_profiles.csv",
-        nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
-    output:
-        "networks/" + RDIR + "elec.nc",
-    log:
-        "logs/" + RDIR + "add_electricity.log",
-    benchmark:
-        "benchmarks/" + RDIR + "add_electricity"
-    threads: 1
-    resources:
-        mem_mb=3000,
-    script:
-        "scripts/add_electricity.py"
+if config["electricity"].get("biomass_potential"):
+
+    rule add_electricity:
+        params:
+            countries=config["countries"],
+            output_currency=config["costs"]["output_currency"],
+            fill_values=config["costs"]["fill_values"],
+            conventional=config.get("conventional", {}),
+            electricity=config["electricity"],
+            alternative_clustering=config["cluster_options"]["alternative_clustering"],
+            renewable=config["renewable"],
+            length_factor=config["lines"]["length_factor"],
+            existing_capacities=config["existing_capacities"],
+        input:
+            **{
+                f"profile_{tech}": (
+                    f"data/hydro_profiles/glofas_profile.nc"
+                    if config["renewable"][tech].get("source", "era5") == "custom"
+                    else f"resources/{RDIR}renewable_profiles/profile_{tech}.nc"
+                )
+                for tech in config["renewable"]
+                if tech in config["electricity"]["renewable_carriers"]
+            },
+            **{
+                f"conventional_{carrier}_{attr}": fn
+                for carrier, d in config.get("conventional", {None: {}}).items()
+                for attr, fn in d.items()
+                if str(fn).startswith("data/")
+            },
+            base_network="networks/" + RDIR + "base.nc",
+            tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+            powerplants="resources/" + RDIR + "powerplants.csv",
+            gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+            hydro_capacities="data/hydro_capacities.csv",
+            demand_profiles="resources/" + RDIR + "demand_profiles.csv",
+            nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
+            biomass_geojson="data/biomass.geojson",
+        output:
+            "networks/" + RDIR + "elec.nc",
+        log:
+            "logs/" + RDIR + "add_electricity.log",
+        benchmark:
+            "benchmarks/" + RDIR + "add_electricity"
+        threads: 1
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/add_electricity.py"
+
+else:
+
+    rule add_electricity:
+        params:
+            countries=config["countries"],
+            output_currency=config["costs"]["output_currency"],
+            fill_values=config["costs"]["fill_values"],
+            conventional=config.get("conventional", {}),
+            electricity=config["electricity"],
+            alternative_clustering=config["cluster_options"]["alternative_clustering"],
+            renewable=config["renewable"],
+            length_factor=config["lines"]["length_factor"],
+            existing_capacities=config["existing_capacities"],
+        input:
+            **{
+                f"profile_{tech}": (
+                    f"data/hydro_profiles/glofas_profile.nc"
+                    if config["renewable"][tech].get("source", "era5") == "custom"
+                    else f"resources/{RDIR}renewable_profiles/profile_{tech}.nc"
+                )
+                for tech in config["renewable"]
+                if tech in config["electricity"]["renewable_carriers"]
+            },
+            **{
+                f"conventional_{carrier}_{attr}": fn
+                for carrier, d in config.get("conventional", {None: {}}).items()
+                for attr, fn in d.items()
+                if str(fn).startswith("data/")
+            },
+            base_network="networks/" + RDIR + "base.nc",
+            tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+            powerplants="resources/" + RDIR + "powerplants.csv",
+            gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
+            hydro_capacities="data/hydro_capacities.csv",
+            demand_profiles="resources/" + RDIR + "demand_profiles.csv",
+            nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
+        output:
+            "networks/" + RDIR + "elec.nc",
+        log:
+            "logs/" + RDIR + "add_electricity.log",
+        benchmark:
+            "benchmarks/" + RDIR + "add_electricity"
+        threads: 1
+        resources:
+            mem_mb=3000,
+        script:
+            "scripts/add_electricity.py"
 
 
 rule simplify_network:
