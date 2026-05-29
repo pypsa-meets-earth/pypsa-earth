@@ -1014,7 +1014,22 @@ def check_retrieved_cutout_match(snakemake: Snakemake) -> None:
     import atlite
     from build_renewable_profiles import check_cutout_match
 
-    cutout = atlite.Cutout(snakemake.output[0])
+    cutout_output_fl = snakemake.output[0]
+    configured_bundle_outputs = [
+        output
+        for bundle in snakemake.params.bundles_to_download
+        for output in snakemake.config["databundles"][bundle].get("output", [])
+    ]
+
+    if not os.path.isfile(cutout_output_fl):
+        raise FileNotFoundError(
+            f"A target cutout file '{cutout_output_fl}' was not extracted. "
+            f"The downloaded bundle is {', '.join(map(str, snakemake.params.bundles_to_download))}"
+            f"Expected bundle output(s): "
+            f"{', '.join(configured_bundle_outputs)}"
+        )
+
+    cutout = atlite.Cutout(cutout_output_fl)
 
     onshore = gpd.read_file(snakemake.input.onshore_shapes)
     offshore = gpd.read_file(snakemake.input.offshore_shapes)
