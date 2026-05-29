@@ -181,7 +181,7 @@ if (LANDCOVER_DATASET := dataset_version("landcover", config))["source"] in ["pr
 rule download_custom_powerplants:
     input:
         url=HTTP.remote(
-            "https://sandbox.zenodo.org/records/491391/files/custom_powerplants.csv",
+            "https://sandbox.zenodo.org/records/499641/files/custom_powerplants.csv",
             keep_local=True,
             additional_request_string="?download=1",
         ),
