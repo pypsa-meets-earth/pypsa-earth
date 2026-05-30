@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, override_component_attrs, prepare_costs, read_csv_nafix
+from _helpers import locate_bus
 
 logger = logging.getLogger(__name__)
 
@@ -180,13 +180,14 @@ def create_export_profile():
             )
 
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
-    sopts = snakemake.wildcards.sopts.split("-")
-    export_profile = export_profile.resample(sopts[0].casefold()).mean()
+    sel_export = export_profile[n.snapshots]
+    pu_profile_export = sel_export / (1e-6 + sel_export.sum())
+    export_profile = pu_profile_export * export_profile.sum() * len(n.snapshots) / 8760
 
     # revise logger msg
     export_type = snakemake.params.export_profile
     logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {sopts[0]}"
+        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {len(n.snapshots)} snapshots."
     )
 
     return export_profile
@@ -211,9 +212,8 @@ if __name__ == "__main__":
             # configfile="test/config.test1.yaml",
         )
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    countries = list(n.buses.country[n.buses.country != ""].unique())
+    n = pypsa.Network(snakemake.input.network)
+    countries = list(n.buses.country.unique())
 
     # Create export profile
     export_profile = create_export_profile()
@@ -221,16 +221,7 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+    costs = pd.read_csv(snakemake.input.costs, index_col=0)
 
     # get hydrogen export buses/ports
     hydrogen_buses_ports = select_ports(n)

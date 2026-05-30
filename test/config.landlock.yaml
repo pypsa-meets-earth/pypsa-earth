@@ -3,17 +3,13 @@
 # SPDX-License-Identifier: CC0-1.0
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
-version: 0.7.0
-
 countries: ["BW"]
 
 run:
   name: "landlock"
 
 subregion:
-  enable:
-    simplify_network: true # activate subregion in simplify_network
-    cluster_network: true # activate subregion in cluster_network
+  method: "gadm" # method to define subregions, either "gadm" or "custom", false to not use subregions.
   define_by_gadm:
     Central: [BW.3]
 
@@ -22,6 +18,8 @@ focus_weights:
   Central: 0.3
 
 electricity:
+  extendable_carriers:
+    Generator: [solar, onwind, OCGT]
   renewable_carriers: [solar, csp, onwind, hydro]
 
 build_osm_network:

@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 group_close_buses, bool, "{True, False}", "True: close buses are merged and guarantee the voltage matching among line endings."
 group_tolerance_buses, m,, "Tolerance in meters of the close buses to merge."
 split_overpassing_lines, bool, "{True, False}", "True: lines overpassing buses are splitted and connected to the buses."

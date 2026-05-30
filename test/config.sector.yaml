@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: 0.7.0
 tutorial: true
 
 enable:
@@ -10,8 +9,8 @@ enable:
   retrieve_databundle_sector: true
 
 run:
-  name: sector
-  sector_name: "sector" # use this to keep track of sector scenario runs
+  name: "test"
+  sector_name: "test" # use this to keep track of sector scenario runs
   shared_cutouts: true
 
 scenario:
@@ -37,7 +36,7 @@ electricity:
     Store: [H2]
     Link: [H2 pipeline]
 
-  co2limit: 7.75e7
+  co2limit: 7.75e+7
 
 export:
   h2export: [120] # Yearly export demand in TWh
@@ -61,6 +60,8 @@ policy_config:
 
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+  solar_rooftop:
+    use_building_size: true
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"

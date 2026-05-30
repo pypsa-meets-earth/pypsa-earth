@@ -21,12 +21,11 @@ Relevant Settings
 
 .. code:: yaml
 
+    links:
+
+    lines:
+
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
         emission_prices:
 
     electricity:
@@ -72,7 +71,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import load_costs, update_transmission_costs
+from add_electricity import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -270,13 +269,13 @@ def apply_time_segmentation(n, segments, solver_name):
             "Optional dependency 'tsam' not found." "Install via 'pip install tsam'"
         )
 
-    p_max_pu_norm = n.generators_t.p_max_pu.max()
+    p_max_pu_norm = n.generators_t.p_max_pu.abs().max().clip(lower=1e-6)
     p_max_pu = n.generators_t.p_max_pu / p_max_pu_norm
 
-    load_norm = n.loads_t.p_set.max()
+    load_norm = n.loads_t.p_set.abs().max().clip(lower=1e-6)
     load = n.loads_t.p_set / load_norm
 
-    inflow_norm = n.storage_units_t.inflow.max()
+    inflow_norm = n.storage_units_t.inflow.abs().max().clip(lower=1e-6)
     inflow = n.storage_units_t.inflow / inflow_norm
 
     raw = pd.concat([p_max_pu, load, inflow], axis=1, sort=False)
@@ -350,12 +349,7 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
-    )
+    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
     s_max_pu = snakemake.params.lines["s_max_pu"]
 
     set_line_s_max_pu(n, s_max_pu)
@@ -375,7 +369,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Co2L" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if snakemake.params.electricity["automatic_emission"]:
                 country_names = n.buses.country.unique()
                 emission_year = snakemake.params.electricity[
@@ -399,7 +393,7 @@ if __name__ == "__main__":
 
     for o in opts:
         if "CH4L" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 limit = float(m[0]) * 1e6
                 add_gaslimit(n, limit, Nyears)
@@ -431,13 +425,13 @@ if __name__ == "__main__":
 
     for o in opts:
         if "Ep" in o:
-            m = re.findall("[0-9]*\.?[0-9]+$", o)
+            m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 logger.info("Setting emission prices according to wildcard value.")
                 add_emission_prices(n, dict(co2=float(m[0])))
             else:
                 logger.info("Setting emission prices according to config value.")
-                add_emission_prices(n, snakemake.params.costs["emission_prices"])
+                add_emission_prices(n, snakemake.params.emission_prices)
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
