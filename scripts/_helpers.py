@@ -873,8 +873,12 @@ def create_country_list(input, iso_coding=True):
         # create a list with all countries
         full_codes_list.extend(codes_list)
 
-    # Removing duplicates and filter outputs by coding
-    full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
+    # Sorting gives a canonical order to keep Snakemake params stable across runs,
+    # allowing CI to reuse cached rules. dict.fromkeys() is used instead of set()
+    # to deduplicate while preserving insertion order (set() ordering is non-deterministic).
+    full_codes_list = sorted(
+        filter_codes(list(dict.fromkeys(full_codes_list)), iso_coding=iso_coding)
+    )
 
     return full_codes_list
 
