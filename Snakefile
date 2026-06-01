@@ -211,7 +211,9 @@ rule clean_osm_data:
         substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        extended_country_shape="resources/"
+        + RDIR
+        + "shapes/extended_country_shape.geojson",
     output:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         generators_csv="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
@@ -276,7 +278,9 @@ rule build_shapes:
     output:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        extended_country_shape="resources/"
+        + RDIR
+        + "shapes/extended_country_shape.geojson",
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
         subregion_offshore="resources/" + RDIR + "shapes/subregion_offshore.geojson",
@@ -1993,7 +1997,9 @@ rule plot_network:
         network="results/"
         + RDIR
         + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        extended_country_shape="resources/"
+        + RDIR
+        + "shapes/extended_country_shape.geojson",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
     output:
         only_map="results/"
