@@ -22,10 +22,20 @@ from ruamel.yaml import YAML
 
 def update(d, u):
     for k, v in u.items():
-        if isinstance(v, collections.abc.Mapping):
-            d[k] = update(d.get(k, {}), v)
+        if (
+            isinstance(v, collections.abc.Mapping)
+            and isinstance(d.get(k), collections.abc.Mapping)
+        ):
+            base_keys = set(d[k])
+            diff_keys = set(v)
+
+            if base_keys & diff_keys:
+                d[k] = update(d[k], v)
+            else:
+                d[k] = copy.deepcopy(v)
         else:
-            d[k] = v
+            d[k] = copy.deepcopy(v)
+
     return d
 
 
