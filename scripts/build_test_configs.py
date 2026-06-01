@@ -22,6 +22,11 @@ from ruamel.yaml import YAML
 
 def update(d, u):
     for k, v in u.items():
+    """
+    A function to recursivelly update items in a dictionary which 
+    intended usage is unpdating the base config according to the diff
+    config 
+    """
         if (
             isinstance(v, collections.abc.Mapping)
             and isinstance(d.get(k), collections.abc.Mapping)
