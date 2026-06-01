@@ -394,7 +394,7 @@ rule build_transmission_projects:
     input:
         base_network="networks/" + RDIR + "base_pre_ext.nc",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        region_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        region_shape="resources/" + RDIR + "shapes/extended_country_shape.geojson",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         transmission_projects=lambda w: [
             "data/transmission_projects/" + name
