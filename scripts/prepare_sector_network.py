@@ -3454,6 +3454,7 @@ def add_enhanced_geothermal(
             bus0=surface_bus,
             bus1=bus,
             p_nom_extendable=True,
+            p_nom_max=p_nom_max_th,
             carrier="geothermal organic rankine cycle",
             capital_cost=orc_capital_cost * efficiency_orc * egs_cost_factor,
             efficiency=efficiency_orc,

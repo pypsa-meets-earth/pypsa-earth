@@ -163,12 +163,10 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
         raise ValueError(f"Missing required input columns: {missing_columns}")
 
     countries = two_2_three_digits_country(countries)
-    
     if isinstance(countries, str):
         countries = [countries]
 
     countries = [str(c).upper() for c in countries]
-    
     df = df.drop(
         columns=[
             'Pout_VolumeMethod_MW',
@@ -200,20 +198,29 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
     df = df.loc[df['PowerSust_MW'] > 0.0].copy()
 
     if df.empty:
-        raise ValueError('No valid EGS rows left after dropping invalid or zero-output rows.')
+        raise ValueError(
+            'No valid EGS rows left after dropping invalid or zero-output rows.'
+        )
 
-    # EUR/kWh =>  EUR/MWh
+    # EUR/kWh => EUR/MWh
     df['LCOE_EUR_per_MWh'] = df['LCOE_Eur_per_kWh'] * 1000.0
 
     # Energy produced per year in MWh
     df['Leistung_MWh'] = df['PowerSust_MW'] * 8760.0
 
-    # Annualized CAPEX-like quantity, then converted to EUR/GW
-    capex = (df['LCOE_EUR_per_MWh'] * df['Leistung_MWh']) / (CRF + 0.02) #assumtion that 2% of Capex = Opex see Franzmann et al.
+    # Annualized CAPEX-like quantity
+    # Assumption: 2 % of CAPEX as OPEX, -> CRF + 0.02
+    capex = (
+        df['LCOE_EUR_per_MWh']
+        * df['Leistung_MWh']
+        / (CRF + 0.02)
+    )
 
+    # PowerSust in GW 
     df['PowerSust'] = df['PowerSust_MW'] / 1000.0  # MW -> GW
-    df['CAPEX'] = capex / df['PowerSust']  # EUR/GW
-   
+
+    # CAPEX in EUR/GW
+    df['CAPEX'] = capex / df['PowerSust']
 
     point_gdf = gpd.GeoDataFrame(
         df[['gid1', 'country_code', 'Lon', 'Lat', 'CAPEX', 'PowerSust']],
@@ -244,15 +251,39 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
             'No EGS points could be assigned to the provided network regions.'
         )
 
+    # ------------------------------------------------------------
+    # Power-weighted CAPEX by region
+    # ------------------------------------------------------------
+    def weighted_average_capex(group):
+        weights = group['PowerSust'].fillna(0.0)
+
+        if weights.sum() <= 0:
+            return group['CAPEX'].mean()
+
+        return np.average(
+            group['CAPEX'],
+            weights=weights,
+        )
+
+    # Aggregate standard sizes first
     region_agg = (
         joined.groupby('region', as_index=True)
         .agg(
-            CAPEX=('CAPEX', 'mean'),
             PowerSust=('PowerSust', 'sum'),
             n_points=('region', 'size'),
         )
         .sort_index()
     )
+
+    # Then add CAPEX on a performance-weighted basis
+    weighted_capex = (
+        joined
+        .groupby('region')
+        .apply(weighted_average_capex)
+        .rename('CAPEX')
+    )
+
+    region_agg = region_agg.join(weighted_capex)
 
     region_agg.index.name = 'region'
     region_agg['p_nom_max'] = region_agg['PowerSust']
