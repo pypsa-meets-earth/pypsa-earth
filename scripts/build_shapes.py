@@ -428,9 +428,9 @@ def country_cover(
     if eez_shapes is not None:
         shapes_list += list(eez_shapes)
 
-    africa_shape = make_valid(unary_union(shapes_list))
+    extended_country_shape = make_valid(unary_union(shapes_list))
 
-    return africa_shape
+    return extended_country_shape
 
 
 def load_EEZ(
@@ -2057,10 +2057,10 @@ if __name__ == "__main__":
 
     offshore_shapes.reset_index().to_file(out.offshore_shapes)
 
-    africa_shape = gpd.GeoDataFrame(
+    extended_country_shape = gpd.GeoDataFrame(
         geometry=[country_cover(country_shapes, offshore_shapes.geometry)]
     )
-    africa_shape.reset_index().to_file(out.africa_shape)
+    extended_country_shape.reset_index().to_file(out.extended_country_shape)
 
     gadm_shapes = gadm(
         worldpop_method,
