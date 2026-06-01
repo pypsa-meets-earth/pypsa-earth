@@ -22,20 +22,21 @@ from ruamel.yaml import YAML
 
 def update(base_dictionary, diff_dictionary):
     """
-    A function to recursivelly update items in a dictionary which 
+    A function to recursivelly update items in a dictionary which
     intended usage is unpdating the base config according to the diff
-    config 
+    config
     """
     for key_to_apply, value_to_apply in diff_dictionary.items():
-        if (
-            isinstance(value_to_apply, collections.abc.Mapping)
-            and isinstance(base_dictionary.get(key_to_apply), collections.abc.Mapping)
+        if isinstance(value_to_apply, collections.abc.Mapping) and isinstance(
+            base_dictionary.get(key_to_apply), collections.abc.Mapping
         ):
             base_keys = set(base_dictionary[key_to_apply])
             diff_keys = set(value_to_apply)
 
             if base_keys & diff_keys:
-                base_dictionary[key_to_apply] = update(base_dictionary[key_to_apply], value_to_apply)
+                base_dictionary[key_to_apply] = update(
+                    base_dictionary[key_to_apply], value_to_apply
+                )
             else:
                 base_dictionary[key_to_apply] = copy.deepcopy(value_to_apply)
         else:
