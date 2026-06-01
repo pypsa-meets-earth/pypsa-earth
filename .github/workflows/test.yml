@@ -228,7 +228,7 @@ jobs:
 
   run-tests-pixi:
     name: OS (pixi)
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.head_ref, 'pixi'))
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
