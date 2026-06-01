@@ -20,28 +20,28 @@ from pathlib import Path
 from ruamel.yaml import YAML
 
 
-def update(d, u):
-    for k, v in u.items():
+def update(base_dictionary, diff_dictionary):
     """
     A function to recursivelly update items in a dictionary which 
     intended usage is unpdating the base config according to the diff
     config 
     """
+    for key_to_apply, value_to_apply in diff_dictionary.items():
         if (
-            isinstance(v, collections.abc.Mapping)
-            and isinstance(d.get(k), collections.abc.Mapping)
+            isinstance(value_to_apply, collections.abc.Mapping)
+            and isinstance(base_dictionary.get(key_to_apply), collections.abc.Mapping)
         ):
-            base_keys = set(d[k])
-            diff_keys = set(v)
+            base_keys = set(base_dictionary[key_to_apply])
+            diff_keys = set(value_to_apply)
 
             if base_keys & diff_keys:
-                d[k] = update(d[k], v)
+                base_dictionary[key_to_apply] = update(base_dictionary[key_to_apply], value_to_apply)
             else:
-                d[k] = copy.deepcopy(v)
+                base_dictionary[key_to_apply] = copy.deepcopy(value_to_apply)
         else:
-            d[k] = copy.deepcopy(v)
+            base_dictionary[key_to_apply] = copy.deepcopy(value_to_apply)
 
-    return d
+    return base_dictionary
 
 
 def _parse_inputconfig(input_config, yaml):
