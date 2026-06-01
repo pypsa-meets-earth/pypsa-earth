@@ -27,7 +27,7 @@ PyPSA-Earth is a community effort which exists thanks to coordinated contributio
 
 For every code contribution, the [pre-commit](https://pre-commit.com/index.html) utility must be executed. That is a way to keep the code tidy and licensing consistent with minimal effort. We use [Black](https://github.com/psf/black) as code style and aim for [REUSE compliance](https://reuse.software/)).
 
-`pre-commit` is still a part of pypsa-earth environment. To use it, you can chose from two options:
+`pre-commit` is part of pypsa-earth environment. To use it, you can chose from two options:
     * To automatically activate `pre-commit` on every `git commit`: Run `pre-commit install`
     * To manually run it: `pre-commit run --all`
 
