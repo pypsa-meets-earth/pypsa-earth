@@ -17,7 +17,6 @@ watch:
 - scripts
 
 hooks:
-- doc/gen_dags.py
 - doc/assets/hooks/cleanup.py
 
 # Navigation
