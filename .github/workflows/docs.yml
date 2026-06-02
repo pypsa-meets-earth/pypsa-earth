@@ -50,6 +50,7 @@ jobs:
     - name: Check spelling
       uses: codespell-project/actions-codespell@v2
       with:
-        # Ignore list mirrors .pre-commit-config.yaml codespell hook to keep both in sync
-        ignore_words_list: ore,tabacco,fo,FO,vor
+        # Ignore list mirrors .pre-commit-config.yaml codespell hook.
+        # FOM = Fixed Operation & Maintenance. splitted appears in auto-generated snippets.
+        ignore_words_list: ore,tabacco,fo,FO,vor,fom,FOM,splitted
         path: doc
