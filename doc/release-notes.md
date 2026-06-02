@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
+
 * Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population [PR #1622](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622)
 
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
