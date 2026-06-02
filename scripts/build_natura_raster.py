@@ -114,7 +114,6 @@ def get_relevant_regions(
     natura_crs: str,
     buffer: float,
 ) -> gpd.GeoDataFrame:
-    
     """
     Load and merge country and offshore regions into a unified geometry.
 
