@@ -11,24 +11,23 @@ Every little bit helps, and you always earn credits.
 
 You can contribute on the code side in many ways:
 
-* submit feedback,
-* add new features,
+* submit questions and feedback,
+* propose and develop new features,
 * report bugs,
-* fix bugs,
-* implement a new cluster/cloud computation backend,
-* write documentation
+* submit bug fixes,
+* improve documentation,
+* share your insights on energy modelling needs for different regions,
+* contribute datasets
 
 ## Code
 
+PyPSA-Earth is a community effort which exists thanks to coordinated contributions on many volunteers around the world. Every typo fix counts!
+
 ### Linting and pre-commit
 
-For every code contribution, the [pre-commit](https://pre-commit.com/index.html) utility should be executed.
-This will lint, format and check your code contributions against our guidelines
-(e.g. we use [Black](https://github.com/psf/black) as code style
-and aim for [REUSE compliance](https://reuse.software/)):
+For every code contribution, the [pre-commit](https://pre-commit.com/index.html) utility must be executed. That is a way to keep the code tidy and licensing consistent with minimal effort. We use [Black](https://github.com/psf/black) as code style and aim for [REUSE compliance](https://reuse.software/)).
 
-1. Installation `conda install -c conda-forge pre-commit` or `pip install pre-commit`
-2. Usage:
+`pre-commit` is part of pypsa-earth environment. To use it, you can chose from two options:
     * To automatically activate `pre-commit` on every `git commit`: Run `pre-commit install`
     * To manually run it: `pre-commit run --all`
 

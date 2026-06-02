@@ -1024,8 +1024,10 @@ if __name__ == "__main__":
 
     if snakemake.rule == "plot_network":
 
-        # load africa shape to identify borders of the image
-        africa_shape = gpd.read_file(snakemake.input.africa_shape)["geometry"].iloc[0]
+        # load extended country shape to identify borders of the image
+        extended_country_shape = gpd.read_file(snakemake.input.extended_country_shape)[
+            "geometry"
+        ].iloc[0]
 
         set_plot_style()
 
@@ -1034,7 +1036,7 @@ if __name__ == "__main__":
         map_boundaries = opts["map"]["boundaries"]
 
         if len(map_boundaries) != 4:
-            map_boundaries = africa_shape.boundary.bounds
+            map_boundaries = extended_country_shape.boundary.bounds
 
         n = pypsa.Network(snakemake.input.network)
 
