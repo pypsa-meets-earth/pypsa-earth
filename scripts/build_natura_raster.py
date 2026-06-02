@@ -6,13 +6,11 @@
 # -*- coding: utf-8 -*-
 """
 Builds a rasterized Natura and environmental exclusion mask from vector geometries.
-The geometries are sourced from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_
+The geometries are sourced from [Protected Planet Data](https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA)
 and filtered for the required regions.
 
 Relevant Settings
 -----------------
-
-.. code:: yaml
 
     countries:
 
@@ -36,7 +34,7 @@ Relevant Settings
 Inputs
 ------
 
-- ``data/landcover/world_protected_areas/*.shp``: Vectorized shapefiles representing the world protected areas from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_.
+- ``data/landcover/world_protected_areas/*.shp``: Vectorized shapefiles representing the world protected areas from [Protected Planet Data](https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA).
 - ``cutouts/{CDIR}/{cutout}.nc``: Atlite cutout specified in ``renewable: {technology}: cutout`` for each technology. The cutout(s) are used to determine geographic coverage and resolution alignment.
 - ``resources/{RDIR}/shapes/country_shapes.geojson``: Onshore country geometries used to determine the spatial extent of the rasterization.
 - ``resources/{RDIR}/shapes/offshore_shapes.geojson``: Offshore regions associated with the selected countries.
@@ -48,7 +46,7 @@ Outputs
 
 Description
 -----------
-The rule :mod:`build_natura_raster` converts large collections of vector-based
+The rule ``build_natura_raster`` converts large collections of vector-based
 environmental exclusion geometries into a rasterized binary mask containing:
 
 - ``1`` for raster cells intersecting exclusion geometries, and
@@ -79,17 +77,18 @@ the rule to run efficiently on standard compute environments.
 Notes
 -----
 This script only runs in the current PyPSA-Earth workflow if ``enable: build_natura_raster`` is ``true``.
-Otherwise, the workflow will use the general ``data/natura/natura.tiff`` file, which is copied using the rule :mod:`copy_defaultnatura_tiff`.
+Otherwise, the workflow will use the general ``data/natura/natura.tiff`` file, which is copied using the rule ``copy_defaultnatura_tiff``.
 
 There are two main differences between the two options, the data source and the license:
 
-- The rule :mod:`build_natura_raster` uses data from `Protected Planet Data <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>`_
-  which is generally more up-to-date. However, the `Protected Planet License <https://www.protectedplanet.net/en/legal>`_
+- The rule ``build_natura_raster`` uses data from [Protected Planet Data](https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA)
+  which is generally more up-to-date. However, the [Protected Planet License](https://www.protectedplanet.net/en/legal)
   is less permissive and might not be applicable for your use case.
-- The rule :mod:`copy_defaultnatura_tiff` uses data from `Harvard Dataverse Protected areas (WDPA) <https://doi.org/10.7910/DVN/XIV9BL>`_,
-  which was last updated in 2022. This dataset is licensed under the `CC0 1.0 license <https://creativecommons.org/publicdomain/zero/1.0/>`_.
+- The rule ``copy_defaultnatura_tiff`` uses data from [Harvard Dataverse Protected areas (WDPA)](https://doi.org/10.7910/DVN/XIV9BL),
+  which was last updated in 2022. This dataset is licensed under the [CC0 1.0 license](https://creativecommons.org/publicdomain/zero/1.0/).
 """
 
+from __future__ import annotations
 import os
 
 import atlite
@@ -115,7 +114,8 @@ def get_relevant_regions(
     offshore_shapes: str,
     natura_crs: str,
     buffer: float,
-):
+) -> gpd.GeoDataFrame:
+    
     """
     Load and merge country and offshore regions into a unified geometry.
 
@@ -124,6 +124,7 @@ def get_relevant_regions(
 
     Parameters
     ----------
+
     country_shapes : str
         Path to the vector file containing the country geometries.
     offshore_shapes : str
@@ -132,30 +133,33 @@ def get_relevant_regions(
         Coordinate reference system used for all geometries.
     buffer : float
         Buffer distance applied to both country and offshore geometries.
-        Units are determined by `natura_crs`.
+        Units are determined by ``natura_crs``.
 
     Returns
     -------
-    geopandas.GeoDataFrame
+
+    gpd.GeoDataFrame
         GeoDataFrame containing a single merged geometry representing the
         buffered union of all country and offshore regions.
 
     Notes
     -----
-    Both input datasets are reprojected to `natura_crs` before merging.
+
+    Both input datasets are reprojected to ``natura_crs`` before merging.
 
     Examples
     --------
-    >>> regions = get_relevant_regions(
-    ...     "resources/shapes/country_shapes.geojson",
-    ...     "resources/shapes/offshore_shapes.geojson",
-    ...     "ESRI:54009",
-    ...     10000,
-    ... )
-    >>> len(regions)
-    1
-    >>> regions.crs.to_string()
-    "ESRI:54009"
+
+        regions = get_relevant_regions(
+            "resources/shapes/country_shapes.geojson",
+            "resources/shapes/offshore_shapes.geojson",
+            "ESRI:54009",
+            10000,
+        )
+        len(regions)
+        # 1
+        regions.crs.to_string()
+        # "ESRI:54009"
     """
 
     # unify the country_shapes and offshore_shapes to select the regions of interest
@@ -197,11 +201,12 @@ def get_fileshapes(
 
     Examples
     --------
-    >>> paths = ["shape_file.shp", "shape_index.shi"]
-    >>> get_fileshapes(paths)
-    ["shape_file.shp"]
-    >>> get_fileshapes(paths, ".shi")
-    ["shape_index.shi"]
+
+        paths = ["shape_file.shp", "shape_index.shi"]
+        get_fileshapes(paths)
+        # ["shape_file.shp"]
+        get_fileshapes(paths, ".shi")
+        # ["shape_index.shi"]
     """
     list_fileshapes = []
     for lf in list_paths:
@@ -225,7 +230,7 @@ def determine_region_xXyY(
     regions: gpd.GeoDataFrame | None,
     natura_size: str,
     out_logging: bool,
-):
+) -> list[float]:
     """
     Determine the bounds of the analyzed regions.
 
@@ -251,27 +256,28 @@ def determine_region_xXyY(
 
     Examples
     --------
-    >>> cutout_path = "cutouts/cutout-2013-era5.nc"
-    >>> regions = None
 
-    Global extent:
-    >>> determine_region_xXyY(cutout_path, regions, "global", False)
-    [-180, 180, -90, 90]
+        cutout_path = "cutouts/cutout-2013-era5.nc"
+        regions = None
 
-    Cutout extent:
-    >>> determine_region_xXyY(cutout_path, regions, "cutout", False)
-    [-19.8, 67.8, -37.8, 39.6]
+        # Global extent:
+        determine_region_xXyY(cutout_path, regions, "global", False)
+        # [-180, 180, -90, 90]
 
-    Countries extent:
-    >>> import geopandas as gpd
-    >>> from shapely.geometry import Polygon
-    >>>
-    >>> regions = gpd.GeoDataFrame(
-    ...     geometry=[Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])],
-    ...     crs="EPSG:4326",
-    ... )
-    >>> determine_region_xXyY(cutout_path, regions, "countries", False)
-    [0.0, 10.0, 0.0, 10.0]
+        # Cutout extent (Africa):
+        determine_region_xXyY(cutout_path, regions, "cutout", False)
+        # [-19.8, 67.8, -37.8, 39.6]
+
+        # Countries extent:
+        import geopandas as gpd
+        from shapely.geometry import Polygon
+
+        regions = gpd.GeoDataFrame(
+            geometry=[Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])],
+            crs="EPSG:4326",
+        )
+        determine_region_xXyY(cutout_path, regions, "countries", False)
+        # [0.0, 10.0, 0.0, 10.0]
     """
 
     if out_logging:
@@ -336,18 +342,19 @@ def get_transform_and_shape(
 
     Examples
     --------
-    >>> import rasterio as rio
-    >>>
-    >>> # [min_lon, min_lat, max_lon, max_lat]
-    >>> bounds = [0.0, 50.0, 3.0, 52.0]
-    >>> res = 1.0
-    >>>
-    >>> transform, shape = get_transform_and_shape(bounds, res, False)
-    >>> shape
-    (2, 3)
-    >>> transform
-    Affine(1.0, 0.0, 0.0,
-       0.0, -1.0, 52.0)
+
+        import rasterio as rio
+
+        # [min_lon, min_lat, max_lon, max_lat]
+        bounds = [0.0, 50.0, 3.0, 52.0]
+        res = 1.0
+
+        transform, shape = get_transform_and_shape(bounds, res, False)
+        shape
+        # (2, 3)
+        transform
+        # Affine(1.0, 0.0, 0.0,
+        # 0.0, -1.0, 52.0)
     """
     if out_logging:
         logger.info("Stage 2/5: Get transform and shape")
@@ -368,7 +375,7 @@ def decide_bigtiff_flag(
     out_shape: tuple[int, int],
     dtype: str = "uint8",
     safety_factor: float = 1.1,
-):
+) -> str:
     """
     Decide whether a raster requires BIGTIFF storage based on raster shape.
 
@@ -400,8 +407,9 @@ def decide_bigtiff_flag(
 
     Examples
     --------
-    >>> decide_bigtiff_flag((100, 100), dtype="uint8")
-    "NO"
+
+        decide_bigtiff_flag((100, 100), dtype="uint8")
+        # "NO"
     """
 
     tiff_size = 4_000_000_000
