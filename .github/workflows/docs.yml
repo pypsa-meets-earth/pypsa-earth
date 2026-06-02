@@ -38,6 +38,9 @@ jobs:
         cache: pip
         cache-dependency-path: doc/requirements.txt
 
+    - name: Install system dependencies
+      run: sudo apt-get update -qq && sudo apt-get install -y -qq graphviz
+
     - name: Install doc dependencies
       run: pip install -r doc/requirements.txt
 
