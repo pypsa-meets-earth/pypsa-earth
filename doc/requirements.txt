@@ -49,3 +49,4 @@ currencyconverter
 
 # DAG generation (snakemake 8+ requires Python 3.12)
 snakemake<8
+pulp>=2.5.0,<2.8.0

@@ -43,14 +43,28 @@ def check_dependencies():
     """Check if snakemake and dot are available."""
     try:
         subprocess.run(["snakemake", "--version"], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Error: 'snakemake' not found. Please install it.")
+    except FileNotFoundError:
+        print("INFO: 'snakemake' not installed. Rulegraph SVGs will not be generated.")
+        return False
+    except subprocess.CalledProcessError as e:
+        print(
+            f"INFO: 'snakemake' failed to start (exit code {e.returncode}). "
+            "Rulegraph SVGs will not be generated."
+        )
         return False
 
     try:
         subprocess.run(["dot", "-V"], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Error: 'dot' (graphviz) not found. Please install it.")
+    except FileNotFoundError:
+        print(
+            "INFO: 'dot' (graphviz) not installed. Rulegraph SVGs will not be generated."
+        )
+        return False
+    except subprocess.CalledProcessError as e:
+        print(
+            f"INFO: 'dot' failed to start (exit code {e.returncode}). "
+            "Rulegraph SVGs will not be generated."
+        )
         return False
 
     return True
