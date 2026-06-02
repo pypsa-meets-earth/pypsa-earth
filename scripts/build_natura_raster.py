@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-
-# -*- coding: utf-8 -*-
 """
 Builds a rasterized Natura and environmental exclusion mask from vector geometries.
 The geometries are sourced from [Protected Planet Data](https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA)
