@@ -124,7 +124,6 @@ def get_relevant_regions(
 
     Parameters
     ----------
-
     country_shapes : str
         Path to the vector file containing the country geometries.
     offshore_shapes : str
@@ -137,29 +136,28 @@ def get_relevant_regions(
 
     Returns
     -------
-
     gpd.GeoDataFrame
         GeoDataFrame containing a single merged geometry representing the
         buffered union of all country and offshore regions.
 
     Notes
     -----
-
     Both input datasets are reprojected to ``natura_crs`` before merging.
 
     Examples
     --------
-
-        regions = get_relevant_regions(
-            "resources/shapes/country_shapes.geojson",
-            "resources/shapes/offshore_shapes.geojson",
-            "ESRI:54009",
-            10000,
-        )
-        len(regions)
-        # 1
-        regions.crs.to_string()
-        # "ESRI:54009"
+    ```python
+    regions = get_relevant_regions(
+        "resources/shapes/country_shapes.geojson",
+        "resources/shapes/offshore_shapes.geojson",
+        "ESRI:54009",
+        10000,
+    )
+    len(regions)
+    # 1
+    regions.crs.to_string()
+    # "ESRI:54009"
+    ```
     """
 
     # unify the country_shapes and offshore_shapes to select the regions of interest
@@ -201,12 +199,13 @@ def get_fileshapes(
 
     Examples
     --------
-
-        paths = ["shape_file.shp", "shape_index.shi"]
-        get_fileshapes(paths)
-        # ["shape_file.shp"]
-        get_fileshapes(paths, ".shi")
-        # ["shape_index.shi"]
+    ```python
+    paths = ["shape_file.shp", "shape_index.shi"]
+    get_fileshapes(paths)
+    # ["shape_file.shp"]
+    get_fileshapes(paths, ".shi")
+    # ["shape_index.shi"]
+    ```
     """
     list_fileshapes = []
     for lf in list_paths:
@@ -256,28 +255,29 @@ def determine_region_xXyY(
 
     Examples
     --------
+    ```python
+    cutout_path = "cutouts/cutout-2013-era5.nc"
+    regions = None
 
-        cutout_path = "cutouts/cutout-2013-era5.nc"
-        regions = None
+    # Global extent:
+    determine_region_xXyY(cutout_path, regions, "global", False)
+    # [-180, 180, -90, 90]
 
-        # Global extent:
-        determine_region_xXyY(cutout_path, regions, "global", False)
-        # [-180, 180, -90, 90]
+    # Cutout extent (Africa):
+    determine_region_xXyY(cutout_path, regions, "cutout", False)
+    # [-19.8, 67.8, -37.8, 39.6]
 
-        # Cutout extent (Africa):
-        determine_region_xXyY(cutout_path, regions, "cutout", False)
-        # [-19.8, 67.8, -37.8, 39.6]
+    # Countries extent:
+    import geopandas as gpd
+    from shapely.geometry import Polygon
 
-        # Countries extent:
-        import geopandas as gpd
-        from shapely.geometry import Polygon
-
-        regions = gpd.GeoDataFrame(
-            geometry=[Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])],
-            crs="EPSG:4326",
-        )
-        determine_region_xXyY(cutout_path, regions, "countries", False)
-        # [0.0, 10.0, 0.0, 10.0]
+    regions = gpd.GeoDataFrame(
+        geometry=[Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])],
+        crs="EPSG:4326",
+    )
+    determine_region_xXyY(cutout_path, regions, "countries", False)
+    # [0.0, 10.0, 0.0, 10.0]
+    ```
     """
 
     if out_logging:
@@ -342,19 +342,20 @@ def get_transform_and_shape(
 
     Examples
     --------
+    ```python
+    import rasterio as rio
 
-        import rasterio as rio
+    # [min_lon, min_lat, max_lon, max_lat]
+    bounds = [0.0, 50.0, 3.0, 52.0]
+    res = 1.0
 
-        # [min_lon, min_lat, max_lon, max_lat]
-        bounds = [0.0, 50.0, 3.0, 52.0]
-        res = 1.0
-
-        transform, shape = get_transform_and_shape(bounds, res, False)
-        shape
-        # (2, 3)
-        transform
-        # Affine(1.0, 0.0, 0.0,
-        # 0.0, -1.0, 52.0)
+    transform, shape = get_transform_and_shape(bounds, res, False)
+    shape
+    # (2, 3)
+    transform
+    # Affine(1.0, 0.0, 0.0,
+    # 0.0, -1.0, 52.0)
+    ```
     """
     if out_logging:
         logger.info("Stage 2/5: Get transform and shape")
@@ -407,9 +408,10 @@ def decide_bigtiff_flag(
 
     Examples
     --------
-
-        decide_bigtiff_flag((100, 100), dtype="uint8")
-        # "NO"
+    ```python
+    decide_bigtiff_flag((100, 100), dtype="uint8")
+    # "NO"
+    ```
     """
 
     tiff_size = 4_000_000_000
