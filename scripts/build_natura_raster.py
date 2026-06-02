@@ -89,6 +89,7 @@ There are two main differences between the two options, the data source and the 
 """
 
 from __future__ import annotations
+
 import os
 
 import atlite
@@ -115,7 +116,6 @@ def get_relevant_regions(
     natura_crs: str,
     buffer: float,
 ) -> gpd.GeoDataFrame:
-    
     """
     Load and merge country and offshore regions into a unified geometry.
 
