@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 # MkDocs and theme
-mkdocs>=1.5.0
+mkdocs>=1.5.0, <2.0.0
 mkdocs-material>=9.5.0
 mkdocs-git-revision-date-localized-plugin
 mkdocs-table-reader-plugin
