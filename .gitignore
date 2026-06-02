@@ -42,6 +42,7 @@ cutouts/
 data/*
 dask-worker-space/
 img/
+!doc/img/gen_*.svg
 logs/
 networks/
 notebooks
