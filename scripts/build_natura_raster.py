@@ -88,7 +88,6 @@ There are two main differences between the two options, the data source and the 
   which was last updated in 2022. This dataset is licensed under the [CC0 1.0 license](https://creativecommons.org/publicdomain/zero/1.0/).
 """
 
-from __future__ import annotations
 import os
 
 import atlite
