@@ -340,6 +340,7 @@ if __name__ == "__main__":
             clusters="4",
             ll="c1",
             opts="Co2L-4H",
+            planning_horizons=2030,
             # configfile="test/config.sector.yaml",
         )
 
