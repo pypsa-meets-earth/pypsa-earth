@@ -38,6 +38,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)
+
 * Generalize the hard-coded legacy name `africa_shape` [PR #1848](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1848)
 
 * Reduce execution time of CI tests [PR #1819](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1819)
