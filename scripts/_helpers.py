@@ -5,6 +5,33 @@
 
 # -*- coding: utf-8 -*-
 
+"""
+Shared utility functions used across the PyPSA-Earth workflow.
+
+This module collects small, reusable helpers that are imported as ``_helpers``
+by many of the ``scripts/*.py`` rule scripts rather than belonging to a single
+rule. It is not meant to be run as a standalone Snakemake rule. The helpers are
+grouped roughly as follows:
+
+- **Configuration and logging**: ``check_config_version``,
+  ``update_cutout_config``, ``copy_default_files``, ``create_logger``,
+  ``configure_logging``, ``handle_exception``, ``read_osm_config``,
+  ``update_config_dictionary``.
+- **Network aggregation**: ``update_p_nom_max``, ``aggregate_p_nom``,
+  ``aggregate_p``, ``aggregate_e_nom``, ``aggregate_p_curtailed``,
+  ``aggregate_costs``, ``create_network_topology``.
+- **Country handling**: ``two_2_three_digits_country``,
+  ``three_2_two_digits_country``, ``country_name_2_two_digits``,
+  ``two_digits_2_name_country``, ``create_country_list``, ``get_country``,
+  ``add_transform_iso3``.
+- **I/O helpers**: ``read_csv_nafix``, ``to_csv_nafix``, ``save_to_geojson``,
+  ``read_geojson``, ``download_GADM``, ``content_retrieve``,
+  ``progress_retrieve``.
+- **Snakemake helpers**: ``mock_snakemake``, ``get_aggregation_strategies``.
+- **Sector-coupling helpers**: ``get_conv_factors``, ``aggregate_fuels``,
+  ``rename_techs``, ``safe_divide``.
+"""
+
 import calendar
 import io
 import logging
@@ -122,6 +149,13 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 def copy_default_files():
+    """
+    Create a minimal ``config.yaml`` next to ``config.default.yaml`` if missing.
+
+    If no ``config.yaml`` exists in the repository root, write a small
+    placeholder file instructing the user to add only the entries that differ
+    from ``config.default.yaml``.
+    """
     fn = Path(os.path.join(BASE_DIR, "config.yaml"))
     if not fn.exists():
         fn.write_text(
@@ -231,12 +265,41 @@ def configure_logging(snakemake, skip_handlers=False):
 
 
 def pdbcast(v, h):
+    """
+    Broadcast two pandas Series into a DataFrame via an outer product.
+
+    Parameters
+    ----------
+    v : pandas.Series
+        Series providing the row index and the values broadcast down the rows.
+    h : pandas.Series
+        Series providing the column index and the values broadcast across columns.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame indexed by ``v.index`` with columns ``h.index`` where entry
+        ``(i, j)`` equals ``v[i] * h[j]``.
+    """
     return pd.DataFrame(
         v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
     )
 
 
 def update_p_nom_max(n):
+    """
+    Ensure ``p_nom_max`` is at least ``p_nom_min`` for all generators.
+
+    When existing assets (e.g. from the OPSD project) are included, the already
+    installed capacity may exceed the configured expansion limit. This sets
+    ``n.generators.p_nom_max`` to the row-wise maximum of ``p_nom_min`` and
+    ``p_nom_max`` so the optimisation stays feasible.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network whose ``generators.p_nom_max`` column is updated in place.
+    """
     # if extendable carriers (solar/onwind/...) have capacity >= 0,
     # e.g. existing assets from the OPSD project are included to the network,
     # the installed capacity might exceed the expansion limit.
@@ -246,6 +309,20 @@ def update_p_nom_max(n):
 
 
 def aggregate_p_nom(n):
+    """
+    Aggregate optimal nominal power capacity per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Optimal nominal power (``p_nom_opt``) of generators, storage units and
+        links plus the mean load, grouped by carrier.
+    """
     return pd.concat(
         [
             n.generators.groupby("carrier").p_nom_opt.sum(),
@@ -257,6 +334,20 @@ def aggregate_p_nom(n):
 
 
 def aggregate_p(n):
+    """
+    Aggregate dispatched power per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Total dispatched power of generators, storage units and stores, and the
+        (negative) load, grouped by carrier.
+    """
     return pd.concat(
         [
             n.generators_t.p.sum().groupby(n.generators.carrier).sum(),
@@ -268,6 +359,20 @@ def aggregate_p(n):
 
 
 def aggregate_e_nom(n):
+    """
+    Aggregate optimal nominal energy storage capacity per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Optimal energy capacity of storage units (``p_nom_opt * max_hours``) and
+        stores (``e_nom_opt``), grouped by carrier.
+    """
     return pd.concat(
         [
             (n.storage_units["p_nom_opt"] * n.storage_units["max_hours"])
@@ -279,6 +384,20 @@ def aggregate_e_nom(n):
 
 
 def aggregate_p_curtailed(n):
+    """
+    Aggregate curtailed power per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Curtailed power of generators (available minus dispatched) and storage
+        units (inflow minus dispatch), grouped by carrier.
+    """
     return pd.concat(
         [
             (
@@ -299,6 +418,29 @@ def aggregate_p_curtailed(n):
 
 
 def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
+    """
+    Aggregate capital and marginal system costs per component and carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+    flatten : bool, default False
+        If True, collapse the result into a single Series combining capital and
+        marginal costs (marginal costs of conventional technologies are renamed
+        with a `` marginal`` suffix). Requires ``opts``.
+    opts : dict, optional
+        Options dictionary; must contain ``"conv_techs"`` when ``flatten`` is True.
+    existing_only : bool, default False
+        If True, use installed capacities (``p_nom``/``e_nom``) instead of the
+        optimised ones (``p_nom_opt``/``e_nom_opt``).
+
+    Returns
+    -------
+    pandas.Series
+        Costs indexed by (component, cost type, carrier), or a flattened Series
+        when ``flatten`` is True.
+    """
     components = dict(
         Link=("p_nom", "p0"),
         Generator=("p_nom", "p"),
@@ -703,6 +845,29 @@ def read_csv_nafix(file, **kwargs):
 
 
 def to_csv_nafix(df, path, **kwargs):
+    """
+    Write a DataFrame to CSV using the project's standard NA representation.
+
+    Counterpart to :func:`read_csv_nafix`. Empty DataFrames are written as an
+    empty file so downstream Snakemake rules still find their expected output.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame to write.
+    path : str or pathlib.Path
+        Destination file path.
+    **kwargs
+        Additional keyword arguments forwarded to
+        :meth:`pandas.DataFrame.to_csv`; any ``na_rep`` is overridden with the
+        project default.
+
+    Returns
+    -------
+    str or None
+        The CSV as a string if ``path`` is None and the frame is non-empty,
+        otherwise None.
+    """
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     # if len(df) > 0:
@@ -754,6 +919,19 @@ def add_transform_iso3(
 
 
 def save_to_geojson(df, fn):
+    """
+    Save a (Geo)DataFrame to a GeoJSON file, overwriting any existing file.
+
+    Empty frames are written as an empty file to avoid breaking Snakemake rules
+    that expect the output to exist.
+
+    Parameters
+    ----------
+    df : geopandas.GeoDataFrame
+        (Geo)DataFrame to save.
+    fn : str or pathlib.Path
+        Destination file path.
+    """
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
 
@@ -916,6 +1094,23 @@ def update_config_dictionary(
     parameter_key_to_fill="lines",
     dict_to_use={"geometry": "first", "bounds": "first"},
 ):
+    """
+    Ensure a configuration sub-dictionary exists and update it with defaults.
+
+    Parameters
+    ----------
+    config_dict : dict
+        Configuration dictionary to update in place.
+    parameter_key_to_fill : str, default "lines"
+        Key under which the sub-dictionary is created if absent.
+    dict_to_use : dict, default {"geometry": "first", "bounds": "first"}
+        Key/value pairs merged into ``config_dict[parameter_key_to_fill]``.
+
+    Returns
+    -------
+    dict
+        The updated configuration dictionary.
+    """
     config_dict.setdefault(parameter_key_to_fill, {})
     config_dict[parameter_key_to_fill].update(dict_to_use)
     return config_dict
@@ -977,6 +1172,29 @@ def create_network_topology(
 
 
 def create_dummy_data(n, sector, carriers):
+    """
+    Create randomised dummy demand data for a sector (placeholder/testing use).
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network providing the AC bus index used as the data index.
+    sector : str
+        Sector to create dummy data for. Only ``"industry"`` is supported.
+    carriers : list
+        Unused; kept for interface compatibility.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Random integer demand values indexed by AC bus with one column per
+        industry carrier.
+
+    Raises
+    ------
+    Exception
+        If ``sector`` is not ``"industry"``.
+    """
     ind = n.buses_t.p.index
     ind = n.buses.index[n.buses.carrier == "AC"]
 
@@ -1241,6 +1459,22 @@ def locate_bus(
 
 
 def get_conv_factors(sector):
+    """
+    Return conversion factors from mass/volume units to TWh per fuel.
+
+    The factors convert ktons (or m³) to TWh, based on the UN energy balance
+    methodology (https://unstats.un.org/unsd/energy/balance/2014/05.pdf).
+
+    Parameters
+    ----------
+    sector : str
+        Sector to return factors for. Only ``"industry"`` is populated.
+
+    Returns
+    -------
+    dict
+        Mapping of fuel name to its conversion factor to TWh.
+    """
     # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
     if sector == "industry":
         fuels_conv_toTWh = {
@@ -1299,6 +1533,21 @@ def get_conv_factors(sector):
 
 
 def aggregate_fuels(sector):
+    """
+    Return the fuel names grouped by energy carrier category.
+
+    Parameters
+    ----------
+    sector : str
+        Sector for which to return the groupings (currently the same lists are
+        returned regardless of the value).
+
+    Returns
+    -------
+    tuple of list of str
+        Six lists in the order ``(gas_fuels, oil_fuels, biomass_fuels,
+        coal_fuels, heat, electricity)``.
+    """
     gas_fuels = [
         "Natural gas (including LNG)",  #
         "Natural Gas (including LNG)",  #
@@ -1560,6 +1809,23 @@ def branch(condition, then, otherwise=None):
 
 
 def rename_techs(label):
+    """
+    Normalise a technology label to a canonical, human-readable name.
+
+    Removes location prefixes (e.g. ``"residential "``), collapses labels that
+    contain a known keyword (e.g. ``"CHP"``) and applies explicit renamings
+    (e.g. ``"onwind"`` to ``"onshore wind"``).
+
+    Parameters
+    ----------
+    label : str
+        Original technology label.
+
+    Returns
+    -------
+    str
+        Renamed technology label.
+    """
     prefix_to_remove = [
         "residential ",
         "services ",
@@ -1780,6 +2046,18 @@ def sanitize_carriers(n, config):
 
 
 def sanitize_locations(n):
+    """
+    Fill missing bus coordinates and country codes from the ``location`` mapping.
+
+    For buses that carry a ``location`` column, zero ``x``/``y`` coordinates and
+    empty or missing ``country`` entries are replaced with the corresponding
+    values of the referenced location bus.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network whose ``buses`` table is updated in place.
+    """
     if "location" in n.buses.columns:
         n.buses["x"] = n.buses.x.where(n.buses.x != 0, n.buses.location.map(n.buses.x))
         n.buses["y"] = n.buses.y.where(n.buses.y != 0, n.buses.location.map(n.buses.y))
