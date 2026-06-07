@@ -1159,14 +1159,14 @@ if config["sector"]["hydrogen"]["water_network"]:
         rule prepare_water_network:
             params:
                 costs=config["costs"],
-                water_stress=config['sector']['hydrogen']['aqueduct_water_stress_classification'],
+                water_stress=config["sector"]["hydrogen"][
+                    "aqueduct_water_stress_classification"
+                ],
             input:
                 regions_onshore="resources/"
                 + RDIR
                 + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-                country_shapes="resources/"
-                + RDIR
-                + "shapes/country_shapes.geojson",
+                country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
                 natura="resources/" + RDIR + "natura.tiff",
             output:
                 shorelines="resources/"
@@ -1192,7 +1192,6 @@ if config["sector"]["hydrogen"]["water_network"]:
                 + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
             script:
                 "scripts/prepare_water_network.py"
-    
 
         rule plot_water_network:
             input:
@@ -1219,11 +1218,11 @@ if config["sector"]["hydrogen"]["water_network"]:
             script:
                 "scripts/plot_water_network.py"
 
-
     else:
+
         rule copy_water_network:
             input:
-                source="data_custom/water_network_elec_s{simpl}_{clusters}.csv"
+                source="data_custom/water_network_elec_s{simpl}_{clusters}.csv",
             output:
                 destination="resources/"
                 + SECDIR
@@ -1316,6 +1315,15 @@ rule prepare_sector_network:
                 for country in config["countries"]
             },
         ),
+        **(
+            {
+                "clustered_water_network": "resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson"
+            }
+            if config["sector"]["hydrogen"]["water_network"]
+            else {}
+        ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
@@ -1355,16 +1363,6 @@ rule prepare_sector_network:
                 + SECDIR
                 + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
             ),
-        ),
-        **(
-            {
-                "clustered_water_network":
-                "resources/"
-                + SECDIR
-                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson"
-            }
-            if config["sector"]["hydrogen"]["water_network"]
-            else {}
         ),
     output:
         RESDIR

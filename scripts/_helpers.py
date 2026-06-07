@@ -696,7 +696,9 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if isinstance(file, str) and (file.startswith("http://") or file.startswith("https://")):
+    if isinstance(file, str) and (
+        file.startswith("http://") or file.startswith("https://")
+    ):
         return pd.read_csv(file, **kwargs)
 
     if os.path.exists(file) and os.stat(file).st_size > 0:

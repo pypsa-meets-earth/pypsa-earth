@@ -603,7 +603,7 @@ sector:
     water_network: true
     ratio_water_hydrogen: 13 # liters of water per kg of hydrogen, see: https://www.plugpower.com/wp-content/uploads/2021/10/EX-4250D_F041122.pdf
     costs_brine_disposal: 23 # EUR/m³ brine, see: https://www.mdpi.com/2071-1050/14/11/6752
-      # assuming maximum opex of conventional crystallizers 
+      # assuming maximum opex of conventional crystallizers
       # surface_water_discharge: 0.04 - 0.26   # EUR/m³ (0.05–0.30 USD)
       # sewer_discharge:         0.28 - 0.57   # EUR/m³ (0.32–0.66 USD)
       # deep_well_injection:     0.46 - 2.28   # EUR/m³ (0.54–2.65 USD)
