@@ -341,10 +341,10 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     """
     snakemake = _mock_snakemake(rulename)
 
-    if not Path(snakemake.output.africa_shape).is_file():
+    if not Path(snakemake.output.extended_country_shape).is_file():
         return pd.DataFrame()
 
-    df_continent = gpd.read_file(snakemake.output.africa_shape)
+    df_continent = gpd.read_file(snakemake.output.extended_country_shape)
     continent_area = (
         df_continent["geometry"]
         .apply(make_valid)
