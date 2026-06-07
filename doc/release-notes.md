@@ -38,6 +38,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add error when emission_extractor fails [PR #1856](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1856)
+
 * Generalize the hard-coded legacy name `africa_shape` [PR #1848](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1848)
 
 * Reduce execution time of CI tests [PR #1819](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1819)
