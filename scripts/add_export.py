@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus
+from _helpers import locate_bus, read_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def select_ports(n):
     This function selects the buses where ports are located.
     """
 
-    ports = pd.read_csv(
+    ports = read_csv_nafix(
         snakemake.input.export_ports,
         index_col=None,
         keep_default_na=False,
@@ -54,8 +54,15 @@ def select_ports(n):
     gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
-    # Select the hydrogen buses based on nodes with ports
-    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+    # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
+    if ports_sel.empty:
+        hydrogen_buses_ports = n.buses[n.buses.carrier == "H2"]
+        logger.info(
+            "No hydrogen export ports are found. Setting all hydrogen buses as export nodes"
+        )
+    else:
+        hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
@@ -76,7 +83,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     n.add(
         "Bus",
         "H2 export bus",
-        carrier="H2",
+        carrier="H2 export",
         location="Earth",
         x=x_export,
         y=y_export,
@@ -165,7 +172,7 @@ def create_export_profile():
 
     elif snakemake.params.export_profile == "ship":
         # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
-        export_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
+        export_profile = read_csv_nafix(snakemake.input.ship_profile, index_col=0)
         export_profile.index = pd.to_datetime(export_profile.index)
         export_profile = pd.Series(
             export_profile["profile"], index=pd.to_datetime(export_profile.index)
@@ -213,7 +220,7 @@ if __name__ == "__main__":
         )
 
     n = pypsa.Network(snakemake.input.network)
-    countries = list(n.buses.country.unique())
+    countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
     export_profile = create_export_profile()
@@ -221,7 +228,7 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = pd.read_csv(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     # get hydrogen export buses/ports
     hydrogen_buses_ports = select_ports(n)
