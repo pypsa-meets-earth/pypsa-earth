@@ -12,6 +12,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
+
+* Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
+
 * Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
 
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
@@ -30,11 +34,16 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove unused override_respot [PR #1805](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1805)
 
+* Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
+
 **Minor Changes and bug-fixing**
 
 * Adjusted the code to be more robust [#1812](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1812)
 
 * Avoid crash in `add_chp_constraints` when the network has no links, supporting operational models without brownfield/expandable batteries, pumped storage, or DC links [#1750](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1750)
+* Generalize the hard-coded legacy name `africa_shape` [PR #1848](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1848)
+
+* Reduce execution time of CI tests [PR #1819](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1819)
 
 * Avoid crash in `build_osm_network` when merging substations with the same `station_id` if `tag_substation` or `symbol` contains missing OSM metadata [PR #1818](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1818)
 
@@ -101,6 +110,9 @@ This part of documentation collects descriptive release notes to capture the mai
 * Make checking the need for exclusion rasters more explicit [PR #1755](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1755)
 
 * Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
+
+* Update contribution guide [PR #1803](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1803)
+
 
 # PyPSA-Earth 0.8.0
 

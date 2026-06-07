@@ -63,7 +63,6 @@ SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
-load_data_paths = get_load_paths_gegis("data", config)
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -203,7 +202,9 @@ rule clean_osm_data:
         substations="resources/" + RDIR + "osm/raw/all_raw_substations.geojson",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        extended_country_shape="resources/"
+        + RDIR
+        + "shapes/extended_country_shape.geojson",
     output:
         generators="resources/" + RDIR + "osm/clean/all_clean_generators.geojson",
         generators_csv="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
@@ -268,7 +269,9 @@ rule build_shapes:
     output:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        extended_country_shape="resources/"
+        + RDIR
+        + "shapes/extended_country_shape.geojson",
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         subregion_shapes="resources/" + RDIR + "shapes/subregion_shapes.geojson",
         subregion_offshore="resources/" + RDIR + "shapes/subregion_offshore.geojson",
@@ -548,7 +551,11 @@ rule build_demand_profiles:
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
-        load=load_data_paths,
+        load=branch(
+            config["load_options"].get("source", "gegis") in ["gegis", "ssp"],
+            get_load_paths_gegis("data", config),
+            "data/demand/forecasts_on_historical_period.parquet",
+        ),
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -1845,7 +1852,9 @@ rule plot_network:
         network="results/"
         + RDIR
         + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        africa_shape="resources/" + RDIR + "shapes/africa_shape.geojson",
+        extended_country_shape="resources/"
+        + RDIR
+        + "shapes/extended_country_shape.geojson",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
     output:
         only_map="results/"
@@ -1914,8 +1923,10 @@ rule plot_sector_summary:
 
 
 rule build_industrial_database:
+    input:
+        ammonia_plants="resources/ammonia_plants.csv",
     output:
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
     script:
         "scripts/build_industrial_database.py"
 
@@ -1957,7 +1968,7 @@ rule build_industrial_distribution_key:  #default data
         clustered_gdp_layout="resources/"
         + SECDIR
         + "gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
@@ -2013,6 +2024,10 @@ rule build_industry_demand:  #default data
         base_year=config["demand_data"]["base_year"],
         industry_util_factor=config["sector"]["industry_util_factor"],
         aluminium_year=config["demand_data"]["aluminium_year"],
+        ammonia_enable=config["sector"]["ammonia"]["enable"],
+        ammonia_gas_mwh_per_t=config["sector"]["ammonia"]["gas_MWh_per_tNH3"],
+        ammonia_elec_mwh_per_t=config["sector"]["ammonia"]["elec_MWh_per_tNH3"],
+        ammonia_year=config["sector"]["ammonia"]["production_year"],
     input:
         industrial_distribution_key="resources/"
         + SECDIR
@@ -2022,7 +2037,8 @@ rule build_industry_demand:  #default data
         base_industry_totals="resources/"
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
+        ammonia_production="resources/ammonia_production.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
@@ -2040,6 +2056,39 @@ rule build_industry_demand:  #default data
         )
     script:
         "scripts/build_industry_demand.py"
+
+
+rule retrieve_us_cities_dataset:
+    output:
+        us_cities="data/industry/us_cities.csv",
+    script:
+        "scripts/retrieve_us_cities_dataset.py"
+
+
+rule retrieve_ammonia_dataset:
+    output:
+        usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
+    script:
+        "scripts/retrieve_ammonia_dataset.py"
+
+
+rule build_ammonia_production:
+    input:
+        ammonia_plants="data/industry/ammonia_plants.csv",
+        us_cities="data/industry/us_cities.csv",
+        usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
+    output:
+        ammonia_production="resources/ammonia_production.csv",
+        ammonia_plants="resources/ammonia_plants.csv",
+    threads: 1
+    resources:
+        mem_mb=1000,
+    log:
+        RESDIR + "logs/build_ammonia_production.log",
+    benchmark:
+        RESDIR + "benchmarks/build_ammonia_production"
+    script:
+        "scripts/build_ammonia_production.py"
 
 
 rule build_existing_heating_distribution:
