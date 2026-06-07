@@ -23,7 +23,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus
+from _helpers import locate_bus, read_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +146,46 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             p_set=export_profile,
         )
 
+    # =========================================================================
+    #  ADD FIXED LOCAL WATER LOAD DERIVED FROM EXPORT PROFILE
+    # =========================================================================
+    # Check if water network is activated and parameters exist
+    h2_config = snakemake.config["sector"]["hydrogen"]
+    if h2_config.get("water_network", False):
+        oversizing_factor = h2_config.get("desalination_oversizing_factor", 0.0)
+        base_water_ratio_l_per_kg = h2_config.get("ratio_water_hydrogen", 13)
+
+        if oversizing_factor > 0:
+            # 1. Get the dynamic total annual H2 export from the generated profile (MWh/a)
+            # 'export_profile' is in MWh/h for each snapshot
+            total_annual_h2_mwh = export_profile.sum() * (8760 / len(n.snapshots))
+            
+            # 2. Convert to annual mass (MWh -> kWh -> divide by 33.33 LHV -> kg/a)
+            annual_h2_kg = (total_annual_h2_mwh * 1000) / 33.33
+            
+            # 3. Calculate constant water demand profile baseline (m3/h)
+            hourly_h2_baseline_kg = annual_h2_kg / 8760.0
+            fixed_water_demand_m3h = (hourly_h2_baseline_kg * base_water_ratio_l_per_kg / 1000.0) * oversizing_factor
+
+            # 4. Find all existing desalination nodes to distribute the load
+            desal_buses = n.buses[n.buses.carrier == "H2O_desalinated"].index
+            
+            if not desal_buses.empty:
+                # Divide the total requirement across all coastal desalination nodes
+                load_per_node = fixed_water_demand_m3h / len(desal_buses)
+                
+                n.madd(
+                    "Load",
+                    desal_buses + " local_water_demand",
+                    bus=desal_buses,
+                    carrier="local water consumption",
+                    p_set=load_per_node # Constant load in m3/h applied to all snapshots
+                )
+                logger.info(f"Successfully allocated {fixed_water_demand_m3h:.2f} m³/h of fixed water demand "
+                            f"({load_per_node:.2f} m³/h per node) across {len(desal_buses)} desalination buses.")
+            else:
+                logger.warning("Water network config is active, but no 'H2O_desalinated' buses were found in the network!")
+
     return
 
 
@@ -213,7 +253,8 @@ if __name__ == "__main__":
         )
 
     n = pypsa.Network(snakemake.input.network)
-    countries = list(n.buses.country.unique())
+   
+    countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
     export_profile = create_export_profile()

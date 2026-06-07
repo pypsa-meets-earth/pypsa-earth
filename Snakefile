@@ -526,6 +526,7 @@ rule process_cost_data:
             "resources/" + RDIR + "costs_{year}.csv",
             "data/costs.csv",
         ),
+        costs_desal="data/costs_desal.csv",
     output:
         "resources/" + RDIR + "costs_{year}_{scope}.csv",
     log:
@@ -1313,7 +1314,6 @@ rule prepare_sector_network:
         ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
-        costs_desal="data/costs_desal.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],

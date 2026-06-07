@@ -986,7 +986,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_water_network",
             simpl="",
-            clusters="30",
+            clusters="13",
         )
 
     shoreline_gdf = download_shorelines().copy()

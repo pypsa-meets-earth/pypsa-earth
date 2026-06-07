@@ -193,6 +193,17 @@ def add_water_network(n, costs):
         y=n.buses.loc[list(seawater_nodes)].y.values,
     )
 
+    costs_brine_disposal = snakemake.config["sector"]["hydrogen"].get("costs_brine_disposal", 0.0)             # EUR/m3 (brine)
+    seawater_water_ratio = snakemake.config["sector"]["hydrogen"].get("seawater_water_ratio", 2.5)             # L_sea / L_fresh    
+
+    # Calculate dynamic link efficiency and marginal cost for brine disposal
+    # efficiency = 1 / 2.5 = 0.4 m3 freshwater output per m3 seawater input
+    desal_efficiency = 1.0 / seawater_water_ratio 
+    
+    # Brine generated per m3 of seawater input = (2.5 - 1) / 2.5 = 0.6 m3_brine / m3_seawater
+    brine_per_m3_seawater = (seawater_water_ratio - 1.0) / seawater_water_ratio
+    desal_marginal_cost = brine_per_m3_seawater * costs_brine_disposal
+
     n.madd(
         "Link",
         seawater_nodes + " desalination",
@@ -201,8 +212,10 @@ def add_water_network(n, costs):
         bus2=seawater_nodes,
         carrier="desalination",
         p_nom_extendable=True,
-        efficiency=costs.at["seawater desalination", "efficiency"],
+        # efficiency=costs.at["seawater desalination", "efficiency"],
+        efficiency=desal_efficiency, # m3 freshwater per m3 seawater
         efficiency2= -(costs.at["seawater desalination", "electricity-input"]/1000), # Electricity-input is in kWh/m3 -> convert to MWh/m3 
+        marginal_cost=desal_marginal_cost, # Variable brine disposal costs attributed to bus0 input
         capital_cost=costs.at["seawater desalination", "fixed"],
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
@@ -513,22 +526,26 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
     }
     
     if snakemake.config["sector"]["hydrogen"]["water_network"]:
-      add_water_network(n, costs)
-      for tech in [
-          "H2 Electrolysis",
-          "Alkaline electrolyzer large",
-          "Alkaline electrolyzer medium",
-          "Alkaline electrolyzer small",
-          "PEM electrolyzer",
-          "SOEC",
-      ]:
-          if tech in tech_params:
-              tech_params[tech]["bus2"] = spatial.nodes + " H2O"
-              tech_params[tech]["efficiency2"] = (
-                  -costs.at["electrolysis", "efficiency"]
-                  * snakemake.config["sector"]["hydrogen"]["ratio_water_hydrogen"]
-                  / 33 # 33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion TODO: integrate ratio_water_elec in technology data
-              )
+        add_water_network(n, costs)
+        h2_config = snakemake.config["sector"]["hydrogen"]
+        base_water_ratio = h2_config.get("ratio_water_hydrogen", 13) # for electrolysis, L/kg_H2
+        additional_water_consumption = snakemake.config["sector"]["hydrogen"].get("additional_water_consumption_elec", 0.0) # additional water consumption (e.g. cooling purposes), L/kg_H2
+        total_water_ratio_l_per_kg = base_water_ratio + additional_water_consumption
+        for tech in [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC",
+        ]:
+            if tech in tech_params:
+                tech_params[tech]["bus2"] = spatial.nodes + " H2O"
+                tech_params[tech]["efficiency2"] = (
+                    -costs.at["electrolysis", "efficiency"]
+                    * total_water_ratio_l_per_kg
+                    / 33.33 # 33.33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion
+                )
 
     if options["hydrogen"].get("hydrogen_colors", False):
         color_techs = {
@@ -3455,32 +3472,9 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
-    #------
-    ##### TO BE REMOVED AGAIN AFTER MERGING desalination data to technologydata
-    costs1 = read_csv_nafix(snakemake.input.costs)
-    costs2 = read_csv_nafix(snakemake.input.costs_desal)
-    merged = pd.concat([costs1, costs2], ignore_index=True)
-    # merged.to_csv("data/costs_merged.csv", index=False)
+    costs = read_csv_nafix(snakemake.input.costs)
 
-    path_to_save = Path(os.path.join(BASE_DIR, "data/costs_merged.csv"))
-    merged.to_csv(path_to_save, index=False)
-
-    # Prepare the costs dataframe
-    costs = pd.read_csv(path_to_save, index_col=0)
-    #------
-
-    ##### TO BE USED AGAIN AFTER MERGING desalination data to technologydata
-    # # Prepare the costs dataframe
-    # costs = prepare_costs(
-    #     snakemake.input.costs,
-    #     snakemake.config["costs"],
-    #     snakemake.params.costs["output_currency"],
-    #     snakemake.params.costs["fill_values"],
-    #     Nyears,
-    #     snakemake.params.costs["default_exchange_rate"],
-    #     snakemake.params.costs["future_exchange_rate_strategy"],
-    #     snakemake.params.costs["custom_future_exchange_rate"],
-    # )
+    costs = costs.set_index("technology")
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
