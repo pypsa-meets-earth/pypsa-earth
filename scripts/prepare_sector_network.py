@@ -830,6 +830,19 @@ def define_spatial(nodes, options):
 
     spatial.lignite.df = pd.DataFrame(vars(spatial.lignite), index=spatial.nodes)
 
+    # ammonia
+
+    if options["ammonia"]["enable"]:
+        spatial.ammonia = SimpleNamespace()
+        if options["ammonia"]["spatial_ammonia"]:
+            spatial.ammonia.nodes = nodes + " NH3"
+            spatial.ammonia.locations = nodes
+        else:
+            spatial.ammonia.nodes = ["Earth NH3"]
+            spatial.ammonia.locations = ["Earth"]
+
+        spatial.ammonia.df = pd.DataFrame(vars(spatial.ammonia), index=spatial.nodes)
+
     return spatial
 
 
@@ -1140,7 +1153,6 @@ def add_aviation(n, cost, energy_totals, airports_fn):
     aviation_demand = energy_totals.loc[countries, all_aviation].sum(axis=1)
 
     airports = read_csv_nafix(airports_fn, keep_default_na=False)
-
     airports = airports[airports.country.isin(countries)]
 
     gadm_layer_id = snakemake.params.gadm_layer_id
@@ -1539,7 +1551,7 @@ def add_industry(
     logger.info("adding industrial demand")
 
     # Load industry demand data
-    industrial_demand = pd.read_csv(
+    industrial_demand = read_csv_nafix(
         industrial_demand_fn, index_col=0, header=0
     )  # * 1e6
 
@@ -1818,6 +1830,99 @@ def add_industry(
         )
 
 
+def add_ammonia(
+    n: pypsa.Network, costs: pd.DataFrame, industrial_demand_fn: str
+) -> None:
+    """
+    Add conventional Haber-Bosch ammonia production and demand to the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to which ammonia production and demand will be added.
+    costs : pd.DataFrame
+        DataFrame containing cost information for ammonia production technologies.
+    industrial_demand_fn : str
+        Path to the industrial demand CSV file. Must contain an 'ammonia'
+        column in MWh/year, indexed by spatial nodes.
+
+    Returns
+    -------
+    None
+    """
+    industrial_demand = pd.read_csv(industrial_demand_fn, index_col=0, header=0)
+
+    logger.info("Adding conventional Haber-Bosch ammonia industry")
+
+    if "NH3" not in n.carriers.index:
+        n.add("Carrier", "NH3", co2_emissions=0)
+
+    n.madd(
+        "Bus",
+        spatial.ammonia.nodes,
+        location=spatial.ammonia.locations,
+        carrier="NH3",
+    )
+
+    # Define ammonia demand
+    n.madd(
+        "Load",
+        spatial.nodes,
+        suffix=" NH3",
+        bus=spatial.ammonia.nodes,
+        carrier="NH3",
+        p_set=industrial_demand.loc[spatial.nodes, "ammonia"] / 8760,
+    )
+
+    # Define Haber-Bosch
+    n.madd(
+        "Link",
+        spatial.nodes,
+        suffix=" Haber-Bosch",
+        bus0=spatial.nodes + " H2",
+        bus1=spatial.ammonia.nodes,
+        bus2=spatial.nodes,
+        carrier="Haber-Bosch",
+        p_nom_extendable=True,
+        efficiency=1 / costs.at["Haber-Bosch", "hydrogen-input"],
+        efficiency2=-costs.at["Haber-Bosch", "electricity-input"]
+        / costs.at["Haber-Bosch", "hydrogen-input"],
+        capital_cost=costs.at["Haber-Bosch", "fixed"]
+        / costs.at["Haber-Bosch", "hydrogen-input"],  # costs are per MWh_NH3
+        marginal_cost=costs.at["Haber-Bosch", "VOM"]
+        / costs.at["Haber-Bosch", "hydrogen-input"],
+        lifetime=costs.at["Haber-Bosch", "lifetime"],
+    )
+
+    # Ammonia cracker (NH3 to H2)
+    n.madd(
+        "Link",
+        spatial.nodes,
+        suffix=" ammonia cracker",
+        bus0=spatial.ammonia.nodes,
+        bus1=spatial.nodes + " H2",
+        carrier="ammonia cracker",
+        p_nom_extendable=True,
+        efficiency=1 / costs.at["Ammonia cracker", "ammonia-input"],
+        capital_cost=costs.at["Ammonia cracker", "fixed"]
+        / costs.at["Ammonia cracker", "ammonia-input"],  # costs are per MWh_H2
+        lifetime=costs.at["Ammonia cracker", "lifetime"],
+    )
+
+    # Ammonia liquid storage (incl. liquefaction)
+    n.madd(
+        "Store",
+        spatial.ammonia.nodes,
+        suffix=" ammonia store",
+        bus=spatial.ammonia.nodes,
+        carrier="ammonia store",
+        e_nom_extendable=True,
+        e_cyclic=True,
+        capital_cost=costs.at["NH3 (l) storage tank incl. liquefaction", "fixed"],
+        lifetime=costs.at["NH3 (l) storage tank incl. liquefaction", "lifetime"],
+    )
+
+
 def get(item, investment_year=None):
     """
     Check whether item depends on investment year.
@@ -1852,13 +1957,13 @@ def add_land_transport(
     """
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    transport = pd.read_csv(transport_fn, index_col=0, parse_dates=True).reindex(
+    transport = read_csv_nafix(transport_fn, index_col=0, parse_dates=True).reindex(
         columns=spatial.nodes, fill_value=0.0
     )
 
-    avail_profile = pd.read_csv(avail_profile_fn, index_col=0, parse_dates=True)
-    dsm_profile = pd.read_csv(dsm_profile_fn, index_col=0, parse_dates=True)
-    nodal_transport_data = pd.read_csv(nodal_transport_data_fn, index_col=0)
+    avail_profile = read_csv_nafix(avail_profile_fn, index_col=0, parse_dates=True)
+    dsm_profile = read_csv_nafix(dsm_profile_fn, index_col=0, parse_dates=True)
+    nodal_transport_data = read_csv_nafix(nodal_transport_data_fn, index_col=0)
     # TODO nodal_transport_data only includes no. of cars, change name to something descriptive?
     # TODO options?
 
@@ -2084,21 +2189,21 @@ def add_heat(
     district_heat_share_fn,
 ):
     # Load data required for heat sector
-    heat_demand = pd.read_csv(
+    heat_demand = read_csv_nafix(
         heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
     ).fillna(0)
     # Solar thermal availability profiles
-    solar_thermal = pd.read_csv(solar_thermal_fn, index_col=0, parse_dates=True)
+    solar_thermal = read_csv_nafix(solar_thermal_fn, index_col=0, parse_dates=True)
     # Ground-sourced heatpump coefficient of performance
-    gshp_cop = pd.read_csv(gshp_cop_fn, index_col=0, parse_dates=True)
+    gshp_cop = read_csv_nafix(gshp_cop_fn, index_col=0, parse_dates=True)
     # Air-sourced heatpump coefficient of performance
-    ashp_cop = pd.read_csv(
+    ashp_cop = read_csv_nafix(
         ashp_cop_fn, index_col=0, parse_dates=True
     )  # only needed with heat dep. hp cop allowed from config
     # TODO add option heat_dep_hp_cop to the config
 
     # Share of district heating at each node
-    district_heat_share = pd.read_csv(district_heat_share_fn, index_col=0)
+    district_heat_share = read_csv_nafix(district_heat_share_fn, index_col=0)
     # TODO options?
     # TODO pop_layout?
 
@@ -2534,7 +2639,7 @@ def add_services(n, costs, energy_totals):
 
 
 def add_agriculture(n, costs, nodal_energy_totals_fn):
-    nodal_energy_totals = pd.read_csv(
+    nodal_energy_totals = read_csv_nafix(
         nodal_energy_totals_fn,
         index_col=0,
         keep_default_na=False,
@@ -2847,7 +2952,7 @@ def add_electricity_distribution_grid(n, costs):
 
             solar_rooftop_layout = pd.concat(
                 [
-                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    read_csv_nafix(snakemake.input[fn], index_col=0)
                     for fn in snakemake.input.keys()
                     if "solar_rooftop_layout" in fn
                 ]
@@ -3008,7 +3113,7 @@ def add_custom_water_cost(n):
 
 
 def add_rail_transport(n, costs, nodal_energy_totals_fn):
-    nodal_energy_totals = pd.read_csv(
+    nodal_energy_totals = read_csv_nafix(
         nodal_energy_totals_fn,
         index_col=0,
         keep_default_na=False,
@@ -3215,7 +3320,7 @@ if __name__ == "__main__":
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
     # Prepare the costs dataframe
-    costs = pd.read_csv(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
@@ -3269,6 +3374,9 @@ if __name__ == "__main__":
             costs,
             industrial_demand_fn=snakemake.input.industrial_demand,
         )
+
+    if options["ammonia"]["enable"]:
+        add_ammonia(n, costs, industrial_demand_fn=snakemake.input.industrial_demand)
 
     if enable["shipping"]:
         add_shipping(

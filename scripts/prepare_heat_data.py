@@ -10,7 +10,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from _helpers import mock_snakemake
+from _helpers import mock_snakemake, read_csv_nafix
 
 
 def generate_periodic_profiles(dt_index, nodes, weekly_profile, localize=None):
@@ -55,7 +55,7 @@ def prepare_heat_data(n):
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
     solar_thermal = options["solar_cf_correction"] * solar_thermal / 1e3
 
-    energy_totals = pd.read_csv(
+    energy_totals = read_csv_nafix(
         snakemake.input.energy_totals_name,
         index_col=0,
         keep_default_na=False,
@@ -75,7 +75,7 @@ def prepare_heat_data(n):
         .reindex(index=n.snapshots, method="ffill")
     )
 
-    intraday_profiles = pd.read_csv(
+    intraday_profiles = read_csv_nafix(
         snakemake.input.heat_profile, index_col=0
     )  # TODO GHALAT
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     # Get pop_layout
-    pop_layout = pd.read_csv(
+    pop_layout = read_csv_nafix(
         snakemake.input.clustered_pop_layout,
         index_col=0,
         keep_default_na=False,
