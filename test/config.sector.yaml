@@ -65,7 +65,7 @@ sector:
   hydrogen:
     underground_storage:
       enabled: true
-      
+
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
