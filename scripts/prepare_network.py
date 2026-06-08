@@ -71,7 +71,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import update_transmission_costs
+from assign_costs import update_transmission_costs
 
 idx = pd.IndexSlice
 
