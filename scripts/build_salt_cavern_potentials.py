@@ -36,8 +36,7 @@ import rasterio.features
 import requests
 import rioxarray
 import shapely.geometry
-from _helpers import COPERNICUS_CRS, mock_snakemake, to_csv_nafix
-
+from _helpers import mock_snakemake, to_csv_nafix
 
 def capsule_volume(diameter_m: float, height_m: float) -> float:
     """
@@ -526,8 +525,6 @@ if __name__ == "__main__":
 
     area_crs = snakemake.params.crs["area_crs"]
     geo_crs = snakemake.params.crs["geo_crs"]
-    copernicus_crs = COPERNICUS_CRS
-    distance_crs = snakemake.params.crs["distance_crs"]
     paths = snakemake.input
 
     # Load potash deposits shapefile
