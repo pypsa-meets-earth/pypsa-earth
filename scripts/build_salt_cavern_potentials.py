@@ -38,6 +38,7 @@ import rioxarray
 import shapely.geometry
 from _helpers import mock_snakemake, to_csv_nafix
 
+
 def capsule_volume(diameter_m: float, height_m: float) -> float:
     """
     Calculate the volume of a cylindrical capsule-shaped cavern.
