@@ -55,7 +55,14 @@ def select_ports(n):
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
     # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
-    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+    if ports_sel.empty:
+        hydrogen_buses_ports = n.buses[n.buses.carrier == "H2"]
+        logger.info(
+            "No hydrogen export ports are found. Setting all hydrogen buses as export nodes"
+        )
+    else:
+        hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
@@ -76,7 +83,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     n.add(
         "Bus",
         "H2 export bus",
-        carrier="H2",
+        carrier="H2 export",
         location="Earth",
         x=x_export,
         y=y_export,
@@ -259,7 +266,6 @@ if __name__ == "__main__":
         )
 
     n = pypsa.Network(snakemake.input.network)
-
     countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
@@ -268,7 +274,7 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = pd.read_csv(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     # get hydrogen export buses/ports
     hydrogen_buses_ports = select_ports(n)

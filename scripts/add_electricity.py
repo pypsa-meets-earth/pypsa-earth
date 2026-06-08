@@ -1307,7 +1307,7 @@ if __name__ == "__main__":
     # Snakemake imports:
     demand_profiles = snakemake.input["demand_profiles"]
 
-    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.tech_costs, index_col=0)
     ppl = load_powerplants(
         snakemake.input.powerplants,
         costs,
@@ -1364,7 +1364,7 @@ if __name__ == "__main__":
     attach_existing_batteries(n, costs, ppl)
     apply_nuclear_p_max_pu(
         n,
-        pd.read_csv(snakemake.input.nuclear_p_max_pu),
+        read_csv_nafix(snakemake.input.nuclear_p_max_pu),
     )
 
     update_p_nom_max(n)

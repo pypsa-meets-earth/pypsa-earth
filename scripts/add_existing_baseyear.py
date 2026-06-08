@@ -262,7 +262,7 @@ if __name__ == "__main__":
     add_build_year_to_new_assets(n, baseyear)
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
-    costs = pd.read_csv(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     grouping_years_heat = snakemake.params.existing_capacities["grouping_years_heat"]
 

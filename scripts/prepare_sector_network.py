@@ -3226,7 +3226,7 @@ def add_electricity_distribution_grid(n, costs):
 
             solar_rooftop_layout = pd.concat(
                 [
-                    pd.read_csv(snakemake.input[fn], index_col=0)
+                    read_csv_nafix(snakemake.input[fn], index_col=0)
                     for fn in snakemake.input.keys()
                     if "solar_rooftop_layout" in fn
                 ]

@@ -765,7 +765,7 @@ if __name__ == "__main__":
     else:
         line_length_factor = snakemake.params.length_factor
         Nyears = n.snapshot_weightings.objective.sum() / 8760
-        hvac_overhead_cost = pd.read_csv(snakemake.input.tech_costs, index_col=0).at[
+        hvac_overhead_cost = read_csv_nafix(snakemake.input.tech_costs, index_col=0).at[
             "HVAC overhead", "capital_cost"
         ]
 
