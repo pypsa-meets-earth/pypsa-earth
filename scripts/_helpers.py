@@ -78,7 +78,7 @@ def update_cutout_config(config):
     Update renewable cutout settings in the configuration.
 
     This function replaces any `"auto"` cutout entries in the
-    `config["renewables"]` section with the default cutout specified in
+    `config["renewable"]` section with the default cutout specified in
     `config["atlite"]["default"]`.
     """
     cutout_default = config["atlite"]["default"]
@@ -696,7 +696,12 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if os.stat(file).st_size > 0:
+    if isinstance(file, str) and (
+        file.startswith("http://") or file.startswith("https://")
+    ):
+        return pd.read_csv(file, **kwargs)
+
+    if os.path.exists(file) and os.stat(file).st_size > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
@@ -711,6 +716,46 @@ def to_csv_nafix(df, path, **kwargs):
     else:
         with open(path, "w") as fp:
             pass
+
+
+def add_transform_iso3(
+    df: pd.DataFrame,
+    source: str = "Entity code",
+    target: str = "name_short",
+    output: str = "region_name",
+) -> pd.DataFrame:
+    """
+    Transform a column containing ISO3 codes into another country-code or country-name
+    format and store the result in a new column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame.
+    source : str
+        Name of the column in ``df`` containing country names.
+    target : str
+        Target format as expected by ``coco.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
+    output : str
+        Name of a new output column of ``df`` to keep converted region names.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        DataFrame with an additional column containing the converted region names.
+
+    """
+    # coco.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = coco.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
 
 
 def save_to_geojson(df, fn):
@@ -833,8 +878,12 @@ def create_country_list(input, iso_coding=True):
         # create a list with all countries
         full_codes_list.extend(codes_list)
 
-    # Removing duplicates and filter outputs by coding
-    full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
+    # Sorting gives a canonical order to keep Snakemake params stable across runs,
+    # allowing CI to reuse cached rules. dict.fromkeys() is used instead of set()
+    # to deduplicate while preserving insertion order (set() ordering is non-deterministic).
+    full_codes_list = sorted(
+        filter_codes(list(dict.fromkeys(full_codes_list)), iso_coding=iso_coding)
+    )
 
     return full_codes_list
 
@@ -1249,6 +1298,7 @@ def get_conv_factors(sector):
             "Ethane": 0.01289,
             "Oil shale": 0.00247,
             "Other kerosene": 0.01216,
+            "ammonia": 0.00517,  # MWh (LHV) per tonne NH3 = 0.00517 TWh/kton
         }
     return fuels_conv_toTWh
 

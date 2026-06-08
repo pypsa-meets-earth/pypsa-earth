@@ -61,7 +61,7 @@ playground/
 
 # Specific configuration files
 configs/scenarios/config.*.yaml
-!configs/scenarios/config.NG.yaml
+!configs/scenarios/config.test.yaml
 
 # VS Code-related files
 .vscode
@@ -75,4 +75,4 @@ screenlog*
 # Exclude specific file paths
 !data/demand/unsd/paths/Energy_Statistics_Database.xlsx
 site/
-doc/img/gen_*.svg
+!data/industry/ammonia_plants.csv

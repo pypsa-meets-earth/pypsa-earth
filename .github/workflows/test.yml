@@ -7,6 +7,12 @@ on:
   pull_request:
     branches:
     - main
+    paths-ignore:
+    - "doc/**"
+    - "**.md"
+    - "**.rst"
+    - "mkdocs.yml"
+    - ".readthedocs.yaml"
   schedule:
   - cron: "0 5 * * TUE"
 
@@ -57,7 +63,7 @@ jobs:
           echo "env_file=${{ matrix.env_file }}" >> $GITHUB_ENV
         fi
 
-    - uses: conda-incubator/setup-miniconda@v3
+    - uses: conda-incubator/setup-miniconda@v4
       with:
         miniforge-version: latest
         activate-environment: pypsa-earth
