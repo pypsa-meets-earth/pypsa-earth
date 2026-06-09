@@ -15,17 +15,17 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["NG", "BJ"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
+countries: ["GH"] #Ghana configuration
+# Can be replaced by country ["NG"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
 enable:
-  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_databundle_sector: true
-  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  retrieve_cutout: true
-  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle_sector: false
+  retrieve_cost_data: false # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cutout: false
+  download_osm_data: false # If 'true', OpenStreetMap data will be downloaded for the above given countries
   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
-  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+  build_natura_raster: true # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/how-to-api
@@ -58,7 +58,7 @@ scenario:
 
 snapshots:
   start: "2013-01-01"
-  end: "2014-01-01"
+  end: "2013-12-31"
   inclusive: "left" # end is not inclusive
 
 # definition of the Coordinate Reference Systems
@@ -146,7 +146,7 @@ subregion:
 
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
-  threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  threshold_voltage: 33000 #Ghana's lowest subtransmission #51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
@@ -166,7 +166,7 @@ build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMa
 
 base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network
+  min_voltage_rebase_voltage: 33000 #minimum for Ghana #51000 # [V] minimum voltage in base network
 
 # DemandCast and GEGIS are two available options
 # DemandCast covers 2000-2024
@@ -275,7 +275,7 @@ atlite:
       dy: 0.3 # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
-      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
   default: cutout-2013-era5
@@ -368,7 +368,7 @@ renewable:
     extendable: true
   hydro:
     cutout: auto
-    hydrobasins_level: 6
+    hydrobasins_level: 6 
     resource:
       method: hydro
       hydrobasins: data/hydrobasins/hybas_world.shp
@@ -376,7 +376,7 @@ renewable:
       # weight_with_height: false
       # show_progress: true
     carriers: [ror, PHS, hydro]
-    PHS_max_hours: 6
+    PHS_max_hours: 6 # have to check this for Ghana
     hydro_max_hours: "energy_capacity_totals_by_country" # not active
     hydro_max_hours_default: 6.0 # (optional, default 6) Default value of max_hours for hydro when NaN values are found
     clip_min_inflow: 1.0
@@ -609,14 +609,6 @@ sector:
   oil:
     spatial_oil: true
 
-  ammonia:
-    enable: true
-    spatial_ammonia: true
-    production_year: 2019 # 2019 - 2023 are available
-    gas_MWh_per_tNH3: 7.81   # MWh natural gas per tNH3 (SMR eff.=0.76, HB H2-input=1.1484 MWh_H2/MWh_NH3, NH3 LHV=5.167 MWh/t)
-    elec_MWh_per_tNH3: 1.278  # MWh electricity per tNH3 (HB elec-input=0.2473 MWh_el/MWh_NH3, NH3 LHV=5.167 MWh/t)
-    co2_t_per_tNH3: 1.547    # tCO2 per tNH3 (gas CO2 intensity=0.198 tCO2/MWh_gas x 7.81 MWh_gas/tNH3)
-
   # ------------------- HEAT SECTOR -------------------
 
   district_heating:
@@ -829,8 +821,8 @@ solving:
     # nhours: 10
 
   solver:
-    name: gurobi
-    options: gurobi-default
+    name: highs #gurobi
+    options: highs-default #gurobi-default
 
   solver_options:
     highs-default:
@@ -893,7 +885,7 @@ solving:
 plotting:
   map:
     figsize: [7, 7]
-    boundaries: [-10.2, 29, 35, 72]
+    boundaries: [-4.0, 2.0, 4.0, 12.0] #for Ghana specific boundaries
     p_nom:
       bus_size_factor: 5.e+4
       linewidth_factor: 3.e+3
