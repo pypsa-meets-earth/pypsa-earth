@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from _helpers import BASE_DIR
+from _helpers import BASE_DIR, read_csv_nafix
 
 # from _helpers import configure_logging
 
@@ -27,13 +27,13 @@ def download_airports():
     """
     fn = "https://davidmegginson.github.io/ourairports-data/airports.csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
-    airports_csv = pd.read_csv(
+    airports_csv = read_csv_nafix(
         fn, index_col=0, storage_options=storage_options, encoding="utf8"
     )
 
     fn = "https://davidmegginson.github.io/ourairports-data/runways.csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
-    runways_csv = pd.read_csv(
+    runways_csv = read_csv_nafix(
         fn, index_col=0, storage_options=storage_options, encoding="utf8"
     )
 

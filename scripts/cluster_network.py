@@ -137,6 +137,7 @@ from _helpers import (
     create_logger,
     locate_bus,
     nearest_shape,
+    read_csv_nafix,
     restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
@@ -763,7 +764,7 @@ if __name__ == "__main__":
     else:
         line_length_factor = snakemake.params.length_factor
         Nyears = n.snapshot_weightings.objective.sum() / 8760
-        hvac_overhead_cost = pd.read_csv(snakemake.input.tech_costs, index_col=0).at[
+        hvac_overhead_cost = read_csv_nafix(snakemake.input.tech_costs, index_col=0).at[
             "HVAC overhead", "capital_cost"
         ]
 
@@ -795,7 +796,9 @@ if __name__ == "__main__":
 
         custom_busmap = snakemake.params.custom_busmap
         if custom_busmap:
-            busmap = pd.read_csv(snakemake.input.custom_busmap, index_col=0).squeeze()
+            busmap = read_csv_nafix(
+                snakemake.input.custom_busmap, index_col=0
+            ).squeeze()
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
             custom_busmap = busmap
