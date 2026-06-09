@@ -37,13 +37,30 @@ from _helpers import configure_logging, create_logger
 logger = create_logger(__name__)
 
 
-# ---------------------------------------------------------------------------
-# Transmission helpers
-# ---------------------------------------------------------------------------
+def attach_dc_costs(
+    lines_or_links: pd.DataFrame,
+    costs: pd.DataFrame,
+    length_factor: float = 1.0,
+    simple_hvdc_costs: bool = False,
+) -> None:
+    """
+    Apply capital costs to DC lines or links in-place.
 
+    Parameters
+    ----------
+    lines_or_links : pd.DataFrame
+        DataFrame containing the lines or links to attach costs to.
+    costs : pd.DataFrame
+        DataFrame containing the costs to attach.
+    length_factor : float
+        Factor scaling connection distances for offshore wind.
+    simple_hvdc_costs : bool
+        Whether to use simple HVDC costs.
 
-def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
-    """Apply capital costs to DC lines or links in-place."""
+    Returns
+    -------
+    None
+    """
     if lines_or_links.empty:
         return
 
@@ -72,8 +89,30 @@ def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=
     lines_or_links.loc[dc_b, "capital_cost"] = cap
 
 
-def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
-    """Refresh AC line and DC link capital costs from the cost table."""
+def update_transmission_costs(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    length_factor: float = 1.0,
+    simple_hvdc_costs: bool = False,
+) -> None:
+    """
+    Refresh AC line and DC link capital costs from the cost table.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to update the transmission costs for.
+    costs : pd.DataFrame
+        The costs to update the transmission costs for.
+    length_factor : float
+        Factor scaling connection distances for offshore wind.
+    simple_hvdc_costs : bool
+        Whether to use simple HVDC costs.
+
+    Returns
+    -------
+    None
+    """
     n.lines["capital_cost"] = (
         n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
     )
@@ -92,9 +131,49 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
     )
 
 
-# ---------------------------------------------------------------------------
-# Renewable capital cost
-# ---------------------------------------------------------------------------
+def offwind_connection_cost(
+    carrier: str,
+    avg_dist: "pd.Series",
+    uw_frac: "pd.Series",
+    costs: pd.DataFrame,
+    length_factor: float,
+) -> pd.Series:
+    """
+    Compute the per-bus grid connection capital cost for an offshore wind carrier.
+
+    This is the distance- and substrate-dependent part of the offshore wind
+    capital cost (submarine + underground cable), separate from the turbine and
+    substation costs. It is the single formula used both at network build time
+    (from the renewable profile dataset) and during per-horizon re-costing
+    (from attributes stored on generators).
+
+    Parameters
+    ----------
+    carrier : str
+        Offshore carrier name, e.g. ``"offwind-ac"`` or ``"offwind-dc"``.
+    avg_dist : pd.Series
+        Average connection distance per bus [km].
+    uw_frac : pd.Series
+        Fraction of the connection that is submarine (0–1) per bus.
+    costs : pd.DataFrame
+        Technology cost table indexed by technology.
+    length_factor : float
+        Scalar multiplier applied to distances.
+
+    Returns
+    -------
+    pd.Series
+        Per-bus connection capital cost [currency/MW/a].
+    """
+    return (
+        length_factor
+        * avg_dist
+        * (
+            uw_frac * costs.at[carrier + "-connection-submarine", "capital_cost"]
+            + (1.0 - uw_frac)
+            * costs.at[carrier + "-connection-underground", "capital_cost"]
+        )
+    )
 
 
 def calculate_renewable_capital_cost(
@@ -103,26 +182,27 @@ def calculate_renewable_capital_cost(
     costs: pd.DataFrame,
     line_length_factor: float,
     output_currency: str = "EUR",
-):
+) -> tuple:
     """
     Compute the per-bus capital cost of a renewable carrier from a cost table.
 
     For offshore wind the capital cost includes a distance-dependent grid
-    connection cost (submarine/underground), which is why the renewable profile
-    dataset ``ds`` (providing ``average_distance`` and ``underwater_fraction``)
-    is required. For all other carriers the capital cost is the carrier-level
-    value from ``costs``.
+    connection cost (submarine/underground cable), computed via
+    :func:`offwind_connection_cost`. For all other carriers the capital cost
+    is a scalar taken directly from the cost table.
 
-    This helper is the single source of truth for renewable capital costs and is
-    used both at network build time (``attach_wind_and_solar``) and for
-    per-horizon re-costing, so the two paths can never diverge.
+    Used at network build time by ``attach_wind_and_solar``. The geometry
+    (``average_distance``, ``underwater_fraction``) is stored on generators
+    so that :func:`update_generator_costs` can recompute the same value per
+    horizon without the profile dataset.
 
     Parameters
     ----------
     carrier : str
-        Renewable carrier name (e.g. ``"onwind"``, ``"offwind-ac"``).
+        Renewable carrier name, e.g. ``"onwind"``, ``"offwind-ac"``.
     ds : xr.Dataset
-        Renewable profile dataset for the carrier.
+        Renewable profile dataset providing ``average_distance`` and
+        ``underwater_fraction`` variables (buses as coordinate).
     costs : pd.DataFrame
         Technology cost table indexed by technology.
     line_length_factor : float
@@ -132,13 +212,11 @@ def calculate_renewable_capital_cost(
 
     Returns
     -------
-    capital_cost : float or pandas.Series
-        Total carrier capital cost (technology + connection). A per-bus
-        ``Series`` for offshore wind, a scalar otherwise.
+    capital_cost : float or pd.Series
+        Total capital cost per bus (technology + connection for offshore).
     capital_cost_tech : float
-        The technology-only component of the capital cost (a scalar per
-        carrier), i.e. excluding the distance-dependent grid connection cost.
-        For non-offshore carriers this equals ``capital_cost``.
+        Technology-only component (turbine + substation), without connection.
+        Equals ``capital_cost`` for non-offshore carriers.
     """
     supcarrier = carrier.split("-", 2)[0]
 
@@ -147,23 +225,19 @@ def calculate_renewable_capital_cost(
             costs.at["offwind", "capital_cost"]
             + costs.at[carrier + "-station", "capital_cost"]
         )
-        underwater_fraction = ds["underwater_fraction"].to_pandas()
-        connection_cost = (
-            line_length_factor
-            * ds["average_distance"].to_pandas()
-            * (
-                underwater_fraction
-                * costs.at[carrier + "-connection-submarine", "capital_cost"]
-                + (1.0 - underwater_fraction)
-                * costs.at[carrier + "-connection-underground", "capital_cost"]
-            )
+        conn_cost = offwind_connection_cost(
+            carrier,
+            avg_dist=ds["average_distance"].to_pandas(),
+            uw_frac=ds["underwater_fraction"].to_pandas(),
+            costs=costs,
+            length_factor=line_length_factor,
         )
-        capital_cost = capital_cost_tech + connection_cost
+        capital_cost = capital_cost_tech + conn_cost
 
         logger.info(
             "Added connection cost of {:0.0f}-{:0.0f} {}/MW/a to {}".format(
-                connection_cost.min(),
-                connection_cost.max(),
+                conn_cost.min(),
+                conn_cost.max(),
                 output_currency,
                 carrier,
             )
@@ -175,9 +249,133 @@ def calculate_renewable_capital_cost(
     return capital_cost, capital_cost_tech
 
 
-# ---------------------------------------------------------------------------
-# Per-horizon re-costing
-# ---------------------------------------------------------------------------
+def update_generator_costs(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    renewable_carriers: set,
+    length_factor: float,
+) -> None:
+    """
+    Update cost-vintage-dependent attributes on all generators in-place.
+
+    Two rules govern what gets updated:
+
+    - **marginal_cost** is refreshed for **all** generators whose carrier is
+      in the cost table.  Operating costs (fuel, VOM) change per horizon for
+      both existing and new-build units.
+    - **capital_cost, efficiency, lifetime** are refreshed **only for
+      extendable** (new-build) generators.  For non-extendable (existing)
+      plants these attributes are either irrelevant to the optimisation
+      (capital_cost) or were set plant-specifically at build time and must
+      not be overwritten (efficiency, lifetime).
+
+    Offshore wind capital_cost is recomputed from ``average_distance`` and
+    ``underwater_fraction`` stored on generators at build time, via
+    :func:`offwind_connection_cost`, keeping the formula consistent with
+    :func:`calculate_renewable_capital_cost`.
+
+    Carriers absent from the cost table are silently skipped.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    costs : pd.DataFrame
+        Horizon-specific cost table indexed by technology.
+    renewable_carriers : set of str
+    length_factor : float
+    """
+    for carrier in n.generators.carrier.unique():
+        supcarrier = carrier.split("-", 2)[0]
+        cost_key = "offwind" if supcarrier == "offwind" else carrier
+
+        if cost_key not in costs.index:
+            continue
+
+        is_carrier = n.generators.carrier == carrier
+        is_ext = is_carrier & n.generators.p_nom_extendable
+
+        # marginal_cost: refresh for all units — operating costs change per horizon
+        assign_component_attrs(
+            n.generators,
+            is_carrier,
+            marginal_cost=costs.at[cost_key, "marginal_cost"],
+        )
+
+        # capital_cost / efficiency / lifetime: extendable units only
+        if not is_ext.any():
+            continue
+
+        if carrier in renewable_carriers or supcarrier in renewable_carriers:
+            assign_component_attrs(
+                n.generators,
+                is_ext,
+                efficiency=costs.at[cost_key, "efficiency"],
+                lifetime=costs.at[cost_key, "lifetime"],
+            )
+
+            sub = n.generators.index[is_ext]
+            has_geometry = (
+                "average_distance" in n.generators.columns
+                and "underwater_fraction" in n.generators.columns
+                and n.generators.loc[sub, "average_distance"].notna().all()
+            )
+
+            if supcarrier == "offwind" and has_geometry:
+                conn_cost = offwind_connection_cost(
+                    carrier,
+                    avg_dist=n.generators.loc[sub, "average_distance"],
+                    uw_frac=n.generators.loc[sub, "underwater_fraction"],
+                    costs=costs,
+                    length_factor=length_factor,
+                )
+                n.generators.loc[sub, "capital_cost"] = (
+                    costs.at["offwind", "capital_cost"]
+                    + costs.at[carrier + "-station", "capital_cost"]
+                    + conn_cost
+                )
+            elif supcarrier == "offwind":
+                logger.warning(
+                    f"No stored geometry for offshore carrier '{carrier}'; "
+                    "capital_cost left unchanged during re-costing."
+                )
+            else:
+                assign_component_attrs(
+                    n.generators,
+                    is_ext,
+                    capital_cost=costs.at[carrier, "capital_cost"],
+                )
+        else:
+            assign_component_attrs(
+                n.generators,
+                is_ext,
+                capital_cost=costs.at[carrier, "capital_cost"],
+                efficiency=costs.at[carrier, "efficiency"],
+                lifetime=costs.at[carrier, "lifetime"],
+            )
+
+
+def assign_component_attrs(df, mask, **attrs) -> None:
+    """
+    Assign one or more column values to rows of a PyPSA component table.
+
+    The update is skipped when the selected rows are empty, so callers can
+    safely pass carrier masks that may match no components.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        A PyPSA component table such as ``n.generators`` or ``n.links``.
+    mask : pandas.Series or pandas.Index
+        Boolean mask selecting rows, or an index of row labels.
+    **attrs
+        Column names and values to assign, e.g.
+        ``capital_cost=1000, marginal_cost=5``.
+    """
+    idx = df.index[mask] if not isinstance(mask, pd.Index) else mask
+    if idx.empty:
+        return
+    for attr, value in attrs.items():
+        df.loc[idx, attr] = value
 
 
 def update_electricity_costs(
@@ -196,21 +394,8 @@ def update_electricity_costs(
     and the plant-specific efficiencies/lifetimes of *existing* units) is built
     once by ``add_electricity`` + ``add_extra_components``; this function then
     overwrites only the economic attributes that depend on the cost year, using
-    a horizon-specific ``costs`` table.
-
-    The formulas below mirror exactly those used at build time in
-    ``add_electricity`` and ``add_extra_components``.  Attributes that do NOT
-    depend on the cost vintage are deliberately left untouched:
-      * ``p_nom``/``p_nom_min``/``p_nom_max`` and ``p_max_pu`` (capacities, profiles),
-      * ``build_year`` and the per-plant ``efficiency``/``lifetime`` of existing
-        (non-extendable) conventional generators,
-      * transmission ``efficiency`` (set from ``sector.transmission_efficiency``).
-
-    Conventional generators store a ``cost_key`` attribute at build time (set by
-    ``attach_conventional_generators``).  The update path reads that tag instead
-    of re-deriving the cost-table key from the carrier string, so the mapping
-    between the network component and its cost row is explicit and
-    change-tolerant.
+    a horizon-specific ``costs`` table. Attributes that do NOT
+    depend on the cost vintage are deliberately left untouched.
 
     Parameters
     ----------
@@ -224,111 +409,31 @@ def update_electricity_costs(
         Transmission/offshore connection length factor.
     hydro_capital_cost : bool
         Whether hydro reservoirs carry a capital cost.
+
+    Returns
+    -------
+    None
     """
     renewable_carriers = set(renewable_carriers)
 
-    def _assign(df, mask, **attrs):
-        idx = df.index[mask] if not isinstance(mask, pd.Index) else mask
-        if idx.empty:
-            return
-        for attr, value in attrs.items():
-            df.loc[idx, attr] = value
-
-    # --- Transmission lines and DC links ---
+    # Updating transmission costs
     update_transmission_costs(n, costs, length_factor=length_factor)
 
-    gens = n.generators
+    # Updating generator costs
+    update_generator_costs(
+        n,
+        costs,
+        renewable_carriers,
+        length_factor,
+    )
+
     storage = n.storage_units
     stores = n.stores
     links = n.links
 
-    # --- Generators ---
-    for carrier in gens.carrier.dropna().unique():
-        supcarrier = carrier.split("-", 2)[0]
-        is_carrier = gens.carrier == carrier
-        is_ext = is_carrier & gens.p_nom_extendable
-
-        if carrier == "ror":
-            _assign(
-                n.generators,
-                is_carrier,
-                capital_cost=costs.at["ror", "capital_cost"],
-                efficiency=costs.at["ror", "efficiency"],
-            )
-
-        elif carrier in renewable_carriers or supcarrier in renewable_carriers:
-            # Wind/solar/csp: refresh all cost attributes from the horizon table.
-            # For offshore wind, geometry (average_distance, underwater_fraction)
-            # stored at build time lets us recompute the exact connection cost.
-            if supcarrier == "offwind":
-                lifetime = costs.at["offwind", "lifetime"]
-            else:
-                lifetime = costs.at[carrier, "lifetime"]
-
-            _assign(
-                n.generators,
-                is_carrier,
-                marginal_cost=costs.at[supcarrier, "marginal_cost"],
-                efficiency=costs.at[supcarrier, "efficiency"],
-                lifetime=lifetime,
-            )
-
-            sub = gens.index[is_carrier]
-            has_geometry = (
-                "average_distance" in n.generators.columns
-                and "underwater_fraction" in n.generators.columns
-                and n.generators.loc[sub, "average_distance"].notna().all()
-            )
-
-            if supcarrier == "offwind" and has_geometry:
-                avg_dist = n.generators.loc[sub, "average_distance"]
-                uw_frac = n.generators.loc[sub, "underwater_fraction"]
-                connection_cost = (
-                    length_factor
-                    * avg_dist
-                    * (
-                        uw_frac
-                        * costs.at[carrier + "-connection-submarine", "capital_cost"]
-                        + (1.0 - uw_frac)
-                        * costs.at[carrier + "-connection-underground", "capital_cost"]
-                    )
-                )
-                n.generators.loc[sub, "capital_cost"] = (
-                    costs.at["offwind", "capital_cost"]
-                    + costs.at[carrier + "-station", "capital_cost"]
-                    + connection_cost
-                )
-            elif supcarrier == "offwind":
-                logger.warning(
-                    f"No stored geometry for offshore carrier '{carrier}'; "
-                    "capital_cost left unchanged during re-costing."
-                )
-            else:
-                n.generators.loc[sub, "capital_cost"] = costs.at[
-                    carrier, "capital_cost"
-                ]
-
-        elif carrier in costs.index:
-            # Conventional generator. carrier is the cost-table row key.
-            # marginal_cost is refreshed for all units; capital_cost, efficiency
-            # and lifetime are only refreshed for extendable units (existing
-            # plants keep their plant-specific values).
-            _assign(
-                n.generators,
-                is_carrier,
-                marginal_cost=costs.at[carrier, "marginal_cost"],
-            )
-            _assign(
-                n.generators,
-                is_ext,
-                capital_cost=costs.at[carrier, "capital_cost"],
-                efficiency=costs.at[carrier, "efficiency"],
-                lifetime=costs.at[carrier, "lifetime"],
-            )
-
     # --- Storage units ---
     if not storage.empty:
-        _assign(
+        assign_component_attrs(
             n.storage_units,
             storage.carrier == "PHS",
             capital_cost=costs.at["PHS", "capital_cost"],
@@ -336,7 +441,7 @@ def update_electricity_costs(
             efficiency_dispatch=np.sqrt(costs.at["PHS", "efficiency"]),
         )
 
-        _assign(
+        assign_component_attrs(
             n.storage_units,
             storage.carrier == "hydro",
             capital_cost=(
@@ -349,7 +454,7 @@ def update_electricity_costs(
         is_batt = storage.carrier == "battery"
         is_batt_existing = is_batt & (~storage.p_nom_extendable)
         is_batt_ext = is_batt & storage.p_nom_extendable
-        _assign(
+        assign_component_attrs(
             n.storage_units,
             is_batt_existing,
             capital_cost=costs.at["battery", "capital_cost"],
@@ -357,7 +462,7 @@ def update_electricity_costs(
             efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
             efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
         )
-        _assign(
+        assign_component_attrs(
             n.storage_units,
             is_batt_ext,
             capital_cost=costs.at["battery", "capital_cost"],
@@ -366,7 +471,7 @@ def update_electricity_costs(
             efficiency_dispatch=costs.at["battery inverter", "efficiency"],
         )
 
-        _assign(
+        assign_component_attrs(
             n.storage_units,
             storage.carrier == "H2",
             capital_cost=costs.at["H2", "capital_cost"],
@@ -377,18 +482,18 @@ def update_electricity_costs(
 
     # --- Stores (Store-Link-Bus storage representation) ---
     if not stores.empty:
-        _assign(
+        assign_component_attrs(
             n.stores,
             stores.carrier == "H2",
             capital_cost=costs.at["hydrogen storage tank", "capital_cost"],
         )
-        _assign(
+        assign_component_attrs(
             n.stores,
             stores.carrier == "battery",
             capital_cost=costs.at["battery storage", "capital_cost"],
             marginal_cost=costs.at["battery", "marginal_cost"],
         )
-        _assign(
+        assign_component_attrs(
             n.stores,
             stores.carrier == "csp",
             capital_cost=costs.at["csp-tower TES", "capital_cost"],
@@ -397,14 +502,14 @@ def update_electricity_costs(
 
     # --- Extendable links (charging/discharging, pipelines, csp) ---
     if not links.empty:
-        _assign(
+        assign_component_attrs(
             n.links,
             links.carrier == "H2 electrolysis",
             efficiency=costs.at["electrolysis", "efficiency"],
             capital_cost=costs.at["electrolysis", "capital_cost"],
             marginal_cost=costs.at["electrolysis", "marginal_cost"],
         )
-        _assign(
+        assign_component_attrs(
             n.links,
             links.carrier == "H2 fuel cell",
             efficiency=costs.at["fuel cell", "efficiency"],
@@ -412,20 +517,20 @@ def update_electricity_costs(
             * costs.at["fuel cell", "efficiency"],
             marginal_cost=costs.at["fuel cell", "marginal_cost"],
         )
-        _assign(
+        assign_component_attrs(
             n.links,
             links.carrier == "battery charger",
             efficiency=costs.at["battery inverter", "efficiency"],
             capital_cost=costs.at["battery inverter", "capital_cost"],
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
-        _assign(
+        assign_component_attrs(
             n.links,
             links.carrier == "battery discharger",
             efficiency=costs.at["battery inverter", "efficiency"],
             marginal_cost=costs.at["battery inverter", "marginal_cost"],
         )
-        _assign(
+        assign_component_attrs(
             n.links,
             links.carrier == "csp",
             efficiency=costs.at["csp-tower", "efficiency"],
@@ -439,10 +544,6 @@ def update_electricity_costs(
             )
 
 
-# ---------------------------------------------------------------------------
-# Snakemake entry point
-# ---------------------------------------------------------------------------
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -450,8 +551,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "assign_costs",
             simpl="",
-            clusters="4",
-            planning_horizons=2030,
+            clusters="10",
+            planning_horizons=2040,
+            configfile="config.BE.yaml",
         )
 
     configure_logging(snakemake)

@@ -93,9 +93,7 @@ from _helpers import (
     update_p_nom_max,
 )
 from assign_costs import (
-    attach_dc_costs,
     calculate_renewable_capital_cost,
-    update_electricity_costs,
     update_transmission_costs,
 )
 
