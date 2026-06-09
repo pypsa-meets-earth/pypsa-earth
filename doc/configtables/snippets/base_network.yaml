@@ -1,3 +1,9 @@
 base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network
+
+# DemandCast and GEGIS are two available options
+# DemandCast covers 2000-2024
+# GEGIS dataset provides data for 2011, 2013, 2018
+# Details and comparison are provided in
+# https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724

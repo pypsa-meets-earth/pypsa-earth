@@ -168,10 +168,15 @@ base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network
 
+# DemandCast and GEGIS are two available options
+# DemandCast covers 2000-2024
+# GEGIS dataset provides data for 2011, 2013, 2018
+# Details and comparison are provided in
+# https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
 load_options:
-  ssp: "ssp2-2.6" # shared socio-economic pathway (GDP and population growth) scenario to consider
-  weather_year: 2013 # Load scenarios available with different weather year (different renewable potentials)
-  prediction_year: 2030 # Load scenarios available with different prediction year (GDP, population)
+  source: "gegis" # "demcast" or "gegis"
+  weather_year: 2013 # Weather year of the load profile
+  prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
 co2_budget:
@@ -276,7 +281,7 @@ atlite:
       dy: 0.3 # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
-      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
   default: cutout-2013-era5
@@ -609,6 +614,14 @@ sector:
 
   oil:
     spatial_oil: true
+
+  ammonia:
+    enable: true
+    spatial_ammonia: true
+    production_year: 2019 # 2019 - 2023 are available
+    gas_MWh_per_tNH3: 7.81   # MWh natural gas per tNH3 (SMR eff.=0.76, HB H2-input=1.1484 MWh_H2/MWh_NH3, NH3 LHV=5.167 MWh/t)
+    elec_MWh_per_tNH3: 1.278  # MWh electricity per tNH3 (HB elec-input=0.2473 MWh_el/MWh_NH3, NH3 LHV=5.167 MWh/t)
+    co2_t_per_tNH3: 1.547    # tCO2 per tNH3 (gas CO2 intensity=0.198 tCO2/MWh_gas x 7.81 MWh_gas/tNH3)
 
   # ------------------- HEAT SECTOR -------------------
 
