@@ -962,7 +962,7 @@ def add_existing(n):
         n_name = (
             snakemake.input.network.split("/")[-1]
             .replace(str(snakemake.config["scenario"]["clusters"][0]), "")
-            .replace(str(snakemake.config["costs"]["discountrate"][0]), "")
+            .replace(str(snakemake.config["costs"]["discount_rate"][0]), "")
             .replace("_presec", "")
             .replace(".nc", ".csv")
         )
@@ -973,7 +973,7 @@ def add_existing(n):
         n.links.loc[h2_index, "p_nom_min"] = existing_electrolyzers
 
         # n_name = snakemake.input.network.split("/")[-1].replace(str(snakemake.config["scenario"]["clusters"][0]), "").\
-        #     replace(".nc", ".csv").replace(str(snakemake.config["costs"]["discountrate"][0]), "")
+        #     replace(".nc", ".csv").replace(str(snakemake.config["costs"]["discount_rate"][0]), "")
         df = read_csv_nafix(directory + "/res_caps_" + n_name, index_col=0)
 
         for tech in snakemake.config["custom_data"]["renewables"]:
@@ -1169,7 +1169,7 @@ if __name__ == "__main__":
             ll="c1",
             opts="Co2L-4H",
             planning_horizons="2030",
-            discountrate="0.071",
+            discount_rate="0.071",
             demand="AB",
             sopts="144H",
             h2export="120",

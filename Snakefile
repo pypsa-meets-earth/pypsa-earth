@@ -73,7 +73,7 @@ wildcard_constraints:
     opts=r"[-+a-zA-Z0-9\.]*",
     unc=r"[-+a-zA-Z0-9\.]*",
     sopts=r"[-+a-zA-Z0-9\.\s]*",
-    discountrate=r"[-+a-zA-Z0-9\.\s]*",
+    discount_rate=r"[-+a-zA-Z0-9\.\s]*",
     demand=r"[-+a-zA-Z0-9\.\s]*",
     h2export=r"[0-9]+(\.[0-9]+)?",
     planning_horizons="20[2-9][0-9]|2100",
@@ -1101,7 +1101,7 @@ rule prepare_sector_networks:
     input:
         expand(
             RESDIR
-            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}.nc",
             **config["scenario"],
             **config["costs"],
         ),
@@ -1111,7 +1111,7 @@ rule solve_sector_networks:
     input:
         expand(
             RESDIR
-            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             **config["scenario"],
             **config["costs"],
             **config["export"],
@@ -1278,14 +1278,14 @@ rule prepare_sector_network:
         ),
     output:
         RESDIR
-        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}.nc",
     threads: 1
     resources:
         mem_mb=2000,
     benchmark:
         (
             RESDIR
-            + "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}"
+            + "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}"
         )
     script:
         "scripts/prepare_sector_network.py"
@@ -1316,13 +1316,13 @@ rule add_export:
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
-        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}.nc",
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
     output:
         RESDIR
-        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
     script:
         "scripts/add_export.py"
 
@@ -1743,34 +1743,34 @@ if config["foresight"] == "overnight":
             policy_config=config["policy_config"],
         input:
             # network=RESDIR
-            # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
+            # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}.nc",
             network=RESDIR
-            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             RESDIR
-            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         log:
             solver="logs/"
             + SECDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export_solver.log",
             python="logs/"
             + SECDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_python.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export_python.log",
             memory="logs/"
             + SECDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export_memory.log",
         threads: 25
         resources:
             mem_mb=config["solving"]["mem"],
         benchmark:
             (
                 RESDIR
-                + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+                + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export"
             )
         script:
             "scripts/solve_network.py"
@@ -1789,7 +1789,7 @@ rule make_sector_summary:
     input:
         networks=expand(
             RESDIR
-            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             **config["scenario"],
             **config["costs"],
             **config["export"],
@@ -1797,7 +1797,7 @@ rule make_sector_summary:
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         plots=expand(
             RESDIR
-            + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
+            + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.pdf",
             **config["scenario"],
             **config["costs"],
             **config["export"],
@@ -1888,17 +1888,17 @@ rule make_statistics:
 rule plot_sector_network:
     input:
         network=RESDIR
-        + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
     output:
         map=RESDIR
-        + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.pdf",
+        + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.pdf",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
         (
             RESDIR
-            + "benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+            + "benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export"
         )
     script:
         "scripts/plot_network.py"
@@ -1936,17 +1936,17 @@ rule prepare_db:
         tech_colors=config["plotting"]["tech_colors"],
     input:
         network=RESDIR
-        + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+        + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
     output:
         db=RESDIR
-        + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}_{demand}_{h2export}export.csv",
+        + "summaries/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.csv",
     threads: 2
     resources:
         mem_mb=10000,
     benchmark:
         (
             RESDIR
-            + "benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+            + "benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export"
         )
     script:
         "scripts/prepare_db.py"
@@ -2148,7 +2148,7 @@ if config["foresight"] == "myopic":
         input:
             **branch(sector_enable["heat"], HEAT_BASEYEAR),
             network=RESDIR
-            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
             busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
             busmap="resources/"
@@ -2160,7 +2160,7 @@ if config["foresight"] == "myopic":
             costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         output:
             RESDIR
-            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
         wildcard_constraints:
             # TODO: The first planning_horizon needs to be aligned across scenarios
             # snakemake does not support passing functions to wildcard_constraints
@@ -2171,10 +2171,10 @@ if config["foresight"] == "myopic":
             mem_mb=2000,
         log:
             RESDIR
-            + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
+            + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.log",
         benchmark:
             RESDIR
-            +"benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+            +"benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export"
         script:
             "scripts/add_existing_baseyear.py"
 
@@ -2196,7 +2196,7 @@ if config["foresight"] == "myopic":
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
             + planning_horizon_p
-            + "_{discountrate}_{demand}_{h2export}export.nc"
+            + "_{discount_rate}_{demand}_{h2export}export.nc"
         )
 
     rule add_brownfield:
@@ -2216,7 +2216,7 @@ if config["foresight"] == "myopic":
             + RDIR
             + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
             network=RESDIR
-            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
             costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             cop_soil_total="resources/"
@@ -2227,17 +2227,17 @@ if config["foresight"] == "myopic":
             + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
         output:
             RESDIR
-            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
         threads: 4
         resources:
             mem_mb=10000,
         log:
             RESDIR
-            + "logs/add_brownfield_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.log",
+            + "logs/add_brownfield_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.log",
         benchmark:
             (
                 RESDIR
-                + "benchmarks/add_brownfield/elec_s{simpl}_ec_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+                + "benchmarks/add_brownfield/elec_s{simpl}_ec_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export"
             )
         script:
             "./scripts/add_brownfield.py"
@@ -2256,34 +2256,34 @@ if config["foresight"] == "myopic":
             policy_config=config["policy_config"],
         input:
             network=RESDIR
-            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             network=RESDIR
-            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             # config=RESDIR
-            # + "configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.yaml",
+            # + "configs/config.elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.yaml",
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         log:
             solver="logs/"
             + SECDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_solver.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export_solver.log",
             python="logs/"
             + SECDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_python.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export_python.log",
             memory="logs/"
             + SECDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export_memory.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export_memory.log",
         threads: 25
         resources:
             mem_mb=config["solving"]["mem"],
         benchmark:
             (
                 RESDIR
-                + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export"
+                + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export"
             )
         script:
             "./scripts/solve_network.py"
@@ -2292,7 +2292,7 @@ if config["foresight"] == "myopic":
         input:
             networks=expand(
                 RESDIR
-                + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc",
+                + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
                 **config["scenario"],
                 **config["costs"],
                 **config["export"],

@@ -414,7 +414,7 @@ renewable:
 costs:
   year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
   technology_data_version: v0.13.2
-  discountrate: [0.071] #, 0.086, 0.111]
+  discount_rate: [0.071] #, 0.086, 0.111], is used as fill value in process_cost_data.py for technologies with missing discount rate
   country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
   # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
   cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
@@ -433,7 +433,6 @@ costs:
     investment: 0
     lifetime: 25
     CO2 intensity: 0
-    discount rate: 0.07
   marginal_cost: # EUR/MWh
     solar: 0.01
     onwind: 0.015

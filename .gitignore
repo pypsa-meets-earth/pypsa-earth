@@ -26,6 +26,7 @@
 *.xlsx
 *.org
 *~
+*.out
 
 # Specific untracked files
 config.yaml

@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Fix silent inconsistency between `costs.discountrate` and `costs.fill_values.discount rate`: renamed config key to `costs.discount_rate`, removed the redundant `fill_values.discount rate` entry, and added a bridging assignment in `process_cost_data.py` so the annuity calculation always uses the value from `costs.discount_rate`. **Breaking change**: update your config files by renaming `costs.discountrate` → `costs.discount_rate` and removing `costs.fill_values.discount rate`.
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
