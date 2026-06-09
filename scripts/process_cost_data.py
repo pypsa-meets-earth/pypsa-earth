@@ -354,8 +354,17 @@ def load_costs(
         ]
 
     costs = costs.value.unstack().fillna(config["fill_values"])
+    costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
 
-    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
+    for attr in (
+        "investment",
+        "lifetime",
+        "FOM",
+        "VOM",
+        "efficiency",
+        "fuel",
+        "co2_emissions",
+    ):
         overwrites = config.get(attr)
         if overwrites is not None:
             overwrites = pd.Series(overwrites)
@@ -374,8 +383,6 @@ def load_costs(
     costs.at["CCGT", "fuel"] = costs.at["gas", "fuel"]
 
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
-
-    costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
     costs = costs.rename(

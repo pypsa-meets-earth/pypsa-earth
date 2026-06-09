@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Added link to data versioning in docs, and tidied up the links and licenses in the data inventory [PR #233](https://github.com/open-energy-transition/pypsa-zambia/pull/233)
 
+* Added a baseline configuration for capacity expansion runs [PR #242](https://github.com/open-energy-transition/pypsa-zambia/pull/242)
+
 
 # PyPSA-Zambia v0.3
 

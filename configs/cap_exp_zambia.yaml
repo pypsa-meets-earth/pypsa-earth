@@ -19,7 +19,9 @@ scenario:
 
 electricity:
   extendable_carriers:
-    Generator: ["solar"]
+    # TODO Biomass potential can have strong impact and must be adjusted
+    # according to the conditions it aims to represent
+    Generator: ["solar", "biomass", "hydro", "ror", "oil", "onwind"]
     StorageUnit: []
     Store: []
     Link: []
@@ -47,3 +49,25 @@ costs:
   marginal_cost:
     coal: 0.0
     oil: 4.23
+  co2_emissions: # tCO2/MWh — IRP Table 5 (Zambia 2023)
+    hydro: 0.025
+    ror: 0.024
+    coal: 0.830
+    geothermal: 0.038
+    biomass: 0.038
+    solar: 0.048
+    onwind: 0.011
+    nuclear: 0.012
+    csp-tower: 0.000
+    oil: 0.490
+  lifetime: # years — IRP Table 5 (Zambia 2023)
+    hydro: 50
+    ror: 35
+    coal: 40
+    geothermal: 35
+    biomass: 25
+    solar: 25
+    onwind: 30
+    nuclear: 50
+    csp-tower: 25
+    oil: 30

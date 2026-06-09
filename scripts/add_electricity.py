@@ -94,7 +94,10 @@ from _helpers import (
     update_p_nom_max,
 )
 from powerplantmatching.export import map_country_bus
-from utility_custom_features import add_biomass_potential, disaggregate_plants
+from utility_custom_features import (
+    add_biomass_potential,
+    disaggregate_plants,
+)
 
 idx = pd.IndexSlice
 
@@ -1362,6 +1365,7 @@ if __name__ == "__main__":
         renewable_carriers = set(snakemake.params.renewable)
 
     extendable_carriers = snakemake.params.electricity["extendable_carriers"]
+
     if not (set(renewable_carriers) & set(extendable_carriers["Generator"])):
         logger.warning(
             "No renewables found in config entry `extendable_carriers`. "
