@@ -1,6 +1,6 @@
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
-  threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  threshold_voltage: 33000 #Ghana's lowest subtransmission #51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true # When "True", then line endings are added to the dataset of the substations
   generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
