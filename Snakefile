@@ -531,11 +531,11 @@ rule process_cost_data:
             "data/costs.csv",
         ),
     output:
-        "resources/" + RDIR + "costs_{year}_{scope}.csv",
+        "resources/" + RDIR + "costs_{year}_{scope}_{discount_rate}.csv",
     log:
-        "logs/" + RDIR + "build_cost_data_{year}_{scope}.log",
+        "logs/" + RDIR + "build_cost_data_{year}_{scope}_{discount_rate}.log",
     benchmark:
-        "benchmarks/" + RDIR + "build_cost_data_{year}_{scope}"
+        "benchmarks/" + RDIR + "build_cost_data_{year}_{scope}_{discount_rate}"
     threads: 1
     resources:
         mem_mb=4000,
@@ -678,8 +678,7 @@ rule add_electricity:
             for attr, fn in d.items()
             if str(fn).startswith("data/")
         },
-        base_network="networks/" + RDIR + "base.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
@@ -690,11 +689,11 @@ rule add_electricity:
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
         nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:
-        "networks/" + RDIR + "elec.nc",
+        "networks/" + RDIR + "elec_{discount_rate}.nc",
     log:
-        "logs/" + RDIR + "add_electricity.log",
+        "logs/" + RDIR + "add_electricity_{discount_rate}.log",
     benchmark:
-        "benchmarks/" + RDIR + "add_electricity"
+        "benchmarks/" + RDIR + "add_electricity_{discount_rate}"
     threads: 1
     resources:
         mem_mb=3000,
@@ -717,26 +716,26 @@ rule simplify_network:
         focus_weights=config.get("focus_weights", None),
     input:
         **retrieve_subregion("simplify_network"),
-        network="networks/" + RDIR + "elec.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        network="networks/" + RDIR + "elec_{discount_rate}.nc",
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
     output:
-        network="networks/" + RDIR + "elec_s{simpl}.nc",
+        network="networks/" + RDIR + "elec_s{simpl}_{discount_rate}.nc",
         regions_onshore="resources/"
         + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
+        + "bus_regions/regions_onshore_elec_s{simpl}_{discount_rate}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
-        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
+        + "bus_regions/regions_offshore_elec_s{simpl}_{discount_rate}.geojson",
+        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
         connection_costs="resources/"
         + RDIR
-        + "bus_regions/connection_costs_s{simpl}.csv",
+        + "bus_regions/connection_costs_s{simpl}_{discount_rate}.csv",
     log:
-        "logs/" + RDIR + "simplify_network/elec_s{simpl}.log",
+        "logs/" + RDIR + "simplify_network/elec_s{simpl}_{discount_rate}.log",
     benchmark:
-        "benchmarks/" + RDIR + "simplify_network/elec_s{simpl}"
+        "benchmarks/" + RDIR + "simplify_network/elec_s{simpl}_{discount_rate}"
     threads: 1
     resources:
         mem_mb=4000,
@@ -758,14 +757,14 @@ rule cluster_network:
         custom_busmap=config["enable"].get("custom_busmap", False),
     input:
         **retrieve_subregion("cluster_network"),
-        network="networks/" + RDIR + "elec_s{simpl}.nc",
+        network="networks/" + RDIR + "elec_s{simpl}_{discount_rate}.nc",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         regions_onshore="resources/"
         + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
+        + "bus_regions/regions_onshore_elec_s{simpl}_{discount_rate}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
+        + "bus_regions/regions_offshore_elec_s{simpl}_{discount_rate}.geojson",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -777,25 +776,25 @@ rule cluster_network:
             if config["enable"].get("custom_busmap", False)
             else []
         ),
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
     output:
         network=branch(
             config["augmented_line_connection"].get("add_to_snakefile", False) == True,
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation_{discount_rate}.nc",
+            "networks/" + RDIR + "elec_s{simpl}_{clusters}_{discount_rate}.nc",
         ),
         regions_onshore="resources/"
         + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}_{discount_rate}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
-        linemap="resources/" + RDIR + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}_{discount_rate}.geojson",
+        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
+        linemap="resources/" + RDIR + "bus_regions/linemap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
     log:
-        "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}.log",
+        "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}_{discount_rate}.log",
     benchmark:
-        "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}"
+        "benchmarks/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}_{discount_rate}"
     threads: 1
     resources:
         mem_mb=3000,
@@ -847,8 +846,8 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
             hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
             electricity=config["electricity"],
         input:
-            tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
+            tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation_{discount_rate}.nc",
             regions_onshore="resources/"
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
@@ -856,11 +855,11 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
             + RDIR
             + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
         output:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_{discount_rate}.nc",
         log:
-            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}.log",
+            "logs/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}_{discount_rate}.log",
         benchmark:
-            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}"
+            "benchmarks/" + RDIR + "augmented_line_connections/elec_s{simpl}_{clusters}_{discount_rate}"
         threads: 1
         resources:
             mem_mb=3000,
@@ -872,14 +871,14 @@ rule add_extra_components:
     params:
         transmission_efficiency=config["sector"]["transmission_efficiency"],
     input:
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_{discount_rate}.nc",
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
     output:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
+        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_{discount_rate}.nc",
     log:
-        "logs/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}.log",
+        "logs/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}_{discount_rate}.log",
     benchmark:
-        "benchmarks/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}_ec"
+        "benchmarks/" + RDIR + "add_extra_components/elec_s{simpl}_{clusters}_ec_{discount_rate}"
     threads: 1
     resources:
         mem_mb=3000,
@@ -895,17 +894,17 @@ rule prepare_network:
         electricity=config["electricity"],
         emission_prices=config["costs"]["emission_prices"],
     input:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_{discount_rate}.nc",
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
     output:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
     log:
-        "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+        "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.log",
     benchmark:
         (
             "benchmarks/"
             + RDIR
-            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}"
         )
     threads: 1
     resources:
@@ -1236,8 +1235,8 @@ rule prepare_sector_network:
                 for country in config["countries"]
             },
         ),
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
+        costs="resources/" + RDIR + "costs_{planning_horizons}_sec_{discount_rate}.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
@@ -1313,7 +1312,7 @@ rule add_export:
         snapshots=config["snapshots"],
     input:
         export_ports="resources/" + SECDIR + "export_ports.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        costs="resources/" + RDIR + "costs_{planning_horizons}_sec_{discount_rate}.csv",
         ship_profile="resources/" + SECDIR + "ship_profile_{h2export}TWh.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}.nc",
@@ -1746,7 +1745,7 @@ if config["foresight"] == "overnight":
             # + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}.nc",
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}_sec_{discount_rate}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
@@ -2257,7 +2256,7 @@ if config["foresight"] == "myopic":
         input:
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}_sec_{discount_rate}.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
