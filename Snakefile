@@ -99,7 +99,9 @@ rule clean:
 rule solve_all_networks:
     input:
         expand(
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
             **config["scenario"],
             **config["costs"],
         ),
@@ -738,7 +740,9 @@ rule simplify_network:
         regions_offshore="resources/"
         + RDIR
         + "bus_regions/regions_offshore_elec_s{simpl}_{discount_rate}.geojson",
-        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
+        busmap="resources/"
+        + RDIR
+        + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
         connection_costs="resources/"
         + RDIR
         + "bus_regions/connection_costs_s{simpl}_{discount_rate}.csv",
@@ -803,8 +807,12 @@ rule cluster_network:
         regions_offshore="resources/"
         + RDIR
         + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}_{discount_rate}.geojson",
-        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
-        linemap="resources/" + RDIR + "bus_regions/linemap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
+        busmap="resources/"
+        + RDIR
+        + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
+        linemap="resources/"
+        + RDIR
+        + "bus_regions/linemap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
     log:
         "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}_{discount_rate}.log",
     benchmark:
@@ -987,10 +995,14 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
         log:
             solver=os.path.normpath(
                 "logs/"
@@ -1021,9 +1033,13 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         params:
             monte_carlo=config["monte_carlo"],
         input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
+            "networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
         output:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}_{unc}.nc",
+            "networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}_{unc}.nc",
         log:
             "logs/"
             + RDIR
@@ -1109,8 +1125,14 @@ def input_make_summary(w):
             ll = [l for l in ll if l[0] == w.ll[0]]
     else:
         ll = w.ll
-    return ["resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{w.discount_rate}}.csv"] + expand(
-        "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
+    return [
+        "resources/"
+        + RDIR
+        + f"costs_{config['costs']['year']}_elec_{{w.discount_rate}}.csv"
+    ] + expand(
+        "results/"
+        + RDIR
+        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{discount_rate}.nc",
         ll=ll,
         discount_rate=w.discount_rate,
         **{
@@ -1126,7 +1148,9 @@ rule make_summary:
         scenario=config["scenario"],
     input:
         input_make_summary,
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
     output:
         directory(
             "results/"
@@ -1903,7 +1927,9 @@ rule plot_network:
         extended_country_shape="resources/"
         + RDIR
         + "shapes/extended_country_shape.geojson",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
     output:
         only_map="results/"
         + RDIR
@@ -2205,7 +2231,9 @@ if config["foresight"] == "myopic":
             # clustered_pop_layout="resources/"
             # + SECDIR
             # + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec_{discount_rate}.csv",
+            costs="resources/"
+            + RDIR
+            + "costs_{planning_horizons}_sec_{discount_rate}.csv",
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
@@ -2266,7 +2294,9 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec_{discount_rate}.csv",
+            costs="resources/"
+            + RDIR
+            + "costs_{planning_horizons}_sec_{discount_rate}.csv",
             cop_soil_total="resources/"
             + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
