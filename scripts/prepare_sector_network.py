@@ -252,12 +252,12 @@ def add_water_network(n, costs):
         bus2=water_network.nearest_point_bus.values,
         p_nom_extendable=True,
         length=water_network.adjusted_distance_km.values,
-        # capital_cost=0.0172 * water_network.adjusted_distance_km.values, # 0.0172 €/m3/km source: backward calucation from https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf
+        # capital_cost=0.0172 * water_network.adjusted_distance_km.values, # 0.0172 €/m3/km source: backward calculation from https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf
         capital_cost=CAPEX_pipline + CAPEX_pumps,
         carrier="H2O pipeline",
         lifetime=costs.at["HDPE water pipeline", "lifetime"],
         efficiency=1,  # No losses in the pipeline
-        efficiency2=water_network.efficiency2.values,  # Efficieny of both pipeline and pumps calculated in prepare_water_netowrk.py.  MW consumed per m³/h transferred
+        efficiency2=water_network.efficiency2.values,  # Efficiency of both pipeline and pumps calculated in prepare_water_netowrk.py.  MW consumed per m³/h transferred
     )
 
     n.madd(
