@@ -178,9 +178,10 @@ def add_export(n, hydrogen_buses_ports, export_profile):
                     "Load",
                     desal_buses + " local_water_demand",
                     bus=desal_buses,
-                    carrier="local water consumption",
+                    carrier="H2O_desalinated",
                     p_set=load_per_node # Constant load in m3/h applied to all snapshots
                 )
+
                 logger.info(f"Successfully allocated {fixed_water_demand_m3h:.2f} m³/h of fixed water demand "
                             f"({load_per_node:.2f} m³/h per node) across {len(desal_buses)} desalination buses.")
             else:
