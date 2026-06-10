@@ -60,13 +60,13 @@ playground/
 !data/nuclear_p_max_pu.csv
 
 # Specific configuration files
-configs/scenarios/config.*.yaml
 !configs/scenarios/config.test.yaml
 
 # VS Code-related files
 .vscode
 *.code-workspace
 *.vscode/settings.json
+.gitignore
 
 # Additional debugging folders
 backup*
