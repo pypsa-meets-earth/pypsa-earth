@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import create_logger, mock_snakemake, to_csv_nafix, read_csv_nafix
+from _helpers import create_logger, mock_snakemake, read_csv_nafix, to_csv_nafix
 from build_test_configs import create_test_config
 from shapely.validation import make_valid
 
@@ -341,10 +341,10 @@ def collect_shape_stats(rulename="build_shapes", area_crs="ESRI:54009"):
     """
     snakemake = _mock_snakemake(rulename)
 
-    if not Path(snakemake.output.africa_shape).is_file():
+    if not Path(snakemake.output.extended_country_shape).is_file():
         return pd.DataFrame()
 
-    df_continent = gpd.read_file(snakemake.output.africa_shape)
+    df_continent = gpd.read_file(snakemake.output.extended_country_shape)
     continent_area = (
         df_continent["geometry"]
         .apply(make_valid)

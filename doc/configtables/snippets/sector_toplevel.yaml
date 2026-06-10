@@ -24,11 +24,25 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
+    aqueduct_water_stress_classification: # ["above_40"] # If "True" then the water stress classification is used to determine the water availability for desalination
     hydrogen_colors: false
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
     production_technologies: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"] a list of H2 production technologies that can be added
+    water_network: true
+    ratio_water_hydrogen: 13 # liters of water per kg of hydrogen, see: https://www.plugpower.com/wp-content/uploads/2021/10/EX-4250D_F041122.pdf
+    costs_brine_disposal: 23 # EUR/m³ brine, see: https://www.mdpi.com/2071-1050/14/11/6752
+      # assuming maximum opex of conventional crystallizers
+      # surface_water_discharge: 0.04 - 0.26   # EUR/m³ (0.05–0.30 USD)
+      # sewer_discharge:         0.28 - 0.57   # EUR/m³ (0.32–0.66 USD)
+      # deep_well_injection:     0.46 - 2.28   # EUR/m³ (0.54–2.65 USD)
+      # evaporation_ponds:       2.82 - 8.63   # EUR/m³ (3.28–10.04 USD)
+      # land_application:        0.64 - 1.68   # EUR/m³ (0.74–1.95 USD)
+      # conventional_crystallizers: 2.58 - 23.22 # EUR/m³ (3–27 USD)
+    additional_water_consumption_elec: 0 # liters of water per kg of hydrogen, additional to the water used for electrolysis, e.g. for cooling purposes
+    desalination_oversizing_factor: 0 # additional water consumption for desalination, e.g. for local population water supply, agriculture, or industry; e.g. 0.5 means that for every 2 liters of freshwater needed for electrolysis, addditional 1 liter is produced to cover other water needs
+    seawater_water_ratio: 2.5 # liters of seawater needed to produce 1 liter of freshwater - producting 1.5 kg brine, see: https://dechema.de/-p-20395331-EGOTEC-f36ccaaaa9d2d4d47e232bb9a6bb029b/_/report%20seawater%20brine%20treatment%20and%20disposal%20in%20Namibia%20(1).pdf
 
   coal:
     spatial_coal: true
@@ -39,3 +53,11 @@ sector:
 
   oil:
     spatial_oil: true
+
+  ammonia:
+    enable: true
+    spatial_ammonia: true
+    production_year: 2019 # 2019 - 2023 are available
+    gas_MWh_per_tNH3: 7.81   # MWh natural gas per tNH3 (SMR eff.=0.76, HB H2-input=1.1484 MWh_H2/MWh_NH3, NH3 LHV=5.167 MWh/t)
+    elec_MWh_per_tNH3: 1.278  # MWh electricity per tNH3 (HB elec-input=0.2473 MWh_el/MWh_NH3, NH3 LHV=5.167 MWh/t)
+    co2_t_per_tNH3: 1.547    # tCO2 per tNH3 (gas CO2 intensity=0.198 tCO2/MWh_gas x 7.81 MWh_gas/tNH3)

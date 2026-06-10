@@ -10,28 +10,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import os
-import geopandas as gpd
-import pandas as pd
-import requests
-import zipfile
 import io
-import matplotlib.pyplot as plt
-import rasterio
-from rasterio.plot import show
-from rasterio.mask import mask
-from rasterio.warp import calculate_default_transform, reproject, Resampling
-from matplotlib.colors import LinearSegmentedColormap, to_rgba
-import matplotlib.patches as mpatches
-from shapely.geometry import LineString
-from rasterio import sample
-import country_converter as coco
-import numpy as np
-from rasterio.features import shapes
-from shapely.geometry import shape
-from shapely.ops import nearest_points
-from geopandas import GeoSeries
+import os
+import zipfile
 from pathlib import Path
+
+import country_converter as coco
+import geopandas as gpd
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import rasterio
+import requests
 import xarray as xr
 from _helpers import (
     BASE_DIR,
@@ -39,6 +30,15 @@ from _helpers import (
     progress_retrieve,
     two_2_three_digits_country,
 )
+from geopandas import GeoSeries
+from matplotlib.colors import LinearSegmentedColormap, to_rgba
+from rasterio import sample
+from rasterio.features import shapes
+from rasterio.mask import mask
+from rasterio.plot import show
+from rasterio.warp import Resampling, calculate_default_transform, reproject
+from shapely.geometry import LineString, shape
+from shapely.ops import nearest_points
 
 
 def download_gebco():
@@ -46,7 +46,7 @@ def download_gebco():
     Downloads the GEBCO bathymetric data, extracts it to a local directory, and saves it to snakemake.output.
     """
     url = "https://www.bodc.ac.uk/data/open_download/gebco/gebco_2024_sub_ice_topo/zip/"
-    gebco_file = "GEBCO_2024_sub_ice_topo.nc"  
+    gebco_file = "GEBCO_2024_sub_ice_topo.nc"
 
     zip_fn = Path(os.path.join(BASE_DIR, "gebco.zip"))
     to_fn = Path(os.path.join(BASE_DIR, "data/gebco"))
@@ -56,9 +56,10 @@ def download_gebco():
 
     # Check if the target file already exists
     if gebco_file_path.exists():
-        logger.info(f"Gebco data already exists at '{gebco_file_path}'. Skipping download.")
+        logger.info(
+            f"Gebco data already exists at '{gebco_file_path}'. Skipping download."
+        )
         return gebco_file_path
-
 
     logger.info(f"Downloading GEBCO data from '{url}'.")
     try:
@@ -81,11 +82,11 @@ def download_gebco():
 
 def download_aqueduct():
     """
-    Downloads the Aqueduct 4.0 Water Risk data, extracts it to a local directory, 
+    Downloads the Aqueduct 4.0 Water Risk data, extracts it to a local directory,
     and returns it.
     """
     url = "https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip"
-    aqueduct_file = "Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb"  
+    aqueduct_file = "Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb"
 
     zip_fn = Path(os.path.join(BASE_DIR, "aqueduct.zip"))
     to_fn = Path(os.path.join(BASE_DIR, "data/aqueduct"))
@@ -94,7 +95,9 @@ def download_aqueduct():
 
     # Check if the target file already exists
     if aqueduct_file_path.exists():
-        logger.info(f"Aqueduct data already exists at '{aqueduct_file_path}'. Skipping download.")
+        logger.info(
+            f"Aqueduct data already exists at '{aqueduct_file_path}'. Skipping download."
+        )
         return aqueduct_file_path
 
     logger.info(f"Downloading Aqueduct data from '{url}'.")
@@ -125,7 +128,9 @@ def download_shorelines():
     Downloads the Global Self-consistent, Hierarchical, High-resolution Geography Database (GSHHG)
     shapefile archive, extracts the relevant shoreline shapefile, and saves it to snakemake.output.
     """
-    url = "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip"
+    url = (
+        "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip"
+    )
     shoreline_file = "GSHHS_shp/i/GSHHS_i_L1.shp"  # Relative path inside the zip
     output_file = snakemake.output.shorelines
 
@@ -138,7 +143,9 @@ def download_shorelines():
 
     # Check if the target file already exists
     if extracted_shoreline_path.exists():
-        logger.info(f"Shoreline data already exists at '{extracted_shoreline_path}'. Skipping download.")
+        logger.info(
+            f"Shoreline data already exists at '{extracted_shoreline_path}'. Skipping download."
+        )
 
         # Load the shapefile using GeoPandas
         shoreline_gdf = gpd.read_file(extracted_shoreline_path)
@@ -165,10 +172,9 @@ def download_shorelines():
         else:
             logger.info(f"File {shoreline_file} not found in the archive.")
             return None
-    
+
     zip_fn.unlink()
     logger.info(f"Shorelines data available in '{to_fn}'.")
-    
 
     # Load the shapefile using GeoPandas
     shoreline_gdf = gpd.read_file(extracted_shoreline_path)
@@ -177,7 +183,6 @@ def download_shorelines():
     shoreline_gdf.to_file(output_file)
 
     return shoreline_gdf
-
 
 
 def clip_shorelines_country(shoreline_gdf, country_shapes):
@@ -206,7 +211,7 @@ def clip_shorelines_country(shoreline_gdf, country_shapes):
         country_gdf = country_gdf.to_crs(epsg=3857)  # Web Mercator (meters)
 
     # Apply buffer (3000 meters)
-    country_gdf['geometry'] = country_gdf.buffer(3000)
+    country_gdf["geometry"] = country_gdf.buffer(3000)
 
     # Convert back to the original CRS if needed
     country_gdf = country_gdf.to_crs(epsg=4326)
@@ -219,13 +224,16 @@ def clip_shorelines_country(shoreline_gdf, country_shapes):
     shoreline_boundary = shoreline_gdf.boundary
 
     # Convert the boundary to a GeoDataFrame
-    shoreline_boundary_gdf = gpd.GeoDataFrame(geometry=shoreline_boundary, crs=shoreline_gdf.crs)
+    shoreline_boundary_gdf = gpd.GeoDataFrame(
+        geometry=shoreline_boundary, crs=shoreline_gdf.crs
+    )
 
     # Clip the shoreline boundary to the country boundary
-    clipped_shoreline = gpd.overlay(shoreline_boundary_gdf, country_gdf, how="intersection")
+    clipped_shoreline = gpd.overlay(
+        shoreline_boundary_gdf, country_gdf, how="intersection"
+    )
 
     return clipped_shoreline
-
 
 
 def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
@@ -267,7 +275,7 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
         positive_polygons = [shape(geom) for geom, val in shapes_gen if val == 1]
 
     # Create a GeoDataFrame from the positive polygons
-    positive_area_gdf = gpd.GeoDataFrame({'geometry': positive_polygons}, crs=src.crs)
+    positive_area_gdf = gpd.GeoDataFrame({"geometry": positive_polygons}, crs=src.crs)
 
     # Switch to a projected CRS for buffering (e.g., EPSG:3857)
     projected_crs = "EPSG:3857"
@@ -278,12 +286,20 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
     buffered_positive_area_gdf = positive_area_gdf.buffer(4000)
 
     # Drop empty or invalid geometries after buffering
-    buffered_positive_area_gdf = gpd.GeoDataFrame(geometry=buffered_positive_area_gdf, crs=projected_crs)
-    buffered_positive_area_gdf = buffered_positive_area_gdf[buffered_positive_area_gdf.geometry.notnull()]
-    buffered_positive_area_gdf = buffered_positive_area_gdf[buffered_positive_area_gdf.is_valid]
+    buffered_positive_area_gdf = gpd.GeoDataFrame(
+        geometry=buffered_positive_area_gdf, crs=projected_crs
+    )
+    buffered_positive_area_gdf = buffered_positive_area_gdf[
+        buffered_positive_area_gdf.geometry.notnull()
+    ]
+    buffered_positive_area_gdf = buffered_positive_area_gdf[
+        buffered_positive_area_gdf.is_valid
+    ]
 
     # Remove the overlapping areas (buffered) from the clipped shoreline
-    clipped_shoreline_natura = gpd.overlay(clipped_shoreline, buffered_positive_area_gdf, how="difference")
+    clipped_shoreline_natura = gpd.overlay(
+        clipped_shoreline, buffered_positive_area_gdf, how="difference"
+    )
 
     # Ensure the final GeoDataFrames are in EPSG:4326 for plotting
     clipped_shoreline = clipped_shoreline.to_crs(epsg=4326)
@@ -295,7 +311,6 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
     buffered_positive_area_gdf.to_file(snakemake.output.buffered_natura)
 
     return clipped_shoreline_natura
-
 
 
 def prepare_gebco(country_shapes, gebco_path):
@@ -325,24 +340,30 @@ def prepare_gebco(country_shapes, gebco_path):
         # Clip the raster
         out_image, out_transform = mask(src, [country_geometry], crop=True)
         out_meta = src.meta.copy()
-        out_meta.update({
-            "driver": "GTiff",
-            "height": out_image.shape[1],
-            "width": out_image.shape[2],
-            "transform": out_transform
-        })
+        out_meta.update(
+            {
+                "driver": "GTiff",
+                "height": out_image.shape[1],
+                "width": out_image.shape[2],
+                "transform": out_transform,
+            }
+        )
 
         # Save the clipped raster
-        clipped_output_path = Path(os.path.join(BASE_DIR, "data/gebco/GEBCO_2024_clipped.tif"))
+        clipped_output_path = Path(
+            os.path.join(BASE_DIR, "data/gebco/GEBCO_2024_clipped.tif")
+        )
         with rasterio.open(clipped_output_path, "w", **out_meta) as dest:
             dest.write(out_image)
-        
+
     # Reprojecct and save clipped raster
-    reprojected_clipped_output_path = Path(os.path.join(BASE_DIR, "data/gebco/GEBCO_2024_reprojected_clipped.tif"))
+    reprojected_clipped_output_path = Path(
+        os.path.join(BASE_DIR, "data/gebco/GEBCO_2024_reprojected_clipped.tif")
+    )
 
     with rasterio.open(clipped_output_path) as src:
         # Target crs to be able to calculate distances
-        target_crs = "EPSG:3857" 
+        target_crs = "EPSG:3857"
 
         # Calculate transformation and dimensions for the target CRS
         transform, width, height = calculate_default_transform(
@@ -351,15 +372,17 @@ def prepare_gebco(country_shapes, gebco_path):
 
         # Update metadata
         kwargs = src.meta.copy()
-        kwargs.update({
-            'crs': target_crs,
-            'transform': transform,
-            'width': width,
-            'height': height
-        })
+        kwargs.update(
+            {
+                "crs": target_crs,
+                "transform": transform,
+                "width": width,
+                "height": height,
+            }
+        )
 
         # Write the reprojected raster
-        with rasterio.open(reprojected_clipped_output_path, 'w', **kwargs) as dst:
+        with rasterio.open(reprojected_clipped_output_path, "w", **kwargs) as dst:
             for i in range(1, src.count + 1):  # Iterate over raster bands
                 reproject(
                     source=rasterio.band(src, i),
@@ -368,14 +391,13 @@ def prepare_gebco(country_shapes, gebco_path):
                     src_crs=src.crs,
                     dst_transform=transform,
                     dst_crs=target_crs,
-                    resampling=Resampling.nearest
+                    resampling=Resampling.nearest,
                 )
-    
+
     # Load the reprojected raster
     gebco_raster = rasterio.open(reprojected_clipped_output_path)
 
     return gebco_raster
-
 
 
 def prepare_aqueduct(regions_onshore, aqueduct_file_path):
@@ -399,12 +421,12 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
     """
     # List all layers in the GeoDatabase
     # layers = gpd.io.file.fiona.listlayers(aqueduct_file_path)
-    layer_name = 'baseline_annual'  # TODO To put this in config file for user to choose if baseline or future
+    layer_name = "baseline_annual"  # TODO To put this in config file for user to choose if baseline or future
 
     # Create a column with iso3 country code
     cc = coco.CountryConverter()
     iso2 = pd.Series(regions_onshore.country)
-    regions_onshore["iso3"] = cc.pandas_convert(series=iso2, to='ISO3') 
+    regions_onshore["iso3"] = cc.pandas_convert(series=iso2, to="ISO3")
 
     # Use a filter to read only features where gid_0 IN regions_onshore
     countries = regions_onshore.iso3.unique()
@@ -412,8 +434,9 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
     filter_expression = f"gid_0 IN ('{country_list}')"
 
     # filter_expression"
-    aqueduct = gpd.read_file(aqueduct_file_path, layer=layer_name, where=filter_expression)
-
+    aqueduct = gpd.read_file(
+        aqueduct_file_path, layer=layer_name, where=filter_expression
+    )
 
     # Compute the intersection between aqueduct and regions_onshore
     intersected = gpd.overlay(regions_onshore, aqueduct, how="intersection")
@@ -434,19 +457,25 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
     )
 
     # Merge the aggregated values back into regions_onshore
-    regions_onshore_aqueduct = regions_onshore.merge(aggregated_values, on="name", how="left")
-
-    # Scale values for plotting (convert to percentages)
-    regions_onshore_aqueduct['aggregated_bws_raw_percent'] = regions_onshore_aqueduct['aggregated_bws_raw'] * 100
-
-    # Create a new column to classify the data
-    regions_onshore_aqueduct['color_category'] = regions_onshore_aqueduct['aggregated_bws_raw_percent'].apply(
-        lambda x: 'above_40' if x > 40 else 'below_40'
+    regions_onshore_aqueduct = regions_onshore.merge(
+        aggregated_values, on="name", how="left"
     )
 
+    # Scale values for plotting (convert to percentages)
+    regions_onshore_aqueduct["aggregated_bws_raw_percent"] = (
+        regions_onshore_aqueduct["aggregated_bws_raw"] * 100
+    )
+
+    # Create a new column to classify the data
+    regions_onshore_aqueduct["color_category"] = regions_onshore_aqueduct[
+        "aggregated_bws_raw_percent"
+    ].apply(lambda x: "above_40" if x > 40 else "below_40")
+
     # Define a custom color map: Red for "above_40", Blue for "below_40"
-    color_map = {'above_40': 'red', 'below_40': 'blue'}
-    regions_onshore_aqueduct['color'] = regions_onshore_aqueduct['color_category'].map(color_map)
+    color_map = {"above_40": "red", "below_40": "blue"}
+    regions_onshore_aqueduct["color"] = regions_onshore_aqueduct["color_category"].map(
+        color_map
+    )
 
     # Save to snakemake.output
     regions_onshore_aqueduct.to_file(snakemake.output.regions_onshore_aqueduct)
@@ -454,7 +483,9 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
     return regions_onshore_aqueduct
 
 
-def calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura, gebco_raster):
+def calc_distances_to_shore(
+    regions_onshore_aqueduct, clipped_shoreline_natura, gebco_raster
+):
     """
     Calculates distances and altitude changes from onshore aqueduct regions to the nearest shoreline.
 
@@ -464,7 +495,7 @@ def calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura,
     - gebco_raster (rasterio.DatasetReader): GEBCO raster dataset for altitude data.
 
     Returns:
-    - shortest_distance_lines (GeoDataFrame): GeoDataFrame containing LineStrings connecting centroids to nearest shoreline points, 
+    - shortest_distance_lines (GeoDataFrame): GeoDataFrame containing LineStrings connecting centroids to nearest shoreline points,
       along with calculated distances and altitude changes.
 
     Functionality:
@@ -478,11 +509,12 @@ def calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura,
     """
     # Filter GeoDataFrame for regions with 'above_40'
     if snakemake.params.water_stress:
-        gadm_desal = regions_onshore_aqueduct[regions_onshore_aqueduct.color_category == snakemake.params.water_stress]
+        gadm_desal = regions_onshore_aqueduct[
+            regions_onshore_aqueduct.color_category == snakemake.params.water_stress
+        ]
 
     else:
         gadm_desal = regions_onshore_aqueduct
-
 
     # Ensure both GeoDataFrames are in the same projected CRS
     if gadm_desal.crs.is_geographic:
@@ -491,7 +523,7 @@ def calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura,
         clipped_shoreline_natura = clipped_shoreline_natura.to_crs(gadm_desal.crs)
 
     # Compute centroids and save them in a separate column
-    gadm_desal['centroid'] = gadm_desal.geometry.centroid
+    gadm_desal["centroid"] = gadm_desal.geometry.centroid
 
     # Calculate the nearest point on the shoreline for each centroid
     def get_nearest_point(centroid, shoreline):
@@ -500,92 +532,116 @@ def calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura,
         nearest_geom = shoreline.iloc[distances.idxmin()].geometry
 
         # For MultiLineString or LineString, compute the true nearest point
-        if nearest_geom.geom_type in ['MultiLineString', 'LineString']:
+        if nearest_geom.geom_type in ["MultiLineString", "LineString"]:
             # Use Shapely's `nearest_points` to find the exact nearest point
             nearest_point = nearest_points(centroid, nearest_geom)[1]
             return nearest_point
         else:
             raise ValueError(f"Unexpected geometry type: {nearest_geom.geom_type}")
 
-    gadm_desal['nearest_point'] = gadm_desal['centroid'].apply(
+    gadm_desal["nearest_point"] = gadm_desal["centroid"].apply(
         lambda centroid: get_nearest_point(centroid, clipped_shoreline_natura)
     )
 
     # Create LineStrings connecting centroids to their nearest points
-    gadm_desal['shortest_distance_line'] = gadm_desal.apply(
-        lambda row: LineString([row['nearest_point'], row['centroid']]), axis=1
+    gadm_desal["shortest_distance_line"] = gadm_desal.apply(
+        lambda row: LineString([row["nearest_point"], row["centroid"]]), axis=1
     )
 
-
-    
     # # Create shortest_distance_lines GeoDataFrame with all columns from gadm_desal
-    shortest_distance_lines = gadm_desal.drop(columns='geometry').copy()
+    shortest_distance_lines = gadm_desal.drop(columns="geometry").copy()
 
     # Ensure the geometry of shortest_distance_lines is set to 'gadm_desal'
-    shortest_distance_lines = shortest_distance_lines.set_geometry('shortest_distance_line')
+    shortest_distance_lines = shortest_distance_lines.set_geometry(
+        "shortest_distance_line"
+    )
     shortest_distance_lines = shortest_distance_lines.set_crs(gadm_desal.crs)
 
     # Extract bus names for centroids and nearest points
     def get_bus_name(point, regions):
         # Find the region where the point is within the geometry
         matching_region = regions[regions.geometry.intersects(point)]
-        
+
         if not matching_region.empty:
             # Return the name of the first matching region
-            return matching_region.iloc[0]['name']
+            return matching_region.iloc[0]["name"]
         else:
             raise ValueError("Point does not intersect with any region.")
-    
-    shortest_distance_lines['centroid_bus'] = gadm_desal['centroid'].to_crs(epsg=4326).apply(
-        lambda centroid: get_bus_name(centroid, regions_onshore_aqueduct)
+
+    shortest_distance_lines["centroid_bus"] = (
+        gadm_desal["centroid"]
+        .to_crs(epsg=4326)
+        .apply(lambda centroid: get_bus_name(centroid, regions_onshore_aqueduct))
     )
 
     # Create new GeoDataFrame using the original attributes, but set the new geometry column
     gdf_nearest = gadm_desal.copy()
     gdf_nearest.set_geometry("nearest_point", inplace=True)
-    nearest = gpd.sjoin_nearest(gdf_nearest, gadm_desal, how="left", distance_col="dist")
+    nearest = gpd.sjoin_nearest(
+        gdf_nearest, gadm_desal, how="left", distance_col="dist"
+    )
 
-    shortest_distance_lines['nearest_point_bus'] = nearest['name_right']
+    shortest_distance_lines["nearest_point_bus"] = nearest["name_right"]
 
-    shortest_distance_lines['line_name'] = shortest_distance_lines['centroid_bus'] + ' -> ' + shortest_distance_lines['nearest_point_bus']
+    shortest_distance_lines["line_name"] = (
+        shortest_distance_lines["centroid_bus"]
+        + " -> "
+        + shortest_distance_lines["nearest_point_bus"]
+    )
 
     # Apply the calculate_altitude_difference function to all shortest_distance_lines
     results = []
     dfs = []
 
-
-    for line_name, line in zip(shortest_distance_lines.line_name, shortest_distance_lines.geometry):
+    for line_name, line in zip(
+        shortest_distance_lines.line_name, shortest_distance_lines.geometry
+    ):
         df_i, total_altitude = calculate_altitude_difference(line, gebco_raster)
         df_i["line_name"] = line_name
         df_i = df_i.assign(**total_altitude)
         dfs.append(df_i)
-        results.append(total_altitude['required_altitude'])
+        results.append(total_altitude["required_altitude"])
 
-    shortest_distance_lines['total_positive_altitude_change'] = results
+    shortest_distance_lines["total_positive_altitude_change"] = results
     all_profiles = pd.concat(dfs, ignore_index=True)
 
     # Compute distances and apply the routing factor
-    shortest_distance_lines['distance_km'] = shortest_distance_lines.geometry.apply(calculate_distance_km)
-    shortest_distance_lines['adjusted_distance_km'] = shortest_distance_lines['distance_km'] * 1.5
-    shortest_distance_lines['adjusted_altitude_change'] = shortest_distance_lines['total_positive_altitude_change'] / 1.5
+    shortest_distance_lines["distance_km"] = shortest_distance_lines.geometry.apply(
+        calculate_distance_km
+    )
+    shortest_distance_lines["adjusted_distance_km"] = (
+        shortest_distance_lines["distance_km"] * 1.5
+    )
+    shortest_distance_lines["adjusted_altitude_change"] = (
+        shortest_distance_lines["total_positive_altitude_change"] / 1.5
+    )
 
     # Ensure the columns are in the GeoDataFrame and reproject to EPSG:4326
-    for col in ['centroid', 'nearest_point']:
-        if col in shortest_distance_lines.columns or shortest_distance_lines[col].dtype.name == 'geometry':
-            shortest_distance_lines[col] = shortest_distance_lines[col].to_crs(epsg=4326)
-            shortest_distance_lines[col] = shortest_distance_lines[col].apply(lambda geom: geom.wkt if geom else None)
+    for col in ["centroid", "nearest_point"]:
+        if (
+            col in shortest_distance_lines.columns
+            or shortest_distance_lines[col].dtype.name == "geometry"
+        ):
+            shortest_distance_lines[col] = shortest_distance_lines[col].to_crs(
+                epsg=4326
+            )
+            shortest_distance_lines[col] = shortest_distance_lines[col].apply(
+                lambda geom: geom.wkt if geom else None
+            )
 
     # Ensure the columns are in the GeoDataFrame and reproject to EPSG:4326
-    for col in ['centroid', 'nearest_point', 'shortest_distance_line']:
-        if col in gadm_desal.columns and gadm_desal[col].dtype.name == 'geometry':
-            gadm_desal[col] = GeoSeries(gadm_desal[col], crs=gadm_desal.crs).to_crs(epsg=4326)
-            gadm_desal[col] = gadm_desal[col].apply(lambda geom: geom.wkt if geom else None)
+    for col in ["centroid", "nearest_point", "shortest_distance_line"]:
+        if col in gadm_desal.columns and gadm_desal[col].dtype.name == "geometry":
+            gadm_desal[col] = GeoSeries(gadm_desal[col], crs=gadm_desal.crs).to_crs(
+                epsg=4326
+            )
+            gadm_desal[col] = gadm_desal[col].apply(
+                lambda geom: geom.wkt if geom else None
+            )
 
     gadm_desal.to_file(snakemake.output.regions_onshore_aqueduct_desalination)
 
-
-    return shortest_distance_lines , all_profiles
-
+    return shortest_distance_lines, all_profiles
 
 
 def calculate_altitude_difference(line, raster, resolution=1000, max_altitude=3000):
@@ -617,16 +673,16 @@ def calculate_altitude_difference(line, raster, resolution=1000, max_altitude=30
     elev = np.array([float(v[0]) for v in it], dtype=float)
 
     # Enforce non-negative elevations (treat anything below sea level as 0 m)
-    elev = np.clip(elev, 0.0, None)        # same as: elev[elev < 0] = 0.0
+    elev = np.clip(elev, 0.0, None)  # same as: elev[elev < 0] = 0.0
 
     # simple NaN handling (forward/back fill, then drop any remaining)
     if np.isnan(elev).any():
         for i in range(1, len(elev)):
-            if np.isnan(elev[i]) and not np.isnan(elev[i-1]):
-                elev[i] = elev[i-1]
-        for i in range(len(elev)-2, -1, -1):
-            if np.isnan(elev[i]) and not np.isnan(elev[i+1]):
-                elev[i] = elev[i+1]
+            if np.isnan(elev[i]) and not np.isnan(elev[i - 1]):
+                elev[i] = elev[i - 1]
+        for i in range(len(elev) - 2, -1, -1):
+            if np.isnan(elev[i]) and not np.isnan(elev[i + 1]):
+                elev[i] = elev[i + 1]
         mask = ~np.isnan(elev)
         d, elev = d[mask], elev[mask]
         if len(elev) < 2:
@@ -642,8 +698,8 @@ def calculate_altitude_difference(line, raster, resolution=1000, max_altitude=30
     for diff in diffs:
         if diff > 0:
             room = max_altitude - head
-            add = max(0.0, min(diff, room))      # what counts this step
-            clip = max(0.0, diff - room)         # what is lost due to cap
+            add = max(0.0, min(diff, room))  # what counts this step
+            clip = max(0.0, diff - room)  # what is lost due to cap
             head = min(max_altitude, head + diff)
             effective_inc.append(add)
             clipped.append(clip)
@@ -665,18 +721,18 @@ def calculate_altitude_difference(line, raster, resolution=1000, max_altitude=30
     effective_head = float(effective_inc.sum())
     required_altitude = max(effective_head, min_required_head)
 
-    df = pd.DataFrame({
-        "distance_m": d,
-        "elevation_m": elev,
-        "head_clamped_m": head_series
-    })
+    df = pd.DataFrame(
+        {"distance_m": d, "elevation_m": elev, "head_clamped_m": head_series}
+    )
     # step-wise arrays align to the *end* of each segment
-    step_df = pd.DataFrame({
-        "distance_m": d[1:],
-        "diff_m": diffs,
-        "effective_increment_m": effective_inc,
-        "clipped_m": clipped
-    })
+    step_df = pd.DataFrame(
+        {
+            "distance_m": d[1:],
+            "diff_m": diffs,
+            "effective_increment_m": effective_inc,
+            "clipped_m": clipped,
+        }
+    )
     df = df.merge(step_df, on="distance_m", how="left")
 
     stats = {
@@ -692,8 +748,6 @@ def calculate_altitude_difference(line, raster, resolution=1000, max_altitude=30
     return df, stats
 
 
-
-
 def calculate_distance_km(line):
     """
     Calculate the length of a LineString in kilometers.
@@ -704,7 +758,7 @@ def calculate_distance_km(line):
 def delta_p_friction(lambda_f, L, d, rho, v):
     """
     Calculate pressure drop due to friction in a pipe.
-    
+
     Parameters:
         lambda_f : float
             Friction factor [-]
@@ -716,7 +770,7 @@ def delta_p_friction(lambda_f, L, d, rho, v):
             Fluid density [kg/m³]
         v : float
             Fluid velocity [m/s]
-    
+
     Returns:
         delta_p_bar : float
             Pressure drop [bar]
@@ -729,7 +783,7 @@ def delta_p_friction(lambda_f, L, d, rho, v):
 def delta_p_altitude(rho, h, g=9.81):
     """
     Calculate pressure drop due to altitude difference.
-    
+
     Parameters:
         rho : float
             Fluid density [kg/m³]
@@ -737,7 +791,7 @@ def delta_p_altitude(rho, h, g=9.81):
             Altitude difference [m]
         g : float, optional
             Gravitational acceleration [m/s²], default is 9.81.
-    
+
     Returns:
         delta_p_Pa : float
             Pressure difference [Pa]
@@ -752,13 +806,13 @@ def delta_p_altitude(rho, h, g=9.81):
 def number_of_pumping_stations(delta_p_total, p_max_pipeline):
     """
     Calculate the required number of pumping stations.
-    
+
     Parameters:
         delta_p_total : float
             Total pressure drop [bar]
         p_max_pipeline : float
             Nominal pressure of the pipeline [bar]
-    
+
     Returns:
         n : float
             Number of pumping stations needed
@@ -768,10 +822,12 @@ def number_of_pumping_stations(delta_p_total, p_max_pipeline):
     return n
 
 
-def pump_electrical_power_kw(total_dp, Nbr_of_pumping_stations, mass_flow_rate, rho, eta_pump, eta_motor):
+def pump_electrical_power_kw(
+    total_dp, Nbr_of_pumping_stations, mass_flow_rate, rho, eta_pump, eta_motor
+):
     """
     Calculate the electrical power consumption of a pump in kW.
-    
+
     Parameters:
         total_dp : float
             Total pressure drop [bar]
@@ -785,14 +841,14 @@ def pump_electrical_power_kw(total_dp, Nbr_of_pumping_stations, mass_flow_rate, 
             Pump efficiency [-], e.g., 0.85
         eta_motor : float
             Motor efficiency [-], e.g., 0.92
-    
+
     Returns:
         P_el_pump_W : float
             Electrical power [W]
         P_el_pump_kW : float
             Electrical power [kW]
     """
-    delta_p_pump = (total_dp / Nbr_of_pumping_stations) * 1e5 # Convert bar to Pa
+    delta_p_pump = (total_dp / Nbr_of_pumping_stations) * 1e5  # Convert bar to Pa
     P_el_pump_W = delta_p_pump * (mass_flow_rate / rho) * (1 / (eta_pump * eta_motor))
     P_el_pump_kW = P_el_pump_W / 1000  # Convert W → kW
     # return round(P_el_pump_kW,1)
@@ -802,7 +858,7 @@ def pump_electrical_power_kw(total_dp, Nbr_of_pumping_stations, mass_flow_rate, 
 def pump_station_cost_kw(power_kw, usd_to_eur, a=35768, b=0.558):
     """
     Calculate pump station investment cost from installed power in kW.
-    
+
     Parameters:
     -----------
     power_kw : float or array
@@ -813,7 +869,7 @@ def pump_station_cost_kw(power_kw, usd_to_eur, a=35768, b=0.558):
         Scaling exponent (default 0.558) Source: 1+b = 1-0.442 in https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf).
     usd_to_eur : float
         Conversion rate from USD to EUR .
-    
+
     Returns:
     --------
     cost_eur : float or array
@@ -823,22 +879,21 @@ def pump_station_cost_kw(power_kw, usd_to_eur, a=35768, b=0.558):
     power_hp = power_kw / 0.7457
 
     # Cost formula in USD
-    cost_usd = a * (power_hp ** b)
-    
+    cost_usd = a * (power_hp**b)
+
     # Convert to EUR
     cost_eur = cost_usd * usd_to_eur
-    
+
     # Return cost in million EUR
     return cost_eur / 1e6
-
 
 
 def add_pipeline_hydraulics(row):
     """
     Calculate pipeline hydraulics, pumping station requirements, and associated costs.
 
-    This function computes various hydraulic parameters, including pressure drops due to friction 
-    and altitude, the number of pumping stations required, pump electrical power, and investment 
+    This function computes various hydraulic parameters, including pressure drops due to friction
+    and altitude, the number of pumping stations required, pump electrical power, and investment
     costs for both pumps and pipelines. It also calculates electricity demand and efficiency metrics.
 
     Parameters:
@@ -879,10 +934,10 @@ def add_pipeline_hydraulics(row):
     """
 
     # Constansts
-    d_mm   = 171.65
-    d_m     = d_mm/1000
-    v       = 1.5
-    rho     = 1000
+    d_mm = 171.65
+    d_m = d_mm / 1000
+    v = 1.5
+    rho = 1000
     eta_pump, eta_motor = 0.85, 0.90
     eta_sys = eta_pump * eta_motor
     lambda_f = 0.01489
@@ -893,27 +948,27 @@ def add_pipeline_hydraulics(row):
     # Calculate pressure drop due to friction
     dp_friction = delta_p_friction(
         lambda_f=lambda_f,  # example friction factor
-        L=row['adjusted_distance_km'] * 1000,  # length in meters
+        L=row["adjusted_distance_km"] * 1000,  # length in meters
         d=d_m,  # diameter in meters
         rho=rho,  # density in kg/m³
-        v=v  # velocity in m/s
+        v=v,  # velocity in m/s
     )
-    
+
     # Calculate pressure drop due to altitude
     dp_altitude = delta_p_altitude(
         rho=rho,  # water density in kg/m³
-        h=row['adjusted_altitude_change']  # altitude difference in meters
+        h=row["adjusted_altitude_change"],  # altitude difference in meters
     )
-    
+
     # Total pressure drop
     total_dp = dp_friction + dp_altitude
-    
+
     # Number of pumping stations
     n_pumping_stations = number_of_pumping_stations(
         delta_p_total=total_dp,
-        p_max_pipeline=16  # nominal pressure of the pipeline in bar
+        p_max_pipeline=16,  # nominal pressure of the pipeline in bar
     )
-    
+
     # Pump electrical power
     power_kW = pump_electrical_power_kw(
         total_dp=total_dp,
@@ -921,24 +976,24 @@ def add_pipeline_hydraulics(row):
         mass_flow_rate=mass_flow_rate,  # kg/s
         rho=rho,  # kg/m³
         eta_pump=eta_pump,  # pump efficiency
-        eta_motor=eta_motor  # motor efficiency
+        eta_motor=eta_motor,  # motor efficiency
     )
 
     # Pump investment in millions Eur
     invest_pumping_station = pump_station_cost_kw(
         power_kw=power_kW,
         usd_to_eur=snakemake.params.costs["default_exchange_rate"],
-        a=35768, # 15570 # 35768 with inflation 2% 1981 till 2023
+        a=35768,  # 15570 # 35768 with inflation 2% 1981 till 2023
         b=0.558,
     )
 
     # Pipeline investment (HYPAT formulas: https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf)
-    C_pipes = 1.1852 * (d_mm**1.9557)     # €/km material
-    f_inst  = 176.97 * (d_mm**-0.624)     # installation factor
-    C_inst_km = C_pipes * f_inst           # €/km installed
+    C_pipes = 1.1852 * (d_mm**1.9557)  # €/km material
+    f_inst = 176.97 * (d_mm**-0.624)  # installation factor
+    C_inst_km = C_pipes * f_inst  # €/km installed
     # Pipeline investment per km per m3/h
-    capex_per_pnom_per_km = C_inst_km / mass_flow_rate_m3h # €/ (m3/h) / km
-    L_km = row['adjusted_distance_km']  # length in km
+    capex_per_pnom_per_km = C_inst_km / mass_flow_rate_m3h  # €/ (m3/h) / km
+    L_km = row["adjusted_distance_km"]  # length in km
 
     # pipeline CAPEX per unit flow (€/ (m3/h))
     pipeline_capex_per_pnom = capex_per_pnom_per_km * L_km
@@ -949,34 +1004,34 @@ def add_pipeline_hydraulics(row):
 
     # --- electricity per m3 ---
     dp_fric_Pa = dp_friction * 1e5
-    e_fric = dp_fric_Pa / (eta_sys * 3.6e6)      # kWh/m3
+    e_fric = dp_fric_Pa / (eta_sys * 3.6e6)  # kWh/m3
     dp_alt_Pa = dp_altitude * 1e5
     e_alt = max(0.0, dp_alt_Pa / (eta_sys * 3.6e6))
 
-    efficiency2 = - (e_fric + e_alt)/1000  # MW per (m³/h)
+    efficiency2 = -(e_fric + e_alt) / 1000  # MW per (m³/h)
 
     pump_elec_demand = (e_fric + e_alt) / 1000  # MWh per m³
 
-
-    return pd.Series({
-        'dp_friction_bar': dp_friction,
-        'dp_altitude_bar': dp_altitude,
-        'total_dp_bar': total_dp,
-        'n_pumping_stations': n_pumping_stations,
-        'power_kW': power_kW,
-        'mass_flow_rate_m3h': mass_flow_rate_m3h,
-        'invest_pumping_station': invest_pumping_station,
-        'total_pump_invest_mil_eur' : invest_pumping_station * n_pumping_stations,
-        'total_pump_invest_eur' : invest_pumping_station * n_pumping_stations * 1e6,
-        'total_pump_invest_eur_per_kW' : invest_pumping_station * 1e6 / power_kW,  # Convert to Eur/kW
-        'pump_elec_demand' : pump_elec_demand,  # MWh_el per m3
-        'pump_capex_per_pnom' : pump_capex_per_pnom,
-        'pipeline_capex_per_pnom' : pipeline_capex_per_pnom,
-        'efficiency2': efficiency2,              # -kWh_el per m3 
-    })
-
-
-
+    return pd.Series(
+        {
+            "dp_friction_bar": dp_friction,
+            "dp_altitude_bar": dp_altitude,
+            "total_dp_bar": total_dp,
+            "n_pumping_stations": n_pumping_stations,
+            "power_kW": power_kW,
+            "mass_flow_rate_m3h": mass_flow_rate_m3h,
+            "invest_pumping_station": invest_pumping_station,
+            "total_pump_invest_mil_eur": invest_pumping_station * n_pumping_stations,
+            "total_pump_invest_eur": invest_pumping_station * n_pumping_stations * 1e6,
+            "total_pump_invest_eur_per_kW": invest_pumping_station
+            * 1e6
+            / power_kW,  # Convert to Eur/kW
+            "pump_elec_demand": pump_elec_demand,  # MWh_el per m3
+            "pump_capex_per_pnom": pump_capex_per_pnom,
+            "pipeline_capex_per_pnom": pipeline_capex_per_pnom,
+            "efficiency2": efficiency2,  # -kWh_el per m3
+        }
+    )
 
 
 if __name__ == "__main__":
@@ -997,13 +1052,14 @@ if __name__ == "__main__":
     country_shapes = gpd.read_file(snakemake.input.country_shapes)
     regions_onshore = gpd.read_file(snakemake.input.regions_onshore)
     natura_tiff_path = snakemake.input.natura
-   
 
     # Clip shoreline to country borders
     clipped_shoreline = clip_shorelines_country(shoreline_gdf, country_shapes)
 
     # Exclude Natura
-    clipped_shoreline_natura = clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline)
+    clipped_shoreline_natura = clip_shorelines_natura(
+        natura_tiff_path, country_shapes, clipped_shoreline
+    )
 
     # Prepare Digital Elevation Raster
     gebco_raster = prepare_gebco(country_shapes, gebco_path)
@@ -1012,8 +1068,10 @@ if __name__ == "__main__":
     regions_onshore_aqueduct = prepare_aqueduct(regions_onshore, aqueduct_file_path)
 
     # Calculate Distances and Elevations to shore
-    shortest_distance_lines , water_pipes_profiles = calc_distances_to_shore (regions_onshore_aqueduct, clipped_shoreline_natura, gebco_raster)
-    
+    shortest_distance_lines, water_pipes_profiles = calc_distances_to_shore(
+        regions_onshore_aqueduct, clipped_shoreline_natura, gebco_raster
+    )
+
     # Add pipeline hydraulics calculations
     hydraulics = shortest_distance_lines.apply(add_pipeline_hydraulics, axis=1)
 
@@ -1024,6 +1082,3 @@ if __name__ == "__main__":
 
     # Save to snakemake.output
     shortest_distance_lines.to_file(snakemake.output.clustered_water_network)
-
- 
-

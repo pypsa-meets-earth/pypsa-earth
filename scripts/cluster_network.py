@@ -137,10 +137,10 @@ from _helpers import (
     create_logger,
     locate_bus,
     nearest_shape,
+    read_csv_nafix,
     restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
-    read_csv_nafix,
 )
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
@@ -375,9 +375,7 @@ def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
         gadm_clustering=True,
     )
 
-    buses["gadm_subnetwork"] = (
-        buses["gadm_{}".format(gadm_layer_id)]
-    )
+    buses["gadm_subnetwork"] = buses["gadm_{}".format(gadm_layer_id)]
     # buses["gadm_subnetwork"] = (
     #     buses["gadm_{}".format(gadm_layer_id)] + "_" + buses["carrier"].astype(str)
     # )
@@ -767,7 +765,7 @@ if __name__ == "__main__":
     else:
         line_length_factor = snakemake.params.length_factor
         Nyears = n.snapshot_weightings.objective.sum() / 8760
-        hvac_overhead_cost = pd.read_csv(snakemake.input.tech_costs, index_col=0).at[
+        hvac_overhead_cost = read_csv_nafix(snakemake.input.tech_costs, index_col=0).at[
             "HVAC overhead", "capital_cost"
         ]
 
@@ -799,7 +797,9 @@ if __name__ == "__main__":
 
         custom_busmap = snakemake.params.custom_busmap
         if custom_busmap:
-            busmap = read_csv_nafix(snakemake.input.custom_busmap, index_col=0).squeeze()
+            busmap = read_csv_nafix(
+                snakemake.input.custom_busmap, index_col=0
+            ).squeeze()
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
             custom_busmap = busmap

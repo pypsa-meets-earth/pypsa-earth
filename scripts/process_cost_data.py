@@ -45,12 +45,11 @@ Relevant Settings
 import logging
 import os
 
-from anyio import Path
 import pandas as pd
 import pypsa
+from _helpers import BASE_DIR, read_csv_nafix
+from anyio import Path
 from currency_converter import CurrencyConverter
-
-from _helpers import read_csv_nafix, BASE_DIR
 
 currency_converter = CurrencyConverter(
     fallback_on_missing_rate=True,
@@ -565,12 +564,12 @@ if __name__ == "__main__":
         )
 
     if snakemake.wildcards.scope == "sec":
-         #------
+        # ------
         ##### TO BE REMOVED AGAIN AFTER MERGING desalination data to technologydata
         costs1 = read_csv_nafix(snakemake.input.costs)
-        costs1 = costs1.set_index(['technology', 'parameter'])
+        costs1 = costs1.set_index(["technology", "parameter"])
         costs2 = read_csv_nafix(snakemake.input.costs_desal)
-        costs2 = costs2.set_index(['technology', 'parameter'])
+        costs2 = costs2.set_index(["technology", "parameter"])
         merged = pd.concat([costs1, costs2])
         path_to_save = Path(os.path.join(BASE_DIR, "data/costs_merged.csv"))
         merged.to_csv(path_to_save)
@@ -594,6 +593,5 @@ if __name__ == "__main__":
         #     snakemake.params.costs["future_exchange_rate_strategy"],
         #     snakemake.params.costs["custom_future_exchange_rate"],
         # )
-        
 
     costs.to_csv(snakemake.output[0])
