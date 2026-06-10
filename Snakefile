@@ -733,9 +733,7 @@ rule simplify_network:
         regions_offshore="resources/"
         + RDIR
         + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
-        busmap="resources/"
-        + RDIR
-        + "bus_regions/busmap_elec_s{simpl}.csv",
+        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
         connection_costs="resources/"
         + RDIR
         + "bus_regions/connection_costs_s{simpl}.csv",
@@ -800,12 +798,8 @@ rule cluster_network:
         regions_offshore="resources/"
         + RDIR
         + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
-        busmap="resources/"
-        + RDIR
-        + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
-        linemap="resources/"
-        + RDIR
-        + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
+        busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
+        linemap="resources/" + RDIR + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
     log:
         "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}_{discount_rate}.log",
     benchmark:
