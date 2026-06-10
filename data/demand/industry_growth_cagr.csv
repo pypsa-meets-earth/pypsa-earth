@@ -1,4 +1,4 @@
-country,chemical and petrochemical,construction,food and tobacco,iron and steel,machinery,mining and quarrying,non-ferrous metals,non-metallic minerals,paper pulp and print,textile and leather,transport equipment,wood and wood products,ammonia, other
+country,chemical and petrochemical,construction,food and tobacco,iron and steel,machinery,mining and quarrying,non-ferrous metals,non-metallic minerals,paper pulp and print,textile and leather,transport equipment,wood and wood products,ammonia,other
 DEFAULT,0.03,0.015,0.02,0.017,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03
 MA,0.03,0.015,0.02,0.017,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03
 TN,0.128, 0.167, 0.073,,,0.45,,,,0.079,,,0.128,0.096
