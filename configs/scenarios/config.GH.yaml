@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+# Ghana scenario configuration for PyPSA-Earth
+# NOTE: This config assumes all required databundles have been retrieved
+# and extracted prior to running the workflow. On a first run, temporarily
+# set retrieve_databundle: true and retrieve_databundle_sector: true,
+# then revert to false for subsequent modelling runs.
+
 version: 0.8.0
 tutorial: false
 
