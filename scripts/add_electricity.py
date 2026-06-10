@@ -865,30 +865,6 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
 
 
 def attach_hydro(
-    n: pypsa.Network,
-    costs: pd.DataFrame,
-    ppl: pd.DataFrame,
-    hydro_min_inflow_pu: float = 1.0,
-) -> None:
-    """
-    Add existing hydro powerplants to the network as Hydro Storage units, Run-Of-River generators, and Pumped Hydro storage units.
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        The PyPSA network to modify.
-    costs : pd.DataFrame
-        DataFrame containing technology costs.
-    ppl : pd.DataFrame
-        Power plant DataFrame.
-
-    Returns
-    -------
-    None
-    """
-
-
-def attach_hydro(
     n,
     costs,
     ppl,
