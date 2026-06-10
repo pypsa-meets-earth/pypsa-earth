@@ -42,6 +42,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix silent inconsistency between `costs.discountrate` and `costs.fill_values.discount rate`: renamed config key to `costs.discount_rate`, removed the redundant `fill_values.discount rate` entry, and added a bridging assignment in `process_cost_data.py` so the annuity calculation always uses the value from `costs.discount_rate`. **Breaking change**: update your config files by renaming `costs.discountrate` → `costs.discount_rate` and removing `costs.fill_values.discount rate`. [PR #1862](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1862)
 
+* Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)
+
 * Adjusted the code to be more robust [#1812](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1812)
 
 * Avoid crash in `add_chp_constraints` when the network has no links, supporting operational models without brownfield/expandable batteries, pumped storage, or DC links [#1750](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1750)
