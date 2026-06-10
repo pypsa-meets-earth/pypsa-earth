@@ -678,6 +678,7 @@ rule add_electricity:
             for attr, fn in d.items()
             if str(fn).startswith("data/")
         },
+        base_network="networks/" + RDIR + "base.nc",
         tech_costs="resources/"
         + RDIR
         + f"costs_{config['costs']['year']}_elec_{{discount_rate}}.csv",
@@ -728,16 +729,16 @@ rule simplify_network:
         network="networks/" + RDIR + "elec_s{simpl}_{discount_rate}.nc",
         regions_onshore="resources/"
         + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}_{discount_rate}.geojson",
+        + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{discount_rate}.geojson",
+        + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
         busmap="resources/"
         + RDIR
-        + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
+        + "bus_regions/busmap_elec_s{simpl}.csv",
         connection_costs="resources/"
         + RDIR
-        + "bus_regions/connection_costs_s{simpl}_{discount_rate}.csv",
+        + "bus_regions/connection_costs_s{simpl}.csv",
     log:
         "logs/" + RDIR + "simplify_network/elec_s{simpl}_{discount_rate}.log",
     benchmark:
@@ -767,10 +768,10 @@ rule cluster_network:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         regions_onshore="resources/"
         + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}_{discount_rate}.geojson",
+        + "bus_regions/regions_onshore_elec_s{simpl}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{discount_rate}.geojson",
+        + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
@@ -795,16 +796,16 @@ rule cluster_network:
         ),
         regions_onshore="resources/"
         + RDIR
-        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}_{discount_rate}.geojson",
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
         regions_offshore="resources/"
         + RDIR
-        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}_{discount_rate}.geojson",
+        + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
         busmap="resources/"
         + RDIR
-        + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
+        + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
         linemap="resources/"
         + RDIR
-        + "bus_regions/linemap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
+        + "bus_regions/linemap_elec_s{simpl}_{clusters}.csv",
     log:
         "logs/" + RDIR + "cluster_network/elec_s{simpl}_{clusters}_{discount_rate}.log",
     benchmark:
