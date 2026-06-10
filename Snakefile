@@ -2177,24 +2177,24 @@ rule build_existing_heating_distribution:
         + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.csv",
         clustered_pop_energy_layout="resources/"
         + SECDIR
-        + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        + "demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.csv",
         #"resources/population_shares/pop_weighted_energy_totals_s{simpl}_{clusters}.csv",
         district_heat_share="resources/"
         + SECDIR
-        + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        + "demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.csv",
     output:
         existing_heating_distribution="resources/"
         + SECDIR
-        + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.csv",
     threads: 1
     resources:
         mem_mb=2000,
     log:
         RESDIR
-        + "logs/build_existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.log",
+        + "logs/build_existing_heating_distribution_{demand}_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.log",
     benchmark:
         RESDIR
-        +"benchmarks/build_existing_heating_distribution/{demand}_s{simpl}_{clusters}_{planning_horizons}"
+        +"benchmarks/build_existing_heating_distribution/{demand}_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}"
     script:
         "scripts/build_existing_heating_distribution.py"
 
@@ -2204,13 +2204,13 @@ if config["foresight"] == "myopic":
     HEAT_BASEYEAR = {
         "cop_soil_total": "resources/"
         + SECDIR
-        + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.nc",
         "cop_air_total": "resources/"
         + SECDIR
-        + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        + "cops/cop_air_total_elec_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.nc",
         "existing_heating_distribution": "resources/"
         + SECDIR
-        + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv",
+        + "heating/existing_heating_distribution_{demand}_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.csv",
     }
 
     rule add_existing_baseyear:
@@ -2224,10 +2224,10 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
-            busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
+            busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
             busmap="resources/"
             + RDIR
-            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
+            + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
             # clustered_pop_layout="resources/"
             # + SECDIR
             # + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
@@ -2287,10 +2287,10 @@ if config["foresight"] == "myopic":
             carriers=config["electricity"]["renewable_carriers"],
         input:
             # unpack(input_profile_tech_brownfield),
-            simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
+            simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
             cluster_busmap="resources/"
             + RDIR
-            + "bus_regions/busmap_elec_s{simpl}_{clusters}.csv",
+            + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
@@ -2299,10 +2299,10 @@ if config["foresight"] == "myopic":
             + "costs_{planning_horizons}_sec_{discount_rate}.csv",
             cop_soil_total="resources/"
             + SECDIR
-            + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.nc",
             cop_air_total="resources/"
             + SECDIR
-            + "cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+            + "cops/cop_air_total_elec_s{simpl}_{clusters}_{discount_rate}_{planning_horizons}.nc",
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
