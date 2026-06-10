@@ -2224,7 +2224,9 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discount_rate}_{demand}_{h2export}export.nc",
             powerplants="resources/" + RDIR + "powerplants.csv",
-            busmap_s="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
+            busmap_s="resources/"
+            + RDIR
+            + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
             busmap="resources/"
             + RDIR
             + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
@@ -2287,7 +2289,9 @@ if config["foresight"] == "myopic":
             carriers=config["electricity"]["renewable_carriers"],
         input:
             # unpack(input_profile_tech_brownfield),
-            simplify_busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
+            simplify_busmap="resources/"
+            + RDIR
+            + "bus_regions/busmap_elec_s{simpl}_{discount_rate}.csv",
             cluster_busmap="resources/"
             + RDIR
             + "bus_regions/busmap_elec_s{simpl}_{clusters}_{discount_rate}.csv",
