@@ -364,10 +364,11 @@ def calculate_cost_for_storage_units(
             missing_store += [k]
 
     if missing_store:
-        logger.warning(
+        raise Exception(
             f"No cost data on:\n - "
             + "\n - ".join(missing_store)
-            + "\nPlease enable retrieve_cost_data if this storage technology is used"
+            + "\nPlease enable retrieve_cost_data if this storage technology is defined as StorageUnit,"
+            + "\nor remove them in electricity: max_hours."
         )
 
     return costs

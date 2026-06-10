@@ -82,15 +82,12 @@ def get_available_storage_carriers(
     not_implemented = input_carriers - implemented
     if not_implemented:
         logger.warning(
-            f"The following carriers are not implemented as storage technologies in PyPSA-Eur: {sorted(not_implemented)}"
+            f"The following carriers are not implemented as storage technologies in PyPSA-Earth:\n - "
+            + "\n - ".join(not_implemented)
+            + f"\nPlease include these carriers and their respective store, bicharger or (charger and discharger) names in the technology data."
         )
 
     available_carriers = sorted(input_carriers & implemented)
-
-    # Add any missing carriers to the network
-    missing_carriers = [c for c in available_carriers if c not in n.carriers.index]
-    if missing_carriers:
-        n.madd("Carrier", missing_carriers)
 
     return available_carriers
 
@@ -119,7 +116,6 @@ def attach_stores(
         A dictionary mapping storage carriers to their respective technology parameters.
     """
     available_carriers = get_available_storage_carriers(n, carriers, storage_techs)
-    n.madd("Carrier", available_carriers)
 
     for carrier in available_carriers:
         roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
@@ -137,6 +133,16 @@ def attach_stores(
         discharge_name = (
             "Fuel Cell" if lookup_discharge == "fuel cell" else "discharger"
         )
+
+        discharge_capital_cost = (
+            0.0 if "bicharger" in lookup else costs.at[lookup_discharge, "capital_cost"]
+        )
+        if lookup_discharge == "fuel cell":
+            # NB: fuel cell investment cost is per MWel
+            discharge_capital_cost *= costs.at[lookup_discharge, "efficiency"]
+
+        if carrier not in n.carriers.index:
+            n.add("Carrier", carrier)
 
         n.madd(
             "Bus",
@@ -182,7 +188,7 @@ def attach_stores(
             bus1=buses_i,
             carrier=f"{carrier} {discharge_name.lower()}",
             efficiency=costs.at[lookup_discharge, "efficiency"] ** roundtrip_correction,
-            capital_cost=costs.at[lookup_discharge, "capital_cost"],
+            capital_cost=discharge_capital_cost,
             marginal_cost=costs.at[lookup_discharge, "marginal_cost"],
             p_nom_extendable=True,
             lifetime=costs.at[lookup_discharge, "lifetime"],
@@ -221,7 +227,6 @@ def attach_storageunits(
         A dictionary mapping storage carriers to their respective technology parameters.
     """
     available_carriers = get_available_storage_carriers(n, carriers, storage_techs)
-    n.madd("Carrier", available_carriers)
 
     for carrier in available_carriers:
         max_hour = max_hours.get(carrier)
@@ -237,6 +242,9 @@ def attach_storageunits(
         else:
             lookup_charge = lookup["charger"]
             lookup_discharge = lookup["discharger"]
+
+        if carrier not in n.carriers.index:
+            n.add("Carrier", carrier)
 
         n.madd(
             "StorageUnit",
