@@ -145,6 +145,14 @@ def emission_extractor(filename, emission_year, country_names):
         logger.warning(
             f"The emission value for the following countries has not been found: {missing_ccs}"
         )
+    if emission_by_country.empty:
+        raise ValueError(
+            f"No CO2 emission data could be extracted from '{filename}' for year "
+            f"{emission_year} and countries {list(country_names)} (ISO3: {list(cc_iso3)}). "
+            "The automatic CO2 limit cannot be derived from an empty result. "
+            "Please check the emission data file, the requested base year, or the "
+            "configured countries."
+        )
     return emission_by_country
 
 
