@@ -27,7 +27,7 @@ countries: ["GH"] #Ghana configuration
 enable:
   retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: false
-  retrieve_cost_data: true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cost_data: true: #retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   retrieve_cutout: false
   download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
   download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
