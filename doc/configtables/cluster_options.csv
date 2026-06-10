@@ -22,9 +22,18 @@ aggregation_strategies,,,
 -- -- p_nom_max,,"{min, mean, max, sum}",Indicates how the p_nom_max of the aggregated generator is computed from the original p_nom_max values.
 -- -- p_nom_min,,"{min, mean, max, sum}",Indicates how the p_nom_min of the aggregated generator is computed from the original p_nom_min values.
 -- -- p_min_pu,,"{min, mean, max, sum}",Indicates how the p_min_pu of the aggregated generator is computed from the original p_min_pu values.
+-- -- p_max_pu,,"{weighted_average, min, mean, max, sum}","Indicates how the p_max_pu of the aggregated generator is computed. ``weighted_average`` weights by p_nom and is recommended for capacity-factor time series."
 -- -- marginal_cost,,"{min, mean, max, sum}",Indicates how the marginal_cost of the aggregated generator is computed from the original marginal_cost values.
--- -- commitable,,{any},"Indicates how the commit status of the aggregated generator is set depending on the original values of the generators. Unit Commitment is currently under development, so should be left to ``any``."
+-- -- average_distance,,"{min, mean, max, sum}","Indicates how the average offshore cable distance [km] of the aggregated generator is computed. Used by the assign_costs rule to recalculate per-horizon offshore wind connection costs."
+-- -- underwater_fraction,,"{min, mean, max, sum}","Indicates how the underwater cable fraction of the aggregated generator is computed. Used together with average_distance by the assign_costs rule for per-horizon offshore wind connection costs."
+-- -- committable,,{any},"Indicates how the commit status of the aggregated generator is set depending on the original values of the generators. Unit Commitment is currently under development, so should be left to ``any``."
 -- -- ramp_limit_up,,"{min, mean, max, sum}",Indicates how the ramp_limit_up of the aggregated generator is computed from the original ramp_limit_up values.
 -- -- ramp_limit_down,,"{min, mean, max, sum}",Indicates how the ramp_limit_down of the aggregated generator is computed from the original ramp_limit_down values.
 -- -- efficiency,,"{min, mean, max, sum}",Indicates how the efficiency of the aggregated generator is computed from the original efficiency values.
+-- -- build_year,,"{min, mean, max, sum}",Indicates how the build_year of the aggregated generator is computed from the original build_year values.
+-- -- lifetime,,"{min, mean, max, sum}",Indicates how the lifetime of the aggregated generator is computed from the original lifetime values.
+-- one_ports,,,
+-- -- StorageUnit,,,
+-- -- -- build_year,,"{min, mean, max, sum}",Indicates how the build_year of the aggregated storage unit is computed from the original build_year values.
+-- -- -- lifetime,,"{min, mean, max, sum}",Indicates how the lifetime of the aggregated storage unit is computed from the original lifetime values.
 focus_weights,,Dict consisting of {country: share} such as {NG: 0.4},"When specified, set the share of nodes allocated to each country. The sum of focus weights must be less than or equal to 1."
