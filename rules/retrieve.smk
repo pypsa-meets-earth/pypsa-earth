@@ -331,10 +331,13 @@ if (NATURA_EARTH_DATASET := dataset_version("natura_earth", config))["source"] i
             copy2(os.path.join(output["tiff"]), output["shp"])
 
 
-if (ERA5_CUTOUT := dataset_version("cutout-era5", config))["source"] in [
-    "primary",
-    "tutorial",
-]:
+if not (config["enable"].get("retrieve_cutout", False)) and (
+    (ERA5_CUTOUT := dataset_version("cutout-era5", config))["source"]
+    in [
+        "primary",
+        "tutorial",
+    ]
+):
     year = int(float(ERA5_CUTOUT["year"]))
     region = ERA5_CUTOUT["region"]
 

@@ -3,7 +3,3 @@ load_options:
   weather_year: 2013 # Weather year of the load profile
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
-  demand_weights:
-    mining: 0.76
-    gdp: 0.24
-  zambia_demand_distribution: false # if true, distributes load using mining and GDP rasters (Zambia-specific)

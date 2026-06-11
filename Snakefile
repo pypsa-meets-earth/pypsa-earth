@@ -41,6 +41,7 @@ configfile: "config.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
 configfile: "configs/validation_dispatch_zambia.yaml"
+configfile: "config_current_scenario.yaml"
 
 
 check_config_version(config=config)
@@ -260,7 +261,7 @@ rule build_osm_network:
 
 
 # Ensure mining data is only used if Zambia-specific load-options are set in config
-if config["load_options"]["zambia_demand_distribution"]:
+if config["load_options"].get("zambia_demand_distribution", False):
 
     rule build_shapes:
         params:
@@ -708,7 +709,7 @@ rule build_powerplants:
         "scripts/build_powerplants.py"
 
 
-if config["electricity"].get("biomass_potential"):
+if config["validation"].get("biomass"):
 
     rule add_electricity:
         params:
@@ -2375,6 +2376,7 @@ rule run_scenario:
     threads: 1
     resources:
         mem_mb=5000,
+        scenario_runner=1,  # ensures only one scenario runs at a time (shared config_current_scenario.yaml)
     run:
         from build_test_configs import create_test_config
         import yaml
@@ -2396,18 +2398,22 @@ rule run_scenario:
             input.diff_config,
         )
         # merge the default config file with the difference
-        create_test_config(base_config_path, input.diff_config, "config.yaml")
+        create_test_config(
+            base_config_path, input.diff_config, "config_current_scenario.yaml"
+        )
+        # --nolock: inner snakemake must not compete for the project lock with the outer process
         run(
-            "snakemake -j all solve_all_networks --rerun-incomplete",
+            "snakemake --cores all solve_all_networks --rerun-incomplete --nolock",
             shell=True,
             check=not config["run"]["allow_scenario_failure"],
         )
         run(
-            "snakemake -j1 make_statistics --force",
+            "snakemake --cores 1 make_statistics --force --nolock",
             shell=True,
             check=not config["run"]["allow_scenario_failure"],
         )
-        copyfile("config.yaml", output.copyconfig)
+        os.makedirs(os.path.dirname(output.copyconfig), exist_ok=True)
+        copyfile("config_current_scenario.yaml", output.copyconfig)
 
 
 

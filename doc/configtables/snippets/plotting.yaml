@@ -219,8 +219,6 @@ plotting:
     solid biomass for industry: "#654321"
     rail transport oil: "#44DD33"
     low voltage: "y"
-
-
   nice_names:
     OCGT: Open-Cycle Gas
     CCGT: Combined-Cycle Gas
@@ -235,4 +233,4 @@ plotting:
     lines: Transmission Lines
     ror: Run of River
 
-# Zambia-specific parameters --------------------------------------------------
+# Zambia-specific data --------------------------------------------------------
