@@ -528,6 +528,7 @@ if __name__ == "__main__":
             "build_salt_cavern_potentials", clusters="10", simpl=""
         )
 
+    distance_crs = snakemake.params.crs["distance_crs"]
     area_crs = snakemake.params.crs["area_crs"]
     geo_crs = snakemake.params.crs["geo_crs"]
     paths = snakemake.input
