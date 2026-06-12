@@ -28,7 +28,7 @@ Relevant Settings
     co2:
         limit:
         base:
-        emission_prices:
+        emission_price:
         automatic_emission:
         budget:
 
@@ -182,11 +182,9 @@ def add_gaslimit(n, gaslimit, Nyears=1.0):
     )
 
 
-def add_emission_prices(n, emission_prices={"co2": 0.0}, exclude_co2=False):
-    if exclude_co2:
-        emission_prices.pop("co2")
+def add_emission_prices(n, co2_price=0.0):
     ep = (
-        pd.Series(emission_prices).rename(lambda x: x + "_emissions")
+        pd.Series({"co2": co2_price}).rename(lambda x: x + "_emissions")
         * n.carriers.filter(like="_emissions")
     ).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
@@ -437,10 +435,10 @@ if __name__ == "__main__":
             m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 logger.info("Setting emission prices according to wildcard value.")
-                add_emission_prices(n, dict(co2=float(m[0])))
+                add_emission_prices(n, float(m[0]))
             else:
                 logger.info("Setting emission prices according to config value.")
-                add_emission_prices(n, snakemake.params.co2["emission_prices"])
+                add_emission_prices(n, snakemake.params.co2["emission_price"])
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
