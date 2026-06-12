@@ -458,8 +458,6 @@ costs:
   #   CCGT: 25.0
   # efficiency: # per unit
   #   CCGT: 0.58
-  lines:
-    length_factor: 1.25 #to estimate offwind connection costs
 
 
 monte_carlo:
