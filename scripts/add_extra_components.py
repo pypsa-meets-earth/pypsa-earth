@@ -84,7 +84,7 @@ def get_available_storage_carriers(
         logger.warning(
             f"The following carriers are not implemented as storage technologies in PyPSA-Earth:\n - "
             + "\n - ".join(not_implemented)
-            + f"\nPlease include these carriers and their respective store, bicharger or (charger and discharger) names in the technology data."
+            + "\nPlease include these carriers and their respective store, bicharger or (charger and discharger) names in the technology data."
         )
 
     available_carriers = sorted(input_carriers & implemented)

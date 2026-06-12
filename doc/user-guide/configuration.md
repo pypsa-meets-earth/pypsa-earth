@@ -461,9 +461,27 @@ Specify linear power flow formulation and optimization solver settings.
 
 # storage_tech
 
-Specifies storage technologies mapping. Specifies storage technologies mapping. Each storage carrier can either be defined either as Stores or StorageUnit.
-When defined as Store, the storage component have its own bus and and a charging and discharge links, each component has its own cost and efficiencies.
-When defined as StorageUnit, the storage componen are merged into one with the cost combined together and is dependent on the max_hours.
+Specifies storage technologies mapping. Specifies storage technologies mapping. Each storage carrier can either be defined either as Stores or StorageUnit as shown in `electricity: extendable_carriers:`
+
+!!! note
+    When those carrier are defined as Store:
+
+    - The storage component is represented by a dedicated storage component with its own bus, as well as separate charging and discharging links. Each component has its own costs and efficiencies.
+    - Charging and discharging capacities are optimized independently from the storage energy capacity (except for the default `battery` configuration).
+    - The optimized storage capacity is expressed in MWh.
+    - A Store is best suited for technologies where charging and discharging power can be sized independently of the storage energy capacity.
+
+    When those carrier are defined as StorageUnit:
+
+    - The storage component is represented as a single component, with charging, discharging, and storage costs combined.
+    - Charging and discharging capacities are tied to the storage capacity through the `max_hours` parameter.
+    - The optimized capacity is expressed in MW. To obtain the corresponding energy capacity in MWh, multiply the optimized capacity by `max_hours`.
+    - A StorageUnit is best suited for technologies where charging and discharging power have a fixed relationship to the storage energy capacity.
+
+!!! warning
+    In order to define storages as StorageUnit, define it's `max_hours` in `electricity: max_hours:`
+
+The following storage technologies are available for implementation in the model. Users may also define additional storage technologies, provided that the necessary technology cost data is included:
 
 ```yaml
 --8<-- "configtables/snippets/storage_techs.yaml"
