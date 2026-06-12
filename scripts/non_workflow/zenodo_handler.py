@@ -56,30 +56,28 @@ The script performs the following steps:
 Relevant Settings
 -----------------
 
-.. code:: python
-
-    SANDBOX_BOOL = True
+    SANDBOX_BOOL
         Use the Zenodo Sandbox environment for testing.
 
-    NEW_PROJECT = False
+    NEW_PROJECT
         Create a new deposition if True; otherwise use an existing deposition.
 
-    EXISTING_PROJECT_ID = 1183583
+    EXISTING_PROJECT_ID
         Identifier of the deposition to modify.
 
-    TYPE = "upload"
+    TYPE
         Operation to perform: ``"upload"`` or ``"delete"``.
 
-    PUBLISH_BOOL = False
+    PUBLISH_BOOL
         Publish the deposition after modifications.
 
-    ROOT = "/path/to/files"
+    ROOT
         Root directory containing files to upload.
 
-    UPLOAD_PATHS = [...]
+    UPLOAD_PATHS
         List of files or directories to upload.
 
-    METADATA = {...}
+    METADATA
         Metadata associated with the deposition.
 
 Notes
