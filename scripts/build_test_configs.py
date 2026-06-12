@@ -14,13 +14,34 @@ tutorial config.
 """
 import collections.abc
 import copy
-import os
 from pathlib import Path
+from typing import Any
 
 from ruamel.yaml import YAML
 
 
-def update(d, u):
+def update(
+    d: dict[str, Any],
+    u: collections.abc.Mapping[str, Any],
+) -> dict[str, Any]:
+    """
+    Recursively merge mappings into a dictionary.
+
+    Nested mappings in ``u`` are merged into the corresponding keys of ``d``;
+    all other values in ``u`` overwrite values in ``d``.
+
+    Parameters
+    ----------
+    d : dict
+        Base dictionary to update.
+    u : mapping
+        Mapping whose items are merged into ``d``.
+
+    Returns
+    -------
+    dict
+        Updated dictionary (same object as ``d``).
+    """
     for k, v in u.items():
         if isinstance(v, collections.abc.Mapping):
             d[k] = update(d.get(k, {}), v)
@@ -29,9 +50,24 @@ def update(d, u):
     return d
 
 
-def _parse_inputconfig(input_config, yaml):
+def _parse_inputconfig(
+    input_config: dict[str, Any] | str | Path,
+    yaml: YAML,
+) -> dict[str, Any]:
     """
-    Utility function to parse input config into a dictionary.
+    Parse a configuration object or YAML file into a dictionary.
+
+    Parameters
+    ----------
+    input_config : dict or path-like
+        Configuration provided as a dictionary or a path to a YAML file.
+    yaml : ruamel.yaml.YAML
+        YAML parser/loader instance.
+
+    Returns
+    -------
+    dict
+        Parsed configuration dictionary.
     """
     if isinstance(input_config, dict):
         return input_config
@@ -43,26 +79,32 @@ def _parse_inputconfig(input_config, yaml):
         return yaml.load(fp)
 
 
-def create_test_config(default_config, diff_config, output_path):
+def create_test_config(
+    default_config: dict[str, Any] | str | Path,
+    diff_config: dict[str, Any] | str | Path,
+    output_path: str | Path,
+) -> dict[str, Any]:
     """
-    This function takes as input a default dictionary-like object and a
-    difference dictionary-like object, merges the changes of the latter into
-    the former, and saves the output in the desired output path.
+    Merge a default config with a diff config and write the result to disk.
 
-    Inputs
-    ------
+    Takes a default dictionary-like object and a difference dictionary-like
+    object, merges the changes of the latter into the former, and saves the
+    output at the desired path.
+
+    Parameters
+    ----------
     default_config : dict or path-like
-        Default dictionary-like object provided as
-        a dictionary or a path to a yaml file
+        Default configuration provided as a dictionary or a path to a YAML file.
     diff_config : dict or path-like
-        Difference dictionary-like object provided as
-        a dictionary or a path to a yaml file
+        Difference configuration provided as a dictionary or a path to a YAML
+        file. Values in this config override or extend ``default_config``.
     output_path : path-like
-        Output path where the merged dictionary is saved
+        Output path where the merged configuration is saved.
 
-    Outputs
+    Returns
     -------
-    - merged dictionary
+    dict
+        Merged configuration dictionary.
     """
 
     # Load yaml files
