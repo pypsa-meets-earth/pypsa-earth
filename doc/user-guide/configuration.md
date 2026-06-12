@@ -181,7 +181,7 @@ The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `w
 
 ## co2
 
-Carbon dioxide policy settings: emission caps, carbon prices, automatic emission extraction, and myopic planning-horizon budgets.
+Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep` wildcards), automatic emission extraction, and optional planning-horizon budgets in sector-coupled runs.
 
 ```yaml
 --8<-- "configtables/snippets/co2.yaml"

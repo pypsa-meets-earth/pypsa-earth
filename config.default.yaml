@@ -186,7 +186,7 @@ co2:
   automatic_emission: # derive co2.limit from historical emission data instead of the value above
     enable: false
     base_year: 1990  # any year from 1970 to 2018
-  budget:            # year-by-year reduction trajectory; used in myopic and sector-coupled runs
+  budget:            # year-by-year reduction trajectory; used in all sector-coupled runs
     enable: false
     override_co2opt: true
     base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
