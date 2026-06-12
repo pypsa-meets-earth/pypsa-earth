@@ -34,7 +34,14 @@
   oil_boilers: false
   chp: true
   micro_chp: false
-  solar_thermal: true
+
+  solar_thermal:
+    enable: true
+    cf_correction: 0.788457 # correction factor applied to atlite's raw output; = 1/1.2683
+    clearsky_model: simple
+    orientation:
+      slope: 45.
+      azimuth: 180.
+
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
-  solar_cf_correction: 0.788457 # = >>>1/1.2683

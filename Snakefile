@@ -1498,7 +1498,7 @@ rule prepare_energy_totals:
 
 rule build_solar_thermal_profiles:
     params:
-        solar_thermal_config=config["solar_thermal"],
+        solar_thermal_config=config["sector"]["solar_thermal"],
         snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/"

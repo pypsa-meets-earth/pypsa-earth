@@ -548,12 +548,6 @@ custom_data:
 industry:
   reference_year: 2015
 
-solar_thermal:
-  clearsky_model: simple
-  orientation:
-    slope: 45.
-    azimuth: 180.
-
 existing_capacities:
   grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]
   grouping_years_heat: [1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2019] # these should not extend 2020
@@ -651,10 +645,17 @@ sector:
   oil_boilers: false
   chp: true
   micro_chp: false
-  solar_thermal: true
+
+  solar_thermal:
+    enable: true
+    cf_correction: 0.788457 # correction factor applied to atlite's raw output; = 1/1.2683
+    clearsky_model: simple
+    orientation:
+      slope: 45.
+      azimuth: 180.
+
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
-  solar_cf_correction: 0.788457 # = >>>1/1.2683
 
   # ------------------- LAND TRANSPORT SECTOR -------------------
 
