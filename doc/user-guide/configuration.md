@@ -179,19 +179,19 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
-## co2_budget
+## co2
 
-If enabled, this option allows setting different CO₂ targets for each planning horizon year. Only supports foresights with planning horizon such as myopic.
+Carbon dioxide policy settings: emission caps, carbon prices, automatic emission extraction, and myopic planning-horizon budgets.
 
 ```yaml
---8<-- "configtables/snippets/co2budget.yaml"
+--8<-- "configtables/snippets/co2.yaml"
 ```
 
-{{ read_csv('configtables/co2_budget.csv') }}
+{{ read_csv('configtables/co2.csv') }}
 
 ## electricity
 
-Specifies the options for the rule `add_electricity`. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, CO2 emission limits, operational reserve, storage parameters. See the table below for more details.
+Specifies the options for the rule `add_electricity`. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, operational reserve, storage parameters. See the table below for more details.
 
 ```yaml
 --8<-- "configtables/snippets/electricity.yaml"

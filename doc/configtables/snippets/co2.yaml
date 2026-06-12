@@ -1,0 +1,20 @@
+co2:
+  limit: 7.75e+7     # annual cap [tCO2/year]; European default — adjust for your region; active via Co2L wildcard
+  base: 1.487e+9     # baseline emissions used for relative reduction targets; European default
+  emission_prices:   # [currency/tCO2]; active via Ep wildcard
+    co2: 0.
+  automatic_emission: # derive co2.limit from historical emission data instead of the value above
+    enable: false
+    base_year: 1990  # any year from 1970 to 2018
+  budget:            # year-by-year reduction trajectory; used in myopic and sector-coupled runs
+    enable: false
+    override_co2opt: true
+    base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
+    year:
+      2020: 1.0
+      2025: 0.85
+      2030: 0.70
+      2035: 0.55
+      2040: 0.40
+      2045: 0.25
+      2050: 0.1

@@ -25,16 +25,19 @@ Relevant Settings
 
     lines:
 
-    costs:
+    co2:
+        limit:
+        base:
         emission_prices:
+        automatic_emission:
+        budget:
 
     electricity:
-        co2limit:
         max_hours:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`costs_cf`, :ref:`electricity_cf`
+    :ref:`co2_cf`, :ref:`electricity_cf`
 
 Inputs
 ------
@@ -378,11 +381,9 @@ if __name__ == "__main__":
     for o in opts:
         if "Co2L" in o:
             m = re.findall(r"[0-9]*\.?[0-9]+$", o)
-            if snakemake.params.electricity["automatic_emission"]:
+            if snakemake.params.co2["automatic_emission"]["enable"]:
                 country_names = n.buses.country.unique()
-                emission_year = snakemake.params.electricity[
-                    "automatic_emission_base_year"
-                ]
+                emission_year = snakemake.params.co2["automatic_emission"]["base_year"]
                 filename = download_emission_data()
                 co2limit = emission_extractor(
                     filename, emission_year, country_names
@@ -391,10 +392,10 @@ if __name__ == "__main__":
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
-                co2limit = float(m[0]) * float(snakemake.params.electricity["co2base"])
+                co2limit = float(m[0]) * float(snakemake.params.co2["base"])
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = float(snakemake.params.electricity["co2limit"])
+                co2limit = float(snakemake.params.co2["limit"])
                 logger.info("Setting CO2 limit according to config value.")
             add_co2limit(n, co2limit, Nyears)
             break
@@ -439,7 +440,7 @@ if __name__ == "__main__":
                 add_emission_prices(n, dict(co2=float(m[0])))
             else:
                 logger.info("Setting emission prices according to config value.")
-                add_emission_prices(n, snakemake.params.emission_prices)
+                add_emission_prices(n, snakemake.params.co2["emission_prices"])
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]

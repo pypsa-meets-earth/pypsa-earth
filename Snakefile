@@ -893,7 +893,7 @@ rule prepare_network:
         lines=config["lines"],
         s_max_pu=config["lines"]["s_max_pu"],
         electricity=config["electricity"],
-        emission_prices=config["costs"]["emission_prices"],
+        co2=config["co2"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
@@ -1222,7 +1222,7 @@ rule prepare_sector_network:
         sector_options=config["sector"],
         foresight=config["foresight"],
         water_costs=config["custom_data"]["water_costs"],
-        co2_budget=config["co2_budget"],
+        co2=config["co2"],
     input:
         **branch(sector_enable["land_transport"], TRANSPORT),
         **branch(sector_enable["heat"], HEAT),
