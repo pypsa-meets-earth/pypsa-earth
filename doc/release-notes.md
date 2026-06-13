@@ -20,6 +20,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Added a baseline configuration for capacity expansion runs [PR #242](https://github.com/open-energy-transition/pypsa-zambia/pull/242)
 
+* Added proposed hydro powerplants projects from IPPPO to the custom powerplants file [PR #242](https://github.com/open-energy-transition/pypsa-zambia/pull/265)
 
 # PyPSA-Zambia v0.3
 
