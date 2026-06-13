@@ -118,6 +118,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update contribution guide [PR #1803](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1803)
 
+* Add module-level and missing function docstrings to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
+
 
 # PyPSA-Earth 0.8.0
 
