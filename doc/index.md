@@ -84,7 +84,7 @@ There are multiple ways to get involved and learn more about our work:
 
 - [Optimization](user-guide/optimization.md) - Optimization theory and methods
 
-### Utilities
+### Features
 
 - [Monte Carlo](utilities/monte-carlo.md) - Uncertainty quantification and sensitivity analysis
 
