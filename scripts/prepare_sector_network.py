@@ -4,6 +4,240 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # -*- coding: utf-8 -*-
+"""
+Adds sector based technologies to the PyPSA network
+
+Relevant Settings
+-----------------
+
+.. code:: yaml
+    sector:
+        enable:
+            heat: 
+            biomass: 
+            industry: 
+            shipping: 
+            aviation: 
+            land_transport: 
+            rail_transport: 
+            agriculture: 
+            residential: 
+            services: 
+
+        gas:
+            spatial_gas:
+            network:
+            network_data:
+            network_data_GGIT_status:
+
+        hydrogen:
+            network:
+            H2_retrofit_capacity_per_CH4:
+            network_limit:
+            network_routes:
+            gas_network_repurposing:
+            underground_storage:
+            hydrogen_colors:
+            set_color_shares:
+            blue_share:
+            pink_share:
+            production_technologies:
+
+        coal:
+            spatial_coal:
+            shift_to_elec:
+
+        lignite:
+            spatial_lignite: 
+
+        oil:
+            spatial_oil: 
+
+        ammonia:
+            enable:
+            spatial_ammonia:
+            production_year:
+            gas_MWh_per_tNH3:
+            elec_MWh_per_tNH3:
+            co2_t_per_tNH3:
+
+        # ------------------- HEAT SECTOR -------------------
+
+        district_heating:
+            potential:
+            progress:
+            district_heating_loss:
+        reduce_space_heat_exogenously:
+        reduce_space_heat_exogenously_factor:
+        space_heat_share:
+
+        tes:
+        tes_tau:
+            decentral:
+            central:
+        boilers:
+        oil_boilers:
+        chp:
+        micro_chp:
+        solar_thermal:
+        heat_pump_sink_T:
+        time_dep_hp_cop:
+        solar_cf_correction:
+
+        # ------------------- LAND TRANSPORT SECTOR -------------------
+
+        bev_plug_to_wheel_efficiency:
+        bev_charge_efficiency:
+        transport_heating_deadband_upper:
+        transport_heating_deadband_lower:
+        ICE_lower_degree_factor:
+        ICE_upper_degree_factor:
+        EV_lower_degree_factor:
+        EV_upper_degree_factor:
+        bev_avail_max:
+        bev_avail_mean:
+        bev_dsm_restriction_value:
+        bev_dsm_restriction_time:
+        v2g:
+        bev_dsm:
+        bev_energy:
+        bev_availability:
+        transport_fuel_cell_efficiency:
+        transport_internal_combustion_efficiency:
+
+        land_transport_fuel_cell_share:
+        land_transport_electric_share:
+
+        dynamic_transport
+            enable:
+            land_transport_fuel_cell_share
+            land_transport_electric_share
+
+        # ------------------- BIOMASS SECTOR -------------------
+
+        biomass_transport:
+        biomass_transport_default_cost:
+        solid_biomass_potential:
+        biogas_potential:
+
+        # ------------------- ELECTRICITY DISTRIBUTION GRID -------------------
+
+        electricity_distribution_grid:
+        enable_electricity_connection_cost:
+        solar_rooftop:
+            enable:
+            kW_per_m2:
+            m2_per_person:
+            use_building_size:
+            tolerance:
+
+        home_battery:
+        transmission_efficiency
+            electricity distribution grid
+            efficiency_static:
+            H2 pipeline
+            efficiency_per_1000km:
+            compression_per_1000km:
+
+        # ------------------- SHIPPING & AVIATION SECTOR -------------------
+
+        shipping_hydrogen_liquefaction:
+        shipping_average_efficiency:
+        shipping_hydrogen_share:
+        airport_sizing_factor:
+        international_bunkers:
+
+        # ------------------- CCUS & CONVERSION OPTIONS -------------------
+
+        co2_network:
+        co2_sequestration_potential:
+        co2_sequestration_cost:
+
+        methanation:
+        helmeth:
+        dac:
+        cc_fraction:
+        cc:
+        fischer_tropsch:
+        min_part_load_fischer_tropsch:
+
+        # ------------------- INDUSTRY OPTIONS -------------------
+
+        industry_util_factor:
+
+        efficiency_heat_oil_to_elec:
+        efficiency_heat_biomass_to_elec:
+        efficiency_heat_gas_to_elec:
+
+        # ------------------- POWERPLANTS OPTIONS -------------------
+
+        conventional_generation:
+        keep_existing_capacities:
+
+        marginal_cost_storage:
+
+Inputs
+------
+
+    - ``resources/{SECDIR}/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Transport demand per node and carrier for transport sectors (road, rail, aviation, shipping) if enabled.
+    - ``resources/{SECDIR}/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Availability profiles for the transport sector if enabled.
+    - ``resources/{SECDIR}/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Demand-side management profiles for the transport sector if enabled.
+    - ``resources/{SECDIR}/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal transport demand data for transport sectors if enabled.
+
+    - ``resources/{SECDIR}/demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Heat demand per node for heat sector if enabled.
+    - ``resources/{SECDIR}/demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for air source heat pumps for heat sector if enabled.
+    - ``resources/{SECDIR}/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for ground source heat pumps for heat sector if enabled.
+    - ``resources/{SECDIR}/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal availability profiles for heat sector if enabled.
+    - ``resources/{SECDIR}/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: District heat share per node for heat sector if enabled.
+
+    - ``resources/{RDIR}/solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv``: Solar rooftop layout per country if enabled.
+        
+    - ``networks/{RDIR}/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: PyPSA network file for electricity sector.
+
+    - ``resources/{RDIR}/costs_{planning_horizons}_sec.csv``: Cost parameters for sector technologies.
+        
+    - ``data/hydrogen_salt_cavern_potentials.csv``: Hydrogen salt cavern potentials per country.
+
+    - ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal energy totals if rail transport or agriculture sector is enabled.
+
+    - ``resources/{SECDIR}/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv``: Population layout per node.
+        
+    - ``resources/{SECDIR}/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Industrial energy demand per node if industry sector is enabled.
+
+    - ``resources/{SECDIR}/energy_totals_{demand}_{planning_horizons}.csv``: Energy totals per sector
+
+    - ``resources/{SECDIR}/airports.csv``: Airport locations if aviation sector is enabled.
+
+    - ``resources/{SECDIR}/ports.csv``: Port locations if shipping sector is enabled.
+
+    - ``data/temp_hard_coded/biomass_transport_costs.csv``: Biomass transport costs if biomass sector is enabled.
+
+    - ``resources/{RDIR}/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson``: GeoJSON file containing onshore regions.
+
+    - ``resources/{SECDIR}/gas_network/gas_network_elec_s{simpl}_{clusters}.csv``: Gas network data if gas sector is enabled.
+
+Outputs
+-------
+ - RESDIR + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
+
+
+Description
+-----------
+Add sector based technologies to the PyPSA network, including:
+- Carrier buses for fossil fuels (coal, oil, gas) and nuclear.
+- Electricity grid connection costs for solar and wind generators.
+- Hydrogen as an energy carrier, including production technologies, storage options, and a potential hydrogen network.
+- Battery storage and other storage technologies if enabled.
+- Rail transport technologies (e.g. electric and diesel trains) if the rail transport sector is enabled.
+- Land transport technologies (e.g. electric vehicles) if the land transport sectors are enabled.
+- Shipping and aviation sectors if enabled
+- Heat sector technologies (e.g. heat pumps, solar thermal) if the heat sector is enabled.
+- Industrial sector technologies if the industry sector is enabled.
+- Agriculture sector technologies if the agriculture sector is enabled.
+- Biomass supply chain technologies if biomass is used in any sector.
+- CO2 storage and direct air capture technologies if carbon capture or negative emissions are enabled.
+
+"""
 import logging
 import os
 import re
@@ -37,9 +271,19 @@ logger = logging.getLogger(__name__)
 spatial = SimpleNamespace()
 
 
-def add_carrier_buses(n, carrier, nodes=None):
+def add_carrier_buses(n: pypsa.Network, carrier: str, nodes=None: list) -> None:
     """
     Add buses to connect e.g. coal, nuclear and oil plants.
+
+    Parameters
+    ----------
+    n: PyPSA Network
+        Network to which the carrier and buses will be added.
+    carrier: str
+        Name of the carrier to be added (e.g. 'coal', 'nuclear', 'oil').
+    nodes: list or pd.Index, optional
+        List of nodes to which the carrier buses will be added. If None, uses all nodes from spatial data for the given carrier.
+
     """
 
     if nodes is None:
@@ -80,7 +324,22 @@ def add_carrier_buses(n, carrier, nodes=None):
     )
 
 
-def add_electricity_grid_connection(n, costs):
+def add_electricity_grid_connection(n: pypsa.Network, costs: pd.DataFrame) -> None:
+    
+    """
+    Add electricity grid connection costs for solar and wind generators
+
+    Parameters
+    ----------
+    n: PyPSA Network
+        Network to which the grid connection costs will be added.
+    costs: pd.DataFrame
+        DataFrame containing the cost parameters, including 'electricity grid connection' costs.
+
+    Returns
+    -------
+    None
+    """
     carriers = ["onwind", "solar"]
 
     gens = n.generators.index[n.generators.carrier.isin(carriers)]
@@ -91,10 +350,21 @@ def add_electricity_grid_connection(n, costs):
     logger.info("Added electricity grid connection costs for solar and wind generators")
 
 
-def H2_liquid_fossil_conversions(n, costs):
+def H2_liquid_fossil_conversions(n: pypsa.Network, costs: pd.DataFrame) -> None:
     """
     Function to add conversions between H2 and liquid fossil Carrier and bus is
     added in add_oil, which later on might be switched to add_generation.
+
+    Parameters
+    ----------
+    n: PyPSA Network
+        Network to which the conversions will be added.
+    costs: pd.DataFrame
+        DataFrame containing the cost and efficiency parameters for the conversions.
+
+    Returns
+    -------
+    None
     """
 
     n.madd(
@@ -124,14 +394,14 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
     """
     Function to add hydrogen as an energy carrier with its conversion technologies from and to AC.
 
-    Parameters:
+    Parameters
     ----------
     n : pypsa.Network
         The PyPSA network to which hydrogen components will be added.
     costs : pd.DataFrame
         DataFrame containing the cost and efficiency parameters for hydrogen technologies.
 
-    Returns:
+    Returns
     -------
     None
     """
@@ -766,13 +1036,21 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             )
 
 
-def define_spatial(nodes, options):
+def define_spatial(nodes: list, options: dict) -> SimpleNamespace:
     """
     Namespace for spatial.
 
     Parameters
     ----------
     nodes : list-like
+        List of nodes in the model.
+    options: dict
+        Dictionary containing the options for spatially resolved carriers and technologies.
+
+    Returns
+    -------
+    spatial : SimpleNamespace
+        Namespace containing the spatial attributes for the model, including nodes and spatially resolved carriers and technologies.
     """
 
     global spatial
@@ -895,7 +1173,21 @@ def define_spatial(nodes, options):
     return spatial
 
 
-def add_biomass(n, costs):
+def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
+    """
+    Add biomass and biogas potentials to the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to which the biomass and biogas potentials will be added.
+    costs : pd.DataFrame
+        DataFrame containing the costs for the biomass and biogas technologies.
+
+    Returns
+    -------
+    None
+    """
     logger.info("adding biomass")
 
     # TODO get biomass potentials dataset and enable spatially resolved potentials
@@ -1099,8 +1391,23 @@ def add_biomass(n, costs):
             )
 
 
-def add_co2(n, costs, co2_network):
-    "add carbon carrier, it's networks and storage units"
+def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
+    """
+    Add carbon carrier, its networks and storage units
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to which the carbon carrier, its networks and storage units will be added.
+    costs : pd.DataFrame
+        DataFrame containing the costs for the carbon carrier, its networks and storage units.
+    co2_network : bool
+        Whether to add CO2 network components.
+
+    Returns
+    -------
+    None
+    """
 
     # minus sign because opposite to how fossil fuels used:
     # CH4 burning puts CH4 down, atmosphere up
@@ -1193,7 +1500,25 @@ def add_co2(n, costs, co2_network):
         )
 
 
-def add_aviation(n, cost, energy_totals, airports_fn):
+def add_aviation(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, airports_fn: str) -> None:
+    """
+    Add aviation demand and emissions to the sector network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to which aviation demand and emissions will be added.
+    costs : pd.DataFrame
+        DataFrame containing the costs for aviation technologies.
+    energy_totals : pd.DataFrame
+        DataFrame containing energy total values for different sectors.
+    airports_fn : str
+        File path to the airports data file.
+
+    Returns
+    -------
+    None
+    """
     # Load data required for aviation and navigation
     # TODO follow the same structure as land transport and heat
 
@@ -1403,8 +1728,21 @@ def add_storage(n: pypsa.Network, costs: pd.DataFrame) -> None:
     )
 
 
-def h2_hc_conversions(n, costs):
-    "function to add the conversion technologies between H2 and hydrocarbons"
+def h2_hc_conversions(n: pypsa.Network, costs: pd.DataFrame) -> None:
+    """
+    function to add the conversion technologies between H2 and hydrocarbons
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to which the conversion technologies will be added.
+    costs : pd.DataFrame
+        DataFrame containing the costs for the conversion technologies.
+
+    Returns
+    -------
+    None
+    """
     if options["methanation"]:
         n.madd(
             "Link",
@@ -1442,7 +1780,25 @@ def h2_hc_conversions(n, costs):
         )
 
 
-def add_shipping(n, costs, energy_totals, ports_fn):
+def add_shipping(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, ports_fn: str) -> None:
+    """
+    Add shipping technologies to the sector model
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        PyPSA Network to which the shipping technologies will be added
+    costs: pd.DataFrame
+        DataFrame containing the costs for the shipping technologies
+    energy_totals: pd.DataFrame
+        DataFrame containing energy total values for different sectors
+    ports_fn: str
+        File path to the ports data file
+
+    Returns
+    -------
+    None
+    """
     ports = read_csv_nafix(ports_fn, index_col=None, keep_default_na=False).squeeze()
     ports = ports[ports.country.isin(countries)]
 
@@ -1593,10 +1949,26 @@ def add_shipping(n, costs, energy_totals, ports_fn):
 
 
 def add_industry(
-    n,
-    costs,
-    industrial_demand_fn,
-):
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    industrial_demand_fn: str
+) -> None:
+    """
+    Add industrial technologies and industrial demands to the sector network
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        PyPSA Network to which industrial demands will be added
+    costs: pd.DataFrame
+        DataFrame containing the costs for industrial technologies
+    industrial_demand_fn: str
+        File path to the industrial demand data file
+
+    Returns
+    -------
+    None
+    """
     logger.info("adding industrial demand")
 
     # Load industry demand data
@@ -1994,15 +2366,34 @@ Missing data:
 
 
 def add_land_transport(
-    n,
-    costs,
-    transport_fn,
-    avail_profile_fn,
-    dsm_profile_fn,
-    nodal_transport_data_fn,
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    transport_fn: str,
+    avail_profile_fn: str,
+    dsm_profile_fn: str,
+    nodal_transport_data_fn: str,
 ):
     """
     Function to add land transport to network.
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which land transport will be added.
+    costs: pd.DataFrame
+        DataFrame containing cost information for land transport technologies.
+    transport_fn: str
+        File path to the transport demand data file.
+    avail_profile_fn: str
+        File path to the availability profile data file for electric vehicles.
+    dsm_profile_fn: str
+        File path to the demand-side management profile data file for electric vehicles.
+    nodal_transport_data_fn: str
+        File path to the nodal transport data file containing information such as the number of cars.
+    
+    Returns
+    -------
+    None
     """
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
@@ -2183,7 +2574,24 @@ def add_land_transport(
         )
 
 
-def create_nodes_for_heat_sector(district_heat_share):
+def create_nodes_for_heat_sector(district_heat_share: pd.DataFrame):
+    """
+    Create nodes for the heat sector based on population layout and district heating share.
+
+    Parameters
+    ----------
+    district_heat_share : pd.DataFrame
+        DataFrame containing the share of district heating at each node.
+
+    Returns
+    -------
+    h_nodes : dict
+        Dictionary containing the nodes for each heat sector.
+    dist_fraction_node : pd.Series
+        Series containing the district heating share at each node.
+    urban_fraction : pd.Series
+        Series containing the urban fraction at each node.
+    """
     # TODO pop_layout
 
     # rural are areas with low heating density and individual heating
@@ -2229,14 +2637,38 @@ def create_nodes_for_heat_sector(district_heat_share):
 
 
 def add_heat(
-    n,
-    costs,
-    heat_demand_fn,
-    solar_thermal_fn,
-    gshp_cop_fn,
-    ashp_cop_fn,
-    district_heat_share_fn,
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    heat_demand_fn: str,
+    solar_thermal_fn: str,
+    gshp_cop_fn: str,
+    ashp_cop_fn: str,
+    district_heat_share_fn: str,
 ):
+    """
+    Add heat sector to the network
+    
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which the heat sector will be added.
+    costs: pd.DataFrame
+        DataFrame containing cost information for heat sector technologies.
+    heat_demand_fn: str
+        File path to the heat demand data file.
+    solar_thermal_fn: str
+        File path to the solar thermal availability profiles data file.
+    gshp_cop_fn: str
+        File path to the ground-sourced heat pump coefficient of performance data file.
+    ashp_cop_fn: str
+        File path to the air-sourced heat pump coefficient of performance data file.
+    district_heat_share_fn: str
+        File path to the district heating share data file.
+
+    Returns
+    -------
+    None
+    """
     # Load data required for heat sector
     heat_demand = read_csv_nafix(
         heat_demand_fn, index_col=0, header=[0, 1], parse_dates=True
@@ -2541,7 +2973,23 @@ def add_heat(
             )
 
 
-def average_every_nhours(n, offset):
+def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
+
+    """
+    Resample the network to a lower temporal resolution by averaging every n hours.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to be resampled.
+    offset : str
+        The offset string representing the new temporal resolution (e.g., '2H' for 2 hours).
+
+    Returns
+    -------
+    pypsa.Network
+        A new PyPSA network resampled to the specified temporal resolution.
+    """
     # logger.info(f'Resampling the network to {offset}')
     m = n.copy(with_time=False)
 
@@ -2563,7 +3011,21 @@ def average_every_nhours(n, offset):
     return m
 
 
-def add_dac(n, costs):
+def add_dac(n: pypsa.Network, costs: pd.DataFrame):
+    """
+    Add direct air capture (DAC) technology to the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to which DAC will be added.
+    costs : pd.DataFrame
+        DataFrame containing cost information for DAC technology.
+
+    Returns
+    -------
+    None
+    """
     heat_carriers = ["urban central heat", "services urban decentral heat"]
     heat_buses = n.buses.index[n.buses.carrier.isin(heat_carriers)]
     locations = n.buses.location[heat_buses]
@@ -2594,7 +3056,23 @@ def add_dac(n, costs):
     )
 
 
-def add_services(n, costs, energy_totals):
+def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame):
+    """
+    Add services sector to the network.
+    
+    Parameters
+    ----------
+    n : pypsa.Network
+        PyPSA network to which the services sector will be added.
+    costs : pd.DataFrame
+        DataFrame containing cost information for services sector technologies.
+    energy_totals : pd.DataFrame
+        DataFrame containing energy total information for the services sector.
+
+    Returns
+    -------
+    None
+    """
     temporal_resolution = n.snapshot_weightings.generators
     buses = spatial.nodes.intersection(n.loads_t.p_set.columns)
 
@@ -2687,7 +3165,23 @@ def add_services(n, costs, energy_totals):
     )
 
 
-def add_agriculture(n, costs, nodal_energy_totals_fn):
+def add_agriculture(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str):
+    """
+    Add agriculture to the pypsa network.
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which agriculture technologies will be added
+    costs: pd.DataFrame
+        DataFrame containing cost information for agriculture technologies
+    nodal_energy_totals_fn: str
+        File path to the nodal energy totals data file
+
+    Returns
+    -------
+    None
+    """
     nodal_energy_totals = read_csv_nafix(
         nodal_energy_totals_fn,
         index_col=0,
@@ -2774,7 +3268,23 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     )
 
 
-def add_residential(n, costs, energy_totals):
+def add_residential(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame):
+    """
+    Add residential sector to the network
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA Network to which the residential sector will be added
+    costs: pd.DataFrame
+        DataFrame containing cost information for residential sector technologies
+    energy_totals: pd.DataFrame
+        DataFrame containing energy total information for the residential sector
+
+    Returns
+    -------
+    None
+    """
     # need to adapt for many countries #TODO
 
     # if snakemake.config["custom_data"]["heat_demand"]:
@@ -2924,7 +3434,22 @@ def add_residential(n, costs, energy_totals):
     )
 
 
-def add_electricity_distribution_grid(n, costs):
+def add_electricity_distribution_grid(n: pd.DataFrame, costs: pd.DataFrame):
+    """
+    Add electricity distribution grid to the network
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which the electricity distribution grid will be added
+    costs: pd.DataFrame
+        DataFrame containing cost information for electricity distribution grid technology
+    
+    Returns
+    -------
+    None
+
+    """
     logger.info("Adding electricity distribution network")
 
     n.madd(
@@ -3097,7 +3622,25 @@ def add_electricity_distribution_grid(n, costs):
         )
 
 
-def add_co2_budget(n, co2_budget, investment_year, elec_opts):
+def add_co2_budget(n: pd.DataFrame, co2_budget: pd.DataFrame, investment_year: int, elec_opts: pd.DataFrame):
+    """
+    Add CO2 budget constraint to the network based on the specified co2_budget parameters.
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which the CO2 budget constraint will be added.
+    co2_budget: dict
+        Dictionary containing CO2 budget parameters
+    investment_year: int
+        The year for which the CO2 budget constraint is being added
+    elec_opts: dict
+        Dictionary containing electricity options, used if co2base_value is 'co2limit' or 'co2base'
+
+    Returns
+    -------
+    None
+    """
     # Check if CO2Limit already exists
     if "CO2Limit" in n.global_constraints.index:
         if co2_budget["override_co2opt"]:
@@ -3136,7 +3679,19 @@ def add_co2_budget(n, co2_budget, investment_year, elec_opts):
     add_co2limit(n, annual_emissions, Nyears)
 
 
-def add_custom_water_cost(n):
+def add_custom_water_cost(n: pypsa.Network):
+    """
+    Add custom water cost to the network based on country-specific water cost data.
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which the custom water cost will be added.
+    
+    Returns
+    -------
+    None
+    """
     for country in countries:
         water_costs = read_csv_nafix(
             os.path.join(
@@ -3161,7 +3716,23 @@ def add_custom_water_cost(n):
         # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
 
-def add_rail_transport(n, costs, nodal_energy_totals_fn):
+def add_rail_transport(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str):
+    """
+    Add rail transport sector to the network based on nodal energy totals for rail transport.
+
+    Parameters
+    ----------
+    n: pypsa.Network
+        The PyPSA network to which the rail transport sector will be added.
+    costs: pd.DataFrame
+        DataFrame containing cost information for rail transport technologies.
+    nodal_energy_totals_fn: str
+        File path to the nodal energy totals data file for rail transport.
+
+    Returns
+    -------
+    None
+    """
     nodal_energy_totals = read_csv_nafix(
         nodal_energy_totals_fn,
         index_col=0,
