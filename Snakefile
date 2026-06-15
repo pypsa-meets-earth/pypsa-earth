@@ -9,7 +9,7 @@ import pathlib
 
 sys.path.append("./scripts")
 
-from shutil import copyfile, move
+from shutil import copyfile, move, unpack_archive
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -64,6 +64,10 @@ SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
+
+# EDGAR CO2 emission dataset (v8.0)
+EDGAR_CO2_URL = "jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.zip"
+EDGAR_CO2_FILENAME = "EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
 
 
 wildcard_constraints:
@@ -887,6 +891,33 @@ rule add_extra_components:
         "scripts/add_extra_components.py"
 
 
+if config["electricity"]["automatic_emission"]:
+
+    rule retrieve_emissions:
+        input:
+            HTTP.remote(EDGAR_CO2_URL, keep_local=True),
+        output:
+            f"data/{EDGAR_CO2_FILENAME}",
+        log:
+            "logs/" + RDIR + "retrieve_emissions.log",
+        run:
+            unpack_archive(input[0], "data")
+
+    rule build_co2_emissions:
+        input:
+            edgar=f"data/{EDGAR_CO2_FILENAME}",
+        output:
+            emissions="resources/" + RDIR + "co2_emissions.csv",
+        log:
+            "logs/" + RDIR + "build_co2_emissions.log",
+        benchmark:
+            "benchmarks/" + RDIR + "build_co2_emissions"
+        resources:
+            mem_mb=2000,
+        script:
+            "scripts/build_co2_emissions.py"
+
+
 rule prepare_network:
     params:
         links=config["links"],
@@ -897,6 +928,10 @@ rule prepare_network:
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        **branch(
+            config["electricity"]["automatic_emission"],
+            {"emissions": "resources/" + RDIR + "co2_emissions.csv"},
+        ),
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
