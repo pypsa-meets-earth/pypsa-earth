@@ -896,7 +896,7 @@ if config["electricity"]["automatic_emission"]:
                 keep_local=True,
             ),
         output:
-            "data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx,
+            "data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
         run:
