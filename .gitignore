@@ -60,7 +60,9 @@ playground/
 !data/nuclear_p_max_pu.csv
 
 # Specific configuration files
+configs/scenarios/config.*.yaml
 !configs/scenarios/config.test.yaml
+!configs/scenarios/config.GH.yaml
 
 # VS Code-related files
 .vscode
