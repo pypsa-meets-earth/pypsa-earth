@@ -17,8 +17,6 @@ How it runs:
 import re
 from pathlib import Path
 
-import yaml
-
 
 def extract_yaml_section(yaml_content, section_key, subsection=None):
     """
@@ -78,7 +76,10 @@ def main():
         },
         "run": ["run"],
         "scenario": ["scenario"],
-        "snapshots": ["snapshots"],
+        "snapshots": {
+            "start": "snapshots:",
+            "end": "# =================== DATA RETRIEVAL ===================",
+        },
         "crs": ["crs"],
         "augmented_line_connection": ["augmented_line_connection"],
         "cluster_options": ["cluster_options"],
