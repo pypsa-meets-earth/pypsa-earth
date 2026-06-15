@@ -898,7 +898,8 @@ if config["electricity"]["automatic_emission"]:
             fallback_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_FT2022_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_FT2022_GHG_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
             try:
                 content = content_retrieve(primary_url)
-            except Exception:
+            except Exception as e:
+                print(f"Primary EDGAR source failed ({e}), trying fallback...")
                 content = content_retrieve(fallback_url)
             with open(output.edgar, "wb") as f:
                 f.write(content.read())
