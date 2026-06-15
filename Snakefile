@@ -9,7 +9,7 @@ import pathlib
 
 sys.path.append("./scripts")
 
-from shutil import copyfile, move, unpack_archive
+from shutil import copyfile, move
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -890,17 +890,12 @@ rule add_extra_components:
 if config["electricity"]["automatic_emission"]:
 
     rule retrieve_emissions:
-        input:
-            HTTP.remote(
-                "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
-                keep_local=True,
-            ),
         output:
-            "data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
+            edgar="data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
-        run:
-            unpack_archive(input[0], "data")
+        script:
+            "scripts/retrieve_edgar_emissions.py"
 
     rule build_co2_emissions:
         input:
