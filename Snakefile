@@ -927,11 +927,11 @@ rule prepare_network:
         emission_prices=config["costs"]["emission_prices"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
         **branch(
             config["electricity"]["automatic_emission"],
             {"emissions": "resources/" + RDIR + "co2_emissions.csv"},
         ),
+        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
     log:
