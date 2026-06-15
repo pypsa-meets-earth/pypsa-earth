@@ -552,6 +552,10 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
 
+    snakemake.params.costs["fill_values"]["discount rate"] = float(
+        snakemake.wildcards.discount_rate
+    )
+
     if snakemake.wildcards.scope == "elec":
         costs = load_costs(
             snakemake.input.costs,

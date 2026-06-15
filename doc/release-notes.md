@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* The discount_rate config parameter now works as a true Snakemake wildcard, generating separate cost files and network pipelines for each value in the list, enabling proper sensitivity analysis [PR #1862](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1862)
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
@@ -37,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
 
 **Minor Changes and bug-fixing**
+
+* Fix silent inconsistency between `costs.discountrate` and `costs.fill_values.discount rate`: renamed config key to `costs.discount_rate`, removed the redundant `fill_values.discount rate` entry, and added a bridging assignment in `process_cost_data.py` so the annuity calculation always uses the value from `costs.discount_rate`. **Breaking change**: update your config files by renaming `costs.discountrate` → `costs.discount_rate` and removing `costs.fill_values.discount rate`. [PR #1862](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1862)
 
 * Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)
 

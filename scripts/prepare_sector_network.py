@@ -3328,7 +3328,7 @@ if __name__ == "__main__":
             opts="Co2L-4H",
             planning_horizons="2030",
             sopts="144H",
-            discountrate=0.071,
+            discount_rate=0.071,
             demand="AB",
         )
 
