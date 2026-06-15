@@ -8,7 +8,8 @@ Process EDGAR CO2 emission data from the raw Excel file into a clean CSV.
 
 Reads the EDGAR CO2 fossil fuel emission Excel file, filters to
 'Public electricity and heat production' entries, and saves the result
-as a CSV file indexed by ISO3 country code for use by prepare_network.
+as a CSV with country identifier columns (three-letter code, two-letter
+code, full name) and year columns for use by prepare_network.
 """
 
 import pandas as pd
@@ -23,7 +24,8 @@ def process_edgar_emission_data(excel_file):
 
     Detects the CO2 fossil fuel emissions sheet automatically, filters to
     'Public electricity and heat production' rows, and returns a DataFrame
-    indexed by Country_code_A3 with year columns (Y_YYYY).
+    with country identifier columns (Country_code_A3, Country_code_A2, Name)
+    and year columns (Y_YYYY).
 
     Parameters
     ----------
@@ -33,8 +35,9 @@ def process_edgar_emission_data(excel_file):
     Returns
     -------
     pd.DataFrame
-        DataFrame indexed by Country_code_A3 with columns Y_YYYY for each
-        available year.
+        DataFrame with columns Country_code_A3 (three-letter ISO code),
+        Country_code_A2 (two-letter ISO code), Name (full country name),
+        and Y_YYYY columns for each available year.
     """
     xl = pd.ExcelFile(excel_file)
     sheet_names = xl.sheet_names
@@ -55,15 +58,21 @@ def process_edgar_emission_data(excel_file):
 
     df = pd.read_excel(excel_file, sheet_name=target_sheet, skiprows=8)
     df.columns = df.iloc[0]
-    df = df.iloc[1:].set_index("Country_code_A3")
+    df = df.iloc[1:]
     df = df.loc[
         df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
     ]
 
+    id_cols = [
+        col
+        for col in ["Country_code_A3", "Country_code_A2", "Name"]
+        if col in df.columns
+    ]
     year_cols = [
         col for col in df.columns if isinstance(col, str) and col.startswith("Y_")
     ]
-    df = df[year_cols].astype(float).ffill(axis=1).bfill(axis=1)
+    df = df[id_cols + year_cols].copy()
+    df[year_cols] = df[year_cols].astype(float).ffill(axis=1).bfill(axis=1)
 
     logger.info(
         f"Processed emission data for {len(df)} countries, "
@@ -81,5 +90,5 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     df = process_edgar_emission_data(snakemake.input.edgar)
-    df.to_csv(snakemake.output.emissions)
+    df.to_csv(snakemake.output.emissions, index=False)
     logger.info(f"Emission data saved to '{snakemake.output.emissions}'.")

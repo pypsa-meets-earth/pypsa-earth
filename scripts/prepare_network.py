@@ -82,8 +82,9 @@ def emission_extractor(emission_csv, emission_year, country_names):
     Parameters
     ----------
     emission_csv : str
-        Path to the CSV file produced by build_co2_emissions. The file is
-        indexed by ISO3 country code (Country_code_A3) with year columns
+        Path to the CSV file produced by build_co2_emissions. The file has
+        columns Country_code_A3 (three-letter ISO code), Country_code_A2
+        (two-letter ISO code), Name (full country name), and year columns
         named Y_YYYY.
     emission_year : int or str
         Year of CO2 emissions.
@@ -96,7 +97,7 @@ def emission_extractor(emission_csv, emission_year, country_names):
         CO2 emission values (in kt CO2) of studied countries for the given year.
     """
     emission_year = int(emission_year)
-    df = pd.read_csv(emission_csv, index_col=0)
+    df = pd.read_csv(emission_csv).set_index("Country_code_A3")
 
     year_col = f"Y_{emission_year}"
     if year_col not in df.columns:
