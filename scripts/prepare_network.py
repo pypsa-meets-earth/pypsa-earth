@@ -184,8 +184,7 @@ def add_gaslimit(n, gaslimit, Nyears=1.0):
 
 def add_emission_prices(n, co2_price=0.0):
     ep = (
-        pd.Series({"co2": co2_price}).rename(lambda x: x + "_emissions")
-        * n.carriers.filter(like="_emissions")
+        pd.Series({"co2_emissions": co2_price}) * n.carriers.filter(like="_emissions")
     ).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
     n.generators["marginal_cost"] += gen_ep

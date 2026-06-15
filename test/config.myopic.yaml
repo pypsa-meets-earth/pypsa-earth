@@ -34,6 +34,7 @@ scenario:
   demand: ["DF"]
 
 co2:
+  limit: 7.75e+7
   budget:
     enable: true
     override_co2opt: true

@@ -27,6 +27,8 @@ scenario:
 
 countries: ["NG", "BJ"]
 
+co2:
+  limit: 7.75e+7
 
 electricity:
   agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
