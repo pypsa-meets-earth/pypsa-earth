@@ -64,7 +64,18 @@ def main():
 
     # Mapping of snippet files to config sections
     sections = {
-        "toplevel": {"start": "version:", "end": "run:"},
+        "meta": {
+            "start": "version:",
+            "end": "# =================== STUDY SETUP ===================",
+        },
+        "study_setup": {
+            "start": "countries:",
+            "end": "run:",
+        },
+        "data_retrieval": {
+            "start": "enable:",
+            "end": "# =================== GEOGRAPHY & SHAPES ===================",
+        },
         "run": ["run"],
         "scenario": ["scenario"],
         "snapshots": ["snapshots"],

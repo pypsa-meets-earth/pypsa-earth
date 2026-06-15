@@ -16,19 +16,45 @@ confer installation instructions at [installation](../home/installation.md).
 
 ## Top-level configuration
 
+Version, tutorial mode, logging, and optional custom Snakemake rules (``# META`` banner in ``config.default.yaml``).
+
 ```yaml
---8<-- "configtables/snippets/toplevel.yaml"
+--8<-- "configtables/snippets/meta.yaml"
 ```
 
-{{ read_csv('configtables/toplevel.csv') }}
+{{ read_csv('configtables/meta.csv') }}
 
-## run
+## Study setup
 
-It is common conduct to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
-e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
-investment changes as more ambitious greenhouse-gas emission reduction targets are applied.
+Options under the **STUDY SETUP** banner in ``config.default.yaml``: region, output paths, run namespacing, [scenario wildcards](wildcards.md), and model time range.
 
-The `run` section is used for running and storing scenarios with different configurations which are not covered by [wildcards](wildcards.md). It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set `shared_cutouts` to `true`.
+Region, foresight mode, and default output directories (`results_dir`, `summary_dir` are top-level keys, not nested under ``run``).
+
+```yaml
+--8<-- "configtables/snippets/study_setup.yaml"
+```
+
+{{ read_csv('configtables/study_setup.csv') }}
+
+### run
+
+It is common conduct to analyse energy system
+optimisation models for **multiple scenarios** for
+a variety of reasons,
+e.g. assessing their sensitivity towards changing
+the temporal and/or geographical resolution or
+investigating how
+investment changes as more ambitious greenhouse-gas
+emission reduction targets are applied.
+
+The `run` section is used for running and storing
+scenarios with different configurations which are
+not covered by [wildcards](wildcards.md). It
+determines the path at which resources, networks
+and results are stored. Therefore the user can run
+different configurations within the same directory.
+If a run with a non-empty name should use cutouts
+shared across runs, set `shared_cutouts` to `true`.
 
 ```yaml
 --8<-- "configtables/snippets/run.yaml"
@@ -36,7 +62,7 @@ The `run` section is used for running and storing scenarios with different confi
 
 {{ read_csv('configtables/run.csv') }}
 
-## scenario
+### scenario
 
 The `scenario` section is an extraordinary section of the config file
 that is strongly connected to the [wildcards](wildcards.md) and is designed to
@@ -67,6 +93,16 @@ Specifies the temporal range for the historical weather data, which is used to b
 ```
 
 {{ read_csv('configtables/snapshots.csv') }}
+
+## Data retrieval
+
+Switches in ``enable`` for downloading databundles, OSM data, cutouts, and building inputs locally. Set most retrieve flags to ``true`` for the first run.
+
+```yaml
+--8<-- "configtables/snippets/data_retrieval.yaml"
+```
+
+{{ read_csv('configtables/data_retrieval.csv') }}
 
 ## crs
 

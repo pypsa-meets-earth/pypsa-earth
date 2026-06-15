@@ -27,7 +27,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
+    :ref:`meta_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
 
 Inputs
 ------

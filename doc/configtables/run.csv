@@ -1,3 +1,5 @@
 Parameter,Unit,Values,Description
-name,string,,"Keeps track of runs with different settings."
-shared_cutouts,bool,"{True, False}","True: shares the default cutout(s) across runs. Note: value false requires build_cutout to be enabled."
+name,string,,Run label; prefixes ``resources/`` and ``results/`` paths when non-empty.
+sector_name,string,,Sector scenario label; subfolder under ``results_dir`` and ``summary_dir``.
+shared_cutouts,bool,"{true, false}",Share default cutout(s) across named runs; ``false`` requires ``enable.build_cutout``.
+allow_scenario_failure,bool,"{true, false}",Continue the workflow if a scenario in ``run_scenario`` fails.

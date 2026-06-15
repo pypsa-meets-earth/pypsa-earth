@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+# =================== META ===================
+
 version: 0.8.0
 tutorial: false
 
@@ -9,47 +11,29 @@ logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
+custom_rules: [] # paths to additional .smk files included in the Snakefile
+
+
+# =================== STUDY SETUP ===================
+countries: ["NG", "BJ"] # ISO codes, continent, or custom region
+
+foresight: overnight # "myopic" or "overnight"
+
 results_dir: results/
 summary_dir: results/
 
-foresight: overnight
-
-
-countries: ["NG", "BJ"]
-# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
-
-enable:
-  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_databundle_sector: true
-  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  retrieve_cutout: true
-  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
-  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
-  build_cutout: false
-  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/how-to-api
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  progress_bar: true # show progress bar during downloading routines and other long-running tasks
-  custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
-
-
-
-custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
-
 run:
-  name: "" # use this to keep track of runs with different settings
-  sector_name: "" # use this to keep track of sector scenario runs
-  shared_cutouts: true # set to true to share the default cutout(s) across runs
-  # Note: value false requires build_cutout to be enabled
-  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
+  name: "" # run label; prefixes resources/ and results/ paths
+  sector_name: "" # sector scenario label; subfolder under results/
+  shared_cutouts: true # share cutouts across named runs
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scenario fails
 
 scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
   opts: [Co2L-3h]
-  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  planning_horizons: # investment years for myopic; costs year for overnight
   - 2030
   sopts:
   - "144h"
@@ -61,6 +45,25 @@ snapshots:
   end: "2014-01-01"
   inclusive: "left" # end is not inclusive
 
+
+# =================== DATA RETRIEVAL ===================
+enable:
+  # ----------------- Retrieving data -----------------
+  retrieve_databundle: true # recommended for first run
+  download_osm_data: true # download OpenStreetMap data for the above given countries
+  retrieve_cutout: true
+  retrieve_cost_data: true # false: use existing data/costs.csv
+  retrieve_databundle_sector: true
+  download_global_buildings: false # download GlobalMLBuildingFootprints data for the above given countries
+  # ----------------- Building locally -----------------
+  build_cutout: false # requires CDS API key; uses snapshots and countries
+  build_natura_raster: false
+  # ----------------- Advanced -----------------
+  progress_bar: true
+  custom_busmap: false # optional override for cluster_network busmap
+
+
+# =================== GEOGRAPHY & SHAPES ===================
 # definition of the Coordinate Reference Systems
 crs:
   geo_crs: EPSG:4326 # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
