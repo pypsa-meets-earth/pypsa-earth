@@ -82,9 +82,10 @@ def emission_extractor(emission_csv, emission_year, country_names):
     Parameters
     ----------
     emission_csv : str
-        Path to the CSV file produced by retrieve_emissions. The file is indexed
-        by ISO3 country code (Country_code_A3) with year columns named Y_YYYY.
-    emission_year : int
+        Path to the CSV file produced by build_co2_emissions. The file is
+        indexed by ISO3 country code (Country_code_A3) with year columns
+        named Y_YYYY.
+    emission_year : int or str
         Year of CO2 emissions.
     country_names : numpy.ndarray
         Two letter country codes of analysed countries.
@@ -94,6 +95,7 @@ def emission_extractor(emission_csv, emission_year, country_names):
     pd.Series
         CO2 emission values (in kt CO2) of studied countries for the given year.
     """
+    emission_year = int(emission_year)
     df = pd.read_csv(emission_csv, index_col=0)
 
     year_col = f"Y_{emission_year}"
@@ -101,7 +103,7 @@ def emission_extractor(emission_csv, emission_year, country_names):
         available_years = sorted(
             int(col[2:]) for col in df.columns if col.startswith("Y_")
         )
-        closest_year = min(available_years, key=lambda y: abs(y - int(emission_year)))
+        closest_year = min(available_years, key=lambda y: abs(y - emission_year))
         logger.warning(
             f"Emission year {emission_year} not found in data. "
             f"Using closest available year {closest_year} instead."

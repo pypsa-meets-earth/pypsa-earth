@@ -55,7 +55,7 @@ def process_edgar_emission_data(excel_file):
 
     df = pd.read_excel(excel_file, sheet_name=target_sheet, skiprows=8)
     df.columns = df.iloc[0]
-    df = df.set_index("Country_code_A3")
+    df = df.iloc[1:].set_index("Country_code_A3")
     df = df.loc[
         df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
     ]
