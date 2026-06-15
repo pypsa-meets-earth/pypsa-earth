@@ -2,33 +2,32 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import sys
 import os
-import warnings
 import pathlib
+import sys
+import warnings
 
 sys.path.append("./scripts")
 
+from pathlib import Path
 from shutil import copyfile, move
 
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
+from _helpers import branch  # Remove if Snakemake >= 8.3.0
 from _helpers import (
+    BASE_DIR,
+    check_config_version,
+    content_retrieve,
+    copy_default_files,
     create_country_list,
     get_last_commit_message,
-    check_config_version,
-    copy_default_files,
     update_cutout_config,
-    BASE_DIR,
-    branch,  # Remove if Snakemake >= 8.3.0
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
 )
-from pathlib import Path
-
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 HTTP = HTTPRemoteProvider()
 
@@ -894,8 +893,15 @@ if config["electricity"]["automatic_emission"]:
             edgar="data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
-        script:
-            "scripts/retrieve_edgar_emissions.py"
+        run:
+            primary_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_GHG_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
+            fallback_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_FT2022_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_FT2022_GHG_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
+            try:
+                content = content_retrieve(primary_url)
+            except Exception:
+                content = content_retrieve(fallback_url)
+            with open(output.edgar, "wb") as f:
+                f.write(content.read())
 
     rule build_co2_emissions:
         input:
@@ -2338,9 +2344,10 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from build_test_configs import create_test_config
-        import yaml
         from subprocess import run
+
+        import yaml
+        from build_test_configs import create_test_config
 
         # get base configuration file from diff config
         with open(input.diff_config) as f:
