@@ -65,10 +65,6 @@ RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
-# EDGAR CO2 emission dataset (v8.0)
-EDGAR_CO2_URL = "jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.zip"
-EDGAR_CO2_FILENAME = "EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
-
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -895,9 +891,12 @@ if config["electricity"]["automatic_emission"]:
 
     rule retrieve_emissions:
         input:
-            HTTP.remote(EDGAR_CO2_URL, keep_local=True),
+            HTTP.remote(
+                "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
+                keep_local=True,
+            ),
         output:
-            f"data/{EDGAR_CO2_FILENAME}",
+            "data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx,
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
         run:
@@ -905,7 +904,7 @@ if config["electricity"]["automatic_emission"]:
 
     rule build_co2_emissions:
         input:
-            edgar=f"data/{EDGAR_CO2_FILENAME}",
+            edgar="data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
         output:
             emissions="resources/" + RDIR + "co2_emissions.csv",
         log:
