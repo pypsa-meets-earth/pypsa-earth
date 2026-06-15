@@ -20,6 +20,7 @@
 *.done
 *.tif
 *.csv
+!doc/configtables/*.csv
 *.geojson
 *.nc
 *.xls
