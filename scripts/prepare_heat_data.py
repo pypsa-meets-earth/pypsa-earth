@@ -33,11 +33,11 @@ Outputs
 - ``resources/{SECDIR}/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: ground source heat pump COP time series CSV
 - ``resources/{SECDIR}/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal demand time series CSV
 - ``resources/{SECDIR}/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: per node district heat share CSV
-        
+
 Description
 -----------
 This module builds nodal heating energy totals, hourly heat demand time series, coefficient of performance (COP)
-profiles for air-source and ground-source heat pumps, solar thermal time series and the district heating share per node. 
+profiles for air-source and ground-source heat pumps, solar thermal time series and the district heating share per node.
 """
 import os
 from itertools import product
@@ -75,7 +75,7 @@ def generate_periodic_profiles(
     weekly_profile : list
         Iterable of 168 hourly values representing a typical week (24 * 7 hours).
     localize : str, optional
-        Optional timezone string to localize the final DataFrame to 
+        Optional timezone string to localize the final DataFrame to
 
     Returns
     -------

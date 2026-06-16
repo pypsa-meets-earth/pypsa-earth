@@ -56,7 +56,7 @@ Output
 Description
 -----------
 To prepare network for brownfield expansion
-    
+
 """
 
 import logging
