@@ -5,3 +5,5 @@ subregion:
   path_custom_shapes: false # provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
   path_custom_offshore: false # (optional) provide the specific absolute path of the custom offshore file e.g. (...\data\custom_offshore.geojson)
   tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
+
+# ------------------- Land-cover exclusions -------------------

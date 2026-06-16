@@ -35,3 +35,5 @@ cluster_options:
         lifetime: mean
   focus_weights: false # false: use distribute_cluster; or {country_or_subregion: share} e.g. NG: 0.4 (shares must sum to <= 1)
   out_logging: true # When "True", logging is printed to console
+
+# ------------------- Augmented connectivity -------------------
