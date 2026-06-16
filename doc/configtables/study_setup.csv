@@ -1,5 +1,5 @@
 Parameter,Unit,Values,Description
 countries,--,"ISO 3166-1 alpha-2 codes, continent name, or custom region",Countries or regions included in the model.
-foresight,--,"{overnight, myopic, perfect}",Optimization foresight mode.
+foresight,--,"{overnight, myopic}",Optimization foresight mode.
 results_dir,--,path,Base directory for network and map outputs.
 summary_dir,--,path,Base directory for summary CSVs and plots.

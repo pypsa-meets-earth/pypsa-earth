@@ -1,5 +1,5 @@
 Parameter,Unit,Values,Description
 name,string,,Run label; prefixes ``resources/`` and ``results/`` paths when non-empty.
 sector_name,string,,Sector scenario label; subfolder under ``results_dir`` and ``summary_dir``.
-shared_cutouts,bool,"{true, false}",Share default cutout(s) across named runs; ``false`` requires ``enable.build_cutout``.
+shared_cutouts,bool,"{true, false}","If ``true``, cutout files are stored at ``cutouts/{cutout}.nc`` and shared across named runs. If ``false`` and ``run.name`` is set, cutouts are stored under ``cutouts/{run.name}/`` instead (applies to ``retrieve_cutout`` and ``build_cutout``)."
 allow_scenario_failure,bool,"{true, false}",Continue the workflow if a scenario in ``run_scenario`` fails.
