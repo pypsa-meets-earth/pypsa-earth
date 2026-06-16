@@ -11,5 +11,3 @@ build_shape_options:
   update_file: false # When true, all the input files are downloaded again and replace the existing files
   nprocesses: 3 # number of processes to be used in build_shapes
   out_logging: true # When true, logging is printed to console
-
-# ------------------- Subregions -------------------

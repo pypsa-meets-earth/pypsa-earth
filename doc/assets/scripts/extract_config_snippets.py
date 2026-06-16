@@ -80,14 +80,38 @@ def main():
             "start": "snapshots:",
             "end": "# =================== DATA RETRIEVAL ===================",
         },
-        "crs": ["crs"],
-        "augmented_line_connection": ["augmented_line_connection"],
-        "cluster_options": ["cluster_options"],
-        "build_shape_options": ["build_shape_options"],
-        "subregion": ["subregion"],
-        "natura": ["natura"],
-        "osm": ["osm"],
-        "base_network": ["base_network"],
+        "crs": {
+            "start": "crs:",
+            "end": "# ------------------- Regional shapes",
+        },
+        "augmented_line_connection": {
+            "start": "augmented_line_connection:",
+            "end": "# =================== NETWORK & RESOURCES",
+        },
+        "cluster_options": {
+            "start": "cluster_options:",
+            "end": "# ------------------- Augmented connectivity",
+        },
+        "build_shape_options": {
+            "start": "build_shape_options:",
+            "end": "# ------------------- Subregions",
+        },
+        "subregion": {
+            "start": "subregion:",
+            "end": "# ------------------- Land-cover exclusions",
+        },
+        "natura": {
+            "start": "natura:",
+            "end": "# ------------------- OpenStreetMap",
+        },
+        "osm": {
+            "start": "osm:",
+            "end": "# ------------------- Clustering",
+        },
+        "base_network": {
+            "start": "base_network:",
+            "end": "# download_osm_data_nprocesses",
+        },
         "load_options": ["load_options"],
         "co2": ["co2"],
         "electricity": ["electricity"],

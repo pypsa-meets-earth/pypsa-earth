@@ -5,8 +5,3 @@ augmented_line_connection:
   new_line_type: ["HVAC"] # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
   min_expansion: 1 # [MW] New created line expands by float/int input
   min_DC_length: 600 # [km] Minimum line length of DC line
-
-
-# =================== NETWORK & RESOURCES ===================
-
-# ------------------- Base network -------------------
