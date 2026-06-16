@@ -179,68 +179,33 @@ base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network
 
-# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
-
-# DemandCast and GEGIS are two available options
-# DemandCast covers 2000-2024
-# GEGIS dataset provides data for 2011, 2013, 2018
-# Details and comparison are provided in
-# https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
+# ------------------- Demand -------------------
 load_options:
-  source: "gegis" # "demcast" or "gegis"
+  source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2024 available): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
   weather_year: 2013 # Weather year of the load profile
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
-co2:
-  limit: 7.75e+7     # annual cap [tCO2/year]; European default — adjust for your region; active via Co2L wildcard
-  base: 1.487e+9     # baseline emissions used for relative reduction targets; European default
-  emission_price: 0. # [currency/tCO2]; active via Ep wildcard
-  automatic_emission: # derive co2.limit from historical emission data instead of the value above
-    enable: false
-    base_year: 1990  # any year from 1970 to 2018
-  budget:            # year-by-year reduction trajectory; used in all sector-coupled runs
-    enable: false
-    override_co2opt: true
-    base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
-    year:
-      2020: 1.0
-      2025: 0.85
-      2030: 0.70
-      2035: 0.55
-      2040: 0.40
-      2045: 0.25
-      2050: 0.1
+# ------------------- Electricity grid -------------------
 
 electricity:
-  base_voltage: 380.
-  voltages: [132., 220., 300., 380., 500., 750.]
-  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
-    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
-    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
-  hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
-
-  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
-    activate: false
-    epsilon_load: 0.02 # share of total load
-    epsilon_vres: 0.02 # share of total renewable supply
-    contingency: 0 # fixed capacity in MW
-
-  max_hours:
-    battery: 6
-    H2: 168
-
+  # ----------------- Electricity generation -------------------
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT] # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and'offwind-dc'
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
     Link: [] # H2 pipeline
 
-  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
-  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
-
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  max_hours: # Storage duration [h]: fill time at max power for extendable battery/H2 storage
+    battery: 6
+    H2: 168
+
+  # ----------------- Existing powerplants -------------------
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   estimate_renewable_capacities:
     stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -252,6 +217,22 @@ electricity:
       Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
+
+  # ----------------- Grid topology -------------------
+  base_voltage: 380.
+  voltages: [132., 220., 300., 380., 500., 750.]
+  hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
+
+  # ----------------- Constraints & reserve -------------------
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
+
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
+    activate: false
+    epsilon_load: 0.02 # share of total load
+    epsilon_vres: 0.02 # share of total renewable supply
+    contingency: 0 # fixed capacity in MW
 
 lines:
   ac_types:
@@ -280,6 +261,7 @@ transformers:
   s_nom: 2000.
   type: ""
 
+# ------------------- Weather & renewables -------------------
 atlite:
   nprocesses: 4
   cutouts:
@@ -423,8 +405,7 @@ renewable:
     extendable: true
     csp_model: advanced # simple or advanced
 
-# TODO: Needs to be adjusted for Africa.
-# Costs Configuration
+# ------------------- Costs & emissions -------------------
 costs:
   year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
   technology_data_version: v0.13.2
@@ -471,7 +452,27 @@ costs:
   # efficiency: # per unit
   #   CCGT: 0.58
 
+co2:
+  limit: 7.75e+7     # annual cap [tCO2/year]; European default — adjust for your region; active via Co2L wildcard
+  base: 1.487e+9     # baseline emissions used for relative reduction targets; European default
+  emission_price: 0. # [currency/tCO2]; active via Ep wildcard
+  automatic_emission: # derive co2.limit from historical emission data instead of the value above
+    enable: false
+    base_year: 1990  # any year from 1970 to 2018
+  budget:            # year-by-year reduction trajectory; used in all sector-coupled runs
+    enable: false
+    override_co2opt: true
+    base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
+    year:
+      2020: 1.0
+      2025: 0.85
+      2030: 0.70
+      2035: 0.55
+      2040: 0.40
+      2045: 0.25
+      2050: 0.1
 
+# ------------------- Uncertainty -------------------
 monte_carlo:
   # Description: Specify Monte Carlo sampling options for uncertainty analysis.
   # Define the option list for Monte Carlo sampling.

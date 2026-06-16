@@ -110,23 +110,68 @@ def main():
         },
         "base_network": {
             "start": "base_network:",
-            "end": "# download_osm_data_nprocesses",
+            "end": "# ------------------- Demand",
         },
-        "load_options": ["load_options"],
-        "co2": ["co2"],
-        "electricity": ["electricity"],
-        "lines": ["lines"],
-        "links": ["links"],
-        "transformers": ["transformers"],
-        "atlite": ["atlite"],
-        "renewable_onwind": ["renewable", "onwind"],
-        "renewable_offwind-ac": ["renewable", "offwind-ac"],
-        "renewable_offwind-dc": ["renewable", "offwind-dc"],
-        "renewable_solar": ["renewable", "solar"],
-        "renewable_hydro": ["renewable", "hydro"],
-        "renewable_csp": ["renewable", "csp"],
-        "costs": ["costs"],
-        "monte_carlo": ["monte_carlo"],
+        "load_options": {
+            "start": "load_options:",
+            "end": "# ------------------- Electricity grid",
+        },
+        "electricity": {
+            "start": "electricity:",
+            "end": "lines:",
+        },
+        "lines": {
+            "start": "lines:",
+            "end": "links:",
+        },
+        "links": {
+            "start": "links:",
+            "end": "transformers:",
+        },
+        "transformers": {
+            "start": "transformers:",
+            "end": "# ------------------- Weather & renewables",
+        },
+        "atlite": {
+            "start": "atlite:",
+            "end": "renewable:",
+        },
+        "renewable_onwind": {
+            "start": "onwind:",
+            "end": "offwind-ac:",
+        },
+        "renewable_offwind-ac": {
+            "start": "offwind-ac:",
+            "end": "offwind-dc:",
+        },
+        "renewable_offwind-dc": {
+            "start": "offwind-dc:",
+            "end": "solar:",
+        },
+        "renewable_solar": {
+            "start": "solar:",
+            "end": "hydro:",
+        },
+        "renewable_hydro": {
+            "start": "hydro:",
+            "end": "csp:",
+        },
+        "renewable_csp": {
+            "start": "csp:",
+            "end": "# ------------------- Costs & emissions",
+        },
+        "costs": {
+            "start": "costs:",
+            "end": "co2:",
+        },
+        "co2": {
+            "start": "co2:",
+            "end": "# ------------------- Uncertainty",
+        },
+        "monte_carlo": {
+            "start": "monte_carlo:",
+            "end": "# ------------------- SECTOR OPTIONS",
+        },
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
         "plotting": ["plotting"],

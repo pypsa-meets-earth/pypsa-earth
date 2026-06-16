@@ -224,7 +224,7 @@ augmented_line_connection.csv') }}
 
 ## Network & resources
 
-Base network assembly, demand, CO₂ policy, electricity component parameters, renewable potentials, costs, and Monte Carlo settings (``# NETWORK & RESOURCES`` in ``config.default.yaml``).
+Base network assembly, demand, electricity grid, weather and renewables, costs and emissions, and Monte Carlo settings (``# NETWORK & RESOURCES`` in ``config.default.yaml``).
 
 ### base_network
 
@@ -247,16 +247,6 @@ Specifies the options to estimate future electricity demand (load). Different ye
 {{ read_csv('configtables/load_options.csv') }}
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
-
-### co2
-
-Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep` wildcards), automatic emission extraction, and optional planning-horizon budgets in sector-coupled runs.
-
-```yaml
---8<-- "configtables/snippets/co2.yaml"
-```
-
-{{ read_csv('configtables/co2.csv') }}
 
 ### electricity
 
@@ -381,6 +371,16 @@ Specifies the cost assumptions of the technologies considered. Cost information 
     If not appropriately set, the model might output unrealistic results. Learn more about this in
     [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
     [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
+
+### co2
+
+Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep` wildcards), automatic emission extraction, and optional planning-horizon budgets in sector-coupled runs.
+
+```yaml
+--8<-- "configtables/snippets/co2.yaml"
+```
+
+{{ read_csv('configtables/co2.csv') }}
 
 ### monte_carlo
 
