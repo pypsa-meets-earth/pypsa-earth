@@ -4,6 +4,44 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Prepare gas network.
+
+
+Relevant Settings
+-----------------
+
+```yaml
+
+    sector:
+        gas:
+            spatial_gas:
+            network:
+            network_data:
+            network_data_GGIT_status:
+    
+    cluster_options:
+        alternative_clustering:
+
+    custom_data:
+        gas_network:
+
+```
+
+Inputs
+------
+- ``resources/{RDIR}/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson``: path to onshore region polygons used to assign pipelines to regions.
+
+Outputs
+-------
+- ``resources/{SECDIR}/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv``: CSV containing aggregated pipeline capacities and lengths between onshore regions.
+
+Description
+-----------
+
+Utilities to download, load and cluster global natural gas pipeline datasets
+for use with PyPSA-Earth. This module supports two source datasets:
+`GGIT` and `IGGIELGN`. It provides helpers to normalise pipeline diameters and
+capacities, clean geometry, assign pipelines to onshore regions, and aggregate
+inter-state pipeline capacities.
 """
 
 import logging
@@ -132,14 +170,46 @@ def diameter_to_capacity(pipe_diameter_mm):
 
 
 def inch_to_mm(len_inch):
+    """
+    Convert a length from inches to millimetres.
+
+    Parameters
+    ----------
+    len_inch : float
+        Length in inches.
+
+    Returns
+    -------
+    float
+        Length in millimetres.
+    """
     return len_inch / 0.0393701
 
 
 def bcm_to_MW(cap_bcm):
+    """
+    Convert volumetric capacity in bcm/year to power in MW.
+
+    Parameters
+    ----------
+    cap_bcm : float
+        Capacity in billion cubic metres per year.
+
+    Returns
+    -------
+    float
+        Equivalent average power in MW.
+    """
     return cap_bcm * 9769444.44 / 8760
 
 
 def correct_Diameter_col(value):
+    """
+    Parse and average compound pipeline diameter values.
+
+    Handles diameter strings containing commas, slashes or dashes by splitting
+    the string into numeric parts and returning the mean.
+    """
     value = str(value)
     # Check if the value contains a comma
     if "," in value:
@@ -163,6 +233,21 @@ def correct_Diameter_col(value):
 
 
 def prepare_GGIT_data(GGIT_gas_pipeline):
+    """
+    Clean and normalise the GGIT pipeline dataset.
+
+    Parameters
+    ----------
+    GGIT_gas_pipeline : pandas.DataFrame
+        Raw GGIT pipeline table read from the Excel source.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        GeoDataFrame containing valid geometries, corrected diameter values,
+        and capacities expressed in MW.
+    """
+
     df = GGIT_gas_pipeline.copy().reset_index()
 
     # Drop rows containing "--" in the 'WKTFormat' column
@@ -215,6 +300,20 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
 
 
 def load_IGGIELGN_data(fn):
+    """
+    Load and flatten the IGGIELGN gas pipeline dataset.
+
+    Parameters
+    ----------
+    fn : str or pathlib.Path
+        Path to the IGGIELGN GeoJSON/GeoPackage file.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        GeoDataFrame with flattened parameter columns and dropped raw
+        metadata fields.
+    """
     df = gpd.read_file(fn)
     param = df.param.apply(pd.Series)
     method = df.method.apply(pd.Series)[["diameter_mm", "max_cap_M_m3_per_d"]]
@@ -233,6 +332,31 @@ def prepare_IGGIELGN_data(
     correction_threshold_p_nom=8,
     bidirectional_below=10,
 ):  # Taken from pypsa-eur and adapted
+    """
+    Process IGGIELGN pipeline data and infer missing attributes.
+
+    Parameters
+    ----------
+    df : geopandas.GeoDataFrame
+        Raw IGGIELGN pipeline GeoDataFrame.
+    length_factor : float, optional
+        Multiplier applied to haversine-based distances when correcting
+        reported line lengths.
+    correction_threshold_length : float, optional
+        Threshold ratio for when the reported length is replaced by the
+        haversine-based length.
+    correction_threshold_p_nom : float, optional
+        Threshold ratio for when reported capacity is corrected using
+        diameter-based capacity estimates.
+    bidirectional_below : float, optional
+        Line length (km) below which pipelines are assumed bidirectional.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Cleaned pipeline GeoDataFrame with normalized capacity, length, and
+        bidirectionality attributes.
+    """
     # extract start and end from LineString
     df["point0"] = df.geometry.apply(lambda x: Point(x.coords[0]))
     df["point1"] = df.geometry.apply(lambda x: Point(x.coords[-1]))
@@ -330,6 +454,22 @@ def load_bus_region(onshore_path, pipelines):
 
 
 def get_states_in_order(pipeline, bus_regions_onshore):
+    """
+    Determine the ordered onshore regions traversed by a pipeline.
+
+    Parameters
+    ----------
+    pipeline : shapely.geometry.LineString or MultiLineString
+        Pipeline geometry to sample along its route.
+    bus_regions_onshore : geopandas.GeoDataFrame
+        Onshore region geometries with a `gadm_id` column.
+
+    Returns
+    -------
+    list[str]
+        Ordered list of `gadm_id` values for the regions intersected by the
+        pipeline geometry.
+    """
     states_p = []
 
     if pipeline.geom_type == "LineString":
@@ -369,6 +509,22 @@ def get_states_in_order(pipeline, bus_regions_onshore):
 
 
 def parse_states(pipelines, bus_regions_onshore):
+    """
+    Parse which onshore regions each pipeline traverses.
+
+    Parameters
+    ----------
+    pipelines : geopandas.GeoDataFrame
+        Pipeline geometries with a `geometry` column.
+    bus_regions_onshore : geopandas.GeoDataFrame
+        Onshore regions with a `gadm_id` column.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Input pipeline GeoDataFrame augmented with `states_passed`,
+        `amount_states_passed`, and `nodes` columns.
+    """
     # Parse the states of the points which are connected by the pipeline geometry object
     pipelines["nodes"] = None
     pipelines["states_passed"] = None
@@ -390,6 +546,29 @@ def parse_states(pipelines, bus_regions_onshore):
 
 
 def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
+    """
+    Aggregate interstate gas pipelines to bus-region clusters.
+
+    This function drops purely intrastate pipelines, splits interstate
+    pipelines by region overlay, aggregates capacity by region pairs, and
+    computes a representative line length and GWkm metric.
+
+    Parameters
+    ----------
+    pipelines : geopandas.GeoDataFrame
+        Pipeline GeoDataFrame with `states_passed` and `amount_states_passed`.
+    bus_regions_onshore : geopandas.GeoDataFrame
+        Onshore region geometries used for overlay.
+    length_factor : float
+        Multiplier applied to the haversine distance between region centroids
+        to estimate pipeline length.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Aggregated pipeline table with columns `bus0`, `bus1`, `capacity`,
+        `length`, and `GWKm`.
+    """
     # drop innerstatal pipelines
     pipelines_interstate = pipelines.drop(
         pipelines.loc[pipelines.amount_states_passed < 2].index
