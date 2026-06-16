@@ -63,46 +63,84 @@ enable:
 
 
 # =================== GEOGRAPHY & SHAPES ===================
-# definition of the Coordinate Reference Systems
+
+# ------------------- Coordinate systems -------------------
 crs:
   geo_crs: EPSG:4326 # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
   distance_crs: EPSG:3857 # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
   area_crs: ESRI:54009 # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
+# ------------------- Regional shapes -------------------
+build_shape_options:
+  gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
+  year: 2020 # reference year used to derive shapes, info on population and info on GDP
+  simplify_gadm: true # When true, shape polygons are simplified else no
+  simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
+  minarea: 0.01 # Minimum area of polygons to be retained in GADM shapes after simplification, in square degrees. Polygons with area smaller than this value will be removed
+  contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
+  worldpop_method: "standard" # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster,
+  # false (not "false") no pop addition to shape which is useful when generating only cutout
+  gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
+  update_file: false # When true, all the input files are downloaded again and replace the existing files
+  nprocesses: 3 # number of processes to be used in build_shapes
+  out_logging: true # When true, logging is printed to console
+
+# ------------------- Subregions -------------------
+subregion:
+  method: false # method to define subregions, either "gadm" or "custom", false to not use subregions.
+  apply_on: ["simplify_network", "cluster_network"] # apply subregion on the simplify_network and/or cluster_network rule.
+  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
+  path_custom_shapes: false # provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
+  path_custom_offshore: false # (optional) provide the specific absolute path of the custom offshore file e.g. (...\data\custom_offshore.geojson)
+  tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
+
+# ------------------- Land-cover exclusions -------------------
 natura: # only relevant when using build_natura_raster: true
   natura_size: countries # countries, cutout, or global. Select which regions to include in the natura raster.
   natura_resolution: 100 # [m] Grid resolution of the natura data.
   window_size: 10000 # [bytes] Size of the shifting rasterization window. The required RAM scales with window_size^2.
   buffer_size: 10000 # [unit of area_crs, default: m] Buffer around the regions of interest to include every required value. A buffer of around 100 km will be sufficient for most cases.
 
-# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
+# ------------------- OpenStreetMap -------------------
+osm:
+  clean_osm_data:
+    threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+    tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
+    names_by_shapes: true # Set the country name based on the extended country shapes
+    add_line_endings: true # When "True", then line endings are added to the dataset of the substations
+    generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
+    use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
+    path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
+    use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
+    path_custom_substations: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
+    use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
+    path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
-augmented_line_connection:
-  add_to_snakefile: false # If True, includes this rule to the workflow
-  connectivity_upgrade: 2 # Min. lines connection per node,
-  # https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
-  new_line_type: ["HVAC"] # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
-  min_expansion: 1 # [MW] New created line expands by float/int input
-  min_DC_length: 600 # [km] Minimum line length of DC line
+  build_osm_network: # Options of the build_osm_network script
+    group_close_buses: true # When "True", close buses are merged and guarantee the voltage matching among line endings
+    group_tolerance_buses: 5000 # [m] (default 5000) Tolerance in meters of the close buses to merge
+    split_overpassing_lines: true # When True, lines overpassing buses are splitted and connected to the bueses
+    overpassing_lines_tolerance: 1 # [m] (default 1) Tolerance to identify lines overpassing buses
+    force_ac: false # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
+# ------------------- Clustering -------------------
 cluster_options:
+  alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
+  distribute_cluster: ["load"] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   simplify_network:
-    to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
-    algorithm: kmeans # choose from: [hac, kmeans]
-    feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
     exclude_carriers: []
     remove_stubs: true
     remove_stubs_across_borders: false
     p_threshold_drop_isolated: 20 # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
     p_threshold_merge_isolated: 300 # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
     s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
+    to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
+    algorithm: kmeans # choose from: [hac, kmeans]
+    feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
   cluster_network:
+    exclude_carriers: []
     algorithm: kmeans
     feature: solar+onwind-time
-    exclude_carriers: []
-  alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
-  distribute_cluster: ["load"] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
-  out_logging: true # When "True", logging is printed to console
   aggregation_strategies:
     generators: # use "min" for more conservative assumptions
       p_nom: sum
@@ -121,54 +159,27 @@ cluster_options:
       StorageUnit:
         build_year: mean
         lifetime: mean
-  focus_weights: false # When a value specified, set the share of nodes allocated to each country
-    # country: share
+  focus_weights: false # false: use distribute_cluster; or {country_or_subregion: share} e.g. NG: 0.4 (shares must sum to <= 1)
+  out_logging: true # When "True", logging is printed to console
 
-build_shape_options:
-  gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
-  simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
-  simplify_gadm: true # When true, shape polygons are simplified else no
-  minarea: 0.01 # Minimum area of polygons to be retained in GADM shapes after simplification, in square degrees. Polygons with area smaller than this value will be removed
-  update_file: false # When true, all the input files are downloaded again and replace the existing files
-  out_logging: true # When true, logging is printed to console
-  year: 2020 # reference year used to derive shapes, info on population and info on GDP
-  nprocesses: 3 # number of processes to be used in build_shapes
-  worldpop_method: "standard" # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster,
-  # false (not "false") no pop addition to shape which is useful when generating only cutout
-  gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
-  contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
+# ------------------- Augmented connectivity -------------------
+augmented_line_connection:
+  add_to_snakefile: false # If True, includes this rule to the workflow
+  connectivity_upgrade: 2 # Min. lines connection per node,
+  # https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
+  new_line_type: ["HVAC"] # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
+  min_expansion: 1 # [MW] New created line expands by float/int input
+  min_DC_length: 600 # [km] Minimum line length of DC line
 
-subregion:
-  method: false # method to define subregions, either "gadm" or "custom", false to not use subregions.
-  apply_on: ["simplify_network", "cluster_network"] # apply subregion on the simplify_network and/or cluster_network rule.
-  define_by_gadm: false # name of the subregion. Multiple countries can be part in the same subregion.
-  path_custom_shapes: false # provide the specific absolute path of the custom file e.g. (...\data\custom_shapes.geojson)
-  path_custom_offshore: false # (optional) provide the specific absolute path of the custom offshore file e.g. (...\data\custom_offshore.geojson)
-  tolerance: 100 # Buffer distance (in km) for assigning a country/subregion shape to a bus (the default tolerance is 100 km)
 
-clean_osm_data_options: # osm = OpenStreetMap
-  names_by_shapes: true # Set the country name based on the extended country shapes
-  threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
-  tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
-  add_line_endings: true # When "True", then line endings are added to the dataset of the substations
-  generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
-  use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
-  path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
-  use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
-  path_custom_substations: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
-  use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
-  path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
+# =================== NETWORK & RESOURCES ===================
 
-build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMap
-  group_close_buses: true # When "True", close buses are merged and guarantee the voltage matching among line endings
-  group_tolerance_buses: 5000 # [m] (default 5000) Tolerance in meters of the close buses to merge
-  split_overpassing_lines: true # When True, lines overpassing buses are splitted and connected to the bueses
-  overpassing_lines_tolerance: 1 # [m] (default 1) Tolerance to identify lines overpassing buses
-  force_ac: false # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
-
+# ------------------- Base network -------------------
 base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 51000 # [V] minimum voltage in base network
+
+# download_osm_data_nprocesses: 10  # (optional) number of threads used to download osm data
 
 # DemandCast and GEGIS are two available options
 # DemandCast covers 2000-2024
@@ -220,9 +231,7 @@ electricity:
     H2: 168
 
   extendable_carriers:
-      # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
-          # from the Generator list below, as these offshore wind technologies require coastline access.
-    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT] # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and'offwind-dc'
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
     Link: [] # H2 pipeline
@@ -388,8 +397,8 @@ renewable:
     extendable: true
     normalization:
       method: irena # 'hydro_capacities' to rescale country hydro production by using hydro_capacities, 'eia' or 'irena' to rescale by eia or irena data, false for no rescaling
-     # use the weather year for weather-dominated variations (installed capacity is changing slowly)
-     # the technology-year for policy-determined changes (installed capacity is changing quickly)
+      # use the weather year for weather-dominated variations (installed capacity is changing slowly)
+      # the technology-year for policy-determined changes (installed capacity is changing quickly)
       year: 2023 # (optional) year of statistics used to rescale the runoff time series. When not provided, the cutout weather year is used
     multiplier: 1.1 # multiplier applied after the normalization of the hydro production; default 1.0
     hydro_min_inflow_pu: 1.0 # [hour] A threshold of energy to power ratio to classify hydro powerplants as reservoirs in case type is missed
@@ -427,7 +436,7 @@ costs:
   # Management of output currencies and exchange rates
   output_currency: "EUR" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
   default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
-  future_exchange_rate_strategy: "reference" # reference uses the exchange rate from `reference_year` for all conversions, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  future_exchange_rate_strategy: "reference" # reference: the exchange rate from `reference_year`, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate`
   custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
   rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
   fill_values:
@@ -592,7 +601,23 @@ sector:
     set_color_shares: false
     blue_share: 0.40
     pink_share: 0.05
-    production_technologies: ["H2 Electrolysis", "SMR", "SMR CC"] # ["Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"] a list of H2 production technologies that can be added
+    production_technologies: # H2 production carriers from costs data; uncomment lines to enable
+    - H2 Electrolysis
+    - SMR
+    - SMR CC
+    # - Alkaline electrolyzer large
+    # - Alkaline electrolyzer medium
+    # - Alkaline electrolyzer small
+    # - PEM electrolyzer
+    # - SOEC
+    # - Solid biomass steam reforming
+    # - Biomass gasification
+    # - Biomass gasification CC
+    # - Natural gas steam reforming
+    # - Natural gas steam reforming CC
+    # - Coal gasification
+    # - Coal gasification CC
+    # - Heavy oil partial oxidation
 
   coal:
     spatial_coal: true
@@ -755,7 +780,7 @@ sector:
       200: 0.41
       450: 0.49
       2300: 0.66
-     # maximum distance [km] to allocate a building within the nearest bus shapes
+    # maximum distance [km] to allocate a building within the nearest bus shapes
     tolerance: 100
 
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)

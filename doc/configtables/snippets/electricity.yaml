@@ -17,9 +17,7 @@ electricity:
     H2: 168
 
   extendable_carriers:
-      # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
-          # from the Generator list below, as these offshore wind technologies require coastline access.
-    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT] # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and'offwind-dc'
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
     Link: [] # H2 pipeline

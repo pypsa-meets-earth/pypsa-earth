@@ -84,7 +84,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 {{ read_csv('configtables/scenario.csv') }}
 
-## snapshots
+### snapshots
 
 Specifies the temporal range for the historical weather data, which is used to build the energy system model. It uses arguments to [pandas.date_range](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html). The date range must be in the past (before 2022). A well-tested year is 2013.
 
@@ -104,7 +104,11 @@ Switches in ``enable`` for downloading databundles, OSM data, cutouts, and build
 
 {{ read_csv('configtables/data_retrieval.csv') }}
 
-## crs
+## Geography & shapes
+
+Coordinate systems, regional shapes, subregions, land-cover exclusions, OpenStreetMap, clustering, and optional augmented connectivity (``# GEOGRAPHY & SHAPES`` in ``config.default.yaml``).
+
+### crs
 
 Defines the coordinate reference systems (crs).
 
@@ -114,31 +118,11 @@ Defines the coordinate reference systems (crs).
 
 {{ read_csv('configtables/crs.csv') }}
 
-## augmented_line_connection
+### build_shape_options
 
-If enabled, it increases the connectivity of the network. It makes the network graph [k-edge-connected](https://en.wikipedia.org/wiki/K-edge-connected_graph), i.e.,
-if fewer than k edges are removed, the network graph stays connected. It uses the [k-edge-augmentation](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation)
-algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.html) Python package.
-
-```yaml
---8<-- "configtables/snippets/augmented_line_connection.yaml"
-```
-
-{{ read_csv('configtables/augmented_line_connection.csv') }}
-
-## cluster_options
-
-Specifies the options to simplify and cluster the network. This is done in two stages, first using the rule `simplify_network` and then using the rule `cluster_network`. For more details on this process, see the [PyPSA-Earth paper](https://www.sciencedirect.com/science/article/pii/S0306261923004609), section 3.7.
-
-```yaml
---8<-- "configtables/snippets/cluster_options.yaml"
-```
-
-{{ read_csv('configtables/cluster_options.csv') }}
-
-## build_shape_options
-
-Specifies the options to build the shapes in which the region of interest (`countries`) is divided.
+Specifies the options to build the shapes in
+which the region of interest (`countries`) is
+divided.
 
 ```yaml
 --8<-- "configtables/snippets/build_shape_options.yaml"
@@ -146,7 +130,7 @@ Specifies the options to build the shapes in which the region of interest (`coun
 
 {{ read_csv('configtables/build_shape_options.csv') }}
 
-## subregion
+### subregion
 
 If enabled, this option allows a region of interest (`countries`) to be redefined into subregions,
 which can be activated at various stages of the workflow. Currently, it is used in `simplify_network` and `cluster_network` rule.
@@ -167,33 +151,82 @@ For example, consider the Central District of Botswana, which has a GADM ID of `
 
 There are several formats for GADM IDs depending on the version, so before using this feature, please review the `resources/shapes/gadm_shape.geojson` file which can be created using the command:
 
-``bash
+```bash
 snakemake -j 1 build_shapes
+```
 
 !!! note
     The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
 
-## clean_osm_data_options
+### natura
 
-Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) data.
-
-```yaml
---8<-- "configtables/snippets/clean_osm_data_options.yaml"
-```
-
-{{ read_csv('configtables/clean_osm_data_options.csv') }}
-
-## build_osm_network
-
-Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) network.
+Land-cover exclusion raster settings. Only relevant when ``enable.build_natura_raster`` is ``true``.
 
 ```yaml
---8<-- "configtables/snippets/build_osm_network.yaml"
+--8<-- "configtables/snippets/natura.yaml"
 ```
 
-{{ read_csv('configtables/build_osm_network.csv') }}
+{{ read_csv('configtables/natura.csv') }}
 
-## base_network
+### osm
+
+OpenStreetMap ([OSM](https://wiki.osmfoundation.org/wiki/Main_Page)) pipeline settings: `clean_osm_data` filters raw downloads; `build_osm_network` merges buses and lines into the base-network CSV inputs.
+
+```yaml
+--8<-- "configtables/snippets/osm.yaml"
+```
+
+{{ read_csv('configtables/osm.csv') }}
+
+### cluster_options
+
+Specifies the options to simplify and cluster the
+network. This is done in two stages, first using
+the rule `simplify_network` and then using the
+rule `cluster_network`. For more details on this
+process, see the [PyPSA-Earth paper](https://www.
+sciencedirect.com/science/article/pii/
+S0306261923004609), section 3.7.
+
+```yaml
+--8<-- "configtables/snippets/cluster_options.
+yaml"
+```
+
+{{ read_csv('configtables/cluster_options.csv') }}
+
+### augmented_line_connection
+
+If enabled, it increases the connectivity of the
+network. It makes the network graph
+[k-edge-connected](https://en.wikipedia.org/wiki/
+K-edge-connected_graph), i.e.,
+if fewer than k edges are removed, the network
+graph stays connected. It uses the
+[k-edge-augmentation](https://networkx.org/
+documentation/stable/reference/algorithms/
+generated/networkx.algorithms.connectivity.
+edge_augmentation.k_edge_augmentation.
+html#networkx.algorithms.connectivity.
+edge_augmentation.k_edge_augmentation)
+algorithm from the [NetworkX](https://networkx.
+org/documentation/stable/index.html) Python
+package.
+
+```yaml
+--8<-- "configtables/snippets/
+augmented_line_connection.yaml"
+```
+
+{{ read_csv('configtables/
+augmented_line_connection.csv') }}
+
+
+## Network & resources
+
+Base network assembly, demand, CO₂ policy, electricity component parameters, renewable potentials, costs, and Monte Carlo settings (``# NETWORK & RESOURCES`` in ``config.default.yaml``).
+
+### base_network
 
 Specifies the minimum voltage magnitude in the base network and the offshore substations.
 
@@ -203,7 +236,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 
 {{ read_csv('configtables/base_network.csv') }}
 
-## load_options
+### load_options
 
 Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socioeconomic pathway (GDP and population growth), to enhance modelling capabilities.
 
@@ -215,7 +248,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
-## co2
+### co2
 
 Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep` wildcards), automatic emission extraction, and optional planning-horizon budgets in sector-coupled runs.
 
@@ -225,7 +258,7 @@ Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep`
 
 {{ read_csv('configtables/co2.csv') }}
 
-## electricity
+### electricity
 
 Specifies the options for the rule `add_electricity`. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, operational reserve, storage parameters. See the table below for more details.
 
@@ -237,7 +270,7 @@ Specifies the options for the rule `add_electricity`. This includes options acro
 
 Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
-## lines
+### lines
 
 Specifies electricity line parameters.
 
@@ -247,7 +280,7 @@ Specifies electricity line parameters.
 
 {{ read_csv('configtables/lines.csv') }}
 
-## links
+### links
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .
 
@@ -257,7 +290,7 @@ Specifies Link parameters. Links are a fundamental component of [PyPSA](https://
 
 {{ read_csv('configtables/links.csv') }}
 
-## transformers
+### transformers
 
 Specifies transformers parameters and types.
 
@@ -267,13 +300,13 @@ Specifies transformers parameters and types.
 
 {{ read_csv('configtables/transformers.csv') }}
 
-## atlite
+### atlite
 
 Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).
 
 {{ read_csv('configtables/atlite.csv') }}
 
-## renewable
+### renewable
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
@@ -329,7 +362,7 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 
 {{ read_csv('configtables/csp.csv') }}
 
-## costs
+### costs
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
 
@@ -349,7 +382,7 @@ Specifies the cost assumptions of the technologies considered. Cost information 
     [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
     [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
 
-## monte_carlo
+### monte_carlo
 
 Specifies the options for Monte Carlo sampling.
 

@@ -1,0 +1,20 @@
+osm:
+  clean_osm_data:
+    threshold_voltage: 51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+    tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
+    names_by_shapes: true # Set the country name based on the extended country shapes
+    add_line_endings: true # When "True", then line endings are added to the dataset of the substations
+    generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
+    use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
+    path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
+    use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
+    path_custom_substations: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_substations.geojson)
+    use_custom_cables: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
+    path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
+
+  build_osm_network: # Options of the build_osm_network script
+    group_close_buses: true # When "True", close buses are merged and guarantee the voltage matching among line endings
+    group_tolerance_buses: 5000 # [m] (default 5000) Tolerance in meters of the close buses to merge
+    split_overpassing_lines: true # When True, lines overpassing buses are splitted and connected to the bueses
+    overpassing_lines_tolerance: 1 # [m] (default 1) Tolerance to identify lines overpassing buses
+    force_ac: false # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
