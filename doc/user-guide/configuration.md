@@ -189,8 +189,7 @@ sciencedirect.com/science/article/pii/
 S0306261923004609), section 3.7.
 
 ```yaml
---8<-- "configtables/snippets/cluster_options.
-yaml"
+--8<-- "configtables/snippets/cluster_options.yaml"
 ```
 
 {{ read_csv('configtables/cluster_options.csv') }}
@@ -214,12 +213,10 @@ org/documentation/stable/index.html) Python
 package.
 
 ```yaml
---8<-- "configtables/snippets/
-augmented_line_connection.yaml"
+--8<-- "configtables/snippets/augmented_line_connection.yaml"
 ```
 
-{{ read_csv('configtables/
-augmented_line_connection.csv') }}
+{{ read_csv('configtables/augmented_line_connection.csv') }}
 
 
 ## Network & resources
