@@ -858,7 +858,7 @@ def country_name_2_two_digits(country_name: str) -> str:
     return full_name
 
 
-def read_csv_nafix(file, **kwargs):
+def read_csv_nafix(file: str | Path, **kwargs) -> pd.DataFrame:
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" not in kwargs:
         kwargs["keep_default_na"] = False
@@ -876,7 +876,7 @@ def read_csv_nafix(file, **kwargs):
         return pd.DataFrame()
 
 
-def to_csv_nafix(df, path, **kwargs):
+def to_csv_nafix(df: pd.DataFrame, path: str | Path | None, **kwargs):
     """
     Write a DataFrame to CSV using the project's standard NA representation.
 
@@ -950,7 +950,7 @@ def add_transform_iso3(
     return df
 
 
-def save_to_geojson(df, fn):
+def save_to_geojson(df: gpd.GeoDataFrame, fn: str | Path) -> None:
     """
     Save a (Geo)DataFrame to a GeoJSON file, overwriting any existing file.
 
@@ -977,7 +977,9 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
+def read_geojson(
+    fn: str | Path, cols: list = [], dtype: dict | None = None, crs: str = "EPSG:4326"
+) -> gpd.GeoDataFrame:
     """
     Function to read a geojson file fn. When the file is empty, then an empty
     GeoDataFrame is returned having columns cols, the specified crs and the
