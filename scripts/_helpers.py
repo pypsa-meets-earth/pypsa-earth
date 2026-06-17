@@ -494,8 +494,13 @@ def aggregate_costs(
 
 
 def progress_retrieve(
-    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
-):
+    url: str,
+    file: str,
+    data=None,
+    headers: dict | None = None,
+    disable_progress: bool = False,
+    roundto: float = 1.0,
+) -> None:
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -537,7 +542,13 @@ def progress_retrieve(
         urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
-def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor=0.3):
+def content_retrieve(
+    url: str,
+    data: dict | None = None,
+    headers: dict | None = None,
+    max_retries: int = 3,
+    backoff_factor: float = 0.3,
+) -> io.BytesIO:
     """
     Retrieve the content of a url with improved robustness.
 
@@ -596,7 +607,7 @@ def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor
     raise Exception("Max retries exceeded")
 
 
-def get_aggregation_strategies(aggregation_strategies):
+def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict]:
     """
     Default aggregation strategies that cannot be defined in .yaml format must
     be specified within the function, otherwise (when defaults are passed in
@@ -622,7 +633,11 @@ def get_aggregation_strategies(aggregation_strategies):
 
 
 def mock_snakemake(
-    rulename, root_dir=None, submodule_dir=None, configfile=None, **wildcards
+    rulename: str,
+    root_dir: str | Path | None = None,
+    submodule_dir: str | None = None,
+    configfile: str | None = None,
+    **wildcards,
 ):
     """
     This function is expected to be executed from the "scripts"-directory of "
