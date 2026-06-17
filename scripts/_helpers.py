@@ -1298,7 +1298,9 @@ def create_dummy_data(n: pypsa.Network, sector: str, carriers: list) -> pd.DataF
 #     return energy_totals
 
 
-def cycling_shift(df: pd.DataFrame | pd.Series, steps: int = 1) -> pd.DataFrame | pd.Series:
+def cycling_shift(
+    df: pd.DataFrame | pd.Series, steps: int = 1
+) -> pd.DataFrame | pd.Series:
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
     """
