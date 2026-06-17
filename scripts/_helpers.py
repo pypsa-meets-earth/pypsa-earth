@@ -42,6 +42,7 @@ import subprocess
 import sys
 import time
 import zipfile
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
@@ -1500,7 +1501,7 @@ def locate_bus(
     return df
 
 
-def get_conv_factors(sector):
+def get_conv_factors(sector: str) -> dict:
     """
     Return conversion factors from mass/volume units to TWh per fuel.
 
@@ -1574,7 +1575,7 @@ def get_conv_factors(sector):
     return fuels_conv_toTWh
 
 
-def aggregate_fuels(sector):
+def aggregate_fuels(sector: str) -> tuple[list[str], ...]:
     """
     Return the fuel names grouped by energy carrier category.
 
@@ -1674,7 +1675,9 @@ def aggregate_fuels(sector):
     return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
 
 
-def safe_divide(numerator, denominator, default_value=np.nan):
+def safe_divide(
+    numerator: pd.DataFrame, denominator: float, default_value: float = np.nan
+) -> pd.DataFrame:
     """
     Safe division function that returns NaN when the denominator is zero.
     """
@@ -1687,7 +1690,7 @@ def safe_divide(numerator, denominator, default_value=np.nan):
         return pd.DataFrame(np.nan, index=numerator.index, columns=numerator.columns)
 
 
-def lossy_bidirectional_links(n, carrier):
+def lossy_bidirectional_links(n: pypsa.Network, carrier: str) -> None:
     """
     Split bidirectional links of type carrier into two unidirectional links to include transmission losses.
     """
@@ -1722,7 +1725,9 @@ def lossy_bidirectional_links(n, carrier):
     n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
 
 
-def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency):
+def set_length_based_efficiency(
+    n: pypsa.Network, carrier: str, bus_suffix: str, transmission_efficiency: dict
+) -> None:
     """
     Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
     Additionally add the length based electricity demand required for compression (if applicable).
@@ -1775,7 +1780,9 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
 
 
-def nearest_shape(n, path_shapes, crs, tolerance=100):
+def nearest_shape(
+    n: pypsa.Network, path_shapes: str, crs: dict, tolerance: int = 100
+) -> pypsa.Network:
     """
     Reassigns buses in the network `n` to the nearest country shape based on coordinates.
 
@@ -1831,7 +1838,7 @@ def nearest_shape(n, path_shapes, crs, tolerance=100):
     return n
 
 
-def branch(condition, then, otherwise=None):
+def branch(condition: bool, then, otherwise=None):
     """
     This is a placeholder function that exists in Snakemake versions > 8.3.0.
     It can be removed once Snakemake is updated to a compatible version.
@@ -1850,7 +1857,7 @@ def branch(condition, then, otherwise=None):
     return otherwise
 
 
-def rename_techs(label):
+def rename_techs(label: str) -> str:
     """
     Normalise a technology label to a canonical, human-readable name.
 
@@ -1931,7 +1938,7 @@ def rename_techs(label):
     return label
 
 
-def add_missing_carriers(n, carriers):
+def add_missing_carriers(n: pypsa.Network, carriers: Iterable) -> None:
     """
     Function to add missing carriers to the network without raising errors.
     """
@@ -2032,7 +2039,7 @@ def add_year_suffix_to_carriers(n: pypsa.Network) -> None:
     logger.info("Added year suffixes to carrier names for clustering")
 
 
-def sanitize_carriers(n, config):
+def sanitize_carriers(n: pypsa.Network, config: dict) -> None:
     """
     Sanitize the carrier information in a PyPSA Network object.
 
@@ -2087,7 +2094,7 @@ def sanitize_carriers(n, config):
     n.carriers["color"] = n.carriers.color.where(n.carriers.color != "", colors)
 
 
-def sanitize_locations(n):
+def sanitize_locations(n: pypsa.Network) -> None:
     """
     Fill missing bus coordinates and country codes from the ``location`` mapping.
 
