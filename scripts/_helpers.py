@@ -181,7 +181,7 @@ def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger
     return logger
 
 
-def read_osm_config(*args: str) -> dict | str | tuple:
+def read_osm_config(*args: str):
     """
     Read values from the regions config file based on provided key arguments.
 
@@ -744,7 +744,7 @@ def mock_snakemake(
     return snakemake
 
 
-def two_2_three_digits_country(two_code_country):
+def two_2_three_digits_country(two_code_country: str) -> str:
     """
     Convert 2-digit to 3-digit country code:
 
@@ -765,7 +765,7 @@ def two_2_three_digits_country(two_code_country):
     return three_code_country
 
 
-def three_2_two_digits_country(three_code_country):
+def three_2_two_digits_country(three_code_country: str) -> str:
     """
     Convert 3-digit to 2-digit country code:
 
@@ -786,7 +786,9 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_words=[]):
+def two_digits_2_name_country(
+    two_code_country: str, nocomma: bool = False, remove_start_words: list = []
+) -> str:
     """
     Convert 2-digit country code to full name country:
 
@@ -832,7 +834,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     return full_name
 
 
-def country_name_2_two_digits(country_name):
+def country_name_2_two_digits(country_name: str) -> str:
     """
     Convert full country name to 2-digit country code.
 
@@ -1004,7 +1006,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
         return df
 
 
-def create_country_list(input, iso_coding=True):
+def create_country_list(input: list[str], iso_coding: bool = True) -> list[str]:
     """
     Create a country list for defined regions..
 
@@ -1299,7 +1301,7 @@ def cycling_shift(df, steps=1):
     return df
 
 
-def get_country(target, **keys):
+def get_country(target: str, **keys: str) -> str | float:
     """
     Function to convert country codes using pycountry.
 
@@ -1337,7 +1339,9 @@ def get_country(target, **keys):
         return np.nan
 
 
-def download_GADM(country_code, update=False, out_logging=False):
+def download_GADM(
+    country_code: str, update: bool = False, out_logging: bool = False
+) -> tuple[str, str]:
     """
     Download gpkg file from GADM for a given country code.
 
@@ -1392,7 +1396,9 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
+def _get_shape_col_gdf(
+    path_to_gadm: str | None, co: str, gadm_layer_id: int, gadm_clustering: bool
+) -> tuple[gpd.GeoDataFrame, str]:
     """
     Parameters
     ----------
@@ -1435,14 +1441,14 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
 
 
 def locate_bus(
-    df,
-    countries,
-    gadm_level,
-    path_to_gadm=None,
-    gadm_clustering=False,
-    dropnull=True,
-    col_out=None,
-):
+    df: pd.DataFrame,
+    countries: list,
+    gadm_level: int,
+    path_to_gadm: str | None = None,
+    gadm_clustering: bool = False,
+    dropnull: bool = True,
+    col_out: str | None = None,
+) -> pd.DataFrame:
     """
     Function to locate the points of the dataframe df into the GADM shapefile.
 
