@@ -269,7 +269,7 @@ def configure_logging(snakemake, skip_handlers: bool = False) -> None:
     logging.basicConfig(**kwargs, force=True)
 
 
-def pdbcast(v, h):
+def pdbcast(v: pd.Series, h: pd.Series) -> pd.DataFrame:
     """
     Broadcast two pandas Series into a DataFrame via an outer product.
 
@@ -291,7 +291,7 @@ def pdbcast(v, h):
     )
 
 
-def update_p_nom_max(n):
+def update_p_nom_max(n: pypsa.Network) -> None:
     """
     Ensure ``p_nom_max`` is at least ``p_nom_min`` for all generators.
 
@@ -313,7 +313,7 @@ def update_p_nom_max(n):
     n.generators.p_nom_max = n.generators[["p_nom_min", "p_nom_max"]].max(1)
 
 
-def aggregate_p_nom(n):
+def aggregate_p_nom(n: pypsa.Network) -> pd.Series:
     """
     Aggregate optimal nominal power capacity per carrier.
 
@@ -338,7 +338,7 @@ def aggregate_p_nom(n):
     )
 
 
-def aggregate_p(n):
+def aggregate_p(n: pypsa.Network) -> pd.Series:
     """
     Aggregate dispatched power per carrier.
 
@@ -363,7 +363,7 @@ def aggregate_p(n):
     )
 
 
-def aggregate_e_nom(n):
+def aggregate_e_nom(n: pypsa.Network) -> pd.Series:
     """
     Aggregate optimal nominal energy storage capacity per carrier.
 
@@ -388,7 +388,7 @@ def aggregate_e_nom(n):
     )
 
 
-def aggregate_p_curtailed(n):
+def aggregate_p_curtailed(n: pypsa.Network) -> pd.Series:
     """
     Aggregate curtailed power per carrier.
 
@@ -422,7 +422,12 @@ def aggregate_p_curtailed(n):
     )
 
 
-def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
+def aggregate_costs(
+    n: pypsa.Network,
+    flatten: bool = False,
+    opts: dict | None = None,
+    existing_only: bool = False,
+) -> pd.Series:
     """
     Aggregate capital and marginal system costs per component and carrier.
 
