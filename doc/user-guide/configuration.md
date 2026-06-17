@@ -435,6 +435,8 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 ### top-level
 
+Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted.
+
 ```yaml
 --8<-- "configtables/snippets/sector_toplevel.yaml"
 ```

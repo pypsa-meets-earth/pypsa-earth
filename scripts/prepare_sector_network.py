@@ -58,7 +58,9 @@ def add_carrier_buses(n, carrier, nodes=None):
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
     # initial fossil reserves
-    e_initial = (snakemake.params.fossil_reserves).get(carrier, 0) * 1e6
+    e_initial = (
+        snakemake.params.sector_options.get(carrier, {}).get("reserves", 0)
+    ) * 1e6
     # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
     n.madd(
         "Store",

@@ -170,7 +170,7 @@ def main():
         },
         "monte_carlo": {
             "start": "monte_carlo:",
-            "end": "# ------------------- SECTOR OPTIONS",
+            "end": "# =================== SECTOR OPTIONS",
         },
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],

@@ -505,8 +505,10 @@ monte_carlo:
       type: beta
       args: [0.5, 2]
 
-# ------------------- SECTOR OPTIONS -------------------
 
+# =================== SECTOR OPTIONS ===================
+
+# ------------------- Sector inputs & policy -------------------
 policy_config:
   hydrogen:
     temporal_matching: "no_temporal_matching" #either "hour", "month", "year", "no_temporal_matching"
@@ -528,9 +530,6 @@ demand_data:
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
-
-fossil_reserves:
-  oil: 100 #TWh Maybe redundant
 
 export:
   endogenous: false # If true, the export demand is endogenously determined by the model
@@ -626,6 +625,7 @@ sector:
 
   oil:
     spatial_oil: true
+    reserves: 100 # TWh per bus: Maybe redundant
 
   ammonia:
     enable: true
