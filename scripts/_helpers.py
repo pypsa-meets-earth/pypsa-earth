@@ -44,6 +44,7 @@ import time
 import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
+from types import TracebackType
 
 import country_converter as coco
 import geopandas as gpd
@@ -77,7 +78,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
-def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
+def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
@@ -100,7 +101,7 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
         )
 
 
-def update_cutout_config(config):
+def update_cutout_config(config: dict) -> dict:
     """
     Update renewable cutout settings in the configuration.
 
@@ -121,7 +122,11 @@ def update_cutout_config(config):
     return config
 
 
-def handle_exception(exc_type, exc_value, exc_traceback):
+def handle_exception(
+    exc_type: type[BaseException],
+    exc_value: BaseException,
+    exc_traceback: TracebackType | None,
+) -> None:
     """
     Customise errors traceback.
     """
@@ -148,7 +153,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         )
 
 
-def copy_default_files():
+def copy_default_files() -> None:
     """
     Create a minimal ``config.yaml`` next to ``config.default.yaml`` if missing.
 
@@ -163,7 +168,7 @@ def copy_default_files():
         )
 
 
-def create_logger(logger_name, level=logging.INFO):
+def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger:
     """
     Create a logger for a module and adds a handler needed to capture in logs
     traceback from exceptions emerging during the workflow.
@@ -176,7 +181,7 @@ def create_logger(logger_name, level=logging.INFO):
     return logger
 
 
-def read_osm_config(*args):
+def read_osm_config(*args: str) -> dict | str | tuple:
     """
     Read values from the regions config file based on provided key arguments.
 
@@ -221,7 +226,7 @@ def read_osm_config(*args):
         return tuple([osm_config[a] for a in args])
 
 
-def configure_logging(snakemake, skip_handlers=False):
+def configure_logging(snakemake, skip_handlers: bool = False) -> None:
     """
     Configure the basic behaviour for the logging module.
 
@@ -1066,7 +1071,7 @@ def create_country_list(input, iso_coding=True):
     return full_codes_list
 
 
-def get_last_commit_message(path):
+def get_last_commit_message(path: str | Path) -> str | None:
     """
     Function to get the last PyPSA-Earth Git commit message.
 
@@ -1095,10 +1100,10 @@ def get_last_commit_message(path):
 
 
 def update_config_dictionary(
-    config_dict,
-    parameter_key_to_fill="lines",
-    dict_to_use={"geometry": "first", "bounds": "first"},
-):
+    config_dict: dict,
+    parameter_key_to_fill: str = "lines",
+    dict_to_use: dict = {"geometry": "first", "bounds": "first"},
+) -> dict:
     """
     Ensure a configuration sub-dictionary exists and update it with defaults.
 
