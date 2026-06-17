@@ -1151,8 +1151,12 @@ def update_config_dictionary(
 
 
 def create_network_topology(
-    n, prefix, like="ac", connector=" <-> ", bidirectional=True
-):
+    n: pypsa.Network,
+    prefix: str,
+    like: str = "ac",
+    connector: str = " <-> ",
+    bidirectional: bool = True,
+) -> pd.DataFrame:
     """
     Create a network topology like the power transmission network.
 
@@ -1205,7 +1209,7 @@ def create_network_topology(
     return topo
 
 
-def create_dummy_data(n, sector, carriers):
+def create_dummy_data(n: pypsa.Network, sector: str, carriers: list) -> pd.DataFrame:
     """
     Create randomised dummy demand data for a sector (placeholder/testing use).
 
@@ -1293,7 +1297,7 @@ def create_dummy_data(n, sector, carriers):
 #     return energy_totals
 
 
-def cycling_shift(df, steps=1):
+def cycling_shift(df: pd.DataFrame | pd.Series, steps: int = 1) -> pd.DataFrame | pd.Series:
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
     """
