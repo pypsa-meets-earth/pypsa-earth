@@ -86,7 +86,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, read_csv_nafix
 from linopy import merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
@@ -216,7 +216,7 @@ def add_CCL_constraints(n, config):
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
-        agg_p_nom_minmax = pd.read_csv(
+        agg_p_nom_minmax = read_csv_nafix(
             snakemake.input.agg_p_nom_minmax, index_col=list(range(2)), header=[0, 1]
         )[snakemake.wildcards.planning_horizons]
     except IOError:
@@ -994,7 +994,7 @@ def add_existing(n):
             .replace("_presec", "")
             .replace(".nc", ".csv")
         )
-        df = pd.read_csv(directory + "/electrolyzer_caps_" + n_name, index_col=0)
+        df = read_csv_nafix(directory + "/electrolyzer_caps_" + n_name, index_col=0)
         existing_electrolyzers = df.p_nom_opt.values
 
         h2_index = n.links[n.links.carrier == "H2 Electrolysis"].index
@@ -1002,10 +1002,10 @@ def add_existing(n):
 
         # n_name = snakemake.input.network.split("/")[-1].replace(str(snakemake.config["scenario"]["clusters"][0]), "").\
         #     replace(".nc", ".csv").replace(str(snakemake.config["costs"]["discountrate"][0]), "")
-        df = pd.read_csv(directory + "/res_caps_" + n_name, index_col=0)
+        df = read_csv_nafix(directory + "/res_caps_" + n_name, index_col=0)
 
         for tech in snakemake.config["custom_data"]["renewables"]:
-            # df = pd.read_csv(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
+            # df = read_csv_nafix(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
             existing_res = df.loc[tech]
             existing_res.index = existing_res.index.str.apply(lambda x: x + tech)
             tech_index = n.generators[n.generators.carrier == tech].index

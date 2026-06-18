@@ -2068,8 +2068,10 @@ rule plot_sector_summary:
 
 
 rule build_industrial_database:
+    input:
+        ammonia_plants="resources/ammonia_plants.csv",
     output:
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
     script:
         "scripts/build_industrial_database.py"
 
@@ -2111,7 +2113,7 @@ rule build_industrial_distribution_key:  #default data
         clustered_gdp_layout="resources/"
         + SECDIR
         + "gdp_shares/gdp_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
@@ -2167,6 +2169,10 @@ rule build_industry_demand:  #default data
         base_year=config["demand_data"]["base_year"],
         industry_util_factor=config["sector"]["industry_util_factor"],
         aluminium_year=config["demand_data"]["aluminium_year"],
+        ammonia_enable=config["sector"]["ammonia"]["enable"],
+        ammonia_gas_mwh_per_t=config["sector"]["ammonia"]["gas_MWh_per_tNH3"],
+        ammonia_elec_mwh_per_t=config["sector"]["ammonia"]["elec_MWh_per_tNH3"],
+        ammonia_year=config["sector"]["ammonia"]["production_year"],
     input:
         industrial_distribution_key="resources/"
         + SECDIR
@@ -2176,7 +2182,8 @@ rule build_industry_demand:  #default data
         base_industry_totals="resources/"
         + SECDIR
         + "demand/base_industry_totals_{planning_horizons}_{demand}.csv",
-        industrial_database="data/industrial_database.csv",
+        industrial_database="resources/industrial_database.csv",
+        ammonia_production="resources/ammonia_production.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
@@ -2194,6 +2201,39 @@ rule build_industry_demand:  #default data
         )
     script:
         "scripts/build_industry_demand.py"
+
+
+rule retrieve_us_cities_dataset:
+    output:
+        us_cities="data/industry/us_cities.csv",
+    script:
+        "scripts/retrieve_us_cities_dataset.py"
+
+
+rule retrieve_ammonia_dataset:
+    output:
+        usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
+    script:
+        "scripts/retrieve_ammonia_dataset.py"
+
+
+rule build_ammonia_production:
+    input:
+        ammonia_plants="data/industry/ammonia_plants.csv",
+        us_cities="data/industry/us_cities.csv",
+        usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
+    output:
+        ammonia_production="resources/ammonia_production.csv",
+        ammonia_plants="resources/ammonia_plants.csv",
+    threads: 1
+    resources:
+        mem_mb=1000,
+    log:
+        RESDIR + "logs/build_ammonia_production.log",
+    benchmark:
+        RESDIR + "benchmarks/build_ammonia_production"
+    script:
+        "scripts/build_ammonia_production.py"
 
 
 rule build_existing_heating_distribution:

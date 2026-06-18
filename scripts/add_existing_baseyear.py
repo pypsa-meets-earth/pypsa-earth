@@ -17,7 +17,7 @@ import pandas as pd
 import powerplantmatching as pm
 import pypsa
 import xarray as xr
-from _helpers import sanitize_carriers, sanitize_locations
+from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
 
 # from _helpers import (
 #     configure_logging,
@@ -89,7 +89,7 @@ def add_heating_capacities_installed_before_baseyear(
     """
     logger.debug(f"Adding heating capacities installed before {baseyear}")
 
-    existing_heating = pd.read_csv(
+    existing_heating = read_csv_nafix(
         snakemake.input.existing_heating_distribution, header=[0, 1], index_col=0
     )
 
@@ -298,7 +298,7 @@ if __name__ == "__main__":
     )
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
-    costs = pd.read_csv(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     grouping_years_heat = snakemake.params.existing_capacities["grouping_years_heat"]
 

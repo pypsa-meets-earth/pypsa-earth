@@ -696,7 +696,12 @@ def read_csv_nafix(file, **kwargs):
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if os.stat(file).st_size > 0:
+    if isinstance(file, str) and (
+        file.startswith("http://") or file.startswith("https://")
+    ):
+        return pd.read_csv(file, **kwargs)
+
+    if os.path.exists(file) and os.stat(file).st_size > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
@@ -1293,6 +1298,7 @@ def get_conv_factors(sector):
             "Ethane": 0.01289,
             "Oil shale": 0.00247,
             "Other kerosene": 0.01216,
+            "ammonia": 0.00517,  # MWh (LHV) per tonne NH3 = 0.00517 TWh/kton
         }
     return fuels_conv_toTWh
 

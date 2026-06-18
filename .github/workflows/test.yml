@@ -7,6 +7,12 @@ on:
   pull_request:
     branches:
     - main
+    paths-ignore:
+    - "doc/**"
+    - "**.md"
+    - "**.rst"
+    - "mkdocs.yml"
+    - ".readthedocs.yaml"
   schedule:
   - cron: "0 5 * * TUE"
 

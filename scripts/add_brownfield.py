@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import sanitize_carriers, sanitize_locations
+from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
 from add_existing_baseyear import (
     add_build_year_to_new_assets,
     filter_transmission_project_build_year,
@@ -200,8 +200,8 @@ def disable_grid_expansion_if_limit_hit(n: pypsa.Network) -> None:
 #     """
 
 #     # spatial clustering
-#     cluster_busmap = pd.read_csv(snakemake.input.cluster_busmap, index_col=0).squeeze()
-#     simplify_busmap = pd.read_csv(
+#     cluster_busmap = read_csv_nafix(snakemake.input.cluster_busmap, index_col=0).squeeze()
+#     simplify_busmap = read_csv_nafix(
 #         snakemake.input.simplify_busmap, index_col=0
 #     ).squeeze()
 #     clustermaps = simplify_busmap.map(cluster_busmap)
