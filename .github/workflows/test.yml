@@ -251,7 +251,7 @@ jobs:
         cache: true
 
     - name: Run Test
-      run: pixi run -e pypsa-earth-env make test
+      run: pixi run -e pypsa-earth make test
 
     - name: Upload artifacts
       if: always()
