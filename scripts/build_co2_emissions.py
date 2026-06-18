@@ -8,23 +8,23 @@ Process EDGAR CO2 emission data from the raw Excel file into a clean CSV.
 
 Reads the EDGAR CO2 fossil fuel emission Excel file, filters to
 'Public electricity and heat production' entries, and saves the result
-as a CSV with country identifier columns (three-letter code, two-letter
-code, full name) and year columns for use by prepare_network.
+as a CSV with country identifier columns (country_code_a3, country_code_a2,
+country_name) and year columns for use by prepare_network.
 """
 
 import pandas as pd
-from _helpers import configure_logging, create_logger
+from _helpers import configure_logging, create_logger, three_2_two_digits_countries
 
 logger = create_logger(__name__)
 
 
-def process_edgar_emission_data(excel_file):
+def process_edgar_emission_data(excel_file: str) -> pd.DataFrame:
     """
     Process EDGAR CO2 emission Excel data into a clean DataFrame.
 
     Detects the CO2 fossil fuel emissions sheet automatically, filters to
     'Public electricity and heat production' rows, and returns a DataFrame
-    with country identifier columns (Country_code_A3, Country_code_A2, Name)
+    with country identifier columns (country_code_a3, country_code_a2, country_name)
     and year columns (Y_YYYY).
 
     Parameters
@@ -35,8 +35,8 @@ def process_edgar_emission_data(excel_file):
     Returns
     -------
     pd.DataFrame
-        DataFrame with columns Country_code_A3 (three-letter ISO code),
-        Country_code_A2 (two-letter ISO code), Name (full country name),
+        DataFrame with columns country_code_a3 (three-letter ISO code),
+        country_code_a2 (two-letter ISO code), country_name (full country name),
         and Y_YYYY columns for each available year.
     """
     xl = pd.ExcelFile(excel_file)
@@ -63,15 +63,18 @@ def process_edgar_emission_data(excel_file):
         df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
     ]
 
-    id_cols = [
-        col
-        for col in ["Country_code_A3", "Country_code_A2", "Name"]
-        if col in df.columns
-    ]
     year_cols = [
         col for col in df.columns if isinstance(col, str) and col.startswith("Y_")
     ]
-    df = df[id_cols + year_cols].copy()
+    df = df[["Country_code_A3", "Name"] + year_cols].copy()
+    df = df.rename(
+        columns={
+            "Country_code_A3": "country_code_a3",
+            "Name": "country_name",
+        }
+    )
+    df["country_code_a2"] = three_2_two_digits_countries(df["country_code_a3"])
+    df = df[["country_code_a3", "country_code_a2", "country_name"] + year_cols]
     df[year_cols] = df[year_cols].astype(float).ffill(axis=1).bfill(axis=1)
 
     logger.info(
