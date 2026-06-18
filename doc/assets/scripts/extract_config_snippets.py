@@ -175,43 +175,60 @@ def main():
         "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
         "plotting": ["plotting"],
-        "policy_config": ["policy_config"],
-        "demand_data": ["demand_data"],
-        "export": ["export"],
+        "policy_config": {
+            "start": "policy_config:",
+            "end": "export:",
+        },
+        "export": {
+            "start": "export:",
+            "end": "# ------------------- Demand data",
+        },
+        "demand_data": {
+            "start": "demand_data:",
+            "end": "# ------------------- Custom data",
+        },
+        "custom_data": {
+            "start": "custom_data:",
+            "end": "# ------------------- Brownfield capacities",
+        },
+        "existing_capacities": {
+            "start": "existing_capacities:",
+            "end": "# ------------------- Sector settings",
+        },
         "sector_toplevel": {
             "start": "sector:",
-            "end": "# ------------------- HEAT SECTOR",
+            "end": "# ------------------- Heat sector",
         },
         "sector_heat": {
-            "start": "# ------------------- HEAT SECTOR",
-            "end": "# ------------------- LAND TRANSPORT SECTOR",
+            "start": "# ------------------- Heat sector",
+            "end": "# ------------------- Land transport sector",
         },
         "sector_land_transport": {
-            "start": "# ------------------- LAND TRANSPORT SECTOR",
-            "end": "# ------------------- BIOMASS SECTOR",
+            "start": "# ------------------- Land transport sector",
+            "end": "# ------------------- Biomass sector",
         },
         "sector_biomass": {
-            "start": "# ------------------- BIOMASS SECTOR",
-            "end": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
+            "start": "# ------------------- Biomass sector",
+            "end": "# ------------------- Electricity distribution grid",
         },
         "sector_electricity_distribution_grid": {
-            "start": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
-            "end": "# ------------------- SHIPPING & AVIATION SECTOR",
+            "start": "# ------------------- Electricity distribution grid",
+            "end": "# ------------------- Shipping & aviation sector",
         },
         "sector_shipping_aviation": {
-            "start": "# ------------------- SHIPPING & AVIATION SECTOR",
-            "end": "# ------------------- CCUS & CONVERSION OPTIONS",
+            "start": "# ------------------- Shipping & aviation sector",
+            "end": "# ------------------- CCUS & conversion options",
         },
         "sector_ccus": {
-            "start": "# ------------------- CCUS & CONVERSION OPTIONS",
-            "end": "# ------------------- INDUSTRY OPTIONS",
+            "start": "# ------------------- CCUS & conversion options",
+            "end": "# ------------------- Industry options",
         },
         "sector_industry": {
-            "start": "# ------------------- INDUSTRY OPTIONS",
-            "end": "# ------------------- POWERPLANTS OPTIONS",
+            "start": "# ------------------- Industry options",
+            "end": "# ------------------- Powerplants options",
         },
         "sector_powerplants": {
-            "start": "# ------------------- POWERPLANTS OPTIONS",
+            "start": "# ------------------- Powerplants options",
             "end": "solving:",
         },
     }

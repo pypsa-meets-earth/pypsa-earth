@@ -389,9 +389,13 @@ Specifies the options for Monte Carlo sampling.
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
-## policy_config
+## Sector options
 
-Specifies the options regarding energy policy, for example in relation to hydrogen exports.
+Options under the **SECTOR OPTIONS** banner in ``config.default.yaml``: hydrogen policy and export, sector demand inputs, custom data overrides, brownfield capacity grouping, and sector coupling settings.
+
+### policy_config
+
+Specifies energy-policy options for hydrogen, for example temporal matching and additionality constraints.
 
 ```yaml
 --8<-- "configtables/snippets/policy_config.yaml"
@@ -399,19 +403,9 @@ Specifies the options regarding energy policy, for example in relation to hydrog
 
 {{ read_csv('configtables/policy_config.csv') }}
 
-## demand_data
+### export
 
-Specifies sector-coupled related demand.
-
-```yaml
---8<-- "configtables/snippets/demand_data.yaml"
-```
-
-{{ read_csv('configtables/demand_data.csv') }}
-
-## export
-
-Specifies the option related to hydrogen exports.
+Specifies hydrogen export demand, storage, and shipping profile settings.
 
 ```yaml
 --8<-- "configtables/snippets/export.yaml"
@@ -419,7 +413,17 @@ Specifies the option related to hydrogen exports.
 
 {{ read_csv('configtables/export.csv') }}
 
-## custom_data
+### demand_data
+
+Specifies sector-coupled demand inputs (UNSD energy balances and related years).
+
+```yaml
+--8<-- "configtables/snippets/demand_data.yaml"
+```
+
+{{ read_csv('configtables/demand_data.csv') }}
+
+### custom_data
 
 Specifies which custom datasets are used to replace or supplement the default model data. For full details see [Custom Data Integration](custom-data.md).
 
@@ -429,11 +433,21 @@ Specifies which custom datasets are used to replace or supplement the default mo
 
 {{ read_csv('configtables/custom_data.csv') }}
 
-## sector
+### existing_capacities
 
-Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+Vintage grouping and thresholds for brownfield power and heating capacities in ``add_existing_baseyear`` and related rules.
 
-### top-level
+```yaml
+--8<-- "configtables/snippets/existing_capacities.yaml"
+```
+
+{{ read_csv('configtables/existing_capacities.csv') }}
+
+### sector
+
+Specifies the options for sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+
+#### top-level
 
 Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted.
 
@@ -443,7 +457,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_toplevel.csv') }}
 
-### heat sector
+#### heat sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_heat.yaml"
@@ -451,7 +465,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_heat.csv') }}
 
-### land transport sector
+#### land transport sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_land_transport.yaml"
@@ -459,7 +473,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_land_transport.csv') }}
 
-### biomass sector
+#### biomass sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_biomass.yaml"
@@ -467,7 +481,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_biomass.csv') }}
 
-### electricity distribution grid
+#### electricity distribution grid
 
 ```yaml
 --8<-- "configtables/snippets/sector_electricity_distribution_grid.yaml"
@@ -475,7 +489,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_electricity_distribution_grid.csv') }}
 
-### shipping & aviation sector
+#### shipping & aviation sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_shipping_aviation.yaml"
@@ -483,7 +497,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_shipping_aviation.csv') }}
 
-### ccus & conversion options
+#### ccus & conversion options
 
 ```yaml
 --8<-- "configtables/snippets/sector_ccus.yaml"
@@ -491,7 +505,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_ccus.csv') }}
 
-### industry options
+#### industry options
 
 ```yaml
 --8<-- "configtables/snippets/sector_industry.yaml"
@@ -499,7 +513,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_industry.csv') }}
 
-### powerplants options
+#### powerplants options
 
 ```yaml
 --8<-- "configtables/snippets/sector_powerplants.yaml"
