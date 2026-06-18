@@ -140,7 +140,7 @@ def _migrate_simple_keys(
     migrations: Sequence[tuple[str, str]],
     warn: Callable[[str, str], None],
 ) -> None:
-    """Copy deprecated keys to new locations, overriding defaults from config.default.yaml."""
+    """Copy each deprecated leaf key to its new path, overriding only that value."""
     for old_path, new_path in migrations:
         if not _has_nested(config, old_path):
             continue
@@ -172,23 +172,26 @@ def _migrate_co2_budget_base_value(
 def _migrate_solar_thermal(
     config: dict[str, Any], warn: Callable[[str, str], None]
 ) -> None:
-    """Migrate legacy solar-thermal settings into ``sector.solar_thermal``.
+    """Migrate legacy solar-thermal keys onto ``sector.solar_thermal``.
 
-    Handles the bool flag, top-level ``solar_thermal`` block, and must run
-    before simple migrations that write under ``sector.solar_thermal.*``.
+    Only values from deprecated paths are written; existing keys in the
+    merged config dict are kept. Must run before ``CONFIG_MIGRATIONS`` that
+    write under ``sector.solar_thermal.*`` (e.g. ``solar_cf_correction``).
     """
     sector = config.setdefault("sector", {})
 
     if isinstance(sector.get("solar_thermal"), bool):
-        enable = sector["solar_thermal"]
-        sector["solar_thermal"] = {"enable": enable}
+        sector["solar_thermal"] = {"enable": sector["solar_thermal"]}
         warn("sector.solar_thermal (bool)", "sector.solar_thermal.enable")
 
-    solar_thermal = config.get("solar_thermal")
-    if isinstance(solar_thermal, dict):
-        target = sector.setdefault("solar_thermal", {})
-        for key, value in solar_thermal.items():
+    top_level = config.get("solar_thermal")
+    if isinstance(top_level, dict):
+        target = sector.get("solar_thermal")
+        if not isinstance(target, dict):
+            target = {}
+        for key, value in top_level.items():
             target[key] = value
+        sector["solar_thermal"] = target
         warn("solar_thermal", "sector.solar_thermal")
 
 
@@ -198,13 +201,13 @@ def migrate_config(
 ) -> dict[str, Any]:
     """Migrate deprecated config keys to the consolidated layout.
 
-    When a deprecated key is present, its value overrides the corresponding
-    new key from ``config.default.yaml`` so existing user configs keep working.
+    When a deprecated key is present, its value is copied to the new path in
+    the merged config dict. All other keys are left as already merged by
+    Snakemake (defaults from ``config.default.yaml`` plus user overrides).
 
-    Simple renames are listed in ``CONFIG_MIGRATIONS`` (or passed via
-    ``migrations``). Handlers for structural changes run first so simple
-    migrations do not overwrite incompatible types (e.g. bool
-    ``sector.solar_thermal``).
+    Simple renames are listed in ``CONFIG_MIGRATIONS``. Structural handlers
+    cover cases that are not a straight leaf copy (e.g. bool
+    ``sector.solar_thermal`` → ``sector.solar_thermal.enable``).
 
     Parameters
     ----------
@@ -226,7 +229,6 @@ def migrate_config(
             stacklevel=2,
         )
 
-    # Structural handlers before simple path copies that share the same parent keys.
     _migrate_solar_thermal(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
