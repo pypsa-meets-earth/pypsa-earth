@@ -909,7 +909,7 @@ if config["electricity"]["automatic_emission"]:
         input:
             edgar="data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
         output:
-            emissions="resources/" + RDIR + "co2_emissions.csv",
+            emissions="resources/" + RDIR + "co2_emissions_elec_and_heat.csv",
         log:
             "logs/" + RDIR + "build_co2_emissions.log",
         benchmark:
@@ -931,7 +931,7 @@ rule prepare_network:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         **branch(
             config["electricity"]["automatic_emission"],
-            {"emissions": "resources/" + RDIR + "co2_emissions.csv"},
+            {"emissions": "resources/" + RDIR + "co2_emissions_elec_and_heat.csv"},
         ),
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
     output:

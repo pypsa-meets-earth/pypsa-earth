@@ -60,7 +60,8 @@ def process_edgar_emission_data(excel_file: str) -> pd.DataFrame:
     df.columns = df.iloc[0]
     df = df.iloc[1:]
     df = df.loc[
-        df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
+        df["ipcc_code_2006_for_standard_report_name"]
+        == "Main Activity Electricity and Heat Production"
     ]
 
     year_cols = [
