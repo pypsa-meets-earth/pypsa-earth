@@ -1,0 +1,3 @@
+Beginner: ['countries','enable','results_dir','summary_dir',]
+Modeller: ['all']
+Client: ['results_dir','summary_dir','countries','enable','custom_data']
