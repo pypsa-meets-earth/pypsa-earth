@@ -120,6 +120,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update contribution guide [PR #1803](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1803)
 
+* Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
 
 # PyPSA-Earth 0.8.0
 
