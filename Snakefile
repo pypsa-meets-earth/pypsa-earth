@@ -890,7 +890,7 @@ if config["electricity"]["automatic_emission"]:
     rule retrieve_emissions:
         output:
             edgar_zip="data/EDGAR/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
-            edgar_xlsx="data/EDGAR/EDGAR_v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.xlsx",
+            edgar_xlsx="data/EDGAR/EDGAR_v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.xls",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
         run:
@@ -907,7 +907,7 @@ if config["electricity"]["automatic_emission"]:
 
     rule build_co2_emissions:
         input:
-            edgar="data/EDGAR/EDGAR_v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.xlsx",
+            edgar="data/EDGAR/EDGAR_v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.xls",
         output:
             emissions="resources/" + RDIR + "co2_emissions.csv",
         log:
