@@ -1,7 +1,7 @@
 import typer
 from rich.console import Console
 from rich.panel import Panel
-from pathlib import Path
+from rich.columns import Columns
 from typing_extensions import Annotated
 import yaml
 from enum import Enum
@@ -70,15 +70,13 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
         
     return nested_dict
 
-@app.command()
-def config_setup(user_group:Annotated[UserGroup,typer.Option(prompt="Select user group")]):
+@app.command("config-setup")
+def config_setup(user_groups_config):
     config_path="config.default.yaml"
     config=load_config_file(config_path)
 
-    user_groups_path="user_groups.yaml"
-    user_groups_config=load_config_file(user_groups_path)
-
-    config_options=user_groups_config[user_group.value]
+    user_group=typer.prompt("Select user group", default=[x.value for x in UserGroup])
+    config_options=user_groups_config[user_group]
     reqd_config={x:config[x] for x in config_options} 
     flattened_options=flatten_dict(reqd_config)
 
@@ -91,10 +89,44 @@ def config_setup(user_group:Annotated[UserGroup,typer.Option(prompt="Select user
     
     save_config_file(config_save_path,unflatten_dict(updated_config))
 
-@app.command()
-def main():
+@app.callback(invoke_without_command=True)
+def main(ctx: typer.Context):
+
+    if ctx.invoked_subcommand is not None:
+        return
+    
     # Display the welcome message
-    typer.echo(f"[bold green]🚀 Welcome to PyPSA-Earth config CLI application!")
+    console.rule("[bold magenta]🚀 Welcome to PyPSA-Earth config CLI application! [/bold magenta]")
+    console.print("[white]PyPSA-Earth is the first open-source global cross-sectoral energy system model " \
+    "with high spatial and temporal resolution. The workflow provide capabilities for modelling the energy systems of" \
+    " any country in the world, enabling large-scale collaboration and transparent analysis for an inclusive and " \
+    "sustainable energy future. PyPSA-Earth is suitable for both operational studies and capacity expansion studies. " \
+    "Its sector-coupled modeling capabilities enable features for the detailed optimization of multi-energy systems, " \
+    "covering electricity, heating, transport, industry, hydrogen and more. [/white]")
+    console.print(style="dim") 
+    
+    menu_items = [
+        {"num": "1", "name": "Setup & activate environment", "desc": "Setup python environment using conda"},
+        {"num": "2", "name": "Edit config parameters", "desc": "Edit config parameters"},
+        {"num": "3", "name": "Run model", "desc": "Trigger snakemake workflow to run PyPSA-Earth model"},
+        {"num": "4", "name": "Exit", "desc": "Close the application"},
+    ]
+
+    panels = []
+    for item in menu_items:
+        panel_content = f"[bold cyan]{item['num']}[/bold cyan] | [bold white]{item['name']}[/bold white]\n[dim]{item['desc']}[/dim]"
+        panels.append(Panel(panel_content, expand=False, border_style="green"))
+
+    # Print the menu title and options
+    console.rule("[bold magenta] MAIN MENU [/bold magenta]")
+    console.print(Columns(panels, padding=(1, 2)))
+    choice=typer.prompt("Select option 1-4 to proceed further[/yellow]")
+
+    if choice == "2":
+        user_groups_path="user_groups.yaml"
+        user_groups_config=load_config_file(user_groups_path)
+        config_setup(user_groups_config)
+
 
 if __name__ == "__main__":
 
