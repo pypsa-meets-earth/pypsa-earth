@@ -9,6 +9,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
+from _helpers import BASE_DIR, read_csv_nafix
 
 
 def transport_degree_factor(
@@ -67,7 +68,7 @@ def prepare_transport_data(n):
     Function to prepare the data required for the (land) transport sector.
     """
 
-    energy_totals = pd.read_csv(
+    energy_totals = read_csv_nafix(
         snakemake.input.energy_totals_name,
         index_col=0,
         keep_default_na=False,
@@ -82,7 +83,7 @@ def prepare_transport_data(n):
 
     # Get overall demand curve for all vehicles
 
-    traffic = pd.read_csv(
+    traffic = read_csv_nafix(
         snakemake.input.traffic_data_KFZ, skiprows=2, usecols=["count"]
     ).squeeze("columns")
 
@@ -96,7 +97,7 @@ def prepare_transport_data(n):
     nodal_transport_shape = transport_shape / transport_shape.sum().sum()
     transport_shape = transport_shape / transport_shape.sum()
 
-    transport_data = pd.read_csv(
+    transport_data = read_csv_nafix(
         snakemake.input.transport_name, index_col=0, keep_default_na=False
     )
 
@@ -164,7 +165,7 @@ def prepare_transport_data(n):
 
     # derive plugged-in availability for PKW's (cars)
 
-    traffic = pd.read_csv(
+    traffic = read_csv_nafix(
         snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"]
     ).squeeze("columns")
 
@@ -217,7 +218,7 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
 
     # Get population layout
-    pop_layout = pd.read_csv(
+    pop_layout = read_csv_nafix(
         snakemake.input.clustered_pop_layout,
         index_col=0,
         keep_default_na=False,

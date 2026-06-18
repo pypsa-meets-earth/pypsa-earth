@@ -14,7 +14,7 @@ from itertools import product
 
 import geopandas as gpd
 import pandas as pd
-from _helpers import locate_bus, three_2_two_digits_country
+from _helpers import locate_bus, read_csv_nafix, three_2_two_digits_country
 from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
@@ -32,14 +32,14 @@ def build_nodal_distribution_key(
 
     keys = pd.DataFrame(index=regions.name, columns=industry, dtype=float)
 
-    pop = pd.read_csv(
+    pop = read_csv_nafix(
         snakemake.input.clustered_pop_layout,
         index_col=0,
         keep_default_na=False,
         na_values=[""],
     )
 
-    gdp = pd.read_csv(
+    gdp = read_csv_nafix(
         snakemake.input.clustered_gdp_layout,
         index_col=0,
         keep_default_na=False,
@@ -86,6 +86,7 @@ def match_technology(df):
         "HVC": "chemical and petrochemical",
         "Paper": "paper pulp and print",
         "Aluminium": "non-ferrous metals",
+        "Haber-Bosch": "ammonia",
     }
 
     df["industry"] = df["technology"].map(industry_mapping)
@@ -124,7 +125,7 @@ if __name__ == "__main__":
         logger.info(
             "Using custom industry database from 'data/custom/industrial_database.csv' instead of default"
         )
-        geo_locs = pd.read_csv(
+        geo_locs = read_csv_nafix(
             "data/custom/industrial_database.csv",
             sep=",",
             header=0,
@@ -133,7 +134,7 @@ if __name__ == "__main__":
         geo_locs["industry"] = geo_locs["technology"]
     else:
         logger.info("Using default industry database")
-        geo_locs = pd.read_csv(
+        geo_locs = read_csv_nafix(
             snakemake.input.industrial_database,
             sep=",",
             header=0,

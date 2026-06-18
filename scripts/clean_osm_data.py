@@ -930,7 +930,7 @@ def load_network_data(network_asset, data_options):
 def clean_data(
     input_files,
     output_files,
-    africa_shape,
+    extended_country_shape,
     geo_crs,
     distance_crs,
     data_options,
@@ -988,7 +988,9 @@ def clean_data(
         logger.info("Select lines and cables in the region of interest")
 
         # drop lines crossing regions with and without the region under interest
-        df_all_lines = df_all_lines[df_all_lines.geometry.boundary.within(africa_shape)]
+        df_all_lines = df_all_lines[
+            df_all_lines.geometry.boundary.within(extended_country_shape)
+        ]
 
         df_all_lines = gpd.GeoDataFrame(df_all_lines, geometry="geometry")
 
@@ -1122,7 +1124,9 @@ if __name__ == "__main__":
     input_files = snakemake.input
     output_files = snakemake.output
 
-    africa_shape = gpd.read_file(snakemake.input.africa_shape)["geometry"].iloc[0]
+    extended_country_shape = gpd.read_file(snakemake.input.extended_country_shape)[
+        "geometry"
+    ].iloc[0]
 
     # only when country names are defined by shapes, load the info
     if names_by_shapes:
@@ -1144,7 +1148,7 @@ if __name__ == "__main__":
     clean_data(
         input_files,
         output_files,
-        africa_shape,
+        extended_country_shape,
         geo_crs,
         distance_crs,
         data_options,
