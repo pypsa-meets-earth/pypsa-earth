@@ -3,14 +3,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import os
-import pathlib
 import sys
 import warnings
 
 sys.path.append("./scripts")
 
 from pathlib import Path
-from shutil import copyfile, move
+from shutil import copyfile, move, unpack_archive
 
 from _helpers import branch  # Remove if Snakemake >= 8.3.0
 from _helpers import (
@@ -890,19 +889,21 @@ if config["electricity"]["automatic_emission"]:
 
     rule retrieve_emissions:
         output:
-            edgar="data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
+            edgar_zip="data/EDGAR/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
+            edgar_xlsx="data/EDGAR/EDGAR_v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.xlsx",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
         run:
-            primary_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_GHG_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
-            fallback_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v80_FT2022_GHG/CO2_excl_short-cycle_org_C/EDGAR_v80_FT2022_GHG_CO2_excl_short-cycle_org_C_1970_2022.xlsx"
+            edgar_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
             try:
-                content = content_retrieve(primary_url)
+                content = content_retrieve(edgar_url)
             except Exception as e:
-                print(f"Primary EDGAR source failed ({e}), trying fallback...")
-                content = content_retrieve(fallback_url)
-            with open(output.edgar, "wb") as f:
+                raise Exception(
+                    f"Emissions dataset EDGAR failed to be download ({e})."
+                )
+            with open(output.edgar_zip, "wb") as f:
                 f.write(content.read())
+            unpack_archive(output.edgar_zip, extract_dir="data/EDGAR/")
 
     rule build_co2_emissions:
         input:
