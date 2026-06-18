@@ -907,7 +907,7 @@ if config["electricity"]["automatic_emission"]:
 
     rule build_co2_emissions:
         input:
-            edgar="data/EDGAR_v80_CO2_excl_short-cycle_org_C_1970_2022.xlsx",
+            edgar="data/EDGAR/EDGAR_v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.xlsx",
         output:
             emissions="resources/" + RDIR + "co2_emissions.csv",
         log:
