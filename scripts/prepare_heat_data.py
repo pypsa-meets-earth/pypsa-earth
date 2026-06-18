@@ -53,7 +53,9 @@ def prepare_heat_data(n):
         .reindex(index=n.snapshots)
     )
     # 1e3 converts from W/m^2 to MW/(1000m^2) = kW/m^2
-    solar_thermal = options["solar_thermal"]["cf_correction"] * solar_thermal / 1e3
+    solar_thermal = (
+        options["solar_thermal_collector"]["cf_correction"] * solar_thermal / 1e3
+    )
 
     energy_totals = read_csv_nafix(
         snakemake.input.energy_totals_name,

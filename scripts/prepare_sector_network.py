@@ -2447,7 +2447,7 @@ def add_heat(
                 lifetime=costs.at[key, "lifetime"],
             )
 
-        if options["solar_thermal"]["enable"]:
+        if options["solar_thermal_collector"]["enable"]:
             n.add("Carrier", name + " solar thermal")
 
             n.madd(

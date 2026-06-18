@@ -377,6 +377,8 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 ### heat sector
 
+Solar thermal collector settings live under ``sector.solar_thermal_collector`` (not ``sector.solar_thermal``). Legacy keys ``sector.solar_thermal`` (bool), ``sector.solar_cf_correction``, and top-level ``solar_thermal`` are migrated automatically; see ``migrate_config`` in ``scripts/_helpers.py``.
+
 ```yaml
 --8<-- "configtables/snippets/sector_heat.yaml"
 ```

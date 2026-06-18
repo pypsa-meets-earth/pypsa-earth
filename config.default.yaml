@@ -647,7 +647,7 @@ sector:
   chp: true
   micro_chp: false
 
-  solar_thermal:
+  solar_thermal_collector:
     enable: true
     cf_correction: 0.788457 # correction factor applied to atlite's raw output; = 1/1.2683
     clearsky_model: simple

@@ -95,7 +95,9 @@ CONFIG_MIGRATIONS = [
     ("co2_budget.enable", "co2.budget.enable"),
     ("co2_budget.override_co2opt", "co2.budget.override_co2opt"),
     ("co2_budget.year", "co2.budget.year"),
-    ("sector.solar_cf_correction", "sector.solar_thermal.cf_correction"),
+    ("sector.solar_cf_correction", "sector.solar_thermal_collector.cf_correction"),
+    ("solar_thermal.clearsky_model", "sector.solar_thermal_collector.clearsky_model"),
+    ("solar_thermal.orientation", "sector.solar_thermal_collector.orientation"),
 ]
 
 
@@ -169,30 +171,24 @@ def _migrate_co2_budget_base_value(
     warn("co2_budget.co2base_value", "co2.budget.base_value")
 
 
-def _migrate_solar_thermal(
+def _migrate_solar_thermal_enable(
     config: dict[str, Any], warn: Callable[[str, str], None]
 ) -> None:
-    """Migrate legacy solar-thermal keys onto ``sector.solar_thermal``.
+    """Copy legacy ``sector.solar_thermal`` bool to ``sector.solar_thermal_collector.enable``.
 
-    Only values from deprecated paths are written; existing keys in the
-    merged config dict are kept. Must run before ``CONFIG_MIGRATIONS`` that
-    write under ``sector.solar_thermal.*`` (e.g. ``solar_cf_correction``).
+    The new collector settings use a separate config key, so the legacy bool no
+    longer replaces the default dict during Snakemake config merging.
     """
-    sector = config.setdefault("sector", {})
+    sector = config.get("sector", {})
+    if not isinstance(sector.get("solar_thermal"), bool):
+        return
 
-    if isinstance(sector.get("solar_thermal"), bool):
-        sector["solar_thermal"] = {"enable": sector["solar_thermal"]}
-        warn("sector.solar_thermal (bool)", "sector.solar_thermal.enable")
-
-    top_level = config.get("solar_thermal")
-    if isinstance(top_level, dict):
-        target = sector.get("solar_thermal")
-        if not isinstance(target, dict):
-            target = {}
-        for key, value in top_level.items():
-            target[key] = value
-        sector["solar_thermal"] = target
-        warn("solar_thermal", "sector.solar_thermal")
+    _set_nested(
+        config,
+        "sector.solar_thermal_collector.enable",
+        sector["solar_thermal"],
+    )
+    warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
 def migrate_config(
@@ -205,9 +201,9 @@ def migrate_config(
     the merged config dict. All other keys are left as already merged by
     Snakemake (defaults from ``config.default.yaml`` plus user overrides).
 
-    Simple renames are listed in ``CONFIG_MIGRATIONS``. Structural handlers
-    cover cases that are not a straight leaf copy (e.g. bool
-    ``sector.solar_thermal`` → ``sector.solar_thermal.enable``).
+    Simple renames are listed in ``CONFIG_MIGRATIONS``. The only special
+    handler left is ``co2_budget.co2base_value`` (renames values, not just
+    paths) and ``sector.solar_thermal`` when it is still a legacy bool flag.
 
     Parameters
     ----------
@@ -229,7 +225,7 @@ def migrate_config(
             stacklevel=2,
         )
 
-    _migrate_solar_thermal(config, _warn)
+    _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
 
