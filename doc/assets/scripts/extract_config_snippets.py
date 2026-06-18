@@ -172,8 +172,14 @@ def main():
             "start": "monte_carlo:",
             "end": "# =================== SECTOR OPTIONS",
         },
-        "solving_options": ["solving", "options"],
-        "solving_solver": ["solving", "solver"],
+        "solving_solver": {
+            "start": "# ------------------- Solver",
+            "end": "# ------------------- Optimization options",
+        },
+        "solving_options": {
+            "start": "# ------------------- Optimization options",
+            "end": "# ------------------- Solver presets",
+        },
         "plotting": ["plotting"],
         "policy_config": {
             "start": "policy_config:",
@@ -229,7 +235,7 @@ def main():
         },
         "sector_powerplants": {
             "start": "# ------------------- Powerplants options",
-            "end": "solving:",
+            "end": "# =================== SOLVING",
         },
     }
 

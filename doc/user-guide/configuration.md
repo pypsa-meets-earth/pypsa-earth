@@ -521,17 +521,9 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 {{ read_csv('configtables/sector_powerplants.csv') }}
 
-## solving
+## Solving
 
-Specify linear power flow formulation and optimization solver settings.
-
-### options
-
-```yaml
---8<-- "configtables/snippets/solving_options.yaml"
-```
-
-{{ read_csv('configtables/solving-options.csv') }}
+Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, solver presets, and memory limit.
 
 ### solver
 
@@ -541,9 +533,17 @@ Specify linear power flow formulation and optimization solver settings.
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
-## plotting
+### options
 
-Specifies plotting options.
+```yaml
+--8<-- "configtables/snippets/solving_options.yaml"
+```
+
+{{ read_csv('configtables/solving-options.csv') }}
+
+## Plotting
+
+Options under the **PLOTTING** banner in ``config.default.yaml``: map layout, plot thresholds, technology groupings, carrier colours, and display names.
 
 ```yaml
 --8<-- "configtables/snippets/plotting.yaml"

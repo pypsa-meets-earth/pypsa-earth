@@ -842,11 +842,19 @@ sector:
 
   marginal_cost_storage: 0
 
+
+# =================== SOLVING ===================
 solving:
+  # ------------------- Solver -------------------
+  solver:
+    name: gurobi
+    options: gurobi-default
+
+  # ------------------- Optimization options -------------------
   options:
-    formulation: kirchhoff
     load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay https://doi.org/10.3389/fenrg.2015.00055)
     noisy_costs: true
+    formulation: kirchhoff
     min_iterations: 4
     max_iterations: 6
     clip_p_max_pu: 0.01
@@ -854,10 +862,7 @@ solving:
     track_iterations: false
     # nhours: 10
 
-  solver:
-    name: gurobi
-    options: gurobi-default
-
+  # ------------------- Solver presets -------------------
   solver_options:
     highs-default:
       # refer to https://ergo-code.github.io/HiGHS/dev/options/definitions/
@@ -916,6 +921,7 @@ solving:
   mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
 
 
+# =================== PLOTTING ===================
 plotting:
   map:
     figsize: [7, 7]
