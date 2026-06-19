@@ -3,11 +3,9 @@ from pathlib import Path
 
 import typer
 import yaml
+from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-from rich.columns import Columns
-import yaml
-from enum import Enum
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -19,12 +17,14 @@ class UserGroup(str, Enum):
     client = "Client"
     custom = "Custom"
 
-def ask(text: str, default: str="") -> str:
+
+def ask(text: str, default: str = "") -> str:
     styled_text = typer.style(f"➔ {text}", fg=typer.colors.YELLOW, bold=True)
     if default != "":
         return typer.prompt(styled_text, default=default)
     else:
         return typer.prompt(styled_text)
+
 
 def load_config_file(config_path: str) -> dict:
     with open(config_path, "r") as file:
@@ -82,37 +82,44 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
 
     return nested_dict
 
+
 @app.command("config-setup")
-def config_setup():        
+def config_setup():
     console.print(style="dim")
     console.rule("[bold magenta] EDIT CONFIG PARAMETERS [/bold magenta]")
 
     # Load user groups
-    user_groups_path="user_groups.yaml"
-    user_groups_config=load_config_file(user_groups_path)
+    user_groups_path = "user_groups.yaml"
+    user_groups_config = load_config_file(user_groups_path)
     # Prompt user to identify his/her user group
-    user_group=ask("Select user group", default=[x.value for x in UserGroup])
+    user_group = ask("Select user group", default=[x.value for x in UserGroup])
 
     # Prompt user for config file locations
-    config_path=ask("Enter config file name to modify", default="config.default.yaml")
-    console.print(style="dim") 
+    config_path = ask("Enter config file name to modify", default="config.default.yaml")
+    console.print(style="dim")
     try:
-        config=load_config_file(config_path)
+        config = load_config_file(config_path)
     except FileNotFoundError:
-        console.print("[bold red] No such file found. \n Exitting the application [/bold red]")
+        console.print(
+            "[bold red] No such file found. \n Exitting the application [/bold red]"
+        )
         raise typer.Exit()
 
     # Filter config file for the required params based on user group
-    config_options=user_groups_config[user_group]
+    config_options = user_groups_config[user_group]
     # Read config file
     try:
-        reqd_config={x:config[x] for x in config_options} 
+        reqd_config = {x: config[x] for x in config_options}
     except KeyError:
-        console.print("[bold red] Mismatch in choice of user group and config file. \n Exitting the application [/bold red]")
+        console.print(
+            "[bold red] Mismatch in choice of user group and config file. \n Exitting the application [/bold red]"
+        )
         raise typer.Exit()
-    
+
     console.print("[bold]Instructions[/bold]\n")
-    console.print("If a config entry is a nested dictionary, the child param name is represented the parent param name separated by a '.'.\n")
+    console.print(
+        "If a config entry is a nested dictionary, the child param name is represented the parent param name separated by a '.'.\n"
+    )
     console.print(style="dim")
     console.print("For example, \nenable:\n\tretrieve_databundle:\n")
     console.print(style="dim")
@@ -121,41 +128,64 @@ def config_setup():
     console.print(style="dim")
 
     # Flatten nested dictionaries in the config parameters
-    flattened_options=flatten_dict(reqd_config)
+    flattened_options = flatten_dict(reqd_config)
 
     # Iterate through the config parameters
-    updated_config=flattened_options.copy()
+    updated_config = flattened_options.copy()
     for option in flattened_options:
-        updated_value=ask(f"Enter new value for {option} [Press Enter to skip]",default=flattened_options[option])
-        console.print(style="dim") 
+        updated_value = ask(
+            f"Enter new value for {option} [Press Enter to skip]",
+            default=flattened_options[option],
+        )
+        console.print(style="dim")
 
         if updated_value != flattened_options[option]:
-            updated_config[option]=updated_value
+            updated_config[option] = updated_value
 
     # Save updated config file
-    config_save_path=ask(f"Enter name for updated config file [Press Enter to skip]", default="config.cli_updated.yaml")
-    save_config_file(config_save_path,unflatten_dict(updated_config))
+    config_save_path = ask(
+        f"Enter name for updated config file [Press Enter to skip]",
+        default="config.cli_updated.yaml",
+    )
+    save_config_file(config_save_path, unflatten_dict(updated_config))
+
 
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
 
     if ctx.invoked_subcommand is not None:
         return
-    
+
     # Display the welcome message
-    console.rule("[bold magenta]🚀 Welcome to PyPSA-Earth config CLI application! [/bold magenta]")
-    console.print("[white]PyPSA-Earth is the first open-source global cross-sectoral energy system model " \
-    "with high spatial and temporal resolution. The workflow provide capabilities for modelling the energy systems of" \
-    " any country in the world, enabling large-scale collaboration and transparent analysis for an inclusive and " \
-    "sustainable energy future. PyPSA-Earth is suitable for both operational studies and capacity expansion studies. " \
-    "Its sector-coupled modeling capabilities enable features for the detailed optimization of multi-energy systems, " \
-    "covering electricity, heating, transport, industry, hydrogen and more. [/white]")
-    console.print(style="dim") 
-    
+    console.rule(
+        "[bold magenta]🚀 Welcome to PyPSA-Earth config CLI application! [/bold magenta]"
+    )
+    console.print(
+        "[white]PyPSA-Earth is the first open-source global cross-sectoral energy system model "
+        "with high spatial and temporal resolution. The workflow provide capabilities for modelling the energy systems of"
+        " any country in the world, enabling large-scale collaboration and transparent analysis for an inclusive and "
+        "sustainable energy future. PyPSA-Earth is suitable for both operational studies and capacity expansion studies. "
+        "Its sector-coupled modeling capabilities enable features for the detailed optimization of multi-energy systems, "
+        "covering electricity, heating, transport, industry, hydrogen and more. [/white]"
+    )
+    console.print(style="dim")
+
     menu_items = [
-        {"num": "1", "name": "Setup & activate environment", "desc": "Setup python environment using conda"},
-        {"num": "2", "name": "Edit config parameters", "desc": "Edit config parameters"},
-        {"num": "3", "name": "Run model", "desc": "Trigger snakemake workflow to run PyPSA-Earth model"},
+        {
+            "num": "1",
+            "name": "Setup & activate environment",
+            "desc": "Setup python environment using conda",
+        },
+        {
+            "num": "2",
+            "name": "Edit config parameters",
+            "desc": "Edit config parameters",
+        },
+        {
+            "num": "3",
+            "name": "Run model",
+            "desc": "Trigger snakemake workflow to run PyPSA-Earth model",
+        },
         {"num": "4", "name": "Exit", "desc": "Close the application"},
     ]
 
@@ -167,14 +197,16 @@ def main(ctx: typer.Context):
     # Print the menu title and options
     console.rule("[bold magenta] MAIN MENU [/bold magenta]")
     console.print(Columns(panels, padding=(1, 2)))
-    choice=ask("Select option 1-4 to proceed further")
+    choice = ask("Select option 1-4 to proceed further")
 
     if choice == "2":
         config_setup()
     else:
-        console.print("[bold magenta] Feature still under development. Please check again later [/bold magenta]")
+        console.print(
+            "[bold magenta] Feature still under development. Please check again later [/bold magenta]"
+        )
         raise typer.Exit()
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     app()
