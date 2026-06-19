@@ -3,6 +3,7 @@ on:
   push:
     paths:
     - envs/environment.yaml
+    - pixi.toml
   schedule:
   - cron: "0 8 1,16 * *" # Bi-weekly
   workflow_dispatch:
