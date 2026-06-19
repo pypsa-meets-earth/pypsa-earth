@@ -1,4 +1,8 @@
+from enum import Enum
+from pathlib import Path
+
 import typer
+import yaml
 from rich.console import Console
 from rich.panel import Panel
 from rich.columns import Columns
@@ -6,7 +10,8 @@ import yaml
 from enum import Enum
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
-console=Console()
+console = Console()
+
 
 class UserGroup(str, Enum):
     beg = "Beginner"
@@ -36,32 +41,34 @@ def save_config_file(config_path: str, config_data: dict[dict]) -> None:
         print(f"Saved the file to {config_path}")
 
 
-def flatten_dict(nested_dict: dict, separator: str = ".", current_path: str = "") -> dict:
+def flatten_dict(
+    nested_dict: dict, separator: str = ".", current_path: str = ""
+) -> dict:
     """Recursively flattens a nested dictionary using a path separator."""
     flat_map = {}
-    
+
     for key, value in nested_dict.items():
         # Build the new key path string
         new_path = f"{current_path}{separator}{key}" if current_path else str(key)
-        
+
         # If the value is another dictionary, dig deeper recursively
         if isinstance(value, dict) and value:
             flat_map.update(flatten_dict(value, separator, new_path))
         else:
             # Leaf node reached, map it to the flattened key
             flat_map[new_path] = value
-            
+
     return flat_map
 
 
 def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
     """Converts a flat dictionary with delimited keys back into a nested dictionary."""
     nested_dict = {}
-    
+
     for flat_key, value in flat_dict.items():
         # Split the path string into individual keys
         keys = flat_key.split(separator)
-        
+
         # Traverse down or build the nested dictionary layers
         current_layer = nested_dict
         for key in keys[:-1]:
@@ -69,10 +76,10 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
             if key not in current_layer or not isinstance(current_layer[key], dict):
                 current_layer[key] = {}
             current_layer = current_layer[key]
-            
+
         # Assign the actual value to the final leaf key
         current_layer[keys[-1]] = value
-        
+
     return nested_dict
 
 @app.command("config-setup")
