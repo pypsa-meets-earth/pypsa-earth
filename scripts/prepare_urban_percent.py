@@ -25,7 +25,7 @@ def download_urban_percent():
     https://unctadstat.unctad.org/datacentre/
     as a .7z file. The dataset contains urban percent for most countries from 1950 and predictions until 2050.
     """
-    url = "https://unctadstat-api.unctad.org/api/reportMetadata/US.PopTotal/bulkfile/355/en"
+    url = "https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal"
 
     # Make a GET request to the URL
     response = requests.get(url)
