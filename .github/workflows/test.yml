@@ -7,6 +7,12 @@ on:
   pull_request:
     branches:
     - main
+    paths-ignore:
+    - "doc/**"
+    - "**.md"
+    - "**.rst"
+    - "mkdocs.yml"
+    - ".readthedocs.yaml"
   schedule:
   - cron: "0 5 * * TUE"
 
@@ -39,7 +45,7 @@ jobs:
         shell: bash -l {0}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Use base env file if it was changed
       run: |

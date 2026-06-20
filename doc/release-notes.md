@@ -12,6 +12,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
+
+* Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
+
 * Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
 
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
@@ -30,7 +34,29 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove unused override_respot [PR #1805](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1805)
 
+* Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
+
 **Minor Changes and bug-fixing**
+
+* Replace deprecated UNCTAD urban population download endpoint in `prepare_urban_percent.py` [PR #1881](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1881)
+
+* Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)
+
+* Adjusted the code to be more robust [#1812](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1812)
+
+* Avoid crash in `add_chp_constraints` when the network has no links, supporting operational models without brownfield/expandable batteries, pumped storage, or DC links [#1750](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1750)
+
+* Add error when emission_extractor fails [PR #1856](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1856)
+
+* Generalize the hard-coded legacy name `africa_shape` [PR #1848](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1848)
+
+* Reduce execution time of CI tests [PR #1819](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1819)
+
+* Avoid crash in `build_osm_network` when merging substations with the same `station_id` if `tag_substation` or `symbol` contains missing OSM metadata [PR #1818](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1818)
+
+* Add CI to update reference objective values [PR #1811](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1811)
+
+* Fix `UnboundLocalError` and back-pressure RHS leak in `add_chp_constraints` [#1814](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1814)
 
 * Add config parameter `enable_electricity_connection_cost`, which adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network [PR #1810](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1810)
 
@@ -93,6 +119,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Dissolve geometries with duplicated GADM IDs, typical of regions with contested regions [PR #1759](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1759)
 
 * Add unit testing [PR #1811](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1811) by leveraging on past work [PR 1083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1083), [PR 1209](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1209) and [test branches](https://github.com/ekatef/pypsa-earth/tree/unit_testing_draft)
+
+* Update contribution guide [PR #1803](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1803)
+
+* Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
 
 # PyPSA-Earth 0.8.0
 
