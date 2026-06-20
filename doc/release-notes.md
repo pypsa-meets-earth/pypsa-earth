@@ -40,6 +40,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Replace deprecated UNCTAD urban population download endpoint in `prepare_urban_percent.py` [PR #1881](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1881)
+
+* Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)
+
 * Adjusted the code to be more robust [#1812](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1812)
 
 * Avoid crash in `add_chp_constraints` when the network has no links, supporting operational models without brownfield/expandable batteries, pumped storage, or DC links [#1750](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1750)
@@ -118,6 +122,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update contribution guide [PR #1803](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1803)
 
+* Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
 
 # PyPSA-Earth 0.8.0
 
