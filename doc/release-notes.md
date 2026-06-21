@@ -38,6 +38,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix broken EDGAR v6.0 download URL and externalize CO2 emission data retrieval into dedicated `retrieve_emissions` and `build_co2_emissions` Snakemake rules; update `emission_extractor` in `prepare_network.py` to read the pre-built CSV [PR #1877](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1877)
+
 * Replace deprecated UNCTAD urban population download endpoint in `prepare_urban_percent.py` [PR #1881](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1881)
 
 * Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)

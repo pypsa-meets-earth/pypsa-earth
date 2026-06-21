@@ -5,6 +5,8 @@
 
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import calendar
 import io
 import logging
@@ -48,6 +50,8 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+
+cc = coco.CountryConverter()
 
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
@@ -617,6 +621,89 @@ def three_2_two_digits_country(three_code_country):
 
     two_code_country = coco.convert(three_code_country, to="ISO2")
     return two_code_country
+
+
+def convert_country_codes(
+    country_codes: pd.Series | list[str],
+    src: str | None,
+    to: str,
+) -> pd.Series | list[str]:
+    """
+    Convert country codes for a Series or list.
+
+    Parameters
+    ----------
+    country_codes: pandas.Series or list
+        Country codes to convert.
+    src: str or None, default None
+        Source format. If None, country_converter auto-detects the source.
+    to: str, default "ISO3"
+        Target format.
+
+    Returns
+    ----------
+    converted_country_codes: pandas.Series or list
+        Converted country codes.
+    """
+    custom_codes = {
+        ("SEN-GMB", "ISO2"): "SN-GM",
+        ("SEN-GMB", "ISO3"): "SEN-GMB",
+        ("SN-GM", "ISO2"): "SN-GM",
+        ("SN-GM", "ISO3"): "SEN-GMB",
+    }
+
+    if isinstance(country_codes, pd.Series):
+        input_codes = country_codes
+        return_series = True
+    elif isinstance(country_codes, list):
+        input_codes = pd.Series(country_codes)
+        return_series = False
+    else:
+        raise ValueError(
+            "Input must be a pandas Series or list containing country codes."
+        )
+
+    converted_country_codes = pd.Series(index=input_codes.index, dtype=object)
+    custom_code_values = input_codes.map(lambda code: custom_codes.get((code, to)))
+    custom_mask = custom_code_values.notna()
+
+    converted_country_codes.loc[custom_mask] = custom_code_values.loc[custom_mask]
+
+    convert_mask = ~custom_mask
+    if convert_mask.any():
+        converted_codes = cc.convert(
+            names=input_codes.loc[convert_mask].to_list(),
+            src=src,
+            to=to,
+        )
+        if isinstance(converted_codes, str):
+            converted_codes = [converted_codes]
+        converted_country_codes.loc[convert_mask] = converted_codes
+
+    if return_series:
+        converted_country_codes.name = country_codes.name
+        return converted_country_codes
+
+    return converted_country_codes.to_list()
+
+
+def three_2_two_digits_countries(
+    three_code_countries: pd.Series | list[str],
+) -> pd.Series | list[str]:
+    """
+    Convert 3-digit to 2-digit country codes for a Series or list.
+
+    Parameters
+    ----------
+    three_code_countries: pandas.Series or list
+        3-digit country names
+
+    Returns
+    ----------
+    two_code_countries: pandas.Series or list
+        2-digit country names
+    """
+    return convert_country_codes(three_code_countries, src=None, to="ISO2")
 
 
 def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_words=[]):
