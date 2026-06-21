@@ -1,7 +1,7 @@
 plotting:
   map:
     figsize: [7, 7]
-    boundaries: [-4.0, 2.0, 4.0, 12.0] #for Ghana specific boundaries
+    boundaries: [-10.2, 29, 35, 72]
     p_nom:
       bus_size_factor: 5.e+4
       linewidth_factor: 3.e+3
