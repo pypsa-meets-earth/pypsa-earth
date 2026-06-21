@@ -19,7 +19,7 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup conda
       uses: conda-incubator/setup-miniconda@v4
@@ -78,7 +78,7 @@ jobs:
     needs: update-locked-environment
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Download all artifacts
       uses: actions/download-artifact@v8
       with:
