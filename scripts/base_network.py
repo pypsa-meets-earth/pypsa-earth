@@ -280,7 +280,7 @@ def _get_linetypes_config(line_types, voltages):
         Dictionary of linetypes for selected voltages.
     """
     # Warn only if line types are configured for voltages that are not selected.
-    unknown_linetype_voltages = set(line_types) - set(voltages)
+    unknown_linetype_voltages = set(voltages) - set(line_types)
     if unknown_linetype_voltages:
         logger.warning(
             "Line types defined for voltages not selected in the configuration: "
