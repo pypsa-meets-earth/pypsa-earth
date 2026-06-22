@@ -251,14 +251,17 @@ if __name__ == "__main__":
 
     # update_config_from_wildcards(snakemake.config, snakemake.wildcards)
 
-    options = snakemake.params.sector
+    is_sector_coupled = "sopts" in snakemake.wildcards.keys()
 
     baseyear = snakemake.params.baseyear
 
     n = pypsa.Network(snakemake.input.network)
 
-    # define spatial resolution of carriers
-    spatial = define_spatial(n.buses[n.buses.carrier == "AC"].index, options)
+    if is_sector_coupled:
+        sector_options = snakemake.params.sector
+        # define spatial resolution of carriers
+        spatial = define_spatial(n.buses[n.buses.carrier == "AC"].index, sector_options)
+
     add_build_year_to_new_assets(n, baseyear)
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0

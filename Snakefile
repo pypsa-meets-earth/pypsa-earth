@@ -971,7 +971,10 @@ def memory(w):
         return int(factor * (10000 + 195 * int(w.clusters)))
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
+if (
+    config["foresight"] != "myopic"
+    and config["monte_carlo"]["options"].get("add_to_snakefile", False) == False
+):
 
     rule solve_network:
         params:
@@ -1011,7 +1014,10 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             "scripts/solve_network.py"
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+if (
+    config["foresight"] != "myopic"
+    and config["monte_carlo"]["options"].get("add_to_snakefile", False) == True
+):
 
     rule monte_carlo:
         params:
@@ -2238,12 +2244,23 @@ if config["foresight"] == "myopic":
         i = planning_horizons.index(int(w.planning_horizons))
         planning_horizon_p = str(planning_horizons[i - 1])
 
-        return (
-            RESDIR
-            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
-            + planning_horizon_p
-            + "_{discountrate}_{demand}_{h2export}export.nc"
-        )
+        if getattr(w, "sopts", None) is not None:
+            # sector-coupled
+            return (
+                RESDIR
+                + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
+                + planning_horizon_p
+                + "_{discountrate}_{demand}_{h2export}export.nc"
+            )
+        else:
+            # electricity-only
+            return (
+                "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_"
+                + planning_horizon_p
+                + ".nc"
+            )
 
     rule add_brownfield:
         params:
@@ -2342,6 +2359,113 @@ if config["foresight"] == "myopic":
                 **config["scenario"],
                 **config["costs"],
                 **config["export"],
+            ),
+
+    # ============== Electricity-only myopic optimisation rules ==============
+    rule add_existing_baseyear_elec:
+        params:
+            baseyear=config["scenario"]["planning_horizons"][0],
+        input:
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        output:
+            "networks/"
+            + RDIR
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        wildcard_constraints:
+            planning_horizons=config["scenario"]["planning_horizons"][0],  # baseyear only
+        threads: 1
+        resources:
+            mem_mb=2000,
+        log:
+            "logs/"
+            + RDIR
+            + "add_existing_baseyear_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "add_existing_baseyear_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            )
+        script:
+            "scripts/add_existing_baseyear.py"
+
+    rule add_brownfield_elec:
+        params:
+            threshold_capacity=config["existing_capacities"]["threshold_capacity"],
+        input:
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            # solved network at previous time step
+            network_p=solved_previous_horizon,
+        output:
+            "networks/"
+            + RDIR
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        threads: 1
+        resources:
+            mem_mb=4000,
+        log:
+            "logs/"
+            + RDIR
+            + "add_brownfield_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "add_brownfield_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            )
+        script:
+            "scripts/add_brownfield.py"
+
+    ruleorder: add_existing_baseyear_elec > add_brownfield_elec
+
+    rule solve_network:
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
+        input:
+            network="networks/"
+            + RDIR
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],
+        output:
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        log:
+            solver=os.path.normpath(
+                "logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log"
+            ),
+            python="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            )
+        threads: 20
+        resources:
+            mem=memory,
+        shadow:
+            "copy-minimal" if os.name == "nt" else "shallow"
+        script:
+            "scripts/solve_network.py"
+
+    rule solve_all_networks_myopic:
+        input:
+            expand(
+                "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+                **config["scenario"],
             ),
 
 
