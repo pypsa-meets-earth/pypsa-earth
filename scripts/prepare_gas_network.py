@@ -51,6 +51,7 @@ logger = logging.getLogger(__name__)
 import os
 import zipfile
 from pathlib import Path
+from typing import Any, List, Union
 
 import fiona
 import geopandas as gpd
@@ -68,10 +69,9 @@ from build_shapes import gadm
 from matplotlib.lines import Line2D
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely.geometry import LineString, Point, MultiLineString
+from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
-from typing import List, Union, Any
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -442,7 +442,9 @@ def prepare_IGGIELGN_data(
     return df
 
 
-def load_bus_region(onshore_path: str, pipelines: gpd.GeoDataFrame) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
+def load_bus_region(
+    onshore_path: str, pipelines: gpd.GeoDataFrame
+) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Load pypsa-earth-sec onshore regions.
 
@@ -535,7 +537,9 @@ def get_states_in_order(
     return states_p
 
 
-def parse_states(pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def parse_states(
+    pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
     """
     Parse which onshore regions each pipeline traverses.
 
@@ -573,7 +577,9 @@ def parse_states(pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFr
 
 
 def cluster_gas_network(
-    pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFrame, length_factor: float
+    pipelines: gpd.GeoDataFrame,
+    bus_regions_onshore: gpd.GeoDataFrame,
+    length_factor: float,
 ) -> pd.DataFrame:
     """
     Aggregate interstate gas pipelines to bus-region clusters.

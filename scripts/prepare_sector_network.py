@@ -3058,7 +3058,9 @@ def add_dac(n: pypsa.Network, costs: pd.DataFrame) -> None:
     )
 
 
-def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame) -> None:
+def add_services(
+    n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame
+) -> None:
     """
     Add services sector to the network.
 
@@ -3167,7 +3169,9 @@ def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFr
     )
 
 
-def add_agriculture(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str) -> None:
+def add_agriculture(
+    n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str
+) -> None:
     """
     Add agriculture to the pypsa network.
 
@@ -3270,7 +3274,9 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     )
 
 
-def add_residential(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame) -> None:
+def add_residential(
+    n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame
+) -> None:
     """
     Add residential sector to the network
 
