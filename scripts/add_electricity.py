@@ -283,12 +283,6 @@ def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=Fal
         length_factor=length_factor,
         simple_hvdc_costs=simple_hvdc_costs,
     )
-    attach_dc_costs(
-        lines_or_links=n.lines,
-        costs=costs,
-        length_factor=length_factor,
-        simple_hvdc_costs=simple_hvdc_costs,
-    )
 
 
 def get_grouping_year(build_year: int, grouping_years: list) -> int:
