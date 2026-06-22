@@ -1,6 +1,13 @@
-from enum import Enum
-from pathlib import Path
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
+"""
+This script provides the basis to run a CLI to help users navigate through PyPSA-Earth
+
+"""
+from enum import Enum
 import typer
 import yaml
 from rich.console import Console
@@ -13,20 +20,42 @@ app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the 
 console = Console()
 
 
-class UserGroup(str, Enum):
-    beg = "Beginner"
-    mod = "Modeller"
-    client = "Client"
-    custom = "Custom"
-
 def ask(text: str, default: str="") -> str:
+    """
+    Styling for the typer prompt
+
+    Parameters
+    ----------
+    text: str
+        Text to be shown in the prompt
+    default: str
+        The default values for the prompt
+
+    Returns:
+    str
+        Stylized text for the prompt
+    """
     styled_text = typer.style(f"➔ {text}", fg=typer.colors.YELLOW, bold=True)
     if default != "":
         return typer.prompt(styled_text, default=default)
     else:
         return typer.prompt(styled_text)
+    
 
 def load_config_file(config_path: str) -> dict:
+    """
+    Load configuration file
+
+    Parameters
+    ----------
+    config_path: str
+        Path to the config file to be loaded
+    
+    Returns
+    -------
+    dict: 
+        loaded config data
+    """
     with open(config_path, "r") as file:
         try:
             config = yaml.safe_load(file)
@@ -36,6 +65,20 @@ def load_config_file(config_path: str) -> dict:
 
 
 def save_config_file(config_path: str, config_data: dict[dict]) -> None:
+    """
+    Save a nested dictionary as a config file
+
+    Parameters
+    ----------
+    config_path: str
+        Path to save the config file to
+    config_data: dict[dict]
+        Nested dictionary of updated config values
+
+    Returns
+    -------
+    None
+    """
     with open(config_path, "w") as file:
         yaml.safe_dump(config_data, file, default_flow_style=False)
         print(f"Saved the file to {config_path}")
@@ -44,7 +87,21 @@ def save_config_file(config_path: str, config_data: dict[dict]) -> None:
 def flatten_dict(
     nested_dict: dict, separator: str = ".", current_path: str = ""
 ) -> dict:
-    """Recursively flattens a nested dictionary using a path separator."""
+    """
+    Recursively flattens a nested dictionary using a path separator.
+    
+    Parameters
+    ----------
+    nested_dict: dict
+        Nested dictionary of config values
+    separator: str
+        Separator when flattening a dict
+
+    Returns
+    -------
+    dict
+        Flattening of nested dictionary 
+    """
     flat_map = {}
 
     for key, value in nested_dict.items():
@@ -62,7 +119,20 @@ def flatten_dict(
 
 
 def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
-    """Converts a flat dictionary with delimited keys back into a nested dictionary."""
+    """
+    Converts a flat dictionary with delimited keys back into a nested dictionary.
+    
+    Parameters
+    ----------
+    flat_dict: dict
+        Flattened dictionary
+    separator: str
+        Separator string
+
+    Returns
+    --------
+    Unflattened nested dictionary
+    """
     nested_dict = {}
 
     for flat_key, value in flat_dict.items():
@@ -91,7 +161,7 @@ def config_setup():
     user_groups_path="user_groups.yaml"
     user_groups_config=load_config_file(user_groups_path)
     # Prompt user to identify his/her user group
-    user_group=ask("Select user group", default=[x.value for x in UserGroup])
+    user_group=ask("Select user group", default=list(user_groups_config.keys()))
 
     # Prompt user for config file locations
     config_path=ask("Enter config file name to modify", default="config.default.yaml")
