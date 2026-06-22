@@ -14,16 +14,16 @@ Relevant Settings
 
     sector:
         enable:
-            heat: 
-            biomass: 
-            industry: 
-            shipping: 
-            aviation: 
-            land_transport: 
-            rail_transport: 
-            agriculture: 
-            residential: 
-            services: 
+            heat:
+            biomass:
+            industry:
+            shipping:
+            aviation:
+            land_transport:
+            rail_transport:
+            agriculture:
+            residential:
+            services:
 
         gas:
             spatial_gas:
@@ -49,10 +49,10 @@ Relevant Settings
             shift_to_elec:
 
         lignite:
-            spatial_lignite: 
+            spatial_lignite:
 
         oil:
-            spatial_oil: 
+            spatial_oil:
 
         ammonia:
             enable:
@@ -193,17 +193,17 @@ Inputs
 - ``resources/{SECDIR}/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: District heat share per node for heat sector if enabled.
 
 - ``resources/{RDIR}/solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv``: Solar rooftop layout per country if enabled.
-    
+
 - ``networks/{RDIR}/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: PyPSA network file for electricity sector.
 
 - ``resources/{RDIR}/costs_{planning_horizons}_sec.csv``: Cost parameters for sector technologies.
-    
+
 - ``data/hydrogen_salt_cavern_potentials.csv``: Hydrogen salt cavern potentials per country.
 
 - ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal energy totals if rail transport or agriculture sector is enabled.
 
 - ``resources/{SECDIR}/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv``: Population layout per node.
-    
+
 - ``resources/{SECDIR}/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Industrial energy demand per node if industry sector is enabled.
 
 - ``resources/{SECDIR}/energy_totals_{demand}_{planning_horizons}.csv``: Energy totals per sector
@@ -273,7 +273,7 @@ logger = logging.getLogger(__name__)
 spatial = SimpleNamespace()
 
 
-def add_carrier_buses(n: pypsa.Network, carrier: str, nodes:list = None) -> None:
+def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> None:
     """
     Add buses to connect e.g. coal, nuclear and oil plants.
 
@@ -327,7 +327,6 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes:list = None) -> None
 
 
 def add_electricity_grid_connection(n: pypsa.Network, costs: pd.DataFrame) -> None:
-    
     """
     Add electricity grid connection costs for solar and wind generators
 
@@ -1502,7 +1501,9 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
         )
 
 
-def add_aviation(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, airports_fn: str) -> None:
+def add_aviation(
+    n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, airports_fn: str
+) -> None:
     """
     Add aviation demand and emissions to the sector network.
 
@@ -1782,7 +1783,9 @@ def h2_hc_conversions(n: pypsa.Network, costs: pd.DataFrame) -> None:
         )
 
 
-def add_shipping(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, ports_fn: str) -> None:
+def add_shipping(
+    n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, ports_fn: str
+) -> None:
     """
     Add shipping technologies to the sector model
 
@@ -1951,9 +1954,7 @@ def add_shipping(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFr
 
 
 def add_industry(
-    n: pypsa.Network,
-    costs: pd.DataFrame,
-    industrial_demand_fn: str
+    n: pypsa.Network, costs: pd.DataFrame, industrial_demand_fn: str
 ) -> None:
     """
     Add industrial technologies and industrial demands to the sector network
@@ -2392,7 +2393,7 @@ def add_land_transport(
         File path to the demand-side management profile data file for electric vehicles.
     nodal_transport_data_fn: str
         File path to the nodal transport data file containing information such as the number of cars.
-    
+
     Returns
     -------
     None
@@ -2649,7 +2650,7 @@ def add_heat(
 ) -> None:
     """
     Add heat sector to the network
-    
+
     Parameters
     ----------
     n: pypsa.Network
@@ -2976,7 +2977,6 @@ def add_heat(
 
 
 def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
-
     """
     Resample the network to a lower temporal resolution by averaging every n hours.
 
@@ -3061,7 +3061,7 @@ def add_dac(n: pypsa.Network, costs: pd.DataFrame) -> None:
 def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame) -> None:
     """
     Add services sector to the network.
-    
+
     Parameters
     ----------
     n : pypsa.Network
@@ -3446,7 +3446,7 @@ def add_electricity_distribution_grid(n: pypsa.Network, costs: pd.DataFrame) -> 
         The PyPSA network to which the electricity distribution grid will be added
     costs: pd.DataFrame
         DataFrame containing cost information for electricity distribution grid technology
-    
+
     Returns
     -------
     None
@@ -3624,7 +3624,12 @@ def add_electricity_distribution_grid(n: pypsa.Network, costs: pd.DataFrame) -> 
         )
 
 
-def add_co2_budget(n: pypsa.Network, co2_budget:dict, investment_year: int, elec_opts: dict) -> None:
+def add_co2_budget(
+    n: pypsa.Network,
+    co2_budget: dict,
+    investment_year: int,
+    elec_opts: dict,
+) -> None:
     """
     Add CO2 budget constraint to the network based on the specified co2_budget parameters.
 
@@ -3689,7 +3694,7 @@ def add_custom_water_cost(n: pypsa.Network) -> None:
     ----------
     n: pypsa.Network
         The PyPSA network to which the custom water cost will be added.
-    
+
     Returns
     -------
     None
@@ -3718,7 +3723,9 @@ def add_custom_water_cost(n: pypsa.Network) -> None:
         # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
 
-def add_rail_transport(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str) -> None:
+def add_rail_transport(
+    n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str
+) -> None:
     """
     Add rail transport sector to the network based on nodal energy totals for rail transport.
 
@@ -3855,7 +3862,9 @@ def convert_conventional_generators_to_links(
         n.carriers.loc[fuel_carrier, "co2_emissions"] = 0
 
 
-def remove_carrier_related_components(n: pypsa.Network, carriers_to_drop: list[str]) -> None:
+def remove_carrier_related_components(
+    n: pypsa.Network, carriers_to_drop: list[str]
+) -> None:
     """
     Removes carrier related components, such as "Carrier", "Generator", "Link", "Store", and "Storage Unit"
 
