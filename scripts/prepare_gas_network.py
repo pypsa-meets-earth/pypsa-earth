@@ -68,9 +68,10 @@ from build_shapes import gadm
 from matplotlib.lines import Line2D
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, MultiLineString
 from shapely.ops import unary_union
 from shapely.validation import make_valid
+from typing import List, Union, Any
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
 
-def download_IGGIELGN_gas_network():
+def download_IGGIELGN_gas_network() -> None:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
@@ -116,7 +117,7 @@ def download_IGGIELGN_gas_network():
     logger.info(f"Gas infrastructure data available in '{to_fn}'.")
 
 
-def download_GGIT_gas_network():
+def download_GGIT_gas_network() -> pd.DataFrame:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
@@ -135,7 +136,7 @@ def download_GGIT_gas_network():
     return GGIT_gas_pipeline
 
 
-def diameter_to_capacity(pipe_diameter_mm):
+def diameter_to_capacity(pipe_diameter_mm: int) -> int:
     """
     Calculate pipe capacity in MW based on diameter in mm.
 
@@ -146,6 +147,16 @@ def diameter_to_capacity(pipe_diameter_mm):
 
     Based on p.15 of
     https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
+
+    Parameters
+    ----------
+    pipe_diameter_mm: int
+        Diameter of gas pipeline in mm
+
+    Returns
+    -------
+    int
+        Pipe capacity in MW
     """
     # slopes definitions
     m0 = (1500 - 0) / (500 - 0)
@@ -169,7 +180,7 @@ def diameter_to_capacity(pipe_diameter_mm):
         return a3 + m3 * pipe_diameter_mm
 
 
-def inch_to_mm(len_inch):
+def inch_to_mm(len_inch: float) -> float:
     """
     Convert a length from inches to millimetres.
 
@@ -186,7 +197,7 @@ def inch_to_mm(len_inch):
     return len_inch / 0.0393701
 
 
-def bcm_to_MW(cap_bcm):
+def bcm_to_MW(cap_bcm: float) -> float:
     """
     Convert volumetric capacity in bcm/year to power in MW.
 
@@ -203,7 +214,7 @@ def bcm_to_MW(cap_bcm):
     return cap_bcm * 9769444.44 / 8760
 
 
-def correct_Diameter_col(value):
+def correct_Diameter_col(value: Any) -> float:
     """
     Parse and average compound pipeline diameter values.
 
@@ -232,7 +243,7 @@ def correct_Diameter_col(value):
         return float(value)
 
 
-def prepare_GGIT_data(GGIT_gas_pipeline):
+def prepare_GGIT_data(GGIT_gas_pipeline: pd.DataFrame) -> gpd.GeoDataFrame:
     """
     Clean and normalise the GGIT pipeline dataset.
 
@@ -299,13 +310,13 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     return df
 
 
-def load_IGGIELGN_data(fn):
+def load_IGGIELGN_data(fn: Path) -> gpd.GeoDataFrame:
     """
     Load and flatten the IGGIELGN gas pipeline dataset.
 
     Parameters
     ----------
-    fn : str or pathlib.Path
+    fn : pathlib.Path
         Path to the IGGIELGN GeoJSON/GeoPackage file.
 
     Returns
@@ -326,12 +337,12 @@ def load_IGGIELGN_data(fn):
 
 
 def prepare_IGGIELGN_data(
-    df,
-    length_factor=1.5,
-    correction_threshold_length=4,
-    correction_threshold_p_nom=8,
-    bidirectional_below=10,
-):  # Taken from pypsa-eur and adapted
+    df: gpd.GeoDataFrame,
+    length_factor: float = 1.5,
+    correction_threshold_length: float = 4,
+    correction_threshold_p_nom: float = 8,
+    bidirectional_below: float = 10,
+) -> gpd.GeoDataFrame:  # Taken from pypsa-eur and adapted
     """
     Process IGGIELGN pipeline data and infer missing attributes.
 
@@ -431,11 +442,24 @@ def prepare_IGGIELGN_data(
     return df
 
 
-def load_bus_region(onshore_path, pipelines):
+def load_bus_region(onshore_path: str, pipelines: gpd.GeoDataFrame) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Load pypsa-earth-sec onshore regions.
 
     TODO: Think about including Offshore regions but only for states that have offshore pipelines.
+    Parameters
+    ----------
+    onshore_path: str
+        Path to the onshore regions shapefile.
+    pipelines: gpd.GeoDataFrame
+        GeoDataFrame of the pipeline data.
+
+    Returns:
+        bus_regions_onshore: gpd.GeoDataFrame
+            GeoDataFrame of onshore bus regions with a `gadm_id` column.
+        country_borders: gpd.GeoDataFrame
+            Merged onshore region geodataframe.
+
     """
     bus_regions_onshore = gpd.read_file(onshore_path)
     # Convert CRS to EPSG:3857 so we can measure distances
@@ -453,7 +477,10 @@ def load_bus_region(onshore_path, pipelines):
     return bus_regions_onshore, country_borders
 
 
-def get_states_in_order(pipeline, bus_regions_onshore):
+def get_states_in_order(
+    pipeline: Union[LineString, MultiLineString],
+    bus_regions_onshore: gpd.GeoDataFrame,
+) -> list[str]:
     """
     Determine the ordered onshore regions traversed by a pipeline.
 
@@ -470,7 +497,7 @@ def get_states_in_order(pipeline, bus_regions_onshore):
         Ordered list of `gadm_id` values for the regions intersected by the
         pipeline geometry.
     """
-    states_p = []
+    states_p: List[str] = []
 
     if pipeline.geom_type == "LineString":
         # Interpolate points along the LineString with a given step size (e.g., 5)
@@ -508,7 +535,7 @@ def get_states_in_order(pipeline, bus_regions_onshore):
     return states_p
 
 
-def parse_states(pipelines, bus_regions_onshore):
+def parse_states(pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Parse which onshore regions each pipeline traverses.
 
@@ -545,11 +572,13 @@ def parse_states(pipelines, bus_regions_onshore):
     return pipelines
 
 
-def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
+def cluster_gas_network(
+    pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFrame, length_factor: float
+) -> pd.DataFrame:
     """
     Aggregate interstate gas pipelines to bus-region clusters.
 
-    This function drops purely intrastate pipelines, splits interstate
+    This function drops purely intrastatal pipelines, splits interstate
     pipelines by region overlay, aggregates capacity by region pairs, and
     computes a representative line length and GWkm metric.
 
@@ -611,7 +640,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     df_exploded.reset_index(drop=True, inplace=True)
 
     # Custom function to check if value in column 'gadm_id' exists in either column 'bus0' or column 'bus1'
-    def check_existence(row):
+    def check_existence(row: pd.Series) -> bool:
         return row["gadm_id"] in [row["bus0"], row["bus1"]]
 
     # Apply the custom function to each row and keep only the rows that satisfy the condition

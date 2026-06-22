@@ -2374,7 +2374,7 @@ def add_land_transport(
     avail_profile_fn: str,
     dsm_profile_fn: str,
     nodal_transport_data_fn: str,
-):
+) -> None:
     """
     Function to add land transport to network.
 
@@ -2576,7 +2576,7 @@ def add_land_transport(
         )
 
 
-def create_nodes_for_heat_sector(district_heat_share: pd.DataFrame):
+def create_nodes_for_heat_sector(district_heat_share: pd.DataFrame) -> tuple:
     """
     Create nodes for the heat sector based on population layout and district heating share.
 
@@ -2646,7 +2646,7 @@ def add_heat(
     gshp_cop_fn: str,
     ashp_cop_fn: str,
     district_heat_share_fn: str,
-):
+) -> None:
     """
     Add heat sector to the network
     
@@ -3013,7 +3013,7 @@ def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
     return m
 
 
-def add_dac(n: pypsa.Network, costs: pd.DataFrame):
+def add_dac(n: pypsa.Network, costs: pd.DataFrame) -> None:
     """
     Add direct air capture (DAC) technology to the network.
 
@@ -3058,7 +3058,7 @@ def add_dac(n: pypsa.Network, costs: pd.DataFrame):
     )
 
 
-def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame):
+def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame) -> None:
     """
     Add services sector to the network.
     
@@ -3167,7 +3167,7 @@ def add_services(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFr
     )
 
 
-def add_agriculture(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str):
+def add_agriculture(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str) -> None:
     """
     Add agriculture to the pypsa network.
 
@@ -3270,7 +3270,7 @@ def p_set_from_scaling(col, scaling, energy_totals, nhours):
     )
 
 
-def add_residential(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame):
+def add_residential(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame) -> None:
     """
     Add residential sector to the network
 
@@ -3436,7 +3436,7 @@ def add_residential(n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.Dat
     )
 
 
-def add_electricity_distribution_grid(n: pd.DataFrame, costs: pd.DataFrame):
+def add_electricity_distribution_grid(n: pypsa.Network, costs: pd.DataFrame) -> None:
     """
     Add electricity distribution grid to the network
 
@@ -3624,7 +3624,7 @@ def add_electricity_distribution_grid(n: pd.DataFrame, costs: pd.DataFrame):
         )
 
 
-def add_co2_budget(n: pd.DataFrame, co2_budget: pd.DataFrame, investment_year: int, elec_opts: pd.DataFrame):
+def add_co2_budget(n: pypsa.Network, co2_budget:dict, investment_year: int, elec_opts: dict) -> None:
     """
     Add CO2 budget constraint to the network based on the specified co2_budget parameters.
 
@@ -3681,7 +3681,7 @@ def add_co2_budget(n: pd.DataFrame, co2_budget: pd.DataFrame, investment_year: i
     add_co2limit(n, annual_emissions, Nyears)
 
 
-def add_custom_water_cost(n: pypsa.Network):
+def add_custom_water_cost(n: pypsa.Network) -> None:
     """
     Add custom water cost to the network based on country-specific water cost data.
 
@@ -3718,7 +3718,7 @@ def add_custom_water_cost(n: pypsa.Network):
         # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
 
-def add_rail_transport(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str):
+def add_rail_transport(n: pypsa.Network, costs: pd.DataFrame, nodal_energy_totals_fn: str) -> None:
     """
     Add rail transport sector to the network based on nodal energy totals for rail transport.
 
