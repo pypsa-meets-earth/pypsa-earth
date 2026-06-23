@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Integrate `planning_horizon` wildcard into electricity-only networks [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
