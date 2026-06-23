@@ -7,6 +7,8 @@
 This script provides the basis to run a CLI to help users navigate through PyPSA-Earth
 
 """
+import subprocess
+import sys
 from enum import Enum
 
 import typer
@@ -329,7 +331,9 @@ def config_setup():
                     subret = True
                     continue
 
-                updated_value=ask(f"Enter the value of {subchoice} to update in the config file")
+                updated_value = ask(
+                    f"Enter the value of {subchoice} to update in the config file"
+                )
                 updated_config[choice][subchoice] = updated_value
         else:
             updated_value = ask(
