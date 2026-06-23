@@ -16,7 +16,8 @@ from rich.columns import Columns
 import yaml
 from InquirerPy import inquirer, get_style
 from InquirerPy.base import Choice
-
+import subprocess
+import sys
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -283,7 +284,7 @@ def config_setup():
                     continue
 
                 updated_value=ask(f"Enter the value of {subchoice} to update in the config file")
-                updated_config[subchoice] = updated_value
+                updated_config[choice][subchoice] = updated_value
         else:
             updated_value=ask(f"Enter the value of {choice} to update in the config file")
             updated_config[choice] = updated_value
@@ -318,6 +319,9 @@ def display_main_menu() -> None:
 
     if choice == "2":
         config_setup()
+    elif choice == "3":
+        subprocess.run([sys.executable, "scripts/non_workflow/databundle_cli.py"])
+        display_main_menu()
     elif choice == "5":
         exit_message()
     else:
