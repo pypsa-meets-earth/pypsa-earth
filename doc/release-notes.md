@@ -122,6 +122,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
 
+* Add module-level and missing function docstrings and type hints to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
