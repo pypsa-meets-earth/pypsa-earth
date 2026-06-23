@@ -7,6 +7,8 @@
 This script provides the basis to run a CLI to help users navigate through PyPSA-Earth
 
 """
+import subprocess
+import sys
 from enum import Enum
 
 import typer
@@ -16,8 +18,6 @@ from InquirerPy.base import Choice
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-import subprocess
-import sys
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -297,7 +297,9 @@ def config_setup():
                     subret = True
                     continue
 
-                updated_value=ask(f"Enter the value of {subchoice} to update in the config file")
+                updated_value = ask(
+                    f"Enter the value of {subchoice} to update in the config file"
+                )
                 updated_config[choice][subchoice] = updated_value
         else:
             updated_value = ask(
