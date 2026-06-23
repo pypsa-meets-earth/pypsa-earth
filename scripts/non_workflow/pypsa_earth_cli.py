@@ -7,6 +7,7 @@
 This script provides the basis to run a CLI to help users navigate through PyPSA-Earth
 
 """
+import os
 import subprocess
 import sys
 from enum import Enum
@@ -18,9 +19,6 @@ from InquirerPy.base import Choice
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-import subprocess
-import sys
-import os
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -226,14 +224,12 @@ def display_user_groups() -> tuple:
 
     # Prompt user to identify his/her user group
     options = []
-    for index, (key, value) in enumerate(
-        user_groups_config.items(), start=1
-    ):
+    for index, (key, value) in enumerate(user_groups_config.items(), start=1):
         display_label = f"{key} : {value}"
         options.append(Choice(value=key, name=display_label))
 
-    title="Select user group (To add more config parameters to a user group, modify user_groups.yaml)"
-    user_group=display_choice_menu(title, options, len(options)+1)
+    title = "Select user group (To add more config parameters to a user group, modify user_groups.yaml)"
+    user_group = display_choice_menu(title, options, len(options) + 1)
     return user_groups_config, user_group
 
 
@@ -248,9 +244,13 @@ def display_config_files() -> dict[dict]:
     """
     # Prompt user for config file locations
     # config_path = ask("Enter config file name", default="config.default.yaml")
-    config_files_list = [f for f in os.listdir(".") if f.endswith('.yaml') and f.startswith('config')]
+    config_files_list = [
+        f for f in os.listdir(".") if f.endswith(".yaml") and f.startswith("config")
+    ]
 
-    config_path=display_choice_menu("Select config file", config_files_list, len(config_files_list)+1)
+    config_path = display_choice_menu(
+        "Select config file", config_files_list, len(config_files_list) + 1
+    )
 
     # console.print(style="dim")
     try:
@@ -293,9 +293,9 @@ def config_setup():
         # Use case choice
         required_height = len(config_options) + 2
 
-        # Iterate through parent config 
-        title="🗺️  Select config option to modify"
-        choice=display_choice_menu(title, config_options, required_height)
+        # Iterate through parent config
+        title = "🗺️  Select config option to modify"
+        choice = display_choice_menu(title, config_options, required_height)
 
         if choice == "return to main menu":
             ret = False
@@ -324,8 +324,10 @@ def config_setup():
                     )
                 )
                 required_height = len(subchoice_options) + 2
-                title="🗺️  Select config option to modify"
-                subchoice=display_choice_menu(title, subchoice_options, required_height)
+                title = "🗺️  Select config option to modify"
+                subchoice = display_choice_menu(
+                    title, subchoice_options, required_height
+                )
 
                 if subchoice == "return":
                     subret = True
@@ -342,8 +344,8 @@ def config_setup():
             updated_config[choice] = updated_value
 
     # # Save updated config file
-    save_file=ask("Do you want to save the updated params to a file ?",['Yes','No'])
-    if save_file == 'Yes':
+    save_file = ask("Do you want to save the updated params to a file ?", ["Yes", "No"])
+    if save_file == "Yes":
         config_save_path = ask(
             f"Enter config file to save updated params to [Press Enter to use default file]",
             default="config.cli_updated.yaml",
