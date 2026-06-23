@@ -1,3 +1,3 @@
-Beginner: ['countries', 'enable', 'run', 'scenario','snapshots']
+Beginner: ['countries', 'enable', 'run', 'scenario', 'snapshots']
 Modeller: ['all']
 Client: ['results_dir', 'summary_dir', 'countries', 'enable', 'custom_data']

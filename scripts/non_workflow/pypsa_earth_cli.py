@@ -8,21 +8,20 @@ This script provides the basis to run a CLI to help users navigate through PyPSA
 
 """
 from enum import Enum
+
 import typer
 import yaml
+from InquirerPy import get_style, inquirer
+from InquirerPy.base import Choice
+from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-from rich.columns import Columns
-import yaml
-from InquirerPy import inquirer, get_style
-from InquirerPy.base import Choice
-
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
 
 
-def ask(text: str, default: str="") -> str:
+def ask(text: str, default: str = "") -> str:
     """
     Styling for the typer prompt
 
@@ -42,13 +41,13 @@ def ask(text: str, default: str="") -> str:
         return typer.prompt(styled_text, default=default)
     else:
         return typer.prompt(styled_text)
-    
+
 
 def exit_message() -> None:
     console.print(style="dim")
     console.print("[bold red] 👋 Exitting the application. [/bold red]")
     raise typer.Exit()
-    
+
 
 def load_config_file(config_path: str) -> dict:
     """
@@ -58,10 +57,10 @@ def load_config_file(config_path: str) -> dict:
     ----------
     config_path: str
         Path to the config file to be loaded
-    
+
     Returns
     -------
-    dict: 
+    dict:
         loaded config data
     """
     with open(config_path, "r") as file:
@@ -97,7 +96,7 @@ def flatten_dict(
 ) -> dict:
     """
     Recursively flattens a nested dictionary using a path separator.
-    
+
     Parameters
     ----------
     nested_dict: dict
@@ -108,7 +107,7 @@ def flatten_dict(
     Returns
     -------
     dict
-        Flattening of nested dictionary 
+        Flattening of nested dictionary
     """
     flat_map = {}
 
@@ -129,7 +128,7 @@ def flatten_dict(
 def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
     """
     Converts a flat dictionary with delimited keys back into a nested dictionary.
-    
+
     Parameters
     ----------
     flat_dict: dict
@@ -173,10 +172,10 @@ def display_user_groups() -> tuple:
         Choice of user group
     """
     # Load user groups
-    user_groups_path="user_groups.yaml"
-    user_groups_config=load_config_file(user_groups_path)
+    user_groups_path = "user_groups.yaml"
+    user_groups_config = load_config_file(user_groups_path)
     # Prompt user to identify his/her user group
-    user_group=ask("Select user group", default=list(user_groups_config.keys()))
+    user_group = ask("Select user group", default=list(user_groups_config.keys()))
     return user_groups_config, user_group
 
 
@@ -190,17 +189,20 @@ def display_config_files() -> dict[dict]:
         Nested config parameters
     """
     # Prompt user for config file locations
-    config_path=ask("Enter config file name", default="config.default.yaml")
-    console.print(style="dim") 
+    config_path = ask("Enter config file name", default="config.default.yaml")
+    console.print(style="dim")
     try:
-        config=load_config_file(config_path)
+        config = load_config_file(config_path)
         return config
     except FileNotFoundError:
-        console.print("[bold red]❌ No such file found. \n Exitting the application [/bold red]")
+        console.print(
+            "[bold red]❌ No such file found. \n Exitting the application [/bold red]"
+        )
         exit_message()
 
+
 @app.command("config-setup")
-def config_setup():        
+def config_setup():
     # console.print(style="dim")
     # console.rule("[bold magenta] EDIT CONFIG PARAMETERS [/bold magenta]")
 
@@ -209,46 +211,51 @@ def config_setup():
     config = display_config_files()
 
     # Filter config file for the required params based on user group
-    config_options=user_groups_config[user_group]
+    config_options = user_groups_config[user_group]
 
     # Fetch required config file parameters based on user group
     try:
-        reqd_config={x:config[x] for x in config_options} 
+        reqd_config = {x: config[x] for x in config_options}
     except KeyError:
-        console.print("[bold red] ❌ Mismatch in choice of user group and config file. \n Exitting the application [/bold red]")
+        console.print(
+            "[bold red] ❌ Mismatch in choice of user group and config file. \n Exitting the application [/bold red]"
+        )
         exit_message()
 
-    updated_config=reqd_config.copy()
+    updated_config = reqd_config.copy()
 
     # Use get_style to create a proper InquirerPyStyle object
-    custom_menu_style = get_style({
-        "questionmark": "hidden",             
-        "question": "yellow", # Title color inside the top border frame
-        "pointer": "#00ffff bold",            
-        "choice": "#808080",                  
-        "selected": "#ff00ff bold underline", 
-        "frame": "bold white", # Border lines
-    }, style_override=False)
+    custom_menu_style = get_style(
+        {
+            "questionmark": "hidden",
+            "question": "yellow",  # Title color inside the top border frame
+            "pointer": "#00ffff bold",
+            "choice": "#808080",
+            "selected": "#ff00ff bold underline",
+            "frame": "bold white",  # Border lines
+        },
+        style_override=False,
+    )
 
-    config_options.append('return to main menu')
+    config_options.append("return to main menu")
     ret = False
-    choice=""
+    choice = ""
     while not ret:
         # Use case choice
         required_height = len(config_options) + 2
 
         # Iterate through parent config parameters
         choice = inquirer.select(
-            message="🗺️ Select the config option to modify",                           
+            message="🗺️ Select the config option to modify",
             choices=config_options,
             pointer="👉",
-            style=custom_menu_style,  
-            border=True,  
-            max_height=required_height                       
+            style=custom_menu_style,
+            border=True,
+            max_height=required_height,
         ).execute()
-        
-        if choice == 'return to main menu':
-            ret=False
+
+        if choice == "return to main menu":
+            ret = False
             console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
             break
 
@@ -256,41 +263,54 @@ def config_setup():
         if isinstance(reqd_config[choice], dict):
             subret = False
             while not subret:
-                flattened_options=flatten_dict(reqd_config[choice])
+                flattened_options = flatten_dict(reqd_config[choice])
 
-                subchoice_options=[]
-                for index, (key, value) in enumerate(flattened_options.items(), start=1):
-                    # The 'name' controls what the user sees in the box. 
+                subchoice_options = []
+                for index, (key, value) in enumerate(
+                    flattened_options.items(), start=1
+                ):
+                    # The 'name' controls what the user sees in the box.
                     # The 'value' is what gets returned to Python upon selection.
                     display_label = f"{index}. {key} : {value}"
                     subchoice_options.append(Choice(value=key, name=display_label))
 
-                subchoice_options.append(Choice(value="return", name=f"{index+1}. Go back to parent config options"))
+                subchoice_options.append(
+                    Choice(
+                        value="return",
+                        name=f"{index+1}. Go back to parent config options",
+                    )
+                )
                 required_height = len(subchoice_options) + 2
 
                 subchoice = inquirer.select(
-                    message="🗺️  Select config option to update",                           
+                    message="🗺️  Select config option to update",
                     choices=subchoice_options,
                     pointer="👉",
-                    style=custom_menu_style,  
-                    border=True,     
-                    max_height=required_height                    
+                    style=custom_menu_style,
+                    border=True,
+                    max_height=required_height,
                 ).execute()
-
 
                 if subchoice == "return":
                     subret = True
                     continue
 
-                updated_value=ask(f"Enter the value of {subchoice} to update in the config file")
+                updated_value = ask(
+                    f"Enter the value of {subchoice} to update in the config file"
+                )
                 updated_config[subchoice] = updated_value
         else:
-            updated_value=ask(f"Enter the value of {choice} to update in the config file")
+            updated_value = ask(
+                f"Enter the value of {choice} to update in the config file"
+            )
             updated_config[choice] = updated_value
 
     # # Save updated config file
-    config_save_path=ask(f"Enter name for updated config file [Press Enter to skip]", default="config.cli_updated.yaml")
-    save_config_file(config_save_path,unflatten_dict(updated_config))
+    config_save_path = ask(
+        f"Enter name for updated config file [Press Enter to skip]",
+        default="config.cli_updated.yaml",
+    )
+    save_config_file(config_save_path, unflatten_dict(updated_config))
     display_main_menu()
 
 
@@ -299,9 +319,21 @@ def display_main_menu() -> None:
     Interactive menu to be displayed as a starting point for the CLI
     """
     menu_items = [
-        {"num": "1", "name": "Setup environment", "desc": "Setup python environment using conda"},
-        {"num": "2", "name": "Edit config parameters", "desc": "Edit config parameters"},
-        {"num": "3", "name": "Retrieve data bundles", "desc": "Fetch data for snakemake workflow"},
+        {
+            "num": "1",
+            "name": "Setup environment",
+            "desc": "Setup python environment using conda",
+        },
+        {
+            "num": "2",
+            "name": "Edit config parameters",
+            "desc": "Edit config parameters",
+        },
+        {
+            "num": "3",
+            "name": "Retrieve data bundles",
+            "desc": "Fetch data for snakemake workflow",
+        },
         {"num": "4", "name": "Run model", "desc": "Run PyPSA-Earth model"},
         {"num": "5", "name": "Exit", "desc": "Close the application"},
     ]
@@ -314,14 +346,16 @@ def display_main_menu() -> None:
     # Print the menu title and options
     console.rule("[bold magenta]📊 MAIN MENU [/bold magenta]")
     console.print(Columns(panels, padding=(1, 2)))
-    choice=ask("Select option 1-5 to proceed further")
+    choice = ask("Select option 1-5 to proceed further")
 
     if choice == "2":
         config_setup()
     elif choice == "5":
         exit_message()
     else:
-        console.print("[bold magenta] Feature still under development. Please check again later [/bold magenta]")
+        console.print(
+            "[bold magenta] Feature still under development. Please check again later [/bold magenta]"
+        )
         exit_message()
 
 
@@ -330,19 +364,23 @@ def main(ctx: typer.Context):
 
     if ctx.invoked_subcommand is not None:
         return
-    
+
     # Display the welcome message
-    console.rule("[bold magenta]🚀 Welcome to PyPSA-Earth config CLI application! [/bold magenta]")
-    console.print("[white]PyPSA-Earth is the first open-source global cross-sectoral energy system model " \
-    "with high spatial and temporal resolution. The workflow provide capabilities for modelling the energy systems of" \
-    " any country in the world, enabling large-scale collaboration and transparent analysis for an inclusive and " \
-    "sustainable energy future. PyPSA-Earth is suitable for both operational studies and capacity expansion studies. " \
-    "Its sector-coupled modeling capabilities enable features for the detailed optimization of multi-energy systems, " \
-    "covering electricity, heating, transport, industry, hydrogen and more. [/white]")
-    console.print(style="dim") 
+    console.rule(
+        "[bold magenta]🚀 Welcome to PyPSA-Earth config CLI application! [/bold magenta]"
+    )
+    console.print(
+        "[white]PyPSA-Earth is the first open-source global cross-sectoral energy system model "
+        "with high spatial and temporal resolution. The workflow provide capabilities for modelling the energy systems of"
+        " any country in the world, enabling large-scale collaboration and transparent analysis for an inclusive and "
+        "sustainable energy future. PyPSA-Earth is suitable for both operational studies and capacity expansion studies. "
+        "Its sector-coupled modeling capabilities enable features for the detailed optimization of multi-energy systems, "
+        "covering electricity, heating, transport, industry, hydrogen and more. [/white]"
+    )
+    console.print(style="dim")
 
     display_main_menu()
-    
 
-if __name__ == "__main__":    
+
+if __name__ == "__main__":
     app()
