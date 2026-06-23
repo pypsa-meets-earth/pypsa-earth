@@ -18,9 +18,54 @@ from rich.console import Console
 from rich.panel import Panel
 import subprocess
 import sys
+import os
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
+
+# Use get_style to create a proper InquirerPyStyle object
+custom_menu_style = get_style(
+    {
+        "questionmark": "hidden",
+        "question": "yellow",  # Title color inside the top border frame
+        "pointer": "#00ffff bold",
+        "choice": "#808080",
+        "selected": "#ff00ff bold underline",
+        "frame": "bold white",  # Border lines
+    },
+    style_override=False,
+)
+
+
+def display_choice_menu(title: str, options: list, required_height: int) -> str:
+    """
+    Display a menu
+
+    Parameters
+    ----------
+    title: str
+        Title for the menu
+    options: list
+        List of options to be displayed
+    required_height: int
+        Height of the border box for the option list
+
+    Returns
+    -------
+    choice: str
+        Choice selected by the user
+    """
+
+    choice = inquirer.select(
+        message=title,
+        choices=options,
+        pointer="👉",
+        style=custom_menu_style,
+        border=True,
+        max_height=required_height,
+    ).execute()
+
+    return choice
 
 
 def ask(text: str, default: str = "") -> str:
@@ -90,7 +135,7 @@ def save_config_file(config_path: str, config_data: dict[dict]) -> None:
     """
     with open(config_path, "w") as file:
         yaml.safe_dump(config_data, file, default_flow_style=False)
-        print(f"[bold green] ✔ Saved the file to {config_path} [/bold green]")
+        console.print(f"[bold green] ✔ Saved the file to {config_path} [/bold green]")
 
 
 def flatten_dict(
@@ -176,8 +221,17 @@ def display_user_groups() -> tuple:
     # Load user groups
     user_groups_path = "user_groups.yaml"
     user_groups_config = load_config_file(user_groups_path)
+
     # Prompt user to identify his/her user group
-    user_group = ask("Select user group", default=list(user_groups_config.keys()))
+    options = []
+    for index, (key, value) in enumerate(
+        user_groups_config.items(), start=1
+    ):
+        display_label = f"{key} : {value}"
+        options.append(Choice(value=key, name=display_label))
+
+    title="Select user group (To add more config parameters to a user group, modify user_groups.yaml)"
+    user_group=display_choice_menu(title, options, len(options)+1)
     return user_groups_config, user_group
 
 
@@ -191,8 +245,12 @@ def display_config_files() -> dict[dict]:
         Nested config parameters
     """
     # Prompt user for config file locations
-    config_path = ask("Enter config file name", default="config.default.yaml")
-    console.print(style="dim")
+    # config_path = ask("Enter config file name", default="config.default.yaml")
+    config_files_list = [f for f in os.listdir(".") if f.endswith('.yaml') and f.startswith('config')]
+
+    config_path=display_choice_menu("Select config file", config_files_list, len(config_files_list)+1)
+
+    # console.print(style="dim")
     try:
         config = load_config_file(config_path)
         return config
@@ -226,19 +284,6 @@ def config_setup():
 
     updated_config = reqd_config.copy()
 
-    # Use get_style to create a proper InquirerPyStyle object
-    custom_menu_style = get_style(
-        {
-            "questionmark": "hidden",
-            "question": "yellow",  # Title color inside the top border frame
-            "pointer": "#00ffff bold",
-            "choice": "#808080",
-            "selected": "#ff00ff bold underline",
-            "frame": "bold white",  # Border lines
-        },
-        style_override=False,
-    )
-
     config_options.append("return to main menu")
     ret = False
     choice = ""
@@ -246,15 +291,9 @@ def config_setup():
         # Use case choice
         required_height = len(config_options) + 2
 
-        # Iterate through parent config parameters
-        choice = inquirer.select(
-            message="🗺️ Select the config option to modify",
-            choices=config_options,
-            pointer="👉",
-            style=custom_menu_style,
-            border=True,
-            max_height=required_height,
-        ).execute()
+        # Iterate through parent config 
+        title="🗺️  Select config option to modify"
+        choice=display_choice_menu(title, config_options, required_height)
 
         if choice == "return to main menu":
             ret = False
@@ -283,15 +322,8 @@ def config_setup():
                     )
                 )
                 required_height = len(subchoice_options) + 2
-
-                subchoice = inquirer.select(
-                    message="🗺️  Select config option to update",
-                    choices=subchoice_options,
-                    pointer="👉",
-                    style=custom_menu_style,
-                    border=True,
-                    max_height=required_height,
-                ).execute()
+                title="🗺️  Select config option to modify"
+                subchoice=display_choice_menu(title, subchoice_options, required_height)
 
                 if subchoice == "return":
                     subret = True
@@ -306,11 +338,13 @@ def config_setup():
             updated_config[choice] = updated_value
 
     # # Save updated config file
-    config_save_path = ask(
-        f"Enter name for updated config file [Press Enter to skip]",
-        default="config.cli_updated.yaml",
-    )
-    save_config_file(config_save_path, unflatten_dict(updated_config))
+    save_file=ask("Do you want to save the updated params to a file ?",['Yes','No'])
+    if save_file == 'Yes':
+        config_save_path = ask(
+            f"Enter config file to save updated params to [Press Enter to use default file]",
+            default="config.cli_updated.yaml",
+        )
+        save_config_file(config_save_path, unflatten_dict(updated_config))
     display_main_menu()
 
 
