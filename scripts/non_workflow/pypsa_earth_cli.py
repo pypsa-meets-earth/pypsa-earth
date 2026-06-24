@@ -265,12 +265,11 @@ def display_config_files() -> dict[dict]:
 
 @app.command("config-setup")
 def config_setup():
-    # console.print(style="dim")
-    # console.rule("[bold magenta] EDIT CONFIG PARAMETERS [/bold magenta]")
-
     user_groups_config, user_group = display_user_groups()
 
-    config = display_config_files()
+    # Load config file
+    config_path = "config.default.yaml"
+    config = load_config_file(config_path)
 
     # Filter config file for the required params based on user group
     config_options = user_groups_config[user_group]
