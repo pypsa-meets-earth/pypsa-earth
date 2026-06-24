@@ -808,21 +808,40 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         dim="Link"
     )
 
-    # Grouping
-    if time_period == "hour":
-        res = res.groupby("snapshot").sum().rename({"snapshot": "hour"})
-        elec_input = elec_input.groupby("snapshot").sum().rename({"snapshot": "hour"})
-    elif time_period == "month":
-        res = res.groupby("snapshot.month").sum()
-        elec_input = elec_input.groupby("snapshot.month").sum()
-    elif time_period == "year":
-        res = res.groupby("snapshot.year").sum()
-        elec_input = elec_input.groupby("snapshot.year").sum()
+    def _sum_by_period(expr, period):
+        """
+        Aggregate a snapshot-indexed Linopy expression to the requested
+        temporal matching resolution.
 
-    # Defining the constraints
-    for label in res.coords[time_period].values:
-        lhs = res.loc[label] + elec_input.loc[label]
-        n.model.add_constraints(lhs >= 0.0, name=f"RESconstraints_{label}")
+        The returned expression keeps a ``period`` dimension, so Linopy creates
+        one constraint per period with a single vectorized ``add_constraints`` call.
+        """
+        if period in ("hour", "hourly"):
+            labels = n.snapshots
+        elif period in ("month", "monthly"):
+            labels = n.snapshots.month
+        elif period in ("year", "yearly"):
+            labels = n.snapshots.year
+        else:
+            raise ValueError(f"Unsupported time period: {period}")
+
+        period_da = xr.DataArray(
+            labels,
+            dims=["snapshot"],
+            coords={"snapshot": n.snapshots},
+            name="period",
+        )
+
+        return expr.groupby(period_da).sum("snapshot")
+
+    # Aggregate RES generation and electrolysis demand to the requested
+    # temporal matching resolution. This preserves one constraint per period.
+    lhs = _sum_by_period(res, time_period) + _sum_by_period(elec_input, time_period)
+
+    n.model.add_constraints(
+        lhs >= 0.0,
+        name="RES_temporal_matching",
+    )
 
 
 def add_chp_constraints(n):
