@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add pixi as an alternative package manager for environment and dependency management, alongside the existing conda-based setup. [PR #1789](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1789)
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
@@ -37,6 +39,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
 
 **Minor Changes and bug-fixing**
+
+* Replace deprecated UNCTAD urban population download endpoint in `prepare_urban_percent.py` [PR #1881](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1881)
 
 * Remove unused `add_extendable_generators` function in `add_electricity.py` script [PR #1854](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1854)
 
@@ -118,6 +122,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update contribution guide [PR #1803](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1803)
 
+* Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
+
+* Add module-level and missing function docstrings and type hints to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
 
 # PyPSA-Earth 0.8.0
 
