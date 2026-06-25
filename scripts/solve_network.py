@@ -87,7 +87,7 @@ import pandas as pd
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, read_csv_nafix
-from linopy import merge
+from linopy import LinearExpression, merge
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
 from pypsa.optimization.optimize import optimize
@@ -728,7 +728,11 @@ def add_h2_network_cap(n, cap):
     n.model.add_constraints(lhs <= rhs, name="h2_network_cap")
 
 
-def hydrogen_temporal_constraint(n, n_ref, time_period):
+def hydrogen_temporal_constraint(
+    n: pypsa.Network,
+    n_ref: pypsa.Network | None,
+    time_period: str,
+) -> None:
     """
     Applies temporal constraints for hydrogen production based on renewable energy sources (RES)
     and electrolysis within a specified time period. The function ensures that the hydrogen production
@@ -808,13 +812,28 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         dim="Link"
     )
 
-    def _sum_by_period(expr, period):
+    def _sum_by_period(
+        expr: LinearExpression,
+        period: str,
+    ) -> LinearExpression:
         """
         Aggregate a snapshot-indexed Linopy expression to the requested
         temporal matching resolution.
 
-        The returned expression keeps a ``period`` dimension, so Linopy creates
-        one constraint per period with a single vectorized ``add_constraints`` call.
+        Parameters
+        ----------
+        expr : linopy.LinearExpression
+            Snapshot-indexed expression to aggregate.
+        period : str
+            Temporal aggregation level. Supported values are
+            ``"hour"``, ``"month"``, and ``"year"``.
+
+        Returns
+        -------
+        linopy.LinearExpression
+            Expression indexed by a ``period`` dimension. Passing the returned
+            expression to ``add_constraints`` creates one constraint per period
+            while avoiding explicit Python loops.
         """
         if period in ("hour", "hourly"):
             labels = n.snapshots
