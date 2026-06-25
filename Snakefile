@@ -543,6 +543,24 @@ rule process_cost_data:
         "scripts/process_cost_data.py"
 
 
+def get_load_input(load_config: dict) -> str:
+    """
+    Get path to electricity load file from the config
+    """
+    source = load_config.get("source", "demcast")
+    custom_path = load_config.get("path", "")
+
+    if source in ["gegis", "ssp"]:
+        load_path = get_load_paths_gegis("data", config)
+    elif source == "custom" and Path(custom_path).is_file():
+        load_path = custom_path
+    else:
+        load_path = "data/demand/forecasts_on_historical_period.parquet"
+
+    return load_path
+
+
+# TODO Add a sanity check for formal of the custom load file
 rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
@@ -551,11 +569,7 @@ rule build_demand_profiles:
     input:
         base_network="networks/" + RDIR + "base.nc",
         regions="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
-        load=branch(
-            config["load_options"].get("source", "gegis") in ["gegis", "ssp"],
-            get_load_paths_gegis("data", config),
-            "data/demand/forecasts_on_historical_period.parquet",
-        ),
+        load=get_load_input(config["load_options"]),
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
