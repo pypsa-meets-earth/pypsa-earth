@@ -69,7 +69,6 @@ configs/scenarios/config.*.yaml
 *.code-workspace
 *.vscode/settings.json
 
-
 # Additional debugging folders
 backup*
 screenlog*
