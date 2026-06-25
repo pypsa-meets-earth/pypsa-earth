@@ -840,7 +840,7 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
 
     n.model.add_constraints(
         lhs >= 0.0,
-        name="RES_temporal_matching",
+        name="H2_temporal_matching",
     )
 
 
