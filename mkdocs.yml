@@ -36,6 +36,8 @@ nav:
     - Copernicus Data: user-guide/customization/copernicus-data.md
     - Validation: user-guide/customization/validation.md
     - Running Models: user-guide/customization/running-models.md
+  - Use Cases:
+    - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
   - Examples: tutorials/examples.md
 
 - User Guide:
