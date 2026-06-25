@@ -20,6 +20,8 @@ In this first tutorial we will build and solve a baseline electricity model for 
 
 ## How configuration works
 
+Before writing a single line, it is worth understanding how PyPSA-Earth reads configuration — because it explains why the file we are about to create is so short.
+
 PyPSA-Earth loads configuration in layers. The Snakefile reads these files in order, with each subsequent file overriding only the keys it explicitly sets:
 
 ```
@@ -34,7 +36,7 @@ This means your study config can be very short — often just 10–20 lines. You
 
 ## Step 1: Create your configuration file
 
-Create a new, empty file named `config.KZ.yaml` in the project root. We will build it up step by step.
+Time to get started. Create an empty file called `config.KZ.yaml` in the project root — this is the only file we will create in this tutorial. We will fill it in gradually over the next few steps, adding one setting at a time and explaining the reasoning behind each one.
 
 === "Linux / macOS"
 
@@ -56,7 +58,7 @@ Create a new, empty file named `config.KZ.yaml` in the project root. We will bui
 
 ## Step 2: Set the country
 
-Add the following to `config.KZ.yaml`:
+This is the most important line in any country study. Add it to `config.KZ.yaml`:
 
 ```yaml
 countries: ["KZ"]
@@ -120,7 +122,7 @@ Solver-specific options (threads, tolerances, barrier method) can be tuned under
 
 ## Your complete `config.KZ.yaml`
 
-After following all steps above, the file should look like this:
+Take a moment to look at what you have built:
 
 ```yaml
 countries: ["KZ"]
@@ -218,3 +220,5 @@ This is a PyPSA `Network` object stored as NetCDF. In **[Part 2](2-analyze-resul
 | `run.shared_cutouts` | `false` | Store cutout under `cutouts/KZ/` |
 | `scenario.opts` | `[6h]` | 6-hourly resolution for a fast first solve |
 | `solving.solver.name` | `highs` | Free, included, adequate for this model size |
+
+That is everything needed to run a first Kazakhstan model. In **[Part 2](2-analyze-results.md)** we open the solved network and find out what the optimiser actually decided to build.
