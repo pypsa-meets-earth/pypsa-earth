@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1882](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1882)
+
 * Add pixi as an alternative package manager for environment and dependency management, alongside the existing conda-based setup. [PR #1789](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1789)
 
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
