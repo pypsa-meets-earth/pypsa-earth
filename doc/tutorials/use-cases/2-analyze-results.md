@@ -32,14 +32,18 @@ This single NetCDF file is the heart of everything. It contains the full network
 
 ## Create a notebook
 
-Start by creating a notebook in the project root — this keeps relative paths to `results/` short and predictable:
+All paths in this tutorial — `results/KZ/networks/...` — are relative to the **PyPSA-Earth project root** (the folder that contains `Snakefile` and your `config.KZ.yaml`).
+
+From there, start JupyterLab:
 
 ```bash
 cd /path/to/pypsa-earth
-jupyter notebook analyze_kz.ipynb
+jupyter lab
 ```
 
-If you are in VS Code, open the command palette (`Ctrl+Shift+P`), run **Create: New Jupyter Notebook**, and save it as `analyze_kz.ipynb` in the project root. Either way, make sure your `pypsa-earth` conda environment is selected as the kernel.
+In the browser, create a **new notebook** and save it as `analyze_kz.ipynb` in the project root — not under `doc/`. The cells below are what you add step by step as you read on.
+
+If you use VS Code or Cursor instead, open the command palette (`Ctrl+Shift+P`), run **Create: New Jupyter Notebook**, and save it as `analyze_kz.ipynb` in the project root. Select the `pypsa-earth` conda environment as the kernel.
 
 ---
 
@@ -420,6 +424,11 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 
 ## Complete notebook
 
-The [downloadable `analyze_kz.ipynb`](analyze_kz.ipynb){: download="analyze_kz.ipynb"} contains all analysis cells from this tutorial. Copy it to the **project root** (same folder as `Snakefile`) and run it there after completing [Part 1](1-baseline-model.md).
+The [downloadable `analyze_kz.ipynb`](analyze_kz.ipynb){: download="analyze_kz.ipynb"} contains all analysis cells from this tutorial. To use it instead of building the notebook yourself, copy it to the project root first:
+
+```bash
+cp doc/tutorials/use-cases/analyze_kz.ipynb .
+jupyter lab analyze_kz.ipynb
+```
 
 In **[Part 3](3-demand-data.md)** we go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match a specific country's historical electricity consumption.
