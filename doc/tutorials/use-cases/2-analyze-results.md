@@ -132,7 +132,7 @@ ax.set_ylabel("MW")
 fig.tight_layout()
 ```
 
-![Kazakhstan annual load profile](../../img/kz_demand_profile.png)
+![Kazakhstan annual load profile](figures/kz_demand_profile.png)
 
 ---
 
@@ -236,7 +236,7 @@ offwind-dc     0.0 GW
 
 Note that this uses `p_nom_opt` — optimal capacity after expansion — so solar and onwind reflect the new build from the table above, not just what was in the powerplant database.
 
-![Kazakhstan optimal installed capacity](../../img/kz_optimal_installed_capacity.png)
+![Kazakhstan optimal installed capacity](figures/kz_optimal_installed_capacity.png)
 
 ---
 
@@ -288,7 +288,7 @@ oil               0.0 TWh
 
 Together, `ror` and `hydro` supply about **3.6 TWh**.
 
-![Kazakhstan's annual generation](../../img/kz_annual_generation.png)
+![Kazakhstan's annual generation](figures/kz_annual_generation.png)
 
 You can cross-check this with `n.statistics()["Supply"]`, which computes the same thing internally — note that it lists reservoir hydro under `StorageUnit` rather than grouping it with generators:
 
