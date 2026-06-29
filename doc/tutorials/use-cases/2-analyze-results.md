@@ -76,7 +76,7 @@ Components:
 Snapshots: 1460
 ```
 
-The 1460 snapshots correspond to one full year at 6-hourly resolution (8760 h ÷ 6 = 1460). The relatively high component counts — 65 generators, 40 links, 20 stores — come from the `add_extra_components` rule, which adds battery storage, hydrogen stores, and interconnects even in an electricity-only run.
+The 1460 snapshots correspond to one full year at 6-hourly resolution (8760 h ÷ 6 = 1460).
 
 ---
 
@@ -91,7 +91,7 @@ Before diving into numbers it helps to know what you are looking at. A PyPSA `Ne
 | `Generator` | `n.generators` | Power plants: coal, gas, wind, solar, run-of-river (ror) |
 | `Load` | `n.loads` | Electricity demand at each bus |
 | `StorageUnit` | `n.storage_units` | Technologies with a coupled power/energy ratio (PHS) |
-| `Store` | `n.stores` | Free-standing energy stores (batteries, H₂ tanks) |
+| `Store` | `n.stores` | Energy storage (batteries, H₂) — capacity in MWh; charging and discharging via `Link`s |
 | `Link` | `n.links` | Multi-port converters: battery chargers, electrolysers, etc. |
 
 For a thorough description of every attribute and convention, the [PyPSA component reference](https://docs.pypsa.org/en/latest/user-guide/components/buses/) is the definitive resource.

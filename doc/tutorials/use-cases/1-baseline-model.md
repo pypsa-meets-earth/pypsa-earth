@@ -86,7 +86,7 @@ Setting `shared_cutouts: false` stores the weather cutout under `cutouts/KZ/` as
 
 ## Step 4: Set temporal resolution to 6-hourly
 
-The `opts` wildcard inside `scenario` controls, among other things, the temporal resolution of the optimisation. The default `Co2L-3h` resamples the 8760-hour year to 3-hourly snapshots (2920 time steps). For a first run, 6-hourly resolution (`6h`) cuts the problem size in half and reduces solve time from roughly an hour to around ten minutes with the HiGHS solver.
+The temporal resolution of the optimisation is one of the settings controlled by the `opts` wildcard in `scenario`. The default `Co2L-3h` resamples the 8760-hour year to 3-hourly snapshots (2920 time steps). For a first run, 6-hourly resolution (`6h`) cuts the problem size in half and reduces solve time from roughly an hour to around ten minutes with the HiGHS solver.
 
 ```yaml
 --8<-- "tutorials/use-cases/snippets/config.KZ.yaml:11:12"
