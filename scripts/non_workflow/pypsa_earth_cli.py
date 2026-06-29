@@ -6,6 +6,12 @@
 """
 This script provides the basis to run a CLI to help users navigate through PyPSA-Earth
 
+The CLI has the following modules:
+1. Tutorial - A tutorial based module developed in sync with use-case documentation
+2. Edit config - Feature to edit config parameters without direct exposure to the same
+3. Retrieve databundles - Feature to independently retrieve databundles required for a PyPSA-Earth model run
+4. Run snakemake - Feature to run a snakemake workflow
+
 """
 import os
 import subprocess
@@ -233,6 +239,7 @@ def display_user_groups() -> tuple:
     return user_groups_config, user_group
 
 
+# Currently not in use
 def display_config_files() -> dict[dict]:
     """
     Select and load config file data
@@ -242,8 +249,6 @@ def display_config_files() -> dict[dict]:
     dict[dict]
         Nested config parameters
     """
-    # Prompt user for config file locations
-    # config_path = ask("Enter config file name", default="config.default.yaml")
     config_files_list = [
         f for f in os.listdir(".") if f.endswith(".yaml") and f.startswith("config")
     ]
@@ -252,7 +257,6 @@ def display_config_files() -> dict[dict]:
         "Select config file", config_files_list, len(config_files_list) + 1
     )
 
-    # console.print(style="dim")
     try:
         config = load_config_file(config_path)
         return config
