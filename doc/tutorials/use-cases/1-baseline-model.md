@@ -185,7 +185,7 @@ snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
 **Expected runtime:** on a typical laptop or workstation, the full pipeline takes around **1 hour** with HIGHs solver, including the ERA5 cutout download (~20 GB). Note that this is a coarse 10-node model (`clusters: [10]` by default) — a realistic high-resolution model would take significantly longer.
 
 !!! note "First run downloads data"
-    On the first run, PyPSA-Earth downloads OSM network data, cost data, and a pre-compiled ERA5 weather cutout for 2013. Subsequent runs reuse the cached data.
+    On the first run, PyPSA-Earth downloads OSM network data, cost data, and a pre-compiled ERA5 weather cutout for 2013. Subsequent runs reuse the cached data. If anything goes wrong during the run, see the [FAQ](../../community/faq.md) — for example [cutout download failures](../../community/faq.md#cutout-download-failed-retrieve_cutout) or [other data download issues](../../community/faq.md#other-data-download-failed-retrieve_databundle_light).
 
 ### What a successful run looks like
 

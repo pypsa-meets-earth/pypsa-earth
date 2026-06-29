@@ -28,6 +28,8 @@ results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
 
 This single NetCDF file is the heart of everything. It contains the full network topology, all generator and line parameters, the optimised capacities, and 1460 snapshots of dispatch data. Think of it as a self-contained database of your model run.
 
+If this file is not there, return to [Part 1](1-baseline-model.md) or check the [FAQ](../../community/faq.md) for download and workflow issues.
+
 ---
 
 ## Create a notebook

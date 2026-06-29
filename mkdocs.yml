@@ -88,6 +88,7 @@ nav:
   - Talks & Papers: community/talks-and-papers.md
   - Learning Materials: community/learning-materials.md
   - Software Hints: community/software-hints.md
+  - FAQ: community/faq.md
 
 - API Reference:
   - Overview: api-reference/index.md
