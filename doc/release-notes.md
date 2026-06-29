@@ -38,6 +38,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
 
+* Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
+
 **Minor Changes and bug-fixing**
 
 * Replace deprecated UNCTAD urban population download endpoint in `prepare_urban_percent.py` [PR #1881](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1881)

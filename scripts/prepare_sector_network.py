@@ -2447,7 +2447,7 @@ def add_heat(
                 lifetime=costs.at[key, "lifetime"],
             )
 
-        if options["solar_thermal"]:
+        if options["solar_thermal_collector"]["enable"]:
             n.add("Carrier", name + " solar thermal")
 
             n.madd(
@@ -3097,10 +3097,11 @@ def add_electricity_distribution_grid(n, costs):
         )
 
 
-def add_co2_budget(n, co2_budget, investment_year, elec_opts):
+def add_co2_budget(n, co2, investment_year):
+    budget = co2["budget"]
     # Check if CO2Limit already exists
     if "CO2Limit" in n.global_constraints.index:
-        if co2_budget["override_co2opt"]:
+        if budget["override_co2opt"]:
             logger.warning("CO2Limit already exists, value will be overwritten.")
             n.global_constraints.drop(index="CO2Limit", inplace=True)
         else:
@@ -3109,23 +3110,22 @@ def add_co2_budget(n, co2_budget, investment_year, elec_opts):
 
     # Get base year emission factor
     factor = (
-        co2_budget["year"][investment_year]
-        if investment_year in co2_budget["year"]
-        else 1.0
+        budget["year"][investment_year] if investment_year in budget["year"] else 1.0
     )
 
-    co2base_value = co2_budget["co2base_value"]
-    if co2base_value == "co2limit":
-        annual_emissions = factor * elec_opts["co2limit"]
-    elif co2base_value == "co2base":
-        annual_emissions = factor * elec_opts["co2base"]
-    elif co2base_value == "absolute":
+    base_value = budget["base_value"]
+    if base_value == "limit":
+        annual_emissions = factor * co2["limit"]
+    elif base_value == "base":
+        annual_emissions = factor * co2["base"]
+    elif base_value == "absolute":
         annual_emissions = factor
-    elif isinstance(co2base_value, float):
-        annual_emissions = factor * co2base_value
+    elif isinstance(base_value, float):
+        annual_emissions = factor * base_value
     else:
         raise ValueError(
-            f"co2base_value: {co2base_value} is not an option for co2_budget"
+            f"co2.budget.base_value: '{base_value}' is not valid. "
+            "Choose from: 'limit', 'base', 'absolute', or a float."
         )
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
@@ -3486,14 +3486,9 @@ if __name__ == "__main__":
             n = average_every_nhours(n, m.group(0))
             break
 
-    co2_budget = snakemake.params.co2_budget
-    if co2_budget["enable"]:
-        add_co2_budget(
-            n,
-            co2_budget,
-            investment_year,
-            snakemake.params.electricity,
-        )
+    co2 = snakemake.params.co2
+    if co2["budget"]["enable"]:
+        add_co2_budget(n, co2, investment_year)
 
     if options["dac"]:
         add_dac(n, costs)
