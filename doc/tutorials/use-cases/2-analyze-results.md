@@ -422,13 +422,4 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 | System cost | `n.objective` (EUR) |
 | Everything at once | `n.statistics()` |
 
-## Complete notebook
-
-The [downloadable `analyze_kz.ipynb`](analyze_kz.ipynb){: download="analyze_kz.ipynb"} contains all analysis cells from this tutorial. To use it instead of building the notebook yourself, copy it to the project root first:
-
-```bash
-cp doc/tutorials/use-cases/analyze_kz.ipynb .
-jupyter lab analyze_kz.ipynb
-```
-
 In **[Part 3](3-demand-data.md)** we go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match a specific country's historical electricity consumption.
