@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add pixi as an alternative package manager for environment and dependency management, alongside the existing conda-based setup. [PR #1789](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1789)
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
@@ -436,6 +438,7 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fixed problematic float parsing (`_parse_float`) in `clean_osm_data.py` to make sure all OSM lines are correctly accounted for [PR #1089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1089)
 * Fix minor bug for advanced csp implementation [PR #1076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1076)
 * Fix minor bug in `build_powerplants.py` where the gas technology assignment incorrectly introduced NaN values for all powerplant technologies. [PR #1102](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1102)
+* Add Ghana-specific config file supplemented by an exception in `.gitignore` [PR #1861](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1861)
 
 # PyPSA-Earth 0.4.0
 
