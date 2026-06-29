@@ -14,6 +14,10 @@ SPDX-License-Identifier: CC-BY-4.0
 
 Kazakhstan (KZ) is the world's ninth-largest country by area, stretching from the Caspian Sea in the west to the Altai Mountains in the east. Its power system is dominated by coal and gas, yet it holds vast untapped potential for wind and solar — making it a compelling case for energy transition modelling.
 
+![Topographic map of Kazakhstan](https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Kazakhstan_topographic_location_map_conic.png/960px-Kazakhstan_topographic_location_map_conic.png)
+
+*Topographic map of Kazakhstan. Source: [NordNordWest](https://commons.wikimedia.org/wiki/User:NordNordWest) et al., [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kazakhstan_topographic_location_map_conic.png), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0).*
+
 In this first tutorial we will build and solve a baseline electricity model for Kazakhstan. We will create a minimal configuration file from scratch, adding only the settings that differ from the defaults. By the end you will have a solved network file you can inspect and a reproducible configuration to build on in the rest of the series.
 
 ---
