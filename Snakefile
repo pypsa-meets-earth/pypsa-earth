@@ -18,6 +18,7 @@ from _helpers import (
     get_last_commit_message,
     check_config_version,
     copy_default_files,
+    migrate_config,
     update_cutout_config,
     BASE_DIR,
     branch,  # Remove if Snakemake >= 8.3.0
@@ -42,6 +43,8 @@ configfile: "config.yaml"
 
 
 check_config_version(config=config)
+
+config = migrate_config(config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 
@@ -1497,7 +1500,7 @@ rule prepare_energy_totals:
 
 rule build_solar_thermal_profiles:
     params:
-        solar_thermal_config=config["sector"]["solar_thermal"],
+        solar_thermal_config=config["sector"]["solar_thermal_collector"],
         snapshots=config["snapshots"],
     input:
         pop_layout_total="resources/"

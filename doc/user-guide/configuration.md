@@ -14,6 +14,34 @@ confer installation instructions at [installation](../home/installation.md).
 
   Credits to PyPSA-Eur developers for the initial drafting of the configuration documentation here reported
 
+## Keeping your config up to date
+
+PyPSA-Earth loads ``config.default.yaml`` first and then merges your ``config.yaml`` on top (see the ``configfile`` entries in the Snakefile). You therefore only need to list settings in ``config.yaml`` that differ from the defaults—a small override file is enough for most studies.
+
+When you upgrade to a new version, open the updated ``config.default.yaml`` and check what changed: new keys, renamed paths, or reorganised sections. Compare it with your ``config.yaml`` and copy across any new defaults you want to use, or move keys you still override to their new locations. The [release notes](../release-notes.md) summarise breaking config changes per release.
+
+Some deprecated key names are migrated automatically when the workflow starts; if Snakemake prints a ``FutureWarning`` about an old path, update your ``config.yaml`` to the new key and remove the obsolete one. For study-specific settings you can also pass extra files with ``snakemake --configfile my_study.yaml`` instead of growing a single ``config.yaml``.
+
+### Renamed keys
+
+The table below lists all keys that have been renamed or moved. The old keys still work (their values are silently copied to the new location), but you should update your ``config.yaml`` to avoid future breakage.
+
+| Old key (deprecated) | New key |
+|---|---|
+| `electricity.co2limit` | `co2.limit` |
+| `electricity.co2base` | `co2.base` |
+| `electricity.automatic_emission` | `co2.automatic_emission.enable` |
+| `electricity.automatic_emission_base_year` | `co2.automatic_emission.base_year` |
+| `costs.emission_prices.co2` | `co2.emission_price` |
+| `co2_budget.enable` | `co2.budget.enable` |
+| `co2_budget.override_co2opt` | `co2.budget.override_co2opt` |
+| `co2_budget.year` | `co2.budget.year` |
+| `co2_budget.co2base_value` | `co2.budget.base_value` |
+| `sector.solar_thermal` *(bool flag)* | `sector.solar_thermal_collector.enable` |
+| `sector.solar_cf_correction` | `sector.solar_thermal_collector.cf_correction` |
+| `solar_thermal.clearsky_model` | `sector.solar_thermal_collector.clearsky_model` |
+| `solar_thermal.orientation` | `sector.solar_thermal_collector.orientation` |
+
 ## Top-level configuration
 
 Version, tutorial mode, logging, and optional custom Snakemake rules (``# META`` banner in ``config.default.yaml``).
@@ -458,6 +486,8 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 {{ read_csv('configtables/sector_toplevel.csv') }}
 
 #### heat sector
+
+Solar thermal collector settings live under ``sector.solar_thermal_collector`` (not ``sector.solar_thermal``). Legacy keys ``sector.solar_thermal`` (bool), ``sector.solar_cf_correction``, and top-level ``solar_thermal`` are migrated automatically; see ``migrate_config`` in ``scripts/_helpers.py``.
 
 ```yaml
 --8<-- "configtables/snippets/sector_heat.yaml"
