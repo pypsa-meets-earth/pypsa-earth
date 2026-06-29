@@ -38,6 +38,7 @@ nav:
     - Running Models: user-guide/customization/running-models.md
   - Use Cases:
     - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
+    - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
   - Examples: tutorials/examples.md
 
 - User Guide:
