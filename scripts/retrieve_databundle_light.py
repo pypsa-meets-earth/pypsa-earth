@@ -59,7 +59,8 @@ according to the following rules:
   the following source is used and so on
 
 
-**Relevant Settings**
+Relevant Settings
+-----------------
 
 .. code:: yaml
 
@@ -70,7 +71,8 @@ according to the following rules:
     Documentation of the configuration file ``config.yaml`` at
     :ref:`toplevel_cf`
 
-**Outputs**
+Outputs
+-------
 
 - ``data``: input data unzipped into the data folder
 - ``resources``: input data unzipped into the resources folder
@@ -886,6 +888,26 @@ def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list
 
 
 def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> None:
+    """
+    Merge HydroBASINS shapefiles for a specified level into a single shapefile.
+
+    The function reads all HydroBASINS shapefiles corresponding to the given
+    hydrobasin level and configured region suffixes, concatenates them into a
+    single GeoDataFrame, removes duplicate basin entries based on ``HYBAS_ID``,
+    and writes the merged result to the configured output file.
+
+    Parameters
+    ----------
+    config_hydrobasin : dict
+        Dictionary containing HydroBASINS configuration settings.
+    hydrobasins_level : int
+        The HydroBASINS level whose shapefiles should be merged.
+
+    Returns
+    -------
+    None
+        The function writes the merged shapefile to disk and does not return anything.
+    """
     basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
     output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 

@@ -3,38 +3,83 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# -*- coding: utf-8 -*-
 """
-Module to zip the desired folders to be stored in google drive, or equivalent.
+Create ZIP archives from selected workflow directories.
+
+This utility script packages workflow outputs and input datasets into ZIP
+archives for storage, distribution, or upload to external services such as
+Google Drive, Zenodo, or other file repositories.
+
+The script recursively traverses a target directory and adds all files matching
+a user-defined filter function to a compressed ZIP archive. Optionally, the
+directory structure can be stored either relative to the parent directory or
+including the full source directory path.
+
+Typical use cases include packaging:
+
+- ``data``: input datasets used by the workflow
+- ``resources``: processed resources generated during preprocessing
+- ``cutouts``: weather cutouts and climate datasets
+
+Outputs
+-------
+
+- ``*.zip``: compressed archive containing the selected files and directory
+  structure
+
 """
+
 import os
 import zipfile
-from os.path import basename
-from xml.etree.ElementInclude import include
-
-# Zip the files from given directory that matches the filter
+from collections.abc import Callable
 
 
-def zipFilesInDir(dirName, zipFileName, filter, include_parent=True):
-    # create a ZipFile object
-    with zipfile.ZipFile(zipFileName, "w", compression=zipfile.ZIP_DEFLATED) as zipObj:
-        # Iterate over all the files in directory
-        for folderName, subfolders, filenames in os.walk(dirName):
+def zip_files_in_dir(
+    dir_name: str,
+    zip_file_name: str,
+    file_filter: Callable[[str], bool],
+    include_parent: bool = True,
+) -> None:
+    """
+    Create a ZIP archive containing files from a directory.
+
+    The function recursively traverses the specified directory and adds all
+    files matching ``file_filter`` to the output ZIP archive.
+
+    Parameters
+    ----------
+    dir_name : str
+        Path to the directory to archive.
+    zip_file_name : str
+        Name of the ZIP archive to create.
+    file_filter : Callable[[str], bool]
+        Function receiving a filename and returning ``True`` if the file
+        should be included in the archive.
+    include_parent : bool, optional
+        Whether to preserve the original directory path inside the ZIP archive.
+        If ``False``, paths are stored relative to ``dir_name``.
+        Default is ``True``.
+
+    Returns
+    -------
+    None
+        The function writes the ZIP archive to disk and does not return
+        anything.
+    """
+    with zipfile.ZipFile(
+        zip_file_name, "w", compression=zipfile.ZIP_DEFLATED
+    ) as zip_obj:
+        for folder_name, _, filenames in os.walk(dir_name):
             for filename in filenames:
-                if filter(filename):
-                    # create complete filepath of file in directory
-                    filePath = os.path.join(folderName, filename)
+                if file_filter(filename):
+                    file_path = os.path.join(folder_name, filename)
 
-                    # path of the zip file
                     if include_parent:
-                        filePathZip = filePath
+                        file_path_zip = file_path
                     else:
-                        filePathZip = filePath.replace(
-                            dirName, ".", 1
-                        )  # remove first occurrence of the dirName
+                        file_path_zip = file_path.replace(dir_name, ".", 1)
 
-                    # Add file to zip
-                    zipObj.write(filePath, filePathZip)
+                    zip_obj.write(file_path, file_path_zip)
 
 
 if __name__ == "__main__":
@@ -42,5 +87,5 @@ if __name__ == "__main__":
 
     # Execute zip function
     # zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
-    zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
+    zip_files_in_dir("./data", "data.zip", lambda x: True, include_parent=False)
     # zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)
