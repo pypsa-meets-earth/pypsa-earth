@@ -64,7 +64,7 @@ Time to get started. Create an empty file called `config.KZ.yaml` in the project
 This is the most important line in any country study. Add it to `config.KZ.yaml`:
 
 ```yaml
-countries: ["KZ"]
+--8<-- "tutorials/use-cases/snippets/config.KZ.yaml:5:5"
 ```
 
 That single line tells every rule in the workflow — shape building, OSM download, cutout extraction, demand estimation — to focus on Kazakhstan. Two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) codes are used throughout.
@@ -74,9 +74,7 @@ That single line tells every rule in the workflow — shape building, OSM downlo
 ## Step 3: Give the run a name
 
 ```yaml
-run:
-  name: "KZ"
-  shared_cutouts: false
+--8<-- "tutorials/use-cases/snippets/config.KZ.yaml:7:9"
 ```
 
 **Why does `run.name` matter?**
@@ -91,8 +89,7 @@ Setting `shared_cutouts: false` stores the weather cutout under `cutouts/KZ/` as
 The `opts` wildcard inside `scenario` controls, among other things, the temporal resolution of the optimisation. The default `Co2L-3h` resamples the 8760-hour year to 3-hourly snapshots (2920 time steps). For a first run, 6-hourly resolution (`6h`) cuts the problem size in half and reduces solve time from roughly an hour to around ten minutes with the HiGHS solver.
 
 ```yaml
-scenario:
-  opts: [6h]
+--8<-- "tutorials/use-cases/snippets/config.KZ.yaml:11:12"
 ```
 
 Once you are satisfied with the model setup you can increase resolution progressively: `6h` → `3h` → full hourly. The trade-off is always solve time against temporal accuracy.
@@ -104,9 +101,7 @@ Once you are satisfied with the model setup you can increase resolution progress
 PyPSA-Earth supports several open-source and commercial LP solvers. For a baseline run HiGHS is recommended: it is free, ships with the conda environment, and handles networks of this size efficiently.
 
 ```yaml
-solving:
-  solver:
-    name: highs
+--8<-- "tutorials/use-cases/snippets/config.KZ.yaml:14:16"
 ```
 
 **Overview of supported solvers:**
@@ -128,21 +123,12 @@ Solver-specific options (threads, tolerances, barrier method) can be tuned under
 Take a moment to look at what you have built:
 
 ```yaml
-countries: ["KZ"]
-
-run:
-  name: "KZ"
-  shared_cutouts: false
-
-scenario:
-  opts: [6h]
-
-solving:
-  solver:
-    name: highs
+--8<-- "tutorials/use-cases/snippets/config.KZ.yaml"
 ```
 
-That is all — 10 lines. Every other parameter (network voltages, renewable technology settings, cost assumptions, solver tolerances, …) is inherited unchanged from `config.default.yaml`.
+That is all — every other parameter (network voltages, renewable technology settings, cost assumptions, solver tolerances, …) is inherited unchanged from `config.default.yaml`. When you need details on a specific key, the [Configuration reference](../../user-guide/configuration.md) has the full list — later parts of this series will come back to individual sections as we calibrate the model.
+
+Save this as `config.KZ.yaml` in the project root before running Snakemake, or [download the file](snippets/config.KZ.yaml){: download="config.KZ.yaml"} and copy it there.
 
 ---
 

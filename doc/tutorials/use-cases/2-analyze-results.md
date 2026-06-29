@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 !!! note
     This tutorial assumes you have completed [Part 1](1-baseline-model.md) and have a solved network file at
-    `results/KZ/networks/elec_s_10_ec_lcopt_CO2L-6h.nc`.
+    `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
 
 ## Introduction
 
@@ -23,7 +23,7 @@ All of the work here is done in a Jupyter notebook. No Snakemake, no configurati
 After a successful run the solved network lands at:
 
 ```
-results/KZ/networks/elec_s_10_ec_lcopt_CO2L-6h.nc
+results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
 ```
 
 This single NetCDF file is the heart of everything. It contains the full network topology, all generator and line parameters, the optimised capacities, and 1460 snapshots of dispatch data. Think of it as a self-contained database of your model run.
@@ -35,10 +35,11 @@ This single NetCDF file is the heart of everything. It contains the full network
 Start by creating a notebook in the project root — this keeps relative paths to `results/` short and predictable:
 
 ```bash
-jupyter notebook analyze.ipynb
+cd /path/to/pypsa-earth
+jupyter notebook analyze_kz.ipynb
 ```
 
-If you are in VS Code, open the command palette (`Ctrl+Shift+P`), run **Create: New Jupyter Notebook**, and save it as `analyze.ipynb` in the project root. Either way, make sure your `pypsa-earth` conda environment is selected as the kernel.
+If you are in VS Code, open the command palette (`Ctrl+Shift+P`), run **Create: New Jupyter Notebook**, and save it as `analyze_kz.ipynb` in the project root. Either way, make sure your `pypsa-earth` conda environment is selected as the kernel.
 
 ---
 
@@ -51,7 +52,7 @@ import pypsa
 import pandas as pd
 import matplotlib.pyplot as plt
 
-n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_CO2L-6h.nc")
+n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
 print(n)
 ```
 
@@ -416,5 +417,9 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 | Capacity factors | `n.statistics()["Capacity Factor"]` or manual dispatch ÷ `p_nom_opt` |
 | System cost | `n.objective` (EUR) |
 | Everything at once | `n.statistics()` |
+
+## Complete notebook
+
+The [downloadable `analyze_kz.ipynb`](analyze_kz.ipynb){: download="analyze_kz.ipynb"} contains all analysis cells from this tutorial. Copy it to the **project root** (same folder as `Snakefile`) and run it there after completing [Part 1](1-baseline-model.md).
 
 In **[Part 3](3-demand-data.md)** we go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match a specific country's historical electricity consumption.
