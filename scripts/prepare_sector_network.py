@@ -3634,7 +3634,7 @@ def add_co2_budget(
     n: pypsa.Network,
     co2: dict,
     investment_year: int,
-    elec_opts: dict,
+    elec_opts: dict | None = None,
 ) -> None:
     """
     Add CO2 budget constraint to the network based on the specified co2_budget parameters.
