@@ -240,7 +240,6 @@ def display_user_groups() -> tuple:
     return user_groups_config, user_group
 
 
-# Currently not in use
 def display_config_files() -> dict[dict]:
     """
     Select and load config file data
@@ -255,7 +254,7 @@ def display_config_files() -> dict[dict]:
     ]
 
     config_path = display_choice_menu(
-        "Select config file", config_files_list, len(config_files_list) + 1
+        "Select config file to run the model", config_files_list, len(config_files_list) + 1
     )
 
     config = load_config_file(config_path)
@@ -371,17 +370,36 @@ def show_questionnaire(option: str):
                     hint=ask("Would you like a hint?",default=['Yes','No'])
                     if hint == 'Yes':
                         console.print(f"[bold cyan] The answer is one of the following parameters {question['choices']} [/bold cyan]")
+            
             answer_dict[question["id"]] = user_answer
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
     console.print(use_case['exit_message'])
     config_dict={}
     for key,value in use_case['config_update'].items():
-        config_dict[answer_dict[key]]=answer_dict[value]
+        if isinstance('value',list):
+            value = list(('value',))
+        config_dict[answer_dict[key]]=value
+
+    folder=ask("Enter run name for the model")
+    config_dict['run.name'] = folder
+
+    solver=ask("Enter solver to use for running the model",default=['gurobi','highs'])
+    if solver == 'highs':
+        config_dict['solving.solver.name'] = 'highs'
+        config_dict['solving.solver.options'] = 'highs-default'
+
     save_config_path="config.kz.yaml"
-    save_config_file(config_path=save_config_path,config_data=config_dict)
+    save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
 
+    console.print(style="dim")
+    console.print(f"[cyan] The config file {save_config_path} has been updated with your responses. Check to verify. [/cyan]")
 
-def use_case():
+    model_run=ask("Do you want to run the model ?",default=["Yes","No"])
+    if model_run=="Yes":
+        run_model(save_config_path)
+
+@app.command("tutorial")
+def tutorial():
 
     title = "🗺️  Select use-case to try"
     menu_items = [
@@ -438,9 +456,40 @@ def use_case():
 
     if choice != "8":
         show_questionnaire(choice)
+        tutorial()
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
+
+@app.command("run-model")
+def run_model(config_path="") -> None:
+
+    # Load existing config files if not passed to the function
+    if config_path == "":
+        config_path=display_config_files()
+
+    # Selection to run elec-only / sector coupled model
+    rule=ask("Do you want to run the electricity-only model or the sector coupled model",default=["elec-only","sector"])
+    if rule == "elec-only":
+        target_rule="solve_all_networks"
+    elif rule=="sector":
+        target_rule="solve_sector_networks"
+
+    # Prompt user for number of cores to use to run the model
+    cores=ask("Enter the number of cores to run the model")
+
+    # Prompt user for environment type to use - pixi / conda
+    env=ask("Do you want to use a pixi / conda environment",default=["pixi","conda"])
+    if env == "pixi":
+        env_command = "pixi run"
+    elif env=="conda":
+        env_command = "conda run -n pypsa-earth"
+
+    snakemake_command=f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path}"
+    subprocess.run(snakemake_command.split(" "))
+
+    display_main_menu()
+    
 
 
 def display_main_menu() -> None:
@@ -478,18 +527,15 @@ def display_main_menu() -> None:
     choice = ask("Select option 1-5 to proceed further")
 
     if choice == "1":
-        use_case()
+        tutorial()
     elif choice == "2":
         config_setup()
     elif choice == "3":
         subprocess.run([sys.executable, "scripts/non_workflow/databundle_cli.py"])
         display_main_menu()
+    elif choice == "4":
+        run_model()
     elif choice == "5":
-        exit_message()
-    else:
-        console.print(
-            "[bold magenta] Feature still under development. Please check again later [/bold magenta]"
-        )
         exit_message()
 
 
