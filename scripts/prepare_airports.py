@@ -62,8 +62,7 @@ def preprocess_airports(df):
 
     # Calculate the number of total airports size
     df1 = df.copy()
-    df1 = df1.groupby(["iso_country"]).sum("airport_size_nr")
-    df1 = df1[["airport_size_nr"]]
+    df1 = df1.groupby("iso_country")[["airport_size_nr"]].sum()
     df1 = df1.rename(columns={"airport_size_nr": "Total_airport_size_nr"}).reset_index()
 
     # Merge dataframes to get additional info on runnway for most ports
