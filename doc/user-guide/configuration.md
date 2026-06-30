@@ -20,11 +20,11 @@ PyPSA-Earth loads ``config.default.yaml`` first and then merges your ``config.ya
 
 When you upgrade to a new version, open the updated ``config.default.yaml`` and check what changed: new keys, renamed paths, or reorganised sections. Compare it with your ``config.yaml`` and copy across any new defaults you want to use, or move keys you still override to their new locations. The [release notes](../release-notes.md) summarise breaking config changes per release.
 
-Some deprecated key names are migrated automatically when the workflow starts; if Snakemake prints a ``FutureWarning`` about an old path, update your ``config.yaml`` to the new key and remove the obsolete one. For study-specific settings you can also pass extra files with ``snakemake --configfile my_study.yaml`` instead of growing a single ``config.yaml``.
+Some deprecated key names are migrated automatically when the workflow starts; if Snakemake prints a ``FutureWarning`` about an old path, update your ``config.yaml`` to the new key and remove the obsolete one. See [Renamed keys](#renamed-keys) for the full mapping. For study-specific settings you can also pass extra files with ``snakemake --configfile my_study.yaml`` instead of growing a single ``config.yaml``.
 
 ### Renamed keys
 
-The table below lists all keys that have been renamed or moved. The old keys still work (their values are silently copied to the new location), but you should update your ``config.yaml`` to avoid future breakage.
+The table below lists all keys that have been renamed or moved. The old keys still work (their values are copied to the new location), but you should update your ``config.yaml`` to avoid future breakage.
 
 | Old key (deprecated) | New key |
 |---|---|
@@ -41,6 +41,11 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `sector.solar_cf_correction` | `sector.solar_thermal_collector.cf_correction` |
 | `solar_thermal.clearsky_model` | `sector.solar_thermal_collector.clearsky_model` |
 | `solar_thermal.orientation` | `sector.solar_thermal_collector.orientation` |
+| `clean_osm_data_options` | `osm.clean_osm_data` |
+| `build_osm_network` | `osm.build_osm_network` |
+| `fossil_reserves.{carrier}` | `sector.{carrier}.reserves` |
+
+`{carrier}` is the fuel name (e.g. `oil`, `coal`, `gas`, `lignite`, `biomass`). Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
 
 ## Top-level configuration
 
@@ -198,7 +203,7 @@ Land-cover exclusion raster settings. Only relevant when ``enable.build_natura_r
 
 ### osm
 
-OpenStreetMap ([OSM](https://wiki.osmfoundation.org/wiki/Main_Page)) pipeline settings: `clean_osm_data` filters raw downloads; `build_osm_network` merges buses and lines into the base-network CSV inputs.
+OpenStreetMap ([OSM](https://wiki.osmfoundation.org/wiki/Main_Page)) pipeline settings live under the ``osm`` block: ``osm.clean_osm_data`` filters raw downloads; ``osm.build_osm_network`` merges buses and lines into the base-network CSV inputs. If your config still uses the old top-level names, see [Renamed keys](#renamed-keys).
 
 ```yaml
 --8<-- "configtables/snippets/osm.yaml"
@@ -477,7 +482,7 @@ Specifies the options for sector coupling, i.e. the integration of the electrici
 
 #### top-level
 
-Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted.
+Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted. The former top-level ``fossil_reserves`` block is deprecated — see [Renamed keys](#renamed-keys).
 
 ```yaml
 --8<-- "configtables/snippets/sector_toplevel.yaml"
@@ -487,7 +492,7 @@ Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), 
 
 #### heat sector
 
-Solar thermal collector settings live under ``sector.solar_thermal_collector`` (not ``sector.solar_thermal``). Legacy keys ``sector.solar_thermal`` (bool), ``sector.solar_cf_correction``, and top-level ``solar_thermal`` are migrated automatically; see ``migrate_config`` in ``scripts/_helpers.py``.
+Solar thermal collector settings live under ``sector.solar_thermal_collector`` (not ``sector.solar_thermal``). Deprecated solar-thermal keys are listed in [Renamed keys](#renamed-keys).
 
 ```yaml
 --8<-- "configtables/snippets/sector_heat.yaml"
