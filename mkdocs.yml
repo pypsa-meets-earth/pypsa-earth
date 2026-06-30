@@ -39,6 +39,7 @@ nav:
   - Use Cases:
     - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
     - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
+    - Part 3 — Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
   - Examples: tutorials/examples.md
 
 - User Guide:

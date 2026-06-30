@@ -12,7 +12,9 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-The optimiser has finished — now comes the interesting part. In this tutorial we open the solved network, get a feel for what is inside it, and ask the questions any energy modeller cares about: how much power is being produced, by whom, and does it match reality? By the end you will have a set of key performance indicators for the Kazakhstan system and a first sanity check against published statistics.
+The optimiser has finished — now comes the interesting part. In this tutorial we open the solved network, get a feel for what is inside it, and ask the questions any energy modeller cares about: how much power is being produced, by whom, and does it match reality? By the end you will have a set of key performance indicators for the Kazakhstan **power system** and a first sanity check against published statistics.
+
+This use-case series deliberately stays in the **electricity workflow** (`solve_all_networks`) — not the sector-coupled model (`solve_sector_networks`). Over the following parts we will calibrate and validate that power model against **2020** data before exploring further scenarios.
 
 All of the work here is done in a Jupyter notebook. No Snakemake, no configuration files — just Python and a solved `.nc` file.
 
@@ -406,7 +408,7 @@ Model **gas** maps to `CCGT` generators; **hydro** combines run-of-river (`ror`)
 - **Installed capacities** diverge strongly — especially solar and wind, where the optimiser built far beyond what existed in 2020.
 - **Generation by carrier** diverges accordingly — the dispatch reflects that uncorrected fleet, not Kazakhstan's 2020 mix.
 
-This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step, starting with demand in **Part 3** *(coming soon)*.
+This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step, starting with demand in **[Part 3](3-demand-data.md)**.
 
 ---
 
@@ -424,4 +426,4 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 | System cost | `n.objective` (EUR) |
 | Everything at once | `n.statistics()` |
 
-In **Part 3** *(coming soon)* we will go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match a specific country's historical electricity consumption.
+In **[Part 3](3-demand-data.md)** we go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match Kazakhstan's **2020** electricity consumption.
