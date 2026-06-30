@@ -401,6 +401,7 @@ def show_questionnaire(option: str):
     console.print(style="dim")
     console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]")
 
+
     model_run=ask("Do you want to run the model ?",default=["Yes","No"])
     if model_run=="Yes":
         run_model(save_config_path)
