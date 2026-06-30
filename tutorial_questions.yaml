@@ -1,0 +1,24 @@
+use-case-1:
+  "initial_message": "It is assumed that you have completed the use-case documentation for this level. If not, check the use-case documentation at the following link before proceeding."
+  "questionnaire": [
+    {
+      "id":"Q1",
+      "question": "If modelling PyPSA-Earth for Kazakhstan, which config parameter needs to be set to indicate the country name?",
+      "choices": ["country","sub-region"],
+      "answer": "country"
+    },
+    {
+      "id":"Q2",
+      "question": "What convention is used to add countries to the config file in PyPSA-Earth?",
+      "choices": ["2 letter country codes","Formal country name","Short form name"],
+      "answer": "2 letter country codes"
+    },
+    {
+      "id":"Q3",
+      "question": "Provide your entry for the config parameter selected in previous question",
+      "answer": "KZ"
+    }
+  ]
+  "failure_message": "Wrong answer entered. You have exhausted an attempt to answer the question"
+  "success_message": "Great job!!! Correct answer entered."
+  "exit_message": "Congratulations!!! Module completed. You can move on to the next "
