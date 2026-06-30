@@ -348,6 +348,91 @@ def config_setup():
     display_main_menu()
 
 
+def show_questionnaire(option: str):
+    console.print(style="dim")
+    questions_config=load_config_file("tutorial_questions.yaml")
+    use_case = questions_config[f"use-case-{option}"]
+    questions=use_case["questionnaire"]
+    console.print(use_case['initial_message'])
+    console.print(style="dim")
+    for question in questions:
+        answer=question['answer']
+        user_answer=""
+        iter=0
+        while user_answer != answer:
+            user_answer=ask(question['question'])
+            if user_answer != answer:
+                console.print(f"[bold red] ❌ {use_case['failure_message']} [/bold red]")
+                if 'choices' in question:
+                    hint=ask("Would you like a hint?",default=['Yes','No'])
+                    if hint == 'Yes':
+                        console.print(f"[bold cyan] The answer is one of the following parameters {question['choices']} [/bold cyan]")
+        console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
+    console.print(use_case['exit_message'])
+
+
+def use_case():
+
+    title = "🗺️  Select use-case to try"
+    menu_items = [
+        {
+            "num": "1",
+            "name": "Baseline model",
+            "desc": "Build a baseline model for Kazakhstan",
+        },
+        {
+            "num": "2",
+            "name": "Analysze results",
+            "desc": "Edit config parameters",
+        },
+        {
+            "num": "3",
+            "name": "Demand",
+            "desc": "Integrate demand",
+        },
+        {
+            "num": "4", 
+            "name": "Generation", 
+            "desc": "Integrate national generation"},
+        {
+            "num": "5", 
+            "name": "Transmission", 
+            "desc": "Improve transmission network"},
+        {
+            "num": "6",
+            "name": "CO2 limits",
+            "desc":"Define CO2 emission limits"
+        },
+        {
+            "num": "7",
+            "name": "Costs",
+            "desc": "Customize regional costs"
+        },
+        {
+            "num": "8",
+            "name": "Return",
+            "desc": "Return to main menu"
+        }
+    ]
+
+    panels = []
+    for item in menu_items:
+        panel_content = f"[bold cyan]{item['num']}[/bold cyan] | [bold white]{item['name']}[/bold white]\n[dim]{item['desc']}[/dim]"
+        panels.append(Panel(panel_content, expand=False, border_style="green"))
+
+    # Print the menu title and options
+    console.rule("[bold magenta]📊 TUTORIAL [/bold magenta]")
+    console.print(Columns(panels, padding=(1, 2)))
+
+    choice = ask("Select option 1-8 to proceed further")
+
+    if choice != "8":
+        show_questionnaire(choice)
+    elif choice == "8":
+        console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
+        display_main_menu()
+
+
 def display_main_menu() -> None:
     """
     Interactive menu to be displayed as a starting point for the CLI
@@ -382,7 +467,9 @@ def display_main_menu() -> None:
     console.print(Columns(panels, padding=(1, 2)))
     choice = ask("Select option 1-5 to proceed further")
 
-    if choice == "2":
+    if choice == "1":
+        use_case()
+    elif choice == "2":
         config_setup()
     elif choice == "3":
         subprocess.run([sys.executable, "scripts/non_workflow/databundle_cli.py"])
