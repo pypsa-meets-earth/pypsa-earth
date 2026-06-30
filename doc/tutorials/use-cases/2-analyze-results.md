@@ -406,7 +406,7 @@ Model **gas** maps to `CCGT` generators; **hydro** combines run-of-river (`ror`)
 - **Installed capacities** diverge strongly — especially solar and wind, where the optimiser built far beyond what existed in 2020.
 - **Generation by carrier** diverges accordingly — the dispatch reflects that uncorrected fleet, not Kazakhstan's 2020 mix.
 
-This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step, starting with demand in **[Part 3](3-demand-data.md)**.
+This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step, starting with demand in **Part 3** *(coming soon)*.
 
 ---
 
@@ -424,4 +424,4 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 | System cost | `n.objective` (EUR) |
 | Everything at once | `n.statistics()` |
 
-In **[Part 3](3-demand-data.md)** we go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match a specific country's historical electricity consumption.
+In **Part 3** *(coming soon)* we will go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match a specific country's historical electricity consumption.
