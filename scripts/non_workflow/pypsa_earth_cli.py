@@ -355,20 +355,30 @@ def show_questionnaire(option: str):
     questions=use_case["questionnaire"]
     console.print(use_case['initial_message'])
     console.print(style="dim")
+    answer_dict={}
     for question in questions:
         answer=question['answer']
         user_answer=""
         iter=0
         while user_answer != answer:
-            user_answer=ask(question['question'])
+            if 'choices' not in question:
+                user_answer=ask(question['question'])
+            else:
+                user_answer=display_choice_menu(question['question'],question['choices'],len(question['choices']))
             if user_answer != answer:
                 console.print(f"[bold red] ❌ {use_case['failure_message']} [/bold red]")
-                if 'choices' in question:
+                if 'hints' in question:
                     hint=ask("Would you like a hint?",default=['Yes','No'])
                     if hint == 'Yes':
                         console.print(f"[bold cyan] The answer is one of the following parameters {question['choices']} [/bold cyan]")
+            answer_dict[question["id"]] = user_answer
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
     console.print(use_case['exit_message'])
+    config_dict={}
+    for key,value in use_case['config_update'].items():
+        config_dict[answer_dict[key]]=answer_dict[value]
+    save_config_path="config.kz.yaml"
+    save_config_file(config_path=save_config_path,config_data=config_dict)
 
 
 def use_case():
