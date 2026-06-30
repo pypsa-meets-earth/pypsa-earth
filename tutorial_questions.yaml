@@ -3,9 +3,9 @@ use-case-1:
   "questionnaire": [
     {
       "id":"Q1",
-      "question": "If modelling PyPSA-Earth for Kazakhstan, which config parameter needs to be set to indicate the country name?",
-      "hints": ["country","sub-region"],
-      "answer": "country"
+      "question": "What config parameter needs to be updated to model PyPSA-Earth for Kazakhstan?",
+      "hints": ["countries","sub-region"],
+      "answer": "countries",
     },
     {
       "id":"Q2",
@@ -27,5 +27,5 @@ use-case-1:
   ]
   "failure_message": "Wrong answer entered. You have exhausted an attempt to answer the question"
   "success_message": "Great job!!! Correct answer entered."
-  "exit_message": "Congratulations!!! Module completed. You can move on to the next "
-  "config_update": {"Q1":"Q3"}
+  "exit_message": "Congratulations!!! Module completed."
+  "config_update": {"Q1":["Q3"]}
