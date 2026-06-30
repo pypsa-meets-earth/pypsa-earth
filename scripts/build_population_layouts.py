@@ -38,12 +38,15 @@ if __name__ == "__main__":
     # Set value of population to same dimension as in PyPSA-Eur-Sec, where the value is given in 1e3
     nuts3["pop"] = nuts3["pop"] / 1000
 
-    # Indicator matrix NUTS3 -> grid cells
-    I = atlite.cutout.compute_indicatormatrix(nuts3.geometry, grid_cells)
+    # atlite expects geometries to be accessible by integer labels starting at 0.
+    nuts3_geometry = nuts3.geometry.reset_index(drop=True)
 
-    # Indicator matrix grid_cells -> NUTS3; inprinciple Iinv*I is identity
-    # but imprecisions mean not perfect
-    Iinv = cutout.indicatormatrix(nuts3.geometry)
+    # Indicator matrix NUTS3 -> grid cells
+    I = atlite.cutout.compute_indicatormatrix(nuts3_geometry, grid_cells)
+
+    # Indicator matrix grid_cells -> NUTS3; in principle Iinv * I is identity,
+    # but imprecisions mean not perfect.
+    Iinv = cutout.indicatormatrix(nuts3_geometry)
 
     countries = np.sort(nuts3.country.unique())
 
