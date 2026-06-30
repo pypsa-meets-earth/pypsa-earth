@@ -4,7 +4,7 @@ use-case-1:
     {
       "id":"Q1",
       "question": "If modelling PyPSA-Earth for Kazakhstan, which config parameter needs to be set to indicate the country name?",
-      "choices": ["country","sub-region"],
+      "hints": ["country","sub-region"],
       "answer": "country"
     },
     {
@@ -15,10 +15,17 @@ use-case-1:
     },
     {
       "id":"Q3",
-      "question": "Provide your entry for the config parameter selected in previous question",
+      "question": "What should be the country code to update the `country` parameter for Kazakhstan?",
       "answer": "KZ"
+    },
+    {
+      "id":"Q4",
+      "question": "Which one of the following options is the right way to run the model?",
+      "choices":["snakemake --configfile config.default.yaml","snakemake -call solve_all_networks --configfile config.kz.yaml","snakemake solve_network"],
+      "answer":"snakemake -call solve_all_networks --configfile config.kz.yaml"
     }
   ]
   "failure_message": "Wrong answer entered. You have exhausted an attempt to answer the question"
   "success_message": "Great job!!! Correct answer entered."
   "exit_message": "Congratulations!!! Module completed. You can move on to the next "
+  "config_update": {"Q1":"Q3"}
