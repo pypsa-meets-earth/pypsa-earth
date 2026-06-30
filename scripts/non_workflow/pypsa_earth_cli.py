@@ -424,6 +424,7 @@ def tutorial():
             "num": "3",
             "name": "Demand",
             "desc": "Integrate national demand",
+I
         },
         {
             "num": "4", 
@@ -464,6 +465,7 @@ def tutorial():
     if choice != "8":
         show_questionnaire(choice)
         tutorial()
+
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
@@ -497,8 +499,6 @@ def run_model(config_path="") -> None:
 
     display_main_menu()
     
-
-
 def display_main_menu() -> None:
     """
     Interactive menu to be displayed as a starting point for the CLI
