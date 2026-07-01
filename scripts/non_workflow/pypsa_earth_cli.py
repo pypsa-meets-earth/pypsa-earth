@@ -386,8 +386,10 @@ def show_questionnaire(option: str):
     console.print(use_case['exit_message'])
     config_dict={}
     for key,value in use_case['config_update'].items():
-        if isinstance('value',list):
-            value = list(('value',))
+        if isinstance(value,list):
+            value = list((answer_dict[value[0]],))
+        else:
+            value = answer_dict[value]
         config_dict[answer_dict[key]]=value
 
     folder=ask("Enter run name for the model")
@@ -420,13 +422,13 @@ def tutorial():
         },
         {
             "num": "2",
-            "name": "Analysze results",
-            "desc": "Edit config parameters",
+            "name": "Analyze results",
+            "desc": "Analyze results of the baseline model",
         },
         {
             "num": "3",
             "name": "Demand",
-            "desc": "Integrate demand",
+            "desc": "Integrate national demand",
         },
         {
             "num": "4", 
@@ -478,12 +480,8 @@ def run_model(config_path="") -> None:
     if config_path == "":
         config_path=display_config_files()
 
-    # Selection to run elec-only / sector coupled model
-    rule=ask("Do you want to run the electricity-only model or the sector coupled model",default=["elec-only","sector"])
-    if rule == "elec-only":
-        target_rule="solve_all_networks"
-    elif rule=="sector":
-        target_rule="solve_sector_networks"
+    # the tutorial use-case is designed as an elec-only model, so we will use the solve_all_networks rule to run the model
+    target_rule="solve_all_networks"
 
     # Prompt user for number of cores to use to run the model
     cores=ask("Enter the number of cores to run the model")
@@ -495,7 +493,11 @@ def run_model(config_path="") -> None:
     elif env=="conda":
         env_command = "conda run -n pypsa-earth"
 
-    snakemake_command=f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path}"
+    snakemake_command=f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
+
+    console.print(style="dim")
+    console.print(f"[cyan] The following command will be run to execute the model: {snakemake_command} [/cyan]")
+    
     subprocess.run(snakemake_command.split(" "))
 
     display_main_menu()
