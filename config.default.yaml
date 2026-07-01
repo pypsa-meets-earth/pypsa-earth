@@ -179,30 +179,33 @@ load_options:
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
-co2_budget:
-  enable: false
-  override_co2opt: true
-  co2base_value: co2limit # choose from: [co2limit, co2base, absolute, {float}]
-  year:
-    2020: 1.0
-    2025: 0.85
-    2030: 0.70
-    2035: 0.55
-    2040: 0.40
-    2045: 0.25
-    2050: 0.1
+co2:
+  limit: 7.75e+7     # annual cap [tCO2/year]; European default — adjust for your region; active via Co2L wildcard
+  base: 1.487e+9     # baseline emissions used for relative reduction targets; European default
+  emission_price: 0. # [currency/tCO2]; active via Ep wildcard
+  automatic_emission: # derive co2.limit from historical emission data instead of the value above
+    enable: false
+    base_year: 1990  # any year from 1970 to 2018
+  budget:            # year-by-year reduction trajectory; used in all sector-coupled runs
+    enable: false
+    override_co2opt: true
+    base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
+    year:
+      2020: 1.0
+      2025: 0.85
+      2030: 0.70
+      2035: 0.55
+      2040: 0.40
+      2045: 0.25
+      2050: 0.1
 
 electricity:
   base_voltage: 380.
   voltages: [132., 220., 300., 380., 500., 750.]
-  co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 1.487e+9 # European default, adjustment to Africa necessary
   agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
     file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
     include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
   hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
-  automatic_emission: false
-  automatic_emission_base_year: 1990 # 1990 is taken as default. Any year from 1970 to 2018 can be selected.
 
   operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
     activate: false
@@ -444,8 +447,6 @@ costs:
     fuel cell: 0.
     battery: 0.
     battery inverter: 0.
-  emission_prices: # in currency per tonne emission, only used with the option Ep
-    co2: 0.
   # investment: # EUR/MW
   #   CCGT: 830000
   # FOM: # %/year
@@ -458,8 +459,6 @@ costs:
   #   CCGT: 25.0
   # efficiency: # per unit
   #   CCGT: 0.58
-  lines:
-    length_factor: 1.25 #to estimate offwind connection costs
 
 
 monte_carlo:
@@ -549,12 +548,6 @@ custom_data:
 
 industry:
   reference_year: 2015
-
-solar_thermal:
-  clearsky_model: simple
-  orientation:
-    slope: 45.
-    azimuth: 180.
 
 existing_capacities:
   grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]
@@ -653,10 +646,17 @@ sector:
   oil_boilers: false
   chp: true
   micro_chp: false
-  solar_thermal: true
+
+  solar_thermal_collector:
+    enable: true
+    cf_correction: 0.788457 # correction factor applied to atlite's raw output; = 1/1.2683
+    clearsky_model: simple
+    orientation:
+      slope: 45.
+      azimuth: 180.
+
   heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
   time_dep_hp_cop: true #time dependent heat pump coefficient of performance
-  solar_cf_correction: 0.788457 # = >>>1/1.2683
 
   # ------------------- LAND TRANSPORT SECTOR -------------------
 
