@@ -425,7 +425,6 @@ def tutorial():
             "num": "3",
             "name": "Demand",
             "desc": "Integrate national demand",
-I
         },
         {
             "num": "4", 
