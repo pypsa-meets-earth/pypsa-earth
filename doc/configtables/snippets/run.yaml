@@ -1,6 +1,5 @@
 run:
-  name: "" # use this to keep track of runs with different settings
-  sector_name: "" # use this to keep track of sector scenario runs
-  shared_cutouts: true # set to true to share the default cutout(s) across runs
-  # Note: value false requires build_cutout to be enabled
-  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
+  name: "" # run label; prefixes resources/ and results/ paths
+  sector_name: "" # sector scenario label; subfolder under results/
+  shared_cutouts: true # share cutouts across named runs
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scenario fails

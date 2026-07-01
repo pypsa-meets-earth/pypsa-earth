@@ -197,7 +197,7 @@ if config["enable"].get("download_osm_data", True):
 rule clean_osm_data:
     params:
         crs=config["crs"],
-        clean_osm_data_options=config["clean_osm_data_options"],
+        clean_osm_data_options=config["osm"]["clean_osm_data"],
     input:
         cables="resources/" + RDIR + "osm/raw/all_raw_cables.geojson",
         generators="resources/" + RDIR + "osm/raw/all_raw_generators.geojson",
@@ -223,7 +223,7 @@ rule clean_osm_data:
 
 rule build_osm_network:
     params:
-        build_osm_network=config.get("build_osm_network", {}),
+        build_osm_network=config.get("osm", {}).get("build_osm_network", {}),
         countries=config["countries"],
         crs=config["crs"],
     input:
@@ -1216,7 +1216,6 @@ HEAT = {
 rule prepare_sector_network:
     params:
         electricity=config["electricity"],
-        fossil_reserves=config["fossil_reserves"],
         h2_underground=config["custom_data"]["h2_underground"],
         countries=config["countries"],
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],

@@ -1,0 +1,6 @@
+countries: ["NG", "BJ"] # ISO codes, continent, or custom region
+
+foresight: overnight # "myopic" or "overnight"
+
+results_dir: results/
+summary_dir: results/

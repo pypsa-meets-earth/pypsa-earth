@@ -1,3 +1,4 @@
+  # ------------------- Solver -------------------
   solver:
     name: gurobi
     options: gurobi-default

@@ -17,8 +17,6 @@ How it runs:
 import re
 from pathlib import Path
 
-import yaml
-
 
 def extract_yaml_section(yaml_content, section_key, subsection=None):
     """
@@ -64,74 +62,180 @@ def main():
 
     # Mapping of snippet files to config sections
     sections = {
-        "toplevel": {"start": "version:", "end": "run:"},
+        "meta": {
+            "start": "version:",
+            "end": "# =================== STUDY SETUP ===================",
+        },
+        "study_setup": {
+            "start": "countries:",
+            "end": "run:",
+        },
+        "data_retrieval": {
+            "start": "enable:",
+            "end": "# =================== GEOGRAPHY & SHAPES ===================",
+        },
         "run": ["run"],
         "scenario": ["scenario"],
-        "snapshots": ["snapshots"],
-        "crs": ["crs"],
-        "augmented_line_connection": ["augmented_line_connection"],
-        "cluster_options": ["cluster_options"],
-        "build_shape_options": ["build_shape_options"],
-        "subregion": ["subregion"],
-        "clean_osm_data_options": ["clean_osm_data_options"],
-        "build_osm_network": ["build_osm_network"],
-        "base_network": ["base_network"],
-        "load_options": ["load_options"],
-        "co2": ["co2"],
-        "electricity": ["electricity"],
-        "lines": ["lines"],
-        "links": ["links"],
-        "transformers": ["transformers"],
-        "atlite": ["atlite"],
-        "renewable_onwind": ["renewable", "onwind"],
-        "renewable_offwind-ac": ["renewable", "offwind-ac"],
-        "renewable_offwind-dc": ["renewable", "offwind-dc"],
-        "renewable_solar": ["renewable", "solar"],
-        "renewable_hydro": ["renewable", "hydro"],
-        "renewable_csp": ["renewable", "csp"],
-        "costs": ["costs"],
-        "monte_carlo": ["monte_carlo"],
-        "solving_options": ["solving", "options"],
-        "solving_solver": ["solving", "solver"],
+        "snapshots": {
+            "start": "snapshots:",
+            "end": "# =================== DATA RETRIEVAL ===================",
+        },
+        "crs": {
+            "start": "crs:",
+            "end": "# ------------------- Regional shapes",
+        },
+        "augmented_line_connection": {
+            "start": "augmented_line_connection:",
+            "end": "# =================== NETWORK & RESOURCES",
+        },
+        "cluster_options": {
+            "start": "cluster_options:",
+            "end": "# ------------------- Augmented connectivity",
+        },
+        "build_shape_options": {
+            "start": "build_shape_options:",
+            "end": "# ------------------- Subregions",
+        },
+        "subregion": {
+            "start": "subregion:",
+            "end": "# ------------------- Land-cover exclusions",
+        },
+        "natura": {
+            "start": "natura:",
+            "end": "# ------------------- OpenStreetMap",
+        },
+        "osm": {
+            "start": "osm:",
+            "end": "# ------------------- Clustering",
+        },
+        "base_network": {
+            "start": "base_network:",
+            "end": "# ------------------- Demand",
+        },
+        "load_options": {
+            "start": "load_options:",
+            "end": "# ------------------- Electricity grid",
+        },
+        "electricity": {
+            "start": "electricity:",
+            "end": "lines:",
+        },
+        "lines": {
+            "start": "lines:",
+            "end": "links:",
+        },
+        "links": {
+            "start": "links:",
+            "end": "transformers:",
+        },
+        "transformers": {
+            "start": "transformers:",
+            "end": "# ------------------- Weather & renewables",
+        },
+        "atlite": {
+            "start": "atlite:",
+            "end": "renewable:",
+        },
+        "renewable_onwind": {
+            "start": "onwind:",
+            "end": "offwind-ac:",
+        },
+        "renewable_offwind-ac": {
+            "start": "offwind-ac:",
+            "end": "offwind-dc:",
+        },
+        "renewable_offwind-dc": {
+            "start": "offwind-dc:",
+            "end": "solar:",
+        },
+        "renewable_solar": {
+            "start": "solar:",
+            "end": "hydro:",
+        },
+        "renewable_hydro": {
+            "start": "hydro:",
+            "end": "csp:",
+        },
+        "renewable_csp": {
+            "start": "csp:",
+            "end": "# ------------------- Costs & emissions",
+        },
+        "costs": {
+            "start": "costs:",
+            "end": "co2:",
+        },
+        "co2": {
+            "start": "co2:",
+            "end": "# ------------------- Uncertainty",
+        },
+        "monte_carlo": {
+            "start": "monte_carlo:",
+            "end": "# =================== SECTOR OPTIONS",
+        },
+        "solving_solver": {
+            "start": "# ------------------- Solver",
+            "end": "# ------------------- Optimization options",
+        },
+        "solving_options": {
+            "start": "# ------------------- Optimization options",
+            "end": "# ------------------- Solver presets",
+        },
         "plotting": ["plotting"],
-        "policy_config": ["policy_config"],
-        "demand_data": ["demand_data"],
-        "export": ["export"],
+        "policy_config": {
+            "start": "policy_config:",
+            "end": "export:",
+        },
+        "export": {
+            "start": "export:",
+            "end": "# ------------------- Demand data",
+        },
+        "demand_data": {
+            "start": "demand_data:",
+            "end": "# ------------------- Custom data",
+        },
+        "custom_data": {
+            "start": "custom_data:",
+            "end": "# ------------------- Brownfield capacities",
+        },
+        "existing_capacities": {
+            "start": "existing_capacities:",
+            "end": "# ------------------- Sector settings",
+        },
         "sector_toplevel": {
             "start": "sector:",
-            "end": "# ------------------- HEAT SECTOR",
+            "end": "# ------------------- Heat sector",
         },
         "sector_heat": {
-            "start": "# ------------------- HEAT SECTOR",
-            "end": "# ------------------- LAND TRANSPORT SECTOR",
+            "start": "# ------------------- Heat sector",
+            "end": "# ------------------- Land transport sector",
         },
         "sector_land_transport": {
-            "start": "# ------------------- LAND TRANSPORT SECTOR",
-            "end": "# ------------------- BIOMASS SECTOR",
+            "start": "# ------------------- Land transport sector",
+            "end": "# ------------------- Biomass sector",
         },
         "sector_biomass": {
-            "start": "# ------------------- BIOMASS SECTOR",
-            "end": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
+            "start": "# ------------------- Biomass sector",
+            "end": "# ------------------- Electricity distribution grid",
         },
         "sector_electricity_distribution_grid": {
-            "start": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
-            "end": "# ------------------- SHIPPING & AVIATION SECTOR",
+            "start": "# ------------------- Electricity distribution grid",
+            "end": "# ------------------- Shipping & aviation sector",
         },
         "sector_shipping_aviation": {
-            "start": "# ------------------- SHIPPING & AVIATION SECTOR",
-            "end": "# ------------------- CCUS & CONVERSION OPTIONS",
+            "start": "# ------------------- Shipping & aviation sector",
+            "end": "# ------------------- CCUS & conversion options",
         },
         "sector_ccus": {
-            "start": "# ------------------- CCUS & CONVERSION OPTIONS",
-            "end": "# ------------------- INDUSTRY OPTIONS",
+            "start": "# ------------------- CCUS & conversion options",
+            "end": "# ------------------- Industry options",
         },
         "sector_industry": {
-            "start": "# ------------------- INDUSTRY OPTIONS",
-            "end": "# ------------------- POWERPLANTS OPTIONS",
+            "start": "# ------------------- Industry options",
+            "end": "# ------------------- Powerplants options",
         },
         "sector_powerplants": {
-            "start": "# ------------------- POWERPLANTS OPTIONS",
-            "end": "solving:",
+            "start": "# ------------------- Powerplants options",
+            "end": "# =================== SOLVING",
         },
     }
 

@@ -20,11 +20,11 @@ PyPSA-Earth loads ``config.default.yaml`` first and then merges your ``config.ya
 
 When you upgrade to a new version, open the updated ``config.default.yaml`` and check what changed: new keys, renamed paths, or reorganised sections. Compare it with your ``config.yaml`` and copy across any new defaults you want to use, or move keys you still override to their new locations. The [release notes](../release-notes.md) summarise breaking config changes per release.
 
-Some deprecated key names are migrated automatically when the workflow starts; if Snakemake prints a ``FutureWarning`` about an old path, update your ``config.yaml`` to the new key and remove the obsolete one. For study-specific settings you can also pass extra files with ``snakemake --configfile my_study.yaml`` instead of growing a single ``config.yaml``.
+Some deprecated key names are migrated automatically when the workflow starts; if Snakemake prints a ``FutureWarning`` about an old path, update your ``config.yaml`` to the new key and remove the obsolete one. See [Renamed keys](#renamed-keys) for the full mapping. For study-specific settings you can also pass extra files with ``snakemake --configfile my_study.yaml`` instead of growing a single ``config.yaml``.
 
 ### Renamed keys
 
-The table below lists all keys that have been renamed or moved. The old keys still work (their values are silently copied to the new location), but you should update your ``config.yaml`` to avoid future breakage.
+The table below lists all keys that have been renamed or moved. The old keys still work (their values are copied to the new location), but you should update your ``config.yaml`` to avoid future breakage.
 
 | Old key (deprecated) | New key |
 |---|---|
@@ -41,22 +41,53 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `sector.solar_cf_correction` | `sector.solar_thermal_collector.cf_correction` |
 | `solar_thermal.clearsky_model` | `sector.solar_thermal_collector.clearsky_model` |
 | `solar_thermal.orientation` | `sector.solar_thermal_collector.orientation` |
+| `clean_osm_data_options` | `osm.clean_osm_data` |
+| `build_osm_network` | `osm.build_osm_network` |
+| `fossil_reserves.{carrier}` | `sector.{carrier}.reserves` |
+
+`{carrier}` is the fuel name (e.g. `oil`, `coal`, `gas`, `lignite`, `biomass`). Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
 
 ## Top-level configuration
 
+Version, tutorial mode, logging, and optional custom Snakemake rules (``# META`` banner in ``config.default.yaml``).
+
 ```yaml
---8<-- "configtables/snippets/toplevel.yaml"
+--8<-- "configtables/snippets/meta.yaml"
 ```
 
-{{ read_csv('configtables/toplevel.csv') }}
+{{ read_csv('configtables/meta.csv') }}
 
-## run
+## Study setup
 
-It is common conduct to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
-e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
-investment changes as more ambitious greenhouse-gas emission reduction targets are applied.
+Options under the **STUDY SETUP** banner in ``config.default.yaml``: region, output paths, run namespacing, [scenario wildcards](wildcards.md), and model time range.
 
-The `run` section is used for running and storing scenarios with different configurations which are not covered by [wildcards](wildcards.md). It determines the path at which resources, networks and results are stored. Therefore the user can run different configurations within the same directory. If a run with a non-empty name should use cutouts shared across runs, set `shared_cutouts` to `true`.
+Region, foresight mode, and default output directories (`results_dir`, `summary_dir` are top-level keys, not nested under ``run``).
+
+```yaml
+--8<-- "configtables/snippets/study_setup.yaml"
+```
+
+{{ read_csv('configtables/study_setup.csv') }}
+
+### run
+
+It is common conduct to analyse energy system
+optimisation models for **multiple scenarios** for
+a variety of reasons,
+e.g. assessing their sensitivity towards changing
+the temporal and/or geographical resolution or
+investigating how
+investment changes as more ambitious greenhouse-gas
+emission reduction targets are applied.
+
+The `run` section is used for running and storing
+scenarios with different configurations which are
+not covered by [wildcards](wildcards.md). It
+determines the path at which resources, networks
+and results are stored. Therefore the user can run
+different configurations within the same directory.
+If a run with a non-empty name should use cutouts
+shared across runs, set `shared_cutouts` to `true`.
 
 ```yaml
 --8<-- "configtables/snippets/run.yaml"
@@ -64,7 +95,7 @@ The `run` section is used for running and storing scenarios with different confi
 
 {{ read_csv('configtables/run.csv') }}
 
-## scenario
+### scenario
 
 The `scenario` section is an extraordinary section of the config file
 that is strongly connected to the [wildcards](wildcards.md) and is designed to
@@ -86,7 +117,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 
 {{ read_csv('configtables/scenario.csv') }}
 
-## snapshots
+### snapshots
 
 Specifies the temporal range for the historical weather data, which is used to build the energy system model. It uses arguments to [pandas.date_range](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html). The date range must be in the past (before 2022). A well-tested year is 2013.
 
@@ -96,7 +127,21 @@ Specifies the temporal range for the historical weather data, which is used to b
 
 {{ read_csv('configtables/snapshots.csv') }}
 
-## crs
+## Data retrieval
+
+Switches in ``enable`` for downloading databundles, OSM data, cutouts, and building inputs locally. Set most retrieve flags to ``true`` for the first run.
+
+```yaml
+--8<-- "configtables/snippets/data_retrieval.yaml"
+```
+
+{{ read_csv('configtables/data_retrieval.csv') }}
+
+## Geography & shapes
+
+Coordinate systems, regional shapes, subregions, land-cover exclusions, OpenStreetMap, clustering, and optional augmented connectivity (``# GEOGRAPHY & SHAPES`` in ``config.default.yaml``).
+
+### crs
 
 Defines the coordinate reference systems (crs).
 
@@ -106,31 +151,11 @@ Defines the coordinate reference systems (crs).
 
 {{ read_csv('configtables/crs.csv') }}
 
-## augmented_line_connection
+### build_shape_options
 
-If enabled, it increases the connectivity of the network. It makes the network graph [k-edge-connected](https://en.wikipedia.org/wiki/K-edge-connected_graph), i.e.,
-if fewer than k edges are removed, the network graph stays connected. It uses the [k-edge-augmentation](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation)
-algorithm from the [NetworkX](https://networkx.org/documentation/stable/index.html) Python package.
-
-```yaml
---8<-- "configtables/snippets/augmented_line_connection.yaml"
-```
-
-{{ read_csv('configtables/augmented_line_connection.csv') }}
-
-## cluster_options
-
-Specifies the options to simplify and cluster the network. This is done in two stages, first using the rule `simplify_network` and then using the rule `cluster_network`. For more details on this process, see the [PyPSA-Earth paper](https://www.sciencedirect.com/science/article/pii/S0306261923004609), section 3.7.
-
-```yaml
---8<-- "configtables/snippets/cluster_options.yaml"
-```
-
-{{ read_csv('configtables/cluster_options.csv') }}
-
-## build_shape_options
-
-Specifies the options to build the shapes in which the region of interest (`countries`) is divided.
+Specifies the options to build the shapes in
+which the region of interest (`countries`) is
+divided.
 
 ```yaml
 --8<-- "configtables/snippets/build_shape_options.yaml"
@@ -138,7 +163,7 @@ Specifies the options to build the shapes in which the region of interest (`coun
 
 {{ read_csv('configtables/build_shape_options.csv') }}
 
-## subregion
+### subregion
 
 If enabled, this option allows a region of interest (`countries`) to be redefined into subregions,
 which can be activated at various stages of the workflow. Currently, it is used in `simplify_network` and `cluster_network` rule.
@@ -159,33 +184,79 @@ For example, consider the Central District of Botswana, which has a GADM ID of `
 
 There are several formats for GADM IDs depending on the version, so before using this feature, please review the `resources/shapes/gadm_shape.geojson` file which can be created using the command:
 
-``bash
+```bash
 snakemake -j 1 build_shapes
+```
 
 !!! note
     The rule `build_shapes` currently use [Version 4.1](https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/) for their GADM data. This may change in the future.
 
-## clean_osm_data_options
+### natura
 
-Specifies the options to clean the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) data.
-
-```yaml
---8<-- "configtables/snippets/clean_osm_data_options.yaml"
-```
-
-{{ read_csv('configtables/clean_osm_data_options.csv') }}
-
-## build_osm_network
-
-Specifies the options to build the [OpenStreetMap](https://wiki.osmfoundation.org/wiki/Main_Page) (OSM) network.
+Land-cover exclusion raster settings. Only relevant when ``enable.build_natura_raster`` is ``true``.
 
 ```yaml
---8<-- "configtables/snippets/build_osm_network.yaml"
+--8<-- "configtables/snippets/natura.yaml"
 ```
 
-{{ read_csv('configtables/build_osm_network.csv') }}
+{{ read_csv('configtables/natura.csv') }}
 
-## base_network
+### osm
+
+OpenStreetMap ([OSM](https://wiki.osmfoundation.org/wiki/Main_Page)) pipeline settings live under the ``osm`` block: ``osm.clean_osm_data`` filters raw downloads; ``osm.build_osm_network`` merges buses and lines into the base-network CSV inputs. If your config still uses the old top-level names, see [Renamed keys](#renamed-keys).
+
+```yaml
+--8<-- "configtables/snippets/osm.yaml"
+```
+
+{{ read_csv('configtables/osm.csv') }}
+
+### cluster_options
+
+Specifies the options to simplify and cluster the
+network. This is done in two stages, first using
+the rule `simplify_network` and then using the
+rule `cluster_network`. For more details on this
+process, see the [PyPSA-Earth paper](https://www.
+sciencedirect.com/science/article/pii/
+S0306261923004609), section 3.7.
+
+```yaml
+--8<-- "configtables/snippets/cluster_options.yaml"
+```
+
+{{ read_csv('configtables/cluster_options.csv') }}
+
+### augmented_line_connection
+
+If enabled, it increases the connectivity of the
+network. It makes the network graph
+[k-edge-connected](https://en.wikipedia.org/wiki/
+K-edge-connected_graph), i.e.,
+if fewer than k edges are removed, the network
+graph stays connected. It uses the
+[k-edge-augmentation](https://networkx.org/
+documentation/stable/reference/algorithms/
+generated/networkx.algorithms.connectivity.
+edge_augmentation.k_edge_augmentation.
+html#networkx.algorithms.connectivity.
+edge_augmentation.k_edge_augmentation)
+algorithm from the [NetworkX](https://networkx.
+org/documentation/stable/index.html) Python
+package.
+
+```yaml
+--8<-- "configtables/snippets/augmented_line_connection.yaml"
+```
+
+{{ read_csv('configtables/augmented_line_connection.csv') }}
+
+
+## Network & resources
+
+Base network assembly, demand, electricity grid, weather and renewables, costs and emissions, and Monte Carlo settings (``# NETWORK & RESOURCES`` in ``config.default.yaml``).
+
+### base_network
 
 Specifies the minimum voltage magnitude in the base network and the offshore substations.
 
@@ -195,7 +266,7 @@ Specifies the minimum voltage magnitude in the base network and the offshore sub
 
 {{ read_csv('configtables/base_network.csv') }}
 
-## load_options
+### load_options
 
 Specifies the options to estimate future electricity demand (load). Different years might be considered for weather and the socioeconomic pathway (GDP and population growth), to enhance modelling capabilities.
 
@@ -207,17 +278,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
 
-## co2
-
-Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep` wildcards), automatic emission extraction, and optional planning-horizon budgets in sector-coupled runs.
-
-```yaml
---8<-- "configtables/snippets/co2.yaml"
-```
-
-{{ read_csv('configtables/co2.csv') }}
-
-## electricity
+### electricity
 
 Specifies the options for the rule `add_electricity`. This includes options across several features, including but not limited to: voltage levels, electricity carriers available, renewable capacity estimation, operational reserve, storage parameters. See the table below for more details.
 
@@ -229,7 +290,7 @@ Specifies the options for the rule `add_electricity`. This includes options acro
 
 Carriers in `conventional_carriers` must not also be in `extendable_carriers`.
 
-## lines
+### lines
 
 Specifies electricity line parameters.
 
@@ -239,7 +300,7 @@ Specifies electricity line parameters.
 
 {{ read_csv('configtables/lines.csv') }}
 
-## links
+### links
 
 Specifies Link parameters. Links are a fundamental component of [PyPSA](https://pypsa.readthedocs.io/en/latest/components.html) .
 
@@ -249,7 +310,7 @@ Specifies Link parameters. Links are a fundamental component of [PyPSA](https://
 
 {{ read_csv('configtables/links.csv') }}
 
-## transformers
+### transformers
 
 Specifies transformers parameters and types.
 
@@ -259,13 +320,13 @@ Specifies transformers parameters and types.
 
 {{ read_csv('configtables/transformers.csv') }}
 
-## atlite
+### atlite
 
 Define and specify the `atlite.Cutout` used for calculating renewable potentials and time-series. All options except for `features` are directly used as [cutout parameters](https://atlite.readthedocs.io/en/latest/ref_api.html#cutout).
 
 {{ read_csv('configtables/atlite.csv') }}
 
-## renewable
+### renewable
 
 Specifies the options to obtain renewable potentials in every cutout. These are divided in five different renewable technologies: onshore wind (`onwind`), offshore wind with AC connection (`offwind-ac`), offshore wind with DC connection (`offwind-dc`), solar (`solar`), and hydropower (`hydro`).
 
@@ -321,7 +382,7 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 
 {{ read_csv('configtables/csp.csv') }}
 
-## costs
+### costs
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
 
@@ -341,7 +402,17 @@ Specifies the cost assumptions of the technologies considered. Cost information 
     [Parzen et al. 2023](https://www.sciencedirect.com/science/article/pii/S2589004222020028) and in
     [Kittel et al. 2022](https://www.sciencedirect.com/science/article/pii/S2589004222002723).
 
-## monte_carlo
+### co2
+
+Carbon dioxide policy settings: emission caps and carbon prices (via `Co2L`/`Ep` wildcards), automatic emission extraction, and optional planning-horizon budgets in sector-coupled runs.
+
+```yaml
+--8<-- "configtables/snippets/co2.yaml"
+```
+
+{{ read_csv('configtables/co2.csv') }}
+
+### monte_carlo
 
 Specifies the options for Monte Carlo sampling.
 
@@ -351,9 +422,13 @@ Specifies the options for Monte Carlo sampling.
 
 {{ read_csv('configtables/monte-carlo.csv') }}
 
-## policy_config
+## Sector options
 
-Specifies the options regarding energy policy, for example in relation to hydrogen exports.
+Options under the **SECTOR OPTIONS** banner in ``config.default.yaml``: hydrogen policy and export, sector demand inputs, custom data overrides, brownfield capacity grouping, and sector coupling settings.
+
+### policy_config
+
+Specifies energy-policy options for hydrogen, for example temporal matching and additionality constraints.
 
 ```yaml
 --8<-- "configtables/snippets/policy_config.yaml"
@@ -361,19 +436,9 @@ Specifies the options regarding energy policy, for example in relation to hydrog
 
 {{ read_csv('configtables/policy_config.csv') }}
 
-## demand_data
+### export
 
-Specifies sector-coupled related demand.
-
-```yaml
---8<-- "configtables/snippets/demand_data.yaml"
-```
-
-{{ read_csv('configtables/demand_data.csv') }}
-
-## export
-
-Specifies the option related to hydrogen exports.
+Specifies hydrogen export demand, storage, and shipping profile settings.
 
 ```yaml
 --8<-- "configtables/snippets/export.yaml"
@@ -381,7 +446,17 @@ Specifies the option related to hydrogen exports.
 
 {{ read_csv('configtables/export.csv') }}
 
-## custom_data
+### demand_data
+
+Specifies sector-coupled demand inputs (UNSD energy balances and related years).
+
+```yaml
+--8<-- "configtables/snippets/demand_data.yaml"
+```
+
+{{ read_csv('configtables/demand_data.csv') }}
+
+### custom_data
 
 Specifies which custom datasets are used to replace or supplement the default model data. For full details see [Custom Data Integration](custom-data.md).
 
@@ -391,11 +466,23 @@ Specifies which custom datasets are used to replace or supplement the default mo
 
 {{ read_csv('configtables/custom_data.csv') }}
 
-## sector
+### existing_capacities
 
-Specifies the options for the sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+Vintage grouping and thresholds for brownfield power and heating capacities in ``add_existing_baseyear`` and related rules.
 
-### top-level
+```yaml
+--8<-- "configtables/snippets/existing_capacities.yaml"
+```
+
+{{ read_csv('configtables/existing_capacities.csv') }}
+
+### sector
+
+Specifies the options for sector coupling, i.e. the integration of the electricity system with other sectors such as heating and transport.
+
+#### top-level
+
+Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted. The former top-level ``fossil_reserves`` block is deprecated — see [Renamed keys](#renamed-keys).
 
 ```yaml
 --8<-- "configtables/snippets/sector_toplevel.yaml"
@@ -403,9 +490,9 @@ Specifies the options for the sector coupling, i.e. the integration of the elect
 
 {{ read_csv('configtables/sector_toplevel.csv') }}
 
-### heat sector
+#### heat sector
 
-Solar thermal collector settings live under ``sector.solar_thermal_collector`` (not ``sector.solar_thermal``). Legacy keys ``sector.solar_thermal`` (bool), ``sector.solar_cf_correction``, and top-level ``solar_thermal`` are migrated automatically; see ``migrate_config`` in ``scripts/_helpers.py``.
+Solar thermal collector settings live under ``sector.solar_thermal_collector`` (not ``sector.solar_thermal``). Deprecated solar-thermal keys are listed in [Renamed keys](#renamed-keys).
 
 ```yaml
 --8<-- "configtables/snippets/sector_heat.yaml"
@@ -413,7 +500,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_heat.csv') }}
 
-### land transport sector
+#### land transport sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_land_transport.yaml"
@@ -421,7 +508,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_land_transport.csv') }}
 
-### biomass sector
+#### biomass sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_biomass.yaml"
@@ -429,7 +516,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_biomass.csv') }}
 
-### electricity distribution grid
+#### electricity distribution grid
 
 ```yaml
 --8<-- "configtables/snippets/sector_electricity_distribution_grid.yaml"
@@ -437,7 +524,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_electricity_distribution_grid.csv') }}
 
-### shipping & aviation sector
+#### shipping & aviation sector
 
 ```yaml
 --8<-- "configtables/snippets/sector_shipping_aviation.yaml"
@@ -445,7 +532,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_shipping_aviation.csv') }}
 
-### ccus & conversion options
+#### ccus & conversion options
 
 ```yaml
 --8<-- "configtables/snippets/sector_ccus.yaml"
@@ -453,7 +540,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_ccus.csv') }}
 
-### industry options
+#### industry options
 
 ```yaml
 --8<-- "configtables/snippets/sector_industry.yaml"
@@ -461,7 +548,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_industry.csv') }}
 
-### powerplants options
+#### powerplants options
 
 ```yaml
 --8<-- "configtables/snippets/sector_powerplants.yaml"
@@ -469,17 +556,9 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 {{ read_csv('configtables/sector_powerplants.csv') }}
 
-## solving
+## Solving
 
-Specify linear power flow formulation and optimization solver settings.
-
-### options
-
-```yaml
---8<-- "configtables/snippets/solving_options.yaml"
-```
-
-{{ read_csv('configtables/solving-options.csv') }}
+Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, solver presets, and memory limit.
 
 ### solver
 
@@ -489,9 +568,17 @@ Specify linear power flow formulation and optimization solver settings.
 
 {{ read_csv('configtables/solving-solver.csv') }}
 
-## plotting
+### options
 
-Specifies plotting options.
+```yaml
+--8<-- "configtables/snippets/solving_options.yaml"
+```
+
+{{ read_csv('configtables/solving-options.csv') }}
+
+## Plotting
+
+Options under the **PLOTTING** banner in ``config.default.yaml``: map layout, plot thresholds, technology groupings, carrier colours, and display names.
 
 ```yaml
 --8<-- "configtables/snippets/plotting.yaml"
