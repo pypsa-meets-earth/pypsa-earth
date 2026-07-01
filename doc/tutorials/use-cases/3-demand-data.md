@@ -19,22 +19,22 @@ This series builds an **electricity-only (power system) model**. We do not switc
 
 ## Where demand enters the workflow
 
-Electricity demand is not read directly from national statistics inside the optimiser. Snakemake builds a **bus-level hourly profile** first, then attaches it to the network:
+Electricity demand is not read directly from national statistics inside the optimiser. Two rules handle it — both before the network is simplified or solved:
 
 ```
 build_demand_profiles  →  resources/KZ/demand_profiles.csv
         ↓
-add_electricity        →  loads on each cluster bus (networks/KZ/elec.nc)
+add_electricity        →  networks/KZ/elec.nc
         ↓
-simplify / cluster / prepare / solve
+… simplify, cluster, prepare, solve …
 ```
 
 | Rule | What it does |
 |---|---|
-| **`build_demand_profiles`** | Loads a global demand dataset (Step 1), applies `scale` (Step 3), and distributes an hourly profile to each bus → `demand_profiles.csv` |
-| **`add_electricity`** | Reads that CSV and attaches PyPSA **Load** components when building `elec.nc` (also adds generators and storage) |
+| **`build_demand_profiles`** | Loads GEGIS or DemandCast, applies `scale`, and writes an hourly profile per bus → `demand_profiles.csv` |
+| **`add_electricity`** | Attaches those values as PyPSA **Load** components on the network |
 
-All demand settings live under **`load_options`** in the config. They affect **`build_demand_profiles` only** — not the solver.
+All demand settings live under **`load_options`** in the config. They affect **`build_demand_profiles` only**.
 
 ```yaml
 --8<-- "configtables/snippets/load_options.yaml"
@@ -51,7 +51,7 @@ PyPSA-Earth builds hourly load from a **global demand dataset** — pre-calculat
 | Source | Config value | Weather years | Data location |
 |---|---|---|---|
 | **[GEGIS](http://dx.doi.org/10.1016/j.esr.2020.100606)** | `gegis` | 2011, 2013, 2018 | `data/ssp2-2.6/{prediction_year}/era5_{weather_year}/` (regional `.nc` / `.csv`, e.g. `Asia.nc` for KZ) |
-| **[DemandCast](https://github.com/open-energy-transition/demandcast)** | `demcast` | 2000–2024 | `data/demand/forecasts_on_historical_period.parquet` (via databundle) |
+| **[DemandCast](https://github.com/open-energy-transition/demandcast)** | `demcast` | 2000–2024 (must match `snapshots` year) | `data/demand/forecasts_on_historical_period.parquet` (via databundle) |
 
 **GEGIS** is the default. Profiles are pre-calculated from population and GDP using the [synde](https://github.com/euronion/synde) workflow; `prediction_year` selects the SSP pathway folder (e.g. `2030` under `ssp2-2.6`).
 
@@ -95,12 +95,12 @@ load_options:
 
     We keep **`prediction_year: 2030`** because it is the PyPSA-Earth default, matches `planning_horizons: [2030]` in `config.default.yaml`, and is the folder included in the standard databundle. That is why the Part 1 baseline was already near **107 TWh** without any tuning.
 
-    We still validate against **2020** statistics via **`scale`** (Step 3), not by changing these years. If you need a **2020 weather year**, switch to DemandCast from Step 1 (`source: demcast`, `weather_year: 2020`) — `scale` works the same way there.
+    We still validate against **2020** statistics via **`scale`** (Step 3), not by changing these years. DemandCast can use **`weather_year: 2020`**, but only if you also move **`snapshots` `start` / `end`** to 2020 — see below.
 
 !!! tip
-    Validating against **2020** statistics does not mean setting `weather_year: 2020` or `prediction_year: 2020` — GEGIS offers neither. Keep `weather_year: 2013` (matching the default one-year simulation period) and `prediction_year: 2030`, then adjust the **annual total** with `scale` (next step). If you change `weather_year` to 2011 or 2018, change the simulation `start` / `end` dates to that same calendar year as well.
+    Validating against **2020** statistics does not mean setting `weather_year: 2020` or `prediction_year: 2020` under GEGIS — GEGIS offers neither. Keep `weather_year: 2013` and `prediction_year: 2030`, then adjust the **annual total** with `scale` (next step). If you change GEGIS `weather_year` to 2011 or 2018, update `snapshots` `start` / `end` to that same calendar year.
 
-If you experiment with **DemandCast** (`source: demcast`), only `weather_year` matters — choose any year from 2000–2024. Ensure the DemandCast databundle is present under `data/demand/`.
+If you experiment with **DemandCast** (`source: demcast`), set `weather_year` to the **calendar year you simulate** — the same year as `snapshots` `start` / `end`. The parquet holds 2000–2024, but `build_demand_profiles` keeps only rows inside the snapshot window; a mismatch (e.g. `weather_year: 2020` with default 2013 snapshots) produces an **empty** `demand_profiles.csv`.
 
 ---
 
