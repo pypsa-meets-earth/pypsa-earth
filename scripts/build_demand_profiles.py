@@ -40,6 +40,7 @@ It creates the load paths for GEGIS outputs by combining the input parameters of
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
+
 import os
 import os.path
 from itertools import product
