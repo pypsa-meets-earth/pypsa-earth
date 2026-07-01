@@ -369,7 +369,7 @@ def show_questionnaire(option: str):
                 if 'hints' in question:
                     hint=ask("Would you like a hint?",default=['Yes','No'])
                     if hint == 'Yes':
-                        console.print(f"[bold cyan] The answer is one of the following parameters {question['choices']} [/bold cyan]")
+                        console.print(f"[bold cyan] The answer is one of the following parameters {question['hints']}. Enter which one you think is correct. [/bold cyan]")
             
             answer_dict[question["id"]] = user_answer
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
@@ -394,7 +394,7 @@ def show_questionnaire(option: str):
     save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
 
     console.print(style="dim")
-    console.print(f"[cyan] The config file {save_config_path} has been updated with your responses. Check to verify. [/cyan]")
+    console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. Check to verify. [/bold cyan]")
 
     model_run=ask("Do you want to run the model ?",default=["Yes","No"])
     if model_run=="Yes":
@@ -486,7 +486,7 @@ def run_model(config_path="") -> None:
     snakemake_command=f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
 
     console.print(style="dim")
-    console.print(f"[cyan] The following command will be run to execute the model: {snakemake_command} [/cyan]")
+    console.print(f"[bold cyan] The following command will be run to execute the model: {snakemake_command} [/bold cyan]")
     
     subprocess.run(snakemake_command.split(" "))
 

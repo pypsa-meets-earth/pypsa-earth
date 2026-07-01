@@ -9,23 +9,33 @@ use-case-1:
     },
     {
       "id":"Q2",
-      "question": "What convention is used to add countries to the config file in PyPSA-Earth?",
-      "choices": ["2 letter country codes","Formal country name","Short form name"],
-      "answer": "2 letter country codes"
-    },
-    {
-      "id":"Q3",
-      "question": "What should be the country code to update the `country` parameter for Kazakhstan?",
+      "question": "Which of the following is the right format to update the `countries` parameter to Kazakhstan in the config file?",
+      "choices": ["KZ","Kazakhstan","KAZ"],
+      "hints": "The answer should be the 2-letter country code for Kazakhstan.",
       "answer": "KZ"
     },
     {
+      "id": "Q3",
+      "question": "To change the temporal resolution of the electricity model, which config parameter needs to be updated?",
+      "choices": ["snapshots","scenario.opts","scenario.sopts","scenario.planning_horizons"],
+      "hints": "The answer should be one of the parameters under the `scenario` section in the config file.",
+      "answer": "scenario.opts"
+    },
+    {
       "id":"Q4",
+      "question": "Enter the temporal resolution of the electricity model to be 6 hours in the config file.",
+      "answer": "6h",
+      "hints": "The answer should have the format of a number followed by 'h' to represent hours."
+    },
+    {
+      "id":"Q5",
       "question": "Which one of the following options is the right way to run the model?",
       "choices":["snakemake --configfile config.default.yaml","snakemake -call solve_all_networks --configfile config.kz.yaml","snakemake solve_network"],
+      "hints": "The answer should be the command that runs the model with the updated config file for Kazakhstan.",
       "answer":"snakemake -call solve_all_networks --configfile config.kz.yaml"
     }
   ]
-  "failure_message": "Wrong answer entered. You have exhausted an attempt to answer the question"
+  "failure_message": "Wrong answer entered. Please try again."
   "success_message": "Great job!!! Correct answer entered."
   "exit_message": "Congratulations!!! Module completed."
-  "config_update": {"Q1":["Q3"]}
+  "config_update": {"Q1":["Q2"],"Q3":["Q4"]}
