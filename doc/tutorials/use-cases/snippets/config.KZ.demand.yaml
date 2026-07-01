@@ -8,6 +8,9 @@ run:
   name: "KZ"
   shared_cutouts: false
 
+enable:
+  retrieve_cutout: false  # optional — use cached cutout after Part 1
+
 scenario:
   opts: [6h]
 

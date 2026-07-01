@@ -165,6 +165,16 @@ snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
 
 Snakemake compares your config with the last run and **rebuilds only what changed**. Because `load_options` feeds `build_demand_profiles`, expect that rule to run again, followed by `add_electricity` and everything downstream through `solve_network`. Cutouts, OSM data, and the base network stay cached from Part 1.
 
+!!! tip "Optional: disable cutout download on re-runs"
+    If Part 1 completed successfully, add to `config.KZ.yaml`:
+
+    ```yaml
+    enable:
+      retrieve_cutout: false
+    ```
+
+    Demand changes do not require a new ERA5 cutout. This tells Snakemake to use the cached file under `cutouts/KZ/` and avoids another download attempt. See the [FAQ](../../community/faq.md#cutout-download-failed-retrieve_cutout) if cutout retrieval caused trouble in Part 1.
+
 When the run finishes, the updated solved network overwrites the same file you analysed in Part 2:
 
 ```
