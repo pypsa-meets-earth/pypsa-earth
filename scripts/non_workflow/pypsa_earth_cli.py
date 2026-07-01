@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """
-This script provides the basis to run a CLI to help users navigate through PyPSA-Earth
+This script provides the basis to run a command line interface (CLI) to help users navigate through PyPSA-Earth
 
 The CLI has the following modules:
 1. Tutorial - A tutorial based module developed in sync with use-case documentation
@@ -98,7 +98,7 @@ def ask(text: str, default: str = "") -> str:
 
 def exit_message() -> None:
     console.print(style="dim")
-    console.print("[bold red] 👋 Exitting the application. [/bold red]")
+    console.print("[bold magenta] 👋 Exitting the application. [/bold magenta]")
     raise typer.Exit()
 
 
@@ -142,13 +142,14 @@ def save_config_file(config_path: str, config_data: dict[dict]) -> None:
     with open(config_path, "w") as file:
         yaml.safe_dump(config_data, file, default_flow_style=False)
         console.print(f"[bold green] ✔ Saved the file to {config_path} [/bold green]")
+        console.print(style="dim")
 
 
 def flatten_dict(
     nested_dict: dict, separator: str = ".", current_path: str = ""
 ) -> dict:
     """
-    Recursively flattens a nested dictionary using a path separator.
+    Recursively flattens a nested dictionary using a separator.
 
     Parameters
     ----------
@@ -206,7 +207,6 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
             if key not in current_layer or not isinstance(current_layer[key], dict):
                 current_layer[key] = {}
             current_layer = current_layer[key]
-
         # Assign the actual value to the final leaf key
         current_layer[keys[-1]] = value
 
@@ -234,7 +234,8 @@ def display_user_groups() -> tuple:
         display_label = f"{key} : {value}"
         options.append(Choice(value=key, name=display_label))
 
-    title = "Select user group (To add more config parameters to a user group, modify user_groups.yaml)"
+    # To add more config parameters to a user group, modify user_groups.yaml
+    title = "Select user group"
     user_group = display_choice_menu(title, options, len(options) + 1)
     return user_groups_config, user_group
 
@@ -257,14 +258,8 @@ def display_config_files() -> dict[dict]:
         "Select config file", config_files_list, len(config_files_list) + 1
     )
 
-    try:
-        config = load_config_file(config_path)
-        return config
-    except FileNotFoundError:
-        console.print(
-            "[bold red]❌ No such file found. \n Exitting the application [/bold red]"
-        )
-        exit_message()
+    config = load_config_file(config_path)
+    return config
 
 
 @app.command("config-setup")
@@ -279,20 +274,15 @@ def config_setup():
     config_options = user_groups_config[user_group]
 
     # Fetch required config file parameters based on user group
-    try:
-        reqd_config = {x: config[x] for x in config_options}
-    except KeyError:
-        console.print(
-            "[bold red] ❌ Mismatch in choice of user group and config file. \n Exitting the application [/bold red]"
-        )
-        exit_message()
+    reqd_config = {x: config[x] for x in config_options}
 
+    # Create a copy of the required config to store updated values
     updated_config = reqd_config.copy()
 
     config_options.append("return to main menu")
-    ret = False
+    return_to_main = False
     choice = ""
-    while not ret:
+    while not return_to_main:
         # Use case choice
         required_height = len(config_options) + 2
 
@@ -301,14 +291,14 @@ def config_setup():
         choice = display_choice_menu(title, config_options, required_height)
 
         if choice == "return to main menu":
-            ret = False
+            return_to_main = True
             console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
             break
 
-        # Iterate through the child config parameters
+        # Iterate through the child config parameters, e.g., for the `scenario` config option, the child params are `simpl`,`ll`,`clusters` etc.
         if isinstance(reqd_config[choice], dict):
-            subret = False
-            while not subret:
+            return_to_config_setup = False
+            while not return_to_config_setup:
                 flattened_options = flatten_dict(reqd_config[choice])
 
                 subchoice_options = []
@@ -333,27 +323,28 @@ def config_setup():
                 )
 
                 if subchoice == "return":
-                    subret = True
+                    return_to_config_setup = True
                     continue
 
                 updated_value = ask(
                     f"Enter the value of {subchoice} to update in the config file"
                 )
+                if isinstance(updated_config[choice][subchoice],list):
+                    updated_value =updated_value.split(",")
                 updated_config[choice][subchoice] = updated_value
         else:
+        # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
             updated_value = ask(
                 f"Enter the value of {choice} to update in the config file"
             )
+            if isinstance(updated_config[choice],list):
+                # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
+                updated_value = updated_value.split(",")
             updated_config[choice] = updated_value
 
-    # # Save updated config file
-    save_file = ask("Do you want to save the updated params to a file ?", ["Yes", "No"])
-    if save_file == "Yes":
-        config_save_path = ask(
-            f"Enter config file to save updated params to [Press Enter to use default file]",
-            default="config.cli_updated.yaml",
-        )
-        save_config_file(config_save_path, unflatten_dict(updated_config))
+    # Save updated config file
+    config_save_path="config.cli_updated.yaml"
+    save_config_file(config_save_path, unflatten_dict(updated_config))
     display_main_menu()
 
 
@@ -364,20 +355,20 @@ def display_main_menu() -> None:
     menu_items = [
         {
             "num": "1",
-            "name": "Setup environment",
-            "desc": "Setup python environment using conda",
+            "name": "Tutorial",
+            "desc": "Use-case guide for PyPSA-Kazakhstan",
         },
         {
             "num": "2",
-            "name": "Edit config parameters",
-            "desc": "Edit config parameters",
+            "name": "Configuration Setup",
+            "desc": "customize configuration parameters for PyPSA-Earth model run",
         },
         {
             "num": "3",
-            "name": "Retrieve data bundles",
-            "desc": "Fetch data for snakemake workflow",
+            "name": "Data Retrieval",
+            "desc": "Fetch external data required for PyPSA-Earth model run",
         },
-        {"num": "4", "name": "Run model", "desc": "Run PyPSA-Earth model"},
+        {"num": "4", "name": "Run Model", "desc": "Run PyPSA-Earth model"},
         {"num": "5", "name": "Exit", "desc": "Close the application"},
     ]
 

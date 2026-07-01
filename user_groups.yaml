@@ -1,3 +1,3 @@
-Beginner: ['countries', 'enable', 'run', 'scenario', 'snapshots']
-Modeller: ['countries', 'enable', 'run', 'scenario', 'snapshots','foresight','cluster_options','build_shape_options','clean_osm_data_options']
-Client: ['results_dir', 'summary_dir', 'countries', 'enable', 'custom_data']
+Sandbox: ['countries', 'enable', 'run', 'scenario', 'snapshots']
+Specialist: ['countries', 'enable', 'run', 'scenario', 'snapshots','foresight','cluster_options','build_shape_options','clean_osm_data_options']
+Strategist: ['results_dir', 'summary_dir', 'countries', 'enable', 'custom_data']
