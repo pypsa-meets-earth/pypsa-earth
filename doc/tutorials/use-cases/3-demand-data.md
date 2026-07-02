@@ -217,4 +217,4 @@ The hourly profile shape is unchanged from Part 2 — only the annual total move
 | 2 | `load_options.prediction_year` | `2030` | GEGIS SSP level (no 2020 folder) |
 | 3 | `load_options.scale` | `1.005` or `{ DEFAULT: 1.0, KZ: 1.005 }` | Match 2020 KEGOC total (float for single country; dict for multi-country) |
 
-Demand is now anchored to **2020** consumption statistics. Generation and installed capacity still reflect the uncorrected baseline from Part 2 — we fix those in **Part 4** *(coming soon)*, where we lock the 2020 generation fleet for a fair comparison against the same validation tables.
+Demand is now anchored to **2020** consumption statistics. Generation and installed capacity are calibrated in **[Part 4](4-generation-data.md)** — lock the 2020 fleet, filter powerplantmatching, and compare installed capacities to the same validation tables.

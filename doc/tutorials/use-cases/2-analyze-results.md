@@ -371,7 +371,7 @@ The tables below collect 2020 values from these sources.
 | | IRENA | EIA | Ember | KEGOC | Model (baseline) |
 |---|---|---|---|---|---|
 | Total | 23.65 | 24.84 | 21.65 | 23.62 | 42.86 |
-| Coal | 19.46 | 20.65 | 13.4 | 13.4 | 11.72 |
+| Coal | 19.46 | 20.65 | 13.40 | 13.41 | 11.72 |
 | Gas | — | — | 4.06 | 6.01 | 2.43 |
 | Hydro | 2.78 | 2.78 | 2.78 | 2.95 | 2.46 |
 | Solar | 0.91 | 0.91 | 0.91 | 0.96 | 20.06 |
@@ -408,7 +408,7 @@ Model **gas** maps to `CCGT` generators; **hydro** combines run-of-river (`ror`)
 - **Installed capacities** diverge strongly — especially solar and wind, where the optimiser built far beyond what existed in 2020.
 - **Generation by carrier** diverges accordingly — the dispatch reflects that uncorrected fleet, not Kazakhstan's 2020 mix.
 
-This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step, starting with demand in **[Part 3](3-demand-data.md)**.
+This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step: demand in **[Part 3](3-demand-data.md)**, then the **2020 generation fleet** in **[Part 4](4-generation-data.md)**.
 
 ---
 

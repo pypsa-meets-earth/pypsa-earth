@@ -40,6 +40,7 @@ nav:
     - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
     - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
     - Part 3 — Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
+    - Part 4 — Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
   - Examples: tutorials/examples.md
 
 - User Guide:
