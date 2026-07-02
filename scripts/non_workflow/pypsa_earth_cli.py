@@ -257,8 +257,8 @@ def display_config_files() -> dict[dict]:
         "Select config file to run the model", config_files_list, len(config_files_list) + 1
     )
 
-    config = load_config_file(config_path)
-    return config
+    # config = load_config_file(config_path)
+    return config_path
 
 
 @app.command("config-setup")
@@ -358,22 +358,27 @@ def show_questionnaire(option: str):
     for question in questions:
         answer=question['answer']
         user_answer=""
-        iter=0
         while user_answer != answer:
             if 'choices' not in question:
-                user_answer=ask(question['question'])
+                user_answer=ask(f"{question['id']}. {question['question']}")
             else:
-                user_answer=display_choice_menu(question['question'],question['choices'],len(question['choices']))
+                user_answer=display_choice_menu(f"{question['id']}. {question['question']}",question['choices'],len(question['choices']))
             if user_answer != answer:
                 console.print(f"[bold red] ❌ {use_case['failure_message']} [/bold red]")
+                console.print(style="dim")
+
                 if 'hints' in question:
                     hint=ask("Would you like a hint?",default=['Yes','No'])
                     if hint == 'Yes':
-                        console.print(f"[bold cyan] The answer is one of the following parameters {question['hints']}. Enter which one you think is correct. [/bold cyan]")
-            
+                        console.print(f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]")
+                        console.print(style="dim")
+
             answer_dict[question["id"]] = user_answer
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
-    console.print(use_case['exit_message'])
+        console.print(style="dim")
+    console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
+    console.print(style="dim")
+
     config_dict={}
     for key,value in use_case['config_update'].items():
         if isinstance(value,list):
@@ -390,11 +395,11 @@ def show_questionnaire(option: str):
         config_dict['solving.solver.name'] = 'highs'
         config_dict['solving.solver.options'] = 'highs-default'
 
-    save_config_path="config.kz.yaml"
+    save_config_path="config.KZ.yaml"
     save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
 
     console.print(style="dim")
-    console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. Check to verify. [/bold cyan]")
+    console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]")
 
     model_run=ask("Do you want to run the model ?",default=["Yes","No"])
     if model_run=="Yes":
@@ -486,7 +491,7 @@ def run_model(config_path="") -> None:
     snakemake_command=f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
 
     console.print(style="dim")
-    console.print(f"[bold cyan] The following command will be run to execute the model: {snakemake_command} [/bold cyan]")
+    console.print(f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]")
     
     subprocess.run(snakemake_command.split(" "))
 
