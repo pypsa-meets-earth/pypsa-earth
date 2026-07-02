@@ -364,23 +364,23 @@ def show_questionnaire(option: str) -> None:
     console.print(style="dim")
 
     # Load the questionnaire config file
-    questions_config=load_config_file("tutorial_questions.yaml")
+    questions_config = load_config_file("tutorial_questions.yaml")
 
     # Select use-case based on the option selected by the user
     use_case = questions_config[f"use-case-{option}"]
 
     # Get the questions list
-    questions=use_case["questionnaire"]
+    questions = use_case["questionnaire"]
 
     # Print welcome message for the use-case
-    console.print(use_case['initial_message'])
+    console.print(use_case["initial_message"])
     console.print(style="dim")
-    answer_dict={}
+    answer_dict = {}
 
     # Iterate through the questions
     for question in questions:
-        answer=question['answer']
-        user_answer=""
+        answer = question["answer"]
+        user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while user_answer != answer:
             if "choices" not in question:
@@ -398,10 +398,12 @@ def show_questionnaire(option: str) -> None:
                 console.print(style="dim")
 
                 # Provide a hint to the user if the question has a hint defined in the config file
-                if 'hints' in question:
-                    hint=ask("Would you like a hint?",default=['Yes','No'])
-                    if hint == 'Yes':
-                        console.print(f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]")
+                if "hints" in question:
+                    hint = ask("Would you like a hint?", default=["Yes", "No"])
+                    if hint == "Yes":
+                        console.print(
+                            f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]"
+                        )
                         console.print(style="dim")
 
             answer_dict[question["id"]] = user_answer
@@ -411,17 +413,17 @@ def show_questionnaire(option: str) -> None:
     console.print(style="dim")
 
     # Map the answers to the config parameters to be updated in the config file
-    config_dict={}
-    for key,value in use_case['config_update'].items():
-        if isinstance(value,list):
+    config_dict = {}
+    for key, value in use_case["config_update"].items():
+        if isinstance(value, list):
             value = list((answer_dict[value[0]],))
         else:
             value = answer_dict[value]
         config_dict[answer_dict[key]] = value
 
     # Update some additional config parameters that are required for the model run
-    folder=ask("Enter run name for the model")
-    config_dict['run.name'] = folder
+    folder = ask("Enter run name for the model")
+    config_dict["run.name"] = folder
 
     solver = ask(
         "Enter solver to use for running the model", default=["gurobi", "highs"]
@@ -431,8 +433,10 @@ def show_questionnaire(option: str) -> None:
         config_dict["solving.solver.options"] = "highs-default"
 
     # Save the updated config file
-    save_config_path="config.KZ.yaml"
-    save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
+    save_config_path = "config.KZ.yaml"
+    save_config_file(
+        config_path=save_config_path, config_data=unflatten_dict(config_dict)
+    )
 
     console.print(style="dim")
     console.print(
@@ -440,8 +444,8 @@ def show_questionnaire(option: str) -> None:
     )
 
     # Prompt the user to run the model with the updated config file
-    model_run=ask("Do you want to run the model ?",default=["Yes","No"])
-    if model_run=="Yes":
+    model_run = ask("Do you want to run the model ?", default=["Yes", "No"])
+    if model_run == "Yes":
         run_model(save_config_path)
 
 
@@ -511,7 +515,7 @@ def run_model(config_path="") -> None:
     ----------
     config_path: str
         Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
-    
+
     Returns
     -------
     None
