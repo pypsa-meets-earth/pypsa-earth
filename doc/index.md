@@ -96,6 +96,7 @@ There are multiple ways to get involved and learn more about our work:
 - [Talks & Papers](community/talks-and-papers.md) - Publications and presentations
 - [Learning Materials](community/learning-materials.md) - Additional resources
 - [Software Hints](community/software-hints.md) - Tips and troubleshooting
+- [FAQ](community/faq.md) - Common run errors and fixes
 
 ### API Reference
 
