@@ -15,11 +15,11 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["NG", "BJ"]
+countries: ["AU"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
 enable:
-  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
   retrieve_databundle_sector: true
   retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   retrieve_cutout: true
@@ -47,7 +47,7 @@ run:
 scenario:
   simpl: [""]
   ll: ["copt"]
-  clusters: [10]
+  clusters: [11]
   opts: [Co2L-3h]
   planning_horizons: # investment years for myopic and perfect; or costs year for overnight
   - 2030
