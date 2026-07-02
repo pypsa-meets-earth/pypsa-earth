@@ -377,8 +377,10 @@ def show_questionnaire(option: str) -> None:
     console.print(style="dim")
     answer_dict={}
 
+    total_score = 0
     # Iterate through the questions
     for question in questions:
+        score = 1
         answer=question['answer']
         user_answer=""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
@@ -396,6 +398,7 @@ def show_questionnaire(option: str) -> None:
                     f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
                 )
                 console.print(style="dim")
+                score -= 0.25
 
                 # Provide a hint to the user if the question has a hint defined in the config file
                 if 'hints' in question:
@@ -403,11 +406,16 @@ def show_questionnaire(option: str) -> None:
                     if hint == 'Yes':
                         console.print(f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]")
                         console.print(style="dim")
-
+                        score -= 0.25
+        
             answer_dict[question["id"]] = user_answer
+        total_score += max(min(score, 1), 0)
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
         console.print(style="dim")
     console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
+    console.print(style="dim")
+
+    console.print(f"[bold magenta] Your score for this use-case is {total_score}/{len(questions)} [/bold magenta]")
     console.print(style="dim")
 
     if "config_update" in use_case:
