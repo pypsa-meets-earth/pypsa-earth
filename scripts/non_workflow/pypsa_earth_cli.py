@@ -254,7 +254,9 @@ def display_config_files() -> dict[dict]:
     ]
 
     config_path = display_choice_menu(
-        "Select config file to run the model", config_files_list, len(config_files_list) + 1
+        "Select config file to run the model",
+        config_files_list,
+        len(config_files_list) + 1,
     )
 
     return config_path
@@ -327,21 +329,21 @@ def config_setup():
                 updated_value = ask(
                     f"Enter the value of {subchoice} to update in the config file"
                 )
-                if isinstance(updated_config[choice][subchoice],list):
-                    updated_value =updated_value.split(",")
+                if isinstance(updated_config[choice][subchoice], list):
+                    updated_value = updated_value.split(",")
                 updated_config[choice][subchoice] = updated_value
         else:
-        # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
+            # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
             updated_value = ask(
                 f"Enter the value of {choice} to update in the config file"
             )
-            if isinstance(updated_config[choice],list):
+            if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
             updated_config[choice] = updated_value
 
     # Save updated config file
-    config_save_path="config.cli_updated.yaml"
+    config_save_path = "config.cli_updated.yaml"
     save_config_file(config_save_path, unflatten_dict(updated_config))
     display_main_menu()
 
@@ -381,12 +383,18 @@ def show_questionnaire(option: str) -> None:
         user_answer=""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while user_answer != answer:
-            if 'choices' not in question:
-                user_answer=ask(f"{question['id']}. {question['question']}")
+            if "choices" not in question:
+                user_answer = ask(f"{question['id']}. {question['question']}")
             else:
-                user_answer=display_choice_menu(f"{question['id']}. {question['question']}",question['choices'],len(question['choices']))
+                user_answer = display_choice_menu(
+                    f"{question['id']}. {question['question']}",
+                    question["choices"],
+                    len(question["choices"]),
+                )
             if user_answer != answer:
-                console.print(f"[bold red] ❌ {use_case['failure_message']} [/bold red]")
+                console.print(
+                    f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
+                )
                 console.print(style="dim")
 
                 # Provide a hint to the user if the question has a hint defined in the config file
@@ -409,28 +417,33 @@ def show_questionnaire(option: str) -> None:
             value = list((answer_dict[value[0]],))
         else:
             value = answer_dict[value]
-        config_dict[answer_dict[key]]=value
+        config_dict[answer_dict[key]] = value
 
     # Update some additional config parameters that are required for the model run
     folder=ask("Enter run name for the model")
     config_dict['run.name'] = folder
 
-    solver=ask("Enter solver to use for running the model",default=['gurobi','highs'])
-    if solver == 'highs':
-        config_dict['solving.solver.name'] = 'highs'
-        config_dict['solving.solver.options'] = 'highs-default'
+    solver = ask(
+        "Enter solver to use for running the model", default=["gurobi", "highs"]
+    )
+    if solver == "highs":
+        config_dict["solving.solver.name"] = "highs"
+        config_dict["solving.solver.options"] = "highs-default"
 
     # Save the updated config file
     save_config_path="config.KZ.yaml"
     save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
 
     console.print(style="dim")
-    console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]")
+    console.print(
+        f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]"
+    )
 
     # Prompt the user to run the model with the updated config file
     model_run=ask("Do you want to run the model ?",default=["Yes","No"])
     if model_run=="Yes":
         run_model(save_config_path)
+
 
 @app.command("tutorial")
 def tutorial() -> None:
@@ -463,29 +476,11 @@ def tutorial() -> None:
             "name": "Demand",
             "desc": "Integrate national demand",
         },
-        {
-            "num": "4", 
-            "name": "Generation", 
-            "desc": "Integrate national generation"},
-        {
-            "num": "5", 
-            "name": "Transmission", 
-            "desc": "Improve transmission network"},
-        {
-            "num": "6",
-            "name": "CO2 limits",
-            "desc":"Define CO2 emission limits"
-        },
-        {
-            "num": "7",
-            "name": "Costs",
-            "desc": "Customize regional costs"
-        },
-        {
-            "num": "8",
-            "name": "Return",
-            "desc": "Return to main menu"
-        }
+        {"num": "4", "name": "Generation", "desc": "Integrate national generation"},
+        {"num": "5", "name": "Transmission", "desc": "Improve transmission network"},
+        {"num": "6", "name": "CO2 limits", "desc": "Define CO2 emission limits"},
+        {"num": "7", "name": "Costs", "desc": "Customize regional costs"},
+        {"num": "8", "name": "Return", "desc": "Return to main menu"},
     ]
 
     panels = []
@@ -506,6 +501,7 @@ def tutorial() -> None:
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
 
+
 @app.command("run-model")
 def run_model(config_path="") -> None:
     """
@@ -523,30 +519,33 @@ def run_model(config_path="") -> None:
 
     # Load existing config files if not passed to the function
     if config_path == "":
-        config_path=display_config_files()
+        config_path = display_config_files()
 
     # the tutorial use-case is designed as an elec-only model, so we will use the solve_all_networks rule to run the model
-    target_rule="solve_all_networks"
+    target_rule = "solve_all_networks"
 
     # Prompt user for number of cores to use to run the model
-    cores=ask("Enter the number of cores to run the model")
+    cores = ask("Enter the number of cores to run the model")
 
     # Prompt user for environment type to use - pixi / conda
-    env=ask("Do you want to use a pixi / conda environment",default=["pixi","conda"])
+    env = ask(
+        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    )
     if env == "pixi":
         env_command = "pixi run"
-    elif env=="conda":
+    elif env == "conda":
         env_command = "conda run -n pypsa-earth"
 
-    snakemake_command=f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
+    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
 
     console.print(style="dim")
-    console.print(f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]")
-    
+    console.print(
+        f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]"
+    )
+
     subprocess.run(snakemake_command.split(" "))
 
     display_main_menu()
-    
 
 
 def display_main_menu() -> None:
