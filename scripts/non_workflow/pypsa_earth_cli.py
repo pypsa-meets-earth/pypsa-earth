@@ -347,17 +347,40 @@ def config_setup():
     display_main_menu()
 
 
-def show_questionnaire(option: str):
+def show_questionnaire(option: str) -> None:
+    """
+    Display the questionnaire for the selected use-case
+
+    Paramaters
+    ----------
+    options: str
+        Use-case selected by the user
+
+    Returns
+    -------
+    None
+    """
     console.print(style="dim")
+
+    # Load the questionnaire config file
     questions_config=load_config_file("tutorial_questions.yaml")
+
+    # Select use-case based on the option selected by the user
     use_case = questions_config[f"use-case-{option}"]
+
+    # Get the questions list
     questions=use_case["questionnaire"]
+
+    # Print welcome message for the use-case
     console.print(use_case['initial_message'])
     console.print(style="dim")
     answer_dict={}
+
+    # Iterate through the questions
     for question in questions:
         answer=question['answer']
         user_answer=""
+        # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while user_answer != answer:
             if 'choices' not in question:
                 user_answer=ask(f"{question['id']}. {question['question']}")
@@ -367,6 +390,7 @@ def show_questionnaire(option: str):
                 console.print(f"[bold red] ❌ {use_case['failure_message']} [/bold red]")
                 console.print(style="dim")
 
+                # Provide a hint to the user if the question has a hint defined in the config file
                 if 'hints' in question:
                     hint=ask("Would you like a hint?",default=['Yes','No'])
                     if hint == 'Yes':
@@ -379,6 +403,7 @@ def show_questionnaire(option: str):
     console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
     console.print(style="dim")
 
+    # Map the answers to the config parameters to be updated in the config file
     config_dict={}
     for key,value in use_case['config_update'].items():
         if isinstance(value,list):
@@ -387,6 +412,7 @@ def show_questionnaire(option: str):
             value = answer_dict[value]
         config_dict[answer_dict[key]]=value
 
+    # Update some additional config parameters that are required for the model run
     folder=ask("Enter run name for the model")
     config_dict['run.name'] = folder
 
@@ -395,19 +421,30 @@ def show_questionnaire(option: str):
         config_dict['solving.solver.name'] = 'highs'
         config_dict['solving.solver.options'] = 'highs-default'
 
+    # Save the updated config file
     save_config_path="config.KZ.yaml"
     save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
 
     console.print(style="dim")
     console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]")
 
-
     model_run=ask("Do you want to run the model ?",default=["Yes","No"])
     if model_run=="Yes":
         run_model(save_config_path)
 
 @app.command("tutorial")
-def tutorial():
+def tutorial() -> None:
+    """
+    Display the tutorial menu
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
 
     title = "🗺️  Select use-case to try"
     menu_items = [
@@ -472,6 +509,18 @@ def tutorial():
 
 @app.command("run-model")
 def run_model(config_path="") -> None:
+    """
+    Run the PyPSA-Earth model using snakemake
+
+    Parameters
+    ----------
+    config_path: str
+        Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
+    
+    Returns
+    -------
+    None
+    """
 
     # Load existing config files if not passed to the function
     if config_path == "":
@@ -502,6 +551,14 @@ def run_model(config_path="") -> None:
 def display_main_menu() -> None:
     """
     Interactive menu to be displayed as a starting point for the CLI
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
     """
     menu_items = [
         {
