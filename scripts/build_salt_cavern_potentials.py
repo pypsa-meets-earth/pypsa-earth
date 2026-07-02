@@ -511,9 +511,9 @@ def salt_cavern_potential_by_region(
     # calculate share of cavern area inside region
     overlay["share"] = area(overlay) / overlay["area_caverns"]
 
-    overlay["e_nom"] = overlay.eval(
-        "capacity_gwh * share * area_caverns"
-    ) * eta_tech / 1000
+    overlay["e_nom"] = (
+        overlay.eval("capacity_gwh * share * area_caverns") * eta_tech / 1000
+    )
     cavern_regions = overlay.pivot_table(
         index="name", columns="region_type", values="e_nom", aggfunc="sum"
     ).fillna(0.0)
