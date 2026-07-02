@@ -257,7 +257,6 @@ def display_config_files() -> dict[dict]:
         "Select config file to run the model", config_files_list, len(config_files_list) + 1
     )
 
-    # config = load_config_file(config_path)
     return config_path
 
 
