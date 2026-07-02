@@ -410,39 +410,36 @@ def show_questionnaire(option: str) -> None:
     console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
     console.print(style="dim")
 
-    # Map the answers to the config parameters to be updated in the config file
-    config_dict={}
-    for key,value in use_case['config_update'].items():
-        if isinstance(value,list):
-            value = list((answer_dict[value[0]],))
-        else:
-            value = answer_dict[value]
-        config_dict[answer_dict[key]] = value
+    if "config_update" in use_case:
+        # Map the answers to the config parameters to be updated in the config file
+        config_dict={}
+        for key,value in use_case['config_update'].items():
+            if isinstance(value,list):
+                value = list((answer_dict[value[0]],))
+            else:
+                value = answer_dict[value]
+            config_dict[answer_dict[key]]=value
 
-    # Update some additional config parameters that are required for the model run
-    folder=ask("Enter run name for the model")
-    config_dict['run.name'] = folder
+        # Update some additional config parameters that are required for the model run
+        folder=ask("Enter run name for the model")
+        config_dict['run.name'] = folder
 
-    solver = ask(
-        "Enter solver to use for running the model", default=["gurobi", "highs"]
-    )
-    if solver == "highs":
-        config_dict["solving.solver.name"] = "highs"
-        config_dict["solving.solver.options"] = "highs-default"
+        solver=ask("Enter solver to use for running the model",default=['gurobi','highs'])
+        if solver == 'highs':
+            config_dict['solving.solver.name'] = 'highs'
+            config_dict['solving.solver.options'] = 'highs-default'
 
-    # Save the updated config file
-    save_config_path="config.KZ.yaml"
-    save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
+        # Save the updated config file
+        save_config_path="config.KZ.yaml"
+        save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
 
-    console.print(style="dim")
-    console.print(
-        f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]"
-    )
+        console.print(style="dim")
+        console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]")
 
-    # Prompt the user to run the model with the updated config file
-    model_run=ask("Do you want to run the model ?",default=["Yes","No"])
-    if model_run=="Yes":
-        run_model(save_config_path)
+        # Prompt the user to run the model with the updated config file
+        model_run=ask("Do you want to run the model ?",default=["Yes","No"])
+        if model_run=="Yes":
+            run_model(save_config_path)
 
 
 @app.command("tutorial")
