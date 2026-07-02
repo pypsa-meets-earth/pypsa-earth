@@ -243,8 +243,10 @@ Add sector based technologies to the PyPSA network, including:
 import logging
 import os
 import re
+from pathlib import Path
 from types import SimpleNamespace
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
@@ -388,6 +390,204 @@ def H2_liquid_fossil_conversions(n: pypsa.Network, costs: pd.DataFrame) -> None:
         p_nom_extendable=True,
         p_min_pu=options.get("min_part_load_fischer_tropsch", 0),
         lifetime=costs.at["Fischer-Tropsch", "lifetime"],
+    )
+
+
+def add_water_network(n, costs):
+    """
+    Add water network for hydrogen production via electrolysis.
+    """
+    logger.info("Adding water and desalination")
+
+    n.add("Carrier", "H2O")
+
+    n.madd(
+        "Bus",
+        spatial.nodes + " H2O",
+        location=spatial.nodes,
+        carrier="H2O",
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        x=n.buses.loc[list(spatial.nodes)].x.values,
+        y=n.buses.loc[list(spatial.nodes)].y.values,
+    )
+
+    n.add("Carrier", "seawater")
+
+    water_network = gpd.read_file(snakemake.input.clustered_water_network)
+
+    seawater_nodes = n.buses[n.buses.index.isin(water_network.nearest_point_bus)].index
+    H20_nodes_desal_connceted = n.buses[
+        n.buses.index.isin(water_network.centroid_bus)
+    ].index
+    H20_nodes_none_desal_connceted = spatial.nodes.difference(H20_nodes_desal_connceted)
+
+    # Create index column
+    water_network["buses_idx"] = (
+        "H2O pipeline "
+        + water_network["centroid_bus"]
+        + " -> "
+        + water_network["nearest_point_bus"]
+    )
+
+    # Add seawater nodes to the network
+    n.madd(
+        "Bus",
+        seawater_nodes + " seawater",
+        location=seawater_nodes,
+        carrier="seawater",
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        x=n.buses.loc[list(seawater_nodes)].x.values,
+        y=n.buses.loc[list(seawater_nodes)].y.values,
+    )
+
+    # Add fictive sewater generator as a source for seawater
+    n.madd(
+        "Generator",
+        seawater_nodes + " seawater",
+        bus=seawater_nodes + " seawater",
+        carrier="seawater",
+        p_nom_extendable=True,
+        # capital_cost
+        # marginal_cost
+        efficiency=1,
+        lifetime=costs.at["seawater desalination", "lifetime"],
+    )
+
+    n.add("Carrier", "H2O_desalinated")
+
+    n.madd(
+        "Bus",
+        seawater_nodes + " H2O_desalinated",
+        location=seawater_nodes,
+        carrier="H2O_desalinated",
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        x=n.buses.loc[list(seawater_nodes)].x.values,
+        y=n.buses.loc[list(seawater_nodes)].y.values,
+    )
+
+    costs_brine_disposal = snakemake.config["sector"]["hydrogen"].get(
+        "costs_brine_disposal", 0.0
+    )  # EUR/m3 (brine)
+    seawater_water_ratio = snakemake.config["sector"]["hydrogen"].get(
+        "seawater_water_ratio", 2.5
+    )  # L_sea / L_fresh
+
+    # Calculate dynamic link efficiency and marginal cost for brine disposal
+    # efficiency = 1 / 2.5 = 0.4 m3 freshwater output per m3 seawater input
+    desal_efficiency = 1.0 / seawater_water_ratio
+
+    # Brine generated per m3 of seawater input = (2.5 - 1) / 2.5 = 0.6 m3_brine / m3_seawater
+    brine_per_m3_seawater = (seawater_water_ratio - 1.0) / seawater_water_ratio
+    desal_marginal_cost = brine_per_m3_seawater * costs_brine_disposal
+
+    n.madd(
+        "Link",
+        seawater_nodes + " desalination",
+        bus0=seawater_nodes + " seawater",
+        bus1=seawater_nodes + " H2O_desalinated",
+        bus2=seawater_nodes,
+        carrier="desalination",
+        p_nom_extendable=True,
+        # efficiency=costs.at["seawater desalination", "efficiency"],
+        efficiency=desal_efficiency,  # m3 freshwater per m3 seawater
+        efficiency2=-(
+            costs.at["seawater desalination", "electricity-input"] / 1000
+        ),  # Electricity-input is in kWh/m3 -> convert to MWh/m3
+        marginal_cost=desal_marginal_cost,  # Variable brine disposal costs attributed to bus0 input
+        capital_cost=costs.at["seawater desalination", "fixed"],
+        lifetime=costs.at["seawater desalination", "lifetime"],
+    )
+
+    CAPEX_pipline = (
+        costs.at["HDPE water pipeline", "fixed"]
+        * water_network.adjusted_distance_km.values
+    )  # not complete yet
+
+    power_kw = water_network.power_kW.values
+    n_pumping_stations = water_network.n_pumping_stations.values
+    mass_flow_rate_m3h = water_network.mass_flow_rate_m3h.values
+
+    CAPEX_pumps = (
+        costs.at["water booster pump", "fixed"]
+        * power_kw
+        / 1e3
+        * n_pumping_stations
+        / mass_flow_rate_m3h
+    )
+
+    n.madd(
+        "Link",
+        water_network.buses_idx.values,
+        bus0=water_network.nearest_point_bus.values + " H2O_desalinated",
+        bus1=water_network.centroid_bus.values + " H2O",
+        bus2=water_network.nearest_point_bus.values,
+        p_nom_extendable=True,
+        length=water_network.adjusted_distance_km.values,
+        # capital_cost=0.0172 * water_network.adjusted_distance_km.values, # 0.0172 €/m3/km source: backward calculation from https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf
+        capital_cost=CAPEX_pipline + CAPEX_pumps,
+        carrier="H2O pipeline",
+        lifetime=costs.at["HDPE water pipeline", "lifetime"],
+        efficiency=1,  # No losses in the pipeline
+        efficiency2=water_network.efficiency2.values,  # Efficiency of both pipeline and pumps calculated in prepare_water_netowrk.py.  MW consumed per m³/h transferred
+    )
+
+    n.madd(
+        "Bus",
+        H20_nodes_desal_connceted + " H2O store",
+        location=H20_nodes_desal_connceted,
+        carrier="H2O store",
+        unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
+        x=n.buses.loc[list(H20_nodes_desal_connceted)].x.values,
+        y=n.buses.loc[list(H20_nodes_desal_connceted)].y.values,
+    )
+
+    n.madd(
+        "Link",
+        H20_nodes_desal_connceted + " H2O store charger",
+        bus0=H20_nodes_desal_connceted + " H2O",
+        bus1=H20_nodes_desal_connceted + " H2O store",
+        carrier="H2O store charger",
+        efficiency=costs.at["water tank charger", "efficiency"],
+        # capital_cost=costs.at["battery inverter", "fixed"],
+        p_nom_extendable=True,
+        # lifetime=costs.at["battery inverter", "lifetime"],
+    )
+
+    n.madd(
+        "Link",
+        H20_nodes_desal_connceted + " H2O store discharger",
+        bus0=H20_nodes_desal_connceted + " H2O store",
+        bus1=H20_nodes_desal_connceted + " H2O",
+        carrier="H2O store discharger",
+        efficiency=costs.at["water tank discharger", "efficiency"],
+        p_nom_extendable=True,
+        # lifetime=costs.at["battery inverter", "lifetime"],
+    )
+
+    n.madd(
+        "Store",
+        H20_nodes_desal_connceted + " H2O store",
+        bus=H20_nodes_desal_connceted + " H2O store",
+        e_nom_extendable=True,
+        # e_nom_max=h2_pot.values,
+        e_cyclic=True,
+        carrier="H2O store",
+        capital_cost=costs.at["clean water tank storage", "fixed"],
+        lifetime=costs.at["clean water tank storage", "lifetime"],
+    )
+
+    # Add generator for H2O
+    n.madd(
+        "Generator",
+        H20_nodes_none_desal_connceted
+        + " H2O",  # Output unit of generator is in m3, this is defined by the electrolysis.
+        bus=H20_nodes_none_desal_connceted + " H2O",
+        carrier="H2O generator",
+        p_nom_extendable=True,
+        # capital_cost=20000,
+        marginal_cost=0.019159507,  # Added costs for hydrogen [EUR/MWh] TODO PUT in config
+        efficiency=1,
+        lifetime=costs.at["seawater desalination", "lifetime"],
     )
 
 
@@ -608,6 +808,32 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "efficiency3": costs.at["oil", "CO2 intensity"],
         },
     }
+
+    if snakemake.config["sector"]["hydrogen"]["water_network"]:
+        add_water_network(n, costs)
+        h2_config = snakemake.config["sector"]["hydrogen"]
+        base_water_ratio = h2_config.get(
+            "ratio_water_hydrogen", 13
+        )  # for electrolysis, L/kg_H2
+        additional_water_consumption = snakemake.config["sector"]["hydrogen"].get(
+            "additional_water_consumption_elec", 0.0
+        )  # additional water consumption (e.g. cooling purposes), L/kg_H2
+        total_water_ratio_l_per_kg = base_water_ratio + additional_water_consumption
+        for tech in [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC",
+        ]:
+            if tech in tech_params:
+                tech_params[tech]["bus2"] = spatial.nodes + " H2O"
+                tech_params[tech]["efficiency2"] = (
+                    -costs.at["electrolysis", "efficiency"]
+                    * total_water_ratio_l_per_kg
+                    / 33.33  # 33.33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion
+                )
 
     if options["hydrogen"].get("hydrogen_colors", False):
         color_techs = {
@@ -935,22 +1161,21 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
 
         # Order buses to detect equal pairs for bidirectional pipelines
         # buses_ordered = h2_links.apply(lambda p: sorted([p.bus0, p.bus1]), axis=1)
-
-        # Appending string for carrier specification '_AC'
-        # h2_links["bus0"] = buses_ordered.str[0] + "_AC"
-        # h2_links["bus1"] = buses_ordered.str[1] + "_AC"
-
-        # Create index column
-        h2_links["buses_idx"] = (
-            "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
-        )
-
-        # Aggregate pipelines applying mean on length and sum on capacities
-        h2_links = h2_links.groupby("buses_idx").agg(
-            {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
-        )
-
         if len(h2_links) > 0:
+            # Appending string for carrier specification '_AC', because hydrogen has _AC in bus names
+            # h2_links["bus0"] = buses_ordered.str[0] + "_AC"
+            # h2_links["bus1"] = buses_ordered.str[1] + "_AC"
+
+            # Create index column
+            h2_links["buses_idx"] = (
+                "H2 pipeline " + h2_links["bus0"] + " -> " + h2_links["bus1"]
+            )
+
+            # Aggregate pipelines applying mean on length and sum on capacities
+            h2_links = h2_links.groupby("buses_idx").agg(
+                {"bus0": "first", "bus1": "first", "length": "mean", "capacity": "sum"}
+            )
+
             if snakemake.params.sector_options["hydrogen"]["gas_network_repurposing"]:
                 add_links_repurposed_H2_pipelines()
             if (
@@ -3913,13 +4138,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
-            planning_horizons="2030",
-            sopts="144H",
-            discountrate=0.071,
-            demand="AB",
+            clusters="13",
+            ll="copt",
+            opts="Co2L0.15",
+            planning_horizons="2050",
+            sopts="3H",
+            discountrate=0.086,
+            demand="NZ",
         )
 
     # Load population layout
@@ -3958,8 +4183,9 @@ if __name__ == "__main__":
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
     demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
 
-    # Prepare the costs dataframe
-    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.costs)
+
+    costs = costs.set_index("technology")
 
     # Define spatial for biomass and co2. They require the same spatial definition
     spatial = define_spatial(pop_layout.index, options)
