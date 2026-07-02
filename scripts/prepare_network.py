@@ -74,7 +74,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import update_transmission_costs
+from assign_costs import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -348,6 +348,7 @@ if __name__ == "__main__":
             clusters="4",
             ll="c1",
             opts="Co2L-4H",
+            planning_horizons=2030,
             # configfile="test/config.sector.yaml",
         )
 

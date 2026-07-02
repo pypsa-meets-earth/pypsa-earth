@@ -101,7 +101,9 @@ rule clean:
 rule solve_all_networks:
     input:
         expand(
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"],
         ),
 
@@ -111,7 +113,7 @@ rule plot_all_p_nom:
         expand(
             "results/"
             + RDIR
-            + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.{ext}",
+            + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_p_nom.{ext}",
             **config["scenario"],
             ext=["png", "pdf"],
         ),
@@ -890,6 +892,33 @@ rule add_extra_components:
         "scripts/add_extra_components.py"
 
 
+rule assign_costs:
+    params:
+        electricity=config["electricity"],
+        length_factor=config["lines"]["length_factor"],
+        hydro_capital_cost=config["renewable"]["hydro"].get("hydro_capital_cost", False),
+    input:
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
+    output:
+        network="networks/"
+        + RDIR
+        + "elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc",
+    log:
+        "logs/" + RDIR + "assign_costs/elec_s{simpl}_{clusters}_{planning_horizons}.log",
+    benchmark:
+        (
+            "benchmarks/"
+            + RDIR
+            + "assign_costs/elec_s{simpl}_{clusters}_{planning_horizons}"
+        )
+    threads: 1
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/assign_costs.py"
+
+
 rule prepare_network:
     params:
         links=config["links"],
@@ -898,17 +927,21 @@ rule prepare_network:
         electricity=config["electricity"],
         co2=config["co2"],
     input:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
     output:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        "networks/"
+        + RDIR
+        + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     log:
-        "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+        "logs/"
+        + RDIR
+        + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.log",
     benchmark:
         (
             "benchmarks/"
             + RDIR
-            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
         )
     threads: 1
     resources:
@@ -941,7 +974,10 @@ def memory(w):
         return int(factor * (10000 + 195 * int(w.clusters)))
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
+if (
+    config["foresight"] != "myopic"
+    and config["monte_carlo"]["options"].get("add_to_snakefile", False) == False
+):
 
     rule solve_network:
         params:
@@ -949,24 +985,28 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         log:
             solver=os.path.normpath(
                 "logs/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log"
             ),
             python="logs/"
             + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
         benchmark:
             (
                 "benchmarks/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
             )
         threads: 20
         resources:
@@ -977,24 +1017,31 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             "scripts/solve_network.py"
 
 
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+if (
+    config["foresight"] != "myopic"
+    and config["monte_carlo"]["options"].get("add_to_snakefile", False) == True
+):
 
     rule monte_carlo:
         params:
             monte_carlo=config["monte_carlo"],
         input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         output:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            "networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
         log:
             "logs/"
             + RDIR
-            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.log",
         benchmark:
             (
                 "benchmarks/"
                 + RDIR
-                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}"
             )
         threads: 1
         resources:
@@ -1007,7 +1054,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             expand(
                 "networks/"
                 + RDIR
-                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
                 **config["scenario"],
             ),
 
@@ -1019,29 +1066,29 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         input:
             network="networks/"
             + RDIR
-            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             "results/"
             + RDIR
-            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
         log:
             solver=os.path.normpath(
                 "logs/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}_solver.log"
             ),
             python="logs/"
             + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_python.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}_python.log",
             memory="logs/"
             + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_memory.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}_memory.log",
         benchmark:
             (
                 "benchmarks/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}"
             )
         threads: 20
         resources:
@@ -1056,7 +1103,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             expand(
                 "results/"
                 + RDIR
-                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
                 **config["scenario"],
             ),
 
@@ -1070,8 +1117,11 @@ def input_make_summary(w):
     else:
         ll = w.ll
     return ["resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv"] + expand(
-        "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        "results/"
+        + RDIR
+        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         ll=ll,
+        planning_horizons=config["scenario"]["planning_horizons"],
         **{
             k: config["scenario"][k] if getattr(w, k) == "all" else getattr(w, k)
             for k in ["simpl", "clusters", "opts"]
@@ -1239,7 +1289,9 @@ rule prepare_sector_network:
                 for country in config["countries"]
             },
         ),
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        network="networks/"
+        + RDIR
+        + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         h2_cavern="data/hydrogen_salt_cavern_potentials.csv",
         nodal_energy_totals=branch(
@@ -1854,7 +1906,7 @@ rule plot_network:
     input:
         network="results/"
         + RDIR
-        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         extended_country_shape="resources/"
         + RDIR
         + "shapes/extended_country_shape.geojson",
@@ -1862,14 +1914,14 @@ rule plot_network:
     output:
         only_map="results/"
         + RDIR
-        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}.{ext}",
+        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{attr}.{ext}",
         ext="results/"
         + RDIR
-        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_ext.{ext}",
+        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{attr}_ext.{ext}",
     log:
         "logs/"
         + RDIR
-        + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
+        + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{attr}_{ext}.log",
     script:
         "scripts/plot_network.py"
 
@@ -2195,12 +2247,23 @@ if config["foresight"] == "myopic":
         i = planning_horizons.index(int(w.planning_horizons))
         planning_horizon_p = str(planning_horizons[i - 1])
 
-        return (
-            RESDIR
-            + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
-            + planning_horizon_p
-            + "_{discountrate}_{demand}_{h2export}export.nc"
-        )
+        if getattr(w, "sopts", None) is not None:
+            # sector-coupled
+            return (
+                RESDIR
+                + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
+                + planning_horizon_p
+                + "_{discountrate}_{demand}_{h2export}export.nc"
+            )
+        else:
+            # electricity-only
+            return (
+                "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_"
+                + planning_horizon_p
+                + ".nc"
+            )
 
     rule add_brownfield:
         params:
@@ -2299,6 +2362,113 @@ if config["foresight"] == "myopic":
                 **config["scenario"],
                 **config["costs"],
                 **config["export"],
+            ),
+
+    # ============== Electricity-only myopic optimisation rules ==============
+    rule add_existing_baseyear_elec:
+        params:
+            baseyear=config["scenario"]["planning_horizons"][0],
+        input:
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        output:
+            "networks/"
+            + RDIR
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        wildcard_constraints:
+            planning_horizons=config["scenario"]["planning_horizons"][0],  # baseyear only
+        threads: 1
+        resources:
+            mem_mb=2000,
+        log:
+            "logs/"
+            + RDIR
+            + "add_existing_baseyear_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "add_existing_baseyear_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            )
+        script:
+            "scripts/add_existing_baseyear.py"
+
+    rule add_brownfield_elec:
+        params:
+            threshold_capacity=config["existing_capacities"]["threshold_capacity"],
+        input:
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            # solved network at previous time step
+            network_p=solved_previous_horizon,
+        output:
+            "networks/"
+            + RDIR
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        threads: 1
+        resources:
+            mem_mb=4000,
+        log:
+            "logs/"
+            + RDIR
+            + "add_brownfield_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "add_brownfield_elec/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            )
+        script:
+            "scripts/add_brownfield.py"
+
+    ruleorder: add_existing_baseyear_elec > add_brownfield_elec
+
+    rule solve_network:
+        params:
+            solving=config["solving"],
+            augmented_line_connection=config["augmented_line_connection"],
+            policy_config=config["policy_config"],
+        input:
+            network="networks/"
+            + RDIR
+            + "prenetworks-brownfield/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+            agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],
+        output:
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+        log:
+            solver=os.path.normpath(
+                "logs/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log"
+            ),
+            python="logs/"
+            + RDIR
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
+            )
+        threads: 20
+        resources:
+            mem=memory,
+        shadow:
+            "copy-minimal" if os.name == "nt" else "shallow"
+        script:
+            "scripts/solve_network.py"
+
+    rule solve_all_networks_myopic:
+        input:
+            expand(
+                "results/"
+                + RDIR
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
+                **config["scenario"],
             ),
 
 
