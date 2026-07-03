@@ -69,8 +69,6 @@ def main():
         "study_setup": {
             "start": "countries:",
             "end": "run:",
-            "append_start": "results_dir:",
-            "append_end": "# =================== DATA RETRIEVAL ===================",
         },
         "data_retrieval": {
             "start": "enable:",

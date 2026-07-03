@@ -61,7 +61,7 @@ Version, tutorial mode, logging, and optional custom Snakemake rules (``# META``
 
 Options under the **STUDY SETUP** banner in ``config.default.yaml``: region, run namespacing, [scenario wildcards](wildcards.md), model time range, and output directories.
 
-Region, foresight mode, and default output directories (`results_dir`, `summary_dir` at the end of the study setup block, not nested under ``run``).
+Region and foresight mode.
 
 ```yaml
 --8<-- "configtables/snippets/study_setup.yaml"
@@ -126,6 +126,16 @@ Specifies the temporal range for the historical weather data, which is used to b
 ```
 
 {{ read_csv('configtables/snapshots.csv') }}
+
+### Output directories
+
+Default paths for solved networks, summaries, and plots. Top-level keys at the end of the study setup block in ``config.default.yaml`` (not nested under ``run``). Rarely changed in day-to-day runs.
+
+```yaml
+--8<-- "configtables/snippets/output_paths.yaml"
+```
+
+{{ read_csv('configtables/output-paths.csv') }}
 
 ## Data retrieval
 
