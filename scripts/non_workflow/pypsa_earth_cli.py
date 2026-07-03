@@ -7,7 +7,7 @@
 This script provides the basis to run a command line interface (CLI) to help users navigate through PyPSA-Earth
 
 The CLI has the following modules:
-1. Tutorial - A tutorial based module developed in sync with use-case documentation
+1. Quiz zone - A quiz based module developed in sync with use-case documentation to test the user's understanding of the same
 2. Edit config - Feature to edit config parameters without direct exposure to the same
 3. Retrieve databundles - Feature to independently retrieve databundles required for a PyPSA-Earth model run
 4. Run snakemake - Feature to run a snakemake workflow
@@ -16,6 +16,7 @@ The CLI has the following modules:
 import os
 import subprocess
 import sys
+import time
 from enum import Enum
 
 import typer
@@ -345,6 +346,7 @@ def config_setup():
     # Save updated config file
     config_save_path = "config.cli_updated.yaml"
     save_config_file(config_save_path, unflatten_dict(updated_config))
+    time.sleep(3)
     display_main_menu()
 
 
@@ -364,25 +366,25 @@ def show_questionnaire(option: str) -> None:
     console.print(style="dim")
 
     # Load the questionnaire config file
-    questions_config=load_config_file("tutorial_questions.yaml")
+    questions_config = load_config_file("tutorial_questions.yaml")
 
     # Select use-case based on the option selected by the user
     use_case = questions_config[f"use-case-{option}"]
 
     # Get the questions list
-    questions=use_case["questionnaire"]
+    questions = use_case["questionnaire"]
 
     # Print welcome message for the use-case
-    console.print(use_case['initial_message'])
+    console.print(use_case["initial_message"])
     console.print(style="dim")
-    answer_dict={}
+    answer_dict = {}
 
     total_score = 0
     # Iterate through the questions
     for question in questions:
         score = 1
-        answer=question['answer']
-        user_answer=""
+        answer = question["answer"]
+        user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while user_answer != answer:
             if "choices" not in question:
@@ -401,13 +403,15 @@ def show_questionnaire(option: str) -> None:
                 score -= 0.25
 
                 # Provide a hint to the user if the question has a hint defined in the config file
-                if 'hints' in question:
-                    hint=ask("Would you like a hint?",default=['Yes','No'])
-                    if hint == 'Yes':
-                        console.print(f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]")
+                if "hints" in question:
+                    hint = ask("Would you like a hint?", default=["Yes", "No"])
+                    if hint == "Yes":
+                        console.print(
+                            f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]"
+                        )
                         console.print(style="dim")
                         score -= 0.25
-        
+
             answer_dict[question["id"]] = user_answer
         total_score += max(min(score, 1), 0)
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
@@ -415,45 +419,62 @@ def show_questionnaire(option: str) -> None:
     console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
     console.print(style="dim")
 
-    console.print(f"[bold magenta] Your score for this use-case is {total_score}/{len(questions)} [/bold magenta]")
+    console.print(
+        f"[bold magenta] Your score for this module of the quiz zone is {total_score}/{len(questions)} [/bold magenta]"
+    )
     console.print(style="dim")
+    console.print(
+        "Each correct answer has been awarded 1 point. Each incorrect answer was penalized by 0.25 points. If a hint was requested, an additional penalty of 0.25 points was applied."
+    )
+    console.print(style="dim")
+
+    time.sleep(3)
 
     if "config_update" in use_case:
         # Map the answers to the config parameters to be updated in the config file
-        config_dict={}
-        for key,value in use_case['config_update'].items():
-            if isinstance(value,list):
+        console.print(
+            "To make the config file model-ready, a few more responses are required from you. Please enter your responses to the following questions."
+        )
+        config_dict = {}
+        for key, value in use_case["config_update"].items():
+            if isinstance(value, list):
                 value = list((answer_dict[value[0]],))
             else:
                 value = answer_dict[value]
-            config_dict[answer_dict[key]]=value
+            config_dict[answer_dict[key]] = value
 
         # Update some additional config parameters that are required for the model run
-        folder=ask("Enter run name for the model")
-        config_dict['run.name'] = folder
+        folder = ask("Enter run name for the model")
+        config_dict["run.name"] = folder
 
-        solver=ask("Enter solver to use for running the model",default=['gurobi','highs'])
-        if solver == 'highs':
-            config_dict['solving.solver.name'] = 'highs'
-            config_dict['solving.solver.options'] = 'highs-default'
+        solver = ask(
+            "Enter solver to use for running the model", default=["gurobi", "highs"]
+        )
+        if solver == "highs":
+            config_dict["solving.solver.name"] = "highs"
+            config_dict["solving.solver.options"] = "highs-default"
 
         # Save the updated config file
-        save_config_path="config.KZ.yaml"
-        save_config_file(config_path=save_config_path,config_data=unflatten_dict(config_dict))
+        save_config_path = "config.KZ.yaml"
+        save_config_file(
+            config_path=save_config_path, config_data=unflatten_dict(config_dict)
+        )
 
         console.print(style="dim")
-        console.print(f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]")
+        console.print(
+            f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]"
+        )
 
         # Prompt the user to run the model with the updated config file
-        model_run=ask("Do you want to run the model ?",default=["Yes","No"])
-        if model_run=="Yes":
+        model_run = ask("Do you want to run the model ?", default=["Yes", "No"])
+        if model_run == "Yes":
             run_model(save_config_path)
 
 
-@app.command("tutorial")
-def tutorial() -> None:
+@app.command("quiz_zone")
+def quiz_zone() -> None:
     """
-    Display the tutorial menu
+    Display the QUIZ modules
 
     Parameters
     ----------
@@ -494,14 +515,14 @@ def tutorial() -> None:
         panels.append(Panel(panel_content, expand=False, border_style="green"))
 
     # Print the menu title and options
-    console.rule("[bold magenta]📊 TUTORIAL [/bold magenta]")
+    console.rule("[bold magenta]📊 QUIZ ZONE [/bold magenta]")
     console.print(Columns(panels, padding=(1, 2)))
 
     choice = ask("Select option 1-8 to proceed further")
 
     if choice != "8":
         show_questionnaire(choice)
-        tutorial()
+        quiz_zone()
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
@@ -516,7 +537,7 @@ def run_model(config_path="") -> None:
     ----------
     config_path: str
         Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
-    
+
     Returns
     -------
     None
@@ -568,8 +589,8 @@ def display_main_menu() -> None:
     menu_items = [
         {
             "num": "1",
-            "name": "Tutorial",
-            "desc": "Use-case guide for PyPSA-Kazakhstan",
+            "name": "Quiz Zone",
+            "desc": "Quiz based on the use-case guide for PyPSA-Kazakhstan",
         },
         {
             "num": "2",
@@ -596,7 +617,7 @@ def display_main_menu() -> None:
     choice = ask("Select option 1-5 to proceed further")
 
     if choice == "1":
-        tutorial()
+        quiz_zone()
     elif choice == "2":
         config_setup()
     elif choice == "3":
