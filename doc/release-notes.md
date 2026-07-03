@@ -172,6 +172,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Recommend dedicated regional models for supported countries [#PR 1925](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1925)
+
 * Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river [PR #1684](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1684)
 
 * Fix issues where gas and biomass powerplant capacity were not added in `add_existing_baseyear.py`. Differentiate `urban central solid biomass CHP` with non-CHP `biomass` for historical capacity [PR #1678](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1678)
