@@ -61,7 +61,7 @@ Shulbi,Hydro,Reservoir,702,1987,2087,KZ
 Almaty,CCGT,CCGT,120,2017,2057,KZ
 Zhangiz Tobe Solar Farm,Solar,PV,30,2019,2044,KZ
 Aktogay Wind Farm,Wind,Onshore,150,2022,2047,KZ
-Taraz Dzhambul Kazakstan,Oil,Steam Turbine,185,1996,2036,KZ
+Taraz Dzhambul Kazakhstan,Oil,Steam Turbine,185,1996,2036,KZ
 ```
 
 The full file has more columns (`lat`, `lon`, `bus`, …) and on the order of **100 rows** for Kazakhstan. Totals by fuel type (GW):
