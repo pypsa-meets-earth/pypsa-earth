@@ -19,7 +19,7 @@ This series builds an **electricity-only (power system) model**. We do not switc
 
 ## Where demand enters the workflow
 
-Electricity demand is not read directly from national statistics inside the optimiser. Two rules handle it — both before the network is simplified or solved:
+Electricity demand is not read directly from national statistics inside the optimiser. Two rules, `build_demand_profiles` and `add_electricity` , handle it — both before the network is simplified or solved:
 
 ```
 build_demand_profiles  →  resources/KZ/demand_profiles.csv
