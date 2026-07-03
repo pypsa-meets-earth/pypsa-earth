@@ -2,7 +2,7 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [Co2L-3h]
+  opts: [Co2L-3h] # Co2L: emission cap ON (co2.limit); 3h: temporal aggregation — remove Co2L for unconstrained runs
   planning_horizons: # investment years for myopic; costs year for overnight
   - 2030
   sopts:

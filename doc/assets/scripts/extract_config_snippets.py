@@ -80,7 +80,7 @@ def main():
         "scenario": ["scenario"],
         "snapshots": {
             "start": "snapshots:",
-            "end": "# =================== DATA RETRIEVAL ===================",
+            "end": "results_dir:",
         },
         "crs": {
             "start": "crs:",
@@ -189,7 +189,7 @@ def main():
         },
         "export": {
             "start": "export:",
-            "end": "# ------------------- Demand data",
+            "end": "# ------------------- Sector-coupled demand data",
         },
         "demand_data": {
             "start": "demand_data:",
@@ -201,7 +201,7 @@ def main():
         },
         "existing_capacities": {
             "start": "existing_capacities:",
-            "end": "# ------------------- Sector settings",
+            "end": "# ------------------- Enabled sectors & fuel infrastructure",
         },
         "sector_toplevel": {
             "start": "sector:",
