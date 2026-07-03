@@ -14,7 +14,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 The optimiser has finished — now comes the interesting part. In this tutorial we open the solved network, get a feel for what is inside it, and ask the questions any energy modeller cares about: how much power is being produced, by whom, and does it match reality? By the end you will have a set of key performance indicators for the Kazakhstan **power system** and a first sanity check against published statistics.
 
-This use-case series deliberately stays in the **electricity workflow** (`solve_all_networks`) — not the sector-coupled model (`solve_sector_networks`). Over the following parts we will calibrate and validate that power model against **2020** data before exploring further scenarios.
+This series builds an **electricity-only** model — grid generation, transmission, and demand. We do not enable sector coupling (heat, transport, industry, hydrogen, and so on). Over the following parts we will calibrate and validate that power model against **2020** data before exploring further scenarios.
 
 All of the work here is done in a Jupyter notebook. No Snakemake, no configuration files — just Python and a solved `.nc` file.
 
@@ -421,7 +421,7 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 | Total annual demand | `n.loads_t.p_set` × `n.snapshot_weightings` |
 | Installed vs. optimal capacity | `n.statistics()[["Installed Capacity", "Optimal Capacity"]]` |
 | Generation by carrier | `n.generators_t.p` and `n.storage_units_t.p` × weights, grouped by `carrier` |
-| Same thing, one call | `n.statistics()["Supply"]` |
+| Generation by carrier (method 2) | `n.statistics()["Supply"]` |
 | Capacity factors | `n.statistics()["Capacity Factor"]` or manual dispatch ÷ `p_nom_opt` |
 | System cost | `n.objective` (EUR) |
 | Everything at once | `n.statistics()` |
