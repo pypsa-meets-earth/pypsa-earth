@@ -361,7 +361,7 @@ def display_main_menu() -> None:
         {
             "num": "2",
             "name": "Configuration Setup",
-            "desc": "customize configuration parameters for PyPSA-Earth model run",
+            "desc": "Customize configuration parameters for PyPSA-Earth model run",
         },
         {
             "num": "3",
