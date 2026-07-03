@@ -32,7 +32,7 @@ add_electricity        →  networks/KZ/elec.nc
 | Rule | What it does |
 |---|---|
 | **`build_demand_profiles`** | Loads GEGIS or DemandCast, applies `scale`, and writes an hourly profile per bus → `demand_profiles.csv` |
-| **`add_electricity`** | Attaches those values as PyPSA **Load** components on the network |
+| **`add_electricity`** | Attaches demand profiles as PyPSA **Load** components on the network |
 
 All demand settings live under **`load_options`** in the config. They affect **`build_demand_profiles` only**.
 
