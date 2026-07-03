@@ -128,6 +128,9 @@ With the dictionary form, each key is an ISO country code. **`DEFAULT`** is the 
 
 Other targets: [EIA](https://www.eia.gov/international/data/country/KAZ) 103.4 TWh, [Ember](https://ember-climate.org/data/data-explorer/) 107.9 TWh.
 
+!!! note "Where does the baseline come from?"
+    The GEGIS input file (`data/ssp2-2.6/2030/era5_2013/Asia.csv`) contains about **108.0 TWh** for Kazakhstan. After simplification, load on electrically isolated sub-networks is dropped from the main grid, leaving about **106.8 TWh** in the solved network from Part 2 — a gap of roughly **1.2 TWh**. The `scale` factor in this step absorbs that loss together with any GEGIS-vs-actual discrepancy in one multiplier. Later in this series, when you improve network topology to reconnect isolated regions, that topology gap largely disappears and `scale` mainly corrects the dataset-vs-statistics difference.
+
 **2. Compute the multiplier:**
 
 $$
