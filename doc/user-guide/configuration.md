@@ -59,9 +59,9 @@ Version, tutorial mode, logging, and optional custom Snakemake rules (``# META``
 
 ## Study setup
 
-Options under the **STUDY SETUP** banner in ``config.default.yaml``: region, output paths, run namespacing, [scenario wildcards](wildcards.md), and model time range.
+Options under the **STUDY SETUP** banner in ``config.default.yaml``: region, run namespacing, [scenario wildcards](wildcards.md), model time range, and output directories.
 
-Region, foresight mode, and default output directories (`results_dir`, `summary_dir` are top-level keys, not nested under ``run``).
+Region, foresight mode, and default output directories (`results_dir`, `summary_dir` at the end of the study setup block, not nested under ``run``).
 
 ```yaml
 --8<-- "configtables/snippets/study_setup.yaml"

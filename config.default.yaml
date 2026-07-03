@@ -18,9 +18,6 @@ countries: ["NG", "BJ"] # ISO codes, continent, or custom region
 
 foresight: overnight # "myopic" or "overnight"
 
-results_dir: results/
-summary_dir: results/
-
 run:
   name: "" # run label; prefixes resources/ and results/ paths
   sector_name: "" # sector scenario label; subfolder under results/
@@ -43,6 +40,9 @@ snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
   inclusive: "left" # end is not inclusive
+
+results_dir: results/ # solved networks and sector postprocessing (RESDIR in Snakefile)
+summary_dir: results/ # summaries, plots, and copied configs (SDIR in Snakefile)
 
 
 # =================== DATA RETRIEVAL ===================
