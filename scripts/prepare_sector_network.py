@@ -3717,7 +3717,7 @@ def add_existing_rooftop_solar(
 
     n.madd(
         "Generator",
-        name=gen_names,
+        gen_names,
         bus=rooftop["lv_bus"].values,
         carrier="solar rooftop",
         p_nom=rooftop["p_nom"].values,
@@ -3730,6 +3730,20 @@ def add_existing_rooftop_solar(
         p_max_pu=p_max_pu,
         lifetime=costs.at["solar-rooftop", "lifetime"],
     )
+
+    # Reduce the remaining rooftop potential by the existing installed capacity.
+    extendable = n.generators.index[
+        (n.generators.carrier == "solar rooftop") & (n.generators.p_nom_extendable)
+    ]
+
+    existing = rooftop.set_index("lv_bus")["p_nom"]
+
+    extendable_buses = n.generators.loc[extendable, "bus"]
+    existing_capacity = extendable_buses.map(existing).fillna(0.0)
+
+    n.generators.loc[extendable, "p_nom_max"] = (
+        n.generators.loc[extendable, "p_nom_max"] - existing_capacity
+    ).clip(lower=0.0)
 
     added_capacity = n.generators.loc[gen_names, "p_nom"].sum()
     expected_capacity = rooftop["p_nom"].sum()
