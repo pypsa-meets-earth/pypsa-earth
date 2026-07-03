@@ -32,10 +32,11 @@ base_network:
   min_voltage_rebase_voltage: 35000
 
 
-electricity:
-  co2limit: 1.487e+9
-  co2base: 1.487e+9
-  automatic_emission: true
+co2:
+  limit: 1.487e+9
+  base: 1.487e+9
+  automatic_emission:
+    enable: true
 
 
 atlite:
