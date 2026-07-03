@@ -4,14 +4,22 @@
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
 run:
-  name: "custom"
+  name: "test"
   shared_cutouts: true # set to true to share the default cutout(s) across runs
   base_config: config.tutorial.yaml  # base configuration file
 
 download_osm_data_nprocesses: 4
 
+scenario:
+  clusters: [5]
+
 enable:
   retrieve_cost_data: false
+
+load_options:
+  source: "demcast" # "demcast" or "gegis"
+  weather_year: 2013 # Weather year of the load profile
+  scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
 augmented_line_connection:
   add_to_snakefile: true  # If True, includes this rule to the workflow
@@ -28,7 +36,7 @@ hydro:
 electricity:
   hvdc_as_lines: true  # should HVDC lines be modeled as `Line` or as `Link` component?
 
-  operational_reserve: # like https://genxproject.github.io/GenX/dev/core/#Reserves
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
     activate: true
 
   extendable_carriers:

@@ -1,0 +1,168 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: Lint
+
+on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - "**/*.py"
+    - "**/*.smk"
+    - "**/*.yaml"
+    - "**/*.yml"
+    - ".pre-commit-config.yaml"
+    - "pyproject.toml"
+
+# Cancel any in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: Pre-commit checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.11"
+
+    - name: Run pre-commit
+      uses: pre-commit/action@v3.0.1
+
+  docstring-coverage:
+    name: Docstring coverage
+    runs-on: ubuntu-latest
+
+    env:
+      # Baseline: 54.3% (as of April 2026). Raise as coverage improves.
+      DOCSTRING_MIN_COVERAGE: 54
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.11"
+
+    - name: Install interrogate
+      run: pip install interrogate
+
+    - name: Check docstring coverage on PR branch
+      run: |
+        interrogate scripts/ \
+          --ignore-init-method \
+          --ignore-magic \
+          --ignore-module \
+          --fail-under ${{ env.DOCSTRING_MIN_COVERAGE }} \
+          --verbose 2>&1 | tee interrogate-output.txt
+        exit ${PIPESTATUS[0]}
+      continue-on-error: true
+
+    - name: Check docstring coverage on main
+      run: |
+        git checkout origin/main -- scripts/
+        interrogate scripts/ \
+          --ignore-init-method \
+          --ignore-magic \
+          --ignore-module \
+          --fail-under 0 \
+          --verbose 2>&1 | tee interrogate-main.txt || true
+        git checkout HEAD -- scripts/
+
+    - name: Post coverage to step summary
+      if: always()
+      run: |
+        RESULT=$(grep "RESULT:" interrogate-output.txt || echo "RESULT: unknown")
+        ACTUAL=$(echo "$RESULT" | sed 's/.*actual: \([0-9.]*\).*/\1/')
+        MINIMUM=$(echo "$RESULT" | sed 's/.*minimum: \([0-9.]*\).*/\1/')
+
+        RESULT_MAIN=$(grep "RESULT:" interrogate-main.txt || echo "RESULT: unknown")
+        MAIN=$(echo "$RESULT_MAIN" | sed 's/.*actual: \([0-9.]*\).*/\1/')
+
+        if [ -n "$ACTUAL" ] && [ -n "$MAIN" ]; then
+          DELTA=$(awk -v a="$ACTUAL" -v b="$MAIN" 'BEGIN { diff = a - b; printf "%+.1f", diff }')
+        else
+          DELTA="N/A"
+        fi
+
+        if echo "$RESULT" | grep -q "PASSED"; then
+          STATUS="✅ PASSED"
+        else
+          STATUS="❌ FAILED"
+        fi
+
+        {
+          echo "### Docstring Coverage"
+          echo ""
+          echo "| | Value |"
+          echo "|---|---|"
+          echo "| Status | $STATUS |"
+          echo "| Coverage (this PR) | ${ACTUAL}% |"
+          echo "| Coverage (main) | ${MAIN}% |"
+          echo "| Change | ${DELTA}% |"
+          echo "| Acceptable Minimum | ${MINIMUM}% |"
+        } >> "$GITHUB_STEP_SUMMARY"
+
+  type-check:
+    name: Type checking
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.11"
+
+    - name: Install mypy
+      run: pip install mypy types-PyYAML types-requests types-pytz
+
+    - name: Run mypy
+      # Non-enforcing until type hints are more complete.
+      run: |
+        mypy scripts/ \
+          --ignore-missing-imports \
+          --no-strict-optional \
+          2>&1 | tee mypy-output.txt || true
+
+    - name: Post type check summary
+      if: always()
+      run: |
+        SUMMARY=$(grep "^Found" mypy-output.txt || echo "")
+
+        if [ -z "$SUMMARY" ]; then
+          ERRORS=0
+          FILES=0
+          CHECKED=0
+          STATUS="✅ No errors"
+        else
+          ERRORS=$(echo "$SUMMARY" | sed 's/Found \([0-9]*\).*/\1/')
+          FILES=$(echo "$SUMMARY" | sed 's/.*in \([0-9]*\) file.*/\1/')
+          CHECKED=$(echo "$SUMMARY" | sed 's/.*(checked \([0-9]*\).*/\1/')
+          STATUS="❌ Errors found"
+        fi
+
+        {
+          echo "### Mypy Type Check"
+          echo ""
+          echo "| | Value |"
+          echo "|---|---|"
+          echo "| Status | $STATUS |"
+          echo "| Errors | ${ERRORS} |"
+          echo "| Files with errors | ${FILES} |"
+          echo "| Files checked | ${CHECKED:-0} |"
+          echo ""
+          echo "> Full error details are in Type checking job logs."
+        } >> "$GITHUB_STEP_SUMMARY"

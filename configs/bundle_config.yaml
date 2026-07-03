@@ -144,6 +144,7 @@ databundles:
   # Cutout of Kazakhstan for CI test of pypsa-kz-data repo, only 5 MB
   bundle_cutouts_test_KZ:
     countries: [KZ]
+    tutorial: true
     category: cutouts
     destination: "cutouts"
     urls:
@@ -184,6 +185,30 @@ databundles:
     unzip: true
     output:
     - data/hydrobasins/hybas_world.shp
+
+  # DemandCast dataset for electricity demand
+  demandcast_full:
+    countries: [Earth]
+    tutorial: false
+    category: el_demand
+    destination: "data/demand"
+    urls:
+      direct: "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+    unzip: false
+    output:
+    - data/demand/forecasts_on_historical_period.parquet
+
+  demandcast_tutorial:
+    countries: [Earth]
+    tutorial: true
+    category: el_demand
+    destination: "data/demand"
+    urls:
+      # TODO Cross-check with DemandCast team and move to full-scale Zenodo
+      direct: "https://sandbox.zenodo.org/records/493116/files/forecasts_on_historical_period.parquet"
+    unzip: false
+    output:
+    - data/demand/forecasts_on_historical_period.parquet
 
   # IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators.
   # Used in build_renewable_profiles.py to derive hydropower generation potentials.

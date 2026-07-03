@@ -1,5 +1,5 @@
   offwind-dc:
-    cutout: cutout-2013-era5
+    cutout: auto
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_5MW_offshore

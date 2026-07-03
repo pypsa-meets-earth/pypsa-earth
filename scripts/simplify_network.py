@@ -19,15 +19,7 @@ Relevant Settings
         aggregation_strategies:
 
     costs:
-        year:
-        version:
-        rooftop_share:
-        USD2013_to_EUR2013:
-        dicountrate:
-        emission_prices:
-
-    electricity:
-        max_hours:
+        output_currency:
 
     lines:
         length_factor:
@@ -94,13 +86,14 @@ import pandas as pd
 import pypsa
 import scipy as sp
 from _helpers import (
+    add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
     nearest_shape,
+    restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregateoneport,
@@ -271,8 +264,33 @@ def _aggregate_and_move_components(
     output,
     aggregate_one_ports={"Load", "StorageUnit"},
     aggregation_strategies=dict(),
-    exclude_carriers=None,
+    exclude_carriers=[],
 ):
+    """
+    Aggregate and move components according to busmap.
+
+    For generators, existing (p_nom_extendable=False) and extendable
+    (p_nom_extendable=True) generators are aggregated separately to preserve
+    their distinct characteristics for myopic optimization.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    busmap : pd.Series
+        Mapping from previous bus names to new bus names.
+    connection_costs_to_bus : pd.DataFrame
+        Connection costs per bus.
+    output : object
+        Snakemake output object.
+    aggregate_one_ports : set
+        Set of one-port components to aggregate.
+    aggregation_strategies : dict
+        Strategies for aggregating components.
+    exclude_carriers : list
+        Carriers to exclude from aggregation.
+    """
+
     def replace_components(n, c, df, pnl):
         n.mremove(c, n.df(c).index)
 
@@ -285,10 +303,11 @@ def _aggregate_and_move_components(
         n,
         connection_costs_to_bus,
         snakemake.output,
-        snakemake.params.costs["output_currency"],
+        snakemake.params.output_currency,
     )
 
     generator_strategies = aggregation_strategies["generators"]
+    one_port_strategies = aggregation_strategies["one_ports"]
 
     carriers = set(n.generators.carrier) - set(exclude_carriers)
     generators, generators_pnl = aggregateoneport(
@@ -302,7 +321,13 @@ def _aggregate_and_move_components(
     replace_components(n, "Generator", generators, generators_pnl)
 
     for one_port in aggregate_one_ports:
-        df, pnl = aggregateoneport(n, busmap, component=one_port)
+        one_port_strategy = one_port_strategies.get(one_port, dict())
+        df, pnl = aggregateoneport(
+            n,
+            busmap,
+            component=one_port,
+            custom_strategies=one_port_strategy,
+        )
         replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
@@ -326,16 +351,45 @@ def contains_ac(ls):
 
 
 def simplify_links(
-    n,
-    costs,
-    renewable_config,
-    hvdc_as_lines,
-    config_lines,
-    config_links,
-    output,
-    exclude_carriers=[],
-    aggregation_strategies=dict(),
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    config_lines: dict,
+    config_links: dict,
+    output: object,
+    exclude_carriers: list = [],
+    aggregation_strategies: dict = dict(),
 ):
+    """
+    Simplifies multi-node DC link components into single links between end-points.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to be simplified.
+    costs : pd.DataFrame
+        DataFrame containing technology costs.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    config_lines : dict
+        Configuration dictionary for lines.
+    config_links : dict
+        Configuration dictionary for links.
+    output : object
+        Output object containing file paths for saving results.
+    exclude_carriers : list, optional
+        List of carriers to exclude from simplification, by default [].
+    aggregation_strategies : dict, optional
+        Strategies for aggregating components, by default dict().
+
+    Returns
+    -------
+    n : pypsa.Network
+        The simplified PyPSA network.
+    """
     # Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
 
@@ -992,6 +1046,9 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.network)
 
+    # Add year suffix to carrier names for clustering
+    add_year_suffix_to_carriers(n)
+
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetype = snakemake.params.config_lines["ac_types"][base_voltage]
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
@@ -1021,12 +1078,7 @@ if __name__ == "__main__":
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 
-    technology_costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
-    )
+    technology_costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
     n, simplify_links_map = simplify_links(
         n,
@@ -1143,24 +1195,11 @@ if __name__ == "__main__":
     update_p_nom_max(n)
 
     # Option for subregion
-    subregion_config = snakemake.params.subregion
-    if subregion_config["enable"]["simplify_network"]:
-        if subregion_config["define_by_gadm"]:
-            logger.info("Activate subregion classificaition based on GADM")
-            subregion_shapes = snakemake.input.subregion_shapes
-        elif subregion_config["path_custom_shapes"]:
-            logger.info("Activate subregion classificaition based on custom shapes")
-            subregion_shapes = subregion_config["path_custom_shapes"]
-        else:
-            logger.warning("Although enabled, no subregion classificaition is selected")
-            subregion_shapes = False
-
-        if subregion_shapes:
-            crs = snakemake.params.crs
-            tolerance = subregion_config["tolerance"]
-            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
-    else:
-        subregion_shapes = False
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = snakemake.params.crs
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
 
     p_threshold_drop_isolated = cluster_config.get("p_threshold_drop_isolated", False)
     p_threshold_merge_isolated = cluster_config.get("p_threshold_merge_isolated", False)
@@ -1187,8 +1226,11 @@ if __name__ == "__main__":
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
-        country_shapes = snakemake.input.country_shapes
-        n = nearest_shape(n, country_shapes, crs, tolerance=tolerance)
+        original_shapes = snakemake.input.original_shapes
+        n = nearest_shape(n, original_shapes, crs, tolerance=tolerance)
+
+    # Restore base carrier names (remove year suffixes) before saving
+    restore_base_carrier_names(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

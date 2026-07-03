@@ -202,7 +202,12 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+)
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
@@ -210,15 +215,17 @@ from shapely.geometry import LineString, Point, box
 
 cc = coco.CountryConverter()
 
+
 logger = create_logger(__name__)
 
-
 COPERNICUS_CRS = "EPSG:4326"
+
+
 GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
-def check_cutout_match(cutout, geodf):
+def check_cutout_match(cutout, regions):
     cutout_box = box(*cutout.bounds)
     region_box = box(*regions.total_bounds)
 
@@ -240,7 +247,9 @@ def check_cutout_match(cutout, geodf):
 
 def get_eia_annual_hydro_generation(fn, countries):
     # in billion kWh/a = TWh/a
-    df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df = read_csv_nafix(fn, skiprows=1, index_col=1, na_values=[" ", "--"])
+    df = df.apply(pd.to_numeric, errors="coerce")
+    df = df.iloc[1:, 1:]
     df.index = df.index.str.strip()
 
     df.loc["Germany"] = df.filter(like="Germany", axis=0).astype(float).sum()
@@ -298,7 +307,7 @@ def get_irena_annual_hydro_generation(fn, countries):
 
 def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
-        pd.read_csv(
+        read_csv_nafix(
             fn,
             comment="#",
             keep_default_na=False,
@@ -521,6 +530,14 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
     return runoff
 
 
+def check_flag(d: dict, field: str) -> bool:
+    """
+    Check if a string is contained in keys of a dictionary and is either True or non-boolean
+    """
+    safe_field = d.get(field, False)
+    return (not isinstance(safe_field, bool)) or safe_field
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -564,7 +581,7 @@ if __name__ == "__main__":
 
     cutout = atlite.Cutout(paths["cutout"])
 
-    check_cutout_match(cutout=cutout, geodf=regions)
+    check_cutout_match(cutout=cutout, regions=regions)
 
     if not snakemake.wildcards.technology.startswith("hydro"):
         # the region should be restricted for non-hydro technologies, as the hydro potential is calculated across hydrobasins which may span beyond the region of the country
@@ -693,10 +710,10 @@ if __name__ == "__main__":
 
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
-        if "natura" in config and config["natura"]:
+        if check_flag(config, "natura"):
             excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
 
-        if "copernicus" in config and config["copernicus"]:
+        if check_flag(config, "copernicus"):
             copernicus = config["copernicus"]
             excluder.add_raster(
                 paths.copernicus,
@@ -712,7 +729,7 @@ if __name__ == "__main__":
                     crs=COPERNICUS_CRS,
                 )
 
-        if "max_depth" in config:
+        if check_flag(config, "max_depth"):
             # lambda not supported for atlite + multiprocessing
             # use named function np.greater with partially frozen argument instead
             # and exclude areas where: -max_depth > grid cell depth
@@ -721,11 +738,11 @@ if __name__ == "__main__":
                 paths.gebco, codes=func_depth, crs=GEBCO_CRS, nodata=-1000
             )
 
-        if "min_shore_distance" in config:
+        if check_flag(config, "min_shore_distance"):
             buffer = config["min_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer)
 
-        if "max_shore_distance" in config:
+        if check_flag(config, "max_shore_distance"):
             buffer = config["max_shore_distance"]
             excluder.add_geometry(paths.country_shapes, buffer=buffer, invert=True)
 
