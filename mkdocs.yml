@@ -41,6 +41,7 @@ nav:
     - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
     - Part 3 — Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
     - Part 4 — Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
+    - Part 5 — Fix Isolated Nodes and Load Shedding: tutorials/use-cases/5-network-topology.md
   - Examples: tutorials/examples.md
 
 - User Guide:

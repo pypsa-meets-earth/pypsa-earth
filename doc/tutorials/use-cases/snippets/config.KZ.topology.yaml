@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["KZ"]
+
+run:
+  name: "KZ"
+  shared_cutouts: false
+
+enable:
+  retrieve_cutout: false
+
+scenario:
+  opts: [6h]
+
+load_options:
+  source: gegis
+  weather_year: 2013
+  prediction_year: 2030
+  scale: 1.005
+
+electricity:
+  powerplants_filter: (DateOut >= 2020 or DateOut != DateOut) and (DateIn <= 2020 or DateIn != DateIn)
+  extendable_carriers:
+    Generator: []
+    StorageUnit: []
+    Store: []
+    Link: []
+  estimate_renewable_capacities:
+    stats: irena
+    year: 2020
+  custom_powerplants: replace
+
+cluster_options:
+  simplify_network:
+    p_threshold_merge_isolated: false # FIRST: do not stack islands on one stranded bus
+    s_threshold_fetch_isolated: 0.05  # attach islands < 5% of national load to the nearest backbone bus
+    p_threshold_drop_isolated: 10     # [MW] drop only tiny artefact islands
+
+solving:
+  solver:
+    name: highs
