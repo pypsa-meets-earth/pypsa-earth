@@ -193,15 +193,15 @@ print(caps.sort_values(ascending=False).to_string())
 After Part 4 you should see something like (all values in **GW** — from the `/ 1e3` above):
 
 ```
-Line         AC                    31.2
-Generator    Load shedding         17.7
-             Coal                  11.6
-             Combined-Cycle Gas     2.5
-StorageUnit  Reservoir & Dam        2.3
-Generator    Oil                    1.1
-             Solar                  0.9
-             Onshore Wind           0.4
-             Run of River           0.1
+Line         AC                    31.19
+Generator    Load shedding         17.70
+             Coal                  11.60
+             Combined-Cycle Gas     2.47
+StorageUnit  Reservoir & Dam        2.34
+Generator    Oil                    1.14
+             Solar                  0.91
+             Onshore Wind           0.43
+             Run of River           0.13
 ```
 
 Ignore **Load shedding** and **AC** line capacity — they are not part of the generation fleet. **Solar (~0.9 GW)** and **onshore wind (~0.4 GW)** should now sit near KEGOC/IRENA 2020 levels, not the ~20 / ~6 GW from the Part 2 baseline.
@@ -230,15 +230,15 @@ print(supply.sort_values(ascending=False).to_string())
 After Part 4 you might see (in GW):
 
 ```
-Line         AC                    110.3
-Generator    Coal                   90.9
-             Load shedding           8.0
-StorageUnit  Reservoir & Dam         2.8
-Generator    Combined-Cycle Gas      2.4
-             Onshore Wind            1.3
-             Solar                   1.2
-             Run of River            0.8
-             Oil                     0.0
+Line         AC                    110.29
+Generator    Coal                   90.85
+             Load shedding           7.99
+StorageUnit  Reservoir & Dam         2.83
+Generator    Combined-Cycle Gas      2.40
+             Onshore Wind            1.28
+             Solar                   1.16
+             Run of River            0.78
+             Oil                     0.00
 ```
 
 **Solar (~1.2 TWh)** and **wind (~1.3 TWh)** are now in the right ballpark vs KEGOC 2020 generation (~1.3 / ~1.1 TWh). **Coal (~91 TWh)** is too high and **gas (~2.4 TWh)** too low — the model still lacks gas capacity and over-relies on coal. **Hydro (~3.6 TWh)** remains under-generated. Non-zero **load shedding (~8 TWh)** means the solve still struggles to meet demand in some hours.
@@ -308,7 +308,7 @@ After **`replace`**, installed capacity (GW) tracks KEGOC 2020 much more closely
 
 ```
 Line         AC                    31.81
-Generator    Load shedding         17.77
+Generator    Load shedding         17.70
              Coal                  13.17
              Combined-Cycle Gas     3.58
 StorageUnit  Reservoir & Dam        2.31
@@ -323,20 +323,21 @@ Generator    Open-Cycle Gas         1.60
 Annual **Supply** (TWh) is still far from KEGOC 2020:
 
 ```
-Line         AC                    110.3
-Generator    Coal                   90.9
-             Load shedding           8.0
-StorageUnit  Reservoir & Dam         2.8
-Generator    Combined-Cycle Gas      2.4
-             Onshore Wind            1.3
-             Solar                   1.2
-             Run of River            0.8
-             Oil                     0.0
+Line         AC                    109.37
+Generator    Coal                   92.35
+             Load shedding           7.67
+StorageUnit  Reservoir & Dam         3.93
+Generator    Onshore Wind            1.34
+             Solar                   0.99
+             Combined-Cycle Gas      0.63
+             Run of River            0.40
+             Open-Cycle Gas          0.00
+Load         -                       0.00
 ```
 
-**Solar (~1.2 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~91 TWh)** is far too high and **gas (~2.4 TWh from CCGT alone)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~3.6 TWh combined)** is still under-generated.
+**Solar (~1.0 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~92 TWh)** is far too high and **gas (~0.6 TWh from CCGT; OCGT idle)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~4.3 TWh combined)** is still under-generated vs KEGOC (~9.5 TWh).
 
-**Load shedding (~8 TWh)** is still high — roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
+**Load shedding (~7.7 TWh)** is still high — roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
 
 - **Network topology** — a bus may be poorly connected (missing line or no path from local generation to load).
 - **Transmission limits** — line capacities may block power from reaching demand in some hours or regions.
