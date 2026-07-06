@@ -189,37 +189,21 @@ snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
 
 ## Step 7: Verify the fix
 
-Reload the solved network in your notebook and repeat the checks from Steps 1–2.
-
-**Load shedding** — should collapse toward zero:
+Reload the solved network and check **total** load shedding (Step 2 only breaks it down by island — here you want the national total near zero):
 
 ```python
-n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
 weights = n.snapshot_weightings.generators
 shed_TWh = (
     n.generators_t.p.filter(like="load").multiply(weights, axis=0).sum().sum() / 1e6
 )
-print(f"Load shedding: {shed_TWh:.2f} TWh")
+print(f"Load shedding: {shed_TWh:.2f} TWh")  # expect ~0
 ```
 
-```
-Load shedding: 0.0 TWh
-```
+Total demand rises to about **108.1 TWh** — do **not** change **`scale`** until [Part 6](6-transmission-network.md#step-8-final-calibration-of-scale).
 
-Re-plotting with the Step 1 code should now show a single-colour map — no red pocket — because the previously isolated buses were fetched onto the backbone and can now import power.
+![Kazakhstan network after fix — all buses on main grid](figures/kz_subnetworks_fixed.png)
 
-**Total demand** — will be **higher** than the **107.3 TWh** you calibrated in [Part 3](3-demand-data.md#step-3-calibrate-annual-demand-with-scale):
-
-```python
-total_TWh = n.loads_t.p_set.multiply(weights, axis=0).sum().sum() / 1e6
-print(f"Total annual demand: {total_TWh:.1f} TWh")
-```
-
-```
-Total annual demand: 108.1 TWh
-```
-
-That is expected — do **not** change **`scale`** here. Fetching restores load that simplification had dropped or stranded on isolated buses (roughly **1 TWh** in this run). Leave **`load_options.scale`** at the Part 3 value until the grid is final; we re-check demand once in [Part 6](6-transmission-network.md#step-8-final-calibration-of-scale).
+*All green — no isolated buses after `fetch`.*
 
 ---
 
