@@ -13,7 +13,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities, yet the model still **shed about 7.7 TWh of load** — roughly 7–8% of Kazakhstan's annual demand. Load shedding means the optimiser could not serve demand at some buses in some hours, so it "dropped" that load at a very high penalty price. A validated fleet that still sheds load is a signal that the problem is **not generation** but the **network** the generation sits on.
 
-In this tutorial we diagnose the cause — one or more **electrically isolated sub-networks** — and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network. A follow-up tutorial will go one level deeper and improve the base transmission network itself (voltage levels and line ratings) so fewer islands appear in the first place.
+In this tutorial we diagnose the cause — one or more **electrically isolated sub-networks** — and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
 Everything in this part lives under **`cluster_options.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand or the fleet.
 
@@ -219,36 +219,7 @@ print(f"Total annual demand: {total_TWh:.1f} TWh")
 Total annual demand: 108.1 TWh
 ```
 
-That is expected. In Part 3, `scale: 1.005` was sized against a **106.8 TWh** baseline — load that simplification had **dropped or stranded** on isolated buses was missing from the total. Fetching those buses back onto the backbone restores roughly **1.2 TWh** of demand. With the old multiplier still in place, the annual total overshoots KEGOC 2020.
-
----
-
-## Step 8: Re-calibrate `scale`
-
-Update **`load_options.scale`** so the annual total matches **107.3 TWh** again. Multiply the Part 3 value by the ratio of target to what you just measured:
-
-```python
-target_TWh = 107.3  # KEGOC 2020
-measured_TWh = 108.1  # from Step 7 (use your number)
-old_scale = 1.005
-new_scale = old_scale * target_TWh / measured_TWh
-print(f"scale: {new_scale:.4f}")  # → 0.9976
-```
-
-```yaml
-load_options:
-  scale: 0.998   # was 1.005 before the topology fix
-```
-
-Re-run the workflow (same command as Step 6). Snakemake rebuilds from **`build_demand_profiles`** onward because `load_options` changed.
-
-Confirm demand after the second run:
-
-```
-Total annual demand: 107.3 TWh
-```
-
-Load shedding should stay at **~0 TWh** — changing `scale` scales every bus equally and does not re-isolate anyone.
+That is expected — do **not** change **`scale`** here. Fetching restores load that simplification had dropped or stranded on isolated buses (roughly **1 TWh** in this run). Leave **`load_options.scale`** at the Part 3 value until the grid is final; we re-check demand once in [Part 6](6-transmission-network.md#step-8-final-calibration-of-scale).
 
 ---
 
@@ -259,8 +230,7 @@ Load shedding should stay at **~0 TWh** — changing `scale` scales every bus eq
 | 4 | `cluster_options.simplify_network.p_threshold_merge_isolated` | `false` | Do not collapse islands onto one stranded bus (default 300 MW) |
 | 4 | `cluster_options.simplify_network.s_threshold_fetch_isolated` | `0.05` | Attach islands below 5% of national load to the nearest backbone bus |
 | 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `10` | Drop only tiny (<10 MW) artefact islands |
-| 8 | `load_options.scale` | `~0.998` (was `1.005`) | Re-match **107.3 TWh** after fetch restores stranded demand |
 
 Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. This is a **simplification-level** fix — fast and effective, but it approximates *where* that load connects.
 
-A follow-up tutorial (Part 6) will improve how the base grid is built from OSM — voltage thresholds, the 110 kV level, and KZ line ratings — so more of the real sub-transmission network is included and fewer islands appear before simplification.
+In **[Part 6](6-transmission-network.md)** we improve how the base transmission network is built from OSM — KZ voltage levels and line ratings — and do a **final** `scale` check once the grid is settled. Part 5 settings remain useful for any islands OSM still misses.
