@@ -98,7 +98,7 @@ def ask(text: str, default: str = "") -> str:
 
 def exit_message() -> None:
     console.print(style="dim")
-    console.print("[bold magenta] 👋 Exitting the application. [/bold magenta]")
+    console.print("[bold magenta] 👋 Exiting the application. [/bold magenta]")
     raise typer.Exit()
 
 
@@ -215,7 +215,7 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
 
 def display_user_groups() -> tuple:
     """
-    Menu to display user groups to the user from those defined in `user_groups.yaml`.
+    Menu to display user groups to the user from those defined in `user_groups_cli.yaml`.
 
     Returns
     -------
@@ -225,7 +225,7 @@ def display_user_groups() -> tuple:
         Choice of user group
     """
     # Load user groups
-    user_groups_path = "user_groups.yaml"
+    user_groups_path = "configs/pypsa_earth_cli/user_groups.yaml"
     user_groups_config = load_config_file(user_groups_path)
 
     # Prompt user to identify his/her user group
@@ -329,21 +329,21 @@ def config_setup():
                 updated_value = ask(
                     f"Enter the value of {subchoice} to update in the config file"
                 )
-                if isinstance(updated_config[choice][subchoice],list):
-                    updated_value =updated_value.split(",")
+                if isinstance(updated_config[choice][subchoice], list):
+                    updated_value = updated_value.split(",")
                 updated_config[choice][subchoice] = updated_value
         else:
-        # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
+            # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
             updated_value = ask(
                 f"Enter the value of {choice} to update in the config file"
             )
-            if isinstance(updated_config[choice],list):
+            if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
             updated_config[choice] = updated_value
 
     # Save updated config file
-    config_save_path="config.cli_updated.yaml"
+    config_save_path = "config.cli_updated.yaml"
     save_config_file(config_save_path, unflatten_dict(updated_config))
     display_main_menu()
 
