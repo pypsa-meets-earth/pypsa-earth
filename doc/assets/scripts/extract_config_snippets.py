@@ -77,7 +77,7 @@ def main():
         "build_osm_network": ["build_osm_network"],
         "base_network": ["base_network"],
         "load_options": ["load_options"],
-        "co2budget": ["co2_budget"],
+        "co2": ["co2"],
         "electricity": ["electricity"],
         "lines": ["lines"],
         "links": ["links"],
