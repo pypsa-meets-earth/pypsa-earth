@@ -136,6 +136,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add module-level and missing function docstrings and type hints to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
 
+* Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
