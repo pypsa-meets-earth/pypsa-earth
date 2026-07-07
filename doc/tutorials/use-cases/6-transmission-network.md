@@ -11,7 +11,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-[Part 5](5-network-topology.md) eliminated load shedding by **fetching** electrically isolated buses onto the main grid. That works, but it is a simplification shortcut — load is electrically re-assigned to the nearest connected bus, not carried over real missing lines.
+[Part 5](5-network-topology.md) eliminated load shedding by reconnecting electrically isolated buses to the main grid (**fetch on**, **merge off**, **drop off**). That fix works, but it is still a simplification shortcut: load is reassigned to the nearest connected bus, not carried over explicitly modelled transmission lines.
 
 In this tutorial we improve the **base transmission network** that PyPSA-Earth builds from OpenStreetMap (OSM):
 
@@ -19,9 +19,9 @@ In this tutorial we improve the **base transmission network** that PyPSA-Earth b
 2. **A lower OSM voltage floor (35 kV)** — keep regional sub-transmission links that the default 51 kV cutoff drops.
 3. **KZ line types** — conductor ratings that reflect older, single-circuit lines at 110 kV and 220 kV.
 
-These settings live upstream in the workflow (`clean_osm_data`, `base_network`, `electricity`, `lines`). Changing them triggers a **full rebuild** of the grid — slower than Part 5, but the grid topology and line capacities are closer to KZ reality before clustering and solve.
+These settings live upstream in the workflow (`clean_osm_data`, `base_network`, `electricity`, `lines`). Changing them triggers a **full rebuild** of the grid — slower than Part 5, but it gives a base topology and line capacities that are closer to Kazakhstan's real network before clustering and solving.
 
-Keep the Part 5 **`cluster_options`** block. Even with a better OSM grid, some small islands may remain; merge-off and fetch still help.
+Keep the Part 5 **`cluster_options`** block. Even with a better OSM grid, some small islands may remain; `merge` off, `fetch` on, and `drop` off still help preserve both served load and island generation.
 
 ---
 
@@ -68,8 +68,6 @@ Kazakhstan follows the **post-Soviet/CIS** voltage scale, not the European one P
 
 PyPSA-Earth defaults assume a **European** stack (`electricity.voltages: [132, 220, 300, 380, 500, 750]`) and discard OSM assets below **51 kV** (`threshold_voltage: 51000`). For KZ that removes much of the sub-transmission mesh — one reason western pockets appeared as electrical islands in Parts 4–5.
 
-**`electricity.voltages`** lists the nominal levels used while building **`base.nc`** from OSM (line-type matching on 35 / 110 / 220 / 500 kV assets). During **`simplify_network`**, every bus and line is mapped onto **`base_voltage`** (500 kV) and transformers are removed. The **solved** 10-cluster network therefore has **one nominal bus voltage** — not separate 110 / 220 / 500 kV buses. The low-voltage OSM layers still matter: they add regional lines and substation paths in `base.nc` **before** that collapse, which can change connectivity and line capacities even though you no longer see 35 kV or 110 kV in the final file.
-
 ---
 
 ## Step 2: Lower the OSM voltage floor to 35 kV
@@ -98,7 +96,9 @@ electricity:
 - **`base_voltage`** — voltage level that **`simplify_network`** maps the entire grid onto (500 kV for KZ).
 - **`voltages`** — nominal levels used when assigning **`lines.ac_types`** to OSM lines in **`base_network`** (each line matched to the closest kV in this list).
 
-Replace the European default list for KZ — do not mix in 132 kV or 380 kV unless you have a reason to keep them.
+In practice, this means `electricity.voltages` controls which voltage layers are represented in **`base.nc`** (for KZ: 110 / 220 / 500 kV, with 35 kV retained by the OSM filter in Step 2), while `base_voltage` controls the later simplification collapse. During **`simplify_network`**, buses and lines are mapped to a single nominal level (500 kV) and transformers are removed. The solved clustered network therefore shows one nominal bus voltage, but the lower-voltage layers still matter upstream because they affect connectivity and line capacities before that collapse.
+
+For KZ, use `[110, 220, 500]` as the default working set. Add other levels (for example 132 or 380 kV) only if your OSM data or study scope clearly requires them.
 
 ---
 
@@ -186,14 +186,14 @@ print(f"Load shedding: {shed_TWh:.2f} TWh")
 ```
 
 ```
-Total annual demand: 107.87 TWh
+Total annual demand: 108.54 TWh
 Load shedding: 0.00 TWh
 ```
 
 - **Load shedding** at zero — no new islands after the grid rebuild.
-- **Total demand 107.87 TWh** with **`scale: 1.005`** — slightly above KEGOC **107.34 TWh**. A one-time tweak in Step 8 brings it back.
+- **Total demand 108.54 TWh** with **`scale: 1.005`** — above KEGOC **107.34 TWh**. A one-time tweak in Step 8 brings it back.
 
-`n.statistics()` should show the same story: **Load shedding** supply at **0 TWh**; generator **Installed Capacity** unchanged from Part 4. Dispatch stays coal-heavy (~96 TWh) — expected until marginal costs or CO₂ limits are tuned.
+`n.statistics()` should show the same story: **Load shedding** supply at **0 TWh**. Installed capacity can differ from earlier runs if previously dropped island plants are now kept (`p_threshold_drop_isolated: false`), especially for hydro; compare against the Part 4/KEGOC reference table. Dispatch stays coal-heavy (~96 TWh) — expected until marginal costs or CO₂ limits are tuned.
 
 ---
 
@@ -203,19 +203,19 @@ The Part 3 **`scale: 1.005`** was set before the Part 5–6 grid changes. Rescal
 
 ```python
 target_TWh = 107.34  # KEGOC 2020
-measured_TWh = 107.87  # Step 7 (with scale 1.005)
+measured_TWh = 108.54  # Step 7 (with scale 1.005)
 new_scale = 1.005 * target_TWh / measured_TWh
-print(f"scale: {new_scale:.4f}")  # → 1.0000
+print(f"scale: {new_scale:.4f}")  # → 0.9939
 ```
 
 ```yaml
 load_options:
-  scale: 1.0
+  scale: 0.994
 ```
 
-`1.005 × 107.34 / 107.87` rounds to **1.0**.
+`1.005 × 107.34 / 108.54` gives **0.9939**, which rounds to **0.994**.
 
-In [Part 3](3-demand-data.md#step-3-calibrate-annual-demand-with-scale), **`scale: 1.005`** bundled two gaps in one multiplier: GEGIS vs KEGOC statistics, **and** demand lost when simplification dropped load on isolated buses (~1.2 TWh in the Part 2 grid). Parts 5–6 fixed the second problem — **fetch** reconnects islands, **35 kV** keeps regional lines — so that load stays in the model. With the grid settled, the extra **0.5%** scale is no longer needed: **`scale: 1.0`** lands on the KEGOC total without a topology fudge.
+In [Part 3](3-demand-data.md#step-3-calibrate-annual-demand-with-scale), **`scale: 1.005`** bundled two gaps in one multiplier: GEGIS vs KEGOC statistics, **and** demand lost when simplification dropped load on isolated buses (~1.2 TWh in the Part 2 grid). Parts 5–6 fixed the second problem — **fetch** reconnects islands, **35 kV** keeps regional lines, and **drop off** preserves island plants — so that load and capacity stay in the model. With the grid settled, re-calibration gives a slightly lower final multiplier: **`scale: 0.994`**.
 
 Re-run the workflow if you change `scale`. Load shedding should stay at **~0 TWh** — scaling demand does not re-isolate buses.
 
@@ -229,9 +229,9 @@ Re-run the workflow if you change `scale`. Load shedding should stay at **~0 TWh
 | 3 | `electricity.base_voltage` | `500` | Single voltage after `simplify_network` |
 | 3 | `electricity.voltages` | `[110, 220, 500]` | Line-type matching on multi-voltage `base.nc` |
 | 4 | `lines.ac_types` | KZ conductor map | 110 kV type + derated 220 kV **`s_nom`** in build |
-| 5 | *(keep Part 5)* | `cluster_options.simplify_network` | Merge off, fetch on — catch remaining islands |
-| 8 | `load_options.scale` | `1.0` (from `1.005` × 107.34/107.87) | **Final** match to **107.34 TWh** after grid is settled |
+| 5 | *(keep Part 5)* | `cluster_options.simplify_network` | Merge off, fetch on, drop off — catch remaining islands without deleting plants |
+| 8 | `load_options.scale` | `0.994` (from `1.005` × 107.34/108.54) | **Final** match to **107.34 TWh** after grid is settled |
 
-The base grid now reflects Kazakhstan's post-Soviet voltage scale and more conservative line ratings. Part 5's fetch remains a useful safety net for OSM gaps that 35 kV alone cannot close.
+The base grid now reflects Kazakhstan's post-Soviet voltage scale and more conservative line ratings. Part 5's simplification settings (merge off, fetch on, drop off) remain a useful safety net for OSM gaps that 35 kV alone cannot close.
 
-Demand ends at **`scale: 1.0`** — the GEGIS profile at its native total, on a grid that no longer drops regional load. That is a cleaner baseline for the next tutorials (CO₂ limits, regional costs).
+Demand ends at **`scale: 0.994`** — a re-calibrated match to KEGOC on a grid that no longer drops regional load. That is a cleaner baseline for the next tutorials (CO₂ limits, regional costs).

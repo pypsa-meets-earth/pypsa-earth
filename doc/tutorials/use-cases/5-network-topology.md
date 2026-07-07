@@ -189,17 +189,28 @@ snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
 
 ## Step 7: Verify the fix
 
-Reload the solved network and check **total** load shedding (Step 2 only breaks it down by island — here you want the national total near zero):
+Reload the solved network and check **total** load shedding (Step 2 only breaks it down by island — here you want the national total near zero) and **annual demand** (same as [Part 2](2-analyze-results.md#total-annual-demand)):
 
 ```python
 weights = n.snapshot_weightings.generators
+total_TWh = n.loads_t.p_set.multiply(weights, axis=0).sum().sum() / 1e6
 shed_TWh = (
     n.generators_t.p.filter(like="load").multiply(weights, axis=0).sum().sum() / 1e6
 )
+print(f"Total annual demand: {total_TWh:.2f} TWh")
 print(f"Load shedding: {shed_TWh:.2f} TWh")  # expect ~0
 ```
 
-Total demand rises to about **108.1 TWh** — do **not** change **`scale`** until [Part 6](6-transmission-network.md#step-8-final-calibration-of-scale).
+Example after the Part 5 fix (with **`scale: 1.005`** from Part 3 still in place):
+
+```
+Total annual demand: 108.54 TWh
+Load shedding: 0.00 TWh
+```
+
+**Load shedding at 0** confirms the island fix. **Demand above KEGOC 107.3 TWh** is expected: `fetch` puts regional load back on the main grid (Part 3's `scale` was tuned when that load was missing), and **`scale: 1.005`** still sits on top of the native GEGIS total (~108 TWh). Do **not** change **`scale`** here — [Part 6](6-transmission-network.md#step-8-final-calibration-of-scale) recalibrates once the transmission grid is settled.
+
+Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-results.md#installed-capacities) (same `n.statistics()` call). Compare **ror** and **hydro** against the KEGOC 2020 table — they should stay aligned with the Part 4 fleet. This is a useful sanity check because `p_threshold_drop_isolated` can delete **low-load islands** before `fetch` runs, and that may remove **large hydro plants** that happen to sit on those islands.
 
 ![Kazakhstan network after fix — all buses on main grid](figures/kz_subnetworks_fixed.png)
 
@@ -213,8 +224,8 @@ Total demand rises to about **108.1 TWh** — do **not** change **`scale`** unti
 |---|---|---|---|
 | 4 | `cluster_options.simplify_network.p_threshold_merge_isolated` | `false` | Do not collapse islands onto one stranded bus (default 300 MW) |
 | 4 | `cluster_options.simplify_network.s_threshold_fetch_isolated` | `0.05` | Attach islands below 5% of national load to the nearest backbone bus |
-| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro on OSM artefacts) |
+| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro and other plants on OSM artefacts) |
 
-Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. This is a **simplification-level** fix — fast and effective, but it approximates *where* that load connects.
+Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. **`p_threshold_drop_isolated: false`** also keeps power plants on low-load islands in the model, so **installed capacity** — in particular hydro — stays aligned with the Part 4 fleet instead of being deleted during simplification. This is a **simplification-level** fix — fast and effective, but it approximates *where* that load connects.
 
 In **[Part 6](6-transmission-network.md)** we improve how the base transmission network is built from OSM — KZ voltage levels and line ratings — and do a **final** `scale` check once the grid is settled. Part 5 settings remain useful for any islands OSM still misses.
