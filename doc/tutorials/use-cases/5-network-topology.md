@@ -149,15 +149,15 @@ Fetch is **`false` by default** — it does nothing until you set a share thresh
 s_threshold_fetch_isolated: 0.05
 ```
 
-**3. `p_threshold_drop_isolated: 10` — drop only tiny artefacts.**
+**3. `p_threshold_drop_isolated: false` — do not delete islands.**
 
-Keep this low so real regional load is preserved for `fetch`, not deleted:
+`drop` runs **before** `fetch` and removes buses by **mean load on the sub-network**, not by generation. In KZ, large hydro plants (e.g. East Kazakhstan — Bukhtarma, Ust-Kamenogorsk, Shulbinskaya) can sit on OSM islands with **little assigned demand**. With a MW threshold (the default is **20**), those buses — and all attached power plants — are deleted before `fetch` can reconnect them.
 
 ```yaml
-p_threshold_drop_isolated: 10   # [MW] drop only negligible OSM islands
+p_threshold_drop_isolated: false
 ```
 
-The default is **20 MW**; **10 MW** is slightly stricter on artefacts only. You can keep **20** if you prefer the default — it does not change the merge/fetch logic above.
+Keep drop off for KZ. Use `fetch` to reconnect stranded **load**; do not throw away stranded **generation**.
 
 ## Step 5: Add the settings to `config.KZ.yaml`
 
@@ -168,7 +168,7 @@ cluster_options:
   simplify_network:
     p_threshold_merge_isolated: false # do not stack islands on one stranded bus
     s_threshold_fetch_isolated: 0.05  # fetch is off by default; reconnect islands < 5% of national load
-    p_threshold_drop_isolated: 10     # [MW] drop only tiny artefact islands
+    p_threshold_drop_isolated: false  # do not delete low-load islands (can remove hydro)
 ```
 
 You can [download the file](snippets/config.KZ.topology.yaml){: download="config.KZ.yaml"} and merge it with your existing `config.KZ.yaml`, or add the `cluster_options` block by hand.
@@ -213,7 +213,7 @@ Total demand rises to about **108.1 TWh** — do **not** change **`scale`** unti
 |---|---|---|---|
 | 4 | `cluster_options.simplify_network.p_threshold_merge_isolated` | `false` | Do not collapse islands onto one stranded bus (default 300 MW) |
 | 4 | `cluster_options.simplify_network.s_threshold_fetch_isolated` | `0.05` | Attach islands below 5% of national load to the nearest backbone bus |
-| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `10` | Drop only tiny (<10 MW) artefact islands |
+| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro on OSM artefacts) |
 
 Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. This is a **simplification-level** fix — fast and effective, but it approximates *where* that load connects.
 
