@@ -17,7 +17,6 @@ import os
 import subprocess
 import sys
 import time
-from enum import Enum
 
 import typer
 import yaml
@@ -26,6 +25,8 @@ from InquirerPy.base import Choice
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
+
+from pathlib import Path
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -377,6 +378,8 @@ def show_questionnaire(option: str) -> None:
     # Print welcome message for the use-case
     console.print(use_case["initial_message"])
     console.print(style="dim")
+    time.sleep(3)
+
     answer_dict = {}
 
     total_score = 0
@@ -411,6 +414,7 @@ def show_questionnaire(option: str) -> None:
                         )
                         console.print(style="dim")
                         score -= 0.25
+                        time.sleep(2)
 
             answer_dict[question["id"]] = user_answer
         total_score += max(min(score, 1), 0)
@@ -436,12 +440,21 @@ def show_questionnaire(option: str) -> None:
             "To make the config file model-ready, a few more responses are required from you. Please enter your responses to the following questions."
         )
         config_dict = {}
+        pattern=r"Q\d+"
         for key, value in use_case["config_update"].items():
+            k = answer_dict[key] if re.match(pattern,key) else key
+            v = answer_dict[value] if re.match(pattern,value) else value
+            breakpoint()
             if isinstance(value, list):
                 value = list((answer_dict[value[0]],))
             else:
                 value = answer_dict[value]
-            config_dict[answer_dict[key]] = value
+
+            # Check if key is the keyword or question placeholder 
+            if not key.startswith("Q"):
+                config_dict[key] = value
+            else:
+                config_dict[answer_dict[key]] = value
 
         # Update some additional config parameters that are required for the model run
         folder = ask("Enter run name for the model")
@@ -455,9 +468,14 @@ def show_questionnaire(option: str) -> None:
             config_dict["solving.solver.options"] = "highs-default"
 
         # Save the updated config file
-        save_config_path = "config.KZ.yaml"
+        save_config_path = "config.KZ_cli.yaml"
+        if Path(save_config_file).is_file():
+            existing_config_dict=load_config_file(save_config_file)
+        else:
+            existing_config_dict={}
+
         save_config_file(
-            config_path=save_config_path, config_data=unflatten_dict(config_dict)
+            config_path=save_config_path, config_data=unflatten_dict(existing_config_dict|config_dict)
         )
 
         console.print(style="dim")

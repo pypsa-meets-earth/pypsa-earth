@@ -16,3 +16,70 @@ use-case-2:
   "failure_message": "Wrong answer entered. Please try again."
   "success_message": "Great job!!! Correct answer entered."
   "exit_message": "Congratulations!!! Module completed."
+
+
+use-case-3:
+  "initial_message": "In this use-case, you will be asked a series of questions based on the module 3 of the use-case documentation. Therefore, please check the use-case documentation at the following link before proceeding. \n \nThe questions will be related to setting the config options for demand modelling."
+  "questionnaire": [
+      {"id": "Q1", 
+      "question": "How is the total demand of the network obtained in the model?", 
+      "hints": "The total demand of the network can be accessed through the `n.loads_t.p` attribute, which is a dynamic attribute of the load component. Do not forget to account for the temporal granularity", 
+      "choices": ["n.loads.p","n.loads_t.p","n.loads_t.p.sum()","n.loads_t.p.mul(n.snapshot_weightings).sum()"],
+      "answer": "n.loads_t.p.mul(n.snapshot_weightings).sum()"}, 
+      {
+        "id": "Q2",
+        "question": "You have already run the model using the GEGIS load source. When changing the load source to demand cast , what settings need to be changed in the config file?",
+        "hints": "Check the `load_options` and `snapshots` section in the config file",
+        "choices": [[
+                    "load_options.source", "load_options.weather_year","load_options.prediction_year","snapshots.start","snapshots.end"
+                  ],[
+                    "load_options.source", "load_options.weather_year",
+                  ],
+                  [
+                    "load_options.source", "load_options.prediction_year",
+                  ],
+                  [
+                    load_options.source", "load_options.weather_year","load_options.prediction_year",
+                  ]
+        ],
+        "answer":[
+                    "load_options.source", "load_options.weather_year","load_options.prediction_year","snapshots.start","snapshots.end"
+                  ]
+      },
+      {
+        "id": "Q3",
+        "question": "For running the model with demand cast load source, what is the right format to update the `load_options.source` parameter in the config file?",
+        "hints": "Check the comment provided in the config.default.yaml file for the possible options for the `load_options.source` parameter.",
+        "answer": "demcast"
+      },
+      {
+        "id": "Q4",
+        "question": "Can prediction year be set to 2040 for running the model with demand cast load source? (Yes/No)",
+        "hints": "Check if prediction_year is a valid option for `demcast` in the tutorial.",
+        "answer": "No"
+      },
+      {
+        "id": "Q5",
+        "question": "If the snapshot start and end year is 2026, can the model run successfully with demandcast? (Yes/No)",
+        "hints": "Check the valid range of the `demcast` dataset in the tutorial.",
+        "answer": "No"
+      },
+      {
+        "id": "Q6",
+        "question": "If the snapshot start and end year is 2013, what should `load_options.weather_year` be set to? ",
+        "hints": "Same as snapshot year",
+        "answer": "2013"
+      },
+      {
+        "id": "Q7",
+        "question": "In the following list of rules, which rule do you think would be the first to be rerun, if weather year and snapshots are set to 2020",
+        "hints": "Think of which of the datasets is most tightly linked to the weather year.",
+        "choices": ["build_cutout","retrieve_cost","add_electricity"],
+        "answer": "build_cutout"
+      },
+  ]
+  "failure_message": "Wrong answer entered. Please try again."
+  "success_message": "Great job!!! Correct answer entered."
+  "exit_message": "Congratulations!!! Module completed."
+  "config_update": {"load_options.source":"Q3","load_options.weather_year":"Q6","load_options.scale":"1"}
+
