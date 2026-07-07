@@ -381,11 +381,12 @@ def show_questionnaire(option: str) -> None:
     console.print(use_case["initial_message"])
     console.print(style="dim")
 
-    console.print(
-        f"Use [cyan]`Ctrl+C`[/cyan] to exit the quiz in between. Please note that this will also exit the application and your answers will not be saved."
-    )
+    panel_content = "[cyan][bold]Note:\n\n[/bold]* Use [white]`Ctrl+C`[/white] to exit the quiz in between. Please note that this will also exit the application and your answers will not be saved. \n\n* Please ensure that the answers typed in are case-sensitive.[/cyan]"
+
+    console.print(Panel(panel_content, expand=False, border_style="green"))
+
     console.print(style="dim")
-    time.sleep(2)
+    time.sleep(3)
     answer_dict = {}
 
     # Iterate through the questions
