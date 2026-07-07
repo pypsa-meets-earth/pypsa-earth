@@ -16,8 +16,10 @@ The CLI has the following modules:
 import os
 import subprocess
 import sys
+import time
 from enum import Enum
 
+import numpy as np
 import typer
 import yaml
 from InquirerPy import get_style, inquirer
@@ -353,7 +355,7 @@ def show_questionnaire(option: str) -> None:
     """
     Display the questionnaire for the selected use-case
 
-    Paramaters
+    Parameters
     ----------
     options: str
         Use-case selected by the user
@@ -365,7 +367,9 @@ def show_questionnaire(option: str) -> None:
     console.print(style="dim")
 
     # Load the questionnaire config file
-    questions_config = load_config_file("tutorial_questions.yaml")
+    questions_config = load_config_file(
+        "configs/pypsa_earth_cli/tutorial_questions.yaml"
+    )
 
     # Select use-case based on the option selected by the user
     use_case = questions_config[f"use-case-{option}"]
@@ -376,6 +380,12 @@ def show_questionnaire(option: str) -> None:
     # Print welcome message for the use-case
     console.print(use_case["initial_message"])
     console.print(style="dim")
+
+    console.print(
+        f"Use [cyan]`Ctrl+C`[/cyan] to exit the quiz in between. Please note that this will also exit the application and your answers will not be saved."
+    )
+    console.print(style="dim")
+    time.sleep(2)
     answer_dict = {}
 
     # Iterate through the questions
@@ -400,8 +410,8 @@ def show_questionnaire(option: str) -> None:
 
                 # Provide a hint to the user if the question has a hint defined in the config file
                 if "hints" in question:
-                    hint = ask("Would you like a hint?", default=["Yes", "No"])
-                    if hint == "Yes":
+                    hint = ask("Would you like a hint?", default=["Yes", "No"]).lower()
+                    if hint == "yes":
                         console.print(
                             f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]"
                         )
@@ -422,32 +432,36 @@ def show_questionnaire(option: str) -> None:
             value = answer_dict[value]
         config_dict[answer_dict[key]] = value
 
-    # Update some additional config parameters that are required for the model run
+    model_run = ask(
+        "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
+        default=["Yes", "No"],
+    ).lower()
 
-    folder = ask("Enter run name for the model")
-    config_dict["run.name"] = folder
-
-    solver = ask(
-        "Enter solver to use for running the model", default=["gurobi", "highs"]
-    )
-    if solver == "highs":
-        config_dict["solving.solver.name"] = "highs"
-        config_dict["solving.solver.options"] = "highs-default"
-
-    # Save the updated config file
     save_config_path = "config.KZ.yaml"
-    save_config_file(
-        config_path=save_config_path, config_data=unflatten_dict(config_dict)
-    )
+    if model_run == "yes":
 
-    console.print(style="dim")
-    console.print(
-        f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]"
-    )
+        # Update some additional config parameters that are required for the model run
+        console.print(
+            "A few additional parameters need to be updated in the config file for a successful model run. Please enter your preferences for the following questions."
+        )
 
-    model_run = ask("Do you want to run the model ?", default=["Yes", "No"])
-    if model_run == "Yes":
+        folder = ask("Enter run name for the model")
+        config_dict["run.name"] = folder
+
+        solver = ask(
+            "Enter solver to use for running the model", default=["gurobi", "highs"]
+        )
+        if solver == "highs":
+            config_dict["solving.solver.name"] = "highs"
+            config_dict["solving.solver.options"] = "highs-default"
+        save_config_file(
+            config_path=save_config_path, config_data=unflatten_dict(config_dict)
+        )
         run_model(save_config_path)
+    else:
+        save_config_file(
+            config_path=save_config_path, config_data=unflatten_dict(config_dict)
+        )
 
 
 @app.command("tutorial")
@@ -499,13 +513,18 @@ def tutorial() -> None:
 
     choice = ask("Select option 1-8 to proceed further")
 
-    if choice != "8":
+    if choice in list(map(str, np.arange(1, 8))):
         show_questionnaire(choice)
         tutorial()
 
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
+
+    else:
+        console.print(f"[magenta] Please enter a valid option between 1-8 [/magenta]")
+        time.sleep(2)
+        tutorial()
 
 
 @app.command("run-model")
@@ -517,7 +536,7 @@ def run_model(config_path="") -> None:
     ----------
     config_path: str
         Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
-    
+
     Returns
     -------
     None
@@ -552,6 +571,7 @@ def run_model(config_path="") -> None:
     subprocess.run(snakemake_command.split(" "))
 
     display_main_menu()
+
 
 def display_main_menu() -> None:
     """
@@ -606,6 +626,10 @@ def display_main_menu() -> None:
         run_model()
     elif choice == "5":
         exit_message()
+    else:
+        console.print(f"[magenta] Please enter a valid option between 1-5 [/magenta]")
+        time.sleep(2)
+        display_main_menu()
 
 
 @app.callback(invoke_without_command=True)
