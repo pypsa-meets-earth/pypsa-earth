@@ -79,9 +79,6 @@ Solar and wind are already listed — not only conventional plants. Your file sh
 
 Compare with the **2020 installed capacity** table in [Part 2](2-analyze-results.md). Coal and hydro are roughly the right order of magnitude; **gas** is often under-represented in global databases. The Part 2 **model** solar/wind totals were much higher than KEGOC because of **IRENA gap-fill and extendable build**, not because powerplantmatching had no renewables.
 
-!!! tip
-    The log file `logs/KZ/build_powerplants.log` shows how many plants survived the filter. After you change `powerplants_filter` in Step 3, check this log to confirm rows were dropped as expected.
-
 ---
 
 ## Step 2: Understand the defaults we are changing
@@ -94,7 +91,7 @@ PyPSA-Earth defaults in `config.default.yaml` target a **forward-looking** model
 | `electricity.extendable_carriers.Generator` | `[solar, onwind, offwind-ac, offwind-dc, OCGT]` | `[]` | No new solar, wind, or gas build |
 | `electricity.estimate_renewable_capacities.year` | `2023` | `2020` | IRENA solar/wind totals match the validation year |
 
-Kazakhstan is landlocked — offshore wind profiles are empty and irrelevant here. An empty `Generator` list under `extendable_carriers` is appropriate for locking the full 2020 fleet.
+An empty `Generator` list under `extendable_carriers` locks the **2020** fleet: the optimiser cannot add new **solar**, **onwind**, or **OCGT** beyond what is already in `powerplants.csv` and IRENA gap-fill.
 
 ---
 
@@ -115,6 +112,9 @@ Add to `config.KZ.yaml`:
 electricity:
   powerplants_filter: (DateOut >= 2020 or DateOut != DateOut) and (DateIn <= 2020 or DateIn != DateIn)
 ```
+
+!!! tip
+    After you add this filter and re-run (Step 6), open `logs/KZ/build_powerplants.log` — it shows how many plants survived the filter. Confirm rows were dropped as expected.
 
 ---
 
@@ -253,9 +253,24 @@ Improving the **generation** table in [Part 2](2-analyze-results.md) is a follow
 
 This tutorial ships a copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository — **144 rows** in powerplantmatching format — as a **full Kazakhstan fleet** instead of patching gaps by hand.
 
+### Enable custom powerplants
+
+PyPSA-Earth reads **`data/custom_powerplants.csv`** in **`build_powerplants`**. By default it is ignored. Add to `config.KZ.yaml` (alongside the Part 4 `electricity` block):
+
+```yaml
+electricity:
+  custom_powerplants: replace   # "false" | "merge" | "replace"
+```
+
+| Value | Behaviour |
+|---|---|
+| **`false`** | powerplantmatching only (Steps 1–7) — the CSV is ignored |
+| **`merge`** | Append custom rows to powerplantmatching |
+| **`replace`** | Use only your CSV — **recommended** for the fleet below |
+
 ### What is in the file
 
-[Download the file](snippets/custom_powerplants.KZ.csv){: download="custom_powerplants.csv"} and save it as **`data/custom_powerplants.csv`**, replacing the existing placeholder. Snakemake always reads that path in **`build_powerplants`**. With the default `custom_powerplants: false` it is ignored until you set **`replace`** (use this list instead of powerplantmatching) or **`merge`** (append to powerplantmatching) below — we recommend **`replace`** for this full fleet.
+[Download the file](snippets/custom_powerplants.KZ.csv){: download="custom_powerplants.csv"} and save it as **`data/custom_powerplants.csv`**, replacing the existing placeholder.
 
 Installed capacity in the custom list (MW):
 
@@ -268,7 +283,7 @@ Installed capacity in the custom list (MW):
 | Solar | 822 |
 | Wind | 649 |
 
-The main gain over powerplantmatching is **OCGT** (**~1.6 GW**) and fuller **CCGT** coverage. **`replace`** makes this list the sole plant source (no double-counting against overlapping powerplantmatching rows). **`merge`** is available if you only want to add missing units.
+The main gain over powerplantmatching is **OCGT** (**~1.6 GW**) and fuller **CCGT** coverage. With **`replace`**, this list is the sole plant source — no double-counting against overlapping powerplantmatching rows.
 
 Example rows (industrial peakers absent from powerplantmatching):
 
@@ -280,21 +295,6 @@ Aktobe CHP,CCGT,CCGT,CHP,KZ,88,1962,2112,50.33618,57.14072
 ```
 
 The same **`powerplants_filter`** from Step 3 still applies — plants with `DateIn > 2020` are dropped.
-
-### Enable custom powerplants
-
-Add to `config.KZ.yaml` (alongside the Part 4 `electricity` block):
-
-```yaml
-electricity:
-  custom_powerplants: replace   # "false" | "merge" | "replace"
-```
-
-| Value | Behaviour |
-|---|---|
-| **`false`** | powerplantmatching only (Steps 1–7) — `data/custom_powerplants.csv` is ignored |
-| **`merge`** | Append custom rows to powerplantmatching |
-| **`replace`** | Use only your CSV — **recommended** for this list |
 
 ### Re-run and verify
 
