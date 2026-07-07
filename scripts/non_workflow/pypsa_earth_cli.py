@@ -14,9 +14,11 @@ The CLI has the following modules:
 
 """
 import os
+import re
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import typer
 import yaml
@@ -25,8 +27,6 @@ from InquirerPy.base import Choice
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-
-from pathlib import Path
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -440,21 +440,15 @@ def show_questionnaire(option: str) -> None:
             "To make the config file model-ready, a few more responses are required from you. Please enter your responses to the following questions."
         )
         config_dict = {}
-        pattern=r"Q\d+"
+        pattern = r"Q\d+"
         for key, value in use_case["config_update"].items():
-            k = answer_dict[key] if re.match(pattern,key) else key
-            v = answer_dict[value] if re.match(pattern,value) else value
-            breakpoint()
-            if isinstance(value, list):
-                value = list((answer_dict[value[0]],))
-            else:
-                value = answer_dict[value]
+            k = answer_dict[key] if re.match(pattern, key) else key
+            v = answer_dict[value] if re.match(pattern, value) else value
 
-            # Check if key is the keyword or question placeholder 
-            if not key.startswith("Q"):
-                config_dict[key] = value
-            else:
-                config_dict[answer_dict[key]] = value
+            v_final = list((v[0],)) if isinstance(v, list) else v
+
+            # Check if key is the keyword or question placeholder
+            config_dict[k] = v_final
 
         # Update some additional config parameters that are required for the model run
         folder = ask("Enter run name for the model")
@@ -469,13 +463,14 @@ def show_questionnaire(option: str) -> None:
 
         # Save the updated config file
         save_config_path = "config.KZ_cli.yaml"
-        if Path(save_config_file).is_file():
-            existing_config_dict=load_config_file(save_config_file)
+        if Path(save_config_path).is_file():
+            existing_config_dict = load_config_file(save_config_path)
         else:
-            existing_config_dict={}
+            existing_config_dict = {}
 
         save_config_file(
-            config_path=save_config_path, config_data=unflatten_dict(existing_config_dict|config_dict)
+            config_path=save_config_path,
+            config_data=unflatten_dict(existing_config_dict | config_dict),
         )
 
         console.print(style="dim")
