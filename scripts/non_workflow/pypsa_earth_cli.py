@@ -76,7 +76,7 @@ def display_choice_menu(title: str, options: list, required_height: int) -> str:
     return choice
 
 
-def ask(text: str, default: str = "") -> str:
+def ask(text: str, default: str = "", datatype = str) -> str:
     """
     Styling for the typer prompt
 
@@ -86,6 +86,8 @@ def ask(text: str, default: str = "") -> str:
         Text to be shown in the prompt
     default: str
         The default values for the prompt
+    datatype: 
+        The datatype of the prompt
 
     Returns:
     str
@@ -93,9 +95,9 @@ def ask(text: str, default: str = "") -> str:
     """
     styled_text = typer.style(f"➔ {text}", fg=typer.colors.YELLOW, bold=True)
     if default != "":
-        return typer.prompt(styled_text, default=default)
+        return typer.prompt(styled_text, default=default, type=datatype)
     else:
-        return typer.prompt(styled_text)
+        return typer.prompt(styled_text, type=datatype)
 
 
 def exit_message() -> None:
@@ -383,6 +385,8 @@ def show_questionnaire(option: str) -> None:
     answer_dict = {}
 
     total_score = 0
+
+    type_dict = {"str":str,"int":int}
     # Iterate through the questions
     for question in questions:
         score = 1
@@ -390,8 +394,12 @@ def show_questionnaire(option: str) -> None:
         user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while user_answer != answer:
+            if "type" in question:
+                datatype=type_dict[question["type"]]
+            else:
+                datatype=type_dict["str"]
             if "choices" not in question:
-                user_answer = ask(f"{question['id']}. {question['question']}")
+                user_answer = ask(f"{question['id']}. {question['question']}", datatype=datatype)
             else:
                 user_answer = display_choice_menu(
                     f"{question['id']}. {question['question']}",
@@ -443,12 +451,14 @@ def show_questionnaire(option: str) -> None:
         pattern = r"Q\d+"
         for key, value in use_case["config_update"].items():
             k = answer_dict[key] if re.match(pattern, key) else key
-            v = answer_dict[value] if re.match(pattern, value) else value
 
-            v_final = list((v[0],)) if isinstance(v, list) else v
+            if isinstance(value, list):
+                v = list((answer_dict[value[0]],)) if re.match(pattern, str(value[0])) else value[0]
+            else:
+                v = answer_dict[value] if re.match(pattern, str(value)) else value
 
             # Check if key is the keyword or question placeholder
-            config_dict[k] = v_final
+            config_dict[k] = v
 
         # Update some additional config parameters that are required for the model run
         folder = ask("Enter run name for the model")
@@ -463,10 +473,15 @@ def show_questionnaire(option: str) -> None:
 
         # Save the updated config file
         save_config_path = "config.KZ_cli.yaml"
+        existing_config_dict={}
         if Path(save_config_path).is_file():
             existing_config_dict = load_config_file(save_config_path)
-        else:
-            existing_config_dict = {}
+            if existing_config_dict == None:
+                existing_config_dict = {}
+
+        if int(option) > 1:
+            config_dict["enable.retrieve_cutout"] = False
+            config_dict["enable.retrieve_databundle"] = False
 
         save_config_file(
             config_path=save_config_path,
