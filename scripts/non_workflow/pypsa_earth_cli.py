@@ -76,7 +76,7 @@ def display_choice_menu(title: str, options: list, required_height: int) -> str:
     return choice
 
 
-def ask(text: str, default: str = "", datatype = str) -> str:
+def ask(text: str, default: str = "", datatype=str) -> str:
     """
     Styling for the typer prompt
 
@@ -86,7 +86,7 @@ def ask(text: str, default: str = "", datatype = str) -> str:
         Text to be shown in the prompt
     default: str
         The default values for the prompt
-    datatype: 
+    datatype:
         The datatype of the prompt
 
     Returns:
@@ -102,7 +102,7 @@ def ask(text: str, default: str = "", datatype = str) -> str:
 
 def exit_message() -> None:
     console.print(style="dim")
-    console.print("[bold magenta] 👋 Exitting the application. [/bold magenta]")
+    console.print("[bold magenta] 👋 Exiting the application. [/bold magenta]")
     raise typer.Exit()
 
 
@@ -357,7 +357,7 @@ def show_questionnaire(option: str) -> None:
     """
     Display the questionnaire for the selected use-case
 
-    Paramaters
+    Parameters
     ----------
     options: str
         Use-case selected by the user
@@ -386,7 +386,7 @@ def show_questionnaire(option: str) -> None:
 
     total_score = 0
 
-    type_dict = {"str":str,"int":int}
+    type_dict = {"str": str, "int": int}
     # Iterate through the questions
     for question in questions:
         score = 1
@@ -395,11 +395,13 @@ def show_questionnaire(option: str) -> None:
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while user_answer != answer:
             if "type" in question:
-                datatype=type_dict[question["type"]]
+                datatype = type_dict[question["type"]]
             else:
-                datatype=type_dict["str"]
+                datatype = type_dict["str"]
             if "choices" not in question:
-                user_answer = ask(f"{question['id']}. {question['question']}", datatype=datatype)
+                user_answer = ask(
+                    f"{question['id']}. {question['question']}", datatype=datatype
+                )
             else:
                 user_answer = display_choice_menu(
                     f"{question['id']}. {question['question']}",
@@ -453,7 +455,15 @@ def show_questionnaire(option: str) -> None:
             k = answer_dict[key] if re.match(pattern, key) else key
 
             if isinstance(value, list):
-                v = list((answer_dict[value[0]],)) if re.match(pattern, str(value[0])) else value[0]
+                if len(value) == 0:
+                    # Empty lists for e.g., electricity.extendable_carriers.Generator:[]
+                    v = value
+                else:
+                    v = (
+                        list((answer_dict[value[0]],))
+                        if re.match(pattern, str(value[0]))
+                        else value[0]
+                    )
             else:
                 v = answer_dict[value] if re.match(pattern, str(value)) else value
 
@@ -473,7 +483,7 @@ def show_questionnaire(option: str) -> None:
 
         # Save the updated config file
         save_config_path = "config.KZ_cli.yaml"
-        existing_config_dict={}
+        existing_config_dict = {}
         if Path(save_config_path).is_file():
             existing_config_dict = load_config_file(save_config_path)
             if existing_config_dict == None:
