@@ -5,22 +5,55 @@
 
 # -*- coding: utf-8 -*-
 
+"""
+Shared utility functions used across the PyPSA-Earth workflow.
+
+This module collects small, reusable helpers that are imported as ``_helpers``
+by many of the ``scripts/*.py`` rule scripts rather than belonging to a single
+rule. It is not meant to be run as a standalone Snakemake rule. The helpers are
+grouped roughly as follows:
+
+- **Configuration and logging**: ``check_config_version``,
+  ``update_cutout_config``, ``copy_default_files``, ``create_logger``,
+  ``configure_logging``, ``handle_exception``, ``read_osm_config``,
+  ``update_config_dictionary``.
+- **Network aggregation**: ``update_p_nom_max``, ``aggregate_p_nom``,
+  ``aggregate_p``, ``aggregate_e_nom``, ``aggregate_p_curtailed``,
+  ``aggregate_costs``, ``create_network_topology``.
+- **Country handling**: ``two_2_three_digits_country``,
+  ``three_2_two_digits_country``, ``country_name_2_two_digits``,
+  ``two_digits_2_name_country``, ``create_country_list``, ``get_country``,
+  ``add_transform_iso3``.
+- **I/O helpers**: ``read_csv_nafix``, ``to_csv_nafix``, ``save_to_geojson``,
+  ``read_geojson``, ``download_GADM``, ``content_retrieve``,
+  ``progress_retrieve``.
+- **Snakemake helpers**: ``mock_snakemake``, ``get_aggregation_strategies``.
+- **Sector-coupling helpers**: ``get_conv_factors``, ``aggregate_fuels``,
+  ``rename_techs``, ``safe_divide``.
+"""
+
 import calendar
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
 import time
+import warnings
 import zipfile
+from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime, timedelta
 from pathlib import Path
+from types import TracebackType
+from typing import Any
 
 import country_converter as coco
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pypsa
 import requests
 import yaml
 from currency_converter import CurrencyConverter
@@ -48,7 +81,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
 
-def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
+def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
     """
     Check that a version of the local config.yaml matches to the actual config
     version as defined in config.default.yaml.
@@ -71,7 +104,188 @@ def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
         )
 
 
-def handle_exception(exc_type, exc_value, exc_traceback):
+_CO2_BUDGET_BASE_VALUE = {
+    "co2limit": "limit",
+    "co2base": "base",
+    "absolute": "absolute",
+}
+
+# Deprecated config keys — remove entries when bumping ``version`` in
+# config.default.yaml (after one release so users had time to update config.yaml).
+
+# Simple key moves: add one (old_path, new_path) tuple per rename.
+CONFIG_MIGRATIONS = [
+    ("electricity.co2limit", "co2.limit"),
+    ("electricity.co2base", "co2.base"),
+    ("electricity.automatic_emission", "co2.automatic_emission.enable"),
+    ("electricity.automatic_emission_base_year", "co2.automatic_emission.base_year"),
+    ("costs.emission_prices.co2", "co2.emission_price"),
+    ("co2_budget.enable", "co2.budget.enable"),
+    ("co2_budget.override_co2opt", "co2.budget.override_co2opt"),
+    ("co2_budget.year", "co2.budget.year"),
+    ("sector.solar_cf_correction", "sector.solar_thermal_collector.cf_correction"),
+    ("solar_thermal.clearsky_model", "sector.solar_thermal_collector.clearsky_model"),
+    ("solar_thermal.orientation", "sector.solar_thermal_collector.orientation"),
+]
+
+
+def _parse_config_path(path: str) -> list[str]:
+    """Return a dot-separated config key path as a list of nested keys."""
+    return path.split(".")
+
+
+def _get_nested(mapping: dict[str, Any], path: str) -> Any | None:
+    """Return the value at ``path``, or ``None`` if any segment is missing."""
+    current: Any = mapping
+    for key in _parse_config_path(path):
+        if not isinstance(current, dict) or key not in current:
+            return None
+        current = current[key]
+    return current
+
+
+def _has_nested(mapping: dict[str, Any], path: str) -> bool:
+    """Return whether all segments of ``path`` exist in ``mapping``."""
+    current: Any = mapping
+    for key in _parse_config_path(path):
+        if not isinstance(current, dict) or key not in current:
+            return False
+        current = current[key]
+    return True
+
+
+def _set_nested(mapping: dict[str, Any], path: str, value: Any) -> None:
+    """Set ``value`` at ``path``, creating parent dicts as needed."""
+    keys = _parse_config_path(path)
+    current = mapping
+    for key in keys[:-1]:
+        if key not in current or not isinstance(current[key], dict):
+            current[key] = {}
+        current = current[key]
+    current[keys[-1]] = value
+
+
+def _migrate_simple_keys(
+    config: dict[str, Any],
+    migrations: Sequence[tuple[str, str]],
+    warn: Callable[[str, str], None],
+) -> None:
+    """Copy each deprecated leaf key to its new path, overriding only that value."""
+    for old_path, new_path in migrations:
+        if not _has_nested(config, old_path):
+            continue
+        _set_nested(config, new_path, _get_nested(config, old_path))
+        warn(old_path, new_path)
+
+
+def _migrate_co2_budget_base_value(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Migrate ``co2_budget.co2base_value`` to ``co2.budget.base_value``.
+
+    Renames legacy selector strings (e.g. ``co2limit`` → ``limit``); other
+    values (``absolute``, floats) are copied unchanged.
+    """
+    co2_budget = config.get("co2_budget")
+    if not isinstance(co2_budget, dict) or "co2base_value" not in co2_budget:
+        return
+
+    base_value = co2_budget["co2base_value"]
+    _set_nested(
+        config,
+        "co2.budget.base_value",
+        _CO2_BUDGET_BASE_VALUE.get(base_value, base_value),
+    )
+    warn("co2_budget.co2base_value", "co2.budget.base_value")
+
+
+def _migrate_solar_thermal_enable(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Copy legacy ``sector.solar_thermal`` bool to ``sector.solar_thermal_collector.enable``.
+
+    The new collector settings use a separate config key, so the legacy bool no
+    longer replaces the default dict during Snakemake config merging.
+    """
+    sector = config.get("sector", {})
+    if not isinstance(sector.get("solar_thermal"), bool):
+        return
+
+    _set_nested(
+        config,
+        "sector.solar_thermal_collector.enable",
+        sector["solar_thermal"],
+    )
+    warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
+
+
+def migrate_config(
+    config: dict[str, Any],
+    migrations: Sequence[tuple[str, str]] | None = None,
+) -> dict[str, Any]:
+    """Migrate deprecated config keys to the consolidated layout.
+
+    When a deprecated key is present, its value is copied to the new path in
+    the merged config dict. All other keys are left as already merged by
+    Snakemake (defaults from ``config.default.yaml`` plus user overrides).
+
+    Simple renames are listed in ``CONFIG_MIGRATIONS``. The only special
+    handler left is ``co2_budget.co2base_value`` (renames values, not just
+    paths) and ``sector.solar_thermal`` when it is still a legacy bool flag.
+
+    Parameters
+    ----------
+    config : dict
+        Snakemake configuration dictionary (updated in place).
+    migrations : list of (old_path, new_path), optional
+        Dot-separated paths. Defaults to ``CONFIG_MIGRATIONS``.
+
+    Returns
+    -------
+    dict
+        The updated configuration dictionary.
+    """
+
+    def _warn(old: str, new: str) -> None:
+        warnings.warn(
+            f"'{old}' is deprecated, use '{new}' instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
+    _migrate_solar_thermal_enable(config, _warn)
+    _migrate_co2_budget_base_value(config, _warn)
+    _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
+
+    return config
+
+
+def update_cutout_config(config: dict) -> dict:
+    """
+    Update renewable cutout settings in the configuration.
+
+    This function replaces any `"auto"` cutout entries in the
+    `config["renewable"]` section with the default cutout specified in
+    `config["atlite"]["default"]`.
+    """
+    cutout_default = config["atlite"]["default"]
+
+    for tech in config["renewable"]:
+        cutout_res = config["renewable"][tech]["cutout"]
+
+        if cutout_res != "auto":
+            continue
+
+        config["renewable"][tech]["cutout"] = cutout_default
+
+    return config
+
+
+def handle_exception(
+    exc_type: type[BaseException],
+    exc_value: BaseException,
+    exc_traceback: TracebackType | None,
+) -> None:
     """
     Customise errors traceback.
     """
@@ -98,7 +312,14 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         )
 
 
-def copy_default_files():
+def copy_default_files() -> None:
+    """
+    Create a minimal ``config.yaml`` next to ``config.default.yaml`` if missing.
+
+    If no ``config.yaml`` exists in the repository root, write a small
+    placeholder file instructing the user to add only the entries that differ
+    from ``config.default.yaml``.
+    """
     fn = Path(os.path.join(BASE_DIR, "config.yaml"))
     if not fn.exists():
         fn.write_text(
@@ -106,7 +327,7 @@ def copy_default_files():
         )
 
 
-def create_logger(logger_name, level=logging.INFO):
+def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger:
     """
     Create a logger for a module and adds a handler needed to capture in logs
     traceback from exceptions emerging during the workflow.
@@ -119,7 +340,7 @@ def create_logger(logger_name, level=logging.INFO):
     return logger
 
 
-def read_osm_config(*args):
+def read_osm_config(*args: str):
     """
     Read values from the regions config file based on provided key arguments.
 
@@ -164,7 +385,7 @@ def read_osm_config(*args):
         return tuple([osm_config[a] for a in args])
 
 
-def configure_logging(snakemake, skip_handlers=False):
+def configure_logging(snakemake, skip_handlers: bool = False) -> None:
     """
     Configure the basic behaviour for the logging module.
 
@@ -207,13 +428,42 @@ def configure_logging(snakemake, skip_handlers=False):
     logging.basicConfig(**kwargs, force=True)
 
 
-def pdbcast(v, h):
+def pdbcast(v: pd.Series, h: pd.Series) -> pd.DataFrame:
+    """
+    Broadcast two pandas Series into a DataFrame via an outer product.
+
+    Parameters
+    ----------
+    v : pandas.Series
+        Series providing the row index and the values broadcast down the rows.
+    h : pandas.Series
+        Series providing the column index and the values broadcast across columns.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame indexed by ``v.index`` with columns ``h.index`` where entry
+        ``(i, j)`` equals ``v[i] * h[j]``.
+    """
     return pd.DataFrame(
         v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
     )
 
 
-def update_p_nom_max(n):
+def update_p_nom_max(n: pypsa.Network) -> None:
+    """
+    Ensure ``p_nom_max`` is at least ``p_nom_min`` for all generators.
+
+    When existing assets (e.g. from the OPSD project) are included, the already
+    installed capacity may exceed the configured expansion limit. This sets
+    ``n.generators.p_nom_max`` to the row-wise maximum of ``p_nom_min`` and
+    ``p_nom_max`` so the optimisation stays feasible.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network whose ``generators.p_nom_max`` column is updated in place.
+    """
     # if extendable carriers (solar/onwind/...) have capacity >= 0,
     # e.g. existing assets from the OPSD project are included to the network,
     # the installed capacity might exceed the expansion limit.
@@ -222,7 +472,21 @@ def update_p_nom_max(n):
     n.generators.p_nom_max = n.generators[["p_nom_min", "p_nom_max"]].max(1)
 
 
-def aggregate_p_nom(n):
+def aggregate_p_nom(n: pypsa.Network) -> pd.Series:
+    """
+    Aggregate optimal nominal power capacity per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Optimal nominal power (``p_nom_opt``) of generators, storage units and
+        links plus the mean load, grouped by carrier.
+    """
     return pd.concat(
         [
             n.generators.groupby("carrier").p_nom_opt.sum(),
@@ -233,7 +497,21 @@ def aggregate_p_nom(n):
     )
 
 
-def aggregate_p(n):
+def aggregate_p(n: pypsa.Network) -> pd.Series:
+    """
+    Aggregate dispatched power per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Total dispatched power of generators, storage units and stores, and the
+        (negative) load, grouped by carrier.
+    """
     return pd.concat(
         [
             n.generators_t.p.sum().groupby(n.generators.carrier).sum(),
@@ -244,7 +522,21 @@ def aggregate_p(n):
     )
 
 
-def aggregate_e_nom(n):
+def aggregate_e_nom(n: pypsa.Network) -> pd.Series:
+    """
+    Aggregate optimal nominal energy storage capacity per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Optimal energy capacity of storage units (``p_nom_opt * max_hours``) and
+        stores (``e_nom_opt``), grouped by carrier.
+    """
     return pd.concat(
         [
             (n.storage_units["p_nom_opt"] * n.storage_units["max_hours"])
@@ -255,7 +547,21 @@ def aggregate_e_nom(n):
     )
 
 
-def aggregate_p_curtailed(n):
+def aggregate_p_curtailed(n: pypsa.Network) -> pd.Series:
+    """
+    Aggregate curtailed power per carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+
+    Returns
+    -------
+    pandas.Series
+        Curtailed power of generators (available minus dispatched) and storage
+        units (inflow minus dispatch), grouped by carrier.
+    """
     return pd.concat(
         [
             (
@@ -275,7 +581,35 @@ def aggregate_p_curtailed(n):
     )
 
 
-def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
+def aggregate_costs(
+    n: pypsa.Network,
+    flatten: bool = False,
+    opts: dict | None = None,
+    existing_only: bool = False,
+) -> pd.Series:
+    """
+    Aggregate capital and marginal system costs per component and carrier.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved network.
+    flatten : bool, default False
+        If True, collapse the result into a single Series combining capital and
+        marginal costs (marginal costs of conventional technologies are renamed
+        with a `` marginal`` suffix). Requires ``opts``.
+    opts : dict, optional
+        Options dictionary; must contain ``"conv_techs"`` when ``flatten`` is True.
+    existing_only : bool, default False
+        If True, use installed capacities (``p_nom``/``e_nom``) instead of the
+        optimised ones (``p_nom_opt``/``e_nom_opt``).
+
+    Returns
+    -------
+    pandas.Series
+        Costs indexed by (component, cost type, carrier), or a flattened Series
+        when ``flatten`` is True.
+    """
     components = dict(
         Link=("p_nom", "p0"),
         Generator=("p_nom", "p"),
@@ -319,8 +653,13 @@ def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
 
 
 def progress_retrieve(
-    url, file, data=None, headers=None, disable_progress=False, roundto=1.0
-):
+    url: str,
+    file: str,
+    data=None,
+    headers: dict | None = None,
+    disable_progress: bool = False,
+    roundto: float = 1.0,
+) -> None:
     """
     Function to download data from a url with a progress bar progress in
     retrieving data.
@@ -362,7 +701,13 @@ def progress_retrieve(
         urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
-def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor=0.3):
+def content_retrieve(
+    url: str,
+    data: dict | None = None,
+    headers: dict | None = None,
+    max_retries: int = 3,
+    backoff_factor: float = 0.3,
+) -> io.BytesIO:
     """
     Retrieve the content of a url with improved robustness.
 
@@ -421,7 +766,7 @@ def content_retrieve(url, data=None, headers=None, max_retries=3, backoff_factor
     raise Exception("Max retries exceeded")
 
 
-def get_aggregation_strategies(aggregation_strategies):
+def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict]:
     """
     Default aggregation strategies that cannot be defined in .yaml format must
     be specified within the function, otherwise (when defaults are passed in
@@ -447,7 +792,11 @@ def get_aggregation_strategies(aggregation_strategies):
 
 
 def mock_snakemake(
-    rulename, root_dir=None, submodule_dir=None, configfile=None, **wildcards
+    rulename: str,
+    root_dir: str | Path | None = None,
+    submodule_dir: str | None = None,
+    configfile: str | None = None,
+    **wildcards,
 ):
     """
     This function is expected to be executed from the "scripts"-directory of "
@@ -554,7 +903,7 @@ def mock_snakemake(
     return snakemake
 
 
-def two_2_three_digits_country(two_code_country):
+def two_2_three_digits_country(two_code_country: str) -> str:
     """
     Convert 2-digit to 3-digit country code:
 
@@ -575,7 +924,7 @@ def two_2_three_digits_country(two_code_country):
     return three_code_country
 
 
-def three_2_two_digits_country(three_code_country):
+def three_2_two_digits_country(three_code_country: str) -> str:
     """
     Convert 3-digit to 2-digit country code:
 
@@ -596,7 +945,9 @@ def three_2_two_digits_country(three_code_country):
     return two_code_country
 
 
-def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_words=[]):
+def two_digits_2_name_country(
+    two_code_country: str, nocomma: bool = False, remove_start_words: list = []
+) -> str:
     """
     Convert 2-digit country code to full name country:
 
@@ -642,7 +993,7 @@ def two_digits_2_name_country(two_code_country, nocomma=False, remove_start_word
     return full_name
 
 
-def country_name_2_two_digits(country_name):
+def country_name_2_two_digits(country_name: str) -> str:
     """
     Convert full country name to 2-digit country code.
 
@@ -666,20 +1017,48 @@ def country_name_2_two_digits(country_name):
     return full_name
 
 
-def read_csv_nafix(file, **kwargs):
+def read_csv_nafix(file: str | Path, **kwargs) -> pd.DataFrame:
     "Function to open a csv as pandas file and standardize the na value"
     if "keep_default_na" not in kwargs:
         kwargs["keep_default_na"] = False
     if "na_values" not in kwargs:
         kwargs["na_values"] = NA_VALUES
 
-    if os.stat(file).st_size > 0:
+    if isinstance(file, str) and (
+        file.startswith("http://") or file.startswith("https://")
+    ):
+        return pd.read_csv(file, **kwargs)
+
+    if os.path.exists(file) and os.stat(file).st_size > 0:
         return pd.read_csv(file, **kwargs)
     else:
         return pd.DataFrame()
 
 
-def to_csv_nafix(df, path, **kwargs):
+def to_csv_nafix(df: pd.DataFrame, path: str | Path | None, **kwargs):
+    """
+    Write a DataFrame to CSV using the project's standard NA representation.
+
+    Counterpart to :func:`read_csv_nafix`. Empty DataFrames are written as an
+    empty file so downstream Snakemake rules still find their expected output.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame to write.
+    path : str or pathlib.Path
+        Destination file path.
+    **kwargs
+        Additional keyword arguments forwarded to
+        :meth:`pandas.DataFrame.to_csv`; any ``na_rep`` is overridden with the
+        project default.
+
+    Returns
+    -------
+    str or None
+        The CSV as a string if ``path`` is None and the frame is non-empty,
+        otherwise None.
+    """
     if "na_rep" in kwargs:
         del kwargs["na_rep"]
     # if len(df) > 0:
@@ -690,7 +1069,60 @@ def to_csv_nafix(df, path, **kwargs):
             pass
 
 
-def save_to_geojson(df, fn):
+def add_transform_iso3(
+    df: pd.DataFrame,
+    source: str = "Entity code",
+    target: str = "name_short",
+    output: str = "region_name",
+) -> pd.DataFrame:
+    """
+    Transform a column containing ISO3 codes into another country-code or country-name
+    format and store the result in a new column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame.
+    source : str
+        Name of the column in ``df`` containing country names.
+    target : str
+        Target format as expected by ``coco.convert``,e.g. ``"name_short"`` or ``"ISO2"``.
+    output : str
+        Name of a new output column of ``df`` to keep converted region names.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        DataFrame with an additional column containing the converted region names.
+
+    """
+    # coco.convert is pretty slow when being applied over the whole column directly
+    cats = df[source].astype("category").cat.categories
+    target_codes = coco.convert(names=cats.tolist(), to=target)
+
+    if isinstance(target_codes, str):
+        target_codes = [target_codes]
+
+    country_name_mapping = dict(zip(cats, target_codes))
+    df[output] = df[source].map(country_name_mapping)
+
+    return df
+
+
+def save_to_geojson(df: gpd.GeoDataFrame, fn: str | Path) -> None:
+    """
+    Save a (Geo)DataFrame to a GeoJSON file, overwriting any existing file.
+
+    Empty frames are written as an empty file to avoid breaking Snakemake rules
+    that expect the output to exist.
+
+    Parameters
+    ----------
+    df : geopandas.GeoDataFrame
+        (Geo)DataFrame to save.
+    fn : str or pathlib.Path
+        Destination file path.
+    """
     if os.path.exists(fn):
         os.unlink(fn)  # remove file if it exists
 
@@ -704,7 +1136,9 @@ def save_to_geojson(df, fn):
         df.to_file(fn, driver="GeoJSON")
 
 
-def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
+def read_geojson(
+    fn: str | Path, cols: list = [], dtype: dict | None = None, crs: str = "EPSG:4326"
+) -> gpd.GeoDataFrame:
     """
     Function to read a geojson file fn. When the file is empty, then an empty
     GeoDataFrame is returned having columns cols, the specified crs and the
@@ -733,7 +1167,7 @@ def read_geojson(fn, cols=[], dtype=None, crs="EPSG:4326"):
         return df
 
 
-def create_country_list(input, iso_coding=True):
+def create_country_list(input: list[str], iso_coding: bool = True) -> list[str]:
     """
     Create a country list for defined regions..
 
@@ -810,13 +1244,17 @@ def create_country_list(input, iso_coding=True):
         # create a list with all countries
         full_codes_list.extend(codes_list)
 
-    # Removing duplicates and filter outputs by coding
-    full_codes_list = filter_codes(list(set(full_codes_list)), iso_coding=iso_coding)
+    # Sorting gives a canonical order to keep Snakemake params stable across runs,
+    # allowing CI to reuse cached rules. dict.fromkeys() is used instead of set()
+    # to deduplicate while preserving insertion order (set() ordering is non-deterministic).
+    full_codes_list = sorted(
+        filter_codes(list(dict.fromkeys(full_codes_list)), iso_coding=iso_coding)
+    )
 
     return full_codes_list
 
 
-def get_last_commit_message(path):
+def get_last_commit_message(path: str | Path) -> str | None:
     """
     Function to get the last PyPSA-Earth Git commit message.
 
@@ -845,289 +1283,39 @@ def get_last_commit_message(path):
 
 
 def update_config_dictionary(
-    config_dict,
-    parameter_key_to_fill="lines",
-    dict_to_use={"geometry": "first", "bounds": "first"},
-):
+    config_dict: dict,
+    parameter_key_to_fill: str = "lines",
+    dict_to_use: dict = {"geometry": "first", "bounds": "first"},
+) -> dict:
+    """
+    Ensure a configuration sub-dictionary exists and update it with defaults.
+
+    Parameters
+    ----------
+    config_dict : dict
+        Configuration dictionary to update in place.
+    parameter_key_to_fill : str, default "lines"
+        Key under which the sub-dictionary is created if absent.
+    dict_to_use : dict, default {"geometry": "first", "bounds": "first"}
+        Key/value pairs merged into ``config_dict[parameter_key_to_fill]``.
+
+    Returns
+    -------
+    dict
+        The updated configuration dictionary.
+    """
     config_dict.setdefault(parameter_key_to_fill, {})
     config_dict[parameter_key_to_fill].update(dict_to_use)
     return config_dict
 
 
-# PYPSA-EARTH-SEC
-def annuity(n, r):
-    """
-    Calculate the annuity factor for an asset with lifetime n years and.
-
-    discount rate of r, e.g. annuity(20, 0.05) * 20 = 1.6
-    """
-
-    if isinstance(r, pd.Series):
-        return pd.Series(1 / n, index=r.index).where(
-            r == 0, r / (1.0 - 1.0 / (1.0 + r) ** n)
-        )
-    elif r > 0:
-        return r / (1.0 - 1.0 / (1.0 + r) ** n)
-    else:
-        return 1 / n
-
-
-# Single source for the currency reference year (aligned with `technology-data` output files / PyPSA-Earth input cost files).
-# Change this value to update the reference year everywhere.
-TECH_DATA_REFERENCE_YEAR = 2020
-
-# Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
-_currency_conversion_cache = {}
-
-
-def get_yearly_currency_exchange_rate(
-    initial_currency: str,
-    output_currency: str,
-    default_exchange_rate: float = None,
-    _currency_conversion_cache: dict = None,
-    future_exchange_rate_strategy: str = "reference",  # "reference", "latest", "custom"
-    custom_future_exchange_rate: float = None,
-):
-    """
-    Returns the average currency exchange rate for the global reference_year.
-
-    Parameters
-    ----------
-    initial_currency : str
-        Input currency (e.g. "EUR", "USD").
-    output_currency : str
-        Desired output currency (e.g. "USD").
-    default_exchange_rate : float, optional
-        Fallback value if no rate data is found.
-    _currency_conversion_cache : dict, optional
-        Cache for repeated calls.
-    future_exchange_rate_strategy : str
-        "reference" (use TECH_DATA_REFERENCE_YEAR),
-        "latest" (use most recent available year),
-        "custom" (use custom_future_exchange_rate).
-    custom_future_exchange_rate : float, optional
-        Custom exchange rate if strategy is "custom".
-    """
-    if _currency_conversion_cache is None:
-        _currency_conversion_cache = {}
-
-    key = (
-        initial_currency,
-        output_currency,
-        TECH_DATA_REFERENCE_YEAR,
-        future_exchange_rate_strategy,
-    )
-    if key in _currency_conversion_cache:
-        return _currency_conversion_cache[key]
-
-    # Handle EUR specially (no direct rates, fallback on USD dates)
-    if initial_currency == "EUR":
-        available_dates = sorted(currency_converter._rates["USD"].keys())
-    else:
-        if initial_currency not in currency_converter._rates:
-            if default_exchange_rate is not None:
-                return default_exchange_rate
-            raise RuntimeError(f"No data for currency {initial_currency}.")
-        available_dates = sorted(currency_converter._rates[initial_currency].keys())
-
-    max_date = available_dates[-1]
-
-    # Decide which year to use
-    if future_exchange_rate_strategy == "custom":
-        if custom_future_exchange_rate is None:
-            raise RuntimeError("Custom strategy selected but no rate provided.")
-        avg_rate = custom_future_exchange_rate
-    elif future_exchange_rate_strategy == "latest":
-        effective_year = max_date.year
-        logger.info(
-            f"Using latest available year ({effective_year}) for {initial_currency}->{output_currency}."
-        )
-        dates_to_use = [d for d in available_dates if d.year == effective_year]
-        rates = [
-            currency_converter.convert(1, initial_currency, output_currency, d)
-            for d in dates_to_use
-        ]
-        avg_rate = sum(rates) / len(rates) if rates else default_exchange_rate
-    else:  # "reference": use module-level reference_year
-        effective_year = TECH_DATA_REFERENCE_YEAR
-        dates_to_use = [d for d in available_dates if d.year == effective_year]
-        if not dates_to_use and default_exchange_rate is not None:
-            avg_rate = default_exchange_rate
-        else:
-            rates = [
-                currency_converter.convert(1, initial_currency, output_currency, d)
-                for d in dates_to_use
-            ]
-            avg_rate = sum(rates) / len(rates)
-
-    _currency_conversion_cache[key] = avg_rate
-    return avg_rate
-
-
-def build_currency_conversion_cache(
-    df,
-    output_currency,
-    default_exchange_rate=None,
-    future_exchange_rate_strategy: str = "reference",
-    custom_future_exchange_rate: float = None,
-):
-    """
-    Builds a cache of exchange rates for all unique (currency, output_currency) pairs,
-    always using the module-level reference_year.
-    """
-    currency_list = currency_converter.currencies
-    unique_currencies = {
-        x["unit"][0:3]
-        for _, x in df.iterrows()
-        if isinstance(x["unit"], str) and x["unit"][0:3] in currency_list
-    }
-
-    _currency_conversion_cache = {}
-    for initial_currency in unique_currencies:
-        try:
-            rate = get_yearly_currency_exchange_rate(
-                initial_currency,
-                output_currency,
-                default_exchange_rate=default_exchange_rate,
-                _currency_conversion_cache=_currency_conversion_cache,
-                future_exchange_rate_strategy=future_exchange_rate_strategy,
-                custom_future_exchange_rate=custom_future_exchange_rate,
-            )
-            _currency_conversion_cache[
-                (initial_currency, output_currency, TECH_DATA_REFERENCE_YEAR)
-            ] = rate
-        except Exception as e:
-            logger.warning(
-                f"Failed to get rate for {initial_currency}->{output_currency}: {e}"
-            )
-            continue
-
-    return _currency_conversion_cache
-
-
-def apply_currency_conversion(cost_dataframe, output_currency, cache):
-    """
-    Applies exchange rates from the cache to convert all cost values and units.
-
-    All rows are assumed to be in `*_reference_year` already (e.g. EUR_2020).
-    """
-    currency_list = currency_converter.currencies
-
-    def convert_row(x):
-        unit = x["unit"]
-        value = x["value"]
-
-        if not isinstance(unit, str) or "/" not in unit:
-            return pd.Series([value, unit])
-
-        currency = unit[:3]
-
-        if currency not in currency_list:
-            return pd.Series([value, unit])
-
-        key = (currency, output_currency, TECH_DATA_REFERENCE_YEAR)
-        rate = cache.get(key)
-        if rate is not None:
-            new_value = value * rate
-            new_unit = unit.replace(currency, output_currency, 1)
-            return pd.Series([new_value, new_unit])
-        else:
-            logger.warning(f"Missing exchange rate for {key}. Skipping conversion.")
-            return pd.Series([value, unit])
-
-    cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
-    return cost_dataframe
-
-
-def prepare_costs(
-    cost_file: str,
-    config: dict,
-    output_currency: str,
-    fill_values: dict,
-    Nyears: float | int = 1,
-    default_exchange_rate: float = None,
-    future_exchange_rate_strategy: str = "latest",
-    custom_future_exchange_rate: float = None,
-):
-    """
-    Loads and processes cost data, converting units and currency to a common format.
-
-    Applies currency conversion, fills missing values, and computes fixed annualized costs.
-    Always uses the module-level reference_year.
-    """
-    costs = pd.read_csv(cost_file, index_col=[0, 1]).sort_index()
-
-    # correct units to MW
-    costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
-
-    # apply filter on financial_case and scenario, if they are contained in the cost dataframe
-    wished_cost_scenario = config["cost_scenario"]
-    wished_financial_case = config["financial_case"]
-    for col in ["scenario", "financial_case"]:
-        if col in costs.columns:
-            costs[col] = costs[col].replace("", pd.NA)
-
-    if "scenario" in costs.columns:
-        costs = costs[
-            (costs["scenario"].str.casefold() == wished_cost_scenario.casefold())
-            | (costs["scenario"].isnull())
-        ]
-
-    if "financial_case" in costs.columns:
-        costs = costs[
-            (costs["financial_case"].str.casefold() == wished_financial_case.casefold())
-            | (costs["financial_case"].isnull())
-        ]
-
-    if costs["currency_year"].isnull().any():
-        logger.warning(
-            "Some rows are missing 'currency_year' and will be skipped in currency conversion."
-        )
-
-    # Build a shared cache for exchange rates using the global reference_year
-    _currency_conversion_cache = build_currency_conversion_cache(
-        costs,
-        output_currency,
-        default_exchange_rate=default_exchange_rate,
-        future_exchange_rate_strategy=future_exchange_rate_strategy,
-        custom_future_exchange_rate=custom_future_exchange_rate,
-    )
-
-    modified_costs = apply_currency_conversion(
-        costs, output_currency, _currency_conversion_cache
-    )
-
-    modified_costs = (
-        modified_costs.loc[:, "value"]
-        .unstack(level=1)
-        .groupby("technology")
-        .sum(min_count=1)
-    )
-    modified_costs = modified_costs.fillna(fill_values)
-
-    for attr in ("investment", "lifetime", "FOM", "VOM", "efficiency", "fuel"):
-        overwrites = config.get(attr)
-        if overwrites is not None:
-            overwrites = pd.Series(overwrites)
-            modified_costs.loc[overwrites.index, attr] = overwrites
-            logger.info(
-                f"Overwriting {attr} of {overwrites.index} to {overwrites.values}"
-            )
-
-    def annuity_factor(v):
-        return annuity(v["lifetime"], v["discount rate"]) + v["FOM"] / 100
-
-    modified_costs["fixed"] = [
-        annuity_factor(v) * v["investment"] * Nyears
-        for _, v in modified_costs.iterrows()
-    ]
-
-    return modified_costs
-
-
 def create_network_topology(
-    n, prefix, like="ac", connector=" <-> ", bidirectional=True
-):
+    n: pypsa.Network,
+    prefix: str,
+    like: str = "ac",
+    connector: str = " <-> ",
+    bidirectional: bool = True,
+) -> pd.DataFrame:
     """
     Create a network topology like the power transmission network.
 
@@ -1180,7 +1368,30 @@ def create_network_topology(
     return topo
 
 
-def create_dummy_data(n, sector, carriers):
+def create_dummy_data(n: pypsa.Network, sector: str, carriers: list) -> pd.DataFrame:
+    """
+    Create randomised dummy demand data for a sector (placeholder/testing use).
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network providing the AC bus index used as the data index.
+    sector : str
+        Sector to create dummy data for. Only ``"industry"`` is supported.
+    carriers : list
+        Unused; kept for interface compatibility.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Random integer demand values indexed by AC bus with one column per
+        industry carrier.
+
+    Raises
+    ------
+    Exception
+        If ``sector`` is not ``"industry"``.
+    """
     ind = n.buses_t.p.index
     ind = n.buses.index[n.buses.carrier == "AC"]
 
@@ -1245,7 +1456,9 @@ def create_dummy_data(n, sector, carriers):
 #     return energy_totals
 
 
-def cycling_shift(df, steps=1):
+def cycling_shift(
+    df: pd.DataFrame | pd.Series, steps: int = 1
+) -> pd.DataFrame | pd.Series:
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
     """
@@ -1255,7 +1468,7 @@ def cycling_shift(df, steps=1):
     return df
 
 
-def get_country(target, **keys):
+def get_country(target: str, **keys: str) -> str | float:
     """
     Function to convert country codes using pycountry.
 
@@ -1293,7 +1506,9 @@ def get_country(target, **keys):
         return np.nan
 
 
-def download_GADM(country_code, update=False, out_logging=False):
+def download_GADM(
+    country_code: str, update: bool = False, out_logging: bool = False
+) -> tuple[str, str]:
     """
     Download gpkg file from GADM for a given country code.
 
@@ -1348,7 +1563,9 @@ def download_GADM(country_code, update=False, out_logging=False):
     return GADM_inputfile_gpkg, GADM_filename
 
 
-def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
+def _get_shape_col_gdf(
+    path_to_gadm: str | None, co: str, gadm_layer_id: int, gadm_clustering: bool
+) -> tuple[gpd.GeoDataFrame, str]:
     """
     Parameters
     ----------
@@ -1391,14 +1608,14 @@ def _get_shape_col_gdf(path_to_gadm, co, gadm_layer_id, gadm_clustering):
 
 
 def locate_bus(
-    df,
-    countries,
-    gadm_level,
-    path_to_gadm=None,
-    gadm_clustering=False,
-    dropnull=True,
-    col_out=None,
-):
+    df: pd.DataFrame,
+    countries: list,
+    gadm_level: int,
+    path_to_gadm: str | None = None,
+    gadm_clustering: bool = False,
+    dropnull: bool = True,
+    col_out: str | None = None,
+) -> pd.DataFrame:
     """
     Function to locate the points of the dataframe df into the GADM shapefile.
 
@@ -1444,7 +1661,23 @@ def locate_bus(
     return df
 
 
-def get_conv_factors(sector):
+def get_conv_factors(sector: str) -> dict:
+    """
+    Return conversion factors from mass/volume units to TWh per fuel.
+
+    The factors convert ktons (or m³) to TWh, based on the UN energy balance
+    methodology (https://unstats.un.org/unsd/energy/balance/2014/05.pdf).
+
+    Parameters
+    ----------
+    sector : str
+        Sector to return factors for. Only ``"industry"`` is populated.
+
+    Returns
+    -------
+    dict
+        Mapping of fuel name to its conversion factor to TWh.
+    """
     # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
     if sector == "industry":
         fuels_conv_toTWh = {
@@ -1497,11 +1730,27 @@ def get_conv_factors(sector):
             "Ethane": 0.01289,
             "Oil shale": 0.00247,
             "Other kerosene": 0.01216,
+            "ammonia": 0.00517,  # MWh (LHV) per tonne NH3 = 0.00517 TWh/kton
         }
     return fuels_conv_toTWh
 
 
-def aggregate_fuels(sector):
+def aggregate_fuels(sector: str) -> tuple[list[str], ...]:
+    """
+    Return the fuel names grouped by energy carrier category.
+
+    Parameters
+    ----------
+    sector : str
+        Sector for which to return the groupings (currently the same lists are
+        returned regardless of the value).
+
+    Returns
+    -------
+    tuple of list of str
+        Six lists in the order ``(gas_fuels, oil_fuels, biomass_fuels,
+        coal_fuels, heat, electricity)``.
+    """
     gas_fuels = [
         "Natural gas (including LNG)",  #
         "Natural Gas (including LNG)",  #
@@ -1586,7 +1835,9 @@ def aggregate_fuels(sector):
     return gas_fuels, oil_fuels, biomass_fuels, coal_fuels, heat, electricity
 
 
-def safe_divide(numerator, denominator, default_value=np.nan):
+def safe_divide(
+    numerator: pd.DataFrame, denominator: float, default_value: float = np.nan
+) -> pd.DataFrame:
     """
     Safe division function that returns NaN when the denominator is zero.
     """
@@ -1599,7 +1850,7 @@ def safe_divide(numerator, denominator, default_value=np.nan):
         return pd.DataFrame(np.nan, index=numerator.index, columns=numerator.columns)
 
 
-def lossy_bidirectional_links(n, carrier):
+def lossy_bidirectional_links(n: pypsa.Network, carrier: str) -> None:
     """
     Split bidirectional links of type carrier into two unidirectional links to include transmission losses.
     """
@@ -1634,7 +1885,9 @@ def lossy_bidirectional_links(n, carrier):
     n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
 
 
-def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency):
+def set_length_based_efficiency(
+    n: pypsa.Network, carrier: str, bus_suffix: str, transmission_efficiency: dict
+) -> None:
     """
     Set the efficiency of all links of type carrier in network n based on their length and the values specified in the config.
     Additionally add the length based electricity demand required for compression (if applicable).
@@ -1687,7 +1940,9 @@ def set_length_based_efficiency(n, carrier, bus_suffix, transmission_efficiency)
         n.links.loc[carrier_i, "efficiency2"] = -compression_per_1000km * lengths / 1e3
 
 
-def nearest_shape(n, path_shapes, crs, tolerance=100):
+def nearest_shape(
+    n: pypsa.Network, path_shapes: str, crs: dict, tolerance: int = 100
+) -> pypsa.Network:
     """
     Reassigns buses in the network `n` to the nearest country shape based on coordinates.
 
@@ -1743,7 +1998,7 @@ def nearest_shape(n, path_shapes, crs, tolerance=100):
     return n
 
 
-def branch(condition, then, otherwise=None):
+def branch(condition: bool, then, otherwise=None):
     """
     This is a placeholder function that exists in Snakemake versions > 8.3.0.
     It can be removed once Snakemake is updated to a compatible version.
@@ -1762,7 +2017,24 @@ def branch(condition, then, otherwise=None):
     return otherwise
 
 
-def rename_techs(label):
+def rename_techs(label: str) -> str:
+    """
+    Normalise a technology label to a canonical, human-readable name.
+
+    Removes location prefixes (e.g. ``"residential "``), collapses labels that
+    contain a known keyword (e.g. ``"CHP"``) and applies explicit renamings
+    (e.g. ``"onwind"`` to ``"onshore wind"``).
+
+    Parameters
+    ----------
+    label : str
+        Original technology label.
+
+    Returns
+    -------
+    str
+        Renamed technology label.
+    """
     prefix_to_remove = [
         "residential ",
         "services ",
@@ -1826,7 +2098,7 @@ def rename_techs(label):
     return label
 
 
-def add_missing_carriers(n, carriers):
+def add_missing_carriers(n: pypsa.Network, carriers: Iterable) -> None:
     """
     Function to add missing carriers to the network without raising errors.
     """
@@ -1837,7 +2109,97 @@ def add_missing_carriers(n, carriers):
             n.add("Carrier", carrier)
 
 
-def sanitize_carriers(n, config):
+def _is_year_tagged(carrier: str) -> bool:
+    """Return True if carrier ends with a 4-digit year suffix (e.g. 'solar-2020')."""
+    parts = carrier.rsplit("-", 1)
+    return len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 4
+
+
+def get_base_carrier(carrier: str) -> str:
+    """
+    Extract base carrier from carrier_gy format.
+
+    Examples:
+        "solar-2020" -> "solar"
+        "offwind-ac-2020" -> "offwind-ac"
+        "offwind-dc" -> "offwind-dc"
+        "CCGT-2000" -> "CCGT"
+    """
+    if _is_year_tagged(carrier):
+        return carrier.rsplit("-", 1)[0]
+    return carrier
+
+
+def restore_base_carrier_names(n: pypsa.Network) -> None:
+    """
+    Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").
+
+    This is called after all aggregation operations to clean up carrier names while
+    preserving build year information in component names/indices.
+
+    Generator indices keep build year information (e.g., "US0 1 solar-2025"), but carrier becomes base ("solar").
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The PyPSA network to modify in-place.
+    """
+    # Restore base carrier names for generators
+    n.generators["carrier"] = n.generators["carrier"].apply(get_base_carrier)
+
+    # Restore base carrier names for storage units
+    n.storage_units["carrier"] = n.storage_units["carrier"].apply(get_base_carrier)
+
+    logger.info("Restored base carrier names")
+
+
+def add_year_suffix_to_carriers(n: pypsa.Network) -> None:
+    """
+    Extract year suffix from component names and append to carrier names.
+
+    This is necessary for clustering to distinguish between generators/storage
+    of the same technology but different vintage years.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Original network to modify carrier names in-place.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Component name: "NG0 0 coal-1990"
+    Original carrier: "coal"
+    Modified carrier: "coal-1990"
+    """
+    for component in ["Generator", "StorageUnit"]:
+        df = n.df(component)
+
+        if df.empty or "carrier" not in df.columns:
+            continue
+
+        # Extract year suffix from index using regex
+        # Pattern matches: base_name-YYYY at the end of the string
+        pattern = r"-(\d{4})$"
+
+        year_suffix = df.index.str.extract(pattern, expand=False)
+
+        # Only modify carriers where year suffix was found
+        has_year = year_suffix.notna()
+
+        if has_year.any():
+            df.loc[has_year, "carrier"] = (
+                df.loc[has_year, "carrier"] + "-" + year_suffix[has_year]
+            )
+
+    # Add year suffixes to carriers for proper clustering of different vintage years
+    logger.info("Added year suffixes to carrier names for clustering")
+
+
+def sanitize_carriers(n: pypsa.Network, config: dict) -> None:
     """
     Sanitize the carrier information in a PyPSA Network object.
 
@@ -1874,22 +2236,37 @@ def sanitize_carriers(n, config):
         .reindex(carrier_i)
         .fillna(carrier_i.to_series())
     )
+
     n.carriers["nice_name"] = n.carriers.nice_name.where(
         n.carriers.nice_name != "", nice_names
     )
 
     tech_colors = config["plotting"]["tech_colors"]
     colors = pd.Series(tech_colors).reindex(carrier_i)
-    # try to fill missing colors with tech_colors after renaming
+
+    # Try to fill missing colors with tech_colors after renaming
     missing_colors_i = colors[colors.isna()].index
     colors[missing_colors_i] = missing_colors_i.map(rename_techs).map(tech_colors)
+
     if colors.isna().any():
         missing_i = list(colors.index[colors.isna()])
         logger.warning(f"tech_colors for carriers {missing_i} not defined in config.")
     n.carriers["color"] = n.carriers.color.where(n.carriers.color != "", colors)
 
 
-def sanitize_locations(n):
+def sanitize_locations(n: pypsa.Network) -> None:
+    """
+    Fill missing bus coordinates and country codes from the ``location`` mapping.
+
+    For buses that carry a ``location`` column, zero ``x``/``y`` coordinates and
+    empty or missing ``country`` entries are replaced with the corresponding
+    values of the referenced location bus.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network whose ``buses`` table is updated in place.
+    """
     if "location" in n.buses.columns:
         n.buses["x"] = n.buses.x.where(n.buses.x != 0, n.buses.location.map(n.buses.x))
         n.buses["y"] = n.buses.y.where(n.buses.y != 0, n.buses.location.map(n.buses.y))

@@ -31,7 +31,7 @@ conda activate pypsa-earth
 Execute the tutorial workflow:
 
 ```bash
-snakemake -call results/NG/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile config.tutorial.yaml
+snakemake -call results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile config.tutorial.yaml
 ```
 
 This command will:
@@ -47,9 +47,9 @@ The tutorial model typically completes in 5-15 minutes depending on your system.
 
 Once complete, you can find:
 
-  - **Network file**: `results/NG/networks/elec_s_6_ec_lcopt_Co2L-4H.nc`
-  - **Summary statistics**: `results/NG/stats/`
-  - **Plots**: `results/NG/plots/`
+  - **Network file**: `results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc`
+  - **Summary statistics**: `results/stats/`
+  - **Plots**: `results/plots/`
 
 ## What's Next?
 
@@ -75,7 +75,7 @@ If data download fails:
 ```bash
 # Clear cache and retry
 snakemake -call --delete-all-output
-snakemake -call results/NG/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile config.tutorial.yaml
+snakemake -call results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile config.tutorial.yaml
 ```
 
 ### Solver Errors

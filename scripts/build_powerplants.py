@@ -241,11 +241,26 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     return add_ppls
 
 
-def add_custom_powerplants(ppl, inputs, config):
-    if "custom_powerplants" not in config["electricity"]:
-        return ppl
+def add_custom_powerplants(
+    ppl: pd.DataFrame, inputs: dict, custom_ppl_query: str
+) -> pd.DataFrame:
+    """
+    Adds custom powerplants to the powerplants dataframe.
 
-    custom_ppl_query = config["electricity"]["custom_powerplants"]
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Powerplant dataframe.
+    inputs : dict
+        Inputs dictionary containing the path to the custom powerplants file.
+    custom_ppl_query : str
+        Custom powerplant query. Can be "merge", "replace", or false.
+
+    Returns
+    -------
+    pd.DataFrame
+        Powerplant dataframe with custom powerplants added.
+    """
     if not custom_ppl_query:
         return ppl
     add_ppls = read_csv_nafix(
@@ -338,20 +353,24 @@ if __name__ == "__main__":
     else:
         config["main_query"] = ""
 
-    if snakemake.config["electricity"]["custom_powerplants"] != "replace":
+    custom_ppl_query = snakemake.params.custom_powerplants_option
+    if custom_ppl_query != "replace":
         ppl = (
             pm.powerplants(from_url=False, update=True, config_update=config)
             .powerplant.fill_missing_decommissioning_years()
-            .query('Fueltype not in ["Solar", "Wind"] and Country in @countries_names')
+            .query("Country in @countries_names")
             .powerplant.convert_country_to_alpha2()
             .pipe(replace_natural_gas_technology)
         )
     else:
         ppl = pd.DataFrame()
 
-    ppl = add_custom_powerplants(ppl, snakemake.input, snakemake.config).query(
+    ppl = add_custom_powerplants(ppl, snakemake.input, custom_ppl_query).query(
         ppl_query
     )  # add carriers from own powerplant files
+
+    # define unique index
+    ppl = ppl.reset_index(drop=True)
 
     cntries_without_ppl = [c for c in countries_codes if c not in ppl.Country.unique()]
 

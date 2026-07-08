@@ -80,7 +80,7 @@ This covers the retrieval of additional raw data from online resources and prepr
 
 This triggers a workflow of multiple preceding jobs that depend on each rule's inputs and outputs:
 
-![Sector Overnight Workflow](../img/gen_rulegraph-sector.svg)
+![Sector Overnight Workflow](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph-sector.svg)
 
 In the terminal, this will show up as a list of jobs to be run:
 
@@ -115,7 +115,6 @@ clean_osm_data1
 cluster_network   1
 copy_config   1
 download_osm_data 1
-override_respot   1
 prepare_airports  1
 prepare_energy_totals 1
 prepare_gas_network   1
@@ -131,7 +130,7 @@ retrieve_databundle_light 1
 simplify_network  1
 solve_sector_network  1
 solve_sector_networks 1
-total46
+total45
 ```
 
 ## Myopic Foresight Scenarios
@@ -194,7 +193,7 @@ snakemake solve_sector_networks -j2 --configfile test/config.myopic.yaml
 
 which will result in additional jobs snakemake wants to run, which translates to the following workflow diagram which nicely outlines how the sequential pathway optimisation with myopic foresight is implemented in the workflow:
 
-![Sector Myopic Workflow](../img/gen_rulegraph-myopic.svg)
+![Sector Myopic Workflow](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph-myopic.svg)
 
 In the terminal, this will show up as a list of jobs to be run:
 
@@ -232,7 +231,6 @@ clean_osm_data 1
 cluster_network1
 copy_config1
 download_osm_data  1
-override_respot1
 prepare_airports   1
 prepare_energy_totals  1
 prepare_gas_network1
@@ -248,7 +246,7 @@ retrieve_databundle_light  1
 simplify_network   1
 solve_all_networks_myopic  1
 solve_network_myopic   1
-total 49
+total 48
 ```
 
 ## Scaling-Up
