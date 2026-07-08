@@ -127,6 +127,9 @@ def set_lines_ids(lines, buses, distance_crs):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
+    # Filter lines that are empty
+    lines_d = lines_d[~lines_d.geometry.boundary.is_empty]
+    
     for key, lines_sel in lines_d.groupby(["voltage", "dc"]):
         buses_sel = buses_d.query(f"voltage == {key[0]} and dc == {key[1]}")
 
