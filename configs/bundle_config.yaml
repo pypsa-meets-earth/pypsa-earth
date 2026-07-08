@@ -442,8 +442,7 @@ databundles:
       build_cutout: [all]
 
   # national-level cutouts for Africa -----------------------------------------
-  # Cutout for Zambia
-  # Size about 0.5 GB (zipped)
+  # Zambia: size about 0.5 GB (zipped)
   bundle_cutouts_africa_zm:
     countries: [ZM]
     category: cutouts
@@ -456,8 +455,7 @@ databundles:
       build_cutout: [all]
 
   # national-level cutouts for South America ----------------------------------
-  # Cutout for Bolivia
-  # Size about 0.7 GB (zipped)
+  # Bolivia: size about 0.7 GB (zipped)
   bundle_cutouts_bo:
     countries: [BO]
     category: cutouts
@@ -468,8 +466,7 @@ databundles:
     output: [cutouts/cutout-2013-era5.nc]
     disable_by_opt:
       build_cutout: [all]
-  # Cutout for Colombia
-  #  Size about 1.3 GB (zipped)
+  # Colombia: size about 1.3 GB (zipped)
   bundle_cutouts_co:
     countries: [CO]
     category: cutouts
