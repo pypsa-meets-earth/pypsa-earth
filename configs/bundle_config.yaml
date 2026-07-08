@@ -441,7 +441,7 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
-  # national-level cutouts for Africa
+  # national-level cutouts for Africa -----------------------------------------
   # Cutout for Zambia
   # Size about 0.5 GB (zipped)
   bundle_cutouts_africa_zm:
@@ -455,7 +455,7 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
-  # national-level cutouts for South America
+  # national-level cutouts for South America ----------------------------------
   # Cutout for Bolivia  
   # Size about 0.7 GB (zipped)
   bundle_cutouts_bo:
