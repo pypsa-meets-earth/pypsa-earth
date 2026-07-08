@@ -251,7 +251,7 @@ Improving the **generation** table in [Part 2](2-analyze-results.md) is a follow
 
 [Step 7](#step-7-verify-installed-capacity) left **gas** short: **~2.5 GW** CCGT installed and **~2.4 TWh** annual generation vs **~6 GW** gas in KEGOC's 2020 statistics, and almost no **OCGT** peakers in powerplantmatching. For Kazakhstan, the global database misses many industrial gas turbines and smaller thermal units that show up in national statistics.
 
-This tutorial ships a copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository — **144 rows** in powerplantmatching format — as a **full Kazakhstan fleet** instead of patching gaps by hand.
+This tutorial ships an adapted copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository — **120 rows** in powerplantmatching format — as a **full Kazakhstan fleet** instead of patching gaps by hand.
 
 ### Enable custom powerplants
 
@@ -278,7 +278,7 @@ Installed capacity in the custom list (MW):
 |---|---|
 | Hard Coal | 13,171 |
 | CCGT | 3,580 |
-| Hydro | 2,751 |
+| Hydro | 2,688 |
 | OCGT | 1,626 |
 | Solar | 822 |
 | Wind | 649 |
@@ -315,27 +315,25 @@ StorageUnit  Reservoir & Dam        2.31
 Generator    Open-Cycle Gas         1.60
              Solar                  0.80
              Onshore Wind           0.46
-             Run of River           0.06
 ```
 
-**CCGT (~3.6 GW)** and **OCGT (~1.6 GW)** together reach **~5.2 GW** — near KEGOC **~6 GW** gas. **Coal (~13.2 GW)** matches KEGOC **~13.4 GW**.
+**CCGT (~3.6 GW)** and **OCGT (~1.6 GW)** together reach **~5.2 GW** — near KEGOC **~6 GW** gas. **Coal (~13.2 GW)** matches KEGOC **~13.4 GW**. **Hydro (~2.7 GW)** is modeled as reservoir only (no run-of-river rows in the custom list).
 
 Annual **Supply** (TWh) is still far from KEGOC 2020:
 
 ```
-Line         AC                    109.37
-Generator    Coal                   92.35
-             Load shedding           7.67
-StorageUnit  Reservoir & Dam         3.93
+Line         AC                    105.15
+Generator    Coal                   89.47
+             Load shedding           7.72
+StorageUnit  Reservoir & Dam         7.15
 Generator    Onshore Wind            1.34
              Solar                   0.99
              Combined-Cycle Gas      0.63
-             Run of River            0.40
              Open-Cycle Gas          0.00
 Load         -                       0.00
 ```
 
-**Solar (~1.0 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~92 TWh)** is far too high and **gas (~0.6 TWh from CCGT; OCGT idle)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~4.3 TWh combined)** is still under-generated vs KEGOC (~9.5 TWh).
+**Solar (~1.0 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~89 TWh)** is far too high and **gas (~0.6 TWh from CCGT; OCGT idle)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~7.1 TWh from reservoirs)** is closer to KEGOC (~9.5 TWh) than the Step 7 mix, but still under-generated.
 
 **Load shedding (~7.7 TWh)** is still high — roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
 
