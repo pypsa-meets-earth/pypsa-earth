@@ -1,0 +1,9 @@
+voltage,default,AU
+132,243-AL1/39-ST1A 20.0,AU_132kV_type
+220,Al/St 240/40 2-bundle 220.0,
+275,,AU_275kV_type
+300,Al/St 240/40 3-bundle 300.0,
+330,,AU_330kV_type
+380,Al/St 240/40 4-bundle 380.0,
+500,Al/St 240/40 4-bundle 380.0,AU_500kV_type
+750,Al/St 560/50 4-bundle 750.0,

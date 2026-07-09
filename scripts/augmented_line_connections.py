@@ -41,8 +41,42 @@ from pypsa.geo import haversine_pts
 
 logger = create_logger(__name__)
 
+LINE_TYPE_MAPPING_AC = os.path.join("data", "line_type_mapping_ac.csv")
+LINE_TYPE_MAPPING_DC = os.path.join("data", "line_type_mapping_dc.csv")
+
 
 # Functions
+def _load_default_linetype(path, voltage):
+    """
+    Load the default line type for the voltage closest to the requested value.
+
+    Parameters
+    ----------
+    path : str
+        Path to the CSV file containing voltage-to-line-type mappings.
+    voltage : float
+        Requested nominal voltage in kV.
+
+    Returns
+    -------
+    str
+        PyPSA line type name from the default mapping.
+    """
+    linetypes = pd.read_csv(path, index_col=0)
+    linetypes.index = linetypes.index.astype(float)
+
+    if "default" not in linetypes.columns:
+        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
+
+    nearest_voltage = min(linetypes.index, key=lambda x: abs(x - voltage))
+    linetype = linetypes.at[nearest_voltage, "default"]
+
+    if pd.isna(linetype):
+        raise ValueError(f"No default line type mapping found for {voltage} kV.")
+
+    return linetype
+
+
 def haversine(p):
     coord0 = n.buses.loc[p.bus0, ["x", "y"]].values
     coord1 = n.buses.loc[p.bus1, ["x", "y"]].values
@@ -135,6 +169,9 @@ if __name__ == "__main__":
     )
 
     #  add new lines to the network
+    dc_linetype = _load_default_linetype(LINE_TYPE_MAPPING_DC, 500)
+    ac_linetype = _load_default_linetype(LINE_TYPE_MAPPING_AC, 380)
+
     if "HVDC" in list(line_type_option):
         n.madd(
             "Link",
@@ -142,7 +179,7 @@ if __name__ == "__main__":
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=snakemake.params.lines.get("dc_types"),
+            type=dc_linetype,
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
@@ -161,7 +198,7 @@ if __name__ == "__main__":
             suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
-            type=snakemake.params.lines["ac_types"].get(380),
+            type=ac_linetype,
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,

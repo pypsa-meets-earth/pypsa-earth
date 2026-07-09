@@ -107,6 +107,39 @@ sys.settrace
 
 logger = create_logger(__name__)
 
+LINE_TYPE_MAPPING_AC = os.path.join("data", "line_type_mapping_ac.csv")
+
+
+def _load_default_linetype(path, voltage):
+    """
+    Load the default line type for the voltage closest to the requested value.
+
+    Parameters
+    ----------
+    path : str
+        Path to the CSV file containing voltage-to-line-type mappings.
+    voltage : float
+        Requested nominal voltage in kV.
+
+    Returns
+    -------
+    str
+        PyPSA line type name from the default mapping.
+    """
+    linetypes = pd.read_csv(path, index_col=0)
+    linetypes.index = linetypes.index.astype(float)
+
+    if "default" not in linetypes.columns:
+        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
+
+    nearest_voltage = min(linetypes.index, key=lambda x: abs(x - voltage))
+    linetype = linetypes.at[nearest_voltage, "default"]
+
+    if pd.isna(linetype):
+        raise ValueError(f"No default line type mapping found for {voltage} kV.")
+
+    return linetype
+
 
 def simplify_network_to_base_voltage(n, linetype, base_voltage):
     """
@@ -1050,7 +1083,7 @@ if __name__ == "__main__":
     add_year_suffix_to_carriers(n)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetype = snakemake.params.config_lines["ac_types"][base_voltage]
+    linetype = _load_default_linetype(LINE_TYPE_MAPPING_AC, base_voltage)
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
         "exclude_carriers", []
     )
