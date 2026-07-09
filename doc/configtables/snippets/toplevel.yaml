@@ -11,7 +11,7 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["NG", "AU"]
+countries: ["NG", "BJ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
 enable:
