@@ -261,7 +261,6 @@ def display_config_files() -> dict[dict]:
         len(config_files_list) + 1,
     )
 
-    # config = load_config_file(config_path)
     return config_path
 
 
