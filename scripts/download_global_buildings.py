@@ -4,7 +4,50 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # -*- coding: utf-8 -*-
 """
-This script handles the downloading and processing of global building data.
+The script retrieves and processes global building footprint data from the
+Microsoft Global ML Building Footprints dataset.
+
+Building geometries are downloaded for a selected country using the dataset
+index. To reduce storage requirements and improve computational performance,
+polygon geometries are transformed into a simplified representation consisting
+of building footprint area and centroid coordinates. The processed data are then
+stored in parquet format for downstream use within the PyPSA-Earth workflow.
+
+For the requested country, all corresponding building footprint tiles are
+retrieved and merged into a single dataset containing:
+
+- Building footprint area in the configured projected CRS
+- Longitude coordinate of the building centroid
+- Latitude coordinate of the building centroid
+
+This simplified representation significantly reduces memory consumption
+compared to storing full building geometries while preserving information
+required for spatial aggregation and demand estimation workflows.
+
+**Data Source**
+
+The building footprint data are obtained from the Microsoft Global ML Building
+Footprints dataset:
+
+https://github.com/microsoft/GlobalMLBuildingFootprints
+
+Relevant Settings
+-----------------
+
+.. code:: yaml
+
+    crs:
+      geo_crs:  # geographic coordinate reference system
+      area_crs:  # projected CRS used for area calculations
+      distance_crs:  # projected CRS used for centroid calculations
+
+Outputs
+-------
+
+- ``data/global_buildings/{country}_global_buildings_raw.parquet``:
+  processed building footprint data containing building area and centroid coordinates
+  for the selected country
+
 """
 import os
 
@@ -24,7 +67,7 @@ cc = coco.CountryConverter()
 logger = create_logger(__name__)
 
 
-def download_global_buildings_url(update=False):
+def download_global_buildings_url(update: bool = False) -> pd.DataFrame:
     """
     Downloads or retrieves the global building URLs from a CSV file, specifically
     from the Microsoft Global Buildings dataset (https://github.com/microsoft/GlobalMLBuildingFootprints).
@@ -79,7 +122,7 @@ def download_global_buildings_url(update=False):
     return df_url
 
 
-def get_building_area_center(df, crs):
+def get_building_area_center(df: pd.DataFrame, crs: dict) -> pd.DataFrame:
     """
     Calculates the area and centroid of buildings from a DataFrame of building geometries.
 
@@ -118,7 +161,9 @@ def get_building_area_center(df, crs):
         )
 
 
-def download_global_buildings(country_code, country_buildings_fn, crs, update=False):
+def download_global_buildings(
+    country_code: str, country_buildings_fn: str, crs: dict, update: bool = False
+) -> None:
     """
     Downloads global building data for a specific country using links from the
     Microsoft Global Buildings dataset (https://github.com/microsoft/GlobalMLBuildingFootprints).

@@ -9,14 +9,17 @@ Prepare and process default cost data to fit PyPSA input requirements (capital c
 
 The technology cost data is loaded from a CSV file, filtered by scenario and financial case,
 and then processed to compute fixed annualized costs and marginal costs for each technology.
-Currency conversion is applied to ensure all costs are in a common output currency, using exchange rates for a specified reference year.
+Currency conversion is applied to ensure all costs are in a common output currency,
+using exchange rates for a specified reference year.
 
 The output differs dependind on the wildcard {scope}:
+
 - For "elec", the output contains capital_cost, marginal_cost, and co2_emissions for each technology, and is used in the electricity sector workflow.
 - For "sec", the output contains fixed (annualized capital cost), marginal_cost, and co2_emissions for each technology, and is used in the sector-coupling workflow.
 
 Relevant Settings
 -----------------
+
 .. code:: yaml
 
     costs:
@@ -41,6 +44,18 @@ Relevant Settings
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
     :ref:`electricity_cf`
+
+Inputs
+------
+
+- ``resources/ + RDIR + costs_{year}.csv`` if retrieve_cost_data is set as true,
+- ``data/costs.csv`` if otherwise,
+
+Outputs
+-------
+
+- ``"resources/" + RDIR + "costs_{year}_{scope}.csv"``,
+
 """
 import logging
 

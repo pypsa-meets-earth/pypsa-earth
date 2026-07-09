@@ -2,6 +2,26 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+The script copies the workflow configuration and selected core workflow files
+to an output directory.
+
+This rule is primarily used for archiving and reproducibility purposes. It
+stores the configuration file and key workflow scripts alongside model outputs,
+allowing the exact settings and implementation used for a simulation run to be
+tracked and reproduced at a later stage.
+
+Outputs
+-------
+
+The following files are copied:
+
+- ``{folder}/config.yaml``: copy of the workflow configuration
+- ``{folder}/Snakefile``: copy of the workflow definition
+- ``{folder}/solve_network.py``: copy of the network solving script
+- ``{folder}/prepare_sector_network.py``: copy of the sector network preparation script
+
+"""
 import os
 from shutil import copy
 
