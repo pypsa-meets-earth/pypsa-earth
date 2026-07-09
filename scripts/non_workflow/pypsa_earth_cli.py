@@ -99,7 +99,7 @@ def ask(text: str, default: str = "") -> str:
 
 def exit_message() -> None:
     console.print(style="dim")
-    console.print("[bold magenta] 👋 Exitting the application. [/bold magenta]")
+    console.print("[bold magenta] 👋 Exiting the application. [/bold magenta]")
     raise typer.Exit()
 
 
@@ -226,7 +226,7 @@ def display_user_groups() -> tuple:
         Choice of user group
     """
     # Load user groups
-    user_groups_path = "user_groups.yaml"
+    user_groups_path = "configs/pypsa_earth_cli/user_groups.yaml"
     user_groups_config = load_config_file(user_groups_path)
 
     # Prompt user to identify his/her user group
@@ -595,7 +595,7 @@ def display_main_menu() -> None:
         {
             "num": "2",
             "name": "Configuration Setup",
-            "desc": "customize configuration parameters for PyPSA-Earth model run",
+            "desc": "Customize configuration parameters for PyPSA-Earth model run",
         },
         {
             "num": "3",
