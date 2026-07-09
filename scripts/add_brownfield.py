@@ -65,7 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
+from _helpers import sanitize_carriers, sanitize_locations
 from add_existing_baseyear import add_build_year_to_new_assets
 
 # from pypsa.clustering.spatial import normed_or_uniform
@@ -242,7 +242,7 @@ def disable_grid_expansion_if_limit_hit(n: pypsa.Network) -> None:
 
                 n.global_constraints.drop(name, inplace=True)
 
-
+# from _helpers import read_csv_nafix
 # def adjust_renewable_profiles(n, input_profiles, params, year):
 #     """
 #     Adjusts renewable profiles according to the renewable technology specified,
