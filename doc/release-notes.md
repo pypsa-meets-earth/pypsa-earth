@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Load transmission line type mappings from CSV files and add Australian custom mapping [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
+
 * Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
 
 * Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
