@@ -216,7 +216,7 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
 
 def display_user_groups() -> tuple:
     """
-    Menu to display user groups to the user from those defined in `user_groups.yaml`.
+    Menu to display user groups to the user from those defined in `configs/pypsa_earth_cli/user_groups.yaml`.
 
     Returns
     -------
@@ -354,7 +354,7 @@ def show_questionnaire(option: str) -> None:
     """
     Display the questionnaire for the selected use-case
 
-    Paramaters
+    Parameters
     ----------
     options: str
         Use-case selected by the user
@@ -366,7 +366,9 @@ def show_questionnaire(option: str) -> None:
     console.print(style="dim")
 
     # Load the questionnaire config file
-    questions_config = load_config_file("tutorial_questions.yaml")
+    questions_config = load_config_file(
+        "configs/pypsa_earth_cli/tutorial_questions.yaml"
+    )
 
     # Select use-case based on the option selected by the user
     use_case = questions_config[f"use-case-{option}"]
