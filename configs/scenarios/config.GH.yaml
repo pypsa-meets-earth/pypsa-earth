@@ -21,17 +21,17 @@ summary_dir: results/
 foresight: overnight
 
 
-countries: ["GH"] #Ghana configuration
+countries: ["GH"] # Ghana configuration
 # Can be replaced by country ["NG"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
 enable:
-  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle: false #  Recommended 'true', for the first run. Otherwise, data might be missing.
   retrieve_databundle_sector: false
   retrieve_cost_data: true #retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
   retrieve_cutout: false
-  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
-  build_natura_raster: true # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the countries specified above
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the countries specified above
+  build_natura_raster: true # If 'true', then an exclusion raster will be built. Otherwise, use pregenerated raster.
   build_cutout: false
   # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
   # requires cds API key https://cds.climate.copernicus.eu/how-to-api
@@ -41,14 +41,14 @@ enable:
 
 
 
-custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that add rules to Snakefile
+custom_rules: [] # Default empty [] or link to custom rule file e.g. ["my_folder/my_rules.smk"] that adds rules to the Snakefile
 
 run:
   name: "" # use this to keep track of runs with different settings
   sector_name: "" # use this to keep track of sector scenario runs
   shared_cutouts: true # set to true to share the default cutout(s) across runs
   # Note: value false requires build_cutout to be enabled
-  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scenario fails
 
 scenario:
   simpl: [""]
@@ -83,10 +83,10 @@ natura: # only relevant when using build_natura_raster: true
 
 augmented_line_connection:
   add_to_snakefile: false # If True, includes this rule to the workflow
-  connectivity_upgrade: 2 # Min. lines connection per node,
+  connectivity_upgrade: 2 # Minimum number of line connections per node,
   # https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation.html#networkx.algorithms.connectivity.edge_augmentation.k_edge_augmentation
   new_line_type: ["HVAC"] # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
-  min_expansion: 1 # [MW] New created line expands by float/int input
+  min_expansion: 1 # [MW] Newly created line expands by float/int input
   min_DC_length: 600 # [km] Minimum line length of DC line
 
 cluster_options:
@@ -130,7 +130,7 @@ cluster_options:
 
 build_shape_options:
   gadm_layer_id: 1 # GADM level area used for the gadm_shapes. Codes are country-dependent but roughly: 0: country, 1: region/county-like, 2: municipality-like
-  simplify_tolerance: 0.01 # Default value is 0.01, higher the value more is the simplification of the GADM shapes
+  simplify_tolerance: 0.01 # Default value is 0.01: the higher the value, the greater the simplification of the GADM shapes
   simplify_gadm: true # When true, shape polygons are simplified else no
   minarea: 0.01 # Minimum area of polygons to be retained in GADM shapes after simplification, in square degrees. Polygons with area smaller than this value will be removed
   update_file: false # When true, all the input files are downloaded again and replace the existing files
@@ -139,7 +139,7 @@ build_shape_options:
   nprocesses: 3 # number of processes to be used in build_shapes
   worldpop_method: "standard" # "standard" pulls from web 1kmx1km raster, "api" pulls from API 100mx100m raster,
   # false (not "false") no pop addition to shape which is useful when generating only cutout
-  gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no gdp addition to shape which useful when generating only cutout
+  gdp_method: "standard" # "standard" pulls from web 1x1km raster, false (not "false") no GDP data are added to the shape, which is useful when generating only cutout
   contended_flag: "set_by_country" # "set_by_country" assigns the contended areas to the countries according to the GADM database, "drop" drops these contended areas from the model
 
 subregion:
@@ -152,10 +152,10 @@ subregion:
 
 clean_osm_data_options: # osm = OpenStreetMap
   names_by_shapes: true # Set the country name based on the extended country shapes
-  threshold_voltage: 33000 #Ghana's lowest subtransmission #51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+  threshold_voltage: 33000 #Ghana's lowest sub-transmission #51000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
   tag_substation: "transmission" # Filters only substations with 'transmission' tag, ('distribution' also available)
   add_line_endings: true # When "True", then line endings are added to the dataset of the substations
-  generator_name_method: OSM # Methodology to specify the name to the generator. Options: OSM (name as by OSM dataset), closest_city (name by the closest city)
+  generator_name_method: OSM # Method used to assign the name of the generator. Options: OSM (name from the OSM dataset), closest_city (name by the closest city)
   use_custom_lines: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
   path_custom_lines: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_lines.geojson)
   use_custom_substations: "OSM_only" # Use OSM (OSM_only), customized (custom_only), both data sets (add_custom) or none (none)
@@ -164,11 +164,11 @@ clean_osm_data_options: # osm = OpenStreetMap
   path_custom_cables: false # If exists, provide the specific absolute path of the custom file e.g. (...\data\custom_cables.geojson)
 
 build_osm_network: # Options of the build_osm_network script; osm = OpenStreetMap
-  group_close_buses: true # When "True", close buses are merged and guarantee the voltage matching among line endings
+  group_close_buses: true # When "True", close buses are merged and ensure voltage matching among line endings
   group_tolerance_buses: 5000 # [m] (default 5000) Tolerance in meters of the close buses to merge
-  split_overpassing_lines: true # When True, lines overpassing buses are splitted and connected to the bueses
+  split_overpassing_lines: true # When True, lines crossing buses are split and connected to the buses
   overpassing_lines_tolerance: 1 # [m] (default 1) Tolerance to identify lines overpassing buses
-  force_ac: false # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
+  force_ac: false # When true, it forces all components (lines and substations) to be AC-only. To be used if DC assets cause problems.
 
 base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
@@ -236,9 +236,9 @@ electricity:
 
   estimate_renewable_capacities:
     stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
-    year: 2023 # Reference year, available years for IRENA stats are 2000 to 2023
+    year: 2023 # Reference year, available years for IRENA stats range from 2000 to 2023
     p_nom_min: 1 # any float, scales the minimum expansion acquired from stats, i.e. 110% of <years>'s capacities => p_nom_min: 1.1
-    p_nom_max: false # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determine by the workflow, float scales the p_nom_min factor accordingly
+    p_nom_max: false # sets the expansion constraint, False to deactivate this option and use estimated renewable potentials determined by the workflow, float scales the p_nom_min factor accordingly
     technology_mapping:
       # Wind is the Fueltype in ppm.data.Capacity_stats, onwind, offwind-{ac,dc} the carrier in PyPSA-Earth
       Offshore: [offwind-ac, offwind-dc]
@@ -281,9 +281,9 @@ atlite:
       dy: 0.3 # cutout resolution
       # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
       # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
-      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
-      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
-      # y: [33., 72]    # manual set cutout range
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manually, instead of automatic by boundaries of country
+      # y: [33., 72]    # manually set cutout range
   default: cutout-2013-era5
 
 renewable:
@@ -300,7 +300,7 @@ renewable:
       # CLC grid codes:
       # 11X/12X - Various forest types
       # 20  - Shrubs
-      # 30  - Herbaceus vegetation
+      # 30  - Herbaceous vegetation
       # 40  - Cropland
       # 50  - Urban
       # 60  - Bare / Sparse vegetation
@@ -476,10 +476,10 @@ monte_carlo:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
     sampling_strategy: "chaospy" # "pydoe2", "chaospy", "scipy", packages that are supported
-    seed: 42 # set seedling for reproducibilty
-  # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
+    seed: 42 # set seed for reproducibility
+  # Uncertainties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
   # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
-  # Supported distributions types are uniform, normal, lognormal, triangle, beta and gamma.
+  # Supported distribution types are uniform, normal, lognormal, triangle, beta and gamma.
   # The arguments of the distribution are passed using the key 'args'  as follows, tailored by distribution type
   # normal: [mean, std], lognormal: [mean, std], uniform: [lower_bound, upper_bound],
   # triangle: [mid_point (between 0 - 1)], beta: [alpha, beta], gamma: [shape, scale]
@@ -511,7 +511,7 @@ policy_config:
     additionality: false # RE electricity is equal to the amount required for additional hydrogen export compared to the 0 export case ("reference_case")
     allowed_excess: 1.0
     is_reference: false # Whether or not this network is a reference case network, relevant only if additionality is _true_
-    remove_h2_load: false #Whether or not to remove the h2 load from the network, relevant only if is_reference is _true_
+    remove_h2_load: false # Whether or not to remove the h2 load from the network, relevant only if is_reference is _true_
     path_to_ref: "" # Path to the reference case network for additionality calculation, relevant only if additionality is _true_ and is_reference is _false_
     re_country_load: false # Set to "True" to force the RE electricity to be equal to the electricity required for hydrogen export and the country electricity load. "False" excludes the country electricity load from the constraint.
 
@@ -520,7 +520,7 @@ demand_data:
   update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
   base_year: 2019
 
-  other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
+  other_industries: false # Whether or not to include industries that are not specified. Some countries have exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
 
@@ -535,7 +535,7 @@ export:
   h2export: [10] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
   export_profile: "ship" # use "ship" or "constant". Only considered, if ["export"]["endogenous"] is set to false
   ship:
-    ship_capacity: 0.4 # TWh # 0.05 TWh for new ones, 0.003 TWh for Susio Frontier, 0.4 TWh according to Hampp2021: "Corresponds to 11360 t H2 (l) with LHV of 33.3333 Mwh/t_H2. Cihlar et al 2020 based on IEA 2019, Table 3-B"
+    ship_capacity: 0.4 # TWh # 0.05 TWh for new ones, 0.003 TWh for Suiso Frontier, 0.4 TWh according to Hampp2021: "Corresponds to 11360 t_H2 (l) with LHV of 33.3333 MWh/t_H2. Cihlar et al 2020 based on IEA 2019, Table 3-B"
     travel_time: 288 # hours # From Agadir to Rotterdam and back (12*24)
     fill_time: 24 # hours, for 48h see Hampp2021
     unload_time: 24 # hours for 48h see Hampp2021
@@ -549,9 +549,9 @@ custom_data:
   h2_underground: false
   add_existing: false
   custom_sectors: false
-  gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose btw "greenfield" or Model built-in datasets. Please refer to ["sector"] below.
+  gas_network: false # If "True" then a custom .csv file must be placed in "resources/custom_data/pipelines.csv" , If "False" the user can choose between "greenfield" or the model's built-in datasets. Please refer to ["sector"] below.
   export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
-  airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.
+  airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for airports must be in the format of the airports.csv file in the data folder.
 
 industry:
   reference_year: 2015
@@ -596,7 +596,7 @@ sector:
     network: true
     H2_retrofit_capacity_per_CH4: 0.6
     network_limit: 2000 #GWkm
-    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
+    network_routes: gas # "gas" or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     underground_storage: false
     hydrogen_colors: false
@@ -618,8 +618,8 @@ sector:
   # ------------------- HEAT SECTOR -------------------
 
   district_heating:
-    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
-    #increase of today's district heating demand to potential maximum district heating share
+    potential: 0.3 # maximum fraction of urban demand which can be supplied by district heating
+    # Increase from today's district heating demand to the maximum district heating share
     #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
     progress: 1
     # 2020: 0.0
@@ -631,7 +631,7 @@ sector:
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth
   # NB The value of space heat reduction are Europe-specific
-  # if they usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
+  # if their use is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
   # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
   # 2020: 0.10  # this results in a space heat demand reduction of 10%
@@ -652,28 +652,28 @@ sector:
   chp: true
   micro_chp: false
   solar_thermal: true
-  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
-  time_dep_hp_cop: true #time dependent heat pump coefficient of performance
+  heat_pump_sink_T: 55 # Celsius, based on DTU / large-area radiators; used in build_cop_profiles.py
+  time_dep_hp_cop: true # time-dependent heat pump coefficient of performance
   solar_cf_correction: 0.788457 # = >>>1/1.2683
 
   # ------------------- LAND TRANSPORT SECTOR -------------------
 
-  bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
-  bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
+  bev_plug_to_wheel_efficiency: 0.2 # kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
+  bev_charge_efficiency: 0.9 # BEV (dis-)charging efficiency
   transport_heating_deadband_upper: 20.
   transport_heating_deadband_lower: 15.
-  ICE_lower_degree_factor: 0.375 #in per cent increase in fuel consumption per degree above deadband
+  ICE_lower_degree_factor: 0.375 # percent increase in fuel consumption per degree above deadband
   ICE_upper_degree_factor: 1.6
   EV_lower_degree_factor: 0.98
   EV_upper_degree_factor: 0.63
   bev_avail_max: 0.95
   bev_avail_mean: 0.8
-  bev_dsm_restriction_value: 0.75 #Set to 0 for no restriction on BEV DSM
-  bev_dsm_restriction_time: 7 #Time at which SOC of BEV has to be dsm_restriction_value
-  v2g: true #allows feed-in to grid from EV battery
-  bev_dsm: true #turns on EV battery
-  bev_energy: 0.05 #average battery size in MWh
-  bev_availability: 0.5 #How many cars do smart charging
+  bev_dsm_restriction_value: 0.75 # Set to 0 for no restriction on BEV DSM
+  bev_dsm_restriction_time: 7 # Time at which SOC of BEV has to be dsm_restriction_value
+  v2g: true # allows feed-in to grid from EV battery
+  bev_dsm: true # turns on EV battery
+  bev_energy: 0.05 # average battery size in MWh
+  bev_availability: 0.5 # Share of cars using smart charging
   transport_fuel_cell_efficiency: 0.5
   transport_internal_combustion_efficiency: 0.3
 
@@ -738,7 +738,7 @@ sector:
 
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
   enable_electricity_connection_cost: false # adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network.
-  solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+  solar_rooftop: # adds distribution side customer rooftop PV (only works if electricity_distribution_grid: true)
     enable: true
     kW_per_m2: 0.1
     m2_per_person: 20
@@ -754,18 +754,18 @@ sector:
      # maximum distance [km] to allocate a building within the nearest bus shapes
     tolerance: 100
 
-  home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
+  home_battery: true # adds home batteries to low voltage buses ((only works if electricity_distribution_grid: true)
   transmission_efficiency:
     electricity distribution grid:
-      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% losses)
     H2 pipeline:
       efficiency_per_1000km: 1
-      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
+      compression_per_1000km: 0.017 # DEA technology data. Mean of energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
 
   # ------------------- SHIPPING & AVIATION SECTOR -------------------
 
   shipping_hydrogen_liquefaction: false
-  shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
+  shipping_average_efficiency: 0.4 # For conversion of fuel oil to propulsion in 2011
   shipping_hydrogen_share: #1.0
     BU_2030: 0.00
     AP_2030: 0.00
@@ -777,7 +777,7 @@ sector:
     NZ_2050: 0.36
     DF_2050: 0.12
   airport_sizing_factor: 3
-  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
+  international_bunkers: false # Whether or not to count the emissions of international aviation and navigation
 
   # ------------------- CCUS & CONVERSION OPTIONS -------------------
 
@@ -817,7 +817,7 @@ sector:
 solving:
   options:
     formulation: kirchhoff
-    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay https://doi.org/10.3389/fenrg.2015.00055)
+    load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersection between macroeconomic and survey-based willingness to pay https://doi.org/10.3389/fenrg.2015.00055)
     noisy_costs: true
     min_iterations: 4
     max_iterations: 6
@@ -863,7 +863,7 @@ solving:
       ObjScale: -0.5
       threads: 8
       Seed: 123
-    gurobi-fallback: # Use gurobi defaults
+    gurobi-fallback: # Use Gurobi defaults
       crossover: 0
       method: 2 # barrier
       BarHomogeneous: 1 # Use homogeneous barrier if standard does not converge
@@ -885,7 +885,7 @@ solving:
     cbc-default: {} # Used in CI
     glpk-default: {} # Used in CI
 
-  mem: 30000 #memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
+  mem: 30000 # memory in MB; 20 GB enough for 50+B+I+H2; 100 GB for 181+B+I+H2
 
 
 plotting:

@@ -1,7 +1,7 @@
   # ------------------- HEAT SECTOR -------------------
 
   district_heating:
-    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+    potential: 0.3 # maximum fraction of urban demand which can be supplied by district heating
     #increase of today's district heating demand to potential maximum district heating share
     #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
     progress: 1
@@ -14,7 +14,7 @@
   # this can represent e.g. building renovation, building demolition, or if
   # the factor is negative: increasing floor area, increased thermal comfort, population growth
   # NB The value of space heat reduction are Europe-specific
-  # if they usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
+  # if their usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
   reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
   # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
   # 2020: 0.10  # this results in a space heat demand reduction of 10%
@@ -43,5 +43,5 @@
       slope: 45.
       azimuth: 180.
 
-  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
-  time_dep_hp_cop: true #time dependent heat pump coefficient of performance
+  heat_pump_sink_T: 55 # Celsius, based on DTU / large-area radiators; used un build_cop_profiles.py
+  time_dep_hp_cop: true # time dependent heat pump coefficient of performance

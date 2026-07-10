@@ -21,13 +21,13 @@ sector:
     network: true
     H2_retrofit_capacity_per_CH4: 0.6
     network_limit: 2000 #GWkm
-    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
+    network_routes: gas # "gas" or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     h2_turbine: true
     underground_storage:
       enabled: false
       # calculations based on https://dx.doi.org/10.2139/ssrn.6307406
-      min_area_km2: 13 # minimum area for kaverns in km2
+      min_area_km2: 13 # minimum area for caverns in km2
       method: "surface" # surface or physics
       technical_realization_factor: 3.5e-5
       energy_density_MWh_per_m3: 0.336 # energy density varies in europe between 0.214 and 0.0458 MWh/m3

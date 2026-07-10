@@ -21,7 +21,7 @@
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
   transmission_efficiency:
     electricity distribution grid:
-      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% losses)
     H2 pipeline:
       efficiency_per_1000km: 1
       compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
