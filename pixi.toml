@@ -13,7 +13,7 @@ pip = "*"
 
 pypsa = ">=0.25.1,<=0.30.3"
 linopy = "<0.6"
-atlite = ">=0.4.1,<0.6"
+atlite = "==0.4.1"
 dask = "*"
 powerplantmatching = ">=0.8"
 earth-osm = ">=2.3.post1"
