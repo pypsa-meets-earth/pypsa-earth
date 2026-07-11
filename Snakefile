@@ -12,7 +12,6 @@ sys.path.append("./scripts")
 from shutil import copyfile, move, unpack_archive
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-from snakemake.exceptions import WorkflowError
 
 from _helpers import (
     create_country_list,
@@ -64,8 +63,8 @@ REGIONAL_MODELS = {
 }
 
 
-def check_regional_models(countries):
-    """Stop early if selected countries are covered by regional models."""
+def warn_about_regional_models(countries):
+    """Warn if selected countries are covered by dedicated regional models."""
     selected = sorted(set(countries) & set(REGIONAL_MODELS))
 
     if not selected:
@@ -77,29 +76,20 @@ def check_regional_models(countries):
 
     message = "\n".join(
         [
-            "The selected country list includes countries covered by dedicated regional models:",
+            "Dedicated regional models are available for some selected countries:",
             "",
             *[
                 f"{model}\n  - " + "\n  - ".join(model_countries)
                 for model, model_countries in sorted(grouped.items())
             ],
             "",
-            "Dedicated regional models are recommended over PyPSA-Earth because they include",
-            "region-specific datasets, assumptions, and workflow improvements.",
+            "These regional models may include more appropriate datasets, assumptions and workflows for the selected countries.",
             "",
-            "To intentionally bypass this check and use the PyPSA-Earth standard workflow,",
-            "rerun with:",
-            "",
-            "    ALLOW_UPSTREAM_MODEL=1 snakemake -j1 solve ...",
-            "",
-            "Proceed at your own risk.",
+            "Please consider using or contributing to the corresponding regional model when appropriate.",
         ]
     )
 
-    if os.getenv("ALLOW_UPSTREAM_MODEL") != "1":
-        raise WorkflowError(message)
-
-    warnings.warn(message, stacklevel=2)
+    warnings.warn(message, RuntimeWarning, stacklevel=2)
 
 
 config.update({"git_commit": get_last_commit_message(".")})
@@ -107,7 +97,7 @@ config.update({"git_commit": get_last_commit_message(".")})
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
-check_regional_models(config["countries"])
+warn_about_regional_models(config["countries"])
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}

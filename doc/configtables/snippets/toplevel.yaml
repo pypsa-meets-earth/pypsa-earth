@@ -14,15 +14,12 @@ foresight: overnight
 countries: ["NG", "BJ"]
 # Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
 
-# The PyPSA meets Earth initiative also provides some dedicated regional models, developed as soft forks of PyPSA-Earth:
+# The PyPSA meets Earth initiative also provides some dedicated regional models (adopting, for instance, dedicated and more specific input data, country-specific constraints, etc.), developed as soft forks of PyPSA-Earth:
 #
 # - BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN: [PyPSA-ASEAN](https://github.com/pypsa-meets-earth/pypsa-asean)
 # - US: [PyPSA-NorthAmerica](https://github.com/pypsa-meets-earth/pypsa-northamerica)
 #
-# Running PyPSA-Earth for these countries is blocked by default.
-# To intentionally bypass this check and use the PyPSA-Earth standard workflow, rerun with:
-#
-# `ALLOW_UPSTREAM_MODEL=1 snakemake -j1 solve ...`
+# For these countries, it is suggested to check the available models and contribute.
 
 enable:
   retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
