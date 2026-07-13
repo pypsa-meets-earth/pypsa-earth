@@ -242,6 +242,7 @@ def disable_grid_expansion_if_limit_hit(n: pypsa.Network) -> None:
 
                 n.global_constraints.drop(name, inplace=True)
 
+
 # from _helpers import read_csv_nafix
 # def adjust_renewable_profiles(n, input_profiles, params, year):
 #     """
