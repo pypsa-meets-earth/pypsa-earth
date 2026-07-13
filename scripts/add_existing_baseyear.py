@@ -266,7 +266,7 @@ if __name__ == "__main__":
     grouping_years_heat = snakemake.params.existing_capacities["grouping_years_heat"]
 
     # TODO: not implemented in -sec yet
-    # costs = read_csv_nafix(snakemake.input.costs, index_col=0)    
+    # costs = read_csv_nafix(snakemake.input.costs, index_col=0)
     # if options["enable"]["heat"]:
     #     time_dep_hp_cop = options["time_dep_hp_cop"]
     #     ashp_cop = (
