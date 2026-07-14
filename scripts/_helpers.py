@@ -15,7 +15,8 @@ grouped roughly as follows:
 
 - **Configuration and logging**: ``check_config_version``,
   ``migrate_config``, ``resolve_weather_configuration``,
-  ``update_cutout_config``, ``copy_default_files``, ``create_logger``,
+  ``validate_cutout_configuration``,  ``update_cutout_config``,
+  ``copy_default_files``, ``create_logger``,
   ``configure_logging``, ``handle_exception``, ``read_osm_config``,
   ``update_config_dictionary``.
 - **Network aggregation**: ``update_p_nom_max``, ``aggregate_p_nom``,
@@ -80,6 +81,11 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+
+# Cutouts currently available for `retrieve_cutout`. Additional entries can be added here as new pre-built cutouts become available.
+PREBUILT_CUTOUTS = {
+    "cutout-2013-era5",
+}
 
 
 def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
@@ -345,6 +351,52 @@ def resolve_weather_configuration(config: dict) -> dict:
 
     config["atlite"]["default"] = cutout_name
     config["atlite"]["cutouts"] = {cutout_name: cutout_config}
+
+    return config
+
+
+def validate_cutout_configuration(config: dict) -> dict:
+    """
+    Validate how the resolved weather cutout is obtained.
+
+    The function prevents conflicting build and retrieve options, checks
+    whether a requested pre-built cutout is available, and warns when the user
+    chooses to build a cutout that can already be retrieved.
+
+    Parameters
+    ----------
+    config : dict
+        Workflow configuration dictionary.
+
+    Returns
+    -------
+    dict
+        Unchanged configuration dictionary.
+    """
+    if config.get("tutorial", False):
+        return config
+
+    build_cutout = config["enable"].get("build_cutout", False)
+    retrieve_cutout = config["enable"].get("retrieve_cutout", False)
+    cutout_name = config["atlite"]["default"]
+
+    if build_cutout and retrieve_cutout:
+        raise ValueError(
+            "`build_cutout` and `retrieve_cutout` cannot both be enabled. Choose one method for obtaining the weather cutout."
+        )
+
+    if retrieve_cutout and cutout_name not in PREBUILT_CUTOUTS:
+        available_cutouts = ", ".join(sorted(PREBUILT_CUTOUTS))
+        raise ValueError(
+            f"`retrieve_cutout` is enabled, but the requested cutout `{cutout_name}` is not available as a pre-built cutout. Available pre-built cutouts: {available_cutouts}. Disable `retrieve_cutout` and enable `build_cutout`."
+        )
+
+    if build_cutout and cutout_name in PREBUILT_CUTOUTS:
+        warnings.warn(
+            f"The requested cutout `cutout-2013-era5` is available as a pre-built cutout. It will still be built because `build_cutout` is enabled.",
+            UserWarning,
+            stacklevel=2,
+        )
 
     return config
 
