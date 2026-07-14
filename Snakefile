@@ -554,6 +554,7 @@ rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
         load_options=config["load_options"],
+        weather_year=config["weather_year"],
         countries=config["countries"],
     input:
         base_network="networks/" + RDIR + "base.nc",

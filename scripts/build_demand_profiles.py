@@ -114,7 +114,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     """
     countries = config.get("countries")
     region_load = get_gegis_regions(countries)
-    weather_year = config.get("load_options")["weather_year"]
+    weather_year = config["weather_year"]
     prediction_year = config.get("load_options")["prediction_year"]
     # legacy option
     ssp = "ssp2-2.6"
@@ -443,7 +443,7 @@ if __name__ == "__main__":
     out_path = snakemake.output[0]
 
     load_source = snakemake.params.load_options.get("source", "gegis")
-    weather_year = snakemake.params.load_options["weather_year"]
+    weather_year = snakemake.params.weather_year
 
     if load_source == "ssp":
         logger.warning(
