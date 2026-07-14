@@ -1,6 +1,7 @@
 Parameter,Unit,Values,Description
 version,--,0.x.x,Version of PyPSA-Earth
 tutorial,bool,"{True, False}",Switch to retrieve the tutorial data set instead of the full data set.
+weather_year,--,"YYYY",Weather year used for demand and all weather-dependent profiles. Supported years depend on `load_options.source`: GEGIS supports 2011, 2013, and 2018; DemandCast supports 2000 to 2024.
 logging,,,
 -- level,--,"Any of {'INFO', 'WARNING', 'ERROR'}","Restrict console outputs to all infos, warning or errors only"
 -- format,--,,Custom format for log messages. See [LogRecord](https://docs.python.org/3/library/logging.html#logging.LogRecord) attributes.

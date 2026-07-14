@@ -277,7 +277,7 @@ atlite:
     module: era5
     dx: 0.3 # cutout resolution
     dy: 0.3 # cutout resolution
-    # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+    # # The cutout time is automatically derived from `weather_year`. See `snapshot:` option above and 'build_cutout.py'.
     # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
     # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
     # y: [33., 72]    # manual set cutout range

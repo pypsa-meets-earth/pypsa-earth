@@ -393,7 +393,7 @@ def validate_cutout_configuration(config: dict) -> dict:
 
     if build_cutout and cutout_name in PREBUILT_CUTOUTS:
         warnings.warn(
-            f"The requested cutout `cutout-2013-era5` is available as a pre-built cutout. It will still be built because `build_cutout` is enabled.",
+            f"The requested cutout `{cutout_name}` is available as a pre-built cutout. It will still be built because `build_cutout` is enabled.",
             UserWarning,
             stacklevel=2,
         )
