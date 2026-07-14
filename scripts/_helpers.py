@@ -342,8 +342,9 @@ def resolve_weather_configuration(config: dict) -> dict:
             f"Unknown load source {load_source!r}. Expected `gegis` or `demcast`."
         )
 
-    config["snapshots"]["start"] = f"{weather_year}-01-01"
-    config["snapshots"]["end"] = f"{weather_year + 1}-01-01"
+    if not config.get("tutorial", False):
+        config["snapshots"]["start"] = f"{weather_year}-01-01"
+        config["snapshots"]["end"] = f"{weather_year + 1}-01-01"
 
     cutout_config = config["atlite"]["cutout"].copy()
     module = cutout_config["module"]
