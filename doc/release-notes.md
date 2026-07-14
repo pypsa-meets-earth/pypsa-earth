@@ -12,7 +12,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Derive snapshots and weather cutout configuration automatically from `weather_year`, with validation for supported demand datasets and pre-built cutout availability. [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Derive snapshots and weather cutout configuration automatically from `weather_year`, with validation for supported demand datasets and pre-built cutout availability. [PR #1941](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1941)
 
 * Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
 
