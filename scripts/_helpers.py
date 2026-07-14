@@ -347,7 +347,11 @@ def resolve_weather_configuration(config: dict) -> dict:
 
     cutout_config = config["atlite"]["cutout"].copy()
     module = cutout_config["module"]
-    cutout_name = f"cutout-{weather_year}-{module}"
+
+    if config.get("tutorial", False):
+        cutout_name = f"cutout-{weather_year}-{module}-tutorial"
+    else:
+        cutout_name = f"cutout-{weather_year}-{module}"
 
     config["atlite"]["default"] = cutout_name
     config["atlite"]["cutouts"] = {cutout_name: cutout_config}
