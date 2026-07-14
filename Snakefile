@@ -19,6 +19,7 @@ from _helpers import (
     check_config_version,
     copy_default_files,
     migrate_config,
+    resolve_weather_configuration,
     update_cutout_config,
     BASE_DIR,
     branch,  # Remove if Snakemake >= 8.3.0
@@ -45,6 +46,8 @@ configfile: "config.yaml"
 check_config_version(config=config)
 
 config = migrate_config(config)
+
+config = resolve_weather_configuration(config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 

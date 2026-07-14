@@ -63,8 +63,6 @@ scenario:
   - "AB"
 
 snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
   inclusive: "left" # end is not inclusive
 
 # definition of the Coordinate Reference Systems
@@ -174,16 +172,17 @@ base_network:
   min_voltage_substation_offshore: 51000 # [V] minimum voltage of the offshore substations
   min_voltage_rebase_voltage: 33000 #minimum for Ghana #51000 # [V] minimum voltage in base network
 
-# DemandCast and GEGIS are two available options
-# DemandCast covers 2000-2024
-# GEGIS dataset provides data for 2011, 2013, 2018
-# Details and comparison are provided in
+# DemandCast and GEGIS are two available options.
+# DemandCast covers 2000-2024.
+# GEGIS dataset provides data for weather years 2011, 2013, and 2018.
+# Details and comparison are provided in:
 # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
+weather_year: 2013 # Used for demand and all weather-dependent profiles
+
 load_options:
   source: "gegis" # "demcast" or "gegis"
-  weather_year: 2013 # Weather year of the load profile
-  prediction_year: 2030 # Valid only if "gegis" used as a source
-  scale: 1 # scales all load time-series, i.e. 2 = doubles load
+  prediction_year: 2030 # Valid only if "gegis" is used as source
+  scale: 1 # scales all load time series, i.e. 2 doubles load
 
 co2_budget:
   enable: false
@@ -274,17 +273,14 @@ transformers:
 
 atlite:
   nprocesses: 4
-  cutouts:
-    cutout-2013-era5:
-      module: era5
-      dx: 0.3 # cutout resolution
-      dy: 0.3 # cutout resolution
-      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
-      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
-      # The cutout spatial extent [x,y] is automatically set by country selection. See `countires:` option above and 'build_cutout.py'.
-      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
-      # y: [33., 72]    # manual set cutout range
-  default: cutout-2013-era5
+  cutout:
+    module: era5
+    dx: 0.3 # cutout resolution
+    dy: 0.3 # cutout resolution
+    # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
+    # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
+    # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
+    # y: [33., 72]    # manual set cutout range
 
 renewable:
   onwind:
