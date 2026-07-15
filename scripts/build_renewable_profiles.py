@@ -549,6 +549,7 @@ if __name__ == "__main__":
     nprocesses = int(snakemake.threads)
     noprogress = not snakemake.config["enable"]["progress_bar"]
     config = snakemake.params.renewable[snakemake.wildcards.technology]
+    full_config = snakemake.config
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
@@ -600,14 +601,16 @@ if __name__ == "__main__":
         ppls = load_powerplants(paths.powerplants)
 
         # In case africa-geoglows-catchment is used
-        # column names must be adjusted accordingly
-        hydrobasins = hydrobasins.rename(
-            columns={
-                "HydroID": "HYBAS_ID",
-                "NextDownID": "NEXT_DOWN",
-                "Shape_Leng": "DIST_MAIN",
-            }
-        )
+        # column names and CRS must be adjusted accordingly
+        if full_config.get("tutorial", False):
+            hydrobasins = hydrobasins.rename(
+                columns={
+                    "HydroID": "HYBAS_ID",
+                    "NextDownID": "NEXT_DOWN",
+                    "Shape_Leng": "DIST_MAIN",
+                }
+            )
+            hydrobasins = hydrobasins.to_crs("EPSG:4326")
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
