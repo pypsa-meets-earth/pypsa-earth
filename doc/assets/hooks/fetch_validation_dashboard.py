@@ -69,80 +69,112 @@ CARRIER_COLORS = {
 }
 
 
-def make_stacked_bar_html(mix_dict, unit):
+def make_grouped_bar_html(carriers_data, unit):
     """
-    Generate horizontal stacked bar charts in HTML for markdown page comparison.
-    mix_dict: {carrier -> (pypsa_val, ref_val)}
+    Generate clustered horizontal bar chart in HTML.
+    carriers_data: {carrier -> {"model": float, "sources": {source -> float}}}
     unit: 'MW' or 'TWh'
     """
-    total_py = sum(val[0] for val in mix_dict.values())
-    total_ref = sum(val[1] for val in mix_dict.values())
-
-    if total_py <= 0 and total_ref <= 0:
+    if not carriers_data:
         return ""
 
-    # Sort carriers by reference value descending
+    # Find max value to scale the bars
+    max_val = 0.0
+    for data in carriers_data.values():
+        max_val = max(max_val, data["model"])
+        for val in data["sources"].values():
+            max_val = max(max_val, val)
+
+    if max_val <= 0:
+        return ""
+
+    # Sort carriers by model value descending
     sorted_carriers = sorted(
-        mix_dict.keys(), key=lambda c: mix_dict[c][1], reverse=True
+        carriers_data.keys(), key=lambda c: carriers_data[c]["model"], reverse=True
     )
 
-    # Render segments
-    segments_py = []
-    segments_ref = []
-    legend_items = []
+    # Color mapping for sources
+    source_colors = {
+        "model": "#2563eb",
+        "ember": "#10b981",
+        "irena": "#f59e0b",
+        "ourworldindata": "#8b5cf6",
+        "owid": "#8b5cf6",
+    }
 
+    rows_html = []
     for c in sorted_carriers:
-        py_val, ref_val = mix_dict[c]
-        color = CARRIER_COLORS.get(c.lower(), "#94a3b8")
+        data = carriers_data[c]
 
-        # PyPSA Segment
-        if total_py > 0 and py_val > 0:
-            pct_py = (py_val / total_py) * 100
-            segments_py.append(
-                f'<div style="width: {pct_py:.1f}%; background-color: {color}; height: 100%;" '
-                f'title="{c.upper()}: {py_val:.1f} {unit} ({pct_py:.1f}%)"></div>'
+        # Skip displaying this carrier if both model and reference values are all zero
+        model_val = data["model"]
+        ref_vals = data["sources"].values()
+        if model_val <= 0 and all(v <= 0 for v in ref_vals):
+            continue
+
+        carrier_name = c.upper()
+
+        # Build list of bars to render for this carrier
+        bars = [("Model", data["model"], source_colors["model"])]
+        for src, val in sorted(data["sources"].items()):
+            color = source_colors.get(src.lower(), "#64748b")
+            label = "OWID" if src.lower() == "ourworldindata" else src.upper()
+            bars.append((label, val, color))
+
+        # Render bars for this carrier
+        bars_html = []
+        for src_label, val, color in bars:
+            width_pct = (val / max_val) * 100 if max_val > 0 else 0
+            val_str = f"{val:.1f}" if val > 0 else "0"
+
+            bars_html.append(
+                f"""
+            <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                <span style="font-size: 10px; font-weight: 500; color: #64748b; width: 60px; text-transform: uppercase;">{src_label}</span>
+                <div style="flex-grow: 1; background-color: #f1f5f9; height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid #e2e8f0; max-width: 350px;">
+                    <div style="width: {width_pct:.1f}%; background-color: {color}; height: 100%; border-radius: 4px;" title="{src_label}: {val_str} {unit}"></div>
+                </div>
+                <span style="font-size: 10px; font-weight: 600; color: #334155; margin-left: 8px; width: 80px;">{val_str} {unit}</span>
+            </div>
+            """
             )
 
-        # Ref Segment
-        if total_ref > 0 and ref_val > 0:
-            pct_ref = (ref_val / total_ref) * 100
-            segments_ref.append(
-                f'<div style="width: {pct_ref:.1f}%; background-color: {color}; height: 100%;" '
-                f'title="{c.upper()}: {ref_val:.1f} {unit} ({pct_ref:.1f}%)"></div>'
-            )
+        rows_html.append(
+            f"""
+        <div style="display: flex; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; align-items: flex-start;">
+            <div style="width: 110px; font-weight: 600; color: #475569; font-size: 12px; padding-top: 2px; text-align: right; margin-right: 16px; word-break: break-all;">
+                {carrier_name}
+            </div>
+            <div style="flex-grow: 1;">
+                {"".join(bars_html)}
+            </div>
+        </div>
+        """
+        )
 
-        # Legend
-        if py_val > 0 or ref_val > 0:
-            legend_items.append(
-                f'<span style="display: inline-flex; align-items: center; margin-right: 12px; font-size: 11px; color: #475569;">'
-                f'<i style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background-color: {color}; margin-right: 4px;"></i>'
-                f"{c.upper()}"
-                f"</span>"
-            )
-
-    py_bars = "".join(segments_py)
-    ref_bars = "".join(segments_ref)
-    legend_html = "".join(legend_items)
+    # Legend HTML
+    legend_items = []
+    for label, color in [
+        ("Model", "#2563eb"),
+        ("EMBER", "#10b981"),
+        ("IRENA", "#f59e0b"),
+        ("OWID", "#8b5cf6"),
+    ]:
+        legend_items.append(
+            f"""
+        <span style="display: inline-flex; align-items: center; margin-right: 16px; font-size: 11px; color: #475569; font-weight: 500;">
+            <i style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background-color: {color}; margin-right: 6px;"></i>
+            {label}
+        </span>
+        """
+        )
 
     html = f"""
-<div style="margin: 16px 0; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc; max-width: 600px;">
-    <div style="display: flex; align-items: center; margin-bottom: 6px;">
-        <span style="font-size: 11px; font-weight: 600; color: #64748b; width: 80px;">Model:</span>
-        <div style="flex-grow: 1; display: flex; height: 16px; border-radius: 3px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
-            {py_bars or '<div style="width: 100%; background-color: #e2e8f0; height: 100%; font-size: 9px; text-align: center; color: #94a3b8; line-height: 14px;">No Generation</div>'}
-        </div>
-        <span style="font-size: 11px; font-weight: 600; color: #334155; margin-left: 8px; width: 70px; text-align: right;">{total_py:.1f} {unit}</span>
+<div style="margin: 20px 0; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; max-width: 650px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+    <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
+        {"".join(legend_items)}
     </div>
-    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 11px; font-weight: 600; color: #64748b; width: 80px;">Reference:</span>
-        <div style="flex-grow: 1; display: flex; height: 16px; border-radius: 3px; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e1;">
-            {ref_bars or '<div style="width: 100%; background-color: #e2e8f0; height: 100%; font-size: 9px; text-align: center; color: #94a3b8; line-height: 14px;">No Generation</div>'}
-        </div>
-        <span style="font-size: 11px; font-weight: 600; color: #334155; margin-left: 8px; width: 70px; text-align: right;">{total_ref:.1f} {unit}</span>
-    </div>
-    <div style="display: flex; flex-wrap: wrap; margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 6px;">
-        {legend_html}
-    </div>
+    {"".join(rows_html)}
 </div>
 """
     return html
@@ -289,10 +321,12 @@ def on_pre_build(config, **kwargs):
 
             # Demand section
             demand_rows = []
+            demand_carriers = {}
             for r in grp:
                 if r["pillar"] == "demand":
-                    py_val = parse_float(r["pypsa_value"])
-                    ref_val = parse_float(r["reference_value"])
+                    py_val = parse_float(r["pypsa_value"]) or 0.0
+                    ref_val = parse_float(r["reference_value"]) or 0.0
+                    source = r["reference_source"]
                     dev = parse_float(r["deviation_pct"])
                     dev_str = f"{dev:+.2f}%" if dev is not None else "-"
 
@@ -309,6 +343,12 @@ def on_pre_build(config, **kwargs):
                             "Grade": r["grade"] if r["grade"] else "-",
                         }
                     )
+                    if "total demand" not in demand_carriers:
+                        demand_carriers["total demand"] = {
+                            "model": py_val,
+                            "sources": {},
+                        }
+                    demand_carriers["total demand"]["sources"][source] = ref_val
 
             if demand_rows:
                 f.write("### 1. Electricity Demand\n\n")
@@ -327,9 +367,15 @@ def on_pre_build(config, **kwargs):
                 )
                 f.write("\n")
 
+                chart_html = make_grouped_bar_html(demand_carriers, "TWh")
+                if chart_html:
+                    f.write("**Total Demand Comparison:**\n\n")
+                    f.write(chart_html)
+                    f.write("\n")
+
             # Capacity section
             capacity_rows = []
-            cap_mix = {}
+            cap_carriers = {}
             for r in grp:
                 if r["pillar"] == "installed_capacity":
                     if r["metric"] == "total_capacity":
@@ -356,9 +402,9 @@ def on_pre_build(config, **kwargs):
                         carrier = r["carrier"]
                         py_val = parse_float(r["pypsa_value"]) or 0.0
                         ref_val = parse_float(r["reference_value"]) or 0.0
-                        if source not in cap_mix:
-                            cap_mix[source] = {}
-                        cap_mix[source][carrier] = (py_val, ref_val)
+                        if carrier not in cap_carriers:
+                            cap_carriers[carrier] = {"model": py_val, "sources": {}}
+                        cap_carriers[carrier]["sources"][source] = ref_val
 
             if capacity_rows:
                 f.write("### 2. Installed Capacity\n\n")
@@ -378,16 +424,15 @@ def on_pre_build(config, **kwargs):
                 )
                 f.write("\n")
 
-                for source, mix in cap_mix.items():
-                    chart_html = make_stacked_bar_html(mix, "MW")
-                    if chart_html:
-                        f.write(f"**Installed Capacity Mix ({source.upper()}):**\n\n")
-                        f.write(chart_html)
-                        f.write("\n")
+                chart_html = make_grouped_bar_html(cap_carriers, "MW")
+                if chart_html:
+                    f.write("**Installed Capacity Mix Comparison:**\n\n")
+                    f.write(chart_html)
+                    f.write("\n")
 
             # Generation section
             generation_rows = []
-            gen_mix = {}
+            gen_carriers = {}
             for r in grp:
                 if r["pillar"] == "generation":
                     if r["metric"] == "total_generation":
@@ -414,9 +459,9 @@ def on_pre_build(config, **kwargs):
                         carrier = r["carrier"]
                         py_val = parse_float(r["pypsa_value"]) or 0.0
                         ref_val = parse_float(r["reference_value"]) or 0.0
-                        if source not in gen_mix:
-                            gen_mix[source] = {}
-                        gen_mix[source][carrier] = (py_val, ref_val)
+                        if carrier not in gen_carriers:
+                            gen_carriers[carrier] = {"model": py_val, "sources": {}}
+                        gen_carriers[carrier]["sources"][source] = ref_val
 
             if generation_rows:
                 f.write("### 3. Electricity Generation\n\n")
@@ -436,14 +481,11 @@ def on_pre_build(config, **kwargs):
                 )
                 f.write("\n")
 
-                for source, mix in gen_mix.items():
-                    chart_html = make_stacked_bar_html(mix, "TWh")
-                    if chart_html:
-                        f.write(
-                            f"**Electricity Generation Mix ({source.upper()}):**\n\n"
-                        )
-                        f.write(chart_html)
-                        f.write("\n")
+                chart_html = make_grouped_bar_html(gen_carriers, "TWh")
+                if chart_html:
+                    f.write("**Electricity Generation Mix Comparison:**\n\n")
+                    f.write(chart_html)
+                    f.write("\n")
 
             f.write("---\n\n")
 
