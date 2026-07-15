@@ -89,18 +89,29 @@ databundles:
     - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
   # load tutorial hydrobasins bundle for Africa only
+  # bundle_tutorial_hydrobasins:
+  #   countries: [Africa]
+  #   tutorial: true
+  #   category: hydrobasins
+  #   destination: "data/hydrobasins"
+  #   urls:
+  #     hydrobasins:
+  #       base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
+  #       suffixes: ["af"]
+  #   unzip: true
+  #   output:
+  #   - data/hydrobasins/hybas_world.shp
+  # load tutorial hydrobasins bundle for Africa only
   bundle_tutorial_hydrobasins:
     countries: [Africa]
     tutorial: true
     category: hydrobasins
     destination: "data/hydrobasins"
     urls:
-      hydrobasins:
-        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
-        suffixes: ["af"]
+      direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
     unzip: true
     output:
-    - data/hydrobasins/hybas_world.shp
+    - data/hydrobasins_hydroshare/africa-geoglows-catchment.shp 
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
