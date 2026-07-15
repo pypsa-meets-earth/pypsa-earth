@@ -108,6 +108,7 @@ databundles:
     category: hydrobasins
     destination: "data/hydrobasins"
     urls:
+      # TODO Double-check if rehosting is needed
       direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
     unzip: true
     output:
