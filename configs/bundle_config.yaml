@@ -441,6 +441,43 @@ databundles:
     disable_by_opt:
       build_cutout: [all]
 
+  # national-level cutouts for Africa -----------------------------------------
+  # Zambia: size about 0.5 GB (zipped)
+  bundle_cutouts_africa_zm:
+    countries: [ZM]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470328/files/bundle_cutouts_zm_2013.zip?download=1
+      gdrive: https://drive.google.com/file/d/1gTKSQFCCw3BK3AIuRL0AQKTU9airIxW8/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
+  # national-level cutouts for South America ----------------------------------
+  # Bolivia: size about 0.7 GB (zipped)
+  bundle_cutouts_bo:
+    countries: [BO]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_bo.zip?download=1
+      gdrive: https://drive.google.com/file/d/1G_Pu0ahhYhQtlNffb-wsXc4yRH_17mhv/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+  # Colombia: size about 1.3 GB (zipped)
+  bundle_cutouts_co:
+    countries: [CO]
+    category: cutouts
+    destination: "cutouts"
+    urls:
+      zenodo: https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_co.zip?download=1
+      gdrive: https://drive.google.com/file/d/1m4aANSNEqo0z0I-K5H8XMKiQvXxd3N5R/view?usp=drive_link
+    output: [cutouts/cutout-2013-era5.nc]
+    disable_by_opt:
+      build_cutout: [all]
+
   # data bundle containing the protected data for the whole world
   bundle_landcover_earth:
     countries: [Earth]
@@ -449,32 +486,3 @@ databundles:
     urls:
       protectedplanet: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
     output: [data/landcover/world_protected_areas/*]
-
-    # # Backup tutorial bundles with no gadm-like data; for reference:
-    # # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1258
-
-    # # tutorial bundle specific for Nigeria and Benin only, without gadm-like data
-    # bundle_tutorial_NGBJ:
-    #   countries: [NG, BJ]
-    #   tutorial: true
-    #   category: data
-    #   destination: "data"
-    #   urls:
-    #     zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_NGBJ.zip?download=1
-    #     gdrive: https://drive.google.com/file/d/1Vb1ISjhy7iwTTZYeezGd6S4nLt-EDGme/view?usp=drive_link
-    #   output:
-    #   - data/gebco/GEBCO_2021_TID.nc
-    #   - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-
-    # # tutorial bundle specific for Botswana only, without gadm-like data
-    # bundle_tutorial_BW:
-    #   countries: [BW]
-    #   tutorial: true
-    #   category: data
-    #   destination: "data"
-    #   urls:
-    #     zenodo: https://sandbox.zenodo.org/records/3853/files/bundle_tutorial_BW.zip?download=1
-    #     gdrive: https://drive.google.com/file/d/19IXvTD8gVSzgTInL85ta7QjaNI8ZPCCY/view?usp=drive_link
-    #   output:
-    #   - data/gebco/GEBCO_2021_TID.nc
-    #   - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif

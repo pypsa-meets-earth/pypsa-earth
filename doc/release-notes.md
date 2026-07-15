@@ -46,6 +46,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add links to national-scale cutouts for a few countries (Bolivia, Colombia, Zambia) [PR #1756](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1756)
+
 * Add `custom_powerplants` into params to make sure change of the config reruns the workflow [PR #1927](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1927)
 
 * Fix misleading linetype voltage warning in `base_network.py` [PR #1883](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1883)
