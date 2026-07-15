@@ -66,7 +66,11 @@ SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
-HYDROBASINS_PATH = "data/hydrobasins_hydroshare/africa-geoglows-catchment.shp" if config.get("tutorial", True) else "data/hydrobasins/hybas_world.shp"
+HYDROBASINS_PATH = (
+    "data/hydrobasins_hydroshare/africa-geoglows-catchment.shp"
+    if config.get("tutorial", True)
+    else "data/hydrobasins/hybas_world.shp"
+)
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 

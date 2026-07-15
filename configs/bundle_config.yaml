@@ -111,7 +111,7 @@ databundles:
       direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
     unzip: true
     output:
-    - data/hydrobasins_hydroshare/africa-geoglows-catchment.shp 
+    - data/hydrobasins_hydroshare/africa-geoglows-catchment.shp
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
