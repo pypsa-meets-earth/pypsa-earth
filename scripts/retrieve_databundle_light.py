@@ -988,7 +988,7 @@ def retrieve_databundle(
         if not downloaded_bundle:
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
-    if len(hydrobasin_bundles) > 0:
+    if (len(hydrobasin_bundles) > 0) and not config_bundles[b_name]["tutorial"]:
         logger.info("Merging regional hydrobasins files into a global shapefile")
         merge_hydrobasins_shape(
             config_bundles[hydrobasin_bundles[0]], hydrobasins_level
