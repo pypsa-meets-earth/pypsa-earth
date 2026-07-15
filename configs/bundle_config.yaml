@@ -102,6 +102,10 @@ databundles:
   #   output:
   #   - data/hydrobasins/hybas_world.shp
   # load tutorial hydrobasins bundle for Africa only
+
+  # Source: Brigham Young University, Ashby, K., Nelson, J., Ames, D. (2026).
+  # Derived Hydrography of Africa, HydroShare,
+  # https://doi.org/10.4211/hs.121bbce392a841178476001843e7510b
   bundle_tutorial_hydrobasins:
     countries: [Africa]
     tutorial: true
