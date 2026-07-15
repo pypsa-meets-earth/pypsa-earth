@@ -22,6 +22,21 @@ CSV_URL = (
 )
 
 
+IRENA_2020_SCENARIOS = {
+    "AU_2021",
+    "BR_2021",
+    "CN_2021",
+    "CO_2021",
+    "DE_2021",
+    "IN_2021",
+    "IT_2021",
+    "MX_2021",
+    "NG_2021",
+    "US_2021",
+    "ZA_2021",
+}
+
+
 def make_markdown_table(headers, alignments, rows):
     """Generate a markdown table with custom alignment."""
     separator = []
@@ -287,7 +302,13 @@ def on_pre_build(config, **kwargs):
     alignments = ["left", "left", "left", "left", "left", "left", "right"]
 
     with open(overview_path, "w", encoding="utf-8") as f:
-        f.write("# Validation Overview\n\n")
+        f.write(
+            "<!--\n"
+            "SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors\n\n"
+            "SPDX-License-" + "Identifier: CC-BY-4.0\n"
+            "-->\n"
+            "# Validation Overview\n\n"
+        )
         f.write(
             "A summary of validation grades across all analyzed countries and scenarios. "
             "Grades assess the percentage deviation between model outputs and historical reference statistics (Ember, IRENA, OWID).\n\n"
@@ -297,7 +318,13 @@ def on_pre_build(config, **kwargs):
     # 4. Generate statistics.md
     logger.info("Validation Dashboard Hook: Generating statistics.md...")
     with open(statistics_path, "w", encoding="utf-8") as f:
-        f.write("# Detailed Validation Statistics\n\n")
+        f.write(
+            "<!--\n"
+            "SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors\n\n"
+            "SPDX-License-" + "Identifier: CC-BY-4.0\n"
+            "-->\n"
+            "# Detailed Validation Statistics\n\n"
+        )
         f.write(
             "Detailed comparisons of active validation scenarios. Metrics are grouped by country and pillar.\n\n"
         )
@@ -309,6 +336,13 @@ def on_pre_build(config, **kwargs):
             f.write(f"## {country_name} ({country_code}) — Scenario `{scenario}`\n\n")
             f.write(f"* **Model Year:** {year}\n")
             f.write(f"* **PyPSA-Earth Version:** `{version}`\n\n")
+
+            if scenario in IRENA_2020_SCENARIOS:
+                f.write(
+                    '!!! note "Validation Baseline Caveat"\n'
+                    '    This validation scenario was solved using renewable capacity lower limits set to historical **2020** levels (`estimate_renewable_capacities: stats: "irena"` referencing 2020).\n'
+                    "    Since the target year is 2021, and the model was not forced to build up to 2021 levels (only allowed to expand if economically optimal), this difference in baseline capacity can result in negative deviations when comparing model outputs against actual 2021 reference statistics.\n\n"
+                )
 
             # Demand section
             demand_rows = []
