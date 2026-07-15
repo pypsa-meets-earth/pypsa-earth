@@ -617,10 +617,12 @@ if __name__ == "__main__":
                 "DIST_MAIN": 1.0,
                 "NEXT_DOWN": 0,
             }
-            
+
             for column, default in defaults.items():
                 if column not in hydrobasins.columns:
                     hydrobasins[column] = default
+
+        resource["hydrobasins"] = hydrobasins
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
