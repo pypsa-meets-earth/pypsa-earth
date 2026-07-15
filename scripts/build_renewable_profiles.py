@@ -612,6 +612,16 @@ if __name__ == "__main__":
             )
             hydrobasins = hydrobasins.to_crs("EPSG:4326")
 
+            defaults = {
+                "HYBAS_ID": 1,
+                "DIST_MAIN": 1.0,
+                "NEXT_DOWN": 0,
+            }
+            
+            for column, default in defaults.items():
+                if column not in hydrobasins.columns:
+                    hydrobasins[column] = default
+
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
         # select hydro units within hydrobasins
