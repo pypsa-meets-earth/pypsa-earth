@@ -15,16 +15,10 @@ from pathlib import Path
 
 logger = logging.getLogger("mkdocs")
 
-# TODO: Update to production repository URL after the pypsa-earth-status PR is merged.
+# TODO: Revert branch to health-status once health-status-docs PR is merged.
 CSV_URL = (
     "https://raw.githubusercontent.com/GbotemiB/pypsa-earth-status/"
-    "health-status/results/health_status.csv"
-)
-
-# World boundaries GeoJSON for Leaflet
-GEOJSON_URL = (
-    "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/"
-    "geojson/ne_110m_admin_0_countries.geojson"
+    "health-status-docs/results/health_status.csv"
 )
 
 
@@ -178,9 +172,6 @@ def make_grouped_bar_html(carriers_data, unit):
 </div>
 """
     return html
-
-
-MAP_TEMPLATE = ""
 
 
 def on_pre_build(config, **kwargs):
