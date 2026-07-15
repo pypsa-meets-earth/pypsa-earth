@@ -599,6 +599,16 @@ if __name__ == "__main__":
         hydrobasins = gpd.read_file(hydrobasins_path)
         ppls = load_powerplants(paths.powerplants)
 
+        # In case africa-geoglows-catchment is used
+        # column names must be adjusted accordingly
+        hydrobasins = hydrobasins.rename(
+            columns={
+                "HydroID": "HYBAS_ID",
+                "NextDownID": "NEXT_DOWN",
+                "Shape_Leng": "DIST_MAIN",
+            }
+        )
+
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
         # select hydro units within hydrobasins
