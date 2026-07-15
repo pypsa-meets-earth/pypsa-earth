@@ -66,6 +66,8 @@ SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
+HYDROBASINS_PATH = "data/hydrobasins_hydroshare/africa-geoglows-catchment.shp" if config.get("tutorial", True) else "data/hydrobasins/hybas_world.shp"
+
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -582,7 +584,7 @@ HYDRO_PROFILES = {
     "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
     "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
     "powerplants": "resources/" + RDIR + "powerplants.csv",
-    "hydrobasins": "data/hydrobasins/hybas_world.shp",
+    "hydrobasins": HYDROBASINS_PATH,
 }
 
 
