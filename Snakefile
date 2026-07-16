@@ -625,6 +625,42 @@ rule build_renewable_profiles:
         "scripts/build_renewable_profiles.py"
 
 
+def get_custom_powerplants_files(wildcards):
+    """
+    Return country-specific custom powerplant files enabled in the configuration.
+    """
+    custom_config = config["electricity"]["custom_powerplants"]
+    general_mode = custom_config.get("general", False)
+    overrides = custom_config.get("overrides", {})
+
+    allowed_modes = {False, "merge", "replace"}
+
+    if general_mode not in allowed_modes:
+        raise ValueError(
+            "electricity.custom_powerplants.general must be "
+            "false, 'merge', or 'replace'."
+        )
+
+    invalid_overrides = {
+        country: mode
+        for country, mode in overrides.items()
+        if mode not in allowed_modes
+    }
+
+    if invalid_overrides:
+        raise ValueError(
+            "Invalid custom_powerplants overrides: "
+            f"{invalid_overrides}. Allowed values are "
+            "false, 'merge', and 'replace'."
+        )
+
+    return [
+        f"data/custom_powerplants_{country}.csv"
+        for country in config["countries"]
+        if overrides.get(country, general_mode)
+    ]
+
+
 rule build_powerplants:
     params:
         geo_crs=config["crs"]["geo_crs"],
@@ -632,11 +668,11 @@ rule build_powerplants:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["cluster_options"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
-        custom_powerplants_option=config["electricity"]["custom_powerplants"],
+        custom_powerplants=config["electricity"]["custom_powerplants"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/custom_powerplants.csv",
+        custom_powerplants=get_custom_powerplants_files,
         osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.

@@ -101,6 +101,7 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 """
 
 import os
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -242,37 +243,73 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
 
 
 def add_custom_powerplants(
-    ppl: pd.DataFrame, inputs: dict, custom_ppl_query: str
+    ppl: pd.DataFrame,
+    custom_powerplants_files: list[str],
+    custom_powerplants_config: dict,
 ) -> pd.DataFrame:
     """
-    Adds custom powerplants to the powerplants dataframe.
+    Apply country-specific custom powerplant files.
+
+    Files must follow the naming convention:
+
+        custom_powerplants_{country}.csv
+
+    where ``country`` is the ISO2 country code.
 
     Parameters
     ----------
     ppl : pd.DataFrame
-        Powerplant dataframe.
-    inputs : dict
-        Inputs dictionary containing the path to the custom powerplants file.
-    custom_ppl_query : str
-        Custom powerplant query. Can be "merge", "replace", or false.
+        powerplantmatching dataframe.
+    custom_powerplants_files : list[str]
+        Country-specific custom powerplants files.
+    custom_powerplants_config : dict
+        Configuration dictionary containing ``general`` and optional
+        ``overrides``.
 
     Returns
     -------
     pd.DataFrame
-        Powerplant dataframe with custom powerplants added.
     """
-    if not custom_ppl_query:
-        return ppl
-    add_ppls = read_csv_nafix(
-        inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
-    )
+    general_mode = custom_powerplants_config.get("general", False)
+    overrides = custom_powerplants_config.get("overrides", {})
 
-    if custom_ppl_query == "merge":
-        return pd.concat(
-            [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
+    result = ppl.copy()
+
+    for filepath in custom_powerplants_files:
+        filepath = Path(filepath)
+
+        country = filepath.stem.removeprefix("custom_powerplants_").upper()
+
+        mode = overrides.get(country, general_mode)
+
+        if not mode:
+            continue
+
+        custom_ppls = read_csv_nafix(
+            filepath,
+            index_col=0,
+            dtype={"bus": "str"},
         )
-    elif custom_ppl_query == "replace":
-        return add_ppls
+
+        file_countries = set(custom_ppls["Country"].dropna().unique())
+
+        if file_countries != {country}:
+            raise ValueError(
+                f"Custom powerplant file '{filepath}' contains "
+                f"countries {sorted(file_countries)}, "
+                f"expected only '{country}'."
+            )
+
+        if mode == "replace":
+            result = result.loc[result.Country != country]
+
+        result = pd.concat(
+            [result, custom_ppls],
+            ignore_index=True,
+            sort=False,
+        )
+
+    return result
 
 
 def replace_natural_gas_technology(df: pd.DataFrame):
@@ -353,21 +390,23 @@ if __name__ == "__main__":
     else:
         config["main_query"] = ""
 
-    custom_ppl_query = snakemake.params.custom_powerplants_option
-    if custom_ppl_query != "replace":
-        ppl = (
-            pm.powerplants(from_url=False, update=True, config_update=config)
-            .powerplant.fill_missing_decommissioning_years()
-            .query("Country in @countries_names")
-            .powerplant.convert_country_to_alpha2()
-            .pipe(replace_natural_gas_technology)
-        )
-    else:
-        ppl = pd.DataFrame()
+    custom_powerplants = snakemake.params.custom_powerplants
 
-    ppl = add_custom_powerplants(ppl, snakemake.input, custom_ppl_query).query(
-        ppl_query
-    )  # add carriers from own powerplant files
+    ppl = (
+        pm.powerplants(from_url=False, update=True, config_update=config)
+        .powerplant.fill_missing_decommissioning_years()
+        .query("Country in @countries_names")
+        .powerplant.convert_country_to_alpha2()
+        .pipe(replace_natural_gas_technology)
+    )
+
+    ppl = add_custom_powerplants(
+        ppl=ppl,
+        custom_powerplants_files=list(snakemake.input.custom_powerplants),
+        custom_powerplants_config=custom_powerplants,
+    )
+
+    ppl = ppl.query(ppl_query)
 
     # define unique index
     ppl = ppl.reset_index(drop=True)
