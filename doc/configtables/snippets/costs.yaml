@@ -21,25 +21,29 @@ costs:
     lifetime: 25
     CO2 intensity: 0
     discount rate: 0.07
-  marginal_cost: # EUR/MWh
-    solar: 0.01
-    onwind: 0.015
-    offwind: 0.015
-    hydro: 0.
-    H2: 0.
-    electrolysis: 0.
-    fuel cell: 0.
-    battery: 0.
-    battery inverter: 0.
-  # investment: # EUR/MW
+  marginal_cost: # output_currency/MWh
+    solar: 0.01 # EUR/MWh: convert to `output_currency` when necessary
+    onwind: 0.015 # EUR/MWh: convert to `output_currency` when necessary
+    offwind: 0.015 # EUR/MWh: convert to `output_currency` when necessary
+    hydro: 0. # EUR/MWh: convert to `output_currency` when necessary
+    H2: 0. # EUR/MWh: convert to `output_currency` when necessary
+    electrolysis: 0. # EUR/MWh: convert to `output_currency` when necessary
+    fuel cell: 0. # EUR/MWh: convert to `output_currency` when necessary
+    battery: 0. # EUR/MWh: convert to `output_currency` when necessary
+    battery inverter: 0. # EUR/MWh: convert to `output_currency` when necessary
+  emission_prices: # in currency per tonne emission, only used with the option Ep
+    co2: 0.
+  # investment: # output_currency/MW
   #   CCGT: 830000
   # FOM: # %/year
   #   CCGT: 3.35
-  # VOM: # EUR/MWh
+  # VOM: # output_currency/MWh
   #   CCGT: 4.2
-  # fuel: # EUR/MWh
+  # fuel: # output_currency/MWh
   #   gas: 10.1
   # lifetime: # years
   #   CCGT: 25.0
   # efficiency: # per unit
   #   CCGT: 0.58
+  lines:
+    length_factor: 1.25 #to estimate offwind connection costs
