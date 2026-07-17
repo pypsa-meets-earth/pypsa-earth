@@ -896,6 +896,9 @@ def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list
 
 
 def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> None:
+    """
+    Merge all hydrobasin files into a global one
+    """
     basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
     output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 
