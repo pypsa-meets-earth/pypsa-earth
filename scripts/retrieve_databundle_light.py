@@ -915,13 +915,14 @@ def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> 
     )
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
+
 def normalise_hydrobasins(config_hydrobasin: dict) -> None:
     """
     Adjust format of a tutorial hydrobasins dataset according to
     atlite expectations
     """
     basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
-    output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0]) 
+    output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 
     hydrobasins = gpd.read_file(basins_path)
     # In case africa-geoglows-catchment is used
@@ -945,7 +946,7 @@ def normalise_hydrobasins(config_hydrobasin: dict) -> None:
         for column, default in defaults.items():
             if column not in hydrobasins.columns:
                 hydrobasins[column] = default
-    hydrobasins.to_file(output_fl, driver="ESRI Shapefile")    
+    hydrobasins.to_file(output_fl, driver="ESRI Shapefile")
 
 
 def retrieve_databundle(
@@ -1033,8 +1034,6 @@ def retrieve_databundle(
         else:
             logger.info("Transforming geoglows hydrobasins into atlite format")
             normalise_hydrobasins(config_bundles[hydrobasin_bundles[0]])
-
-                
 
     # log the downloaded and missing bundles
     logger.info(
