@@ -600,28 +600,6 @@ if __name__ == "__main__":
         hydrobasins = gpd.read_file(hydrobasins_path)
         ppls = load_powerplants(paths.powerplants)
 
-        # # In case africa-geoglows-catchment is used
-        # # column names and CRS must be adjusted accordingly
-        # if full_config.get("tutorial", False):
-        #     hydrobasins = hydrobasins.rename(
-        #         columns={
-        #             "HydroID": "HYBAS_ID",
-        #             "NextDownID": "NEXT_DOWN",
-        #             "Shape_Leng": "DIST_MAIN",
-        #         }
-        #     )
-        #     hydrobasins = hydrobasins.to_crs("EPSG:4326")
-
-        #     defaults = {
-        #         "HYBAS_ID": 1,
-        #         "DIST_MAIN": 1.0,
-        #         "NEXT_DOWN": 0,
-        #     }
-
-        #     for column, default in defaults.items():
-        #         if column not in hydrobasins.columns:
-        #             hydrobasins[column] = default
-
         resource["hydrobasins"] = hydrobasins
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
@@ -634,6 +612,11 @@ if __name__ == "__main__":
             crs=PPL_CRS,
         ).to_crs(hydrobasins.crs)
         temp_gdf = gpd.sjoin(hgdf, hydrobasins, predicate="within", how="left")
+
+        print("temp_gdf")
+        print(temp_gdf)
+        print("temp_gdf.columns")
+        print(temp_gdf.columns)
 
         hydro_ppls = pd.DataFrame(
             hgdf.loc[temp_gdf.index_right.dropna().index].drop(columns="geometry")

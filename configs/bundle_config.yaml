@@ -88,21 +88,6 @@ databundles:
     - data/gadm/gadm41_MAR/gadm41_MAR.gpkg  # needed in build_shapes
     - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
-  # load tutorial hydrobasins bundle for Africa only
-  # bundle_tutorial_hydrobasins:
-  #   countries: [Africa]
-  #   tutorial: true
-  #   category: hydrobasins
-  #   destination: "data/hydrobasins"
-  #   urls:
-  #     hydrobasins:
-  #       base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
-  #       suffixes: ["af"]
-  #   unzip: true
-  #   output:
-  #   - data/hydrobasins/hybas_world.shp
-  # load tutorial hydrobasins bundle for Africa only
-
   # Source: Brigham Young University, Ashby, K., Nelson, J., Ames, D. (2026).
   # Derived Hydrography of Africa, HydroShare,
   # https://doi.org/10.4211/hs.121bbce392a841178476001843e7510b
