@@ -549,7 +549,6 @@ if __name__ == "__main__":
     nprocesses = int(snakemake.threads)
     noprogress = not snakemake.config["enable"]["progress_bar"]
     config = snakemake.params.renewable[snakemake.wildcards.technology]
-    full_config = snakemake.config
     resource = config["resource"]
     correction_factor = config.get("correction_factor", 1.0)
     p_nom_max_meth = config.get("potential", "conservative")
