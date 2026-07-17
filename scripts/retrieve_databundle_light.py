@@ -915,6 +915,38 @@ def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> 
     )
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
 
+def normalise_hydrobasins(config_hydrobasin: dict) -> None:
+    """
+    Adjust format of a tutorial hydrobasins dataset according to
+    atlite expectations
+    """
+    basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
+    output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0]) 
+
+    hydrobasins = gpd.read_file(basins_path)
+    # In case africa-geoglows-catchment is used
+    # column names and CRS must be adjusted accordingly
+    if full_config.get("tutorial", False):
+        hydrobasins = hydrobasins.rename(
+            columns={
+                "HydroID": "HYBAS_ID",
+                "NextDownID": "NEXT_DOWN",
+                "Shape_Leng": "DIST_MAIN",
+            }
+        )
+        hydrobasins = hydrobasins.to_crs("EPSG:4326")
+
+        defaults = {
+            "HYBAS_ID": 1,
+            "DIST_MAIN": 1.0,
+            "NEXT_DOWN": 0,
+        }
+
+        for column, default in defaults.items():
+            if column not in hydrobasins.columns:
+                hydrobasins[column] = default
+    hydrobasins.to_file(output_fl, driver="ESRI Shapefile")    
+
 
 def retrieve_databundle(
     bundles_to_download: list,
