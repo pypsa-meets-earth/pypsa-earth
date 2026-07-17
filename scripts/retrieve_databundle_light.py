@@ -1030,6 +1030,11 @@ def retrieve_databundle(
             merge_hydrobasins_shape(
                 config_bundles[hydrobasin_bundles[0]], hydrobasins_level
             )
+        else:
+            logger.info("Transforming geoglows hydrobasins into atlite format")
+            normalise_hydrobasins(config_bundles[hydrobasin_bundles[0]])
+
+                
 
     # log the downloaded and missing bundles
     logger.info(
