@@ -927,7 +927,7 @@ def normalise_hydrobasins(config_hydrobasin: dict) -> None:
     hydrobasins = gpd.read_file(basins_path)
     # In case africa-geoglows-catchment is used
     # column names and CRS must be adjusted accordingly
-    if full_config.get("tutorial", False):
+    if config_hydrobasin.get("tutorial", False):
         hydrobasins = hydrobasins.rename(
             columns={
                 "HydroID": "HYBAS_ID",
