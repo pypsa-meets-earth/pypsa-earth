@@ -50,7 +50,7 @@ enable:
   # ----------------- Retrieving data -----------------
   retrieve_databundle: true # recommended for first run
   download_osm_data: true # download OpenStreetMap data for the countries specified above
-  retrieve_cutout: true  # Retrieves the bundled 2013 cutout (cutout-2013-era5); changin load_options.weather_year (default: 2013) requires retrieve_cutout:false and build_cutout: true.
+  retrieve_cutout: true # retrieves the bundled 2013 cutout (cutout-2013-era5); changing load_options.weather_year (default: 2013) requires retrieve_cutout:false and build_cutout: true.
   retrieve_cost_data: true # false: use existing data/costs.csv
   retrieve_databundle_sector: true
   download_global_buildings: false # download GlobalMLBuildingFootprints data for the countries specified above
