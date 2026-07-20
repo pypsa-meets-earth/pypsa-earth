@@ -50,12 +50,12 @@ enable:
   # ----------------- Retrieving data -----------------
   retrieve_databundle: true # recommended for first run
   download_osm_data: true # download OpenStreetMap data for the countries specified above
-  retrieve_cutout: true # bundled cutout is 2013 only (cutout-2013-era5); other weather years need build_cutout: true — not load_options.weather_year
+  retrieve_cutout: true  # Retrieves the bundled 2013 cutout (cutout-2013-era5); changin load_options.weather_year (default: 2013) requires retrieve_cutout:false and build_cutout: true.
   retrieve_cost_data: true # false: use existing data/costs.csv
   retrieve_databundle_sector: true
   download_global_buildings: false # download GlobalMLBuildingFootprints data for the countries specified above
   # ----------------- Building locally -----------------
-  build_cutout: false # requires CDS API key; uses snapshots and countries
+  build_cutout: false # requires CDS API key (see https://cds.climate.copernicus.eu/how-to-api); uses snapshots and countries
   build_natura_raster: false
   # ----------------- Advanced -----------------
   progress_bar: true
