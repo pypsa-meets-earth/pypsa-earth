@@ -5,6 +5,7 @@
 """
 Build clustered population layouts.
 """
+
 import os
 
 import atlite
