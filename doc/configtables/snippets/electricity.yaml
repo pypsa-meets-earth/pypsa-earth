@@ -31,7 +31,7 @@ electricity:
   # ----------------- Grid topology -------------------
   base_voltage: 380.
   voltages: [132., 220., 300., 380., 500., 750.]
-  hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
+  hvdc_as_lines: false # false: HVDC as Link; true: HVDC as Line
 
   # ----------------- Constraints & reserve -------------------
   agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)

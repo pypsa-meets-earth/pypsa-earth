@@ -2,7 +2,7 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [Co2L-3h] # Co2L: emission cap ON (co2.limit); 3h: temporal aggregation — remove Co2L for unconstrained runs
+  opts: [Co2L-3h] # hyphen-joined options: 3h/6h/24h/Nseg temporal | Co2L/Ep/CH4L caps & prices | ATK/ATKc autarky | {carrier}+p/c/m scale | CCL/BAU/SAFE/RES/EQ solve constraints — see doc/user-guide/wildcards.md
   planning_horizons: # investment years for myopic; costs year for overnight
   - 2030
   sopts:
