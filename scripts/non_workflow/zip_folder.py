@@ -7,6 +7,7 @@
 """
 Module to zip the desired folders to be stored in google drive, or equivalent.
 """
+
 import os
 import zipfile
 from os.path import basename
