@@ -697,7 +697,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="20flex"
+            "cluster_network", network="elec", simpl="", clusters="24"
         )
     configure_logging(snakemake)
 
