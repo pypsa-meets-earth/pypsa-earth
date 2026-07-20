@@ -234,4 +234,4 @@ Re-run the workflow if you change `scale`. Load shedding should stay at **~0 TWh
 
 The base grid now reflects Kazakhstan's post-Soviet voltage scale and more conservative line ratings. Part 5's simplification settings (merge off, fetch on, drop off) remain a useful safety net for OSM gaps that 35 kV alone cannot close.
 
-Demand ends at **`scale: 0.994`** — a re-calibrated match to KEGOC on a grid that no longer drops regional load. That is a cleaner baseline for the next tutorials (CO₂ limits, regional costs).
+Demand ends at **`scale: 0.994`** — a re-calibrated match to KEGOC on a grid that no longer drops regional load. That is a cleaner baseline for the next tutorial: **[Part 7 — Adapt Fuel and Generation Costs](7-adapting-costs.md)** (why gas stays idle despite capacity, and how to fix the merit order).
