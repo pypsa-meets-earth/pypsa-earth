@@ -1,9 +1,17 @@
-voltage,default,AU
-132,243-AL1/39-ST1A 110.0,243-AL1/39-ST1A 110.0
-220,Al/St 240/40 2-bundle 220.0,
-275,Al/St 240/40 3-bundle 300.0,Al/St 240/40 3-bundle 300.0
-300,Al/St 240/40 3-bundle 300.0,
-330,Al/St 240/40 4-bundle 380.0,Al/St 240/40 4-bundle 380.0
-380,Al/St 240/40 4-bundle 380.0,
-500,Al/St 240/40 4-bundle 380.0,Al/St 560/50 4-bundle 750.0
-750,Al/St 560/50 4-bundle 750.0,
+voltage,default,AU,US
+69,,,US_69kV
+100,,,US_100kV
+115,,,US_115kV
+132,243-AL1/39-ST1A 110.0,243-AL1/39-ST1A 110.0,
+138,,,US_138kV
+161,,,US_161kV
+220,Al/St 240/40 2-bundle 220.0,,
+230,,,US_230kV
+275,Al/St 240/40 3-bundle 300.0,Al/St 240/40 3-bundle 300.0,
+300,Al/St 240/40 3-bundle 300.0,,
+330,Al/St 240/40 4-bundle 380.0,Al/St 240/40 4-bundle 380.0,
+345,,,US_345kV
+380,Al/St 240/40 4-bundle 380.0,,
+500,Al/St 240/40 4-bundle 380.0,Al/St 560/50 4-bundle 750.0,US_500kV
+750,Al/St 560/50 4-bundle 750.0,,
+765,,,US_765kV

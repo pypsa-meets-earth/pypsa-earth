@@ -340,6 +340,9 @@ rule base_network:
         + "base_network/all_transformers_build_network.csv",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        line_type_mapping_ac="data/line_type_mapping_ac.csv",
+        line_type_mapping_dc="data/line_type_mapping_dc.csv",
+        custom_line_types="data/custom_line_types.csv",
     output:
         "networks/" + RDIR + "base.nc",
     log:
@@ -725,6 +728,7 @@ rule simplify_network:
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
+        line_type_mapping_ac="data/line_type_mapping_ac.csv",
     output:
         network="networks/" + RDIR + "elec_s{simpl}.nc",
         regions_onshore="resources/"
@@ -859,6 +863,8 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
             regions_offshore="resources/"
             + RDIR
             + "bus_regions/regions_offshore_elec_s{simpl}_{clusters}.geojson",
+            line_type_mapping_ac="data/line_type_mapping_ac.csv",
+            line_type_mapping_dc="data/line_type_mapping_dc.csv",
         output:
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         log:

@@ -19,16 +19,23 @@ Relevant Settings
 Inputs
 ------
 
+- ``networks/elec_s{simpl}_{clusters}_pre_augmentation.nc``: Input network before augmentation.
+- ``resources/costs_{year}.csv``: Technology cost assumptions.
+- ``data/line_type_mapping_ac.csv``: Country-specific AC voltage-to-line-type mappings.
+- ``data/line_type_mapping_dc.csv``: Country-specific DC voltage-to-line-type mappings.
+
 
 Outputs
 -------
 
+- ``networks/elec_s{simpl}_{clusters}.nc``: Network with the configured connectivity augmentation applied.
 
 
 Description
 -----------
+
+New HVAC connections use the closest country-specific line type available for the country and nominal voltage of their first bus. The default mapping is used when no country-specific mapping is available.
 """
-import os
 
 import networkx as nx
 import numpy as np
@@ -41,26 +48,11 @@ from pypsa.geo import haversine_pts
 
 logger = create_logger(__name__)
 
-LINE_TYPE_MAPPING_AC = os.path.join("data", "line_type_mapping_ac.csv")
-LINE_TYPE_MAPPING_DC = os.path.join("data", "line_type_mapping_dc.csv")
-
 
 # Functions
-def _load_default_linetype(path, voltage):
+def _load_linetypes_from_csv(path):
     """
-    Load the default line type for the voltage closest to the requested value.
-
-    Parameters
-    ----------
-    path : str
-        Path to the CSV file containing voltage-to-line-type mappings.
-    voltage : float
-        Requested nominal voltage in kV.
-
-    Returns
-    -------
-    str
-        PyPSA line type name from the default mapping.
+    Load voltage-to-line-type mappings from a CSV file.
     """
     linetypes = pd.read_csv(path, index_col=0)
     linetypes.index = linetypes.index.astype(float)
@@ -68,13 +60,29 @@ def _load_default_linetype(path, voltage):
     if "default" not in linetypes.columns:
         raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
 
-    nearest_voltage = min(linetypes.index, key=lambda x: abs(x - voltage))
-    linetype = linetypes.at[nearest_voltage, "default"]
+    return linetypes
 
-    if pd.isna(linetype):
-        raise ValueError(f"No default line type mapping found for {voltage} kV.")
 
-    return linetype
+def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
+    """
+    Return the closest available line type for a voltage and country.
+    """
+    if country in linetypes.columns:
+        mapping = linetypes[country].dropna()
+    else:
+        mapping = pd.Series(dtype=object)
+
+    if mapping.empty:
+        mapping = linetypes["default"].dropna()
+
+    if mapping.empty:
+        raise ValueError(
+            f"No line type mapping found for voltage {v_nom} kV "
+            f"and country '{country}'."
+        )
+
+    voltage = min(mapping.index, key=lambda value: abs(value - v_nom))
+    return mapping.at[voltage]
 
 
 def haversine(p):
@@ -169,8 +177,25 @@ if __name__ == "__main__":
     )
 
     #  add new lines to the network
-    dc_linetype = _load_default_linetype(LINE_TYPE_MAPPING_DC, 500)
-    ac_linetype = _load_default_linetype(LINE_TYPE_MAPPING_AC, 380)
+    ac_linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_ac)
+    dc_linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_dc)
+
+    dc_linetype = _get_linetype_by_voltage_and_country(
+        500,
+        None,
+        dc_linetypes,
+    )
+
+    new_kedge_lines["country"] = new_kedge_lines["bus0"].map(n.buses["country"])
+    new_kedge_lines["v_nom"] = new_kedge_lines["bus0"].map(n.buses["v_nom"])
+    new_kedge_lines["type"] = new_kedge_lines.apply(
+        lambda line: _get_linetype_by_voltage_and_country(
+            line.v_nom,
+            line.country,
+            ac_linetypes,
+        ),
+        axis=1,
+    )
 
     if "HVDC" in list(line_type_option):
         n.madd(
@@ -198,7 +223,7 @@ if __name__ == "__main__":
             suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
-            type=ac_linetype,
+            type=new_kedge_lines["type"],
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,
