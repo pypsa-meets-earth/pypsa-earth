@@ -18,6 +18,14 @@ import subprocess
 import sys
 from enum import Enum
 
+# On Windows, the legacy console codepage (e.g. cp1252) cannot encode some of the
+# emojis used in the CLI output, which raises a UnicodeEncodeError as soon as
+# `rich` tries to print them. Force stdout/stderr to UTF-8 so the CLI runs
+# regardless of the active console codepage.
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 import typer
 import yaml
 from InquirerPy import get_style, inquirer
