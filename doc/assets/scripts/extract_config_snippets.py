@@ -98,10 +98,7 @@ def main():
         "costs": ["costs"],
         "co2": ["co2"],
         "monte_carlo": ["monte_carlo"],
-        "solving_solver": {
-            "start": "# ------------------- Solver",
-            "end": "# ------------------- Optimization options",
-        },
+        "solving_solver": ["solving", "solver"],
         "solving_options": {
             "start": "# ------------------- Optimization options",
             "end": "# ------------------- Solver presets",
