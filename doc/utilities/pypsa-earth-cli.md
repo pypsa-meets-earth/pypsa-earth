@@ -32,6 +32,8 @@ The recommended way to launch the CLI is with pixi, using the
 .../pypsa-earth % pixi run -e pypsa-earth-cli python scripts/non_workflow/pypsa_earth_cli.py
 ```
 
+Currently, the CLI is not supported with conda.
+
 Running the script with no arguments prints a welcome message and opens the
 interactive **main menu** as seen in the following image.
 
