@@ -39,10 +39,11 @@ def extract_yaml_section(yaml_content, section_key, subsection=None):
             continue
 
         if in_section:
-            # Check if we've hit a new top-level or same-level key
-            if line.strip() and not line.strip().startswith("#"):
+            # A non-empty line at the same or lower indentation starts the
+            # next sibling section. This includes separator comments, which
+            # belong to the following section rather than the current snippet.
+            if line.strip():
                 current_indent = len(line) - len(line.lstrip())
-                # If we're back to the same or lower indent level, we're done
                 if current_indent <= section_indent:
                     break
 
@@ -70,108 +71,33 @@ def main():
             "start": "countries:",
             "end": "run:",
         },
-        "data_retrieval": {
-            "start": "enable:",
-            "end": "# =================== GEOGRAPHY & SHAPES ===================",
-        },
+        "data_retrieval": ["enable"],
         "run": ["run"],
         "scenario": ["scenario"],
-        "snapshots": {
-            "start": "snapshots:",
-            "end": "results_dir:",
-        },
-        "crs": {
-            "start": "crs:",
-            "end": "# ------------------- Regional shapes",
-        },
-        "augmented_line_connection": {
-            "start": "augmented_line_connection:",
-            "end": "# =================== NETWORK & RESOURCES",
-        },
-        "cluster_options": {
-            "start": "cluster_options:",
-            "end": "# ------------------- Augmented connectivity",
-        },
-        "build_shape_options": {
-            "start": "build_shape_options:",
-            "end": "# ------------------- Subregions",
-        },
-        "subregion": {
-            "start": "subregion:",
-            "end": "# ------------------- Land-cover exclusions",
-        },
-        "natura": {
-            "start": "natura:",
-            "end": "# ------------------- OpenStreetMap",
-        },
-        "osm": {
-            "start": "osm:",
-            "end": "# ------------------- Clustering",
-        },
-        "base_network": {
-            "start": "base_network:",
-            "end": "# ------------------- Demand",
-        },
-        "load_options": {
-            "start": "load_options:",
-            "end": "# ------------------- Electricity grid",
-        },
-        "electricity": {
-            "start": "electricity:",
-            "end": "lines:",
-        },
-        "lines": {
-            "start": "lines:",
-            "end": "links:",
-        },
-        "links": {
-            "start": "links:",
-            "end": "transformers:",
-        },
-        "transformers": {
-            "start": "transformers:",
-            "end": "# ------------------- Weather & renewables",
-        },
-        "atlite": {
-            "start": "atlite:",
-            "end": "renewable:",
-        },
-        "renewable_onwind": {
-            "start": "onwind:",
-            "end": "offwind-ac:",
-        },
-        "renewable_offwind-ac": {
-            "start": "offwind-ac:",
-            "end": "offwind-dc:",
-        },
-        "renewable_offwind-dc": {
-            "start": "offwind-dc:",
-            "end": "solar:",
-        },
-        "renewable_solar": {
-            "start": "solar:",
-            "end": "hydro:",
-        },
-        "renewable_hydro": {
-            "start": "hydro:",
-            "end": "csp:",
-        },
-        "renewable_csp": {
-            "start": "csp:",
-            "end": "# ------------------- Costs & emissions",
-        },
-        "costs": {
-            "start": "costs:",
-            "end": "co2:",
-        },
-        "co2": {
-            "start": "co2:",
-            "end": "# ------------------- Uncertainty",
-        },
-        "monte_carlo": {
-            "start": "monte_carlo:",
-            "end": "# =================== SECTOR OPTIONS",
-        },
+        "snapshots": ["snapshots"],
+        "crs": ["crs"],
+        "augmented_line_connection": ["augmented_line_connection"],
+        "cluster_options": ["cluster_options"],
+        "build_shape_options": ["build_shape_options"],
+        "subregion": ["subregion"],
+        "natura": ["natura"],
+        "osm": ["osm"],
+        "base_network": ["base_network"],
+        "load_options": ["load_options"],
+        "electricity": ["electricity"],
+        "lines": ["lines"],
+        "links": ["links"],
+        "transformers": ["transformers"],
+        "atlite": ["atlite"],
+        "renewable_onwind": ["renewable", "onwind"],
+        "renewable_offwind-ac": ["renewable", "offwind-ac"],
+        "renewable_offwind-dc": ["renewable", "offwind-dc"],
+        "renewable_solar": ["renewable", "solar"],
+        "renewable_hydro": ["renewable", "hydro"],
+        "renewable_csp": ["renewable", "csp"],
+        "costs": ["costs"],
+        "co2": ["co2"],
+        "monte_carlo": ["monte_carlo"],
         "solving_solver": {
             "start": "# ------------------- Solver",
             "end": "# ------------------- Optimization options",
@@ -181,26 +107,11 @@ def main():
             "end": "# ------------------- Solver presets",
         },
         "plotting": ["plotting"],
-        "policy_config": {
-            "start": "policy_config:",
-            "end": "export:",
-        },
-        "export": {
-            "start": "export:",
-            "end": "# ------------------- Sector-coupled demand data",
-        },
-        "demand_data": {
-            "start": "demand_data:",
-            "end": "# ------------------- Custom data",
-        },
-        "custom_data": {
-            "start": "custom_data:",
-            "end": "# ------------------- Brownfield capacities",
-        },
-        "existing_capacities": {
-            "start": "existing_capacities:",
-            "end": "# ------------------- Enabled sectors & fuel infrastructure",
-        },
+        "policy_config": ["policy_config"],
+        "export": ["export"],
+        "demand_data": ["demand_data"],
+        "custom_data": ["custom_data"],
+        "existing_capacities": ["existing_capacities"],
         "sector_toplevel": {
             "start": "sector:",
             "end": "# ------------------- Heat sector",
