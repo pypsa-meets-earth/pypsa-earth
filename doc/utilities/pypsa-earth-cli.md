@@ -21,7 +21,7 @@ Retrieval** checker, and a **Run Model** launcher.
 
 The CLI's dependencies (`typer`, `inquirerpy`, `rich`) are not part of the
 default `pypsa-earth` environment. They are bundled in the dedicated
-`pypsa-earth-cli` [pixi](https://pixi.sh) environemnt. 
+`pypsa-earth-cli` [pixi](https://pixi.sh) environemnt.
 
 ## Launching the CLI
 
