@@ -409,7 +409,7 @@ def show_questionnaire(option: str) -> None:
             answer = eval(answer)
         user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
-        while not_matching(user_answer,answer):
+        while not_matching(user_answer, answer):
             if "choices" not in question:
                 user_answer = ask(f"{question['id']}. {question['question']}")
             else:
@@ -418,7 +418,7 @@ def show_questionnaire(option: str) -> None:
                     random.sample(question["choices"], len(question["choices"])),
                     len(question["choices"]),
                 )
-            if not_matching(user_answer,answer):
+            if not_matching(user_answer, answer):
                 console.print(
                     f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
                 )
@@ -471,12 +471,13 @@ def show_questionnaire(option: str) -> None:
             config_dict[answer_dict[key]] = value
 
         # Prompt the user to run the model with the updated config file
-        model_run = ask(
+        model_run = display_choice_menu(
             "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
-            default=["Yes", "No"],
+            ["No", "Yes"],
+            3,
         ).lower()
 
-        save_config_path = "config.KZ.yaml"
+        save_config_path = "config.kz.yaml"
         if model_run == "yes":
 
             # Update some additional config parameters that are required for the model run
@@ -501,6 +502,7 @@ def show_questionnaire(option: str) -> None:
             save_config_file(
                 config_path=save_config_path, config_data=unflatten_dict(config_dict)
             )
+
 
 @app.command("quiz_zone")
 def quiz_zone() -> None:
@@ -603,6 +605,7 @@ def run_model(config_path="") -> None:
     subprocess.run(snakemake_command.split(" "))
 
     display_main_menu()
+
 
 @app.command("run-model")
 def run_model(config_path="") -> None:
