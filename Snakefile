@@ -66,12 +66,6 @@ SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
-HYDROBASINS_PATH = (
-    "data/hydrobasins_hydroshare/africa-geoglows-atlite.shp"
-    if config.get("tutorial", True)
-    else "data/hydrobasins/hybas_world.shp"
-)
-
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
@@ -583,17 +577,18 @@ rule build_demand_profiles:
         "scripts/build_demand_profiles.py"
 
 
-HYDRO_PROFILES = {
-    "hydro_capacities": "data/hydro_capacities.csv",
-    "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
-    "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
-    "powerplants": "resources/" + RDIR + "powerplants.csv",
-    "hydrobasins": HYDROBASINS_PATH,
-}
-
-
 def inputs_hydro(w):
-    return HYDRO_PROFILES if w.technology == "hydro" else {}
+    if w.technology == "hydro":
+        HYDRO_PROFILES = {
+            "hydro_capacities": "data/hydro_capacities.csv",
+            "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
+            "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
+            "powerplants": "resources/" + RDIR + "powerplants.csv",
+            "hydrobasins": config["renewable"]["hydro"]["resource"]["hydrobasins"],
+        }
+        return HYDRO_PROFILES
+    else:
+        return {}
 
 
 rule build_renewable_profiles:

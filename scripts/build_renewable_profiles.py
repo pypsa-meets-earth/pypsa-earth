@@ -595,11 +595,9 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
-        resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
-        ppls = load_powerplants(paths.powerplants)
-
         resource["hydrobasins"] = hydrobasins
+        ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
 
@@ -611,11 +609,6 @@ if __name__ == "__main__":
             crs=PPL_CRS,
         ).to_crs(hydrobasins.crs)
         temp_gdf = gpd.sjoin(hgdf, hydrobasins, predicate="within", how="left")
-
-        print("temp_gdf")
-        print(temp_gdf)
-        print("temp_gdf.columns")
-        print(temp_gdf.columns)
 
         hydro_ppls = pd.DataFrame(
             hgdf.loc[temp_gdf.index_right.dropna().index].drop(columns="geometry")
