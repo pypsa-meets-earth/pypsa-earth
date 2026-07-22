@@ -18,8 +18,8 @@ import random
 import subprocess
 import sys
 import time
-from enum import Enum
 
+import numpy as np
 import typer
 import yaml
 from InquirerPy import get_style, inquirer
@@ -27,6 +27,14 @@ from InquirerPy.base import Choice
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
+
+# On Windows, the legacy console codepage (e.g. cp1252) cannot encode some of the
+# emojis used in the CLI output, which raises a UnicodeEncodeError as soon as
+# `rich` tries to print them. Force stdout/stderr to UTF-8 so the CLI runs
+# regardless of the active console codepage.
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -380,16 +388,28 @@ def show_questionnaire(option: str) -> None:
     # Print welcome message for the use-case
     console.print(use_case["initial_message"])
     console.print(style="dim")
+    panel_content = "[cyan][bold]Note:\n\n[/bold]* Use [white]`Ctrl+C`[/white] to exit the quiz in between. Please note that this will also exit the application and your answers will not be saved. \n\n* Please ensure that the answers typed in are case-sensitive.[/cyan]"
+    console.print(Panel(panel_content, expand=False, border_style="green"))
+    console.print(style="dim")
+    time.sleep(3)
+
     answer_dict = {}
+
+    def not_matching(a, b):
+        if isinstance(b, (list, tuple, set)):
+            return a not in b
+        return a != b
 
     total_score = 0
     # Iterate through the questions
     for question in questions:
         score = 1
         answer = question["answer"]
+        if isinstance(answer, str) and answer.startswith("["):
+            answer = eval(answer)
         user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
-        while user_answer != answer:
+        while not_matching(user_answer,answer):
             if "choices" not in question:
                 user_answer = ask(f"{question['id']}. {question['question']}")
             else:
@@ -398,7 +418,7 @@ def show_questionnaire(option: str) -> None:
                     random.sample(question["choices"], len(question["choices"])),
                     len(question["choices"]),
                 )
-            if user_answer != answer:
+            if not_matching(user_answer,answer):
                 console.print(
                     f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
                 )
@@ -440,6 +460,8 @@ def show_questionnaire(option: str) -> None:
         console.print(
             "To make the config file model-ready, a few more responses are required from you. Please enter your responses to the following questions."
         )
+
+        # Map the answers to the config parameters to be updated in the config file
         config_dict = {}
         for key, value in use_case["config_update"].items():
             if isinstance(value, list):
@@ -448,33 +470,37 @@ def show_questionnaire(option: str) -> None:
                 value = answer_dict[value]
             config_dict[answer_dict[key]] = value
 
-        # Update some additional config parameters that are required for the model run
-        folder = ask("Enter run name for the model")
-        config_dict["run.name"] = folder
-
-        solver = ask(
-            "Enter solver to use for running the model", default=["gurobi", "highs"]
-        )
-        if solver == "highs":
-            config_dict["solving.solver.name"] = "highs"
-            config_dict["solving.solver.options"] = "highs-default"
-
-        # Save the updated config file
-        save_config_path = "config.KZ.yaml"
-        save_config_file(
-            config_path=save_config_path, config_data=unflatten_dict(config_dict)
-        )
-
-        console.print(style="dim")
-        console.print(
-            f"[bold cyan] The config file {save_config_path} has been updated with your responses. [/bold cyan]"
-        )
-
         # Prompt the user to run the model with the updated config file
-        model_run = ask("Do you want to run the model ?", default=["Yes", "No"])
-        if model_run == "Yes":
-            run_model(save_config_path)
+        model_run = ask(
+            "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
+            default=["Yes", "No"],
+        ).lower()
 
+        save_config_path = "config.KZ.yaml"
+        if model_run == "yes":
+
+            # Update some additional config parameters that are required for the model run
+            console.print(
+                "A few additional parameters need to be updated in the config file for a successful model run. Please enter your preferences for the following questions."
+            )
+
+            folder = ask("Enter run name for the model")
+            config_dict["run.name"] = folder
+
+            solver = ask(
+                "Enter solver to use for running the model", default=["gurobi", "highs"]
+            )
+            if solver == "highs":
+                config_dict["solving.solver.name"] = "highs"
+                config_dict["solving.solver.options"] = "highs-default"
+            save_config_file(
+                config_path=save_config_path, config_data=unflatten_dict(config_dict)
+            )
+            run_model(save_config_path)
+        else:
+            save_config_file(
+                config_path=save_config_path, config_data=unflatten_dict(config_dict)
+            )
 
 @app.command("quiz_zone")
 def quiz_zone() -> None:
@@ -578,6 +604,51 @@ def run_model(config_path="") -> None:
 
     display_main_menu()
 
+@app.command("run-model")
+def run_model(config_path="") -> None:
+    """
+    Run the PyPSA-Earth model using snakemake
+
+    Parameters
+    ----------
+    config_path: str
+        Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
+
+    Returns
+    -------
+    None
+    """
+
+    # Load existing config files if not passed to the function
+    if config_path == "":
+        config_path = display_config_files()
+
+    # the tutorial use-case is designed as an elec-only model, so we will use the solve_all_networks rule to run the model
+    target_rule = "solve_all_networks"
+
+    # Prompt user for number of cores to use to run the model
+    cores = ask("Enter the number of cores to run the model")
+
+    # Prompt user for environment type to use - pixi / conda
+    env = ask(
+        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    )
+    if env == "pixi":
+        env_command = "pixi run"
+    elif env == "conda":
+        env_command = "conda run -n pypsa-earth"
+
+    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
+
+    console.print(style="dim")
+    console.print(
+        f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]"
+    )
+
+    subprocess.run(snakemake_command.split(" "))
+
+    display_main_menu()
+
 
 def display_main_menu() -> None:
     """
@@ -632,6 +703,10 @@ def display_main_menu() -> None:
         run_model()
     elif choice == "5":
         exit_message()
+    else:
+        console.print(f"[magenta] Please enter a valid option between 1-5 [/magenta]")
+        time.sleep(2)
+        display_main_menu()
 
 
 @app.callback(invoke_without_command=True)
