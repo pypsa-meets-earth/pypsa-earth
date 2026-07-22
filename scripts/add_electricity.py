@@ -902,7 +902,10 @@ def attach_hydro(
     ror = ppl_grouped[ppl_grouped["carrier"] == "ror"]
     phs = ppl_grouped[ppl_grouped["carrier"] == "PHS"]
     hydro = ppl_grouped[ppl_grouped["carrier"] == "hydro"]
-    tbd = ppl[ppl.technology.isna()]  # To be determined technologies
+
+    tbd = ppl[
+        ~ppl.technology.isin(tech_to_carrier.keys())
+    ]  # To be determined technologies
 
     inflow_idx = ror.index.union(hydro.index).union(tbd.index)
     if not inflow_idx.empty:
@@ -1023,7 +1026,10 @@ def attach_hydro(
     if "PHS" in carriers and not phs.empty:
         # fill missing max hours to config value and
         # assume no natural inflow due to lack of data
-        phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
+        phs["max_hours"] = phs.max_hours.where(
+            ~phs.max_hours.isna() & (phs.max_hours > 0),
+            c["PHS_max_hours"],
+        )
         n.madd(
             "StorageUnit",
             phs.index,
