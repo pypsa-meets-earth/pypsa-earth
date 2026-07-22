@@ -7,13 +7,14 @@
 This script provides the basis to run a command line interface (CLI) to help users navigate through PyPSA-Earth
 
 The CLI has the following modules:
-1. Tutorial - A tutorial based module developed in sync with use-case documentation
+1. Quiz zone - A quiz based module developed in sync with use-case documentation to test the user's understanding of the same
 2. Edit config - Feature to edit config parameters without direct exposure to the same
 3. Retrieve databundles - Feature to independently retrieve databundles required for a PyPSA-Earth model run
 4. Run snakemake - Feature to run a snakemake workflow
 
 """
 import os
+import random
 import subprocess
 import sys
 import time
@@ -224,7 +225,7 @@ def unflatten_dict(flat_dict: dict, separator: str = ".") -> dict:
 
 def display_user_groups() -> tuple:
     """
-    Menu to display user groups to the user from those defined in `user_groups_cli.yaml`.
+    Menu to display user groups to the user from those defined in `configs/pypsa_earth_cli/user_groups.yaml`.
 
     Returns
     -------
@@ -354,6 +355,7 @@ def config_setup():
     # Save updated config file
     config_save_path = "config.cli_updated.yaml"
     save_config_file(config_save_path, unflatten_dict(updated_config))
+    time.sleep(3)
     display_main_menu()
 
 
@@ -386,13 +388,11 @@ def show_questionnaire(option: str) -> None:
     # Print welcome message for the use-case
     console.print(use_case["initial_message"])
     console.print(style="dim")
-
     panel_content = "[cyan][bold]Note:\n\n[/bold]* Use [white]`Ctrl+C`[/white] to exit the quiz in between. Please note that this will also exit the application and your answers will not be saved. \n\n* Please ensure that the answers typed in are case-sensitive.[/cyan]"
-
     console.print(Panel(panel_content, expand=False, border_style="green"))
-
     console.print(style="dim")
     time.sleep(3)
+
     answer_dict = {}
 
     def not_matching(a, b):
@@ -400,8 +400,10 @@ def show_questionnaire(option: str) -> None:
             return a not in b
         return a != b
 
+    total_score = 0
     # Iterate through the questions
     for question in questions:
+        score = 1
         answer = question["answer"]
         if isinstance(answer, str) and answer.startswith("["):
             answer = eval(answer)
@@ -413,77 +415,99 @@ def show_questionnaire(option: str) -> None:
             else:
                 user_answer = display_choice_menu(
                     f"{question['id']}. {question['question']}",
-                    question["choices"],
+                    random.sample(question["choices"], len(question["choices"])),
                     len(question["choices"]),
                 )
-            # import pdb; pdb.set_trace()
-
             if not_matching(user_answer, answer):
                 console.print(
                     f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
                 )
                 console.print(style="dim")
+                score -= 0.25
 
                 # Provide a hint to the user if the question has a hint defined in the config file
                 if "hints" in question:
-                    hint = ask("Would you like a hint?", default=["Yes", "No"]).lower()
-                    if hint == "yes":
+                    hint = display_choice_menu(
+                        "Would you like a hint?", ["Yes", "No"], 3
+                    )
+                    if hint == "Yes":
                         console.print(
                             f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]"
                         )
                         console.print(style="dim")
+                        score -= 0.25
 
             answer_dict[question["id"]] = user_answer
+        total_score += max(min(score, 1), 0)
         console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
         console.print(style="dim")
     console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
     console.print(style="dim")
 
-    # Map the answers to the config parameters to be updated in the config file
-    config_dict = {}
-    for key, value in use_case["config_update"].items():
-        if isinstance(value, list):
-            value = list((answer_dict[value[0]],))
-        else:
-            value = answer_dict[value]
-        config_dict[answer_dict[key]] = value
+    console.print(
+        f"[bold magenta] Your score for this module of the quiz zone is {total_score}/{len(questions)} [/bold magenta]"
+    )
+    console.print(style="dim")
+    console.print(
+        "Each correct answer has been awarded 1 point. Each incorrect answer was penalized by 0.25 points. If a hint was requested, an additional penalty of 0.25 points was applied."
+    )
+    console.print(style="dim")
 
-    model_run = ask(
-        "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
-        default=["Yes", "No"],
-    ).lower()
+    time.sleep(3)
 
-    save_config_path = "config.KZ.yaml"
-    if model_run == "yes":
-
-        # Update some additional config parameters that are required for the model run
+    if "config_update" in use_case:
+        # Map the answers to the config parameters to be updated in the config file
         console.print(
-            "A few additional parameters need to be updated in the config file for a successful model run. Please enter your preferences for the following questions."
+            "To make the config file model-ready, a few more responses are required from you. Please enter your responses to the following questions."
         )
 
-        folder = ask("Enter run name for the model")
-        config_dict["run.name"] = folder
+        # Map the answers to the config parameters to be updated in the config file
+        config_dict = {}
+        for key, value in use_case["config_update"].items():
+            if isinstance(value, list):
+                value = list((answer_dict[value[0]],))
+            else:
+                value = answer_dict[value]
+            config_dict[answer_dict[key]] = value
 
-        solver = ask(
-            "Enter solver to use for running the model", default=["gurobi", "highs"]
-        )
-        if solver == "highs":
-            config_dict["solving.solver.name"] = "highs"
-            config_dict["solving.solver.options"] = "highs-default"
-        save_config_file(
-            config_path=save_config_path, config_data=unflatten_dict(config_dict)
-        )
-        run_model(save_config_path)
-    else:
-        save_config_file(
-            config_path=save_config_path, config_data=unflatten_dict(config_dict)
-        )
+        # Prompt the user to run the model with the updated config file
+        model_run = display_choice_menu(
+            "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
+            ["No", "Yes"],
+            3,
+        ).lower()
+
+        save_config_path = "config.kz.yaml"
+        if model_run == "yes":
+
+            # Update some additional config parameters that are required for the model run
+            console.print(
+                "A few additional parameters need to be updated in the config file for a successful model run. Please enter your preferences for the following questions."
+            )
+
+            folder = ask("Enter run name for the model")
+            config_dict["run.name"] = folder
+
+            solver = ask(
+                "Enter solver to use for running the model", default=["gurobi", "highs"]
+            )
+            if solver == "highs":
+                config_dict["solving.solver.name"] = "highs"
+                config_dict["solving.solver.options"] = "highs-default"
+            save_config_file(
+                config_path=save_config_path, config_data=unflatten_dict(config_dict)
+            )
+            run_model(save_config_path)
+        else:
+            save_config_file(
+                config_path=save_config_path, config_data=unflatten_dict(config_dict)
+            )
 
 
-@app.command("tutorial")
-def tutorial() -> None:
+@app.command("quiz_zone")
+def quiz_zone() -> None:
     """
-    Display the tutorial menu
+    Display the QUIZ modules
 
     Parameters
     ----------
@@ -524,23 +548,63 @@ def tutorial() -> None:
         panels.append(Panel(panel_content, expand=False, border_style="green"))
 
     # Print the menu title and options
-    console.rule("[bold magenta]📊 TUTORIAL [/bold magenta]")
+    console.rule("[bold magenta]📊 QUIZ ZONE [/bold magenta]")
     console.print(Columns(panels, padding=(1, 2)))
 
     choice = ask("Select option 1-8 to proceed further")
 
-    if choice in list(map(str, np.arange(1, 8))):
+    if choice != "8":
         show_questionnaire(choice)
-        tutorial()
-
+        quiz_zone()
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
 
-    else:
-        console.print(f"[magenta] Please enter a valid option between 1-8 [/magenta]")
-        time.sleep(2)
-        tutorial()
+
+@app.command("run-model")
+def run_model(config_path="") -> None:
+    """
+    Run the PyPSA-Earth model using snakemake
+
+    Parameters
+    ----------
+    config_path: str
+        Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
+
+    Returns
+    -------
+    None
+    """
+
+    # Load existing config files if not passed to the function
+    if config_path == "":
+        config_path = display_config_files()
+
+    # the tutorial use-case is designed as an elec-only model, so we will use the solve_all_networks rule to run the model
+    target_rule = "solve_all_networks"
+
+    # Prompt user for number of cores to use to run the model
+    cores = ask("Enter the number of cores to run the model")
+
+    # Prompt user for environment type to use - pixi / conda
+    env = ask(
+        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    )
+    if env == "pixi":
+        env_command = "pixi run"
+    elif env == "conda":
+        env_command = "conda run -n pypsa-earth"
+
+    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
+
+    console.print(style="dim")
+    console.print(
+        f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]"
+    )
+
+    subprocess.run(snakemake_command.split(" "))
+
+    display_main_menu()
 
 
 @app.command("run-model")
@@ -604,8 +668,8 @@ def display_main_menu() -> None:
     menu_items = [
         {
             "num": "1",
-            "name": "Tutorial",
-            "desc": "Use-case guide for PyPSA-Kazakhstan",
+            "name": "Quiz Zone",
+            "desc": "Quiz based on the use-case guide for PyPSA-Kazakhstan",
         },
         {
             "num": "2",
@@ -632,7 +696,7 @@ def display_main_menu() -> None:
     choice = ask("Select option 1-5 to proceed further")
 
     if choice == "1":
-        tutorial()
+        quiz_zone()
     elif choice == "2":
         config_setup()
     elif choice == "3":
