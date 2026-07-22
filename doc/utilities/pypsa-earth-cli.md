@@ -37,7 +37,7 @@ Currently, the CLI is not supported with conda.
 Running the script with no arguments prints a welcome message and opens the
 interactive **main menu** as seen in the following image.
 
-![PyPSA-Earth CLI main menu](pypsa_earth_cli_menu.png)
+![PyPSA-Earth CLI main menu](img/pypsa_earth_cli_menu.png)
 
 Each module is also exposed as a `typer`
 subcommand, so it can be jumped to directly:
