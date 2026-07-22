@@ -17,7 +17,6 @@ import os
 import subprocess
 import sys
 import time
-from enum import Enum
 
 import numpy as np
 import typer
@@ -388,12 +387,19 @@ def show_questionnaire(option: str) -> None:
     time.sleep(3)
     answer_dict = {}
 
+    def not_matching(a, b):
+        if isinstance(b, (list, tuple, set)):
+            return a not in b
+        return a != b
+
     # Iterate through the questions
     for question in questions:
         answer = question["answer"]
+        if isinstance(answer, str) and answer.startswith("["):
+            answer = eval(answer)
         user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
-        while user_answer != answer:
+        while not_matching(user_answer, answer):
             if "choices" not in question:
                 user_answer = ask(f"{question['id']}. {question['question']}")
             else:
@@ -402,7 +408,9 @@ def show_questionnaire(option: str) -> None:
                     question["choices"],
                     len(question["choices"]),
                 )
-            if user_answer != answer:
+            # import pdb; pdb.set_trace()
+
+            if not_matching(user_answer, answer):
                 console.print(
                     f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
                 )
