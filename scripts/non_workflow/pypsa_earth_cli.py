@@ -345,6 +345,8 @@ def config_setup():
                 )
                 if isinstance(updated_config[choice][subchoice], list):
                     updated_value = updated_value.split(",")
+                if isinstance(updated_config[choice][subchoice], bool):
+                    updated_value = True if updated_value == "True" else False
                 updated_config[choice][subchoice] = updated_value
         else:
             # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
@@ -354,6 +356,8 @@ def config_setup():
             if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
+            if isinstance(updated_config[choice][subchoice], bool):
+                updated_value = True if updated_value == "True" else False
             updated_config[choice] = updated_value
 
     # Save updated config file
@@ -626,8 +630,8 @@ def run_model(config_path="") -> None:
     cores = ask("Enter the number of cores to run the model")
 
     # Prompt user for environment type to use - pixi / conda
-    env = ask(
-        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    env = display_choice_menu(
+        "Do you want to use a pixi / conda environment", ["pixi", "conda"], 3
     )
     if env == "pixi":
         env_command = "pixi run"
@@ -672,8 +676,8 @@ def run_model(config_path="") -> None:
     cores = ask("Enter the number of cores to run the model")
 
     # Prompt user for environment type to use - pixi / conda
-    env = ask(
-        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    env = display_choice_menu(
+        "Do you want to use a pixi / conda environment", ["pixi", "conda"], 3
     )
     if env == "pixi":
         env_command = "pixi run"
