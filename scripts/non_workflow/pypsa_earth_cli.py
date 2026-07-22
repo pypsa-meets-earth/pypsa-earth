@@ -27,6 +27,14 @@ from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 
+# On Windows, the legacy console codepage (e.g. cp1252) cannot encode some of the
+# emojis used in the CLI output, which raises a UnicodeEncodeError as soon as
+# `rich` tries to print them. Force stdout/stderr to UTF-8 so the CLI runs
+# regardless of the active console codepage.
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
 
