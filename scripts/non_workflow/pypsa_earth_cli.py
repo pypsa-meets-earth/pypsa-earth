@@ -14,6 +14,7 @@ The CLI has the following modules:
 
 """
 import os
+import random
 import subprocess
 import sys
 import time
@@ -394,7 +395,7 @@ def show_questionnaire(option: str) -> None:
             else:
                 user_answer = display_choice_menu(
                     f"{question['id']}. {question['question']}",
-                    question["choices"],
+                    random.sample(question["choices"], len(question["choices"])),
                     len(question["choices"]),
                 )
             if user_answer != answer:
@@ -406,7 +407,9 @@ def show_questionnaire(option: str) -> None:
 
                 # Provide a hint to the user if the question has a hint defined in the config file
                 if "hints" in question:
-                    hint = ask("Would you like a hint?", default=["Yes", "No"])
+                    hint = display_choice_menu(
+                        "Would you like a hint?", ["Yes", "No"], 3
+                    )
                     if hint == "Yes":
                         console.print(
                             f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]"
