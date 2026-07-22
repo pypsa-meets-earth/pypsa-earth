@@ -512,40 +512,30 @@ def download_and_unzip_hydrobasins(
     -------
     True when download is successful, False otherwise
     """
-    if config.get("tutorial", False):
+    resource = config["category"]
+    destination = os.path.join(BASE_DIR, config["destination"])
+    url_templ = config["urls"]["hydrobasins"]["base_url"]
+    suffix_list = config["urls"]["hydrobasins"]["suffixes"]
 
-        all_downloaded = download_and_unzip_direct(
-            config=config,
-            rootpath=rootpath,
+    level_code = config["level_code"]
+    level_code = "{:02d}".format(int(level_code))
+
+    all_downloaded = True
+
+    for rg in suffix_list:
+        url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
+        file_path = os.path.join(destination, os.path.basename(url))
+
+        all_downloaded &= download_and_unpack(
+            url=url,
+            file_path=file_path,
+            resource=resource,
+            destination=destination,
+            headers={"User-agent": "Mozilla/5.0"},
             hot_run=hot_run,
+            unzip=True,
             disable_progress=disable_progress,
         )
-
-    else:
-        resource = config["category"]
-        destination = os.path.join(BASE_DIR, config["destination"])
-        url_templ = config["urls"]["hydrobasins"]["base_url"]
-        suffix_list = config["urls"]["hydrobasins"]["suffixes"]
-
-        level_code = config["level_code"]
-        level_code = "{:02d}".format(int(level_code))
-
-        all_downloaded = True
-
-        for rg in suffix_list:
-            url = url_templ + "hybas_" + rg + "_lev" + level_code + "_v1c.zip"
-            file_path = os.path.join(destination, os.path.basename(url))
-
-            all_downloaded &= download_and_unpack(
-                url=url,
-                file_path=file_path,
-                resource=resource,
-                destination=destination,
-                headers={"User-agent": "Mozilla/5.0"},
-                hot_run=hot_run,
-                unzip=True,
-                disable_progress=disable_progress,
-            )
 
     return all_downloaded
 
