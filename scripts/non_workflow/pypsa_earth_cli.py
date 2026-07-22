@@ -14,13 +14,12 @@ The CLI has the following modules:
 
 """
 import os
+import random
 import re
 import subprocess
 import sys
 import time
 from pathlib import Path
-
-import random
 
 import numpy as np
 import typer
@@ -505,7 +504,7 @@ def show_questionnaire(option: str) -> None:
             ["No", "Yes"],
             3,
         ).lower()
-        
+
         if model_run == "yes":
 
             # Update some additional config parameters that are required for the model run
@@ -523,15 +522,14 @@ def show_questionnaire(option: str) -> None:
                 config_dict["solving.solver.name"] = "highs"
                 config_dict["solving.solver.options"] = "highs-default"
 
-
             # Save the updated config file
-            save_config_path = "config.KZ_cli.yaml"
+            save_config_path = use_case["config_path"]
+            existing_config_path = "config.cli_base.yaml"
             existing_config_dict = {}
-            if Path(save_config_path).is_file():
-                existing_config_dict = load_config_file(save_config_path)
+            if Path(existing_config_path).is_file():
+                existing_config_dict = load_config_file(existing_config_path)
                 if existing_config_dict == None:
                     existing_config_dict = {}
-
             save_config_file(
                 config_path=save_config_path,
                 config_data=unflatten_dict(existing_config_dict | config_dict),
@@ -539,9 +537,11 @@ def show_questionnaire(option: str) -> None:
 
             run_model(save_config_path)
         else:
+            save_config_path = use_case["config_path"]
             save_config_file(
                 config_path=save_config_path, config_data=unflatten_dict(config_dict)
             )
+
 
 @app.command("quiz_zone")
 def quiz_zone() -> None:
