@@ -16,7 +16,16 @@ The CLI has the following modules:
 import os
 import subprocess
 import sys
-from enum import Enum
+import time
+
+import numpy as np
+import typer
+import yaml
+from InquirerPy import get_style, inquirer
+from InquirerPy.base import Choice
+from rich.columns import Columns
+from rich.console import Console
+from rich.panel import Panel
 
 # On Windows, the legacy console codepage (e.g. cp1252) cannot encode some of the
 # emojis used in the CLI output, which raises a UnicodeEncodeError as soon as
@@ -25,14 +34,6 @@ from enum import Enum
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-
-import typer
-import yaml
-from InquirerPy import get_style, inquirer
-from InquirerPy.base import Choice
-from rich.columns import Columns
-from rich.console import Console
-from rich.panel import Panel
 
 app = typer.Typer(help="CLI to change config entries in PyPSA-Earth and run the model")
 console = Console()
@@ -248,7 +249,6 @@ def display_user_groups() -> tuple:
     return user_groups_config, user_group
 
 
-# Currently not in use
 def display_config_files() -> dict[dict]:
     """
     Select and load config file data
@@ -263,11 +263,12 @@ def display_config_files() -> dict[dict]:
     ]
 
     config_path = display_choice_menu(
-        "Select config file", config_files_list, len(config_files_list) + 1
+        "Select config file to run the model",
+        config_files_list,
+        len(config_files_list) + 1,
     )
 
-    config = load_config_file(config_path)
-    return config
+    return config_path
 
 
 @app.command("config-setup")
@@ -356,9 +357,249 @@ def config_setup():
     display_main_menu()
 
 
+def show_questionnaire(option: str) -> None:
+    """
+    Display the questionnaire for the selected use-case
+
+    Parameters
+    ----------
+    options: str
+        Use-case selected by the user
+
+    Returns
+    -------
+    None
+    """
+    console.print(style="dim")
+
+    # Load the questionnaire config file
+    questions_config = load_config_file(
+        "configs/pypsa_earth_cli/tutorial_questions.yaml"
+    )
+
+    # Select use-case based on the option selected by the user
+    use_case = questions_config[f"use-case-{option}"]
+
+    # Get the questions list
+    questions = use_case["questionnaire"]
+
+    # Print welcome message for the use-case
+    console.print(use_case["initial_message"])
+    console.print(style="dim")
+
+    panel_content = "[cyan][bold]Note:\n\n[/bold]* Use [white]`Ctrl+C`[/white] to exit the quiz in between. Please note that this will also exit the application and your answers will not be saved. \n\n* Please ensure that the answers typed in are case-sensitive.[/cyan]"
+
+    console.print(Panel(panel_content, expand=False, border_style="green"))
+
+    console.print(style="dim")
+    time.sleep(3)
+    answer_dict = {}
+
+    def not_matching(a, b):
+        if isinstance(b, (list, tuple, set)):
+            return a not in b
+        return a != b
+
+    # Iterate through the questions
+    for question in questions:
+        answer = question["answer"]
+        if isinstance(answer, str) and answer.startswith("["):
+            answer = eval(answer)
+        user_answer = ""
+        # While the user answer is not equal to the correct answer, keep prompting the user for an answer
+        while not_matching(user_answer, answer):
+            if "choices" not in question:
+                user_answer = ask(f"{question['id']}. {question['question']}")
+            else:
+                user_answer = display_choice_menu(
+                    f"{question['id']}. {question['question']}",
+                    question["choices"],
+                    len(question["choices"]),
+                )
+            # import pdb; pdb.set_trace()
+
+            if not_matching(user_answer, answer):
+                console.print(
+                    f"[bold red] ❌ {use_case['failure_message']} [/bold red]"
+                )
+                console.print(style="dim")
+
+                # Provide a hint to the user if the question has a hint defined in the config file
+                if "hints" in question:
+                    hint = ask("Would you like a hint?", default=["Yes", "No"]).lower()
+                    if hint == "yes":
+                        console.print(
+                            f"[bold cyan] Hint: {question['hints']}. Rethink and enter your answer [/bold cyan]"
+                        )
+                        console.print(style="dim")
+
+            answer_dict[question["id"]] = user_answer
+        console.print(f"[bold green] ✔️ {use_case['success_message']} [/bold green]")
+        console.print(style="dim")
+    console.print(f"[bold green] {use_case['exit_message']} [/bold green]")
+    console.print(style="dim")
+
+    # Map the answers to the config parameters to be updated in the config file
+    config_dict = {}
+    for key, value in use_case["config_update"].items():
+        if isinstance(value, list):
+            value = list((answer_dict[value[0]],))
+        else:
+            value = answer_dict[value]
+        config_dict[answer_dict[key]] = value
+
+    model_run = ask(
+        "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
+        default=["Yes", "No"],
+    ).lower()
+
+    save_config_path = "config.KZ.yaml"
+    if model_run == "yes":
+
+        # Update some additional config parameters that are required for the model run
+        console.print(
+            "A few additional parameters need to be updated in the config file for a successful model run. Please enter your preferences for the following questions."
+        )
+
+        folder = ask("Enter run name for the model")
+        config_dict["run.name"] = folder
+
+        solver = ask(
+            "Enter solver to use for running the model", default=["gurobi", "highs"]
+        )
+        if solver == "highs":
+            config_dict["solving.solver.name"] = "highs"
+            config_dict["solving.solver.options"] = "highs-default"
+        save_config_file(
+            config_path=save_config_path, config_data=unflatten_dict(config_dict)
+        )
+        run_model(save_config_path)
+    else:
+        save_config_file(
+            config_path=save_config_path, config_data=unflatten_dict(config_dict)
+        )
+
+
+@app.command("tutorial")
+def tutorial() -> None:
+    """
+    Display the tutorial menu
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+
+    title = "🗺️  Select use-case to try"
+    menu_items = [
+        {
+            "num": "1",
+            "name": "Baseline model",
+            "desc": "Build a baseline model for Kazakhstan",
+        },
+        {
+            "num": "2",
+            "name": "Analyze results",
+            "desc": "Analyze results of the baseline model",
+        },
+        {
+            "num": "3",
+            "name": "Demand",
+            "desc": "Integrate national demand",
+        },
+        {"num": "4", "name": "Generation", "desc": "Integrate national generation"},
+        {"num": "5", "name": "Transmission", "desc": "Improve transmission network"},
+        {"num": "6", "name": "CO2 limits", "desc": "Define CO2 emission limits"},
+        {"num": "7", "name": "Costs", "desc": "Customize regional costs"},
+        {"num": "8", "name": "Return", "desc": "Return to main menu"},
+    ]
+
+    panels = []
+    for item in menu_items:
+        panel_content = f"[bold cyan]{item['num']}[/bold cyan] | [bold white]{item['name']}[/bold white]\n[dim]{item['desc']}[/dim]"
+        panels.append(Panel(panel_content, expand=False, border_style="green"))
+
+    # Print the menu title and options
+    console.rule("[bold magenta]📊 TUTORIAL [/bold magenta]")
+    console.print(Columns(panels, padding=(1, 2)))
+
+    choice = ask("Select option 1-8 to proceed further")
+
+    if choice in list(map(str, np.arange(1, 8))):
+        show_questionnaire(choice)
+        tutorial()
+
+    elif choice == "8":
+        console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
+        display_main_menu()
+
+    else:
+        console.print(f"[magenta] Please enter a valid option between 1-8 [/magenta]")
+        time.sleep(2)
+        tutorial()
+
+
+@app.command("run-model")
+def run_model(config_path="") -> None:
+    """
+    Run the PyPSA-Earth model using snakemake
+
+    Parameters
+    ----------
+    config_path: str
+        Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
+
+    Returns
+    -------
+    None
+    """
+
+    # Load existing config files if not passed to the function
+    if config_path == "":
+        config_path = display_config_files()
+
+    # the tutorial use-case is designed as an elec-only model, so we will use the solve_all_networks rule to run the model
+    target_rule = "solve_all_networks"
+
+    # Prompt user for number of cores to use to run the model
+    cores = ask("Enter the number of cores to run the model")
+
+    # Prompt user for environment type to use - pixi / conda
+    env = ask(
+        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    )
+    if env == "pixi":
+        env_command = "pixi run"
+    elif env == "conda":
+        env_command = "conda run -n pypsa-earth"
+
+    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
+
+    console.print(style="dim")
+    console.print(
+        f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]"
+    )
+
+    subprocess.run(snakemake_command.split(" "))
+
+    display_main_menu()
+
+
 def display_main_menu() -> None:
     """
     Interactive menu to be displayed as a starting point for the CLI
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
     """
     menu_items = [
         {
@@ -390,18 +631,21 @@ def display_main_menu() -> None:
     console.print(Columns(panels, padding=(1, 2)))
     choice = ask("Select option 1-5 to proceed further")
 
-    if choice == "2":
+    if choice == "1":
+        tutorial()
+    elif choice == "2":
         config_setup()
     elif choice == "3":
         subprocess.run([sys.executable, "scripts/non_workflow/databundle_cli.py"])
         display_main_menu()
+    elif choice == "4":
+        run_model()
     elif choice == "5":
         exit_message()
     else:
-        console.print(
-            "[bold magenta] Feature still under development. Please check again later [/bold magenta]"
-        )
-        exit_message()
+        console.print(f"[magenta] Please enter a valid option between 1-5 [/magenta]")
+        time.sleep(2)
+        display_main_menu()
 
 
 @app.callback(invoke_without_command=True)
