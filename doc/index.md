@@ -67,6 +67,7 @@ There are multiple ways to get involved and learn more about our work:
 - [Electricity Model](tutorials/electricity-model.md) - Build an electricity-only model
 - [Sector-Coupled Model](tutorials/sector-coupled-model.md) - Create a multi-sector model
 - [Model Customization](user-guide/model-customization.md) - General Modeling Guidelines
+- [Use Cases](tutorials/use-cases/1-baseline-model.md) - End-to-end country study: baseline, analysis, demand and generation calibration
 - [Examples](tutorials/examples.md) - Jupyter notebooks and use cases
 
 ### User Guide
@@ -96,6 +97,7 @@ There are multiple ways to get involved and learn more about our work:
 - [Talks & Papers](community/talks-and-papers.md) - Publications and presentations
 - [Learning Materials](community/learning-materials.md) - Additional resources
 - [Software Hints](community/software-hints.md) - Tips and troubleshooting
+- [FAQ](community/faq.md) - Common run errors and fixes
 
 ### API Reference
 

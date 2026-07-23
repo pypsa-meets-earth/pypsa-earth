@@ -36,6 +36,11 @@ nav:
     - Copernicus Data: user-guide/customization/copernicus-data.md
     - Validation: user-guide/customization/validation.md
     - Running Models: user-guide/customization/running-models.md
+  - Use Cases:
+    - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
+    - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
+    - Part 3 — Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
+    - Part 4 — Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
   - Examples: tutorials/examples.md
 
 - User Guide:
@@ -85,6 +90,7 @@ nav:
   - Talks & Papers: community/talks-and-papers.md
   - Learning Materials: community/learning-materials.md
   - Software Hints: community/software-hints.md
+  - FAQ: community/faq.md
 
 - API Reference:
   - Overview: api-reference/index.md
