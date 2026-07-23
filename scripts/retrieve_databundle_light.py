@@ -68,7 +68,7 @@ according to the following rules:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`
+    :ref:`meta_cf`
 
 **Outputs**
 
