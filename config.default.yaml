@@ -595,7 +595,7 @@ sector:
     h2_turbine: true
     underground_storage:
       enabled: false
-      # calculations based on https://dx.doi.org/10.2139/ssrn.6307406
+      # calculations based on https://doi.org/10.1016/j.energy.2026.141729
       min_area_km2: 13 # minimum area for kaverns in km2
       method: "surface" # surface or physics
       technical_realization_factor: 3.5e-5
