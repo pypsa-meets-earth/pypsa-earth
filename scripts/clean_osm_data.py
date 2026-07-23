@@ -597,9 +597,6 @@ def fill_circuits(df):
 
     len_f, len_c, isna_c, len_cab, isna_cab = _get_circuits_status(df)
 
-    # Circuits may contain semicolon-separated values for multiple frequencies
-    df["circuits"] = df["circuits"].astype(object)
-
     is_numeric_cables = ~pd.to_numeric(df["cables"], errors="coerce").isna()
 
     to_fill = isna_c | (len_f != len_c)
