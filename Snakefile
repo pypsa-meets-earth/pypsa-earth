@@ -19,6 +19,8 @@ from _helpers import (
     check_config_version,
     copy_default_files,
     migrate_config,
+    resolve_weather_configuration,
+    validate_cutout_configuration,
     update_cutout_config,
     BASE_DIR,
     branch,  # Remove if Snakemake >= 8.3.0
@@ -45,6 +47,9 @@ configfile: "config.yaml"
 check_config_version(config=config)
 
 config = migrate_config(config)
+
+config = resolve_weather_configuration(config)
+config = validate_cutout_configuration(config)
 
 config.update({"git_commit": get_last_commit_message(".")})
 
@@ -393,12 +398,11 @@ def terminate_if_cutout_exists(w):
 
     if os.path.exists(cutout_fl) and not config["tutorial"]:
         raise Exception(
-            f"An option `build_cutout` or `retrieve_cutout` is enabled, while a cutout file '{cutout_fl}' "
-            "still exists and risks to be overwritten. If this is an intended behavior, "
-            "please move, rename or delete this file and re-run the rule. Otherwise, "
-            "just disable the `build_cutout` and `retrieve_cutout` rule in the config file."
+            f"The requested cutout '{cutout_fl}' already exists. "
+            "Disable `build_cutout` and `retrieve_cutout` to reuse it. "
+            "To replace it, remove or rename the existing file before rerunning "
+            "the workflow."
         )
-
     return []
 
 
@@ -550,6 +554,7 @@ rule build_demand_profiles:
     params:
         snapshots=config["snapshots"],
         load_options=config["load_options"],
+        weather_year=config["weather_year"],
         countries=config["countries"],
     input:
         base_network="networks/" + RDIR + "base.nc",
