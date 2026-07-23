@@ -42,7 +42,7 @@ co2:
     year:
       2030: 1.0
 
-cluster_options:
+clustering:
   alternative_clustering: false
 
 countries: ['NG', 'BJ']

@@ -1,5 +1,5 @@
 Parameter,Unit,Values,Description
-ssp,--,string,Scenario considered for shared socio-economic pathway (GDP and population growth)
-weather_year,--,"YYYY (past year)",Year from which weather data is taken. Must be a year in the past
-prediction_year,--,"YYYY (can be in the future)",Year for which the load scenario is computed (GDP and population)
-scale,--,float or dict,Scale for all the load time-series or specific countries if specified
+source,--,"{gegis, demcast}","Load dataset provider. ``gegis``: bundled GEGIS SSP2-2.6 scenario loads (2011, 2013, and 2018 are available); requires ``prediction_year``; ``weather_year`` must match an available folder (2011, 2013, 2018, or a ``*_custom`` suffix for user data). ``demcast``: DemandCast hourly parquet; ``weather_year`` may be 2000–2024; ``prediction_year`` is ignored. Comparison and download notes: [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724). Legacy value ``ssp`` is accepted with a deprecation warning (same as ``gegis``)."
+weather_year,--,"YYYY (past year)","Calendar year of the load time series. Must lie within the ``snapshots`` date range. Available years depend on ``source`` (see ``source`` row)."
+prediction_year,--,"YYYY (past or future)","Future demand scenario year (GDP and population); used only when ``source`` is ``gegis``. Selects the path segment under ``data/ssp2-2.6/<prediction_year>/``."
+scale,--,float or dict,"Multiplier for all load time series (e.g. ``2`` doubles demand), or per-country factors via a dict with optional ``DEFAULT`` key."

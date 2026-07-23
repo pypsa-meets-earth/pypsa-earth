@@ -1,5 +1,4 @@
-  # ------------------- CCUS & CONVERSION OPTIONS -------------------
-
+  # ------------------- CCUS & conversion options -------------------
   co2_network: true
   co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
   co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2

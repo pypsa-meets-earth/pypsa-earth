@@ -1,5 +1,8 @@
 Parameter,Unit,Values,Description
-simpl,--,cf. :ref:`simpl`,List of ``{simpl}`` wildcards to run.
-ll,--,cf. :ref:`ll`,List of ``{ll}`` wildcards to run.
-clusters,--,cf. :ref:`clusters`,List of ``{clusters}`` wildcards to run.
-opts,--,cf. :ref:`opts`,List of ``{opts}`` wildcards to run.
+simpl,--,cf. wildcards,``{simpl}`` pre-clustering wildcard in ``simplify_network``: empty skips optional bus reduction; integer clusters to that many buses before ``cluster_network``.
+ll,--,cf. wildcards,"``{ll}`` transmission expansion wildcard in ``prepare_network`` (``{c|v|l}{opt|float}``): ``c`` = cap on total transmission expansion cost, ``v`` = cap on total line volume (length-weighted capacity), ``l`` = cap each line/link at ``factor`` × existing capacity; suffix ``opt`` enables cost-optimal expansion without a global cap (e.g. ``copt``)."
+clusters,--,cf. wildcards,``{clusters}`` spatial wildcard in ``cluster_network``: integer bus target; suffix ``m`` move-only or ``flex`` cap at available buses; ``all`` or ``min`` for special modes.
+opts,--,cf. wildcards,"``{opts}`` option wildcard (combine with ``-``): ``Co2L`` applies annual CO2 cap from ``co2.limit`` (default run is emission-constrained); temporal/gas limits in ``prepare_network``; CCL/EQ/BAU/SAFE in ``solve_network``; see opts.csv."
+planning_horizons,--,list of years,``{planning_horizons}`` year wildcard: investment year in ``prepare_sector_network``; brownfield grouping and myopic sequencing in ``solve_network``; costs year for overnight sector runs.
+sopts,--,cf. wildcards,``{sopts}`` sector-only wildcard in ``prepare_sector_network``: same role as ``nH`` in ``{opts}`` (e.g. ``144h`` resamples snapshots via ``average_every_nhours``).
+demand,--,cf. wildcards,``{demand}`` sector-only wildcard: labels sector demand inputs (energy totals transport industry shares) in resource file paths.
