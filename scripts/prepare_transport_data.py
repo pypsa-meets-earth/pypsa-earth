@@ -9,7 +9,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from _helpers import BASE_DIR, read_csv_nafix
+from _helpers import read_csv_nafix
 
 
 def transport_degree_factor(
