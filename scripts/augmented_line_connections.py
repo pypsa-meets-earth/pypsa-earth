@@ -19,16 +19,23 @@ Relevant Settings
 Inputs
 ------
 
+- ``networks/elec_s{simpl}_{clusters}_pre_augmentation.nc``: Input network before augmentation.
+- ``resources/costs_{year}.csv``: Technology cost assumptions.
+- ``data/line_type_mapping_ac.csv``: Country-specific AC voltage-to-line-type mappings.
+- ``data/line_type_mapping_dc.csv``: Country-specific DC voltage-to-line-type mappings.
+
 
 Outputs
 -------
 
+- ``networks/elec_s{simpl}_{clusters}.nc``: Network with the configured connectivity augmentation applied.
 
 
 Description
 -----------
+
+New HVAC connections use the closest country-specific line type available for the country and nominal voltage of their first bus. The default mapping is used when no country-specific mapping is available.
 """
-import os
 
 import networkx as nx
 import numpy as np
@@ -43,6 +50,41 @@ logger = create_logger(__name__)
 
 
 # Functions
+def _load_linetypes_from_csv(path):
+    """
+    Load voltage-to-line-type mappings from a CSV file.
+    """
+    linetypes = pd.read_csv(path, index_col=0)
+    linetypes.index = linetypes.index.astype(float)
+
+    if "default" not in linetypes.columns:
+        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
+
+    return linetypes
+
+
+def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
+    """
+    Return the closest available line type for a voltage and country.
+    """
+    if country in linetypes.columns:
+        mapping = linetypes[country].dropna()
+    else:
+        mapping = pd.Series(dtype=object)
+
+    if mapping.empty:
+        mapping = linetypes["default"].dropna()
+
+    if mapping.empty:
+        raise ValueError(
+            f"No line type mapping found for voltage {v_nom} kV "
+            f"and country '{country}'."
+        )
+
+    voltage = min(mapping.index, key=lambda value: abs(value - v_nom))
+    return mapping.at[voltage]
+
+
 def haversine(p):
     coord0 = n.buses.loc[p.bus0, ["x", "y"]].values
     coord1 = n.buses.loc[p.bus1, ["x", "y"]].values
@@ -135,6 +177,26 @@ if __name__ == "__main__":
     )
 
     #  add new lines to the network
+    ac_linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_ac)
+    dc_linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_dc)
+
+    dc_linetype = _get_linetype_by_voltage_and_country(
+        500,
+        None,
+        dc_linetypes,
+    )
+
+    new_kedge_lines["country"] = new_kedge_lines["bus0"].map(n.buses["country"])
+    new_kedge_lines["v_nom"] = new_kedge_lines["bus0"].map(n.buses["v_nom"])
+    new_kedge_lines["type"] = new_kedge_lines.apply(
+        lambda line: _get_linetype_by_voltage_and_country(
+            line.v_nom,
+            line.country,
+            ac_linetypes,
+        ),
+        axis=1,
+    )
+
     if "HVDC" in list(line_type_option):
         n.madd(
             "Link",
@@ -142,7 +204,7 @@ if __name__ == "__main__":
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=snakemake.params.lines.get("dc_types"),
+            type=dc_linetype,
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
@@ -161,7 +223,7 @@ if __name__ == "__main__":
             suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
-            type=snakemake.params.lines["ac_types"].get(380),
+            type=new_kedge_lines["type"],
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,

@@ -5,9 +5,9 @@
 
 # -*- coding: utf-8 -*-
 """
-Lifts electrical transmission network to a single 380 kV voltage layer, removes
-dead-ends of the network, and reduces multi-hop HVDC connections to a single
-link.
+Lifts the electrical transmission network to a single configured voltage layer,
+removes dead ends of the network, and reduces multi-hop HVDC connections to a
+single link.
 
 Relevant Settings
 -----------------
@@ -20,6 +20,9 @@ Relevant Settings
 
     costs:
         output_currency:
+
+    electricity:
+        base_voltage:
 
     lines:
         length_factor:
@@ -43,6 +46,7 @@ Inputs
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
 - ``resources/regions_offshore.geojson``: confer :ref:`busregions`
 - ``networks/elec.nc``: confer :ref:`electricity`
+- ``data/line_type_mapping_ac.csv``: Country-specific voltage-to-line-type mappings.
 
 Outputs
 -------
@@ -68,15 +72,14 @@ Description
 
 The rule :mod:`simplify_network` does up to four things:
 
-1. Create an equivalent transmission network in which all voltage levels are mapped to the 380 kV level by the function ``simplify_network(...)``.
+1. Create an equivalent transmission network in which all voltage levels are mapped to the configured base-voltage layer by ``simplify_network_to_base_voltage(...)``. The closest country-specific line type is used when available; otherwise, the default mapping is applied.
 
 2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the capital costs of the generator.
 
-3. Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
+3. Stub lines and links, i.e. dead ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
 
 4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), the network is clustered to this number of clusters with the routines from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. This step is usually skipped!
 """
-import os
 import sys
 from functools import reduce
 
@@ -108,23 +111,81 @@ sys.settrace
 logger = create_logger(__name__)
 
 
-def simplify_network_to_base_voltage(n, linetype, base_voltage):
+def _load_linetypes_from_csv(path):
     """
-    Fix all lines to a voltage level of base voltage level and remove all
-    transformers.
+    Load voltage-to-line-type mappings from a CSV file.
+    """
+    linetypes = pd.read_csv(path, index_col=0)
+    linetypes.index = linetypes.index.astype(float)
 
-    The function preserves the transmission capacity for each line while
-    updating its voltage level, line type and number of parallel bundles
-    (num_parallel). Transformers are removed and connected components
-    are moved from their starting bus to their ending bus. The
-    corresponding starting buses are removed as well.
+    if "default" not in linetypes.columns:
+        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
+
+    return linetypes
+
+
+def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
+    """
+    Return the closest available line type for a voltage and country.
+    """
+    if country in linetypes.columns:
+        mapping = linetypes[country].dropna()
+    else:
+        mapping = pd.Series(dtype=object)
+
+    if mapping.empty:
+        mapping = linetypes["default"].dropna()
+
+    if mapping.empty:
+        raise ValueError(
+            f"No line type mapping found for voltage {v_nom} kV "
+            f"and country '{country}'."
+        )
+
+    voltage = min(mapping.index, key=lambda value: abs(value - v_nom))
+    return mapping.at[voltage]
+
+
+def simplify_network_to_base_voltage(n, linetypes, base_voltage):
+    """
+    Map all lines to a common voltage while preserving country-specific types.
+
+    Each line is assigned the closest available line type for the country of
+    its first bus. The default mapping is used when no country-specific mapping
+    is available. Transmission capacity is preserved by recalculating the
+    number of parallel bundles after updating the voltage and line type.
+    Transformers are removed and connected components are moved from their
+    starting bus to their ending bus.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network to simplify.
+    linetypes : pandas.DataFrame
+        Voltage-to-line-type mappings with countries as columns.
+    base_voltage : float
+        Common nominal voltage assigned to buses and lines.
+
+    Returns
+    -------
+    tuple
+        Simplified network and transformer bus mapping.
     """
 
     logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
     n.buses["v_nom"] = base_voltage
-    n.lines["type"] = linetype
+
+    line_countries = n.lines["bus0"].map(n.buses["country"])
+    n.lines["type"] = line_countries.map(
+        lambda country: _get_linetype_by_voltage_and_country(
+            base_voltage,
+            country,
+            linetypes,
+        )
+    )
+
     n.lines["v_nom"] = base_voltage
-    n.lines["i_nom"] = n.line_types.i_nom[linetype]
+    n.lines["i_nom"] = n.lines["type"].map(n.line_types["i_nom"])
     # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
@@ -1050,7 +1111,7 @@ if __name__ == "__main__":
     add_year_suffix_to_carriers(n)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetype = snakemake.params.config_lines["ac_types"][base_voltage]
+    linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_ac)
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
         "exclude_carriers", []
     )
@@ -1074,7 +1135,11 @@ if __name__ == "__main__":
         },
     )
 
-    n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
+    n, trafo_map = simplify_network_to_base_voltage(
+        n,
+        linetypes,
+        base_voltage,
+    )
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760
 
