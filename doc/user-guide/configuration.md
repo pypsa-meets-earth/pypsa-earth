@@ -43,6 +43,7 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `solar_thermal.orientation` | `sector.solar_thermal_collector.orientation` |
 | `clean_osm_data_options` | `osm.clean_osm_data` |
 | `build_osm_network` | `osm.build_osm_network` |
+| `cluster_options` | `clustering` |
 | `fossil_reserves.{carrier}` | `sector.{carrier}.reserves` |
 
 `{carrier}` is the fuel name (e.g. `oil`, `coal`, `gas`, `lignite`, `biomass`). Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
@@ -221,7 +222,7 @@ OpenStreetMap ([OSM](https://wiki.osmfoundation.org/wiki/Main_Page)) pipeline se
 
 {{ read_csv('configtables/osm.csv') }}
 
-### cluster_options
+### clustering
 
 Specifies the options to simplify and cluster the
 network. This is done in two stages, first using
@@ -232,10 +233,10 @@ sciencedirect.com/science/article/pii/
 S0306261923004609), section 3.7.
 
 ```yaml
---8<-- "configtables/snippets/cluster_options.yaml"
+--8<-- "configtables/snippets/clustering.yaml"
 ```
 
-{{ read_csv('configtables/cluster_options.csv') }}
+{{ read_csv('configtables/clustering.csv') }}
 
 ### augmented_line_connection
 

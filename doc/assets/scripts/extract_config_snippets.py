@@ -77,7 +77,7 @@ def main():
         "snapshots": ["snapshots"],
         "crs": ["crs"],
         "augmented_line_connection": ["augmented_line_connection"],
-        "cluster_options": ["cluster_options"],
+        "clustering": ["clustering"],
         "build_shape_options": ["build_shape_options"],
         "subregion": ["subregion"],
         "natura": ["natura"],

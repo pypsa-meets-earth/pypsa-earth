@@ -1,4 +1,4 @@
-cluster_options:
+clustering:
   alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
   distribute_cluster: ["load"] # Distributes cluster nodes per country according to ['load'],['pop'] or ['gdp']
   simplify_network:

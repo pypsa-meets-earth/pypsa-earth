@@ -128,6 +128,7 @@ CONFIG_MIGRATIONS = [
     ("solar_thermal.orientation", "sector.solar_thermal_collector.orientation"),
     ("clean_osm_data_options", "osm.clean_osm_data"),
     ("build_osm_network", "osm.build_osm_network"),
+    ("cluster_options", "clustering"),
 ]
 
 
