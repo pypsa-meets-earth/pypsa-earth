@@ -46,10 +46,58 @@ check_config_version(config=config)
 
 config = migrate_config(config)
 
+
+REGIONAL_MODELS = {
+    "US": "PyPSA-NorthAmerica",  # United States
+    "BN": "PyPSA-ASEAN",  # Brunei
+    "KH": "PyPSA-ASEAN",  # Cambodia
+    "ID": "PyPSA-ASEAN",  # Indonesia
+    "LA": "PyPSA-ASEAN",  # Laos
+    "MY": "PyPSA-ASEAN",  # Malaysia
+    "MM": "PyPSA-ASEAN",  # Myanmar
+    "PH": "PyPSA-ASEAN",  # Philippines
+    "SG": "PyPSA-ASEAN",  # Singapore
+    "TH": "PyPSA-ASEAN",  # Thailand
+    "TL": "PyPSA-ASEAN",  # Timor-Leste
+    "VN": "PyPSA-ASEAN",  # Vietnam
+}
+
+
+def warn_about_regional_models(countries):
+    """Warn if selected countries are covered by dedicated regional models."""
+    selected = sorted(set(countries) & set(REGIONAL_MODELS))
+
+    if not selected:
+        return
+
+    grouped = {}
+    for country in selected:
+        grouped.setdefault(REGIONAL_MODELS[country], []).append(country)
+
+    message = "\n".join(
+        [
+            "Dedicated regional models are available for some selected countries:",
+            "",
+            *[
+                f"{model}\n  - " + "\n  - ".join(model_countries)
+                for model, model_countries in sorted(grouped.items())
+            ],
+            "",
+            "These regional models may include more appropriate datasets, assumptions and workflows for the selected countries.",
+            "",
+            "Please consider using or contributing to the corresponding regional model when appropriate.",
+        ]
+    )
+
+    warnings.warn(message, RuntimeWarning, stacklevel=2)
+
+
 config.update({"git_commit": get_last_commit_message(".")})
 
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
+
+warn_about_regional_models(config["countries"])
 
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
