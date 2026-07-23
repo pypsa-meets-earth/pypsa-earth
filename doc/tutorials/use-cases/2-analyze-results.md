@@ -96,7 +96,7 @@ Before diving into numbers it helps to know what you are looking at. A PyPSA `Ne
 | `Load` | `n.loads` | Electricity demand at each bus |
 | `StorageUnit` | `n.storage_units` | Technologies with a coupled power/energy ratio (PHS) |
 | `Store` | `n.stores` | Energy storage (batteries, H₂) — capacity in MWh; charging and discharging via `Link`s |
-| `Link` | `n.links` | Multi-port converters: battery chargers, electrolysers, etc. |
+| `Link` | `n.links` | Multi-port converters: battery chargers, electrolysers, DC links, etc. |
 
 For a thorough description of every attribute and convention, the [PyPSA component reference](https://docs.pypsa.org/en/latest/user-guide/components/buses/) is the definitive resource.
 
@@ -146,13 +146,13 @@ Now let's look at what the model built. The `statistics()` method is the most co
 
 ```python
 caps = n.statistics()["Installed Capacity"].dropna() / 1e3  # GW
+caps = caps.drop(["Line", "Load"], errors="ignore")  # not plant capacity
 print(caps.sort_values(ascending=False).to_string())
 ```
 
 For our Kazakhstan run the output looks like this:
 
 ```
-Line         AC                    31.2 GW
 Generator    Load shedding         17.6 GW
              Coal                  11.7 GW
              Combined-Cycle Gas     2.4 GW
@@ -171,13 +171,14 @@ A few things worth noticing. **Coal (11.7 GW), gas (2.4 GW), and hydro (2.3 GW) 
 
 The `statistics()` method exposes several capacity columns that are easy to confuse:
 
-- **`Installed Capacity`** — maps to `p_nom`, the *pre-existing* capacity from the powerplant database. For existing coal or hydro plants this is the real-world installed capacity. For extendable technologies (wind, solar, new gas) that the model is allowed to build, `p_nom` is typically zero.
+- **`Installed Capacity`** — maps to `p_nom`, the *pre-existing* capacity from the powerplant database (plus IRENA estimates for wind and solar). For existing coal or hydro plants this is the real-world installed capacity. For technologies built from scratch (e.g. new gas, battery, H2), `p_nom` is typically zero.
 - **`Optimal Capacity`** — maps to `p_nom_opt`, the capacity *after* the optimiser has run. For fixed existing plants it equals `Installed Capacity`. For extendable technologies it is whatever the optimiser decided to build.
 
 To see how much *new* capacity was added on top of the existing fleet:
 
 ```python
 stat = n.statistics()[["Installed Capacity", "Optimal Capacity"]].dropna() / 1e3  # GW
+stat = stat.drop(["Line", "Load"], errors="ignore")  # not plant capacity
 stat["New build"] = stat["Optimal Capacity"] - stat["Installed Capacity"]
 print(stat.sort_values("Optimal Capacity", ascending=False).to_string())
 ```

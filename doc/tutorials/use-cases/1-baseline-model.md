@@ -10,6 +10,9 @@ SPDX-License-Identifier: CC-BY-4.0
     This tutorial assumes PyPSA-Earth is already installed and your environment is active.
     If not, see the [installation guide](../../home/installation.md) first.
 
+!!! note "Simple by design"
+    This baseline keeps the model deliberately simple so you can build confidence with the PyPSA-Earth workflow before refining assumptions for a study.
+
 ## Introduction
 
 Kazakhstan (KZ) is the world's ninth-largest country by area, stretching from the Caspian Sea in the west to the Altai Mountains in the east. Its power system is dominated by coal and gas, yet it holds vast untapped potential for wind and solar — making it a compelling case for energy transition modelling.
@@ -18,7 +21,7 @@ Kazakhstan (KZ) is the world's ninth-largest country by area, stretching from th
 
 *Topographic map of Kazakhstan. Source: [NordNordWest](https://commons.wikimedia.org/wiki/User:NordNordWest) et al., [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kazakhstan_topographic_location_map_conic.png), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0).*
 
-In this first tutorial we will build and solve a baseline electricity model for Kazakhstan. We will create a minimal configuration file from scratch, adding only the settings that differ from the defaults. By the end you will have a solved network file you can inspect and a reproducible configuration to build on in the rest of the series.
+In this first tutorial we will build and solve a baseline electricity model for Kazakhstan. We will create a minimal configuration file from scratch, adding only the settings that differ from the defaults. By the end you will have a solved network file you can inspect and a reproducible configuration to build on in the rest of the series. **Kazakhstan is only the study example — the same workflow can model any other country.**
 
 ---
 
@@ -137,6 +140,8 @@ Save this as `config.KZ.yaml` in the project root before running Snakemake, or [
 ---
 
 ## Step 6: Run the model
+
+PyPSA-Earth runs as a Snakemake workflow. Each rule is a named step that runs a corresponding script in `scripts/` to turn specific inputs into outputs.
 
 ### Dry run first
 

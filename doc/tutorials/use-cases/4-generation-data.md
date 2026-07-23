@@ -187,13 +187,13 @@ import pypsa
 n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
 
 caps = n.statistics()["Installed Capacity"].dropna() / 1e3  # GW
+caps = caps.drop(["Line", "Load"], errors="ignore")  # not plant capacity
 print(caps.sort_values(ascending=False).to_string())
 ```
 
 After Part 4 you should see something like (all values in **GW** — from the `/ 1e3` above):
 
 ```
-Line         AC                    31.19
 Generator    Load shedding         17.70
              Coal                  11.60
              Combined-Cycle Gas     2.47
@@ -224,13 +224,13 @@ Locking **capacities** does not fix **dispatch**. An optional check — same `st
 
 ```python
 supply = n.statistics()["Supply"].dropna() / 1e6  # TWh
+supply = supply.drop(["Line", "Load"], errors="ignore")  # not generation
 print(supply.sort_values(ascending=False).to_string())
 ```
 
-After Part 4 you might see (in GW):
+After Part 4 you might see (in TWh):
 
 ```
-Line         AC                    110.29
 Generator    Coal                   90.85
              Load shedding           7.99
 StorageUnit  Reservoir & Dam         2.83
@@ -322,7 +322,6 @@ Generator    Open-Cycle Gas         1.60
 Annual **Supply** (TWh) is still far from KEGOC 2020:
 
 ```
-Line         AC                    105.15
 Generator    Coal                   89.47
              Load shedding           7.72
 StorageUnit  Reservoir & Dam         7.15
@@ -330,7 +329,6 @@ Generator    Onshore Wind            1.34
              Solar                   0.99
              Combined-Cycle Gas      0.63
              Open-Cycle Gas          0.00
-Load         -                       0.00
 ```
 
 **Solar (~1.0 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~89 TWh)** is far too high and **gas (~0.6 TWh from CCGT; OCGT idle)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~7.1 TWh from reservoirs)** is closer to KEGOC (~9.5 TWh) than the Step 7 mix, but still under-generated.
@@ -348,6 +346,18 @@ Capacity alignment does not automatically fix the **generation mix** either. The
 - **Marginal costs** — coal is typically cheaper than gas in the default cost tables, so CCGT/OCGT sit idle even when capacity is there.
 - **Spatial resolution** — how load and plants are distributed across clusters may not match real geography.
 - **Transmission** — line limits may be loose enough that northern coal serves most of the country, or tight enough to cause regional shortfalls.
+
+**Comparison vs. KEGOC 2020 (TWh):**
+
+| Carrier | KEGOC 2020 | Baseline (Part 2) | After custom_powerplants |
+|---|---|---|---|
+| Coal | 74.50 | 62.54 | 89.47 |
+| Gas | 21.69 | 0.63 | 0.63 |
+| Hydro | 9.55 | 3.61 | 7.15 |
+| Solar | 1.25 | 25.40 | 0.99 |
+| Wind | 1.09 | 14.81 | 1.34 |
+
+Solar and wind generation move close to KEGOC; coal stays too high and gas too low — capacity is better, but dispatch is not yet calibrated.
 
 ---
 
