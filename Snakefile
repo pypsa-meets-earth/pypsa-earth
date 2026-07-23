@@ -577,17 +577,18 @@ rule build_demand_profiles:
         "scripts/build_demand_profiles.py"
 
 
-HYDRO_PROFILES = {
-    "hydro_capacities": "data/hydro_capacities.csv",
-    "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
-    "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
-    "powerplants": "resources/" + RDIR + "powerplants.csv",
-    "hydrobasins": "data/hydrobasins/hybas_world.shp",
-}
-
-
 def inputs_hydro(w):
-    return HYDRO_PROFILES if w.technology == "hydro" else {}
+    if w.technology == "hydro":
+        HYDRO_PROFILES = {
+            "hydro_capacities": "data/hydro_capacities.csv",
+            "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
+            "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
+            "powerplants": "resources/" + RDIR + "powerplants.csv",
+            "hydrobasins": config["renewable"]["hydro"]["resource"]["hydrobasins"],
+        }
+        return HYDRO_PROFILES
+    else:
+        return {}
 
 
 rule build_renewable_profiles:
