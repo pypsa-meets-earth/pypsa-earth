@@ -823,6 +823,13 @@ else:
     solar_rooftop_enable = config["sector"]["solar_rooftop"]
 
 
+solar_rooftop_existing_enable = (
+    "AU" in config["countries"]
+    and isinstance(solar_rooftop_config, dict)
+    and solar_rooftop_config.get("enable", False)
+)
+
+
 rule cluster_global_buildings:
     params:
         **solar_rooftop_params,
@@ -841,6 +848,29 @@ rule cluster_global_buildings:
         ),
     script:
         "scripts/cluster_global_buildings.py"
+
+
+rule build_solar_rooftop_existing:
+    input:
+        cer="data/rooftop_pv/sgu-solar-capacity-2011-to-present-and-totals.csv",
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
+    output:
+        "resources/"
+        + RDIR
+        + "rooftop_solar_existing_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+    log:
+        "logs/"
+        + RDIR
+        + "build_solar_rooftop_existing_elec_s{simpl}_{clusters}_{planning_horizons}.log",
+    benchmark:
+        "benchmarks/"
+        +RDIR
+        +"build_solar_rooftop_existing_elec_s{simpl}_{clusters}_{planning_horizons}"
+    threads: 1
+    resources:
+        mem_mb=4000,
+    script:
+        "scripts/build_solar_rooftop_existing.py"
 
 
 if config["augmented_line_connection"].get("add_to_snakefile") == True:
@@ -1292,6 +1322,17 @@ rule prepare_sector_network:
                 + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_"
                 + f"{country}.csv"
                 for country in config["countries"]
+            },
+        ),
+        **branch(
+            solar_rooftop_existing_enable,
+            {
+                "rooftop_solar_existing": "resources/"
+                + RDIR
+                + "rooftop_solar_existing_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+                "solar_profile": "resources/"
+                + RDIR
+                + "renewable_profiles/profile_solar.nc",
             },
         ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
