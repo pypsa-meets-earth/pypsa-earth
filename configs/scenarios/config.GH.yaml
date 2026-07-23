@@ -89,7 +89,7 @@ augmented_line_connection:
   min_expansion: 1 # [MW] New created line expands by float/int input
   min_DC_length: 600 # [km] Minimum line length of DC line
 
-cluster_options:
+clustering:
   simplify_network:
     to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
     algorithm: kmeans # choose from: [hac, kmeans]
