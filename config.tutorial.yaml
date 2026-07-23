@@ -46,6 +46,9 @@ renewable:
   hydro:
     hydrobasins_level: 4
     hydro_max_hours: "energy_capacity_totals_by_country"
+    resource:
+      method: hydro
+      hydrobasins: data/hydrobasins_hydroshare/africa-geoglows-atlite.shp
 
 
 solving:
