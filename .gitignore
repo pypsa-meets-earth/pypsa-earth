@@ -77,3 +77,6 @@ screenlog*
 !data/demand/unsd/paths/Energy_Statistics_Database.xlsx
 site/
 !data/industry/ammonia_plants.csv
+
+# Generated validation dashboard (created by MkDocs hook)
+doc/validation/
