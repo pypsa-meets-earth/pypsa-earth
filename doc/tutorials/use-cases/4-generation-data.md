@@ -187,7 +187,7 @@ import pypsa
 n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
 
 caps = n.statistics()["Installed Capacity"].dropna() / 1e3  # GW
-caps = caps.drop(["Line", "Load"], errors="ignore")  # not plant capacity
+caps = caps.drop(["Line", "Load"], errors="ignore")  # dropping line and load values
 print(caps.sort_values(ascending=False).to_string())
 ```
 
@@ -224,7 +224,7 @@ Locking **capacities** does not fix **dispatch**. An optional check — same `st
 
 ```python
 supply = n.statistics()["Supply"].dropna() / 1e6  # TWh
-supply = supply.drop(["Line", "Load"], errors="ignore")  # not generation
+supply = supply.drop(["Line", "Load"], errors="ignore")  # dropping line and load values
 print(supply.sort_values(ascending=False).to_string())
 ```
 

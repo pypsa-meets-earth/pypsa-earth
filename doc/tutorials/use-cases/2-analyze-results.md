@@ -142,11 +142,11 @@ fig.tight_layout()
 
 ## Installed capacities
 
-Now let's look at what the model built. The `statistics()` method is the most convenient entry point — it sweeps across all component types and returns a tidy MultiIndex DataFrame.
+Now let's look at what the model built. The `statistics()` method is the most convenient entry point — it sweeps across all component types and returns a tidy MultiIndex DataFrame. The statistics module maps installed capacity across all components — lines, loads and generators. Therefore dropping line and load values is required.
 
 ```python
 caps = n.statistics()["Installed Capacity"].dropna() / 1e3  # GW
-caps = caps.drop(["Line", "Load"], errors="ignore")  # not plant capacity
+caps = caps.drop(["Line", "Load"], errors="ignore")
 print(caps.sort_values(ascending=False).to_string())
 ```
 
@@ -178,7 +178,7 @@ To see how much *new* capacity was added on top of the existing fleet:
 
 ```python
 stat = n.statistics()[["Installed Capacity", "Optimal Capacity"]].dropna() / 1e3  # GW
-stat = stat.drop(["Line", "Load"], errors="ignore")  # not plant capacity
+stat = stat.drop(["Line", "Load"], errors="ignore")  # dropping line and load values
 stat["New build"] = stat["Optimal Capacity"] - stat["Installed Capacity"]
 print(stat.sort_values("Optimal Capacity", ascending=False).to_string())
 ```
