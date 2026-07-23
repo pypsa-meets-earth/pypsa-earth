@@ -15,9 +15,11 @@ The CLI has the following modules:
 """
 import os
 import random
+import re
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
 import typer
@@ -84,7 +86,7 @@ def display_choice_menu(title: str, options: list, required_height: int) -> str:
     return choice
 
 
-def ask(text: str, default: str = "") -> str:
+def ask(text: str, default: str = "", datatype=str) -> str:
     """
     Styling for the typer prompt
 
@@ -94,6 +96,8 @@ def ask(text: str, default: str = "") -> str:
         Text to be shown in the prompt
     default: str
         The default values for the prompt
+    datatype:
+        The datatype of the prompt
 
     Returns:
     str
@@ -101,9 +105,9 @@ def ask(text: str, default: str = "") -> str:
     """
     styled_text = typer.style(f"➔ {text}", fg=typer.colors.YELLOW, bold=True)
     if default != "":
-        return typer.prompt(styled_text, default=default)
+        return typer.prompt(styled_text, default=default, type=datatype)
     else:
-        return typer.prompt(styled_text)
+        return typer.prompt(styled_text, type=datatype)
 
 
 def exit_message() -> None:
@@ -341,6 +345,8 @@ def config_setup():
                 )
                 if isinstance(updated_config[choice][subchoice], list):
                     updated_value = updated_value.split(",")
+                if isinstance(updated_config[choice][subchoice], bool):
+                    updated_value = True if updated_value == "True" else False
                 updated_config[choice][subchoice] = updated_value
         else:
             # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
@@ -350,6 +356,8 @@ def config_setup():
             if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
+            if isinstance(updated_config[choice][subchoice], bool):
+                updated_value = True if updated_value == "True" else False
             updated_config[choice] = updated_value
 
     # Save updated config file
@@ -395,6 +403,8 @@ def show_questionnaire(option: str) -> None:
 
     answer_dict = {}
 
+    type_dict = {"str": str, "int": int}
+
     def not_matching(a, b):
         if isinstance(b, (list, tuple, set)):
             return a not in b
@@ -410,8 +420,14 @@ def show_questionnaire(option: str) -> None:
         user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while not_matching(user_answer, answer):
+            if "type" in question:
+                datatype = type_dict[question["type"]]
+            else:
+                datatype = type_dict["str"]
             if "choices" not in question:
-                user_answer = ask(f"{question['id']}. {question['question']}")
+                user_answer = ask(
+                    f"{question['id']}. {question['question']}", datatype=datatype
+                )
             else:
                 user_answer = display_choice_menu(
                     f"{question['id']}. {question['question']}",
@@ -436,6 +452,7 @@ def show_questionnaire(option: str) -> None:
                         )
                         console.print(style="dim")
                         score -= 0.25
+                        time.sleep(2)
 
             answer_dict[question["id"]] = user_answer
         total_score += max(min(score, 1), 0)
@@ -460,15 +477,30 @@ def show_questionnaire(option: str) -> None:
         console.print(
             "To make the config file model-ready, a few more responses are required from you. Please enter your responses to the following questions."
         )
-
-        # Map the answers to the config parameters to be updated in the config file
         config_dict = {}
+        pattern = r"Q\d+"
         for key, value in use_case["config_update"].items():
+            k = answer_dict[key] if re.match(pattern, key) else key
+
             if isinstance(value, list):
-                value = list((answer_dict[value[0]],))
+                if len(value) == 0:
+                    # Empty lists for e.g., electricity.extendable_carriers.Generator:[]
+                    v = value
+                else:
+                    v = (
+                        list((answer_dict[value[0]],))
+                        if re.match(pattern, str(value[0]))
+                        else value[0]
+                    )
             else:
-                value = answer_dict[value]
-            config_dict[answer_dict[key]] = value
+                v = answer_dict[value] if re.match(pattern, str(value)) else value
+
+            # Check if key is the keyword or question placeholder
+            config_dict[k] = v
+
+        if int(option) > 1:
+            config_dict["enable.retrieve_cutout"] = False
+            config_dict["enable.retrieve_databundle"] = False
 
         # Prompt the user to run the model with the updated config file
         model_run = display_choice_menu(
@@ -477,7 +509,6 @@ def show_questionnaire(option: str) -> None:
             3,
         ).lower()
 
-        save_config_path = "config.kz.yaml"
         if model_run == "yes":
 
             # Update some additional config parameters that are required for the model run
@@ -494,11 +525,23 @@ def show_questionnaire(option: str) -> None:
             if solver == "highs":
                 config_dict["solving.solver.name"] = "highs"
                 config_dict["solving.solver.options"] = "highs-default"
+
+            # Save the updated config file
+            save_config_path = use_case["config_path"]
+            existing_config_path = "config.cli_base.yaml"
+            existing_config_dict = {}
+            if Path(existing_config_path).is_file():
+                existing_config_dict = load_config_file(existing_config_path)
+                if existing_config_dict == None:
+                    existing_config_dict = {}
             save_config_file(
-                config_path=save_config_path, config_data=unflatten_dict(config_dict)
+                config_path=save_config_path,
+                config_data=unflatten_dict(existing_config_dict | config_dict),
             )
+
             run_model(save_config_path)
         else:
+            save_config_path = use_case["config_path"]
             save_config_file(
                 config_path=save_config_path, config_data=unflatten_dict(config_dict)
             )
@@ -587,8 +630,8 @@ def run_model(config_path="") -> None:
     cores = ask("Enter the number of cores to run the model")
 
     # Prompt user for environment type to use - pixi / conda
-    env = ask(
-        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    env = display_choice_menu(
+        "Do you want to use a pixi / conda environment", ["pixi", "conda"], 3
     )
     if env == "pixi":
         env_command = "pixi run"
@@ -633,8 +676,8 @@ def run_model(config_path="") -> None:
     cores = ask("Enter the number of cores to run the model")
 
     # Prompt user for environment type to use - pixi / conda
-    env = ask(
-        "Do you want to use a pixi / conda environment", default=["pixi", "conda"]
+    env = display_choice_menu(
+        "Do you want to use a pixi / conda environment", ["pixi", "conda"], 3
     )
     if env == "pixi":
         env_command = "pixi run"
