@@ -46,6 +46,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix sector cost file year resolution [# 1949](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1949)
+
 * Replace hydrobasins for CI testing with a dataset created by Brigham Young University [PR #1944](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1944)
 
 * Add `custom_powerplants` into params to make sure change of the config reruns the workflow [PR #1927](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1927)
