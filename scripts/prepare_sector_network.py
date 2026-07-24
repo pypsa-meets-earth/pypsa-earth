@@ -402,6 +402,8 @@ def add_water_network(n, costs):
 
     n.add("Carrier", "H2O")
 
+    # TODO: Replace `n.madd` with `n.add` when upgrading to PyPSA v1.0+ (madd is deprecated in newer versions)
+    # NOTE: PyPSA uses MW/MWh convention natively. For the water sector, 1 unit of capacity/flow corresponds to 1 m³/h (this is the unit for desalination and electrolysis). Capital and marginal costs as well as Link efficiencies are scaled accordingly.
     n.madd(
         "Bus",
         spatial.nodes + " H2O",
@@ -417,10 +419,10 @@ def add_water_network(n, costs):
     water_network = gpd.read_file(snakemake.input.clustered_water_network)
 
     seawater_nodes = n.buses[n.buses.index.isin(water_network.nearest_point_bus)].index
-    H20_nodes_desal_connceted = n.buses[
+    H20_nodes_desal_connected = n.buses[
         n.buses.index.isin(water_network.centroid_bus)
     ].index
-    H20_nodes_none_desal_connceted = spatial.nodes.difference(H20_nodes_desal_connceted)
+    H20_nodes_none_desal_connceted = spatial.nodes.difference(H20_nodes_desal_connected)
 
     # Create index column
     water_network["buses_idx"] = (
@@ -534,19 +536,19 @@ def add_water_network(n, costs):
 
     n.madd(
         "Bus",
-        H20_nodes_desal_connceted + " H2O store",
-        location=H20_nodes_desal_connceted,
+        H20_nodes_desal_connected + " H2O store",
+        location=H20_nodes_desal_connected,
         carrier="H2O store",
         unit="m³/h",  # Unit for water bus is m³/h, as this is the unit for desalination and electrolysis
-        x=n.buses.loc[list(H20_nodes_desal_connceted)].x.values,
-        y=n.buses.loc[list(H20_nodes_desal_connceted)].y.values,
+        x=n.buses.loc[list(H20_nodes_desal_connected)].x.values,
+        y=n.buses.loc[list(H20_nodes_desal_connected)].y.values,
     )
 
     n.madd(
         "Link",
-        H20_nodes_desal_connceted + " H2O store charger",
-        bus0=H20_nodes_desal_connceted + " H2O",
-        bus1=H20_nodes_desal_connceted + " H2O store",
+        H20_nodes_desal_connected + " H2O store charger",
+        bus0=H20_nodes_desal_connected + " H2O",
+        bus1=H20_nodes_desal_connected + " H2O store",
         carrier="H2O store charger",
         efficiency=costs.at["water tank charger", "efficiency"],
         # capital_cost=costs.at["battery inverter", "fixed"],
@@ -556,9 +558,9 @@ def add_water_network(n, costs):
 
     n.madd(
         "Link",
-        H20_nodes_desal_connceted + " H2O store discharger",
-        bus0=H20_nodes_desal_connceted + " H2O store",
-        bus1=H20_nodes_desal_connceted + " H2O",
+        H20_nodes_desal_connected + " H2O store discharger",
+        bus0=H20_nodes_desal_connected + " H2O store",
+        bus1=H20_nodes_desal_connected + " H2O",
         carrier="H2O store discharger",
         efficiency=costs.at["water tank discharger", "efficiency"],
         p_nom_extendable=True,
@@ -567,8 +569,8 @@ def add_water_network(n, costs):
 
     n.madd(
         "Store",
-        H20_nodes_desal_connceted + " H2O store",
-        bus=H20_nodes_desal_connceted + " H2O store",
+        H20_nodes_desal_connected + " H2O store",
+        bus=H20_nodes_desal_connected + " H2O store",
         e_nom_extendable=True,
         # e_nom_max=h2_pot.values,
         e_cyclic=True,
