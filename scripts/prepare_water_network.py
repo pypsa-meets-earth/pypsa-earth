@@ -894,13 +894,17 @@ def add_pipeline_hydraulics(row):
 
     # pump CAPEX per unit flow (€/ (m3/h))
     total_pump_invest_eur = invest_pumping_station * n_pumping_stations * 1e6
-    pump_capex_per_pnom = total_pump_invest_eur / mass_flow_rate_m3h # € / (m³/h)
+    pump_capex_per_pnom = total_pump_invest_eur / mass_flow_rate_m3h  # € / (m³/h)
 
     # --- electricity per m3 ---
-    dp_fric_Pa = dp_friction * 1e5 # Convert bar to Pa
-    e_fric = dp_fric_Pa / (eta_sys * 3.6e6)  # kWh/m3 (converting J to kWh in the denominator)
-    dp_alt_Pa = dp_altitude * 1e5 # Convert bar to Pa
-    e_alt = max(0.0, dp_alt_Pa / (eta_sys * 3.6e6)) # kWh/m3 (converting J to kWh in the denominator)
+    dp_fric_Pa = dp_friction * 1e5  # Convert bar to Pa
+    e_fric = dp_fric_Pa / (
+        eta_sys * 3.6e6
+    )  # kWh/m3 (converting J to kWh in the denominator)
+    dp_alt_Pa = dp_altitude * 1e5  # Convert bar to Pa
+    e_alt = max(
+        0.0, dp_alt_Pa / (eta_sys * 3.6e6)
+    )  # kWh/m3 (converting J to kWh in the denominator)
 
     efficiency2 = -(e_fric + e_alt) / 1000  # MW per (m³/h)
 
