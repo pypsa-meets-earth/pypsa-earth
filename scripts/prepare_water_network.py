@@ -806,10 +806,15 @@ def add_pipeline_hydraulics(row):
     d_m = d_mm / 1000
     v = watersupply_cfg["pipeline_hydraulics"]["flow_velocity_ms"]
     rho = watersupply_cfg["pipeline_hydraulics"]["water_density_kg_m3"]
-    eta_pump, eta_motor = watersupply_cfg["efficiencies"]["eta_pump"], watersupply_cfg["efficiencies"]["eta_motor"]
+    eta_pump, eta_motor = (
+        watersupply_cfg["efficiencies"]["eta_pump"],
+        watersupply_cfg["efficiencies"]["eta_motor"],
+    )
     eta_sys = eta_pump * eta_motor
     lambda_f = watersupply_cfg["pipeline_hydraulics"]["friction_factor_lambda"]
-    mass_flow_rate = watersupply_cfg["pipeline_hydraulics"]["mass_flow_rate_kgs"]  # kg/s, Considered mass flow rate for 1000 MW Electrolyzer
+    mass_flow_rate = watersupply_cfg["pipeline_hydraulics"][
+        "mass_flow_rate_kgs"
+    ]  # kg/s, Considered mass flow rate for 1000 MW Electrolyzer
     mass_flow_rate_m3s = mass_flow_rate / rho
     mass_flow_rate_m3h = mass_flow_rate_m3s * 3600
 
@@ -834,7 +839,9 @@ def add_pipeline_hydraulics(row):
     # Number of pumping stations
     n_pumping_stations = number_of_pumping_stations(
         delta_p_total=total_dp,
-        p_max_pipeline=watersupply_cfg["pipeline_hydraulics"]["p_max_pipeline_bar"],  # nominal pressure of the pipeline in bar
+        p_max_pipeline=watersupply_cfg["pipeline_hydraulics"][
+            "p_max_pipeline_bar"
+        ],  # nominal pressure of the pipeline in bar
     )
 
     # Pump electrical power
@@ -851,13 +858,19 @@ def add_pipeline_hydraulics(row):
     invest_pumping_station = pump_station_cost_kw(
         power_kw=power_kW,
         usd_to_eur=snakemake.params.costs["default_exchange_rate"],
-        a=watersupply_cfg["costs"]["pump_station"]["cost_factor_a"],  # 15570 # 35768 with inflation 2% 1981 till 2023
+        a=watersupply_cfg["costs"]["pump_station"][
+            "cost_factor_a"
+        ],  # 15570 # 35768 with inflation 2% 1981 till 2023
         b=watersupply_cfg["costs"]["pump_station"]["scaling_exponent_b"],
     )
 
     # Pipeline investment (HYPAT formulas: https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf)
-    C_pipes = watersupply_cfg["costs"]["pipeline"]["pipe_mat_factor"] * (d_mm**watersupply_cfg["costs"]["pipeline"]["pipe_mat_exponent"])  # €/km material
-    f_inst = watersupply_cfg["costs"]["pipeline"]["inst_factor"] * (d_mm**watersupply_cfg["costs"]["pipeline"]["inst_exponent"])  # installation factor
+    C_pipes = watersupply_cfg["costs"]["pipeline"]["pipe_mat_factor"] * (
+        d_mm ** watersupply_cfg["costs"]["pipeline"]["pipe_mat_exponent"]
+    )  # €/km material
+    f_inst = watersupply_cfg["costs"]["pipeline"]["inst_factor"] * (
+        d_mm ** watersupply_cfg["costs"]["pipeline"]["inst_exponent"]
+    )  # installation factor
     C_inst_km = C_pipes * f_inst  # €/km installed
     # Pipeline investment per km per m3/h
     capex_per_pnom_per_km = C_inst_km / mass_flow_rate_m3h  # €/ (m3/h) / km
