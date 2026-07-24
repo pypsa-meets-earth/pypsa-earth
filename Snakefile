@@ -626,6 +626,37 @@ rule build_renewable_profiles:
         "scripts/build_renewable_profiles.py"
 
 
+def get_custom_powerplants_files(wildcards):
+    """Return the configured custom powerplant file paths."""
+    custom_config = config["electricity"]["custom_powerplants"]
+    filepaths = custom_config.get("filepaths", [])
+
+    if isinstance(filepaths, str):
+        filepaths = [filepaths]
+
+    methods = custom_config.get("method", False)
+
+    if isinstance(methods, list) and len(methods) != len(filepaths):
+        raise ValueError(
+            "electricity.custom_powerplants.method must contain one entry "
+            "per configured filepath."
+        )
+
+    allowed_methods = {False, "merge", "replace"}
+    configured_methods = methods if isinstance(methods, list) else [methods]
+
+    invalid_methods = [
+        method for method in configured_methods if method not in allowed_methods
+    ]
+    if invalid_methods:
+        raise ValueError(
+            "electricity.custom_powerplants.method accepts only false, "
+            f"'merge', or 'replace'; found {invalid_methods}."
+        )
+
+    return filepaths
+
+
 rule build_powerplants:
     params:
         geo_crs=config["crs"]["geo_crs"],
@@ -633,11 +664,11 @@ rule build_powerplants:
         gadm_layer_id=config["build_shape_options"]["gadm_layer_id"],
         alternative_clustering=config["clustering"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
-        custom_powerplants_option=config["electricity"]["custom_powerplants"],
+        custom_powerplants=config["electricity"]["custom_powerplants"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
-        custom_powerplants="data/custom_powerplants.csv",
+        custom_powerplants=get_custom_powerplants_files,
         osm_powerplants="resources/" + RDIR + "osm/clean/all_clean_generators.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
