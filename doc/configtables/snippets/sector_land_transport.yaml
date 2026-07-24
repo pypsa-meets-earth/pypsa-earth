@@ -1,5 +1,4 @@
-  # ------------------- LAND TRANSPORT SECTOR -------------------
-
+  # ------------------- Land transport sector -------------------
   bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
   bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
   transport_heating_deadband_upper: 20.

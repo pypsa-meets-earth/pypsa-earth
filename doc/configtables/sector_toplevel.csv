@@ -39,6 +39,7 @@ Parameter,Unit,Values,Description
   ,  ,  ,"  "
 **oil**,  ,  ,Configuration for `sector.oil` settings.
 -- spatial_oil,bool,"{true, false}",Add option to spatially resolve carrier representing oil supply.
+-- reserves,TWh,float,"Initial fossil-fuel reserve energy per bus [TWh] for the carrier Store. Optional; defaults to 0. Same key may be set under other ``sector.{carrier}`` blocks (e.g. ``sector.coal.reserves``)."
   ,  ,  ,"  "
 **ammonia**,  ,  ,Configuration for `sector.ammonia` settings.
 -- enable,bool,"{true, false}",Flag to include conventional Haber-Bosch ammonia production in the industry sector.

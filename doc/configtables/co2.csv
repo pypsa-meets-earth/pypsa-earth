@@ -1,0 +1,12 @@
+Parameter,Unit,Values,Description
+limit,tCO2-eq/a,float,Cap on system total annual carbon dioxide equivalent emissions. Active via ``Co2L`` in the ``{opts}`` wildcard.
+base,tCO2-eq/a,float,Reference value of system total annual carbon dioxide equivalent emissions. Used when a relative reduction target is specified in ``{opts}`` (e.g. ``Co2L0.7``).
+emission_price,currency/tCO2-eq,float,Exogenous CO₂ price applied to marginal costs when ``Ep`` is present in ``{opts}``.
+automatic_emission,,,Derive ``co2.limit`` from historical emission data instead of the configured ``limit`` value.
+-- enable,bool,"{true, false}",True: emissions are obtained from the automatic emission extraction procedure.
+-- base_year,,integer,Reference year for automatic emission extraction (1970–2018).
+budget,,,Year-by-year CO₂ reduction trajectory applied in all sector-coupled runs.
+-- enable,bool,"{true, false}",Switch to activate planning-horizon-specific CO₂ budgets.
+-- override_co2opt,bool,"{true, false}","If true and a CO₂ limit already exists (e.g. from ``Co2L`` in ``{opts}``), overwrite it with the budget value."
+-- base_value,str,"{""limit"", ""base"", ""absolute"", float}","Which ``co2`` scalar to scale by ``year`` factors: ``limit`` or ``base`` (sibling keys above), ``absolute`` (factor is the cap directly), or a custom float [tCO₂-eq/a]."
+-- year,,Dictionary with planning horizons as keys,"CO₂ budget as a fraction of the selected ``base_value`` scalar. If ``absolute`` is selected then the factor is the annual cap [tCO₂-eq/a]."

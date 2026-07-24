@@ -88,19 +88,20 @@ databundles:
     - data/gadm/gadm41_MAR/gadm41_MAR.gpkg  # needed in build_shapes
     - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
-  # load tutorial hydrobasins bundle for Africa only
+  # Source: Brigham Young University, Ashby, K., Nelson, J., Ames, D. (2026).
+  # Derived Hydrography of Africa, HydroShare,
+  # https://doi.org/10.4211/hs.121bbce392a841178476001843e7510b
   bundle_tutorial_hydrobasins:
     countries: [Africa]
     tutorial: true
     category: hydrobasins
-    destination: "data/hydrobasins"
+    destination: "data/hydrobasins_hydroshare"
     urls:
-      hydrobasins:
-        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
-        suffixes: ["af"]
-    unzip: true
-    output:
-    - data/hydrobasins/hybas_world.shp
+      # TODO Double-check if rehosting is needed
+      #direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
+      zenodo: https://sandbox.zenodo.org/records/565987/files/africa-geoglows-catchment.zip?download=1
+    #output: [data/hydrobasins_hydroshare/africa-geoglows-catchment.shp]
+    output: [data/hydrobasins_hydroshare/africa-geoglows-atlite.shp]
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:

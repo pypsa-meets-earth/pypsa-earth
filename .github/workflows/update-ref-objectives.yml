@@ -19,7 +19,7 @@ jobs:
         shell: bash -l {0}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: conda-incubator/setup-miniconda@v4
       with:
@@ -30,7 +30,7 @@ jobs:
 
     - name: Cache Conda env
       id: cache-env
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ env.CONDA }}/envs
         key: conda-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('envs/linux-64.lock.yaml') }}
@@ -102,7 +102,7 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Download updated reference CSV
       uses: actions/download-artifact@v8
