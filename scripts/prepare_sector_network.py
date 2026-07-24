@@ -833,7 +833,7 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
                 tech_params[tech]["efficiency2"] = (
                     -costs.at["electrolysis", "efficiency"]
                     * total_water_ratio_l_per_kg
-                    / 33.33  # 33.33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion
+                    / snakemake.config["sector"]["hydrogen"]["lhv"]  # 33.33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion
                 )
 
     if options["hydrogen"].get("hydrogen_colors", False):

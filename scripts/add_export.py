@@ -168,7 +168,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             total_annual_h2_mwh = export_profile.sum() * (8760 / len(n.snapshots))
 
             # 2. Convert to annual mass (MWh -> kWh -> divide by 33.33 LHV -> kg/a)
-            annual_h2_kg = (total_annual_h2_mwh * 1000) / 33.33
+            annual_h2_kg = (total_annual_h2_mwh * 1000) / snakemake.config["sector"]["hydrogen"]["lhv"]
 
             # 3. Calculate constant water demand profile baseline (m3/h)
             hourly_h2_baseline_kg = annual_h2_kg / 8760.0
