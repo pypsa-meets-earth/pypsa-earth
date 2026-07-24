@@ -1234,7 +1234,8 @@ if config["sector"]["hydrogen"]["water_network"]:
                 + "water_networks/water_network_elec_s{simpl}_{clusters}.csv",
             shell:
                 "cp {input.source} {output.destination}"
-                
+
+
 rule retrieve_potash_data:
     input:
         potash_zip=HTTP.remote(

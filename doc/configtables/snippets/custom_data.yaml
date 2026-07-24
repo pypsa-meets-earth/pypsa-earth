@@ -4,6 +4,7 @@ custom_data:
   industry_database: false
   transport_demand: false
   water_costs: false
+  h2_water_network: false
   h2_underground: false
   add_existing: false
   custom_sectors: false
