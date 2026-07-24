@@ -85,7 +85,24 @@ There are multiple ways to get involved and learn more about our work:
 
    ```bash
    .../some/path/without/spaces % git clone https://github.com/pypsa-meets-earth/pypsa-earth.git
-   ```
+```
+  Remove the -n to do a real run. Follow the tutorial of PyPSA-Eur 1 and 2 on [YouTube](https://www.youtube.com/watch?v=ty47YU1_eeQ) to continue with an analysis.
+
+## Configuration
+
+The model comes with several configuration files:
+
+| Config file | Description |
+|---|---|
+| `config.default.yaml` | Default power model configuration with all available settings |
+| `config.tutorial.yaml` | Simplified configuration for test runs and tutorials |
+| `configs/bundle_config.yaml` | Configuration for data bundle downloads |
+| `configs/powerplantmatching_config.yaml` | Power plant matching configuration |
+| `configs/regions_definition_config.yaml` | Region definition settings |
+| `test/config.sector.yaml` | Sector-coupled model configuration for multi-energy system runs |
+| `test/config.myopic.yaml` | Myopic optimization configuration |
+| `configs/scenarios/` | Scenario-specific configuration overrides |
+```
 2. The python package requirements are curated in the `envs/{your operating system}64.lock.yaml` file.
    - On linux, the environment can be installed using:
      ```bash
