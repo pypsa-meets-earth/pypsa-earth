@@ -466,10 +466,10 @@ def add_water_network(n, costs):
         y=n.buses.loc[list(seawater_nodes)].y.values,
     )
 
-    costs_brine_disposal = snakemake.config["sector"]["hydrogen"].get(
+    costs_brine_disposal = snakemake.config["sector"]["water"].get(
         "costs_brine_disposal", 0.0
     )  # EUR/m3 (brine)
-    seawater_water_ratio = snakemake.config["sector"]["hydrogen"].get(
+    seawater_water_ratio = snakemake.config["sector"]["water"].get(
         "seawater_water_ratio", 2.5
     )  # L_sea / L_fresh
 
@@ -573,7 +573,7 @@ def add_water_network(n, costs):
 
     # Add local water supply (e.g. municipal grid/groundwater) for nodes
     # not connected to the sea-desalination network to guarantee feasibility.
-    water_cost_eur_per_m3 = snakemake.config["sector"]["hydrogen"].get(
+    water_cost_eur_per_m3 = snakemake.config["sector"]["water"].get(
         "local_water_cost", 0.019159507  # [EUR/MWh_H2]
     )
 
@@ -808,13 +808,13 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
         },
     }
 
-    if snakemake.config["sector"]["hydrogen"]["water_network"]:
+    if snakemake.config["sector"]["water"]["water_network"]:
         add_water_network(n, costs)
-        h2_config = snakemake.config["sector"]["hydrogen"]
-        base_water_ratio = h2_config.get(
+        water_config = snakemake.config["sector"]["water"]
+        base_water_ratio = water_config.get(
             "ratio_water_hydrogen", 13
         )  # for electrolysis, L/kg_H2
-        additional_water_consumption = snakemake.config["sector"]["hydrogen"].get(
+        additional_water_consumption = snakemake.config["sector"]["water"].get(
             "additional_water_consumption_elec", 0.0
         )  # additional water consumption (e.g. cooling purposes), L/kg_H2
         total_water_ratio_l_per_kg = base_water_ratio + additional_water_consumption
@@ -831,7 +831,7 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
                 tech_params[tech]["efficiency2"] = (
                     -costs.at["electrolysis", "efficiency"]
                     * total_water_ratio_l_per_kg
-                    / snakemake.config["sector"]["hydrogen"][
+                    / snakemake.config["sector"]["water"][
                         "lhv"
                     ]  # 33.33 kWh == 1 kg H2 (ratio_water_hydrogen is in liters per kg H2) % Conversion from kWh to MWh is canceled by L to m3 conversion
                 )

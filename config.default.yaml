@@ -653,6 +653,8 @@ sector:
     # - Coal gasification
     # - Coal gasification CC
     # - Heavy oil partial oxidation
+    
+  water:
     water_network: true
     aqueduct_water_stress_classification: # ["above_40"] # If "True" then the water stress classification is used to determine the water availability for desalination, see: https://www.wri.org/applications/aqueduct/water-risk-atlas
     ratio_water_hydrogen: 13 # liters of water per kg of hydrogen, see: https://www.plugpower.com/wp-content/uploads/2021/10/EX-4250D_F041122.pdf
@@ -668,6 +670,27 @@ sector:
     desalination_oversizing_factor: 0 # additional water consumption for desalination, e.g. for local population water supply, agriculture, or industry; e.g. 0.5 means that for every 2 liters of freshwater needed for electrolysis, additional 1 liter is produced to cover other water needs
     seawater_water_ratio: 2.5 # liters of seawater needed to produce 1 liter of freshwater - producing 1.5 kg brine, see: https://dechema.de/-p-20395331-EGOTEC-f36ccaaaa9d2d4d47e232bb9a6bb029b/_/report%20seawater%20brine%20treatment%20and%20disposal%20in%20Namibia%20(1).pdf
     local_water_cost: 0.019159507 # [EUR/MWh_H2]
+    shoreline_buffer: 3000 # meters, buffer distance from shoreline for desalination plants
+    water_supply:
+      pipeline_hydraulics:
+        pipe_diameter_mm: 171.65
+        flow_velocity_ms: 1.5
+        water_density_kg_m3: 1000.0
+        friction_factor_lambda: 0.01489
+        p_max_pipeline_bar: 16.0
+        mass_flow_rate_kgs: 34.71  # 1000 MW Electrolysis
+      efficiencies:
+        eta_pump: 0.85
+        eta_motor: 0.90
+      costs:
+        pump_station:
+          cost_factor_a: 35768     # incl. 2% inflation 1981–2023 (15570 in 1981)
+          scaling_exponent_b: 0.558
+        pipeline:
+          pipe_mat_factor: 1.1852
+          pipe_mat_exponent: 1.9557
+          inst_factor: 176.97
+          inst_exponent: -0.624
 
   coal:
     spatial_coal: true

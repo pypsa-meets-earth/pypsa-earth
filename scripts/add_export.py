@@ -157,10 +157,10 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     #  ADD FIXED LOCAL WATER LOAD DERIVED FROM EXPORT PROFILE
     # =========================================================================
     # Check if water network is activated and parameters exist
-    h2_config = snakemake.config["sector"]["hydrogen"]
-    if h2_config.get("water_network", False):
-        oversizing_factor = h2_config.get("desalination_oversizing_factor", 0.0)
-        base_water_ratio_l_per_kg = h2_config.get("ratio_water_hydrogen", 13)
+    water_config = snakemake.config["sector"]["water"]
+    if water_config.get("water_network", False):
+        oversizing_factor = water_config.get("desalination_oversizing_factor", 0.0)
+        base_water_ratio_l_per_kg = water_config.get("ratio_water_hydrogen", 13)
 
         if oversizing_factor > 0:
             # 1. Get the dynamic total annual H2 export from the generated profile (MWh/a)
@@ -168,9 +168,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
             total_annual_h2_mwh = export_profile.sum() * (8760 / len(n.snapshots))
 
             # 2. Convert to annual mass (MWh -> kWh -> divide by 33.33 LHV -> kg/a)
-            annual_h2_kg = (total_annual_h2_mwh * 1000) / snakemake.config["sector"][
-                "hydrogen"
-            ]["lhv"]
+            annual_h2_kg = (total_annual_h2_mwh * 1000) / snakemake.config["sector"]["water"]["lhv"]
 
             # 3. Calculate constant water demand profile baseline (m3/h)
             hourly_h2_baseline_kg = annual_h2_kg / 8760.0

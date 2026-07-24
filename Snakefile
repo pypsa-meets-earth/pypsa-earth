@@ -1158,18 +1158,18 @@ rule prepare_transport_data_input:
         "scripts/prepare_transport_data_input.py"
 
 
-if config["sector"]["hydrogen"]["water_network"]:
+if config["sector"]["water"]["water_network"]:
     if not config["custom_data"]["h2_water_network"]:
 
         rule prepare_water_network:
             params:
                 costs=config["costs"],
-                water_stress=config["sector"]["hydrogen"][
+                water_stress=config["sector"]["water"][
                     "aqueduct_water_stress_classification"
                 ],
                 geo_crs=config["crs"]["geo_crs"],
                 distance_crs=config["crs"]["distance_crs"],
-                shoreline_buffer=config["sector"]["hydrogen"]["shoreline_buffer"],
+                shoreline_buffer=config["sector"]["water"]["shoreline_buffer"],
             input:
                 regions_onshore="resources/"
                 + RDIR
@@ -1410,7 +1410,7 @@ rule prepare_sector_network:
                 + SECDIR
                 + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson"
             }
-            if config["sector"]["hydrogen"]["water_network"]
+            if config["sector"]["water"]["water_network"]
             else {}
         ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
