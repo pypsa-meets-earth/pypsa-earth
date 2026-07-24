@@ -24,6 +24,7 @@ sector:
     network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
     gas_network_repurposing: true # If true -> ["sector"]["gas"]["network"] is automatically false
     h2_turbine: true
+    lhv: 33.33 # Lower Heating Value (LHV) of hydrogen in MWh/t (energy content per t H₂)
     underground_storage:
       enabled: false
       # calculations based on https://doi.org/10.1016/j.energy.2026.141729
