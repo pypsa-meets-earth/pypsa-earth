@@ -1173,6 +1173,9 @@ if config["sector"]["hydrogen"]["water_network"]:
                 + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
                 country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
                 natura="resources/" + RDIR + "natura.tiff",
+                gebco="data/gebco/GEBCO_2025_sub_ice.nc",
+                aqueduct="data/aqueduct/Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb",
+                shorelines="data/shorelines/GSHHS_shp/i/GSHHS_i_L1.shp",
             output:
                 shorelines="resources/"
                 + SECDIR
@@ -1247,6 +1250,30 @@ rule retrieve_potash_data:
         potash_files="data/potash_gis/PotashGIS/global_potash/Shapefiles/PotashTracts.shp",
     run:
         unpack_archive(str(input.potash_zip), output["potash_dir"])
+
+rule retrieve_aqueduct_data:
+    input:
+        aqueduct_zip=HTTP.remote(
+            "https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip",
+            keep_local=True,
+        ),
+    output:
+        aqueduct_dir=directory("data/aqueduct"),
+        aqueduct_gdb="data/aqueduct/Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb",
+    run:
+        unpack_archive(str(input.aqueduct_zip), output["aqueduct_dir"])
+
+rule retrieve_shorelines_data:
+    input:
+        shorelines_zip=HTTP.remote(
+            "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip",
+            keep_local=True,
+        ),
+    output:
+        shorelines_dir=directory("data/shorelines"),
+        shorelines_shp="data/shorelines/GSHHS_shp/i/GSHHS_i_L1.shp",
+    run:
+        unpack_archive(str(input.shorelines_zip), output["shorelines_dir"])
 
 
 if (

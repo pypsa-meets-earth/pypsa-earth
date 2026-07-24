@@ -41,150 +41,6 @@ from shapely.geometry import LineString, shape
 from shapely.ops import nearest_points
 
 
-def download_gebco():
-    """
-    Downloads the GEBCO bathymetric data, extracts it to a local directory, and saves it to snakemake.output.
-    """
-    url = "https://www.bodc.ac.uk/data/open_download/gebco/gebco_2024_sub_ice_topo/zip/"
-    gebco_file = "GEBCO_2024_sub_ice_topo.nc"
-
-    zip_fn = Path(os.path.join(BASE_DIR, "gebco.zip"))
-    to_fn = Path(os.path.join(BASE_DIR, "data/gebco"))
-
-    # Path to the extracted file
-    gebco_file_path = to_fn / gebco_file
-
-    # Check if the target file already exists
-    if gebco_file_path.exists():
-        logger.info(
-            f"Gebco data already exists at '{gebco_file_path}'. Skipping download."
-        )
-        return gebco_file_path
-
-    logger.info(f"Downloading GEBCO data from '{url}'.")
-    try:
-        progress_retrieve(url, zip_fn)
-        logger.info(f"Downloaded GEBCO zip file to '{zip_fn}'.")
-    except Exception as e:
-        logger.error(f"Failed to download GEBCO data: {e}")
-        return None
-
-    logger.info(f"Extracting GEBCO data to '{to_fn}'.")
-    with zipfile.ZipFile(zip_fn) as z:
-        z.extractall(to_fn)
-        logger.info("Extraction complete.")
-
-    zip_fn.unlink()  # Delete the temporary zip file
-    logger.info(f"GEBCO data available in '{to_fn}'.")
-
-    return gebco_file_path
-
-
-def download_aqueduct():
-    """
-    Downloads the Aqueduct 4.0 Water Risk data, extracts it to a local directory,
-    and returns it.
-    """
-    url = "https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip"
-    aqueduct_file = "Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb"
-
-    zip_fn = Path(os.path.join(BASE_DIR, "aqueduct.zip"))
-    to_fn = Path(os.path.join(BASE_DIR, "data/aqueduct"))
-
-    aqueduct_file_path = to_fn / aqueduct_file  # Full path to the extracted target file
-
-    # Check if the target file already exists
-    if aqueduct_file_path.exists():
-        logger.info(
-            f"Aqueduct data already exists at '{aqueduct_file_path}'. Skipping download."
-        )
-        return aqueduct_file_path
-
-    logger.info(f"Downloading Aqueduct data from '{url}'.")
-    try:
-        progress_retrieve(url, zip_fn)
-        logger.info(f"Downloaded Aqueduct zip file to '{zip_fn}'.")
-    except Exception as e:
-        logger.error(f"Failed to download Aqueduct data: {e}")
-        return None
-
-    logger.info(f"Extracting Aqueduct data to '{to_fn}'.")
-    try:
-        with zipfile.ZipFile(zip_fn) as z:
-            z.extractall(to_fn)
-            logger.info("Extraction complete.")
-    except Exception as e:
-        logger.error(f"Failed to extract Aqueduct data: {e}")
-        return None
-
-    zip_fn.unlink()  # Delete the temporary zip file
-    logger.info(f"Aqueduct data available in '{to_fn}'.")
-
-    return aqueduct_file_path
-
-
-def download_shorelines():
-    """
-    Downloads the Global Self-consistent, Hierarchical, High-resolution Geography Database (GSHHG)
-    shapefile archive, extracts the relevant shoreline shapefile, and saves it to snakemake.output.
-    """
-    url = (
-        "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip"
-    )
-    shoreline_file = "GSHHS_shp/i/GSHHS_i_L1.shp"  # Relative path inside the zip
-    output_file = snakemake.output.shorelines
-
-    # Save locations
-    zip_fn = Path(os.path.join(BASE_DIR, "shorelines.zip"))
-    to_fn = Path(os.path.join(BASE_DIR, "data/shorelines"))
-
-    # Path to the extracted shapefile
-    extracted_shoreline_path = to_fn / shoreline_file
-
-    # Check if the target file already exists
-    if extracted_shoreline_path.exists():
-        logger.info(
-            f"Shoreline data already exists at '{extracted_shoreline_path}'. Skipping download."
-        )
-
-        # Load the shapefile using GeoPandas
-        shoreline_gdf = gpd.read_file(extracted_shoreline_path)
-
-        # Save the extracted shapefile to snakemake.output
-        shoreline_gdf.to_file(output_file)
-
-        return shoreline_gdf
-
-    logger.info(f"Downloading databundle from '{url}'.")
-    progress_retrieve(url, zip_fn)
-
-    logger.info(f"Extracting databundle.")
-    # Extract the zip file into memory
-    with zipfile.ZipFile(zip_fn) as z:
-        # Check if the specific file exists in the archive
-        if shoreline_file in z.namelist():
-            logger.info(f"Extracting {shoreline_file}.")
-            # Extract only the specific shapefile and its related files
-            for file in z.namelist():
-                if file.startswith(shoreline_file.rsplit("/", 1)[0]):
-                    z.extract(file, to_fn)
-            logger.info("Extraction complete.")
-        else:
-            logger.info(f"File {shoreline_file} not found in the archive.")
-            return None
-
-    zip_fn.unlink()
-    logger.info(f"Shorelines data available in '{to_fn}'.")
-
-    # Load the shapefile using GeoPandas
-    shoreline_gdf = gpd.read_file(extracted_shoreline_path)
-
-    # Save the extracted shapefile to snakemake.output
-    shoreline_gdf.to_file(output_file)
-
-    return shoreline_gdf
-
-
 def clip_shorelines_country(shoreline_gdf, country_shapes):
     """
     Clips the shorelines to the boundaries of a given country with a buffer applied.
@@ -1044,9 +900,9 @@ if __name__ == "__main__":
             clusters="13",
         )
 
-    shoreline_gdf = download_shorelines().copy()
-    gebco_path = download_gebco()
-    aqueduct_file_path = download_aqueduct()
+    shoreline_gdf = gpd.read_file(snakemake.input.shorelines)
+    gebco_path = snakemake.input.gebco
+    aqueduct_file_path = snakemake.input.aqueduct
 
     # Load input data
     country_shapes = gpd.read_file(snakemake.input.country_shapes)
