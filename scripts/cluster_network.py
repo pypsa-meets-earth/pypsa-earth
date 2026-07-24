@@ -375,9 +375,10 @@ def busmap_for_gadm_clusters(inputs, n, gadm_layer_id, geo_crs, country_list):
         gadm_clustering=True,
     )
 
-    buses["gadm_subnetwork"] = (
-        buses["gadm_{}".format(gadm_layer_id)] + "_" + buses["carrier"].astype(str)
-    )
+    buses["gadm_subnetwork"] = buses["gadm_{}".format(gadm_layer_id)]
+    # buses["gadm_subnetwork"] = (
+    #     buses["gadm_{}".format(gadm_layer_id)] + "_" + buses["carrier"].astype(str)
+    # )
     busmap = buses["gadm_subnetwork"]
 
     return busmap

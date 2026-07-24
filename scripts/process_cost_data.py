@@ -43,9 +43,12 @@ Relevant Settings
     :ref:`electricity_cf`
 """
 import logging
+import os
 
 import pandas as pd
 import pypsa
+from _helpers import BASE_DIR, read_csv_nafix
+from anyio import Path
 from currency_converter import CurrencyConverter
 
 currency_converter = CurrencyConverter(
@@ -547,7 +550,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("process_cost_data", scope="sec")
+        snakemake = mock_snakemake("process_cost_data", scope="sec", year="2050")
 
     n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
@@ -561,8 +564,17 @@ if __name__ == "__main__":
         )
 
     if snakemake.wildcards.scope == "sec":
+        # ------
+        ##### TO BE REMOVED AGAIN AFTER MERGING desalination data to technologydata
+        costs1 = read_csv_nafix(snakemake.input.costs)
+        costs1 = costs1.set_index(["technology", "parameter"])
+        costs2 = read_csv_nafix(snakemake.input.costs_desal)
+        costs2 = costs2.set_index(["technology", "parameter"])
+        merged = pd.concat([costs1, costs2])
+        path_to_save = Path(os.path.join(BASE_DIR, "data/costs_merged.csv"))
+        merged.to_csv(path_to_save)
         costs = prepare_costs(
-            snakemake.input.costs,
+            path_to_save,
             snakemake.params.costs,
             snakemake.params.costs["output_currency"],
             snakemake.params.costs["fill_values"],
@@ -571,5 +583,15 @@ if __name__ == "__main__":
             snakemake.params.costs["future_exchange_rate_strategy"],
             snakemake.params.costs["custom_future_exchange_rate"],
         )
+        # costs = prepare_costs(
+        #     snakemake.input.costs,
+        #     snakemake.params.costs,
+        #     snakemake.params.costs["output_currency"],
+        #     snakemake.params.costs["fill_values"],
+        #     Nyears,
+        #     snakemake.params.costs["default_exchange_rate"],
+        #     snakemake.params.costs["future_exchange_rate_strategy"],
+        #     snakemake.params.costs["custom_future_exchange_rate"],
+        # )
 
     costs.to_csv(snakemake.output[0])

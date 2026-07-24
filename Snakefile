@@ -533,6 +533,7 @@ rule process_cost_data:
             "resources/" + RDIR + "costs_{year}.csv",
             "data/costs.csv",
         ),
+        costs_desal="data/costs_desal.csv",
     output:
         "resources/" + RDIR + "costs_{year}_{scope}.csv",
     log:
@@ -1157,6 +1158,90 @@ rule prepare_transport_data_input:
         "scripts/prepare_transport_data_input.py"
 
 
+if config["sector"]["water"]["water_network"]:
+    if not config["custom_data"]["h2_water_network"]:
+
+        rule prepare_water_network:
+            params:
+                costs=config["costs"],
+                water_stress=config["sector"]["water"][
+                    "aqueduct_water_stress_classification"
+                ],
+                geo_crs=config["crs"]["geo_crs"],
+                distance_crs=config["crs"]["distance_crs"],
+                shoreline_buffer=config["sector"]["water"]["shoreline_buffer"],
+            input:
+                regions_onshore="resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+                country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
+                natura="resources/" + RDIR + "natura.tiff",
+                gebco="data/gebco/GEBCO_2025_sub_ice.nc",
+                aqueduct="data/aqueduct/Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb",
+                shorelines="data/shorelines/GSHHS_shp/i/GSHHS_i_L1.shp",
+            output:
+                shorelines="resources/"
+                + SECDIR
+                + "water_networks/shorelines_elec_s{simpl}_{clusters}.gpkg",
+                shorelines_natura="resources/"
+                + SECDIR
+                + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+                buffered_natura="resources/"
+                + SECDIR
+                + "water_networks/buffered_natura_elec_s{simpl}_{clusters}.gpkg",
+                regions_onshore_aqueduct="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct_desalination="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_desalination_elec_s{simpl}_{clusters}.geojson",
+                clustered_water_network="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+                water_pipes_profiles="resources/"
+                + SECDIR
+                + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
+            script:
+                "scripts/prepare_water_network.py"
+
+        rule plot_water_network:
+            input:
+                regions_onshore="resources/"
+                + RDIR
+                + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_elec_s{simpl}_{clusters}.geojson",
+                regions_onshore_aqueduct_desalination="resources/"
+                + SECDIR
+                + "water_networks/regions_onshore_aqueduct_desalination_elec_s{simpl}_{clusters}.geojson",
+                clustered_water_network="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson",
+                shorelines_natura="resources/"
+                + SECDIR
+                + "water_networks/shorelines_natura_elec_s{simpl}_{clusters}.gpkg",
+                water_pipes_profiles="resources/"
+                + SECDIR
+                + "water_networks/water_pipes_profiles{simpl}_{clusters}.csv",
+            output:
+                water_network="results/plots/desalination/water_network_elec_s{simpl}_{clusters}.{ext}",
+            script:
+                "scripts/plot_water_network.py"
+
+    else:
+
+        rule copy_water_network:
+            input:
+                source="data_custom/water_network_elec_s{simpl}_{clusters}.csv",
+            output:
+                destination="resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.csv",
+            shell:
+                "cp {input.source} {output.destination}"
+
+
 rule retrieve_potash_data:
     input:
         potash_zip=HTTP.remote(
@@ -1168,6 +1253,32 @@ rule retrieve_potash_data:
         potash_files="data/potash_gis/PotashGIS/global_potash/Shapefiles/PotashTracts.shp",
     run:
         unpack_archive(str(input.potash_zip), output["potash_dir"])
+
+
+rule retrieve_aqueduct_data:
+    input:
+        aqueduct_zip=HTTP.remote(
+            "https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip",
+            keep_local=True,
+        ),
+    output:
+        aqueduct_dir=directory("data/aqueduct"),
+        aqueduct_gdb="data/aqueduct/Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb",
+    run:
+        unpack_archive(str(input.aqueduct_zip), output["aqueduct_dir"])
+
+
+rule retrieve_shorelines_data:
+    input:
+        shorelines_zip=HTTP.remote(
+            "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhg/latest/gshhg-shp-2.3.7.zip",
+            keep_local=True,
+        ),
+    output:
+        shorelines_dir=directory("data/shorelines"),
+        shorelines_shp="data/shorelines/GSHHS_shp/i/GSHHS_i_L1.shp",
+    run:
+        unpack_archive(str(input.shorelines_zip), output["shorelines_dir"])
 
 
 if (
@@ -1292,6 +1403,15 @@ rule prepare_sector_network:
                 + f"{country}.csv"
                 for country in config["countries"]
             },
+        ),
+        **(
+            {
+                "clustered_water_network": "resources/"
+                + SECDIR
+                + "water_networks/water_network_elec_s{simpl}_{clusters}.geojson"
+            }
+            if config["sector"]["water"]["water_network"]
+            else {}
         ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
