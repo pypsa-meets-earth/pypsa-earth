@@ -1254,6 +1254,7 @@ rule retrieve_potash_data:
     run:
         unpack_archive(str(input.potash_zip), output["potash_dir"])
 
+
 rule retrieve_aqueduct_data:
     input:
         aqueduct_zip=HTTP.remote(
@@ -1265,6 +1266,7 @@ rule retrieve_aqueduct_data:
         aqueduct_gdb="data/aqueduct/Aqueduct40_waterrisk_download_Y2023M07D05/GDB/Aq40_Y2023D07M05.gdb",
     run:
         unpack_archive(str(input.aqueduct_zip), output["aqueduct_dir"])
+
 
 rule retrieve_shorelines_data:
     input:
