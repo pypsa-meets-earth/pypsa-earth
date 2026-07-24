@@ -27,7 +27,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
+    :ref:`meta_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
 
 Inputs
 ------
@@ -698,7 +698,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="20flex"
+            "cluster_network", network="elec", simpl="", clusters="24"
         )
     configure_logging(snakemake)
 
@@ -709,12 +709,11 @@ if __name__ == "__main__":
     # Add year suffix to carrier names for clustering
     add_year_suffix_to_carriers(n)
 
-    alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
-    distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+    alternative_clustering = snakemake.params.clustering["alternative_clustering"]
+    distribution_cluster = snakemake.params.clustering["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     focus_weights = (
-        snakemake.params.focus_weights
-        or snakemake.params.cluster_options["focus_weights"]
+        snakemake.params.focus_weights or snakemake.params.clustering["focus_weights"]
     )
     country_list = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
@@ -727,7 +726,7 @@ if __name__ == "__main__":
         ]
     )
 
-    exclude_carriers = snakemake.params.cluster_options["cluster_network"].get(
+    exclude_carriers = snakemake.params.clustering["cluster_network"].get(
         "exclude_carriers", []
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
@@ -753,6 +752,8 @@ if __name__ == "__main__":
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
 
+    aggregation_strategies = snakemake.params.aggregation_strategies
+
     if n_clusters == len(n.buses) and not alternative_clustering:
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
@@ -775,8 +776,6 @@ if __name__ == "__main__":
                 x == v
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
-
-        aggregation_strategies = snakemake.params.aggregation_strategies
 
         # Aggregation strategies must be set for all columns
         update_config_dictionary(
@@ -804,7 +803,7 @@ if __name__ == "__main__":
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
             custom_busmap = busmap
 
-        cluster_config = snakemake.config.get("cluster_options", {}).get(
+        cluster_config = snakemake.config.get("clustering", {}).get(
             "cluster_network", {}
         )
         clustering = clustering_for_n_clusters(

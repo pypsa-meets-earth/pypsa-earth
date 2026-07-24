@@ -36,7 +36,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`snapshots_cf`, :ref:`toplevel_cf`, :ref:`electricity_cf`, :ref:`load_options_cf`,
+    :ref:`snapshots_cf`, :ref:`meta_cf`, :ref:`electricity_cf`, :ref:`load_options_cf`,
     :ref:`lines_cf`, :ref:`links_cf`, :ref:`transformers_cf`
 
 Inputs
@@ -279,12 +279,14 @@ def _get_linetypes_config(line_types, voltages):
     -------
         Dictionary of linetypes for selected voltages.
     """
-    # get voltages value that are not available in the line types
-    vnoms_diff = set(voltages).symmetric_difference(set(line_types.keys()))
-    if vnoms_diff:
+    # Warn only if line types are configured for voltages that are not selected.
+    unknown_linetype_voltages = set(voltages) - set(line_types)
+    if unknown_linetype_voltages:
         logger.warning(
-            f"Voltages {vnoms_diff} not in the {line_types} or {voltages} list."
+            "Line types defined for voltages not selected in the configuration: "
+            f"{unknown_linetype_voltages}. Selected voltages are {voltages}."
         )
+
     return {k: v for k, v in line_types.items() if k in voltages}
 
 

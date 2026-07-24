@@ -1051,7 +1051,7 @@ if __name__ == "__main__":
 
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetype = snakemake.params.config_lines["ac_types"][base_voltage]
-    exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
+    exclude_carriers = snakemake.params.clustering["simplify_network"].get(
         "exclude_carriers", []
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
@@ -1094,7 +1094,7 @@ if __name__ == "__main__":
 
     busmaps = [trafo_map, simplify_links_map]
 
-    cluster_config = snakemake.params.cluster_options["simplify_network"]
+    cluster_config = snakemake.params.clustering["simplify_network"]
     renewable_config = snakemake.params.renewable
     lines_length_factor = snakemake.params.config_lines["length_factor"]
     if cluster_config.get("remove_stubs", True):
@@ -1117,7 +1117,7 @@ if __name__ == "__main__":
     # treatment of outliers (nodes without a profile for considered carrier):
     # all nodes that have no profile of the given carrier are being aggregated to closest neighbor
     if (
-        snakemake.config.get("cluster_options", {})
+        snakemake.config.get("clustering", {})
         .get("cluster_network", {})
         .get("algorithm", "hac")
         == "hac"
@@ -1147,15 +1147,13 @@ if __name__ == "__main__":
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
-        alternative_clustering = snakemake.params.cluster_options[
-            "alternative_clustering"
-        ]
+        alternative_clustering = snakemake.params.clustering["alternative_clustering"]
         build_shape_options = snakemake.params.build_shape_options
         country_list = snakemake.params.countries
-        distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+        distribution_cluster = snakemake.params.clustering["distribute_cluster"]
         focus_weights = (
             snakemake.params.focus_weights
-            or snakemake.params.cluster_options["focus_weights"]
+            or snakemake.params.clustering["focus_weights"]
         )
         gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
         geo_crs = snakemake.params.crs["geo_crs"]

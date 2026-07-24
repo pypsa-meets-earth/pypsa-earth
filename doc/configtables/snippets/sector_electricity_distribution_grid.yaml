@@ -1,5 +1,4 @@
-  # ------------------- ELECTRICITY DISTRIBUTION GRID -------------------
-
+  # ------------------- Electricity distribution grid -------------------
   electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
   enable_electricity_connection_cost: false # adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network.
   solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
@@ -15,7 +14,7 @@
       200: 0.41
       450: 0.49
       2300: 0.66
-     # maximum distance [km] to allocate a building within the nearest bus shapes
+    # maximum distance [km] to allocate a building within the nearest bus shapes
     tolerance: 100
 
   home_battery: true # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)

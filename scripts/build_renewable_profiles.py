@@ -214,8 +214,6 @@ cc = coco.CountryConverter()
 logger = create_logger(__name__)
 
 COPERNICUS_CRS = "EPSG:4326"
-
-
 GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
@@ -553,6 +551,7 @@ if __name__ == "__main__":
     # crs
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
+    COPERNICUS_CRS = "EPSG:4326"  # projection for Copernicus data, used by atlite. "EPSG:4326" is the standard used by OSM and google maps
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -591,8 +590,8 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
-        resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
+        resource["hydrobasins"] = hydrobasins
         ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
