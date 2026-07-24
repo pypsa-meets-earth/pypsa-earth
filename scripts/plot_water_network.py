@@ -66,21 +66,26 @@ def plot_water_networks(
         alpha=0.4,
         label="Original Polygons",
     )
-    
+
     if show_labels:
-    # Add labels for each polygon using the 'name' column
+        # Add labels for each polygon using the 'name' column
         for idx, row in regions_onshore_aqueduct.iterrows():
             ax.annotate(
-                text=row['name'],
+                text=row["name"],
                 xy=(row.geometry.centroid.x, row.geometry.centroid.y),
                 xytext=(-9, -9),
                 textcoords="offset points",
                 fontsize=8,
-                color='black',
-                bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="white", alpha=0.7),
-                arrowprops=dict(arrowstyle="->", color='black', lw=0.5),
+                color="black",
+                bbox=dict(
+                    boxstyle="round,pad=0.3",
+                    edgecolor="black",
+                    facecolor="white",
+                    alpha=0.7,
+                ),
+                arrowprops=dict(arrowstyle="->", color="black", lw=0.5),
             )
-    
+
     regions_onshore_aqueduct_desalination.plot(
         ax=ax, color="red", marker="o", label="Centroids"
     )
@@ -170,12 +175,19 @@ def plot_altitude_profile(df, resolution=1000):
     plt.tight_layout()
 
     # Save the figure to a file
-    path_to_save = BASE_DIR / "results" / "plots" / "desalination" / f"{df['line_name'].iloc[0]}_profile.png"
+    path_to_save = (
+        BASE_DIR
+        / "results"
+        / "plots"
+        / "desalination"
+        / f"{df['line_name'].iloc[0]}_profile.png"
+    )
 
     plt.savefig(
         path_to_save, dpi=300, bbox_inches="tight"
     )  # Save with high resolution and tight layout
     plt.close()
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
