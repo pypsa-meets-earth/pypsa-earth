@@ -64,13 +64,13 @@ def clip_shorelines_country(shoreline_gdf, country_shapes):
 
     # Ensure the GeoDataFrame is in a projected CRS (e.g., UTM)
     if country_gdf.crs.is_geographic:
-        country_gdf = country_gdf.to_crs(epsg=3857)  # Web Mercator (meters)
+        country_gdf = country_gdf.to_crs(epsg=snakemake.params.distance_crs)  # Web Mercator (meters)
 
-    # Apply buffer (3000 meters)
-    country_gdf["geometry"] = country_gdf.buffer(3000)
+    # Apply buffer
+    country_gdf["geometry"] = country_gdf.buffer(snakemake.params.shoreline_buffer)  # Buffer in meters
 
     # Convert back to the original CRS if needed
-    country_gdf = country_gdf.to_crs(epsg=4326)
+    country_gdf = country_gdf.to_crs(epsg=snakemake.params.geo_crs)
 
     # Ensure CRS consistency
     if shoreline_gdf.crs != country_gdf.crs:
@@ -134,7 +134,7 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
     positive_area_gdf = gpd.GeoDataFrame({"geometry": positive_polygons}, crs=src.crs)
 
     # Switch to a projected CRS for buffering (e.g., EPSG:3857)
-    projected_crs = "EPSG:3857"
+    projected_crs = snakemake.params.distance_crs
     positive_area_gdf = positive_area_gdf.to_crs(projected_crs)
     clipped_shoreline = clipped_shoreline.to_crs(projected_crs)
 
@@ -158,9 +158,9 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
     )
 
     # Ensure the final GeoDataFrames are in EPSG:4326 for plotting
-    clipped_shoreline = clipped_shoreline.to_crs(epsg=4326)
-    buffered_positive_area_gdf = buffered_positive_area_gdf.to_crs(epsg=4326)
-    clipped_shoreline_natura = clipped_shoreline_natura.to_crs(epsg=4326)
+    clipped_shoreline = clipped_shoreline.to_crs(snakemake.params.geo_crs)
+    buffered_positive_area_gdf = buffered_positive_area_gdf.to_crs(snakemake.params.geo_crs)
+    clipped_shoreline_natura = clipped_shoreline_natura.to_crs(snakemake.params.geo_crs)
 
     # Save to snakemake.output
     clipped_shoreline_natura.to_file(snakemake.output.shorelines_natura)
@@ -219,7 +219,7 @@ def prepare_gebco(country_shapes, gebco_path):
 
     with rasterio.open(clipped_output_path) as src:
         # Target crs to be able to calculate distances
-        target_crs = "EPSG:3857"
+        target_crs = snakemake.params.distance_crs
 
         # Calculate transformation and dimensions for the target CRS
         transform, width, height = calculate_default_transform(
@@ -303,7 +303,7 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
     intersected["bws_raw"] = intersected["bws_raw"].clip(upper=1)
 
     # Calculate the area of each intersected geometry (handles MultiPolygons)
-    intersected["area"] = intersected.to_crs(epsg="3857").geometry.area
+    intersected["area"] = intersected.to_crs(epsg=snakemake.params.distance_crs).geometry.area
 
     # Aggregate the `bws_raw` column using a weighted average based on area
     aggregated_values = (
@@ -374,7 +374,7 @@ def calc_distances_to_shore(
 
     # Ensure both GeoDataFrames are in the same projected CRS
     if gadm_desal.crs.is_geographic:
-        gadm_desal = gadm_desal.to_crs(epsg=3857)  # Example: Web Mercator (meters)
+        gadm_desal = gadm_desal.to_crs(epsg=snakemake.params.distance_crs)  # Example: Web Mercator (meters)
     if clipped_shoreline_natura.crs != gadm_desal.crs:
         clipped_shoreline_natura = clipped_shoreline_natura.to_crs(gadm_desal.crs)
 
@@ -426,7 +426,7 @@ def calc_distances_to_shore(
 
     shortest_distance_lines["centroid_bus"] = (
         gadm_desal["centroid"]
-        .to_crs(epsg=4326)
+        .to_crs(epsg=snakemake.params.geo_crs)
         .apply(lambda centroid: get_bus_name(centroid, regions_onshore_aqueduct))
     )
 
@@ -479,7 +479,7 @@ def calc_distances_to_shore(
             or shortest_distance_lines[col].dtype.name == "geometry"
         ):
             shortest_distance_lines[col] = shortest_distance_lines[col].to_crs(
-                epsg=4326
+                epsg=snakemake.params.geo_crs
             )
             shortest_distance_lines[col] = shortest_distance_lines[col].apply(
                 lambda geom: geom.wkt if geom else None
@@ -489,7 +489,7 @@ def calc_distances_to_shore(
     for col in ["centroid", "nearest_point", "shortest_distance_line"]:
         if col in gadm_desal.columns and gadm_desal[col].dtype.name == "geometry":
             gadm_desal[col] = GeoSeries(gadm_desal[col], crs=gadm_desal.crs).to_crs(
-                epsg=4326
+                epsg=snakemake.params.geo_crs
             )
             gadm_desal[col] = gadm_desal[col].apply(
                 lambda geom: geom.wkt if geom else None

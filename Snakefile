@@ -1167,6 +1167,9 @@ if config["sector"]["hydrogen"]["water_network"]:
                 water_stress=config["sector"]["hydrogen"][
                     "aqueduct_water_stress_classification"
                 ],
+                geo_crs=config["crs"]["geo_crs"],
+                distance_crs=config["crs"]["distance_crs"],
+                shoreline_buffer=config["sector"]["hydrogen"]["shoreline_buffer"],
             input:
                 regions_onshore="resources/"
                 + RDIR
