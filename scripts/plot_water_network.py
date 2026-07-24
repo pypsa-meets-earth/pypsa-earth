@@ -129,7 +129,7 @@ def plot_altitude_profile(df, resolution=1000):
     plt.figure(figsize=(10, 4.2))
     plt.plot(df["distance_m"], df["head_clamped_m"], label="Running head (clamped)")
     plt.plot(df["distance_m"], df["elevation_m"], label="Elevation", linestyle=":")
-    # plt.axhline(df["max_altitude_cap"].unique(), linestyle="--", label="Head cap")
+    plt.axhline(df["max_altitude_cap"].unique(), linestyle="--", label="Head cap")
     plt.axhline(
         df["min_required_head"].unique(),
         linestyle=":",
