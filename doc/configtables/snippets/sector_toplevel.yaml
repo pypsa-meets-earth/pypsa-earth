@@ -82,7 +82,7 @@ sector:
     # - Coal gasification CC
     # - Heavy oil partial oxidation
     water_network: true
-    aqueduct_water_stress_classification: # ["above_40"] # If "True" then the water stress classification is used to determine the water availability for desalination, see: https://www.wri.org/applications/aqueduct/water-risk-atlas
+    aqueduct_water_stress_classification: # ["above_40"] # If "True" then the water stress classification is used to determine the water availability for desalination
     ratio_water_hydrogen: 13 # liters of water per kg of hydrogen, see: https://www.plugpower.com/wp-content/uploads/2021/10/EX-4250D_F041122.pdf
     costs_brine_disposal: 23 # EUR/m³ brine, see: https://www.mdpi.com/2071-1050/14/11/6752
       # assuming maximum opex of conventional crystallizers
