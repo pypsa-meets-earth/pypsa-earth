@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """
-Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend the powerplant database with custom entries provided in ``data/custom_powerplants.csv``.
+Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend or replace country-specific entries in the powerplant database with custom entries provided through one or more custom powerplant files.
 
 Relevant Settings
 -----------------
@@ -14,6 +14,8 @@ Relevant Settings
     electricity:
       powerplants_filter:
       custom_powerplants:
+        filepaths:
+        method:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
@@ -38,35 +40,48 @@ Outputs
 Description
 -----------
 
-The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendments. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
+The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ command applied to the original powerplantmatching database.
 
-1. Adding all powerplants from custom:
+The ``electricity: custom_powerplants`` section specifies the custom files and how they are applied. ``method`` accepts ``false``, ``merge``, or ``replace``. It may be a single value applied to every filepath or a list matching ``filepaths``. The countries affected by ``replace`` are determined from the ``Country`` column of the corresponding file.
 
-    .. code:: yaml
-
-        powerplants_filter: false
-        custom_powerplants: true
-
-2. Replacing powerplants in e.g. Germany by custom data:
+1. Using only powerplantmatching data:
 
     .. code:: yaml
 
-        powerplants_filter: Country not in ['Germany']
-        custom_powerplants: true
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants.csv
+          method: false
 
-    or
-
-    .. code:: yaml
-
-        powerplants_filter: Country not in ['Germany']
-        custom_powerplants: Country in ['Germany']
-
-3. Adding additional built year constraints:
+2. Adding all powerplants from a custom file:
 
     .. code:: yaml
 
-        powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
-        custom_powerplants: YearCommissioned <= 2015
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants.csv
+          method: merge
+
+3. Replacing powerplants for the countries contained in a custom file:
+
+    .. code:: yaml
+
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants_US.csv
+          method: replace
+
+4. Applying different methods to different custom files:
+
+    .. code:: yaml
+
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants_US.csv
+          - data/custom_powerplants_BR.csv
+          method:
+          - replace
+          - merge
 
 Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
 
@@ -76,7 +91,7 @@ Tagging considerations for columns in the file:
 
 - FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
 - Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
-- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.
+- Country: Country name has to be defined with its alpha2 code ('NG' for Nigeria, 'BO' for Bolivia, 'FR' for France, etc.
 
 The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
 
