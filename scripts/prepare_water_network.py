@@ -64,10 +64,14 @@ def clip_shorelines_country(shoreline_gdf, country_shapes):
 
     # Ensure the GeoDataFrame is in a projected CRS (e.g., UTM)
     if country_gdf.crs.is_geographic:
-        country_gdf = country_gdf.to_crs(epsg=snakemake.params.distance_crs)  # Web Mercator (meters)
+        country_gdf = country_gdf.to_crs(
+            epsg=snakemake.params.distance_crs
+        )  # Web Mercator (meters)
 
     # Apply buffer
-    country_gdf["geometry"] = country_gdf.buffer(snakemake.params.shoreline_buffer)  # Buffer in meters
+    country_gdf["geometry"] = country_gdf.buffer(
+        snakemake.params.shoreline_buffer
+    )  # Buffer in meters
 
     # Convert back to the original CRS if needed
     country_gdf = country_gdf.to_crs(epsg=snakemake.params.geo_crs)
@@ -159,7 +163,9 @@ def clip_shorelines_natura(natura_tiff_path, country_shapes, clipped_shoreline):
 
     # Ensure the final GeoDataFrames are in EPSG:4326 for plotting
     clipped_shoreline = clipped_shoreline.to_crs(snakemake.params.geo_crs)
-    buffered_positive_area_gdf = buffered_positive_area_gdf.to_crs(snakemake.params.geo_crs)
+    buffered_positive_area_gdf = buffered_positive_area_gdf.to_crs(
+        snakemake.params.geo_crs
+    )
     clipped_shoreline_natura = clipped_shoreline_natura.to_crs(snakemake.params.geo_crs)
 
     # Save to snakemake.output
@@ -303,7 +309,9 @@ def prepare_aqueduct(regions_onshore, aqueduct_file_path):
     intersected["bws_raw"] = intersected["bws_raw"].clip(upper=1)
 
     # Calculate the area of each intersected geometry (handles MultiPolygons)
-    intersected["area"] = intersected.to_crs(epsg=snakemake.params.distance_crs).geometry.area
+    intersected["area"] = intersected.to_crs(
+        epsg=snakemake.params.distance_crs
+    ).geometry.area
 
     # Aggregate the `bws_raw` column using a weighted average based on area
     aggregated_values = (
@@ -374,7 +382,9 @@ def calc_distances_to_shore(
 
     # Ensure both GeoDataFrames are in the same projected CRS
     if gadm_desal.crs.is_geographic:
-        gadm_desal = gadm_desal.to_crs(epsg=snakemake.params.distance_crs)  # Example: Web Mercator (meters)
+        gadm_desal = gadm_desal.to_crs(
+            epsg=snakemake.params.distance_crs
+        )  # Example: Web Mercator (meters)
     if clipped_shoreline_natura.crs != gadm_desal.crs:
         clipped_shoreline_natura = clipped_shoreline_natura.to_crs(gadm_desal.crs)
 
