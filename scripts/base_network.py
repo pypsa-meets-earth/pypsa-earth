@@ -71,21 +71,68 @@ from shapely.ops import unary_union
 logger = create_logger(__name__)
 
 
-def _get_oid(df):
+def _get_oid(df: pd.DataFrame) -> pd.Series:
+    """Extract the OpenStreetMap object ID (oid) from the tags column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame that may contain a ``tags`` column with OSM tag strings.
+
+    Returns
+    -------
+    pd.Series
+        Series of oid strings aligned to *df*'s index, or NaN where absent.
+    """
     if "tags" in df.columns:
         return df.tags.str.extract('"oid"=>"(\\d+)"', expand=False)
     else:
         return pd.Series(np.nan, df.index)
 
 
-def get_country(df):
+def get_country(df: pd.DataFrame) -> pd.Series:
+    """Extract the two-letter country code from the tags column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame that may contain a ``tags`` column with OSM tag strings.
+
+    Returns
+    -------
+    pd.Series
+        Series of ISO 3166-1 alpha-2 country codes, or NaN where absent.
+    """
     if "tags" in df.columns:
         return df.tags.str.extract('"country"=>"([A-Z]{2})"', expand=False)
     else:
         return pd.Series(np.nan, df.index)
 
 
-def _find_closest_links(links, new_links, distance_upper_bound=1.5):
+def _find_closest_links(
+    links: pd.DataFrame,
+    new_links: pd.DataFrame,
+    distance_upper_bound: float = 1.5,
+) -> pd.Series:
+    """Match each entry in *new_links* to the closest existing link via a KDTree.
+
+    Endpoints are encoded as (x1, y1, x2, y2) coordinate tuples and queried in
+    both forward and reverse direction so that link orientation does not matter.
+
+    Parameters
+    ----------
+    links : pd.DataFrame
+        Existing links with a WKT ``geometry`` column.
+    new_links : pd.DataFrame
+        Candidate links with columns ``x1``, ``y1``, ``x2``, ``y2``.
+    distance_upper_bound : float, optional
+        Maximum allowed endpoint distance (degrees) for a match, by default 1.5.
+
+    Returns
+    -------
+    pd.Series
+        Mapping from *new_links* index to the matched index in *links*.
+    """
     treecoords = np.asarray(
         [np.asarray(shapely.wkt.loads(s))[[0, -1]].flatten() for s in links.geometry]
     )
@@ -107,7 +154,23 @@ def _find_closest_links(links, new_links, distance_upper_bound=1.5):
     )
 
 
-def _load_buses_from_osm(fp_buses):
+def _load_buses_from_osm(fp_buses: str) -> pd.DataFrame:
+    """Load and normalise bus data from an OSM-derived CSV file.
+
+    Converts voltage from V to kV, maps the ``dc`` boolean to a ``carrier``
+    string (``"DC"`` / ``"AC"``), and drops rows with missing coordinates or
+    country.
+
+    Parameters
+    ----------
+    fp_buses : str
+        Path to the CSV file produced by the OSM bus extraction step.
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned bus table indexed by ``bus_id``.
+    """
     buses = (
         read_csv_nafix(fp_buses, dtype=dict(bus_id="str", voltage="float"))
         .set_index("bus_id")
@@ -127,7 +190,16 @@ def _load_buses_from_osm(fp_buses):
     return buses
 
 
-def add_underwater_links(n, fp_offshore_shapes):
+def add_underwater_links(n: "pypsa.Network", fp_offshore_shapes: str) -> None:
+    """Compute and attach the underwater fraction for each HVDC link.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network whose ``links`` component is updated in-place.
+    fp_offshore_shapes : str
+        Path to the offshore shapes file (GeoPackage or shapefile).
+    """
     if not hasattr(n.links, "geometry"):
         n.links["underwater_fraction"] = 0.0
     else:
@@ -141,7 +213,22 @@ def add_underwater_links(n, fp_offshore_shapes):
             )
 
 
-def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
+def _set_dc_underwater_fraction(
+    lines_or_links: pd.DataFrame, fp_offshore_shapes: str
+) -> None:
+    """Set the ``underwater_fraction`` column on DC lines or links in-place.
+
+    Skips computation when the DataFrame is empty, contains no DC carriers, or
+    has no geometry column.  The fraction is the ratio of each branch's length
+    that intersects the offshore polygon.
+
+    Parameters
+    ----------
+    lines_or_links : pd.DataFrame
+        Network component table (lines or links) modified in-place.
+    fp_offshore_shapes : str
+        Path to the offshore shapes file used to determine underwater sections.
+    """
     # HVDC part always has some links as converters
     # excluding probably purely DC networks which are currently somewhat exotic
     if lines_or_links.empty:
@@ -173,7 +260,22 @@ def _set_dc_underwater_fraction(lines_or_links, fp_offshore_shapes):
                 )
 
 
-def _load_lines_from_osm(fp_osm_lines):
+def _load_lines_from_osm(fp_osm_lines: str) -> pd.DataFrame:
+    """Load and normalise AC/DC line data from an OSM-derived CSV file.
+
+    Converts length from metres to kilometres and voltage from volts to
+    kilovolts.  Unnamed columns produced by the CSV exporter are dropped.
+
+    Parameters
+    ----------
+    fp_osm_lines : str
+        Path to the CSV file produced by the OSM line extraction step.
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned line table indexed by ``line_id``.
+    """
     lines = (
         read_csv_nafix(
             fp_osm_lines,
@@ -200,7 +302,35 @@ def _load_lines_from_osm(fp_osm_lines):
 
 
 # TODO Seems to be not needed anymore
-def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config):
+def _load_links_from_osm(
+    fp_osm_converters: str,
+    base_network_config: dict,
+    voltages_config: list,
+) -> pd.DataFrame:
+    """Load HVDC link data from an OSM-derived CSV file.
+
+    Returns an empty DataFrame when the file is empty.  Converts length and
+    voltage units and drops unnamed columns.
+
+    .. deprecated::
+        This function appears to be superseded by
+        :func:`_load_converters_from_osm` and may be removed in a future
+        release.
+
+    Parameters
+    ----------
+    fp_osm_converters : str
+        Path to the OSM converter/link CSV file.
+    base_network_config : dict
+        Base network configuration block from ``config.yaml``.
+    voltages_config : list
+        List of nominal voltages to consider.
+
+    Returns
+    -------
+    pd.DataFrame
+        Link table indexed by ``line_id``, or empty DataFrame if file is empty.
+    """
     # the links file can be empty
     if os.path.getsize(fp_osm_converters) == 0:
         links = pd.DataFrame()
@@ -229,7 +359,26 @@ def _load_links_from_osm(fp_osm_converters, base_network_config, voltages_config
     return links
 
 
-def _load_converters_from_osm(fp_osm_converters, buses):
+def _load_converters_from_osm(
+    fp_osm_converters: str, buses: pd.DataFrame
+) -> pd.DataFrame:
+    """Load back-to-back (B2B) converter data from an OSM-derived CSV file.
+
+    Returns an empty DataFrame when the file is empty.  Converters are marked
+    with ``carrier="B2B"`` and ``dc=True``.
+
+    Parameters
+    ----------
+    fp_osm_converters : str
+        Path to the OSM converter CSV file.
+    buses : pd.DataFrame
+        Bus table used for future dangling-branch removal (currently unused).
+
+    Returns
+    -------
+    pd.DataFrame
+        Converter table indexed by ``converter_id``, or empty DataFrame.
+    """
     # the links file can be empty
     if os.path.getsize(fp_osm_converters) == 0:
         converters = pd.DataFrame()
@@ -248,7 +397,23 @@ def _load_converters_from_osm(fp_osm_converters, buses):
     return converters
 
 
-def _load_transformers_from_osm(fp_osm_transformers, buses):
+def _load_transformers_from_osm(
+    fp_osm_transformers: str, buses: pd.DataFrame
+) -> pd.DataFrame:
+    """Load transformer data from an OSM-derived CSV file.
+
+    Parameters
+    ----------
+    fp_osm_transformers : str
+        Path to the OSM transformer CSV file.
+    buses : pd.DataFrame
+        Bus table used for future dangling-branch removal (currently unused).
+
+    Returns
+    -------
+    pd.DataFrame
+        Transformer table indexed by ``transformer_id``.
+    """
     transformers = (
         read_csv_nafix(
             fp_osm_transformers,
@@ -312,7 +477,26 @@ def _get_linetype_by_voltage(v_nom, d_linetypes):
     return line_type_min
 
 
-def _set_electrical_parameters_lines(lines_config, voltages, lines):
+def _set_electrical_parameters_lines(
+    lines_config: dict, voltages: list, lines: pd.DataFrame
+) -> pd.DataFrame:
+    """Assign AC electrical parameters (carrier, type, s_max_pu) to lines.
+
+    Parameters
+    ----------
+    lines_config : dict
+        ``lines`` section of ``config.yaml``, must contain ``ac_types`` and
+        ``s_max_pu``.
+    voltages : list
+        Nominal voltages to include.
+    lines : pd.DataFrame
+        AC line table modified in-place and returned.
+
+    Returns
+    -------
+    pd.DataFrame
+        Lines with ``carrier``, ``dc``, ``type``, and ``s_max_pu`` columns set.
+    """
     if lines.empty:
         lines["type"] = []
         return lines
@@ -331,7 +515,26 @@ def _set_electrical_parameters_lines(lines_config, voltages, lines):
     return lines
 
 
-def _set_electrical_parameters_dc_lines(lines_config, voltages, lines):
+def _set_electrical_parameters_dc_lines(
+    lines_config: dict, voltages: list, lines: pd.DataFrame
+) -> pd.DataFrame:
+    """Assign DC electrical parameters (carrier, type, s_max_pu) to lines.
+
+    Parameters
+    ----------
+    lines_config : dict
+        ``lines`` section of ``config.yaml``, must contain ``dc_types`` and
+        ``s_max_pu``.
+    voltages : list
+        Nominal voltages to include.
+    lines : pd.DataFrame
+        DC line table modified in-place and returned.
+
+    Returns
+    -------
+    pd.DataFrame
+        Lines with ``carrier``, ``dc``, ``type``, and ``s_max_pu`` columns set.
+    """
     if lines.empty:
         lines["type"] = []
         return lines
@@ -349,7 +552,23 @@ def _set_electrical_parameters_dc_lines(lines_config, voltages, lines):
     return lines
 
 
-def _set_electrical_parameters_links(links_config, links):
+def _set_electrical_parameters_links(
+    links_config: dict, links: pd.DataFrame
+) -> pd.DataFrame:
+    """Assign DC link parameters (p_max_pu, p_min_pu, carrier) to HVDC links.
+
+    Parameters
+    ----------
+    links_config : dict
+        ``links`` section of ``config.yaml``; ``p_max_pu`` defaults to 1.0.
+    links : pd.DataFrame
+        HVDC link table modified in-place and returned.
+
+    Returns
+    -------
+    pd.DataFrame
+        Links with ``p_max_pu``, ``p_min_pu``, ``carrier``, and ``dc`` set.
+    """
     if links.empty:
         return links
 
@@ -363,7 +582,24 @@ def _set_electrical_parameters_links(links_config, links):
     return links
 
 
-def _set_electrical_parameters_transformers(transformers_config, transformers):
+def _set_electrical_parameters_transformers(
+    transformers_config: dict, transformers: pd.DataFrame
+) -> pd.DataFrame:
+    """Assign electrical parameters (x, s_nom, type) to transformers.
+
+    Parameters
+    ----------
+    transformers_config : dict
+        ``transformers`` section of ``config.yaml``; keys ``x``, ``s_nom``,
+        and ``type`` default to 0.1, 2000, and ``""`` respectively.
+    transformers : pd.DataFrame
+        Transformer table modified in-place and returned.
+
+    Returns
+    -------
+    pd.DataFrame
+        Transformers with ``x``, ``s_nom``, and ``type`` columns set.
+    """
     config = transformers_config
 
     # Add transformer parameters
@@ -374,7 +610,26 @@ def _set_electrical_parameters_transformers(transformers_config, transformers):
     return transformers
 
 
-def _set_electrical_parameters_converters(links_config, converters):
+def _set_electrical_parameters_converters(
+    links_config: dict, converters: pd.DataFrame
+) -> pd.DataFrame:
+    """Assign parameters to back-to-back converters before merging with links.
+
+    Sets ``p_max_pu``, ``p_min_pu``, a fixed ``p_nom`` of 2000 MW, and marks
+    converters as neither under construction nor underground.
+
+    Parameters
+    ----------
+    links_config : dict
+        ``links`` section of ``config.yaml``; ``p_max_pu`` defaults to 1.0.
+    converters : pd.DataFrame
+        Converter table modified in-place and returned.
+
+    Returns
+    -------
+    pd.DataFrame
+        Converters ready for import into the PyPSA network as links.
+    """
     p_max_pu = links_config.get("p_max_pu", 1.0)
     converters["p_max_pu"] = p_max_pu
     converters["p_min_pu"] = -p_max_pu
@@ -388,7 +643,18 @@ def _set_electrical_parameters_converters(links_config, converters):
     return converters
 
 
-def _set_lines_s_nom_from_linetypes(n):
+def _set_lines_s_nom_from_linetypes(n: "pypsa.Network") -> None:
+    """Compute s_nom for all lines from their linetype current rating.
+
+    Uses the PyPSA line type register (``n.line_types.i_nom``) to derive the
+    apparent power rating.  DC lines use a single-phase formula; AC lines use
+    the three-phase formula (√3 · i_nom · v_nom · num_parallel).
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network whose ``lines`` component is updated in-place.
+    """
     # Info: n.line_types is a lineregister from pypsa/pandapowers
     n.lines["s_nom"] = (
         np.sqrt(3)
@@ -401,13 +667,60 @@ def _set_lines_s_nom_from_linetypes(n):
     ) * n.lines.eval("v_nom * num_parallel")
 
 
-def _remove_dangling_branches(branches, buses):
+def _remove_dangling_branches(
+    branches: pd.DataFrame, buses: pd.DataFrame
+) -> pd.DataFrame:
+    """Drop branches whose bus0 or bus1 is not present in *buses*.
+
+    Parameters
+    ----------
+    branches : pd.DataFrame
+        Line, link, transformer, or converter table with ``bus0`` and ``bus1``
+        columns.
+    buses : pd.DataFrame
+        Bus table whose index defines the set of valid bus IDs.
+
+    Returns
+    -------
+    pd.DataFrame
+        Subset of *branches* where both endpoints exist in *buses*.
+    """
     return pd.DataFrame(
         branches.loc[branches.bus0.isin(buses.index) & branches.bus1.isin(buses.index)]
     )
 
 
-def _set_countries_and_substations(inputs, base_network_config, countries_config, n):
+def _set_countries_and_substations(
+    inputs: object,
+    base_network_config: dict,
+    countries_config: list,
+    n: "pypsa.Network",
+) -> pd.DataFrame:
+    """Assign country tags and offshore substation flags to buses.
+
+    Buses without a country tag are assigned one from the OSM tag if available,
+    then by nearest-neighbour path length in the network graph.  Buses above
+    the configured offshore voltage threshold that lie within offshore shapes
+    are flagged as ``substation_off``.
+
+    Parameters
+    ----------
+    inputs : snakemake.io.Namedlist
+        Snakemake input object providing ``country_shapes`` and
+        ``offshore_shapes`` file paths.
+    base_network_config : dict
+        Base network config block; must contain
+        ``min_voltage_substation_offshore``.
+    countries_config : list
+        List of valid ISO 3166-1 alpha-2 country codes.
+    n : pypsa.Network
+        Network whose ``buses`` component is updated in-place.
+
+    Returns
+    -------
+    pd.DataFrame
+        Updated bus DataFrame (same object as ``n.buses``).
+    """
     countries = countries_config
     country_shapes = gpd.read_file(inputs.country_shapes).set_index("name")["geometry"]
 
@@ -476,16 +789,54 @@ def _set_countries_and_substations(inputs, base_network_config, countries_config
 
 
 def base_network(
-    inputs,
-    base_network_config,
-    countries_config,
-    hvdc_as_lines_config,
-    lines_config,
-    links_config,
-    snapshots_config,
-    transformers_config,
-    voltages_config,
-):
+    inputs: object,
+    base_network_config: dict,
+    countries_config: list,
+    hvdc_as_lines_config: bool,
+    lines_config: dict,
+    links_config: dict,
+    snapshots_config: dict,
+    transformers_config: dict,
+    voltages_config: list,
+) -> "pypsa.Network":
+    """Build the base PyPSA network from OSM-derived component tables.
+
+    Loads buses, lines, transformers, and converters from CSV files, assigns
+    electrical parameters, imports all components into a new
+    :class:`pypsa.Network`, and returns it ready for further processing.
+
+    When *hvdc_as_lines_config* is ``True``, DC lines are imported as PyPSA
+    ``Line`` components; otherwise they are modelled as ``Link`` components.
+
+    Parameters
+    ----------
+    inputs : snakemake.io.Namedlist
+        Snakemake input paths: ``osm_buses``, ``osm_lines``,
+        ``osm_transformers``, ``osm_converters``, ``country_shapes``,
+        ``offshore_shapes``.
+    base_network_config : dict
+        ``base_network`` section of ``config.yaml``.
+    countries_config : list
+        List of ISO 3166-1 alpha-2 country codes to include.
+    hvdc_as_lines_config : bool
+        If ``True``, treat HVDC lines as PyPSA Line components.
+    lines_config : dict
+        ``lines`` section of ``config.yaml``.
+    links_config : dict
+        ``links`` section of ``config.yaml``.
+    snapshots_config : dict
+        ``snapshots`` section passed to :meth:`pypsa.Network.set_snapshots`.
+    transformers_config : dict
+        ``transformers`` section of ``config.yaml``.
+    voltages_config : list
+        Nominal voltages (kV) to retain.
+
+    Returns
+    -------
+    pypsa.Network
+        Fully assembled base network with buses, lines, links, transformers,
+        converters, country assignments, and underwater fractions.
+    """
     buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
     lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
