@@ -422,7 +422,7 @@ def add_water_network(n, costs):
     H20_nodes_desal_connected = n.buses[
         n.buses.index.isin(water_network.centroid_bus)
     ].index
-    H20_nodes_none_desal_connceted = spatial.nodes.difference(H20_nodes_desal_connected)
+    H20_nodes_none_desal_connected = spatial.nodes.difference(H20_nodes_desal_connected)
 
     # Create index column
     water_network["buses_idx"] = (
@@ -443,15 +443,13 @@ def add_water_network(n, costs):
         y=n.buses.loc[list(seawater_nodes)].y.values,
     )
 
-    # Add fictive sewater generator as a source for seawater
+    # Add fictive sewater generator as a source for seawater - assuming unlimited availability of seawater at zero costs. If there are costs for seawater extraction, they can be added via the marginal_cost parameter.
     n.madd(
         "Generator",
         seawater_nodes + " seawater",
         bus=seawater_nodes + " seawater",
         carrier="seawater",
         p_nom_extendable=True,
-        # capital_cost
-        # marginal_cost
         efficiency=1,
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
@@ -491,7 +489,6 @@ def add_water_network(n, costs):
         bus2=seawater_nodes,
         carrier="desalination",
         p_nom_extendable=True,
-        # efficiency=costs.at["seawater desalination", "efficiency"],
         efficiency=desal_efficiency,  # m3 freshwater per m3 seawater
         efficiency2=-(
             costs.at["seawater desalination", "electricity-input"] / 1000
@@ -501,10 +498,10 @@ def add_water_network(n, costs):
         lifetime=costs.at["seawater desalination", "lifetime"],
     )
 
-    CAPEX_pipline = (
+    CAPEX_pipeline = (
         costs.at["HDPE water pipeline", "fixed"]
         * water_network.adjusted_distance_km.values
-    )  # not complete yet
+    )
 
     power_kw = water_network.power_kW.values
     n_pumping_stations = water_network.n_pumping_stations.values
@@ -526,8 +523,7 @@ def add_water_network(n, costs):
         bus2=water_network.nearest_point_bus.values,
         p_nom_extendable=True,
         length=water_network.adjusted_distance_km.values,
-        # capital_cost=0.0172 * water_network.adjusted_distance_km.values, # 0.0172 €/m3/km source: backward calculation from https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf
-        capital_cost=CAPEX_pipline + CAPEX_pumps,
+        capital_cost=CAPEX_pipeline + CAPEX_pumps,
         carrier="H2O pipeline",
         lifetime=costs.at["HDPE water pipeline", "lifetime"],
         efficiency=1,  # No losses in the pipeline
@@ -551,9 +547,7 @@ def add_water_network(n, costs):
         bus1=H20_nodes_desal_connected + " H2O store",
         carrier="H2O store charger",
         efficiency=costs.at["water tank charger", "efficiency"],
-        # capital_cost=costs.at["battery inverter", "fixed"],
         p_nom_extendable=True,
-        # lifetime=costs.at["battery inverter", "lifetime"],
     )
 
     n.madd(
@@ -564,7 +558,6 @@ def add_water_network(n, costs):
         carrier="H2O store discharger",
         efficiency=costs.at["water tank discharger", "efficiency"],
         p_nom_extendable=True,
-        # lifetime=costs.at["battery inverter", "lifetime"],
     )
 
     n.madd(
@@ -572,25 +565,28 @@ def add_water_network(n, costs):
         H20_nodes_desal_connected + " H2O store",
         bus=H20_nodes_desal_connected + " H2O store",
         e_nom_extendable=True,
-        # e_nom_max=h2_pot.values,
         e_cyclic=True,
         carrier="H2O store",
         capital_cost=costs.at["clean water tank storage", "fixed"],
         lifetime=costs.at["clean water tank storage", "lifetime"],
     )
 
+    # Add local water supply (e.g. municipal grid/groundwater) for nodes 
+    # not connected to the sea-desalination network to guarantee feasibility.
+    water_cost_eur_per_m3 = snakemake.config["sector"]["hydrogen"].get(
+        "local_water_cost", 0.019159507  # [EUR/MWh_H2] 
+    )
+
     # Add generator for H2O
     n.madd(
         "Generator",
-        H20_nodes_none_desal_connceted
+        H20_nodes_none_desal_connected
         + " H2O",  # Output unit of generator is in m3, this is defined by the electrolysis.
-        bus=H20_nodes_none_desal_connceted + " H2O",
+        bus=H20_nodes_none_desal_connected + " H2O",
         carrier="H2O generator",
         p_nom_extendable=True,
-        # capital_cost=20000,
-        marginal_cost=0.019159507,  # Added costs for hydrogen [EUR/MWh] TODO PUT in config
+        marginal_cost=water_cost_eur_per_m3,  # Added costs for hydrogen [EUR/MWh] 
         efficiency=1,
-        lifetime=costs.at["seawater desalination", "lifetime"],
     )
 
 
@@ -4093,13 +4089,13 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_sector_network",
             simpl="",
-            clusters="13",
-            ll="copt",
-            opts="Co2L0.15",
-            planning_horizons="2050",
-            sopts="3H",
-            discountrate=0.086,
-            demand="NZ",
+            clusters="4",
+            ll="c1",
+            opts="Co2L-4H",
+            planning_horizons="2030",
+            sopts="144H",
+            discountrate=0.071,
+            demand="AB",
         )
 
     # Load population layout
