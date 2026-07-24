@@ -32,6 +32,7 @@ from _helpers import (
 )
 from geopandas import GeoSeries
 from matplotlib.colors import LinearSegmentedColormap, to_rgba
+from prepare_cost_data import get_yearly_currency_exchange_rate
 from rasterio import sample
 from rasterio.features import shapes
 from rasterio.mask import mask
@@ -39,7 +40,6 @@ from rasterio.plot import show
 from rasterio.warp import Resampling, calculate_default_transform, reproject
 from shapely.geometry import LineString, shape
 from shapely.ops import nearest_points
-from prepare_cost_data import get_yearly_currency_exchange_rate
 
 
 def clip_shorelines_country(shoreline_gdf, country_shapes):
@@ -860,8 +860,12 @@ def add_pipeline_hydraulics(row):
         initial_currency="USD",
         output_currency="EUR",
         default_exchange_rate=snakemake.params.costs["default_exchange_rate"],
-        future_exchange_rate_strategy=snakemake.params.costs.get("future_exchange_rate_strategy", "reference"),
-        custom_future_exchange_rate=snakemake.params.costs.get("custom_future_exchange_rate", None),
+        future_exchange_rate_strategy=snakemake.params.costs.get(
+            "future_exchange_rate_strategy", "reference"
+        ),
+        custom_future_exchange_rate=snakemake.params.costs.get(
+            "custom_future_exchange_rate", None
+        ),
     )
 
     invest_pumping_station = pump_station_cost_kw(
