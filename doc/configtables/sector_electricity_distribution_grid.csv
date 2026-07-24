@@ -1,5 +1,6 @@
 Parameter,Unit,Values,Description
 electricity_distribution_grid,bool,"{true, false}",Add a simplified representation of the exchange capacity between transmission and distribution grid level through a link.
+enable_electricity_connection_cost,bool,"{true, false}",Adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network.
 solar_rooftop,  ,  ,"  "
 -- enable,bool,"{true, false}",Add option for using solar rooftops to generate electricity in the distribution grid level.
 -- kW_per_m2,kW/m2,,Estimate the kW of PV that can be installed per square meter of rooftop.

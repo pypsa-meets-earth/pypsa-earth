@@ -82,7 +82,7 @@ snakemake -j 1 solve_all_networks --dryrun
 
 This triggers a workflow of multiple preceding jobs that depend on each rule's inputs and outputs:
 
-![Electricity Workflow](../img/gen_rulegraph.svg)
+![Electricity Workflow](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph.svg)
 
 In the terminal, this will show up as a list of jobs to be run:
 

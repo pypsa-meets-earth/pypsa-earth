@@ -20,5 +20,3 @@ marginal_cost,EUR/MWh,dict,Marginal operating costs for specified technologies
 -- lifetime,years,dict,Technology lifetime assumptions
 -- CO2 intensity,t_CO2/MWh,dict,CO2 intensity per technology
 -- discount rate,--,dict,Discount rate per technology
-emission_prices,--,dict,Exogenous prices for emission types
--- co2,EUR/t,float,Exogenous price of carbon-dioxide added to marginal costs

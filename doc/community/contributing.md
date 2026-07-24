@@ -11,24 +11,23 @@ Every little bit helps, and you always earn credits.
 
 You can contribute on the code side in many ways:
 
-* submit feedback,
-* add new features,
+* submit questions and feedback,
+* propose and develop new features,
 * report bugs,
-* fix bugs,
-* implement a new cluster/cloud computation backend,
-* write documentation
+* submit bug fixes,
+* improve documentation,
+* share your insights on energy modelling needs for different regions,
+* contribute datasets
 
 ## Code
 
+PyPSA-Earth is a community effort which exists thanks to coordinated contributions on many volunteers around the world. Every typo fix counts!
+
 ### Linting and pre-commit
 
-For every code contribution, the [pre-commit](https://pre-commit.com/index.html) utility should be executed.
-This will lint, format and check your code contributions against our guidelines
-(e.g. we use [Black](https://github.com/psf/black) as code style
-and aim for [REUSE compliance](https://reuse.software/)):
+For every code contribution, the [pre-commit](https://pre-commit.com/index.html) utility must be executed. That is a way to keep the code tidy and licensing consistent with minimal effort. We use [Black](https://github.com/psf/black) as code style and aim for [REUSE compliance](https://reuse.software/)).
 
-1. Installation `conda install -c conda-forge pre-commit` or `pip install pre-commit`
-2. Usage:
+`pre-commit` is part of pypsa-earth environment. To use it, you can chose from two options:
     * To automatically activate `pre-commit` on every `git commit`: Run `pre-commit install`
     * To manually run it: `pre-commit run --all`
 
@@ -47,13 +46,15 @@ To contribute a test:
 2. Add a new test config path to the `rule build_all_test` in the `Snakefile`.
 3. If your functionality should be tested in the CI for every pull request, add a respective code in `.github/workflows/ci-linux.yaml`. We test all functionalities only for Linux while providing a general test for windows and mac.
 
-### Performance-profiling
+## Data
 
-Performance profiling is important to understand bottlenecks and
-accordingly optimize the speed in PyPSA-Earth. We use the Python built-in
-`cProfiler`, custom decorators on single functions and analysis tools
-like [snakeviz](https://jiffyclub.github.io/snakeviz/). See a detailed example
-in [this discussion #557](https://github.com/pypsa-meets-earth/pypsa-earth/discussions/557).
+A comprehensive set of the databundles has been created by a coordinated work of many people around the world. To improve accuracy and keep the model up-to-date, we highly encourage contribution of new datasets, in particular those which are tailored to the needs of particular regions. Examples of datasets which you can contribute:
+- cutouts for you region of interest
+- hourly time-series of electricity demand
+
+To contribute a new dataset, you just need to upload it to some publicly available storage (e.g. Zenodo) and add specification of this dataset to `configs/bundle_config.yaml` following structure of other specifications. A name of each dataset must be unique, and category specified must be aligned with the other available categories.
+
+If your uploaded dataset is intended for usage in CI testing, a tutorial version must be added as well.
 
 ## Documentation
 

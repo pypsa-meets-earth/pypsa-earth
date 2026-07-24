@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[workspace]
+name = "pypsa-earth"
+channels = ["conda-forge", "bioconda", "gurobi"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+[dependencies]
+python = ">=3.10,<3.12"  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
+pip = "*"
+
+pypsa = ">=0.25.1,<=0.30.3"
+linopy = "<0.6"
+atlite = ">=0.4.1,<0.6"
+dask = "*"
+powerplantmatching = ">=0.8"
+earth-osm = ">=2.3.post1"
+
+# Dependencies of the workflow itself
+xlrd = "*"
+openpyxl = "*"
+seaborn = "*"
+snakemake-minimal = "<8"
+memory_profiler = "*"
+"ruamel.yaml" = "<=0.17.26"
+pytables = "*"
+pyscipopt = "*"
+lxml = "*"
+numpy = "<2"
+pandas = "*"
+geopandas = ">=1"
+fiona = ">=1.10"
+xarray = ">=2023.11.0,<=2025.01.2"
+netcdf4 = "*"
+libgdal-netcdf = "*"
+networkx = "*"
+scipy = "<1.16"
+pydoe2 = "*"
+shapely = "!=2.0.4"
+pre-commit = "*"
+matplotlib = "*"
+reverse-geocode = "*"
+country_converter = "*"
+pyogrio = "*"
+numba = "*"
+py7zr = "*"
+tsam = ">=1.1.0"
+fake-useragent = "*"
+chaospy = "*"
+geopy = "*"
+tqdm = "*"
+pytz = "*"
+
+# Jupyter notebook requirements
+ipykernel = "*"
+ipython = "*"
+jupyterlab = "*"
+
+# GIS dependencies
+cartopy = "*"
+rasterio = "*"
+rioxarray = "*"
+
+# Plotting
+geoviews = "*"
+hvplot = "*"
+graphviz = "*"
+contextily = "*"
+
+# Default solver for tests (required for CI)
+glpk = "*"
+highs = "*"
+gurobi = "*"
+
+# Command Line Interface
+rich = "*"
+
+[pypi-dependencies]
+currencyconverter = "*"
+googledrivedownloader = ">=1.1"
+
+[environments]
+pypsa-earth = ["default"]
+
+[tasks]
+install-kernel = "ipython kernel install --user --name=pypsa-earth"
