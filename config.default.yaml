@@ -1196,7 +1196,6 @@ plotting:
     shipping: "#6495ED"
     shipping oil: "#6495ED"
     shipping oil emissions: "#6495ED"
-    water tanks: "#BBBBBB"
     hot water storage: "#BBBBBB"
     hot water charging: "#BBBBBB"
     hot water discharging: "#999999"
