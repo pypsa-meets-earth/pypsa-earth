@@ -23,6 +23,8 @@ aggregation_strategies,,,
 -- -- p_min_pu,,"{min, mean, max, sum}",Indicates how the p_min_pu of the aggregated generator is computed from the original p_min_pu values.
 -- -- p_max_pu,,"{weighted_average, min, mean, max, sum}",Indicates how the p_max_pu of the aggregated generator is computed from the original p_max_pu values.
 -- -- marginal_cost,,"{min, mean, max, sum}",Indicates how the marginal_cost of the aggregated generator is computed from the original marginal_cost values.
+-- -- average_distance,,"{min, mean, max, sum}","Indicates how the average offshore cable distance [km] of the aggregated generator is computed. Used by the assign_costs rule to recalculate per-horizon offshore wind connection costs."
+-- -- underwater_fraction,,"{min, mean, max, sum}","Indicates how the underwater cable fraction of the aggregated generator is computed. Used together with average_distance by the assign_costs rule for per-horizon offshore wind connection costs."
 -- -- committable,,{any},"Indicates how the commit status of the aggregated generator is set depending on the original values of the generators. Unit Commitment is currently under development, so should be left to ``any``."
 -- -- ramp_limit_up,,"{min, mean, max, sum}",Indicates how the ramp_limit_up of the aggregated generator is computed from the original ramp_limit_up values.
 -- -- ramp_limit_down,,"{min, mean, max, sum}",Indicates how the ramp_limit_down of the aggregated generator is computed from the original ramp_limit_down values.

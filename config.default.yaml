@@ -149,6 +149,8 @@ clustering:
       p_min_pu: mean
       p_max_pu: weighted_average
       marginal_cost: mean
+      average_distance: mean   # offshore wind connection geometry; kept for per-horizon re-costing
+      underwater_fraction: mean  # offshore wind connection geometry; kept for per-horizon re-costing
       committable: any
       ramp_limit_up: max
       ramp_limit_down: max
