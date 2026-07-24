@@ -1,0 +1,3 @@
+Parameter,Unit,Values,Description
+countries,--,"ISO 3166-1 alpha-2 codes, continent name, or custom region",Countries or regions included in the model.
+foresight,--,"{overnight, myopic}",Optimization foresight mode.

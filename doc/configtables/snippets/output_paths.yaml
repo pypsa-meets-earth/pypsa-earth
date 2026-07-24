@@ -1,0 +1,2 @@
+results_dir: results/ # solved networks and sector postprocessing (RESDIR in Snakefile)
+summary_dir: results/ # summaries, plots, and copied configs (SDIR in Snakefile)

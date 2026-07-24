@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import py7zr
 import requests
-from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors
+from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors, read_csv_nafix
 from googledrivedownloader import download_file_from_google_drive as download_gdrive
 
 _logger = logging.getLogger(__name__)
@@ -417,7 +417,8 @@ if __name__ == "__main__":
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
-        (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
+        (read_csv_nafix(f, encoding="utf8", sep=";") for f in all_files),
+        ignore_index=True,
     )
 
     # Split 'Commodity', 'Transaction' column to two
@@ -456,7 +457,7 @@ if __name__ == "__main__":
     df_yr = df_yr[df_yr.country.isin(countries)]
 
     # Create an empty dataframe for energy_totals_base
-    energy_totals_cols = pd.read_csv(
+    energy_totals_cols = read_csv_nafix(
         os.path.join(BASE_DIR, "data/energy_totals_DF_2030.csv")
     ).columns
     energy_totals_base = pd.DataFrame(columns=energy_totals_cols, index=countries)
