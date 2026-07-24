@@ -571,10 +571,10 @@ def add_water_network(n, costs):
         lifetime=costs.at["clean water tank storage", "lifetime"],
     )
 
-    # Add local water supply (e.g. municipal grid/groundwater) for nodes 
+    # Add local water supply (e.g. municipal grid/groundwater) for nodes
     # not connected to the sea-desalination network to guarantee feasibility.
     water_cost_eur_per_m3 = snakemake.config["sector"]["hydrogen"].get(
-        "local_water_cost", 0.019159507  # [EUR/MWh_H2] 
+        "local_water_cost", 0.019159507  # [EUR/MWh_H2]
     )
 
     # Add generator for H2O
@@ -585,7 +585,7 @@ def add_water_network(n, costs):
         bus=H20_nodes_none_desal_connected + " H2O",
         carrier="H2O generator",
         p_nom_extendable=True,
-        marginal_cost=water_cost_eur_per_m3,  # Added costs for hydrogen [EUR/MWh] 
+        marginal_cost=water_cost_eur_per_m3,  # Added costs for hydrogen [EUR/MWh]
         efficiency=1,
     )
 

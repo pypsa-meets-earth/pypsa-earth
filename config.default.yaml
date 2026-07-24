@@ -667,7 +667,7 @@ sector:
     additional_water_consumption_elec: 0 # liters of water per kg of hydrogen, additional to the water used for electrolysis, e.g. for cooling purposes
     desalination_oversizing_factor: 0 # additional water consumption for desalination, e.g. for local population water supply, agriculture, or industry; e.g. 0.5 means that for every 2 liters of freshwater needed for electrolysis, additional 1 liter is produced to cover other water needs
     seawater_water_ratio: 2.5 # liters of seawater needed to produce 1 liter of freshwater - producing 1.5 kg brine, see: https://dechema.de/-p-20395331-EGOTEC-f36ccaaaa9d2d4d47e232bb9a6bb029b/_/report%20seawater%20brine%20treatment%20and%20disposal%20in%20Namibia%20(1).pdf
-    local_water_cost: 0.019159507 # [EUR/MWh_H2] 
+    local_water_cost: 0.019159507 # [EUR/MWh_H2]
 
   coal:
     spatial_coal: true
