@@ -39,6 +39,7 @@ from rasterio.plot import show
 from rasterio.warp import Resampling, calculate_default_transform, reproject
 from shapely.geometry import LineString, shape
 from shapely.ops import nearest_points
+from prepare_cost_data import get_yearly_currency_exchange_rate
 
 
 def clip_shorelines_country(shoreline_gdf, country_shapes):
@@ -734,7 +735,7 @@ def pump_station_cost_kw(power_kw, usd_to_eur, a=35768, b=0.558):
     b : float
         Scaling exponent (default 0.558) Source: 1+b = 1-0.442 in https://hypat.de/hypat-wAssets/docs/new/publikationen/HYPAT_WP_Water-Supply-for-Electrolysis-Plants.pdf).
     usd_to_eur : float
-        Conversion rate from USD to EUR .
+        Conversion rate from USD to EUR.
 
     Returns:
     --------
@@ -848,9 +849,17 @@ def add_pipeline_hydraulics(row):
     )
 
     # Pump investment in millions Eur
+    usd_to_eur = get_yearly_currency_exchange_rate(
+        initial_currency="USD",
+        output_currency="EUR",
+        default_exchange_rate=snakemake.params.costs["default_exchange_rate"],
+        future_exchange_rate_strategy=snakemake.params.costs.get("future_exchange_rate_strategy", "reference"),
+        custom_future_exchange_rate=snakemake.params.costs.get("custom_future_exchange_rate", None),
+    )
+
     invest_pumping_station = pump_station_cost_kw(
         power_kw=power_kW,
-        usd_to_eur=snakemake.params.costs["default_exchange_rate"],
+        usd_to_eur=usd_to_eur,
         a=watersupply_cfg["costs"]["pump_station"]["cost_factor_a"],  # 15570 # 35768 with inflation 2% 1981 till 2023
         b=watersupply_cfg["costs"]["pump_station"]["scaling_exponent_b"],
     )
