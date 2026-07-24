@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# -*- coding: utf-8 -*-
 """
 Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend the powerplant database with custom entries provided in ``data/custom_powerplants.csv``.
 
@@ -101,7 +100,6 @@ The following assumptions were done to map custom OSM-extracted power plants wit
 """
 
 import os
-from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -248,41 +246,49 @@ def add_custom_powerplants(
     custom_powerplants_config: dict,
 ) -> pd.DataFrame:
     """
-    Apply country-specific custom powerplant files.
+    Apply the configured method to each custom powerplant file.
 
-    Files must follow the naming convention:
-
-        custom_powerplants_{country}.csv
-
-    where ``country`` is the ISO2 country code.
+    Countries affected by each method are determined from the ``Country``
+    column of the corresponding file.
 
     Parameters
     ----------
     ppl : pd.DataFrame
-        powerplantmatching dataframe.
+        Powerplantmatching dataframe.
     custom_powerplants_files : list[str]
-        Country-specific custom powerplants files.
+        Paths to custom powerplants CSV files.
     custom_powerplants_config : dict
-        Configuration dictionary containing ``general`` and optional
-        ``overrides``.
+        Configuration containing ``filepaths`` and ``method``. ``method`` may
+        be a scalar applied to all files or a list matching ``filepaths``.
 
     Returns
     -------
     pd.DataFrame
+        Powerplants dataframe including the configured custom powerplants.
     """
-    general_mode = custom_powerplants_config.get("general", False)
-    overrides = custom_powerplants_config.get("overrides", {})
+    methods = custom_powerplants_config.get("method", False)
+
+    if not isinstance(methods, list):
+        methods = [methods] * len(custom_powerplants_files)
+
+    if len(methods) != len(custom_powerplants_files):
+        raise ValueError(
+            "The number of custom powerplant methods must match the number of filepaths."
+        )
+
+    allowed_methods = {False, "merge", "replace"}
+    invalid_methods = [method for method in methods if method not in allowed_methods]
+
+    if invalid_methods:
+        raise ValueError(
+            "Custom powerplant methods must be false, 'merge', or 'replace'; "
+            f"found {invalid_methods}."
+        )
 
     result = ppl.copy()
 
-    for filepath in custom_powerplants_files:
-        filepath = Path(filepath)
-
-        country = filepath.stem.removeprefix("custom_powerplants_").upper()
-
-        mode = overrides.get(country, general_mode)
-
-        if not mode:
+    for filepath, method in zip(custom_powerplants_files, methods):
+        if not method:
             continue
 
         custom_ppls = read_csv_nafix(
@@ -291,17 +297,20 @@ def add_custom_powerplants(
             dtype={"bus": "str"},
         )
 
-        file_countries = set(custom_ppls["Country"].dropna().unique())
-
-        if file_countries != {country}:
+        if "Country" not in custom_ppls.columns:
             raise ValueError(
-                f"Custom powerplant file '{filepath}' contains "
-                f"countries {sorted(file_countries)}, "
-                f"expected only '{country}'."
+                f"Custom powerplant file '{filepath}' has no 'Country' column."
             )
 
-        if mode == "replace":
-            result = result.loc[result.Country != country]
+        countries = custom_ppls["Country"].dropna().unique()
+
+        if len(countries) == 0:
+            raise ValueError(
+                f"Custom powerplant file '{filepath}' contains no countries."
+            )
+
+        if method == "replace":
+            result = result.loc[~result["Country"].isin(countries)]
 
         result = pd.concat(
             [result, custom_ppls],
@@ -406,7 +415,8 @@ if __name__ == "__main__":
         custom_powerplants_config=custom_powerplants,
     )
 
-    ppl = ppl.query(ppl_query)
+    if isinstance(ppl_query, str) and ppl_query:
+        ppl = ppl.query(ppl_query)
 
     # define unique index
     ppl = ppl.reset_index(drop=True)

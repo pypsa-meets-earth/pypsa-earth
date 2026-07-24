@@ -627,39 +627,34 @@ rule build_renewable_profiles:
 
 
 def get_custom_powerplants_files(wildcards):
-    """
-    Return country-specific custom powerplant files enabled in the configuration.
-    """
+    """Return the configured custom powerplant file paths."""
     custom_config = config["electricity"]["custom_powerplants"]
-    general_mode = custom_config.get("general", False)
-    overrides = custom_config.get("overrides", {})
+    filepaths = custom_config.get("filepaths", [])
 
-    allowed_modes = {False, "merge", "replace"}
+    if isinstance(filepaths, str):
+        filepaths = [filepaths]
 
-    if general_mode not in allowed_modes:
+    methods = custom_config.get("method", False)
+
+    if isinstance(methods, list) and len(methods) != len(filepaths):
         raise ValueError(
-            "electricity.custom_powerplants.general must be "
-            "false, 'merge', or 'replace'."
+            "electricity.custom_powerplants.method must contain one entry "
+            "per configured filepath."
         )
 
-    invalid_overrides = {
-        country: mode
-        for country, mode in overrides.items()
-        if mode not in allowed_modes
-    }
+    allowed_methods = {False, "merge", "replace"}
+    configured_methods = methods if isinstance(methods, list) else [methods]
 
-    if invalid_overrides:
-        raise ValueError(
-            "Invalid custom_powerplants overrides: "
-            f"{invalid_overrides}. Allowed values are "
-            "false, 'merge', and 'replace'."
-        )
-
-    return [
-        f"data/custom_powerplants_{country}.csv"
-        for country in config["countries"]
-        if overrides.get(country, general_mode)
+    invalid_methods = [
+        method for method in configured_methods if method not in allowed_methods
     ]
+    if invalid_methods:
+        raise ValueError(
+            "electricity.custom_powerplants.method accepts only false, "
+            f"'merge', or 'replace'; found {invalid_methods}."
+        )
+
+    return filepaths
 
 
 rule build_powerplants:
