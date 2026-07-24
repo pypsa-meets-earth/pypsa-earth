@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """
-Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend or replace country-specific entries in the powerplant database with custom entries provided through one or more custom powerplant files.
+Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to merge the powerplant database with, or replace it using, one or more custom powerplant files.
 
 Relevant Settings
 -----------------
@@ -25,7 +25,7 @@ Inputs
 ------
 
 - ``networks/base.nc``: confer :ref:`base`.
-- ``data/custom_powerplants.csv``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as OSM extractor generates
+- Files listed under ``custom_powerplants.filepaths``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as the OSM extractor generates.
 
 Outputs
 -------
@@ -42,7 +42,7 @@ Description
 
 The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ command applied to the original powerplantmatching database.
 
-The ``electricity: custom_powerplants`` section specifies the custom files and how they are applied. ``method`` accepts ``false``, ``merge``, or ``replace``. It may be a single value applied to every filepath or a list matching ``filepaths``. The countries affected by ``replace`` are determined from the ``Country`` column of the corresponding file.
+The ``electricity: custom_powerplants`` section specifies the custom files and how they are applied. ``method`` accepts ``false``, ``merge``, or ``replace``. It may be a single value applied to every filepath or a list matching ``filepaths``. ``merge`` appends a custom file to the current dataset, while ``replace`` discards the current dataset and uses the corresponding custom file instead. Methods are applied in filepath order.
 
 1. Using only powerplantmatching data:
 
@@ -62,14 +62,25 @@ The ``electricity: custom_powerplants`` section specifies the custom files and h
           - data/custom_powerplants.csv
           method: merge
 
-3. Replacing powerplants for the countries contained in a custom file:
+3. Replacing the complete powerplantmatching dataset:
 
     .. code:: yaml
 
         custom_powerplants:
           filepaths:
-          - data/custom_powerplants_US.csv
+          - data/custom_powerplants.csv
           method: replace
+
+Country-specific replacement can be achieved by filtering the original
+powerplantmatching data and merging the corresponding custom file:
+
+    .. code:: yaml
+
+        powerplants_filter: Country != 'US'
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants_US.csv
+          method: merge
 
 4. Applying different methods to different custom files:
 
@@ -263,9 +274,6 @@ def add_custom_powerplants(
     """
     Apply the configured method to each custom powerplant file.
 
-    Countries affected by each method are determined from the ``Country``
-    column of the corresponding file.
-
     Parameters
     ----------
     ppl : pd.DataFrame
@@ -312,26 +320,14 @@ def add_custom_powerplants(
             dtype={"bus": "str"},
         )
 
-        if "Country" not in custom_ppls.columns:
-            raise ValueError(
-                f"Custom powerplant file '{filepath}' has no 'Country' column."
-            )
-
-        countries = custom_ppls["Country"].dropna().unique()
-
-        if len(countries) == 0:
-            raise ValueError(
-                f"Custom powerplant file '{filepath}' contains no countries."
-            )
-
         if method == "replace":
-            result = result.loc[~result["Country"].isin(countries)]
-
-        result = pd.concat(
-            [result, custom_ppls],
-            ignore_index=True,
-            sort=False,
-        )
+            result = custom_ppls
+        else:
+            result = pd.concat(
+                [result, custom_ppls],
+                ignore_index=True,
+                sort=False,
+            )
 
     return result
 
@@ -429,9 +425,6 @@ if __name__ == "__main__":
         custom_powerplants_files=list(snakemake.input.custom_powerplants),
         custom_powerplants_config=custom_powerplants,
     )
-
-    if isinstance(ppl_query, str) and ppl_query:
-        ppl = ppl.query(ppl_query)
 
     # define unique index
     ppl = ppl.reset_index(drop=True)

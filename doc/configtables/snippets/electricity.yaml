@@ -18,15 +18,17 @@ electricity:
   custom_powerplants:
     filepaths:
     - data/custom_powerplants.csv
-    method: false # false, merge, or replace; can also be a list matching filepaths # allows choosing different strategies for different countries. "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
-  # Example with more files
+    method: false # false, merge, or replace; may also be a list matching filepaths
+  # Example with multiple files and different methods
+  # Methods are applied in filepath order: the first file replaces the PPM
+  # dataset, then the second file is merged into the resulting dataset.
   # custom_powerplants:
-  #  filepaths:
-  #  - data/custom_powerplants_US.csv
-  #  - data/custom_powerplants_BR.csv
-  #  method:
-  #  - replace
-  #  - merge
+  #   filepaths:
+  #   - data/custom_powerplants_US.csv
+  #   - data/custom_powerplants_BR.csv
+  #   method:
+  #   - replace
+  #   - merge
 
   estimate_renewable_capacities:
     stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
