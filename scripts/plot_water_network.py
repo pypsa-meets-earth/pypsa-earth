@@ -176,8 +176,6 @@ def plot_altitude_profile(df, resolution=1000):
         path_to_save, dpi=300, bbox_inches="tight"
     )  # Save with high resolution and tight layout
     plt.close()
-    # plt.show()
-
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
