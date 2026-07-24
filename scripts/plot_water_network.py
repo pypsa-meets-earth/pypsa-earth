@@ -125,7 +125,7 @@ def plot_altitude_profile(df, resolution=1000):
         pd.Series({c: factors[c] for c in cols}), axis=1
     )
 
-    # Running head + added head per step
+    # Running head along pipeline & additional pumped head added per distance segment
     plt.figure(figsize=(10, 4.2))
     plt.plot(df["distance_m"], df["head_clamped_m"], label="Running head (clamped)")
     plt.plot(df["distance_m"], df["elevation_m"], label="Elevation", linestyle=":")
@@ -136,7 +136,7 @@ def plot_altitude_profile(df, resolution=1000):
         label="Min required (end-start)",
     )
 
-    # bar of what was added each step; align at segment ends
+    # Plot additional head added by pumps at each pipeline segment
     if "effective_increment_m" in df:
         w = resolution * 0.9
         plt.bar(
@@ -145,7 +145,7 @@ def plot_altitude_profile(df, resolution=1000):
             width=w,
             align="edge",
             alpha=0.4,
-            label="Added this step",
+            label="Pump head added per segment",
         )
 
         # --- show sum of effective_increment_m on the plot ---
@@ -165,22 +165,17 @@ def plot_altitude_profile(df, resolution=1000):
     plt.ylabel("Head [m]")
     plt.xlabel("Distance along line [m]")
     plt.grid(True, alpha=0.3)
-    plt.title(df["line_name"].unique())
+    plt.title(df["line_name"].iloc[0])
     plt.legend()
     plt.tight_layout()
 
     # Save the figure to a file
-    path_to_save = Path(
-        os.path.join(
-            BASE_DIR,
-            "results/plots/desalination/{}_profile.png".format(
-                df["line_name"].unique()[0]
-            ),
-        )
-    )
+    path_to_save = BASE_DIR / "results" / "plots" / "desalination" / f"{df['line_name'].iloc[0]}_profile.png"
+
     plt.savefig(
         path_to_save, dpi=300, bbox_inches="tight"
     )  # Save with high resolution and tight layout
+    plt.close()
     # plt.show()
 
 
