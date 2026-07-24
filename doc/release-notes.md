@@ -14,6 +14,12 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Integrate `planning_horizon` wildcard into electricity-only networks [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
 
+* Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
+
+* Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
+
+* Add pixi as an alternative package manager for environment and dependency management, alongside the existing conda-based setup. [PR #1789](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1789)
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
@@ -38,7 +44,17 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
 
+* Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
+
 **Minor Changes and bug-fixing**
+
+* Replace hydrobasins for CI testing with a dataset created by Brigham Young University [PR #1944](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1944)
+
+* Add `custom_powerplants` into params to make sure change of the config reruns the workflow [PR #1927](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1927)
+
+* Fix misleading linetype voltage warning in `base_network.py` [PR #1883](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1883)
+
+* Refactor hydrogen temporal matching constraints [PR #1903](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1903)
 
 * Replace deprecated UNCTAD urban population download endpoint in `prepare_urban_percent.py` [PR #1881](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1881)
 
@@ -125,6 +141,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix residual issues with the scaling of H2 demand for export [PR #1692](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1692)
 
 * Add module-level and missing function docstrings and type hints to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
+
+* Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
 
 # PyPSA-Earth 0.8.0
 
@@ -436,6 +454,7 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fixed problematic float parsing (`_parse_float`) in `clean_osm_data.py` to make sure all OSM lines are correctly accounted for [PR #1089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1089)
 * Fix minor bug for advanced csp implementation [PR #1076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1076)
 * Fix minor bug in `build_powerplants.py` where the gas technology assignment incorrectly introduced NaN values for all powerplant technologies. [PR #1102](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1102)
+* Add Ghana-specific config file supplemented by an exception in `.gitignore` [PR #1861](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1861)
 
 # PyPSA-Earth 0.4.0
 

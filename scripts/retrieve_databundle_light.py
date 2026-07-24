@@ -68,7 +68,7 @@ according to the following rules:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`
+    :ref:`meta_cf`
 
 **Outputs**
 
@@ -886,6 +886,9 @@ def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list
 
 
 def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> None:
+    """
+    Merge all hydrobasin files into a global one
+    """
     basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
     output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 
@@ -901,6 +904,39 @@ def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> 
         subset="HYBAS_ID", ignore_index=True
     )
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
+
+
+def normalise_hydrobasins(config_hydrobasin: dict) -> None:
+    """
+    Adjust format of a tutorial hydrobasins dataset according to
+    atlite expectations
+    """
+    basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
+    output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
+
+    hydrobasins = gpd.read_file(basins_path)
+    # In case africa-geoglows-catchment is used
+    # column names and CRS must be adjusted accordingly
+    if config_hydrobasin.get("tutorial", False):
+        hydrobasins = hydrobasins.rename(
+            columns={
+                "HydroID": "HYBAS_ID",
+                "NextDownID": "NEXT_DOWN",
+                "Shape_Leng": "DIST_MAIN",
+            }
+        )
+        hydrobasins = hydrobasins.to_crs("EPSG:4326")
+
+        defaults = {
+            "HYBAS_ID": 1,
+            "DIST_MAIN": 1.0,
+            "NEXT_DOWN": 0,
+        }
+
+        for column, default in defaults.items():
+            if column not in hydrobasins.columns:
+                hydrobasins[column] = default
+    hydrobasins.to_file(output_fl, driver="ESRI Shapefile")
 
 
 def retrieve_databundle(
@@ -947,7 +983,8 @@ def retrieve_databundle(
         b_name for b_name in bundles_to_download if "hydrobasins" in b_name
     ]
     if len(hydrobasin_bundles) > 0:
-        config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
+        if not config_bundles[hydrobasin_bundles[0]]["tutorial"]:
+            config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
 
     # initialize downloaded and missing bundles
     downloaded_bundles = []
@@ -979,10 +1016,14 @@ def retrieve_databundle(
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
     if len(hydrobasin_bundles) > 0:
-        logger.info("Merging regional hydrobasins files into a global shapefile")
-        merge_hydrobasins_shape(
-            config_bundles[hydrobasin_bundles[0]], hydrobasins_level
-        )
+        if not config_bundles[hydrobasin_bundles[0]]["tutorial"]:
+            logger.info("Merging regional hydrobasins files into a global shapefile")
+            merge_hydrobasins_shape(
+                config_bundles[hydrobasin_bundles[0]], hydrobasins_level
+            )
+        else:
+            logger.info("Transforming geoglows hydrobasins into atlite format")
+            normalise_hydrobasins(config_bundles[hydrobasin_bundles[0]])
 
     # log the downloaded and missing bundles
     logger.info(

@@ -17,8 +17,6 @@ How it runs:
 import re
 from pathlib import Path
 
-import yaml
-
 
 def extract_yaml_section(yaml_content, section_key, subsection=None):
     """
@@ -41,10 +39,11 @@ def extract_yaml_section(yaml_content, section_key, subsection=None):
             continue
 
         if in_section:
-            # Check if we've hit a new top-level or same-level key
-            if line.strip() and not line.strip().startswith("#"):
+            # A non-empty line at the same or lower indentation starts the
+            # next sibling section. This includes separator comments, which
+            # belong to the following section rather than the current snippet.
+            if line.strip():
                 current_indent = len(line) - len(line.lstrip())
-                # If we're back to the same or lower indent level, we're done
                 if current_indent <= section_indent:
                     break
 
@@ -64,20 +63,27 @@ def main():
 
     # Mapping of snippet files to config sections
     sections = {
-        "toplevel": {"start": "version:", "end": "run:"},
+        "meta": {
+            "start": "version:",
+            "end": "# =================== STUDY SETUP ===================",
+        },
+        "study_setup": {
+            "start": "countries:",
+            "end": "run:",
+        },
+        "data_retrieval": ["enable"],
         "run": ["run"],
         "scenario": ["scenario"],
         "snapshots": ["snapshots"],
         "crs": ["crs"],
         "augmented_line_connection": ["augmented_line_connection"],
-        "cluster_options": ["cluster_options"],
+        "clustering": ["clustering"],
         "build_shape_options": ["build_shape_options"],
         "subregion": ["subregion"],
-        "clean_osm_data_options": ["clean_osm_data_options"],
-        "build_osm_network": ["build_osm_network"],
+        "natura": ["natura"],
+        "osm": ["osm"],
         "base_network": ["base_network"],
         "load_options": ["load_options"],
-        "co2budget": ["co2_budget"],
         "electricity": ["electricity"],
         "lines": ["lines"],
         "links": ["links"],
@@ -90,48 +96,54 @@ def main():
         "renewable_hydro": ["renewable", "hydro"],
         "renewable_csp": ["renewable", "csp"],
         "costs": ["costs"],
+        "co2": ["co2"],
         "monte_carlo": ["monte_carlo"],
-        "solving_options": ["solving", "options"],
         "solving_solver": ["solving", "solver"],
+        "solving_options": {
+            "start": "# ------------------- Optimization options",
+            "end": "# ------------------- Solver presets",
+        },
         "plotting": ["plotting"],
         "policy_config": ["policy_config"],
-        "demand_data": ["demand_data"],
         "export": ["export"],
+        "demand_data": ["demand_data"],
+        "custom_data": ["custom_data"],
+        "existing_capacities": ["existing_capacities"],
         "sector_toplevel": {
             "start": "sector:",
-            "end": "# ------------------- HEAT SECTOR",
+            "end": "# ------------------- Heat sector",
         },
         "sector_heat": {
-            "start": "# ------------------- HEAT SECTOR",
-            "end": "# ------------------- LAND TRANSPORT SECTOR",
+            "start": "# ------------------- Heat sector",
+            "end": "# ------------------- Land transport sector",
         },
         "sector_land_transport": {
-            "start": "# ------------------- LAND TRANSPORT SECTOR",
-            "end": "# ------------------- BIOMASS SECTOR",
+            "start": "# ------------------- Land transport sector",
+            "end": "# ------------------- Biomass sector",
         },
         "sector_biomass": {
-            "start": "# ------------------- BIOMASS SECTOR",
-            "end": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
+            "start": "# ------------------- Biomass sector",
+            "end": "# ------------------- Electricity distribution grid",
         },
         "sector_electricity_distribution_grid": {
-            "start": "# ------------------- ELECTRICITY DISTRIBUTION GRID",
-            "end": "# ------------------- SHIPPING & AVIATION SECTOR",
+            "start": "# ------------------- Electricity distribution grid",
+            "end": "# ------------------- Shipping & aviation sector",
         },
         "sector_shipping_aviation": {
-            "start": "# ------------------- SHIPPING & AVIATION SECTOR",
-            "end": "# ------------------- CCUS & CONVERSION OPTIONS",
+            "start": "# ------------------- Shipping & aviation sector",
+            "end": "# ------------------- CCUS & conversion options",
         },
         "sector_ccus": {
-            "start": "# ------------------- CCUS & CONVERSION OPTIONS",
-            "end": "# ------------------- INDUSTRY OPTIONS",
+            "start": "# ------------------- CCUS & conversion options",
+            "end": "# ------------------- Industry options",
         },
         "sector_industry": {
-            "start": "# ------------------- INDUSTRY OPTIONS",
-            "end": "# ------------------- POWERPLANTS OPTIONS",
+            "start": "# ------------------- Industry options",
+            "end": "# ------------------- Powerplants options",
         },
         "sector_powerplants": {
-            "start": "# ------------------- POWERPLANTS OPTIONS",
-            "end": "solving:",
+            "start": "# ------------------- Powerplants options",
+            "end": "# =================== SOLVING",
         },
     }
 
