@@ -56,10 +56,22 @@ SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
+path = "doc/tutorials/use-cases/figures/*.png"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
 path = "doc/assets/scripts/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = "doc/tutorials/use-cases/snippets/custom_powerplants.KZ.csv"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The PyPSA-Earth Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
 path = "pixi.lock"

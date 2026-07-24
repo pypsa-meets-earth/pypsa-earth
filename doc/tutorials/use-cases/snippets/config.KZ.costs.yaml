@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["KZ"]
+
+run:
+  name: "KZ"
+  shared_cutouts: false
+
+enable:
+  retrieve_cutout: false
+  retrieve_databundle: false
+
+scenario:
+  opts: [6h]
+  clusters: [10]
+
+load_options:
+  source: gegis
+  weather_year: 2013
+  prediction_year: 2030
+  scale: 0.994
+
+electricity:
+  powerplants_filter: (DateOut >= 2020 or DateOut != DateOut) and (DateIn <= 2020 or DateIn != DateIn)
+  extendable_carriers:
+    Generator: []
+    StorageUnit: []
+    Store: []
+    Link: []
+  estimate_renewable_capacities:
+    stats: irena
+    year: 2020
+  custom_powerplants: replace
+  base_voltage: 500
+  voltages: [110, 220, 500]
+
+clean_osm_data_options:
+  threshold_voltage: 35000
+
+lines:
+  ac_types:
+    110.: "149-AL1/24-ST1A 110.0"
+    220.: "305-AL1/39-ST1A 110.0"
+    500.: "490-AL1/64-ST1A 380.0"
+
+cluster_options:
+  simplify_network:
+    p_threshold_merge_isolated: false
+    s_threshold_fetch_isolated: 0.05
+    p_threshold_drop_isolated: false
+
+costs:
+  year: 2020
+  fuel:                    # EUR/MWh_th — illustrative merit-order flip
+    coal: 15.0
+    gas: 12.0
+  # Optional shortcut (EUR/MWh_el) — uncomment to replace computed MC:
+  # marginal_cost:
+  #   coal: 40.0
+  #   CCGT: 28.0
+  #   OCGT: 45.0
+
+solving:
+  solver:
+    name: highs

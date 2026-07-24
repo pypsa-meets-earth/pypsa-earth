@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["KZ"]
+
+run:
+  name: "KZ"
+  shared_cutouts: false
+
+enable:
+  retrieve_cutout: false  # optional — use cached cutout after Part 1
+
+scenario:
+  opts: [6h]
+
+load_options:
+  source: gegis
+  weather_year: 2013
+  prediction_year: 2030
+  scale: 1.005
+
+solving:
+  solver:
+    name: highs
