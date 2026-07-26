@@ -10,6 +10,7 @@ run:
 
 enable:
   retrieve_cutout: false
+  retrieve_databundle: false
 
 scenario:
   opts: [6h]
@@ -32,11 +33,18 @@ electricity:
     year: 2020
   custom_powerplants: replace
 
+costs:
+  year: 2020
+  marginal_cost:
+    coal: 16.0
+    CCGT: 51.0
+    OCGT: 62.0
+
 cluster_options:
   simplify_network:
+    p_threshold_drop_isolated: false  # do not delete low-load islands
     p_threshold_merge_isolated: false # do not stack islands on one stranded bus
     s_threshold_fetch_isolated: 0.05  # attach islands < 5% of national load to the nearest backbone bus
-    p_threshold_drop_isolated: false  # do not delete low-load islands (can remove hydro)
 
 solving:
   solver:

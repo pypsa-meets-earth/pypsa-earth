@@ -4,18 +4,18 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-# Part 5: Fix Isolated Nodes and Load Shedding
+# Part 6: Fix Isolated Nodes and Load Shedding
 
 !!! note
-    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 4](4-generation-data.md). Your `config.KZ.yaml` should include the Part 3 demand settings and the Part 4 generation fleet, and you should have a solved network at `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
+    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 5](5-adapting-costs.md). Your `config.KZ.yaml` should include the Part 3 demand settings, the Part 4 generation fleet, and the Part 5 `costs` overrides, and you should have a solved network at `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
 
 ## Introduction
 
-By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities, yet the model still **shed about 7.7 TWh of load** — roughly 7–8% of Kazakhstan's annual demand. Load shedding means the optimiser could not serve demand at some buses in some hours, so it "dropped" that load at a very high penalty price. A validated fleet that still sheds load is a signal that the problem is **not generation** but the **network** the generation sits on.
+By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities. [Part 5](5-adapting-costs.md) then replaced generic technology-data costs with sourced Kazakhstan fuel and O&M data — and found that real economics still favor coal, so the coal/gas split is not primarily a costs problem. The model still **sheds about 7.7 TWh of load**, though — roughly 7–8% of Kazakhstan's annual demand, essentially unchanged since Part 4. Load shedding means the optimiser could not serve demand at some buses in some hours, so it "dropped" that load at a very high penalty price. A validated fleet with real dispatch economics that still sheds load is a signal that the problem is **not generation or dispatch economics** but the **network** the generation sits on.
 
 In this tutorial we diagnose the cause — one or more **electrically isolated sub-networks** — and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
-Everything in this part lives under **`cluster_options.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand or the fleet.
+Everything in this part lives under **`cluster_options.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the Part 5 cost overrides.
 
 ---
 
@@ -78,13 +78,13 @@ Any **red** bus is electrically isolated from the green backbone — load there 
 
 ![Kazakhstan network coloured by sub-network (before fix)](figures/kz_subnetworks.png)
 
-*Green = main grid; red = isolated bus. Example from the Part 4 solved network with default simplification settings.*
+*Green = main grid; red = isolated bus. Example from the Part 5 solved network with default simplification settings.*
 
 ---
 
 ## Step 2: Confirm load shedding on the island
 
-The map shows *where* the problem is. Confirm that the **~7.7 TWh load shedding** from Part 4 sits on the **red** sub-network, not on the green backbone.
+The map shows *where* the problem is. Confirm that the **~7.7 TWh load shedding** carried over from Part 4 (unchanged by Part 5's cost update) sits on the **red** sub-network, not on the green backbone.
 
 Load-shedding generators are named `<bus> load`:
 
@@ -104,7 +104,7 @@ Expected output — shedding on the **isolated** sub-network only (the backbone 
 dtype: float64
 ```
 
-The index is the **`sub_network`** id from Step 1 (the red bus). **~7.7 TWh** here matches Part 4's **~7.7 TWh** total load shedding: almost all unmet load sits on that one island, not on the green backbone.
+The index is the **`sub_network`** id from Step 1 (the red bus). **~7.7 TWh** here matches Part 4's **~7.7 TWh** total load shedding: almost all unmet load sits on that one island, not on the green backbone. Your exact number may differ slightly depending on your Part 5 `costs.marginal_cost` values, but the story — nearly all shedding on the isolated island — should hold.
 
 ---
 
@@ -124,7 +124,7 @@ The critical distinction:
 - **`merge`** is the **default trap** (`p_threshold_merge_isolated: 300` in `config.default.yaml`): it collapses many small islands into **one isolated bus per country**. That bus still cannot import power, so it **still sheds** — and it can hold a **large** share of national load (e.g. ~7%).
 - **`fetch`** is the **actual fix**: it wires stranded load onto the closest **connected** bus so the backbone's generation can serve it.
 
-**Defaults in `config.default.yaml`:** merge is **on** (`300` MW) and fetch is **off** (`false`). Nothing reconnects stranded islands — which is why load shedding persists after Part 4.
+**Defaults in `config.default.yaml`:** merge is **on** (`300` MW) and fetch is **off** (`false`). Nothing reconnects stranded islands — which is why load shedding persists after Part 4 (and Part 5's cost update does not change that; it is a connectivity problem, not a price problem).
 
 !!! note "This is a modelling simplification, not a real line"
     `fetch` does **not** build a physical line. It re-assigns the stranded load (and any generation) to the geographically nearest connected bus so the linear program can balance it. The load is served, but its electrical location is approximated — a modelling shortcut, not a real grid connection.
@@ -133,7 +133,17 @@ The critical distinction:
 
 ## Step 4: Settings for Kazakhstan
 
-**1. `p_threshold_merge_isolated: false` — stop stacking islands.**
+**1. `p_threshold_drop_isolated: false` — do not delete islands.**
+
+`drop` runs **first**, before `merge` or `fetch`, and removes buses by **mean load on the sub-network**, not by generation. In KZ, large hydro plants (e.g. East Kazakhstan — Bukhtarma, Ust-Kamenogorsk, Shulbinskaya) can sit on OSM islands with **little assigned demand**. With a MW threshold (the default is **20**), those buses — and all attached power plants — would be deleted before `fetch` (below) ever gets a chance to reconnect them.
+
+```yaml
+p_threshold_drop_isolated: false
+```
+
+Keep drop off for KZ. Use `fetch` to reconnect stranded **load**; do not throw away stranded **generation**.
+
+**2. `p_threshold_merge_isolated: false` — stop stacking islands.**
 
 The default merges islands below **300 MW** mean load onto one stranded bus per country. For KZ that stacks much of the western pocket into a single ~7% island that still cannot import power:
 
@@ -141,23 +151,13 @@ The default merges islands below **300 MW** mean load onto one stranded bus per 
 p_threshold_merge_isolated: false
 ```
 
-**2. `s_threshold_fetch_isolated: 0.05` — turn fetch on.**
+**3. `s_threshold_fetch_isolated: 0.05` — turn fetch on.**
 
-Fetch is **`false` by default** — it does nothing until you set a share threshold. **`0.05`** reconnects any island below **5%** of national load to the nearest backbone bus. With merge off, the western fragments in KZ are each below 5%:
+Fetch is **`false` by default** — it does nothing until you set a share threshold. **`0.05`** reconnects any island below **5%** of national load to the nearest backbone bus. With drop and merge both off, the western fragments in KZ survive intact and are each below 5%:
 
 ```yaml
 s_threshold_fetch_isolated: 0.05
 ```
-
-**3. `p_threshold_drop_isolated: false` — do not delete islands.**
-
-`drop` runs **before** `fetch` and removes buses by **mean load on the sub-network**, not by generation. In KZ, large hydro plants (e.g. East Kazakhstan — Bukhtarma, Ust-Kamenogorsk, Shulbinskaya) can sit on OSM islands with **little assigned demand**. With a MW threshold (the default is **20**), those buses — and all attached power plants — are deleted before `fetch` can reconnect them.
-
-```yaml
-p_threshold_drop_isolated: false
-```
-
-Keep drop off for KZ. Use `fetch` to reconnect stranded **load**; do not throw away stranded **generation**.
 
 ## Step 5: Add the settings to `config.KZ.yaml`
 
@@ -166,9 +166,9 @@ Add a `cluster_options` block:
 ```yaml
 cluster_options:
   simplify_network:
+    p_threshold_drop_isolated: false  # do not delete low-load islands
     p_threshold_merge_isolated: false # do not stack islands on one stranded bus
     s_threshold_fetch_isolated: 0.05  # fetch is off by default; reconnect islands < 5% of national load
-    p_threshold_drop_isolated: false  # do not delete low-load islands (can remove hydro)
 ```
 
 You can [download the file](snippets/config.KZ.topology.yaml){: download="config.KZ.yaml"} and merge it with your existing `config.KZ.yaml`, or add the `cluster_options` block by hand.
@@ -201,16 +201,16 @@ print(f"Total annual demand: {total_TWh:.2f} TWh")
 print(f"Load shedding: {shed_TWh:.2f} TWh")  # expect ~0
 ```
 
-Example after the Part 5 fix (with **`scale: 1.005`** from Part 3 still in place):
+Example after the Part 6 fix (with **`scale: 1.005`** from Part 3 still in place):
 
 ```
 Total annual demand: 108.54 TWh
 Load shedding: 0.00 TWh
 ```
 
-**Load shedding at 0** confirms the island fix. **Demand above KEGOC 107.3 TWh** is expected: `fetch` puts regional load back on the main grid (Part 3's `scale` was tuned when that load was missing), and **`scale: 1.005`** still sits on top of the native GEGIS total (~108 TWh). Do **not** change **`scale`** here — [Part 6](6-transmission-network.md#step-8-final-calibration-of-scale) recalibrates once the transmission grid is settled.
+**Load shedding at 0** confirms the island fix. **Demand above KEGOC 107.3 TWh** is expected: `fetch` puts regional load back on the main grid (Part 3's `scale` was tuned when that load was missing), and **`scale: 1.005`** still sits on top of the native GEGIS total (~108 TWh). Do **not** change **`scale`** here — [Part 7](7-transmission-network.md#step-8-final-calibration-of-scale) recalibrates once the transmission grid is settled.
 
-Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-results.md#installed-capacities) (same `n.statistics()` call). Compare **ror** and **hydro** against the KEGOC 2020 table — they should stay aligned with the Part 4 fleet. This is a useful sanity check because `p_threshold_drop_isolated` can delete **low-load islands** before `fetch` runs, and that may remove **large hydro plants** that happen to sit on those islands.
+Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-results.md#installed-capacities) (same `n.statistics()` call). Compare **hydro** against the KEGOC 2020 table — they should stay aligned with the Part 4 fleet. This is a useful sanity check because `p_threshold_drop_isolated` can delete **low-load islands** before `fetch` runs, and that may remove **large hydro plants** that happen to sit on those islands.
 
 ![Kazakhstan network after fix — all buses on main grid](figures/kz_subnetworks_fixed.png)
 
@@ -222,10 +222,10 @@ Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-resu
 
 | Step | Config key | Value | Role |
 |---|---|---|---|
+| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro and other plants on OSM artefacts) |
 | 4 | `cluster_options.simplify_network.p_threshold_merge_isolated` | `false` | Do not collapse islands onto one stranded bus (default 300 MW) |
 | 4 | `cluster_options.simplify_network.s_threshold_fetch_isolated` | `0.05` | Attach islands below 5% of national load to the nearest backbone bus |
-| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro and other plants on OSM artefacts) |
 
 Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. **`p_threshold_drop_isolated: false`** also keeps power plants on low-load islands in the model, so **installed capacity** — in particular hydro — stays aligned with the Part 4 fleet instead of being deleted during simplification. This is a **simplification-level** fix — fast and effective, but it approximates *where* that load connects.
 
-In **[Part 6](6-transmission-network.md)** we improve how the base transmission network is built from OSM — KZ voltage levels and line ratings — and do a **final** `scale` check once the grid is settled. Part 5 settings remain useful for any islands OSM still misses.
+In **[Part 7](7-transmission-network.md)** we improve how the base transmission network is built from OSM — KZ voltage levels and line ratings — and do a **final** `scale` check once the grid is settled. Part 6 settings remain useful for any islands OSM still misses.

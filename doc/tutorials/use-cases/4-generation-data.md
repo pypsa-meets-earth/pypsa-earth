@@ -360,4 +360,4 @@ Capacity alignment does not automatically fix the **generation mix** either. The
 | 4b | `electricity.estimate_renewable_capacities` | IRENA **2020** solar/wind totals |
 | Adv. | `electricity.custom_powerplants: replace` | Use **`data/custom_powerplants.csv`** as the full fleet |
 
-Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. The fleet matches KEGOC, yet the model still sheds **~8 TWh** of load — a network problem, not a generation one. In **[Part 5](5-network-topology.md)** we diagnose the electrically isolated sub-networks behind that shedding and fix them through simplification settings.
+Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. The fleet matches KEGOC, yet dispatch stays coal-heavy and the model still sheds **~8 TWh** of load. **[Part 5](5-adapting-costs.md)** tackles dispatch economics — why gas stays idle despite capacity — and **[Part 6](6-network-topology.md)** then diagnoses and fixes the electrically isolated sub-networks behind the load shedding.
