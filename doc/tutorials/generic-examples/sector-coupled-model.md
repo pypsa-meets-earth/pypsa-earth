@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC-BY-4.0
 # Tutorial: Building and Running the Sector-Coupled Model
 
 !!! note
-    If you have not yet installed PyPSA-Earth, please refer to the [installation](../home/installation.md) section.
+    If you have not yet installed PyPSA-Earth, please refer to the [installation](../../home/installation.md) section.
 
 In this tutorial, we will show you how to run the sector-coupled model. The sector-coupled model is a model that considers the energy system as a whole, including the electricity, heat, transport, and industry sectors. The model has been insipred and partially based on the PyPSA-Eur model, which is a model of the European energy system. The sector-coupled model is a global model that can be used to model any region of the Earth. This section explains how to run and analyze the tutorial model.
 
@@ -29,7 +29,7 @@ enabled with tutorial: true.
 foresight: overnight
 ```
 
-Documentation for all options is currently being updated in [config](../user-guide/configuration.md).
+Documentation for all options is currently being updated in [config](../../user-guide/configuration.md).
 
 Scenarios can be defined like for electricity-only studies, but with additional wildcard options.
 
@@ -56,12 +56,12 @@ scenario:
 ```
 
 !!! note
- For allowed wildcard values, refer to [wildcards](../user-guide/wildcards.md).
+ For allowed wildcard values, refer to [wildcards](../../user-guide/wildcards.md).
 
 ### Execution
 
 To run the tutorial for the sector-coupled model, you need to activate the pypsa-earth environment.
-You need to have installed PyPSA-Earth using the instructions provided in the [installation](../home/installation.md) section.
+You need to have installed PyPSA-Earth using the instructions provided in the [installation](../../home/installation.md) section.
 Make sure to be in the PyPSA-Earth root directory and run the following command:
 
 !!! tip
@@ -253,4 +253,4 @@ total 48
 
 If you now feel confident and want to tackle runs with larger temporal, technological and
 spatial scopes, you can adjust the configuration file to your needs. You can also check
-the [model_customization](../user-guide/model-customization.md) for more information on how to customize the model.
+the [model_customization](../../user-guide/model-customization.md) for more information on how to customize the model.
