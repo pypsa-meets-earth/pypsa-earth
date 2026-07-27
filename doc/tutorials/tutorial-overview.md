@@ -31,7 +31,7 @@ hide:
     [Electricity model](generic-examples/electricity-model.md)
 
     [Sector-coupled model](generic-examples/sector-coupled-model.md)
-    
+
     [Examples](generic-examples/examples.md)
 
     *\*Source: [Strebe](https://commons.wikimedia.org/wiki/User:Strebe), [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Equirectangular_projection_SW.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0).*
