@@ -247,21 +247,7 @@ jobs:
       id: changes
       shell: bash
       run: |
-        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-        elif [[ "${{ github.event_name }}" == "push" ]]; then
-          BASE_SHA="${{ github.event.before }}"
-          HEAD_SHA="${{ github.sha }}"
-        else
-          echo "pixi_changed=false" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
-        echo "Changed files:"
-        git diff --name-only "$BASE_SHA" "$HEAD_SHA"
-
-        if git diff --name-only "$BASE_SHA" "$HEAD_SHA" |
+        if git diff --name-only origin/main |
           grep -Eq '^(pixi\.toml|pixi\.lock)$'; then
           echo "pixi_changed=true" >> "$GITHUB_OUTPUT"
         else
