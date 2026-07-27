@@ -171,7 +171,7 @@ total                           22
 
 This tells you Snakemake has resolved the full dependency graph and knows exactly what to run. Check that:
 
-- The rule list ends with `solve_network` — this confirms the target is reachable
+- The rule list ends with `solve_network` which confirms the target is reachable
 - The `total` count looks reasonable (a fresh KZ run typically requires 15–25 jobs)
 - No `MissingInputException` or `AmbiguousRuleException` errors appear
 
