@@ -173,6 +173,8 @@ markdown_extensions:
     permalink: true
     toc_depth: 4
 - footnotes
+- attr_list
+- md_in_html
 
   # PyMdown Extensions
 - pymdownx.arithmatex:
@@ -232,7 +234,3 @@ extra:
     link: https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz
   version:
     provider: mike
-
-markdown_extensions:
-  - attr_list
-  - md_in_html
