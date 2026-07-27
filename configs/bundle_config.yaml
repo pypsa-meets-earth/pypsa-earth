@@ -88,19 +88,20 @@ databundles:
     - data/gadm/gadm41_MAR/gadm41_MAR.gpkg  # needed in build_shapes
     - data/gadm/gadm36_MAR/gadm36_MAR.gpkg  # needed in sector-coupled model
 
-  # load tutorial hydrobasins bundle for Africa only
+  # Source: Brigham Young University, Ashby, K., Nelson, J., Ames, D. (2026).
+  # Derived Hydrography of Africa, HydroShare,
+  # https://doi.org/10.4211/hs.121bbce392a841178476001843e7510b
   bundle_tutorial_hydrobasins:
     countries: [Africa]
     tutorial: true
     category: hydrobasins
-    destination: "data/hydrobasins"
+    destination: "data/hydrobasins_hydroshare"
     urls:
-      hydrobasins:
-        base_url: https://data.hydrosheds.org/file/HydroBASINS/standard/
-        suffixes: ["af"]
-    unzip: true
-    output:
-    - data/hydrobasins/hybas_world.shp
+      # TODO Double-check if rehosting is needed
+      #direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
+      zenodo: https://sandbox.zenodo.org/records/565987/files/africa-geoglows-catchment.zip?download=1
+    #output: [data/hydrobasins_hydroshare/africa-geoglows-catchment.shp]
+    output: [data/hydrobasins_hydroshare/africa-geoglows-atlite.shp]
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
@@ -185,6 +186,30 @@ databundles:
     unzip: true
     output:
     - data/hydrobasins/hybas_world.shp
+
+  # DemandCast dataset for electricity demand
+  demandcast_full:
+    countries: [Earth]
+    tutorial: false
+    category: el_demand
+    destination: "data/demand"
+    urls:
+      direct: "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+    unzip: false
+    output:
+    - data/demand/forecasts_on_historical_period.parquet
+
+  demandcast_tutorial:
+    countries: [Earth]
+    tutorial: true
+    category: el_demand
+    destination: "data/demand"
+    urls:
+      # TODO Cross-check with DemandCast team and move to full-scale Zenodo
+      direct: "https://sandbox.zenodo.org/records/493116/files/forecasts_on_historical_period.parquet"
+    unzip: false
+    output:
+    - data/demand/forecasts_on_historical_period.parquet
 
   # IRENA energy statistics dataset including generation, installed capacity, heat production, and related indicators.
   # Used in build_renewable_profiles.py to derive hydropower generation potentials.

@@ -39,6 +39,7 @@ LINES_COLUMNS = [
     "length",
     "dc",
     "geometry",
+    "under_construction",
 ]
 CONVERTERS_COLUMNS = [
     "converter_id",
@@ -52,6 +53,21 @@ TRANSFORMERS_COLUMNS = [
     "bus1",
     "geometry",
 ]
+
+
+def join_non_null_unique(values, sep="|"):
+    """
+    Join unique non-null values as strings.
+
+    OSM tag columns may contain None/NaN values depending on the region.
+    Directly calling sep.join(values.unique()) can fail when non-string
+    or missing values are present.
+    """
+    return sep.join(
+        str(value)
+        for value in pd.Series(values).dropna().unique()
+        if str(value).strip()
+    )
 
 
 def line_endings_to_bus_conversion(lines):
@@ -206,9 +222,9 @@ def merge_stations_same_station_id(
                     v_name[0],  # "voltage"
                     bus_row["dc"].all(),  # "dc"
                     # bus_row["dc"].all(),  # "dc"
-                    "|".join(bus_row["symbol"].unique()),  # "symbol"
-                    bus_row["under_construction"].any(),  # "under_construction"
-                    "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
+                    join_non_null_unique(bus_row["symbol"]),  # "symbol"
+                    bus_row["under_construction"].all(),  # "under_construction"
+                    join_non_null_unique(bus_row["tag_substation"]),  # "tag_substation"
                     bus_row["tag_area"].sum(),  # "tag_area"
                     lon_bus,  # "lon"
                     lat_bus,  # "lat"

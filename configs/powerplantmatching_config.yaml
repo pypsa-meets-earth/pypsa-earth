@@ -17,31 +17,15 @@ matching_sources:
 # - CARMA  # deprecated as no more public
 - GEO
 - GPD
-- GBPT
-- GGPT
-- GCPT
-- GGTPT
-- GNPT
-- GSPT
-- GWPT
-- GHPT
+- GEM
 
-# - GEM_GGPT  # to be enabled once GEM_GGPT is working
 # - EXTERNAL_DATABASE
 
 fully_included_sources:
 # - CARMA  # deprecated as no more public
 - GEO
 - GPD
-- GBPT
-- GGPT
-- GCPT
-- GGTPT
-- GNPT
-- GSPT
-- GWPT
-- GHPT
-# - GEM_GGPT  # to be enabled once GEM_GGPT is working
+- GEM
 # - EXTERNAL_DATABASE
 
 EXTERNAL_DATABASE:
@@ -83,56 +67,352 @@ target_fueltypes:
   # given by the list. An empty string results in a regex expression containing only the key.
   # Parsed of representatives at the top may be overwritten by representatives further below.
   Other: ".*"
-  Bioenergy: [biological, biogas, bioenergy, agricultural, wood, biomass]
-  Nuclear: [nuclear]
-  Natural Gas: [ccgt, gas, natural gas, ocgt, lng, combined cycle, fossil gas, mixed fossil fuels]
-  Hydro: [run-off, run off, run of river, run-of-river, ror, hydro, hydroelectric, wasserkraft]
-  Hard Coal: [coal, coke]
-  Lignite: [brown coal, lignite, peat]
-  Oil: [oil, diesel]
+  Solid Biomass:
+  - biological
+  - bioenergy
+  - agricultural
+  - biomass
+  - feste biomasse
+  - biomasa
+  - biomassa
+  - feste biogene stoffe
+  - pellets
+  - stroh
+  - straw
+  Biogas:
+  - biogas
+  - biogaz
+  - biomethan
+  - gasförmige biomasse
+  Nuclear:
+  - nuclear
+  - kernkraft
+  - atomkraft
+  - nucléaire
+  - atomowa
+  - jądrowa
+  - kjernekraft
+  - atoom
+  Natural Gas:
+  - ccgt
+  - gas
+  - natural gas
+  - ocgt
+  - lng
+  - combined cycle
+  - fossil gas
+  - mixed fossil fuels
+  - erdgas
+  - andere gase
+  - gaz
+  - gaz naturel
+  - gas natural
+  - naturgass
+  - gaz ziemny
+  - gass
+  - aardgas
+  - flüssiggas
+  Hydro:
+  - run-off
+  - run off
+  - run of river
+  - run-of-river
+  - ror
+  - hydro
+  - hidro
+  - hydraulique
+  - hydroelectric
+  - wasserkraft
+  - waterkracht
+  - wasser
+  - vannkraft
+  - vattenkraft
+  - wodna
+  - idroelettrica
+  - idraulica
+  Hard Coal:
+  - coal
+  - coke
+  - steinkohle
+  - houille
+  - charbon dur
+  - hulla
+  - carbón duro
+  - carbone duro
+  - antracite
+  - steinkul
+  - węgiel kamienny
+  - steenkool
+  Lignite:
+  - brown coal
+  - lignite
+  - peat
+  - braunkohle
+  - ligni.*
+  - brunatny
+  - brunkul
+  - bruinkool
+  Oil:
+  - oil
+  - diesel
+  - biodiesel
+  - methanol
+  - heizöl
+  - ethanol
+  - mineralölprodukte
+  - öl
+  - fioul
+  - mazout
+  - petrol
+  - olio
+  - olej
+  - carburante
+  - olie
   Geothermal: ""
   Solar: ""
-  Waste: ""
+  Waste:
+  - "abfall.*"
+  - waste
+  - mva
+  - müll
+  - afval
+  - affald
+  - energy recovery
+  - incineration
+  - reststoffe
+  - refuse
+  - déchets
+  - ordures
+  - residuos
+  - basura
+  - rifiuti
+  - scarti
+  - odpady
+  - śmieci
+  - abfälle
   Wind: ""
-  Battery: [Electro-chemical, battery]
+  Battery:
+  - Electro-chemical
+  - battery
+  Mechanical Storage: ""
+  Heat Storage: ""
+  Hydrogen Storage: ""
 target_sets:
   # Provide a mapping of the keys to a list or a regex expression which are used for parsing.
   # A list will be converted to a regex expression matching all words (case-insensitive)
   # given by the list. An empty string results in a regex expression containing only the key.
   # Parsed of representatives at the top may be overwritten by representatives further below.
   PP: ".*"
-  CHP: [heizkraftwerk, hkw, kwk, fhkw, gud, hp, bhkw, cogeneration, power and heat, heat and power, chp]
-  Store: [battery, storage, store]
+  CHP:
+  - heizkraftwerk
+  - hkw
+  - kwk
+  - fhkw
+  - gud
+  - hp
+  - bhkw
+  - cogeneration
+  - power and heat
+  - heat and power
+  - chp
+  - cogen
+  - heat & power
+  - power & heat
+  - cogeneración
+  - cogenerazione
+  - kogeneracja
+  - combinada calor y electricidad
+  - kraftvarmeverk
+  - kraftvarmeværk
+  - samproduktion
+  - samproduksjon
+  - kvv
+  - wkk
+  - warmtekrachtkoppeling
+  - warmte-krachtcentrale
+  Storage:
+  - battery
+  - storage
+  - store
+  - speicher
+  - pumped
 target_technologies:
   # Provide a mapping of the keys to a list or a regex expression which are used for parsing.
   # A list will be converted to a regex expression matching all words (case-insensitive)
   # given by the list. An empty string results in a regex expression containing only the key.
   # Parsed of representatives at the top may be overwritten by representatives further below.
-  CCGT: [ccgt, gas, natural gas]
-  OCGT: [ocgt]
-  Steam Turbine: [steam, turbine]
-  Combustion Engine: [combustion engine]
-  Run-Of-River: [run-off, run off, run of river, run-of-river, ror]
-  Pumped Storage: [pumped hydro, pumped]
-  Reservoir: ""
+  CCGT:
+  - ccgt
+  - gas
+  - natural gas
+  - gasturbinen mit abhitzekessel
+  OCGT:
+  - ocgt
+  - gasturbinen ohne abhitzekessel
+  Steam Turbine:
+  - steam
+  - turbine
+  - kondensationsmaschine
+  - gegendruckmaschine
+  - dampfmotor
+  Combustion Engine:
+  - combustion engine
+  - verbrennungsmotor
+  - stirlingmotor
+  Run-Of-River:
+  - run-off
+  - run off
+  - run of river
+  - run-of-river
+  - ror
+  - laufwasseranlage
+  - laufwasser
+  - abwasserkraft
+  - trinkwassersystem
+  - brauchwassersystem
+  - pasada
+  - przepływowa
+  - fluente
+  - elvekraft
+  - doorstroom
+  - älvkraft
+  Reservoir:
+  - reservoir
+  - réservoir
+  - impoundment
+  - talsperre
+  - stausee
+  - speicherwasseranlage
+  - speicherwasser
+  - barrage
+  - embalse
+  - bacino
+  - zbiornik
+  - magasinverk
+  - damkraftverk
+  - reguleringsmagasin
+  Pumped Storage:
+  - pumped hydro
+  - pumped
+  - kavernen
+  - bombeo
+  - reversible
+  - reversibel
+  - oberbecken
+  - unterbecken
+  - pompage
+  - pompaggio
+  - pompowa
+  - pumpekraftverk
   Marine: ""
-  Onshore: ""
-  Offshore: ""
-  PV: [pv, photo-voltaic, photo voltaic]
+  PV:
+  - pv
+  - photo-voltaic
+  - photo voltaic
   CSP: ""
+  Onshore:
+  - onshore
+  - an land
+  - terrestre
+  - landvind
+  - på land
+  - op land
+  - lądowy
+  - su terra
+  - en tierra
+  - à terre
+  Offshore:
+  - offshore
+  - nearshore
+  - auf see
+  - en mer
+  - marino
+  - en mar
+  - in mare
+  - morski
+  - havvind
+  - til havs
+  - på havet
+  - op zee
+  - zeewind
 clean_name:
+  fueltypes_with_blocks:
+  - Nuclear
   remove_common_words: false # remove words which appear more that 20 times in all entries
   remove_duplicated_words: true
   replace:
     " ": "[^a-zA-Z]" # non-alphabetical symbols
-    "": [I, II, III, IV, V, VI, VII, VIII, IX, X, XI, parque, grupo, station, power, plant, unit, kraftwerk, kw, hkw, nuclear, thermal, heizkraftwerk, eolico, project, hydroelectric, pumped, storage, france, austria, sweden, serbia, ukraine, switzerland, slovakia, croatia, poland, slovenia, portugal, bosnia, and, herzegovina, \w]
+    "":
+      # This should be a list, if remove_common_words is true.
+    - I
+    - II
+    - III
+    - IV
+    - V
+    - VI
+    - VII
+    - VIII
+    - IX
+    - X
+    - XI
+    - parque
+    - grupo
+    - station
+    - power
+    - plant
+    - unit
+    - block
+    - kraftwerk
+    - kernkraftwerk
+    - wehrkraftwerk
+    - rheinkraftwerk
+    - gemeinschaftskernkraftwerk
+    - kernkw
+    - kw
+    - hkw
+    - nuclear
+    - hydro
+    - thermal
+    - heizkraftwerk
+    - eolico
+    - project
+    - hydroelectric
+    - hydropower
+    - hydroelectrique
+    - hydraulique
+    - embassament
+    - pumped
+    - storage
+    - france
+    - austria
+    - sweden
+    - serbia
+    - ukraine
+    - switzerland
+    - slovakia
+    - croatia
+    - poland
+    - slovenia
+    - portugal
+    - bosnia
+    - and
+    - herzegovina
+    - bulgaria
+    - generating
+    - romania
+    - macedonia
+    - latvia
+    - lithuania
+    - hungary
+    - \w   #remove single letters
     "ss": "ß"
 
 # ---------------------------------------------------------------------------- #
 #                               Heuristic Config                               #
 # ---------------------------------------------------------------------------- #
 fuel_to_lifetime:
-  Bioenergy: 20
+  Solid Biomass: 20
+  Biogas: 20
   Geothermal: 15
   Hard Coal: 45
   Hydro: 100
@@ -149,29 +429,32 @@ fuel_to_lifetime:
 #                                Plotting Config                               #
 # ---------------------------------------------------------------------------- #
 fuel_to_color:
-  OCGT: darkorange
-  Hydro: seagreen
-  Pumped hydro: limegreen
-  Run-of-river: navy
-  Ror: navy
-  Lignite: saddlebrown
-  Nuclear: yellow
+  OCGT: lightcoral
+  Hydro: lightseagreen
+  Pumped hydro: aquamarine
+  Run-of-river: lightseagreen
+  Ror: lightseagreen
+  Lignite: sienna
+  Nuclear: mediumorchid
   Solar: gold
   Windoff: cornflowerblue
   Windon: darkblue
   Offshore: cornflowerblue
   Onshore: darkblue
   Wind: steelblue
-  Bioenergy: forestgreen
-  Natural Gas: red
-  CCGT: red
+  Biogas: yellowgreen
+  Bioenergy: green
+  Solid Biomass: forestgreen
+  Natural Gas: orangered
+  CCGT: orangered
   Coal: black
   Hard Coal: dimgray
   Oil: black
-  Other: silver
-  Waste: grey
-  Geothermal: orange
+  Other: lightgrey
+  Waste: olive
+  Geothermal: darkgoldenrod
   Battery: purple
   Hydrogen Storage: teal
-  Electro-mechanical: teal
+  Mechanical Storage: darkslategray
+  Heat Storage: darkorange
   Total: gold

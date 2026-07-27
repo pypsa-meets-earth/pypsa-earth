@@ -15,6 +15,7 @@ Steps to get access to Copernicus database:
 
 1. Register to the [Copernicus Climate Data Store](https://cds.climate.copernicus.eu);
 2. Setup your CDS API key as described [on their website](https://cds.climate.copernicus.eu/how-to-api).
+3. Accept terms and conditions for use of the API on the portal in your profile on the site, you haven't already. This allows unrestricted use of the API.
 
 These steps are required to use CDS API which allows an automatic file download while executing `build_cutouts` rule.
 

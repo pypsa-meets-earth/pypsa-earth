@@ -39,7 +39,7 @@ bak
 benchmarks/
 backup*
 cutouts/
-data/
+data/*
 dask-worker-space/
 img/
 logs/
@@ -57,10 +57,12 @@ doc/_build
 sample_pypsa_eur
 test/tmp/
 playground/
+!data/nuclear_p_max_pu.csv
 
 # Specific configuration files
 configs/scenarios/config.*.yaml
-!configs/scenarios/config.NG.yaml
+!configs/scenarios/config.test.yaml
+!configs/scenarios/config.GH.yaml
 
 # VS Code-related files
 .vscode
@@ -74,4 +76,4 @@ screenlog*
 # Exclude specific file paths
 !data/demand/unsd/paths/Energy_Statistics_Database.xlsx
 site/
-doc/img/gen_*.svg
+!data/industry/ammonia_plants.csv
