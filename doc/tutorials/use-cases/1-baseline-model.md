@@ -46,7 +46,7 @@ This means your study config can be very short. Often, just 10–20 lines suffic
 
 ## Step 1: Create your configuration file
 
-Time to get started. Create an empty file called `config.KZ.yaml` in the project root — this is the only file we will create in this tutorial. We will fill it in gradually over the next few steps, adding one setting at a time and explaining the reasoning behind each one.
+Time to get started. First, create an empty file called `config.KZ.yaml` in the project root. This is the only file we will create in this tutorial. We will fill it in gradually over the next few steps, adding one setting at a time and explaining the reasoning behind each one.
 
 === "Linux / macOS"
 
