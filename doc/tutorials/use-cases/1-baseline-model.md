@@ -42,7 +42,7 @@ config.yaml           ← base overrides (keep this minimal or empty)
 This means your study config can be very short. Often, just 10–20 lines suffice. You never need to copy the entire default file. Pass your study config explicitly on the command line, and Snakemake merges it on top of everything else.
 
 !!! tip "Browsing the defaults"
-    All default values live in `config.default.yaml` in the project root. Open it any time you want to know what a key does or what its default value is. For a structured, searchable version see the [Configuration reference](../../user-guide/configuration.md).
+    All default values live in `config.default.yaml` in the project root. Open it any time you want to know what a config key does or what its default value is. For a structured, searchable version see the [Configuration reference](../../user-guide/configuration.md).
 
 ## Step 1: Create your configuration file
 
