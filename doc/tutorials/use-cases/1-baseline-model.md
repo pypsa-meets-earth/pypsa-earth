@@ -74,7 +74,7 @@ This is the most important line in any country study since it determines the geo
 --8<-- "tutorials/use-cases/snippets/config.KZ.yaml:5:5"
 ```
 
-That single line tells every rule in the workflow — shape building, OSM download, cutout extraction, demand estimation — to focus on Kazakhstan. Two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) codes are used throughout.
+That single line tells every rule in the workflow to focus on Kazakhstan for shape building, OSM download, cutout extraction, demand estimation . Two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) codes are used throughout.
 
 ---
 
