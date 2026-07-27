@@ -28,6 +28,7 @@ nav:
   - Quick Start: home/quick-start.md
 
 - Tutorials:
+  - tutorials/tutorial-landing-page.md
   - Electricity Model: tutorials/electricity-model.md
   - Sector-Coupled Model: tutorials/sector-coupled-model.md
   - Model Customization:
@@ -154,6 +155,7 @@ extra_javascript:
 - assets/javascripts/mathjax.js
 - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 - assets/javascripts/mermaid-init.js
+- assets/javascripts/tutorial-cards.js
 
 
 markdown_extensions:
@@ -230,3 +232,7 @@ extra:
     link: https://drive.google.com/drive/folders/1U7fgktbxlaGzWxT2C0-Xv-_ffWCxAKZz
   version:
     provider: mike
+
+markdown_extensions:
+  - attr_list
+  - md_in_html

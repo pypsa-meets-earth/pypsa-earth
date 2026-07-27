@@ -334,5 +334,31 @@ html {
 }
 
 /* ============================================
+   11. TUTORIAL LANDING PAGE CARDS
+   ============================================ */
+
+/* Use-case tutorials box (first card) and Examples box (second card): same treatment as the Notes admonition, with a green accent */
+.tutorial-cards > ul > li:first-child,
+.tutorial-cards > ul > li:nth-child(2) {
+  border-left: 4px solid #00c853;
+  background-color: rgba(0, 200, 83, 0.05);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  cursor: pointer;
+}
+
+.tutorial-cards > ul > li:hover {
+  background-color: rgba(0, 200, 83, 0.12);
+}
+
+/* Keep both card images the same size/crop regardless of native aspect ratio */
+.tutorial-cards img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+}
+
+/* ============================================
    END OF STYLES
    ============================================ */
