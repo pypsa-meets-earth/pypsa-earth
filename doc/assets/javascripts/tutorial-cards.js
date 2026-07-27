@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: PyPSA-Earth and PyPSA-Eur Authors
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Make each tutorial landing page card clickable: clicking anywhere on the
 // panel (outside of a specific link) opens the first tutorial page in that card.
 document.addEventListener("DOMContentLoaded", function () {
