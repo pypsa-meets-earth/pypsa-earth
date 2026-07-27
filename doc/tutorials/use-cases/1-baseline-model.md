@@ -133,7 +133,7 @@ Take a moment to look at what you have built:
 --8<-- "tutorials/use-cases/snippets/config.KZ.yaml"
 ```
 
-That is all — every other parameter (network voltages, renewable technology settings, cost assumptions, solver tolerances, …) is inherited unchanged from `config.default.yaml`. When you need details on a specific key, the [Configuration reference](../../user-guide/configuration.md) has the full list — later parts of this series will come back to individual sections as we calibrate the model.
+That is all you need to build and run a model. Every other parameter (network voltages, renewable technology settings, cost assumptions, solver tolerances, …) is inherited unchanged from `config.default.yaml`. When you need details on a specific key, the [Configuration reference](../../user-guide/configuration.md) has the full list. Later parts of this series will come back to individual sections as we calibrate the model.
 
 Save this as `config.KZ.yaml` in the project root before running Snakemake, or [download the file](snippets/config.KZ.yaml){: download="config.KZ.yaml"} and copy it there.
 
