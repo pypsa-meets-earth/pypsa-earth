@@ -275,6 +275,8 @@ Generator    Onshore Wind            1.34
 
 That is the honest result: sourced Kazakhstan fuel and O&amp;M data still make coal the cheaper option on the margin, so this model does **not** reproduce KEGOC's real ~22 TWh/yr of gas generation through costs alone — if anything, gas supply drops slightly further. In practice much of Kazakhstan's gas fleet is combined-heat-and-power (CHP) serving district heat demand, or otherwise committed under contracts rather than pure economic merit order — behaviour a marginal-cost override cannot capture. Closing this gap credibly would mean modelling that constraint directly (for example a must-run floor or heat-linked dispatch for gas CHP), not further fuel-price tuning — a candidate for a future tutorial, alongside a policy-driven CO₂ price.
 
+A second confound sits in the network, not the costs: by default PyPSA-Earth lets the solver expand every line at capital cost (`scenario.ll: ["copt"]`), so coal can reach any bus without a local gas plant ever needing to run. [Part 7](7-transmission-network.md#step-5-stop-lines-from-being-cost-optimized-past-their-rating) turns that off.
+
 ---
 
 ## Recap
@@ -285,4 +287,4 @@ That is the honest result: sourced Kazakhstan fuel and O&amp;M data still make c
 | 3 | *(sourced Kazakhstan fuel + O&amp;M data)* | Compute the real marginal cost per technology (already EUR/MWh<sub>el</sub>) |
 | 4 | `costs.marginal_cost.*` | Apply the computed values, replacing technology-data's generic figures |
 
-Marginal costs now reflect sourced Kazakhstan fuel and O&amp;M data instead of generic technology-data defaults — but the coal/gas dispatch split barely moves, because real costs still favor coal. The gap to KEGOC's observed gas generation is therefore **not primarily an economics problem** in this model; it likely reflects CHP heat-led dispatch or must-run behaviour that a marginal-cost override cannot represent. The model still sheds **~7.7 TWh** of load on electrically isolated buses — that is a separate **network** problem. **[Part 6](6-network-topology.md)** diagnoses and fixes those isolated sub-networks, and **[Part 7](7-transmission-network.md)** then rebuilds the transmission network itself with Kazakhstan-specific voltage levels and line ratings.
+Marginal costs now reflect sourced Kazakhstan fuel and O&amp;M data instead of generic technology-data defaults — but the coal/gas dispatch split barely moves, because real costs still favor coal. The gap to KEGOC's observed gas generation is therefore **not primarily an economics problem** in this model. The model still sheds **~7.7 TWh** of load on electrically isolated buses — that is a separate **network** problem. **[Part 6](6-network-topology.md)** diagnoses and fixes those isolated sub-networks, and **[Part 7](7-transmission-network.md)** then rebuilds the transmission network itself with Kazakhstan-specific voltage levels and line ratings.
