@@ -94,10 +94,10 @@ There are multiple ways to get involved and learn more about our work:
 - [Contributing](community/contributing.md) - How to contribute to the project
 - [Project Structure](community/project-structure.md) - Credits and architecture
 - [Users List](community/users-list.md) - Who's using PyPSA-Earth
-- [Talks & Papers](community/talks-and-papers.md) - Publications and presentations
-- [Learning Materials](community/learning-materials.md) - Additional resources
-- [Software Hints](community/software-hints.md) - Tips and troubleshooting
-- [FAQ](community/faq.md) - Common run errors and fixes
+- [Talks & Papers](community/talks-and-papers.md) containing publications and presentations
+- [Learning Materials](community/learning-materials.md) with additional resources
+- [Software Hints](community/software-hints.md) providing tips and troubleshooting
+- [FAQ](community/faq.md) listing common run errors and fixes
 
 ### API Reference
 
