@@ -27,7 +27,7 @@ In this first tutorial we will build and solve a baseline electricity model for 
 
 ## How configuration works
 
-Before writing a single line, it is worth understanding how PyPSA-Earth reads configuration — because it explains why the file we are about to create is so short.
+Before writing a single line, it is worth understanding how PyPSA-Earth reads configuration because it explains why the file we are about to create is so short.
 
 PyPSA-Earth loads configuration in layers. The Snakefile reads these files in order, with each subsequent file overriding only the keys it explicitly sets:
 
