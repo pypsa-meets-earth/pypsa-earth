@@ -160,6 +160,16 @@ You can [download the file](snippets/config.KZ.demand.yaml){: download="config.K
 
 ## Step 4: Re-run the workflow
 
+Demand changes do not require a new databundle or ERA5 cutout. Add this to `config.KZ.yaml` so Snakemake reuses the cached files from Part 1 instead of re-checking them on every run:
+
+```yaml
+enable:
+  retrieve_databundle: false
+  retrieve_cutout: false
+```
+
+See the [FAQ](../../community/faq.md#cutout-download-failed-retrieve_cutout) if cutout retrieval caused trouble in Part 1.
+
 You updated `load_options` in Steps 1–3. Run the same target as [Part 1](1-baseline-model.md):
 
 ```bash
@@ -167,17 +177,6 @@ snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
 ```
 
 Snakemake compares your config with the last run and **rebuilds only what changed**. Because `load_options` feeds `build_demand_profiles`, expect that rule to run again, followed by `add_electricity` and everything downstream through `solve_network`. Cutouts, OSM data, and the base network stay cached from Part 1.
-
-!!! tip "Optional: skip data downloads on re-runs"
-    If Part 1 completed successfully, add to `config.KZ.yaml`:
-
-    ```yaml
-    enable:
-      retrieve_databundle: false
-      retrieve_cutout: false
-    ```
-
-    Demand changes do not require a new databundle or ERA5 cutout. This tells Snakemake to use cached files under `data/` and `cutouts/KZ/` and avoids another download attempt. See the [FAQ](../../community/faq.md#cutout-download-failed-retrieve_cutout) if cutout retrieval caused trouble in Part 1.
 
 When the run finishes, the updated solved network overwrites the same file you analysed in Part 2:
 
@@ -220,5 +219,6 @@ The hourly profile shape is unchanged from Part 2 — only the annual total move
 | 2 | `load_options.weather_year` | `2013` | Hourly shape (match simulation year) |
 | 2 | `load_options.prediction_year` | `2030` | GEGIS SSP level (no 2020 folder) |
 | 3 | `load_options.scale` | `1.005` or `{ DEFAULT: 1.0, KZ: 1.005 }` | Match 2020 KEGOC total (float for single country; dict for multi-country) |
+| 4 | `enable.retrieve_databundle` / `enable.retrieve_cutout` | `false` | Skip re-downloading cached data from Part 1 |
 
 Demand is now anchored to **2020** consumption statistics. Generation and installed capacity are calibrated in **[Part 4](4-generation-data.md)** — lock the 2020 fleet, filter powerplantmatching, and compare installed capacities to the same validation tables.

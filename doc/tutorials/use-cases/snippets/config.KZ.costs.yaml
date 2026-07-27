@@ -9,8 +9,8 @@ run:
   shared_cutouts: false
 
 enable:
-  retrieve_cutout: false
   retrieve_databundle: false
+  retrieve_cutout: false
 
 scenario:
   opts: [6h]
