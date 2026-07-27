@@ -112,17 +112,27 @@ Defaults assume **modern European** bundles (e.g. two bundles at 220 kV). Kazakh
 lines:
   ac_types:
     110.: "149-AL1/24-ST1A 110.0"
-    220.: "305-AL1/39-ST1A 110.0"
+    220.: "243-AL1/39-ST1A 110.0"
     500.: "490-AL1/64-ST1A 380.0"
 ```
 
 | kV | KZ type | Effect |
 |---|---|---|
-| **110** | `149-AL1/24-ST1A 110.0` | Enables 110 kV line ratings |
-| **220** | `305-AL1/39-ST1A 110.0` | Lighter conductor vs default **2-bundle** → lower **`s_nom`** |
+| **110** | `149-AL1/24-ST1A 110.0` | Enables 110 kV line ratings — the lightest conductor PyPSA-Earth's pinned PyPSA registers at this voltage |
+| **220** | `243-AL1/39-ST1A 110.0` | Lighter conductor vs default **2-bundle** → lower **`s_nom`** |
 | **500** | `490-AL1/64-ST1A 380.0` | Single-circuit EHV vs default **4-bundle** |
 
+!!! note
+    `ac_types` values must exist in your installed PyPSA's line register (`pypsa<=0.30.3` here — see the [version-pinned line types table](https://docs.pypsa.org/v0.30.3/user-guide/components.html#line-types), not the `latest` docs) — an unmatched name silently produces `NaN` **`s_nom`** instead of raising an error.
+
 Tighter line limits can bind regional flows in the LP; looser defaults would under-state congestion on older 220 kV corridors.
+
+**`lines.s_max_pu`** (default `0.7`) derates every line's usable capacity as a security margin. We lower it to `0.5` as a further conservative assumption for KZ's less-meshed grid:
+
+```yaml
+lines:
+  s_max_pu: 0.5
+```
 
 ---
 
@@ -141,8 +151,9 @@ electricity:
 lines:
   ac_types:
     110.: "149-AL1/24-ST1A 110.0"
-    220.: "305-AL1/39-ST1A 110.0"
+    220.: "243-AL1/39-ST1A 110.0"
     500.: "490-AL1/64-ST1A 380.0"
+  s_max_pu: 0.5
 ```
 
 You can [download the file](snippets/config.KZ.transmission.yaml){: download="config.KZ.yaml"} and merge it with your existing `config.KZ.yaml`, or add the blocks by hand.
@@ -156,15 +167,6 @@ Because these keys feed **`clean_osm_data`** and **`base_network`**, Snakemake r
 ```bash
 snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
 ```
-
-!!! tip "Use cached data"
-    Keep from earlier parts:
-
-    ```yaml
-    enable:
-      retrieve_databundle: false
-      retrieve_cutout: false
-    ```
 
 The solved network still overwrites `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
 
@@ -229,6 +231,7 @@ Re-run the workflow if you change `scale`. Load shedding should stay at **~0 TWh
 | 3 | `electricity.base_voltage` | `500` | Single voltage after `simplify_network` |
 | 3 | `electricity.voltages` | `[110, 220, 500]` | Line-type matching on multi-voltage `base.nc` |
 | 4 | `lines.ac_types` | KZ conductor map | 110 kV type + derated 220 kV **`s_nom`** in build |
+| 4 | `lines.s_max_pu` | `0.5` | Conservative N-1 margin for a less-meshed grid (default `0.7`) |
 | 6 | *(keep Part 6)* | `cluster_options.simplify_network` | Merge off, fetch on, drop off — catch remaining islands without deleting plants |
 | 8 | `load_options.scale` | `0.994` (from `1.005` × 107.34/108.54) | **Final** match to **107.34 TWh** after grid is settled |
 

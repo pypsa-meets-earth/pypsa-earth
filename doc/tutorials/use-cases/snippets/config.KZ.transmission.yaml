@@ -14,7 +14,6 @@ enable:
 
 scenario:
   opts: [6h]
-  clusters: [10]
 
 load_options:
   source: gegis
@@ -42,8 +41,9 @@ electricity:
 lines:
   ac_types:
     110.: "149-AL1/24-ST1A 110.0"
-    220.: "305-AL1/39-ST1A 110.0"
+    220.: "243-AL1/39-ST1A 110.0"
     500.: "490-AL1/64-ST1A 380.0"
+  s_max_pu: 0.5
 
 costs:
   year: 2020
