@@ -40,7 +40,7 @@ Outputs
 Description
 -----------
 
-The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ command applied to the original powerplantmatching database.
+The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ command applied to the original powerplantmatching database. Country conditions must therefore use the full country names found in the original database, such as ``United States``. Country values are converted to ISO alpha-2 codes after the custom powerplant files have been applied.
 
 The ``electricity: custom_powerplants`` section specifies the custom files and how they are applied. ``method`` accepts ``false``, ``merge``, or ``replace`` and is applied once to the complete set of configured files. ``merge`` appends all configured custom powerplants to the filtered powerplantmatching dataset, while ``replace`` discards the complete powerplantmatching dataset and uses all configured custom files instead.
 
@@ -132,7 +132,7 @@ Considerations for column values:
 - ``Fueltype`` should use the corresponding powerplantmatching fuel category, such as ``Natural Gas``.
 - Natural-gas plants should specify ``OCGT`` or ``CCGT`` in the ``Technology`` column.
 - Hydro plants with ``Technology`` set to ``Reservoir`` are represented as storage units. Use ``ror`` for hydro plants that should be represented as generators.
-- ``Country`` must use ISO 3166-1 alpha-2 codes, such as ``NG`` for Nigeria, ``BO`` for Bolivia, ``FR`` for France, and ``US`` for the United States.
+- ``Country`` values are converted to ISO 3166-1 alpha-2 codes after the custom files have been applied. Both full country names and alpha-2 codes are therefore accepted in custom files.
 
 OSM mapping assumptions
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -336,6 +336,12 @@ def add_custom_powerplants(
     if method is False:
         return ppl
 
+    if not custom_powerplants_files:
+        raise ValueError(
+            "At least one filepath must be configured when "
+            "electricity.custom_powerplants.method is 'merge' or 'replace'."
+        )
+
     custom_ppls = pd.concat(
         [
             read_csv_nafix(
@@ -440,11 +446,9 @@ if __name__ == "__main__":
     custom_powerplants = snakemake.params.custom_powerplants
 
     ppl = (
-        pm.powerplants(from_url=False, update=True, config_update=config)
+        pm.powerplants(from_url=True, config_update=config)
         .powerplant.fill_missing_decommissioning_years()
         .query("Country in @countries_names")
-        .powerplant.convert_country_to_alpha2()
-        .pipe(replace_natural_gas_technology)
     )
 
     ppl = add_custom_powerplants(
@@ -452,6 +456,8 @@ if __name__ == "__main__":
         custom_powerplants_files=list(snakemake.input.custom_powerplants),
         method=custom_powerplants["method"],
     )
+
+    ppl = ppl.powerplant.convert_country_to_alpha2()
 
     # define unique index
     ppl = ppl.reset_index(drop=True)
