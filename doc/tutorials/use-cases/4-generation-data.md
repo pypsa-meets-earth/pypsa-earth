@@ -366,7 +366,7 @@ Solar and wind generation move close to KEGOC; coal stays too high and gas too l
 | Step | Config key | Role |
 |---|---|---|
 | 3 | `electricity.powerplants_filter` | Keep plants operating in **2020** |
-| 4a | `electricity.extendable_carriers` | Empty `Generator` — no new solar/wind/gas build |
+| 4a | `electricity.extendable_carriers` | Empty `Generator` means no new solar/wind/gas build |
 | 4b | `electricity.estimate_renewable_capacities` | IRENA **2020** solar/wind totals |
 | Adv. | `electricity.custom_powerplants: replace` | Use **`data/custom_powerplants.csv`** as the full fleet |
 
