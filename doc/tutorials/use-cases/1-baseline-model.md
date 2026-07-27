@@ -68,7 +68,7 @@ Time to get started. First, create an empty file called `config.KZ.yaml` in the 
 
 ## Step 2: Set the country
 
-This is the most important line in any country study. Add it to `config.KZ.yaml`:
+This is the most important line in any country study since it determines the geographical scope of the data used to build a model. Add it to `config.KZ.yaml`:
 
 ```yaml
 --8<-- "tutorials/use-cases/snippets/config.KZ.yaml:5:5"
