@@ -105,7 +105,7 @@ Once you are satisfied with the model setup you can increase resolution progress
 
 ## Step 5: Choose a solver
 
-PyPSA-Earth supports several open-source and commercial LP solvers. For a baseline run HiGHS is recommended: it is free, ships with the conda environment, and handles networks of this size efficiently.
+PyPSA-Earth supports several open-source and commercial optimisation solvers. For a baseline run HiGHS is recommended: it is free, ships with the conda environment, and handles networks of this size efficiently.
 
 ```yaml
 --8<-- "tutorials/use-cases/snippets/config.KZ.yaml:14:16"
