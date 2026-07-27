@@ -357,7 +357,7 @@ Capacity alignment does not automatically fix the **generation mix** either. The
 | Solar | 1.25 | 25.40 | 0.99 |
 | Wind | 1.09 | 14.81 | 1.34 |
 
-Solar and wind generation move close to KEGOC; coal stays too high and gas too low — capacity is better, but dispatch is not yet calibrated.
+Solar and wind generation move close to KEGOC; coal stays too high and gas too low. The capacity match is better, but dispatch is not yet calibrated.
 
 ---
 
