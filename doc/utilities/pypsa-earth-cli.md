@@ -25,8 +25,14 @@ default `pypsa-earth` environment. They are bundled in the dedicated
 
 ## Launching the CLI
 
-The recommended way to launch the CLI is with pixi, using the
-`pypsa-earth-cli` environment:
+The recommended way to launch the CLI is with the `cli` pixi task, which is
+scoped to the `pypsa-earth-cli` feature/environment:
+
+```bash
+.../pypsa-earth % pixi run pypsa-earth-cli
+```
+
+Pixi automatically installs and activates the environment — this is equivalent to:
 
 ```bash
 .../pypsa-earth % pixi run -e pypsa-earth-cli python scripts/non_workflow/pypsa_earth_cli.py
