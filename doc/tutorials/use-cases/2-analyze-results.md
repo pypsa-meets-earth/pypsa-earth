@@ -12,11 +12,11 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-The optimiser has finished — now comes the interesting part. In this tutorial we open the solved network, get a feel for what is inside it, and ask the questions any energy modeller cares about: how much power is being produced, by whom, and does it match reality? By the end you will have a set of key performance indicators for the Kazakhstan **power system** and a first sanity check against published statistics.
+The optimiser has finished, and now comes the interesting part. In this tutorial we open the solved network, get a feel for what is inside it, and ask the questions any energy modeller cares about: how much power is being produced, by whom, and does it match reality? By the end you will have a set of key performance indicators for the Kazakhstan **power system** and a first sanity check against published statistics.
 
-This series builds an **electricity-only** model — grid generation, transmission, and demand. We do not enable sector coupling (heat, transport, industry, hydrogen, and so on). Over the following parts we will calibrate and validate that power model against **2020** data before exploring further scenarios.
+This series builds an **electricity-only** model which includes grid generation, transmission, and demand. We do not enable sector coupling (heat, transport, industry, hydrogen, and so on). Over the following parts we will calibrate and validate that power model against **2020** data before exploring further scenarios.
 
-All of the work here is done in a Jupyter notebook. No Snakemake, no configuration files — just Python and a solved `.nc` file.
+All of the work here is done in a Jupyter notebook. No Snakemake, no configuration files have been used, just Python and a solved network `.nc` file.
 
 ---
 
@@ -36,7 +36,7 @@ If this file is not there, return to [Part 1](1-baseline-model.md) or check the 
 
 ## Create a notebook
 
-All paths in this tutorial — `results/KZ/networks/...` — are relative to the **PyPSA-Earth project root** (the folder that contains `Snakefile` and your `config.KZ.yaml`).
+All paths in this tutorial, such as`results/KZ/networks/...`, are relative to the **PyPSA-Earth project root** (the folder that contains `Snakefile` and your `config.KZ.yaml`).
 
 From there, start JupyterLab:
 
@@ -45,7 +45,7 @@ cd /path/to/pypsa-earth
 jupyter lab
 ```
 
-In the browser, create a **new notebook** and save it as `analyze_kz.ipynb` in the project root — not under `doc/`. The cells below are what you add step by step as you read on.
+In the browser, create a **new notebook** and save it as `analyze_kz.ipynb` in the project root (not under `doc/`!). The cells below are what you add step by step as you read on.
 
 If you use VS Code or Cursor instead, open the command palette (`Ctrl+Shift+P`), run **Create: New Jupyter Notebook**, and save it as `analyze_kz.ipynb` in the project root. Select the `pypsa-earth` conda environment as the kernel.
 
@@ -53,7 +53,7 @@ If you use VS Code or Cursor instead, open the command palette (`Ctrl+Shift+P`),
 
 ## Opening the solved network
 
-Load the network and print a summary. This is always the first thing to do — it tells you immediately whether the file loaded cleanly and gives you a count of every component type.
+Load the network and print a summary. This is always the first thing to do since it tells you immediately whether the file loaded cleanly and gives you a count of every component type.
 
 ```python
 import pypsa
@@ -90,12 +90,12 @@ Before diving into numbers it helps to know what you are looking at. A PyPSA `Ne
 
 | Component | Attribute | Description |
 |---|---|---|
-| `Bus` | `n.buses` | Electrical nodes — one per cluster in our 10-node model |
+| `Bus` | `n.buses` | Electrical nodes with one per cluster in our 10-node model |
 | `Line` | `n.lines` | AC transmission lines between buses |
 | `Generator` | `n.generators` | Power plants: coal, gas, wind, solar, run-of-river (ror) |
 | `Load` | `n.loads` | Electricity demand at each bus |
 | `StorageUnit` | `n.storage_units` | Technologies with a coupled power/energy ratio (PHS) |
-| `Store` | `n.stores` | Energy storage (batteries, H₂) — capacity in MWh; charging and discharging via `Link`s |
+| `Store` | `n.stores` | Energy storage (batteries, H₂) capacity in MWh; charging and discharging via `Link`s |
 | `Link` | `n.links` | Multi-port converters: battery chargers, electrolysers, DC links, etc. |
 
 For a thorough description of every attribute and convention, the [PyPSA component reference](https://docs.pypsa.org/en/latest/user-guide/components/buses/) is the definitive resource.
@@ -104,7 +104,7 @@ For a thorough description of every attribute and convention, the [PyPSA compone
 
 ## Electricity demand
 
-Let's start with demand — it sets the scale for everything else. The load profile is PyPSA-Earth's estimate of Kazakhstan's hourly electricity consumption, disaggregated spatially across the 10 nodes.
+Let's start with demand which sets the scale for everything else. The load profile is PyPSA-Earth's estimate of Kazakhstan's hourly electricity consumption, disaggregated spatially across the 10 nodes.
 
 ### Total annual demand
 
@@ -123,11 +123,11 @@ For Kazakhstan the number should come out around **106–107 TWh**:
 Total annual demand: 106.8 TWh
 ```
 
-Good — that is a plausible number for Kazakhstan. Keep it in mind as we look at the rest of the results.
+Good, that is a plausible number for Kazakhstan. Keep it in mind as we look at the rest of the results.
 
 ### Demand profile
 
-Plotting the full-year profile is a quick sanity check. You should see a clear seasonal pattern — demand peaks in the cold Central Asian winter and dips in summer — with a daily cycle visible when you zoom in.
+Plotting the full-year profile is a quick sanity check. You should see a clear seasonal pattern with demand peaks in the cold Central Asian winter and dips in summer, and with a daily cycle visible when you zoom in.
 
 ```python
 fig, ax = plt.subplots(figsize=(12, 3))
@@ -142,7 +142,7 @@ fig.tight_layout()
 
 ## Installed capacities
 
-Now let's look at what the model built. The `statistics()` method is the most convenient entry point — it sweeps across all component types and returns a tidy MultiIndex DataFrame. The statistics module maps installed capacity across all components — lines, loads and generators. Therefore dropping line and load values is required.
+Now let's look at what the model built. The `statistics()` method is the most convenient entry point. It sweeps across all component types and returns a tidy MultiIndex DataFrame. The statistics module maps installed capacity across all components, such as lines, loads and generators. Therefore dropping line and load values is required.
 
 ```python
 caps = n.statistics()["Installed Capacity"].dropna() / 1e3  # GW
@@ -163,16 +163,16 @@ Generator    Onshore Wind           1.4 GW
              Run of River           0.1 GW
 ```
 
-A few things worth noticing. **Coal (11.7 GW), gas (2.4 GW), and hydro (2.3 GW) reflect the existing fleet** from the powerplantmatching database — their `Installed Capacity` equals `Optimal Capacity` because the optimiser did not add conventional build.
+A few things worth noticing. **Coal (11.7 GW), gas (2.4 GW), and hydro (2.3 GW) reflect the existing fleet** from the powerplantmatching database with their `Installed Capacity` equals `Optimal Capacity` because the optimiser did not add conventional build.
 
-**Load shedding (17.6 GW)** appears at the top — but this is expected. Load shedding in PyPSA is a soft-constraint generator added automatically to every bus at a very high cost (100 €/kWh by default). Its `p_nom` is set to roughly match peak demand at that bus, so the total across 10 nodes lands around 17 GW — comparable to Kazakhstan's peak load. Its purpose is purely numerical: it prevents the model from becoming infeasible if supply briefly falls short. In a well-calibrated model it dispatches little or nothing. It is possible to disable it via `solving.options.load_shedding: false`, which we will consider in the later parts of this series once the model is properly calibrated.
+**Load shedding (17.6 GW)** appears at the top but this is expected. Load shedding in PyPSA is a soft-constraint generator added automatically to every bus at a very high cost (100 €/kWh by default). Its `p_nom` is set to roughly match peak demand at that bus, so the total across 10 nodes lands around 17 GW which comparable to Kazakhstan's peak load. Its purpose is purely numerical: it prevents the model from becoming infeasible if supply briefly falls short. In a well-calibrated model it dispatches little or nothing. It is possible to disable it via `solving.options.load_shedding: false`, which we will consider in the later parts of this series once the model is properly calibrated.
 
 ### Installed capacity vs. optimal capacity
 
 The `statistics()` method exposes several capacity columns that are easy to confuse:
 
-- **`Installed Capacity`** — maps to `p_nom`, the *pre-existing* capacity from the powerplant database (plus IRENA estimates for wind and solar). For existing coal or hydro plants this is the real-world installed capacity. For technologies built from scratch (e.g. new gas, battery, H2), `p_nom` is typically zero.
-- **`Optimal Capacity`** — maps to `p_nom_opt`, the capacity *after* the optimiser has run. For fixed existing plants it equals `Installed Capacity`. For extendable technologies it is whatever the optimiser decided to build.
+- **`Installed Capacity`** maps to `p_nom`, the *pre-existing* capacity from the powerplant database (plus IRENA estimates for wind and solar). For existing coal or hydro plants this is the real-world installed capacity. For technologies built from scratch (e.g. new gas, battery, H2), `p_nom` is typically zero.
+- **`Optimal Capacity`** maps to `p_nom_opt`, the capacity *after* the optimiser has run. For fixed existing plants it equals `Installed Capacity`. For extendable technologies it is whatever the optimiser decided to build.
 
 To see how much *new* capacity was added on top of the existing fleet:
 
@@ -183,7 +183,7 @@ stat["New build"] = stat["Optimal Capacity"] - stat["Installed Capacity"]
 print(stat.sort_values("Optimal Capacity", ascending=False).to_string())
 ```
 
-For coal and hydro the `New build` column should be ~0 — those are fixed existing plants. For onshore wind and solar you will see positive values — that is new renewable capacity the optimiser chose to add.
+For coal and hydro the `New build` column should be ~0 as those are fixed existing plants. For onshore wind and solar you will see positive values which stand for new renewable capacity the optimiser chose to add.
 
 For our Kazakhstan run the output looks like this (abbreviated):
 
@@ -202,11 +202,11 @@ StorageUnit Reservoir & Dam             2.3              2.3        0.0
 
 A few things stand out immediately:
 
-- **Coal, gas, hydro, oil: zero new build.** The optimiser accepted the existing fleet as-is — their capacity is fixed at the values from the powerplantmatching database.
+- **Coal, gas, hydro, oil: zero new build.** The optimiser accepted the existing fleet as-is since their capacity is fixed at the values from the powerplantmatching database.
 - **Solar: +18.9 GW, onshore wind: +4.8 GW.** By default, PyPSA-Earth treats wind and solar as *extendable*: the optimiser is allowed to add capacity on top of what is already installed.
 - **H2 and battery storage: large new build.** Storage is extendable by default too, so the model pairs the renewable build with storage to manage intermittency.
 
-This is the default baseline from Part 1 — we have not changed any settings yet.
+This is the default baseline from Part 1 as we have not changed any settings yet.
 
 For a cleaner per-carrier view of generators only, drop the shedding component and plot:
 
@@ -239,7 +239,7 @@ offwind-ac     0.0 GW
 offwind-dc     0.0 GW
 ```
 
-Note that this uses `p_nom_opt` — optimal capacity after expansion — so solar and onwind reflect the new build from the table above, not just what was in the powerplant database.
+Note that this uses `p_nom_opt` which is optimal capacity after expansion, so solar and onwind reflect the new build from the table above, not just what was in the powerplant database.
 
 ![Kazakhstan optimal installed capacity](figures/kz_optimal_installed_capacity.png)
 
@@ -247,11 +247,11 @@ Note that this uses `p_nom_opt` — optimal capacity after expansion — so sola
 
 ## Generation dispatch
 
-Capacities tell you what *could* run — dispatch tells you what *did* run.
+Capacities tell you what *could* run, dispatch tells you what *did* run.
 
 ### Annual generation by carrier
 
-The key calculation is: multiply each component's dispatch time series by the snapshot weights, sum over the year, then group by carrier.
+The key calculation is: multiply each component's dispatch time series by so called the snapshot weights which contain a value of the time steps, then sum over the whole year, then group by carrier.
 
 PyPSA-Earth splits hydro across two component types: **run-of-river** plants are `Generator`s with carrier `ror`, while **reservoir and dam** plants are `StorageUnit`s with carrier `hydro`. A generation tally that only reads `n.generators_t.p` will miss the latter.
 
@@ -295,14 +295,14 @@ Together, `ror` and `hydro` supply about **3.6 TWh**.
 
 ![Kazakhstan's annual generation](figures/kz_annual_generation.png)
 
-You can cross-check this with `n.statistics()["Supply"]`, which computes the same thing internally — note that it lists reservoir hydro under `StorageUnit` rather than grouping it with generators:
+You can cross-check this with `n.statistics()["Supply"]`, which computes the same thing internally. Note that it lists reservoir hydro under `StorageUnit` rather than grouping it with generators:
 
 ```python
 supply = n.statistics()["Supply"].dropna() / 1e6  # TWh
 print(supply.sort_values(ascending=False).to_string())
 ```
 
-The generator totals should match; reservoir hydro appears separately as `StorageUnit / Reservoir & Dam`. The manual approach above merges both into one table; `statistics()` covers all component types in one call but keeps the PyPSA component split visible.
+The generator totals should match to the reference data. Note please that the generation of reservoir hydro appears separately as `StorageUnit / Reservoir & Dam`. The manual approach above merges both into one table; `statistics()` covers all component types in one call but keeps the PyPSA component split visible.
 
 ### Capacity factors
 
@@ -349,7 +349,7 @@ Capacity factors are available here for a quick check.
 
 ## Model validation for 2020
 
-So far we have been exploring the baseline without deciding what year we are modelling. For a first validation, **let's use 2020** as our reference year — recent enough for good statistics, and reported by several independent sources.
+So far we have been exploring the baseline without deciding what year we are modelling. For a first validation, **let's use 2020** as our reference year. It is recent enough to get reliable reference data which have been reported by several independent sources.
 
 Useful references:
 
@@ -379,11 +379,11 @@ The tables below collect 2020 values from these sources.
 | Wind | 0.49 | 0.49 | 0.49 | 0.51 | 6.19 |
 | Bioenergy | 0.01 | 0.01 | 0.01 | 0.001 | — |
 
-For **IRENA** and **EIA**, the **Coal** row lists all fossil-fuel capacity — neither source splits coal and gas.
+For **IRENA** and **EIA**, the **Coal** row lists all fossil-fuel capacity. Neither source splits coal and gas.
 
-**KEGOC** uses a different breakdown: gas and fuel oil in **thermal power plants** are reported as one category, while **gas turbines** are listed separately. The **Gas** values in both tables sum thermal-plant gas/oil and gas turbines so they can be compared with IEA, Ember, and the model. There is no separate **Oil** row for KEGOC in the generation table — that fuel is included in **Gas**.
+**KEGOC** uses a different breakdown: gas and fuel oil in **thermal power plants** are reported as one category, while **gas turbines** are listed separately. The **Gas** values in both tables sum thermal-plant gas/oil and gas turbines so they can be compared with IEA, Ember, and the model. There is no separate **Oil** row for KEGOC in the generation table. That fuel is included in **Gas** instead.
 
-The **Model** column uses **optimal capacity** (`p_nom_opt`) from the baseline run, where wind and solar are **extendable by default** — so solar and wind values reflect new build, not the 2020 installed fleet. In later parts of this series we will make renewables non-extendable and re-run for a proper validation comparison.
+The **Model** column uses **optimal capacity** (`p_nom_opt`) from the baseline run, where wind and solar are **extendable by default**. In this way, solar and wind values reflect new build, not the 2020 installed fleet. In later parts of this series we will make renewables non-extendable and re-run for a proper validation comparison.
 
 ### Electricity generation (2020, GWh)
 
@@ -403,13 +403,13 @@ Model **gas** maps to `CCGT` generators; **hydro** combines run-of-river (`ror`)
 
 ### What the comparison shows
 
-**The baseline does not reproduce 2020.** That is expected — we have not calibrated anything yet:
+**The baseline does not reproduce 2020.** That is expected as we have not calibrated anything yet:
 
-- **Demand** has not been tuned to 2020 — the total may look plausible, but the profile and scaling are still defaults.
-- **Installed capacities** diverge strongly — especially solar and wind, where the optimiser built far beyond what existed in 2020.
-- **Generation by carrier** diverges accordingly — the dispatch reflects that uncorrected fleet, not Kazakhstan's 2020 mix.
+- **Demand** has not been tuned to 2020 making the total may look plausible, but the profile and scaling are still defaults.
+- **Installed capacities** diverge strongly, especially solar and wind, where the optimiser built far beyond what existed in 2020.
+- **Generation by carrier** diverges accordingly while the dispatch reflects that uncorrected fleet, not Kazakhstan's 2020 mix.
 
-This first comparison is not a failure — it tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step: demand in **[Part 3](3-demand-data.md)**, then the **2020 generation fleet** in **[Part 4](4-generation-data.md)**.
+This first comparison is not a failure. It just tells us *where* the defaults stand relative to history and *what* to fix. The next tutorials calibrate the model step by step: demand in **[Part 3](3-demand-data.md)**, then the **2020 generation fleet** in **[Part 4](4-generation-data.md)**.
 
 ---
 
@@ -427,4 +427,4 @@ You now have a working analysis pipeline for any PyPSA-Earth network and a first
 | System cost | `n.objective` (EUR) |
 | Everything at once | `n.statistics()` |
 
-In **[Part 3](3-demand-data.md)** we go under the hood of the demand module — where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match Kazakhstan's **2020** electricity consumption.
+In **[Part 3](3-demand-data.md)** we go under the hood of the demand module. We will see where the load profiles come from, how the demand multiplier works, and how to calibrate the model to match Kazakhstan's **2020** electricity consumption.

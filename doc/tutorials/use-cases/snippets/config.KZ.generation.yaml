@@ -9,6 +9,7 @@ run:
   shared_cutouts: false
 
 enable:
+  retrieve_databundle: false
   retrieve_cutout: false
 
 scenario:

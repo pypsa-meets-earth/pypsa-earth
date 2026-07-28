@@ -126,6 +126,9 @@ CONFIG_MIGRATIONS = [
     ("sector.solar_cf_correction", "sector.solar_thermal_collector.cf_correction"),
     ("solar_thermal.clearsky_model", "sector.solar_thermal_collector.clearsky_model"),
     ("solar_thermal.orientation", "sector.solar_thermal_collector.orientation"),
+    ("clean_osm_data_options", "osm.clean_osm_data"),
+    ("build_osm_network", "osm.build_osm_network"),
+    ("cluster_options", "clustering"),
 ]
 
 
@@ -219,6 +222,23 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
+def _migrate_fossil_reserves(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Move ``fossil_reserves.{carrier}`` to ``sector.{carrier}.reserves``."""
+    fossil_reserves = config.get("fossil_reserves")
+    if not isinstance(fossil_reserves, dict):
+        return
+
+    for carrier, reserves in fossil_reserves.items():
+        if not isinstance(carrier, str):
+            continue
+        old_path = f"fossil_reserves.{carrier}"
+        new_path = f"sector.{carrier}.reserves"
+        _set_nested(config, new_path, reserves)
+        warn(old_path, new_path)
+
+
 def migrate_config(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]] | None = None,
@@ -229,9 +249,10 @@ def migrate_config(
     the merged config dict. All other keys are left as already merged by
     Snakemake (defaults from ``config.default.yaml`` plus user overrides).
 
-    Simple renames are listed in ``CONFIG_MIGRATIONS``. The only special
-    handler left is ``co2_budget.co2base_value`` (renames values, not just
-    paths) and ``sector.solar_thermal`` when it is still a legacy bool flag.
+    Simple renames (including whole option dicts such as OSM settings) are listed
+    in ``CONFIG_MIGRATIONS``. Special handlers cover ``co2_budget.co2base_value``
+    (renames values, not just paths), ``sector.solar_thermal`` when it is still
+    a legacy bool flag, and ``fossil_reserves.{carrier}`` reserve values.
 
     Parameters
     ----------
@@ -255,6 +276,7 @@ def migrate_config(
 
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
+    _migrate_fossil_reserves(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
 
     return config

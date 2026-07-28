@@ -9,7 +9,8 @@ run:
   shared_cutouts: false
 
 enable:
-  retrieve_cutout: false  # optional — use cached cutout after Part 1
+  retrieve_databundle: false
+  retrieve_cutout: false
 
 scenario:
   opts: [6h]
