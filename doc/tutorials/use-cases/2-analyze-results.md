@@ -206,7 +206,7 @@ A few things stand out immediately:
 - **Solar: +18.9 GW, onshore wind: +4.8 GW.** By default, PyPSA-Earth treats wind and solar as *extendable*: the optimiser is allowed to add capacity on top of what is already installed.
 - **H2 and battery storage: large new build.** Storage is extendable by default too, so the model pairs the renewable build with storage to manage intermittency.
 
-This is the default baseline from Part 1 — we have not changed any settings yet.
+This is the default baseline from Part 1 as we have not changed any settings yet.
 
 For a cleaner per-carrier view of generators only, drop the shedding component and plot:
 
