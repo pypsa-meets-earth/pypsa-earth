@@ -8,7 +8,10 @@ document.addEventListener("DOMContentLoaded", function () {
   var cards = document.querySelectorAll(".tutorial-cards > ul > li");
 
   cards.forEach(function (card) {
-    var firstLink = card.querySelector("a");
+    var firstLink = Array.prototype.find.call(
+      card.querySelectorAll("a"),
+      function (link) { return !link.closest(".tutorial-image-source"); }
+    );
     if (!firstLink) return;
 
     card.addEventListener("click", function (event) {
