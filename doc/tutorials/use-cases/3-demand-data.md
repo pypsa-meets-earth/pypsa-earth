@@ -11,15 +11,15 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-In [Part 2](2-analyze-results.md) we compared the baseline model against **2020** national statistics. Total electricity demand looked roughly plausible (~107 TWh), but we had not chosen that number on purpose — it came from PyPSA-Earth defaults. In this tutorial we take control of demand: where the hourly profiles come from, how to adjust them with a multiplier, and how to align the annual total with a reference year before we calibrate generation and capacities in later parts.
+In [Part 2](2-analyze-results.md) we compared the baseline model against **2020** national statistics. Total electricity demand looked roughly plausible (~107 TWh), but we had not chosen that number on purpose, it just came from PyPSA-Earth defaults. In this tutorial we take control of demand looking where the hourly profiles come from, how to adjust them with a multiplier, and how to align the annual total with a reference year before we calibrate generation and capacities in later parts.
 
-This series builds an **electricity-only (power system) model**. We do not switch on sector coupling (heat, transport, industry, hydrogen, and so on). Everything in this part lives under `load_options` in the config and the `build_demand_profiles` rule — not under `sector`.
+This series builds an **electricity-only (power system) model**. We do not switch on sector coupling (heat, transport, industry, hydrogen, and so on). Everything in this part lives under `load_options` in the config and the `build_demand_profiles` rule, not under `sector`.
 
 ---
 
 ## Where demand enters the workflow
 
-Electricity demand is not read directly from national statistics inside the optimiser. Two rules, `build_demand_profiles` and `add_electricity` , handle it — both before the network is simplified or solved:
+Electricity demand is not read directly from national statistics inside the optimiser. Two rules, `build_demand_profiles` and `add_electricity` , handle it, both before the network is simplified or solved:
 
 ```
 build_demand_profiles  →  resources/KZ/demand_profiles.csv
@@ -46,7 +46,7 @@ For the full parameter list see [load_options in the Configuration reference](..
 
 ## Step 1: Choose a demand source
 
-PyPSA-Earth builds hourly load from a **global demand dataset** — pre-calculated country-level electricity consumption, disaggregated using weather patterns — not from national statistics directly. Two datasets are available via `load_options.source`:
+PyPSA-Earth builds hourly load from a synthetic **global demand dataset** which is using pre-calculated country-level electricity consumption, not from national statistics directly. The demand profile is obtained using a machine learning approach which disaggregates the demand profile using seasonal and hourly demand patterns Two datasets are available via `load_options.source`:
 
 | Source | Config value | Weather years | Data location |
 |---|---|---|---|
@@ -55,7 +55,7 @@ PyPSA-Earth builds hourly load from a **global demand dataset** — pre-calculat
 
 **GEGIS** is the default. Profiles are pre-calculated from population and GDP using the [synde](https://github.com/euronion/synde) workflow; `prediction_year` selects the SSP pathway folder (e.g. `2030` under `ssp2-2.6`).
 
-**DemandCast** ([Steijn et al., 2025](https://arxiv.org/abs/2510.08000)) adds wider **time** coverage (25 years vs three for GEGIS) and better **spatial** coverage for countries where GEGIS had gaps or zero demand. For most countries with good reference data, hourly patterns correlate strongly with GEGIS; annual totals are still adjusted with `scale` either way — see the comparison and Ember validation in [#1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724).
+**DemandCast** ([Steijn et al., 2025](https://arxiv.org/abs/2510.08000)) adds wider **time** coverage (25 years vs three for GEGIS) and better **spatial** coverage for countries where GEGIS had gaps or zero demand. For most countries with good reference data, hourly patterns correlate strongly with GEGIS. Annual totals are still adjusted with `scale` either way. For the details, see the comparison and Ember validation in [#1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724).
 
 For Kazakhstan we stay with the default **`gegis`**. The country is part of the **Asia** regional file, which Snakemake selects automatically from your `countries` list.
 
@@ -78,8 +78,8 @@ data/ssp2-2.6/{prediction_year}/era5_{weather_year}/Asia.nc
 
 | Key | Meaning |
 |---|---|
-| `weather_year` | **Weather year** — which calendar year's temperature patterns shape the hourly load curve. GEGIS provides 2011, 2013, and 2018. This must match the **year your model simulates**. With the default config that is **2013** (`start: "2013-01-01"`, `end: "2014-01-01"` near the top of `config.default.yaml`), so `weather_year: 2013` is the right choice. |
-| `prediction_year` | **Pathway year** — which GEGIS future-demand scenario to use. `prediction_year: 2030` loads demand built for **2030** under SSP2-2.6 (population and GDP assumptions for that year). It sets the socioeconomic level in the profile; it is **not** the calendar year you validate against in Part 2. |
+| `weather_year` | **Weather year** is a calendar year whose temperature patterns shape the hourly load curve. GEGIS provides 2011, 2013, and 2018. This must match the **year your model simulates**. With the default config that is **2013** (`start: "2013-01-01"`, `end: "2014-01-01"` near the top of `config.default.yaml`), so `weather_year: 2013` is the right choice. |
+| `prediction_year` | **Pathway year** is a year which GEGIS future-demand scenario must use. `prediction_year: 2030` loads demand built for **2030** under SSP2-2.6 (population and GDP assumptions for that year). It sets the socioeconomic level in the profile; it is **not** the calendar year you validate against in Part 2. |
 
 In short: **`weather_year`** drives *when* the hours look like (hot summers, cold winters); **`prediction_year`** drives *how much* demand GEGIS expects in that SSP future (e.g. 2030).
 
@@ -91,16 +91,16 @@ load_options:
 ```
 
 !!! note "Why `2030`, not `2020`?"
-    GEGIS does **not** ship a 2020 pathway folder. Under `data/ssp2-2.6/` the available `prediction_year` values are **2030, 2040, 2050, and 2100** — future SSP scenario years, not historical calendar years.
+    GEGIS does **not** ship a 2020 pathway folder. Under `data/ssp2-2.6/` the available `prediction_year` values are **2030, 2040, 2050, and 2100** which are future SSP scenario years, not historical calendar years.
 
     We keep **`prediction_year: 2030`** because it is the PyPSA-Earth default, matches `planning_horizons: [2030]` in `config.default.yaml`, and is the folder included in the standard databundle. That is why the Part 1 baseline was already near **107 TWh** without any tuning.
 
     We still validate against **2020** statistics via **`scale`** (Step 3), not by changing these years. DemandCast can use **`weather_year: 2020`**, but only if you also move **`snapshots` `start` / `end`** to 2020 — see below.
 
 !!! tip
-    Validating against **2020** statistics does not mean setting `weather_year: 2020` or `prediction_year: 2020` under GEGIS — GEGIS offers neither. Keep `weather_year: 2013` and `prediction_year: 2030`, then adjust the **annual total** with `scale` (next step). If you change GEGIS `weather_year` to 2011 or 2018, update `snapshots` `start` / `end` to that same calendar year.
+    Validating against **2020** statistics does not mean setting `weather_year: 2020` or `prediction_year: 2020` under GEGIS as it offers neither of those. Keep `weather_year: 2013` and `prediction_year: 2030`, then adjust the **annual total** with `scale` (next step). If you change GEGIS `weather_year` to 2011 or 2018, update `snapshots` `start` / `end` to that same calendar year.
 
-If you experiment with **DemandCast** (`source: demcast`), set `weather_year` to the **calendar year you simulate** — the same year as `snapshots` `start` / `end`. The parquet holds 2000–2024, but `build_demand_profiles` keeps only rows inside the snapshot window; a mismatch (e.g. `weather_year: 2020` with default 2013 snapshots) produces an **empty** `demand_profiles.csv`.
+If you experiment with **DemandCast** (`source: demcast`), set `weather_year` to the **calendar year you simulate** which is the same year as `snapshots` `start` / `end`. The parquet holds 2000–2024, but `build_demand_profiles` keeps only rows inside the snapshot window; a mismatch (e.g. `weather_year: 2020` with default 2013 snapshots) produces an **empty** `demand_profiles.csv`.
 
 ---
 
@@ -115,11 +115,11 @@ You can pass `scale` in **two forms**:
 | Form | When to use | Example |
 |---|---|---|
 | **Single float** | One country in `countries` (this tutorial) | `scale: 1.005` |
-| **Per-country dictionary** | Multi-country run — different multiplier per country | `scale: { DEFAULT: 1.0, KZ: 1.005 }` |
+| **Per-country dictionary** | Multi-country run, different multipliers per country | `scale: { DEFAULT: 1.0, KZ: 1.005 }` |
 
 With the dictionary form, each key is an ISO country code. **`DEFAULT`** is the fallback multiplier for any country in `countries` that does not have its own entry; if you omit it, PyPSA-Earth uses `1.0`.
 
-**1. Pick target and baseline** — both from [Part 2](2-analyze-results.md):
+**1. Pick target and baseline** as explained in [Part 2](2-analyze-results.md):
 
 | Role | Source | TWh |
 |---|---|---|
@@ -129,7 +129,7 @@ With the dictionary form, each key is an ISO country code. **`DEFAULT`** is the 
 Other targets: [EIA](https://www.eia.gov/international/data/country/KAZ) 103.4 TWh, [Ember](https://ember-climate.org/data/data-explorer/) 107.9 TWh.
 
 !!! note "Where does the baseline come from?"
-    The GEGIS input file (`data/ssp2-2.6/2030/era5_2013/Asia.csv`) contains about **108.0 TWh** for Kazakhstan. After simplification, load on electrically isolated sub-networks is dropped from the main grid, leaving about **106.8 TWh** in the solved network from Part 2 — a gap of roughly **1.2 TWh**. The `scale` factor in this step absorbs that loss together with any GEGIS-vs-actual discrepancy in one multiplier. Later in this series, when you improve network topology to reconnect isolated regions, that topology gap largely disappears and `scale` mainly corrects the dataset-vs-statistics difference.
+    The GEGIS input file (`data/ssp2-2.6/2030/era5_2013/Asia.csv`) contains about **108.0 TWh** for Kazakhstan. After simplification, load on electrically isolated sub-networks is dropped from the main grid, leaving about **106.8 TWh** in the solved network from Part 2 with a gap of roughly **1.2 TWh**. The `scale` factor in this step absorbs that loss together with any GEGIS-vs-actual discrepancy in one multiplier. Later in this series, when you improve network topology to reconnect isolated regions, that topology gap largely disappears and `scale` mainly corrects the dataset-vs-statistics difference.
 
 **2. Compute the multiplier:**
 
@@ -184,7 +184,7 @@ When the run finishes, the updated solved network overwrites the same file you a
 results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
 ```
 
-**Expected runtime:** much faster than Part 1 — on the order of **7-10 minutes** with HiGHS, because most upstream rules are skipped.
+**Expected runtime:** much faster than Part 1, on the order of **7-10 minutes** with HiGHS, because most upstream rules are skipped.
 
 ---
 
@@ -207,7 +207,7 @@ Expected output:
 Total annual demand: 107.3 TWh
 ```
 
-The hourly profile shape is unchanged from Part 2 — only the annual total moved.
+The hourly profile shape is unchanged from Part 2, only the annual total moved.
 
 ---
 
@@ -219,6 +219,5 @@ The hourly profile shape is unchanged from Part 2 — only the annual total move
 | 2 | `load_options.weather_year` | `2013` | Hourly shape (match simulation year) |
 | 2 | `load_options.prediction_year` | `2030` | GEGIS SSP level (no 2020 folder) |
 | 3 | `load_options.scale` | `1.005` or `{ DEFAULT: 1.0, KZ: 1.005 }` | Match 2020 KEGOC total (float for single country; dict for multi-country) |
-| 4 | `enable.retrieve_databundle` / `enable.retrieve_cutout` | `false` | Skip re-downloading cached data from Part 1 |
 
-Demand is now anchored to **2020** consumption statistics. Generation and installed capacity are calibrated in **[Part 4](4-generation-data.md)** — lock the 2020 fleet, filter powerplantmatching, and compare installed capacities to the same validation tables.
+Demand is now anchored to **2020** consumption statistics. Generation and installed capacity are calibrated in **[Part 4](4-generation-data.md)** locking the 2020 fleet, filter powerplantmatching, and compare installed capacities to the same validation tables.

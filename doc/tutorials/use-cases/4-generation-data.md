@@ -13,7 +13,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 In [Part 2](2-analyze-results.md) the **installed capacity** table showed a large gap for solar and wind: the model reported **~20 GW solar** and **~6 GW wind** against **~1 GW** each in 2020 statistics. Coal and gas were closer to the national report by KEGOC, but still imperfect.
 
-PyPSA-Earth loads the existing fleet from **[powerplantmatching](https://github.com/FRESNA/powerplantmatching)** — the same global database Part 2 already reflected for coal and gas. Solar and wind farms are in there too. What inflated the baseline was not missing data, but default settings that **add** IRENA capacity on top and **allow the optimiser to build more** (IRENA year **2023**, renewables in `extendable_carriers`).
+PyPSA-Earth loads the existing fleet from **[powerplantmatching](https://github.com/FRESNA/powerplantmatching)**, the same global database Part 2 already reflected for coal and gas. Solar and wind farms are in there too. What inflated the baseline was not missing data, but default settings that **add** IRENA capacity on top and **allow the optimiser to build more** (IRENA year **2023**, renewables in `extendable_carriers`).
 
 In this tutorial we lock the model to the **2020 fleet**:
 
@@ -22,10 +22,10 @@ In this tutorial we lock the model to the **2020 fleet**:
 3. Turn off new build and set IRENA totals for **2020** (`extendable_carriers`, `estimate_renewable_capacities`).
 4. Optionally **replace** powerplantmatching with a custom plant list where the global database is incomplete (often gas and smaller thermal units).
 
-After re-running, compare installed capacity against the same Part 2 validation tables. With no extendable carriers, **`p_nom`** and **`p_nom_opt`** should match — unlike the Part 2 baseline, where optimal capacity (~20 GW solar, ~6 GW wind) was far above installed (~1–2 GW each).
+After re-running, compare installed capacity against the same Part 2 validation tables. With no extendable carriers, **`p_nom`** and **`p_nom_opt`** should match, unlike the Part 2 baseline, where optimal capacity (~20 GW solar, ~6 GW wind) was far above installed (~1–2 GW each).
 
 !!! note "Part 2 vs Part 4"
-    Part 2's validation table used **`p_nom_opt`**, which counted **new build on top of** existing solar and wind. Those already had **`p_nom` ~1–2 GW** from powerplantmatching and IRENA top-up — not zero — but defaults also marked them **extendable**, so the optimiser added much more. After locking the fleet here, installed and optimal capacity should match.
+    Part 2's validation table used **`p_nom_opt`**, which counted **new build on top of** existing solar and wind. Those already had **`p_nom` ~1–2 GW** from powerplantmatching and IRENA top-up, not zero. However, defaults also marked them **extendable**, so the optimiser added much more. After locking the fleet here, installed and optimal capacity should match.
 
 This series stays in the **electricity workflow** (`solve_all_networks`). All settings below live under **`electricity`** in the config.
 
@@ -33,7 +33,7 @@ This series stays in the **electricity workflow** (`solve_all_networks`). All se
 
 ## Where generation enters the workflow
 
-Generation is assembled in two Snakemake rules — both before the network is simplified or solved. **`build_powerplants`** pulls data from powerplantmatching (and optionally your own CSV), then writes one row per plant to disk:
+Generation is assembled in two Snakemake rules, both before the network is simplified or solved. **`build_powerplants`** pulls data from powerplantmatching (and optionally your own CSV), then writes one row per plant to disk:
 
 ```
 build_powerplants  →  resources/KZ/powerplants.csv   ← one row per plant
@@ -52,7 +52,7 @@ add_electricity    →  networks/KZ/elec.nc
 
 ## Step 1: Inspect the plant list
 
-The rule **`build_powerplants`** writes **`resources/KZ/powerplants.csv`** — one row per plant. A few lines from a Part 1 run (columns trimmed for readability):
+The rule **`build_powerplants`** writes **`resources/KZ/powerplants.csv`**, one row per plant. A few lines from a Part 1 run (columns trimmed for readability):
 
 ```csv
 Name,Fueltype,Technology,Capacity,DateIn,DateOut,Country
@@ -75,7 +75,7 @@ The full file has more columns (`lat`, `lon`, `bus`, …) and on the order of **
 | Wind | 1.21 |
 | Oil | 1.14 |
 
-Solar and wind are already listed — not only conventional plants. Your file should look similar after Part 1 simulation; open `resources/KZ/powerplants.csv` locally if you want the complete list.
+Solar and wind are already listed, not only conventional plants. Your file should look similar after Part 1 simulation; open `resources/KZ/powerplants.csv` locally if you want the complete list.
 
 Compare with the **2020 installed capacity** table in [Part 2](2-analyze-results.md). Coal and hydro are roughly the right order of magnitude; **gas** is often under-represented in global databases. The Part 2 **model** solar/wind totals were much higher than KEGOC because of **IRENA gap-fill and extendable build**, not because powerplantmatching had no renewables.
 
@@ -97,14 +97,14 @@ An empty `Generator` list under `extendable_carriers` locks the **2020** fleet: 
 
 ## Step 3: Filter plants for 2020
 
-`powerplants_filter` is a [pandas.query](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html) expression applied in **`build_powerplants`** after loading powerplantmatching data. It runs on **all fuel types** — coal, gas, hydro, solar, and wind.
+`powerplants_filter` is a [pandas.query](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html) expression applied in **`build_powerplants`** after loading powerplantmatching data. It runs on **all fuel types**: coal, gas, hydro, solar, and wind.
 
 Keep plants that were **operating in 2020**:
 
 - **`DateIn <= 2020`** — commissioned on or before 2020 (or unknown commission date).
 - **`DateOut >= 2020`** — still operating in 2020 (or unknown decommission date).
 
-The `DateOut != DateOut` / `DateIn != DateIn` clauses treat **missing** dates (NaN) as unknown — those plants are kept.
+The `DateOut != DateOut` / `DateIn != DateIn` clauses treat **missing** dates (NaN) as unknown, and those plants are kept.
 
 Add to `config.KZ.yaml`:
 
@@ -114,7 +114,7 @@ electricity:
 ```
 
 !!! tip
-    After you add this filter and re-run (Step 6), open `logs/KZ/build_powerplants.log` — it shows how many plants survived the filter. Confirm rows were dropped as expected.
+    After you add this filter and re-run (Step 6), open `logs/KZ/build_powerplants.log`. It shows how many plants survived the filter. Confirm rows were dropped as expected.
 
 ---
 
@@ -146,8 +146,8 @@ electricity:
     year: 2020
 ```
 
-- **`stats: irena`** — top up solar and wind to IRENASTAT national installed capacity.
-- **`year: 2020`** — match the validation year.
+- **`stats: irena`** top up solar and wind to IRENASTAT national installed capacity.
+- **`year: 2020`** match the validation year.
 
 ---
 
@@ -161,7 +161,7 @@ Merge the generation settings with your Part 3 demand block (`load_options`, `en
 
 Or [download the snippet](snippets/config.KZ.generation.yaml){: download="config.KZ.yaml"}.
 
-Your file should contain **both** `load_options` (Part 3) and `electricity` (Part 4). Snakemake merges this file on top of `config.default.yaml` — you only need the keys you are overriding.
+Your file should contain **both** `load_options` (Part 3) and `electricity` (Part 4). Snakemake merges this file on top of `config.default.yaml`, you only need the keys you are overriding.
 
 ---
 
@@ -179,7 +179,7 @@ Snakemake rebuilds `powerplants.csv`, re-runs `add_electricity`, and re-solves. 
 
 ## Step 7: Verify installed capacity
 
-Reopen the notebook from Part 2 and reload the solved network. Use the same **`statistics()`** call as in [Part 2](2-analyze-results.md) — with a locked fleet, **Installed** and **Optimal** capacity should match for generators:
+Reopen the notebook from Part 2 and reload the solved network. Use the same **`statistics()`** call as in [Part 2](2-analyze-results.md) with a locked fleet, **Installed** and **Optimal** capacity should match for generators:
 
 ```python
 import pypsa
@@ -191,7 +191,7 @@ caps = caps.drop(["Line", "Load"], errors="ignore")  # dropping line and load va
 print(caps.sort_values(ascending=False).to_string())
 ```
 
-After Part 4 you should see something like (all values in **GW** — from the `/ 1e3` above):
+After Part 4 you should see something like (all values in **GW** from the `/ 1e3` above):
 
 ```
 Generator    Load shedding         17.70
@@ -204,7 +204,7 @@ Generator    Oil                    1.14
              Run of River           0.13
 ```
 
-Ignore **Load shedding** and **AC** line capacity — they are not part of the generation fleet. **Solar (~0.9 GW)** and **onshore wind (~0.4 GW)** should now sit near KEGOC/IRENA 2020 levels, not the ~20 / ~6 GW from the Part 2 baseline.
+Ignore **Load shedding** and **AC** line capacity as they are not part of the generation fleet. **Solar (~0.9 GW)** and **onshore wind (~0.4 GW)** should now sit near KEGOC/IRENA 2020 levels, not the ~20 / ~6 GW from the Part 2 baseline.
 
 **Comparison vs. KEGOC 2020 (GW):**
 
@@ -216,11 +216,11 @@ Ignore **Load shedding** and **AC** line capacity — they are not part of the g
 | Solar | 0.96 | 20.06 | 0.91 |
 | Wind | 0.51 | 6.19 | 0.43 |
 
-Solar and wind capacities are now aligned with statistics — that was the main gap. **Coal and gas** installed capacity are still below KEGOC; powerplantmatching under-reports gas in particular. The **Advanced** section below uses the custom fleet to replace powerplantmatching (or merge extra plants).
+Solar and wind capacities are now aligned with statistics while that was the main gap previously. **Coal and gas** installed capacity are still below KEGOC; powerplantmatching under-reports gas in particular. The **Advanced** section below uses the custom fleet to replace powerplantmatching (or merge extra plants).
 
 ### Generation mix (still approximate)
 
-Locking **capacities** does not fix **dispatch**. An optional check — same `statistics()` call, **Supply** column in **TWh**:
+Locking **capacities** does not fix **dispatch**. An optional check is to use same `statistics()` call, **Supply** column in **TWh**:
 
 ```python
 supply = n.statistics()["Supply"].dropna() / 1e6  # TWh
@@ -241,7 +241,7 @@ Generator    Combined-Cycle Gas      2.40
              Oil                     0.00
 ```
 
-**Solar (~1.2 TWh)** and **wind (~1.3 TWh)** are now in the right ballpark vs KEGOC 2020 generation (~1.3 / ~1.1 TWh). **Coal (~91 TWh)** is too high and **gas (~2.4 TWh)** too low — the model still lacks gas capacity and over-relies on coal. **Hydro (~3.6 TWh)** remains under-generated. Non-zero **load shedding (~8 TWh)** means the solve still struggles to meet demand in some hours.
+**Solar (~1.2 TWh)** and **wind (~1.3 TWh)** are now in the right ballpark vs KEGOC 2020 generation (~1.3 / ~1.1 TWh). **Coal (~91 TWh)** is too high and **gas (~2.4 TWh)** too low: the model still lacks gas capacity and over-relies on coal. **Hydro (~3.6 TWh)** remains under-generated. Non-zero **load shedding (~8 TWh)** means the solve still struggles to meet demand in some hours.
 
 Improving the **generation** table in [Part 2](2-analyze-results.md) is a follow-up step (custom plants, hydro inflow, marginal costs, and so on).
 
@@ -251,7 +251,7 @@ Improving the **generation** table in [Part 2](2-analyze-results.md) is a follow
 
 [Step 7](#step-7-verify-installed-capacity) left **gas** short: **~2.5 GW** CCGT installed and **~2.4 TWh** annual generation vs **~6 GW** gas in KEGOC's 2020 statistics, and almost no **OCGT** peakers in powerplantmatching. For Kazakhstan, the global database misses many industrial gas turbines and smaller thermal units that show up in national statistics.
 
-This tutorial ships an adapted copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository — **120 rows** in powerplantmatching format — as a **full Kazakhstan fleet** instead of patching gaps by hand.
+This tutorial ships an adapted copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository and contains **120 rows** in powerplantmatching format as a **full Kazakhstan fleet** instead of patching gaps by hand.
 
 ### Enable custom powerplants
 
@@ -264,9 +264,9 @@ electricity:
 
 | Value | Behaviour |
 |---|---|
-| **`false`** | powerplantmatching only (Steps 1–7) — the CSV is ignored |
+| **`false`** | powerplantmatching only (Steps 1–7), the CSV is ignored |
 | **`merge`** | Append custom rows to powerplantmatching |
-| **`replace`** | Use only your CSV — **recommended** for the fleet below |
+| **`replace`** | Use only your CSV, **recommended** for the fleet below |
 
 ### What is in the file
 
@@ -283,7 +283,7 @@ Installed capacity in the custom list (MW):
 | Solar | 822 |
 | Wind | 649 |
 
-The main gain over powerplantmatching is **OCGT** (**~1.6 GW**) and fuller **CCGT** coverage. With **`replace`**, this list is the sole plant source — no double-counting against overlapping powerplantmatching rows.
+The main gain over powerplantmatching is **OCGT** (**~1.6 GW**) and fuller **CCGT** coverage. With **`replace`**, this list is the sole plant source. So, no double-counting happens against overlapping powerplantmatching rows.
 
 Example rows (industrial peakers absent from powerplantmatching):
 
@@ -294,7 +294,7 @@ ZHGTS 56 JSC CNPC-Aktobe,OCGT,OCGT,PP,KZ,118,1999,2149,48.385282,57.434115
 Aktobe CHP,CCGT,CCGT,CHP,KZ,88,1962,2112,50.33618,57.14072
 ```
 
-The same **`powerplants_filter`** from Step 3 still applies — plants with `DateIn > 2020` are dropped.
+The same **`powerplants_filter`** from Step 3 still applies which leads to plants with `DateIn > 2020` are dropped.
 
 ### Re-run and verify
 
@@ -317,7 +317,7 @@ Generator    Open-Cycle Gas         1.60
              Onshore Wind           0.46
 ```
 
-**CCGT (~3.6 GW)** and **OCGT (~1.6 GW)** together reach **~5.2 GW** — near KEGOC **~6 GW** gas. **Coal (~13.2 GW)** matches KEGOC **~13.4 GW**. **Hydro (~2.7 GW)** is modeled as reservoir only (no run-of-river rows in the custom list).
+**CCGT (~3.6 GW)** and **OCGT (~1.6 GW)** together reach **~5.2 GW** which is near KEGOC **~6 GW** gas. **Coal (~13.2 GW)** matches KEGOC **~13.4 GW**. **Hydro (~2.7 GW)** is modeled as reservoir only (no run-of-river rows in the custom list).
 
 Annual **Supply** (TWh) is still far from KEGOC 2020:
 
@@ -333,19 +333,19 @@ Generator    Onshore Wind            1.34
 
 **Solar (~1.0 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~89 TWh)** is far too high and **gas (~0.6 TWh from CCGT; OCGT idle)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~7.1 TWh from reservoirs)** is closer to KEGOC (~9.5 TWh) than the Step 7 mix, but still under-generated.
 
-**Load shedding (~7.7 TWh)** is still high — roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
+**Load shedding (~7.7 TWh)** is still high and roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
 
-- **Network topology** — a bus may be poorly connected (missing line or no path from local generation to load).
-- **Transmission limits** — line capacities may block power from reaching demand in some hours or regions.
-- **Spatial mismatch** — demand and generation may be on different **10-cluster** buses; national totals can look fine while some regions are short.
-- **Dispatch economics** — cheap coal is used first; gas, hydro, and renewables may not fill remaining gaps.
+- **Network topology**: a bus may be poorly connected (missing line or no path from local generation to load).
+- **Transmission limits**: line capacities may block power from reaching demand in some hours or regions.
+- **Spatial mismatch**: demand and generation may be on different **10-cluster** buses; national totals can look fine while some regions are short.
+- **Dispatch economics**: cheap coal is used first; gas, hydro, and renewables may not fill remaining gaps.
 
 Capacity alignment does not automatically fix the **generation mix** either. The optimiser still dispatches the cheapest available energy. With default settings that often means:
 
-- **No CO₂ or fuel constraints** — nothing pushes the model away from cheap coal.
-- **Marginal costs** — coal is typically cheaper than gas in the default cost tables, so CCGT/OCGT sit idle even when capacity is there.
-- **Spatial resolution** — how load and plants are distributed across clusters may not match real geography.
-- **Transmission** — line limits may be loose enough that northern coal serves most of the country, or tight enough to cause regional shortfalls.
+- **No CO₂ or fuel constraints**: nothing pushes the model away from cheap coal.
+- **Marginal costs**: coal is typically cheaper than gas in the default cost tables, so CCGT/OCGT sit idle even when capacity is there.
+- **Spatial resolution**: how load and plants are distributed across clusters may not match real geography.
+- **Transmission**: line limits may be loose enough that northern coal serves most of the country, or tight enough to cause regional shortfalls.
 
 **Comparison vs. KEGOC 2020 (TWh):**
 
@@ -357,7 +357,7 @@ Capacity alignment does not automatically fix the **generation mix** either. The
 | Solar | 1.25 | 25.40 | 0.99 |
 | Wind | 1.09 | 14.81 | 1.34 |
 
-Solar and wind generation move close to KEGOC; coal stays too high and gas too low — capacity is better, but dispatch is not yet calibrated.
+Solar and wind generation move close to KEGOC; coal stays too high and gas too low. The capacity match is better, but dispatch is not yet calibrated.
 
 ---
 
@@ -366,8 +366,8 @@ Solar and wind generation move close to KEGOC; coal stays too high and gas too l
 | Step | Config key | Role |
 |---|---|---|
 | 3 | `electricity.powerplants_filter` | Keep plants operating in **2020** |
-| 4a | `electricity.extendable_carriers` | Empty `Generator` — no new solar/wind/gas build |
+| 4a | `electricity.extendable_carriers` | Empty `Generator` means no new solar/wind/gas build |
 | 4b | `electricity.estimate_renewable_capacities` | IRENA **2020** solar/wind totals |
 | Adv. | `electricity.custom_powerplants: replace` | Use **`data/custom_powerplants.csv`** as the full fleet |
 
-Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. The fleet matches KEGOC, yet dispatch stays coal-heavy and the model still sheds **~8 TWh** of load. **[Part 5](5-adapting-costs.md)** tackles dispatch economics — why gas stays idle despite capacity — and **[Part 6](6-network-topology.md)** then diagnoses and fixes the electrically isolated sub-networks behind the load shedding.
+Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. The fleet matches KEGOC, yet dispatch stays coal-heavy and the model still sheds **~8 TWh** of load. **[Part 5](5-adapting-costs.md)** tackles dispatch economics (why gas stays idle despite capacity), and **[Part 6](6-network-topology.md)** then diagnoses and fixes the electrically isolated sub-networks behind the load shedding.

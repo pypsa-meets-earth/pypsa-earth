@@ -37,13 +37,13 @@ nav:
     - Validation: user-guide/customization/validation.md
     - Running Models: user-guide/customization/running-models.md
   - Use Cases:
-    - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
-    - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
-    - Part 3 — Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
-    - Part 4 — Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
-    - Part 5 — Adapt Fuel and Generation Costs: tutorials/use-cases/5-adapting-costs.md
-    - Part 6 — Fix Isolated Nodes and Load Shedding: tutorials/use-cases/6-network-topology.md
-    - Part 7 — Improve the Transmission Network: tutorials/use-cases/7-transmission-network.md
+    - "Part 1: Build a Baseline Model": tutorials/use-cases/1-baseline-model.md
+    - "Part 2: Analyse Results": tutorials/use-cases/2-analyze-results.md
+    - "Part 3: Calibrate Electricity Demand": tutorials/use-cases/3-demand-data.md
+    - "Part 4: Calibrate the Generation Fleet": tutorials/use-cases/4-generation-data.md
+    - "Part 5: Adapt Fuel and Generation Costs": tutorials/use-cases/5-adapting-costs.md
+    - "Part 6: Fix Isolated Nodes and Load Shedding": tutorials/use-cases/6-network-topology.md
+    - "Part 7: Improve the Transmission Network": tutorials/use-cases/7-transmission-network.md
   - Examples: tutorials/examples.md
 
 - User Guide:
@@ -160,7 +160,7 @@ extra_javascript:
 
 
 markdown_extensions:
-  # Standard Extensions
+# Standard Extensions
 - admonition
 - pymdownx.details
 - pymdownx.superfences:
@@ -175,7 +175,7 @@ markdown_extensions:
     toc_depth: 4
 - footnotes
 
-  # PyMdown Extensions
+# PyMdown Extensions
 - pymdownx.arithmatex:
     generic: true
 - pymdownx.tabbed:
