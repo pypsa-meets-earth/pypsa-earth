@@ -220,7 +220,7 @@ Solar and wind capacities are now aligned with statistics while that was the mai
 
 ### Generation mix (still approximate)
 
-Locking **capacities** does not fix **dispatch**. An optional check — same `statistics()` call, **Supply** column in **TWh**:
+Locking **capacities** does not fix **dispatch**. An optional check is to use same `statistics()` call, **Supply** column in **TWh**:
 
 ```python
 supply = n.statistics()["Supply"].dropna() / 1e6  # TWh
@@ -241,7 +241,7 @@ Generator    Combined-Cycle Gas      2.40
              Oil                     0.00
 ```
 
-**Solar (~1.2 TWh)** and **wind (~1.3 TWh)** are now in the right ballpark vs KEGOC 2020 generation (~1.3 / ~1.1 TWh). **Coal (~91 TWh)** is too high and **gas (~2.4 TWh)** too low — the model still lacks gas capacity and over-relies on coal. **Hydro (~3.6 TWh)** remains under-generated. Non-zero **load shedding (~8 TWh)** means the solve still struggles to meet demand in some hours.
+**Solar (~1.2 TWh)** and **wind (~1.3 TWh)** are now in the right ballpark vs KEGOC 2020 generation (~1.3 / ~1.1 TWh). **Coal (~91 TWh)** is too high and **gas (~2.4 TWh)** too low: the model still lacks gas capacity and over-relies on coal. **Hydro (~3.6 TWh)** remains under-generated. Non-zero **load shedding (~8 TWh)** means the solve still struggles to meet demand in some hours.
 
 Improving the **generation** table in [Part 2](2-analyze-results.md) is a follow-up step (custom plants, hydro inflow, marginal costs, and so on).
 
@@ -251,7 +251,7 @@ Improving the **generation** table in [Part 2](2-analyze-results.md) is a follow
 
 [Step 7](#step-7-verify-installed-capacity) left **gas** short: **~2.5 GW** CCGT installed and **~2.4 TWh** annual generation vs **~6 GW** gas in KEGOC's 2020 statistics, and almost no **OCGT** peakers in powerplantmatching. For Kazakhstan, the global database misses many industrial gas turbines and smaller thermal units that show up in national statistics.
 
-This tutorial ships an adapted copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository — **120 rows** in powerplantmatching format — as a **full Kazakhstan fleet** instead of patching gaps by hand.
+This tutorial ships an adapted copy of [`custom_powerplants.csv`](https://github.com/pypsa-meets-earth/pypsa-kz-data/blob/main/data/custom_powerplants.csv) from the [**pypsa-kz-data**](https://github.com/pypsa-meets-earth/pypsa-kz-data) repository and contains **120 rows** in powerplantmatching format as a **full Kazakhstan fleet** instead of patching gaps by hand.
 
 ### Enable custom powerplants
 
@@ -264,9 +264,9 @@ electricity:
 
 | Value | Behaviour |
 |---|---|
-| **`false`** | powerplantmatching only (Steps 1–7) — the CSV is ignored |
+| **`false`** | powerplantmatching only (Steps 1–7), the CSV is ignored |
 | **`merge`** | Append custom rows to powerplantmatching |
-| **`replace`** | Use only your CSV — **recommended** for the fleet below |
+| **`replace`** | Use only your CSV, **recommended** for the fleet below |
 
 ### What is in the file
 
@@ -283,7 +283,7 @@ Installed capacity in the custom list (MW):
 | Solar | 822 |
 | Wind | 649 |
 
-The main gain over powerplantmatching is **OCGT** (**~1.6 GW**) and fuller **CCGT** coverage. With **`replace`**, this list is the sole plant source — no double-counting against overlapping powerplantmatching rows.
+The main gain over powerplantmatching is **OCGT** (**~1.6 GW**) and fuller **CCGT** coverage. With **`replace`**, this list is the sole plant source. So, no double-counting happens against overlapping powerplantmatching rows.
 
 Example rows (industrial peakers absent from powerplantmatching):
 
@@ -294,7 +294,7 @@ ZHGTS 56 JSC CNPC-Aktobe,OCGT,OCGT,PP,KZ,118,1999,2149,48.385282,57.434115
 Aktobe CHP,CCGT,CCGT,CHP,KZ,88,1962,2112,50.33618,57.14072
 ```
 
-The same **`powerplants_filter`** from Step 3 still applies — plants with `DateIn > 2020` are dropped.
+The same **`powerplants_filter`** from Step 3 still applies which leads to plants with `DateIn > 2020` are dropped.
 
 ### Re-run and verify
 
@@ -317,7 +317,7 @@ Generator    Open-Cycle Gas         1.60
              Onshore Wind           0.46
 ```
 
-**CCGT (~3.6 GW)** and **OCGT (~1.6 GW)** together reach **~5.2 GW** — near KEGOC **~6 GW** gas. **Coal (~13.2 GW)** matches KEGOC **~13.4 GW**. **Hydro (~2.7 GW)** is modeled as reservoir only (no run-of-river rows in the custom list).
+**CCGT (~3.6 GW)** and **OCGT (~1.6 GW)** together reach **~5.2 GW** which is near KEGOC **~6 GW** gas. **Coal (~13.2 GW)** matches KEGOC **~13.4 GW**. **Hydro (~2.7 GW)** is modeled as reservoir only (no run-of-river rows in the custom list).
 
 Annual **Supply** (TWh) is still far from KEGOC 2020:
 
@@ -333,19 +333,19 @@ Generator    Onshore Wind            1.34
 
 **Solar (~1.0 TWh)** and **wind (~1.3 TWh)** look reasonable vs KEGOC (~1.3 / ~1.1 TWh). **Coal (~89 TWh)** is far too high and **gas (~0.6 TWh from CCGT; OCGT idle)** far too low vs KEGOC (~75 / ~22 TWh). **Hydro (~7.1 TWh from reservoirs)** is closer to KEGOC (~9.5 TWh) than the Step 7 mix, but still under-generated.
 
-**Load shedding (~7.7 TWh)** is still high — roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
+**Load shedding (~7.7 TWh)** is still high and roughly unchanged from Step 7 even after capacity improves. Several factors may contribute, alone or together:
 
-- **Network topology** — a bus may be poorly connected (missing line or no path from local generation to load).
-- **Transmission limits** — line capacities may block power from reaching demand in some hours or regions.
-- **Spatial mismatch** — demand and generation may be on different **10-cluster** buses; national totals can look fine while some regions are short.
-- **Dispatch economics** — cheap coal is used first; gas, hydro, and renewables may not fill remaining gaps.
+- **Network topology**: a bus may be poorly connected (missing line or no path from local generation to load).
+- **Transmission limits**: line capacities may block power from reaching demand in some hours or regions.
+- **Spatial mismatch**: demand and generation may be on different **10-cluster** buses; national totals can look fine while some regions are short.
+- **Dispatch economics**: cheap coal is used first; gas, hydro, and renewables may not fill remaining gaps.
 
 Capacity alignment does not automatically fix the **generation mix** either. The optimiser still dispatches the cheapest available energy. With default settings that often means:
 
-- **No CO₂ or fuel constraints** — nothing pushes the model away from cheap coal.
-- **Marginal costs** — coal is typically cheaper than gas in the default cost tables, so CCGT/OCGT sit idle even when capacity is there.
-- **Spatial resolution** — how load and plants are distributed across clusters may not match real geography.
-- **Transmission** — line limits may be loose enough that northern coal serves most of the country, or tight enough to cause regional shortfalls.
+- **No CO₂ or fuel constraints**: nothing pushes the model away from cheap coal.
+- **Marginal costs**: coal is typically cheaper than gas in the default cost tables, so CCGT/OCGT sit idle even when capacity is there.
+- **Spatial resolution**: how load and plants are distributed across clusters may not match real geography.
+- **Transmission**: line limits may be loose enough that northern coal serves most of the country, or tight enough to cause regional shortfalls.
 
 **Comparison vs. KEGOC 2020 (TWh):**
 
