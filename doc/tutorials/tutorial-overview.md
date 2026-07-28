@@ -13,7 +13,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 <div class="grid cards tutorial-cards" markdown>
 
--   **How to build and validate PyPSA-Earth model for a new country ?**
+-   **Want to build a PyPSA-Earth model for a new country?**
+    Learning Path
 
     ---
 
@@ -29,7 +30,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
     *\*Source: [NordNordWest](https://commons.wikimedia.org/wiki/User:NordNordWest) et al., [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kazakhstan_topographic_location_map_conic.png), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0).*
 
--   **Generic tutorials**
+-   **Want to explore generic tutorial examples?**
+    Reference Guide
 
     ---
 
