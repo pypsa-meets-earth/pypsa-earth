@@ -64,11 +64,7 @@ There are multiple ways to get involved and learn more about our work:
 
 ### Tutorials
 
-- [Electricity Model](tutorials/electricity-model.md) to build an electricity-only model
-- [Sector-Coupled Model](tutorials/sector-coupled-model.md) to create a multi-sector model
-- [Model Customization](user-guide/model-customization.md) to general Modeling Guidelines
-- [Use Cases](tutorials/use-cases/1-baseline-model.md) for End-to-end country study: baseline, analysis, demand and generation calibration
-- [Examples](tutorials/examples.md) containing Jupyter notebooks and use cases
+- [Tutorials](tutorials/tutorial-overview.md) - Check out tutorials on how to use PyPSA-Earth
 
 ### User Guide
 
