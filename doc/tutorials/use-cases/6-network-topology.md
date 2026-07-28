@@ -15,7 +15,7 @@ By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capa
 
 In this tutorial we diagnose the cause, one or more **electrically isolated sub-networks**, and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
-Everything in this part lives under **`cluster_options.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the Part 5 cost overrides.
+Everything in this part lives under **`clustering.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the Part 5 cost overrides.
 
 ---
 
@@ -110,7 +110,7 @@ The index is the **`sub_network`** id from Step 1 (the red bus). **~7.7 TWh** he
 
 ## Step 3: The three isolation thresholds
 
-Simplification has three settings for isolated sub-networks under **`cluster_options.simplify_network`**:
+Simplification has three settings for isolated sub-networks under **`clustering.simplify_network`**:
 
 | Parameter | Unit | What it does |
 |---|---|---|
@@ -161,17 +161,17 @@ s_threshold_fetch_isolated: 0.05
 
 ## Step 5: Add the settings to `config.KZ.yaml`
 
-Add a `cluster_options` block:
+Add a `clustering` block:
 
 ```yaml
-cluster_options:
+clustering:
   simplify_network:
     p_threshold_drop_isolated: false  # do not delete low-load islands
     p_threshold_merge_isolated: false # do not stack islands on one stranded bus
     s_threshold_fetch_isolated: 0.05  # fetch is off by default; reconnect islands < 5% of national load
 ```
 
-You can [download the file](snippets/config.KZ.topology.yaml){: download="config.KZ.yaml"} and merge it with your existing `config.KZ.yaml`, or add the `cluster_options` block by hand.
+You can [download the file](snippets/config.KZ.topology.yaml){: download="config.KZ.yaml"} and merge it with your existing `config.KZ.yaml`, or add the `clustering` block by hand.
 
 ---
 
@@ -208,7 +208,7 @@ Total annual demand: 108.54 TWh
 Load shedding: 0.00 TWh
 ```
 
-**Load shedding at 0** confirms the island fix. **Demand above KEGOC 107.3 TWh** is expected: `fetch` puts regional load back on the main grid (Part 3's `scale` was tuned when that load was missing), and **`scale: 1.005`** still sits on top of the native GEGIS total (~108 TWh). Do **not** change **`scale`** here; [Part 7](7-transmission-network.md#step-8-final-calibration-of-scale) recalibrates once the transmission grid is settled.
+**Load shedding at 0** confirms the island fix. **Demand above KEGOC 107.3 TWh** is expected: `fetch` puts regional load back on the main grid (Part 3's `scale` was tuned when that load was missing), and **`scale: 1.005`** still sits on top of the native GEGIS total (~108 TWh). **Step 8** below recalibrates `scale` now that this total is settled.
 
 Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-results.md#installed-capacities) (same `n.statistics()` call). Compare **hydro** against the KEGOC 2020 table; they should stay aligned with the Part 4 fleet. This is a useful sanity check because `p_threshold_drop_isolated` can delete **low-load islands** before `fetch` runs, and that may remove **large hydro plants** that happen to sit on those islands.
 
@@ -218,14 +218,39 @@ Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-resu
 
 ---
 
+## Step 8: Final calibration of `scale`
+
+Part 3's **`scale: 1.005`** bundled two gaps into one multiplier: GEGIS vs KEGOC statistics, **and** demand that vanished under the old default `p_threshold_drop_isolated: 20` (which deleted whole islands, load included). Step 4 above turns `drop` off for good, so no demand can be deleted during simplification anymore, here or later. That makes this the right point to do the final recalibration: `scale` is applied to the national total *before* it is ever split across buses, so nothing in [Part 7](7-transmission-network.md)'s later transmission-network rebuild (different voltages, line types, ratings) changes this total any further.
+
+Rescale once from your Step 7 total:
+
+```python
+target_TWh = 107.34  # KEGOC 2020
+measured_TWh = 108.54  # Step 7 total
+new_scale = 1.005 * target_TWh / measured_TWh
+print(f"scale: {new_scale:.4f}")  # → 0.9939
+```
+
+```yaml
+load_options:
+  scale: 0.994
+```
+
+`1.005 × 107.34 / 108.54` gives **0.9939**, which rounds to **0.994**.
+
+Re-run the workflow if you change `scale`. Load shedding should stay at **0.00 TWh**: scaling demand down slightly does not re-isolate any buses.
+
+---
+
 ## Recap
 
 | Step | Config key | Value | Role |
 |---|---|---|---|
-| 4 | `cluster_options.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro and other plants on OSM artefacts) |
-| 4 | `cluster_options.simplify_network.p_threshold_merge_isolated` | `false` | Do not collapse islands onto one stranded bus (default 300 MW) |
-| 4 | `cluster_options.simplify_network.s_threshold_fetch_isolated` | `0.05` | Attach islands below 5% of national load to the nearest backbone bus |
+| 4 | `clustering.simplify_network.p_threshold_drop_isolated` | `false` | Do not delete low-load islands (preserves hydro and other plants on OSM artefacts) |
+| 4 | `clustering.simplify_network.p_threshold_merge_isolated` | `false` | Do not collapse islands onto one stranded bus (default 300 MW) |
+| 4 | `clustering.simplify_network.s_threshold_fetch_isolated` | `0.05` | Attach islands below 5% of national load to the nearest backbone bus |
+| 8 | `load_options.scale` | `0.994` (from `1.005` × 107.34/108.54) | **Final** match to **107.34 TWh** now that demand no longer gets dropped |
 
-Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. **`p_threshold_drop_isolated: false`** also keeps power plants on low-load islands in the model, so **installed capacity**, in particular hydro, stays aligned with the Part 4 fleet instead of being deleted during simplification. This is a **simplification-level** fix: fast and effective, but it approximates *where* that load connects.
+Load shedding caused by electrical islands is resolved: the stranded demand is now wired onto the main grid and served by national generation. **`p_threshold_drop_isolated: false`** also keeps power plants on low-load islands in the model, so **installed capacity**, in particular hydro, stays aligned with the Part 4 fleet instead of being deleted during simplification. This is a **simplification-level** fix: fast and effective, but it approximates *where* that load connects. With demand now settled, `scale: 0.994` is final; [Part 7](7-transmission-network.md) carries it forward unchanged.
 
-In **[Part 7](7-transmission-network.md)** we improve how the base transmission network is built from OSM (KZ voltage levels and line ratings) and do a **final** `scale` check once the grid is settled. Part 6 settings remain useful for any islands OSM still misses.
+In **[Part 7](7-transmission-network.md)** we improve how the base transmission network is built from OSM (KZ voltage levels and line ratings). Part 6 settings remain useful for any islands OSM still misses.

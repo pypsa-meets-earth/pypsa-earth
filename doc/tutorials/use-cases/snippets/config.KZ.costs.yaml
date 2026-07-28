@@ -35,7 +35,7 @@ electricity:
 
 costs:
   year: 2020
-  marginal_cost:            # EUR/MWh_el — sourced Kazakhstan fuel + O&M data
+  marginal_cost:            # EUR/MWh_el, sourced Kazakhstan fuel + O&M data
     coal: 16.0
     CCGT: 51.0
     OCGT: 62.0

@@ -40,7 +40,7 @@ costs:
     CCGT: 51.0
     OCGT: 62.0
 
-cluster_options:
+clustering:
   simplify_network:
     p_threshold_drop_isolated: false  # do not delete low-load islands
     p_threshold_merge_isolated: false # do not stack islands on one stranded bus
