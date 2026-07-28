@@ -11,15 +11,15 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-In [Part 2](2-analyze-results.md) we compared the baseline model against **2020** national statistics. Total electricity demand looked roughly plausible (~107 TWh), but we had not chosen that number on purpose — it came from PyPSA-Earth defaults. In this tutorial we take control of demand: where the hourly profiles come from, how to adjust them with a multiplier, and how to align the annual total with a reference year before we calibrate generation and capacities in later parts.
+In [Part 2](2-analyze-results.md) we compared the baseline model against **2020** national statistics. Total electricity demand looked roughly plausible (~107 TWh), but we had not chosen that number on purpose, it just came from PyPSA-Earth defaults. In this tutorial we take control of demand looking where the hourly profiles come from, how to adjust them with a multiplier, and how to align the annual total with a reference year before we calibrate generation and capacities in later parts.
 
-This series builds an **electricity-only (power system) model**. We do not switch on sector coupling (heat, transport, industry, hydrogen, and so on). Everything in this part lives under `load_options` in the config and the `build_demand_profiles` rule — not under `sector`.
+This series builds an **electricity-only (power system) model**. We do not switch on sector coupling (heat, transport, industry, hydrogen, and so on). Everything in this part lives under `load_options` in the config and the `build_demand_profiles` rule, not under `sector`.
 
 ---
 
 ## Where demand enters the workflow
 
-Electricity demand is not read directly from national statistics inside the optimiser. Two rules, `build_demand_profiles` and `add_electricity` , handle it — both before the network is simplified or solved:
+Electricity demand is not read directly from national statistics inside the optimiser. Two rules, `build_demand_profiles` and `add_electricity` , handle it, both before the network is simplified or solved:
 
 ```
 build_demand_profiles  →  resources/KZ/demand_profiles.csv
