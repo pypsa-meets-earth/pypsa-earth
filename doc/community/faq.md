@@ -70,10 +70,10 @@ Download the cutout manually and place it where Snakemake expects it:
     snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
     ```
 
-If the download was interrupted but no partial file remains, you can also simply **retry** the Snakemake run — a stable connection often succeeds on a second attempt.
+If the download was interrupted but no partial file remains, you can also simply **retry** the Snakemake run. A stable connection often succeeds on a second attempt.
 
 !!! note
-    Do not set both `retrieve_cutout: true` and `build_cutout: true` while a cutout file already exists — Snakemake will refuse to overwrite it. After a successful manual download, keep `retrieve_cutout: false`.
+    Do not set both `retrieve_cutout: true` and `build_cutout: true` while a cutout file already exists since Snakemake will refuse to overwrite it. After a successful manual download, keep `retrieve_cutout: false`.
 
 ---
 

@@ -30,10 +30,10 @@ nav:
 - Tutorials:
   - tutorials/tutorial-overview.md
   - How to build and validate PyPSA-Earth model for a new country:
-    - Part 1 — Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
-    - Part 2 — Analyse Results: tutorials/use-cases/2-analyze-results.md
-    - Part 3 — Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
-    - Part 4 — Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
+    - Part 1 Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
+    - Part 2 Analyse Results: tutorials/use-cases/2-analyze-results.md
+    - Part 3 Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
+    - Part 4 Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
   - Generic Tutorials:
     - Electricity Model: tutorials/generic-examples/electricity-model.md
     - Sector-Coupled Model: tutorials/generic-examples/sector-coupled-model.md
