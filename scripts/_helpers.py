@@ -41,11 +41,13 @@ import shutil
 import subprocess
 import sys
 import time
+import warnings
 import zipfile
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
+from typing import Any
 
 import country_converter as coco
 import geopandas as gpd
@@ -100,6 +102,162 @@ def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> 
             f"Please update 'config.yaml' according to 'config.default.yaml.'\n\r"
             "If issues persist, consider to update the environment to the latest version."
         )
+
+
+_CO2_BUDGET_BASE_VALUE = {
+    "co2limit": "limit",
+    "co2base": "base",
+    "absolute": "absolute",
+}
+
+# Deprecated config keys — remove entries when bumping ``version`` in
+# config.default.yaml (after one release so users had time to update config.yaml).
+
+# Simple key moves: add one (old_path, new_path) tuple per rename.
+CONFIG_MIGRATIONS = [
+    ("electricity.co2limit", "co2.limit"),
+    ("electricity.co2base", "co2.base"),
+    ("electricity.automatic_emission", "co2.automatic_emission.enable"),
+    ("electricity.automatic_emission_base_year", "co2.automatic_emission.base_year"),
+    ("costs.emission_prices.co2", "co2.emission_price"),
+    ("co2_budget.enable", "co2.budget.enable"),
+    ("co2_budget.override_co2opt", "co2.budget.override_co2opt"),
+    ("co2_budget.year", "co2.budget.year"),
+    ("sector.solar_cf_correction", "sector.solar_thermal_collector.cf_correction"),
+    ("solar_thermal.clearsky_model", "sector.solar_thermal_collector.clearsky_model"),
+    ("solar_thermal.orientation", "sector.solar_thermal_collector.orientation"),
+]
+
+
+def _parse_config_path(path: str) -> list[str]:
+    """Return a dot-separated config key path as a list of nested keys."""
+    return path.split(".")
+
+
+def _get_nested(mapping: dict[str, Any], path: str) -> Any | None:
+    """Return the value at ``path``, or ``None`` if any segment is missing."""
+    current: Any = mapping
+    for key in _parse_config_path(path):
+        if not isinstance(current, dict) or key not in current:
+            return None
+        current = current[key]
+    return current
+
+
+def _has_nested(mapping: dict[str, Any], path: str) -> bool:
+    """Return whether all segments of ``path`` exist in ``mapping``."""
+    current: Any = mapping
+    for key in _parse_config_path(path):
+        if not isinstance(current, dict) or key not in current:
+            return False
+        current = current[key]
+    return True
+
+
+def _set_nested(mapping: dict[str, Any], path: str, value: Any) -> None:
+    """Set ``value`` at ``path``, creating parent dicts as needed."""
+    keys = _parse_config_path(path)
+    current = mapping
+    for key in keys[:-1]:
+        if key not in current or not isinstance(current[key], dict):
+            current[key] = {}
+        current = current[key]
+    current[keys[-1]] = value
+
+
+def _migrate_simple_keys(
+    config: dict[str, Any],
+    migrations: Sequence[tuple[str, str]],
+    warn: Callable[[str, str], None],
+) -> None:
+    """Copy each deprecated leaf key to its new path, overriding only that value."""
+    for old_path, new_path in migrations:
+        if not _has_nested(config, old_path):
+            continue
+        _set_nested(config, new_path, _get_nested(config, old_path))
+        warn(old_path, new_path)
+
+
+def _migrate_co2_budget_base_value(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Migrate ``co2_budget.co2base_value`` to ``co2.budget.base_value``.
+
+    Renames legacy selector strings (e.g. ``co2limit`` → ``limit``); other
+    values (``absolute``, floats) are copied unchanged.
+    """
+    co2_budget = config.get("co2_budget")
+    if not isinstance(co2_budget, dict) or "co2base_value" not in co2_budget:
+        return
+
+    base_value = co2_budget["co2base_value"]
+    _set_nested(
+        config,
+        "co2.budget.base_value",
+        _CO2_BUDGET_BASE_VALUE.get(base_value, base_value),
+    )
+    warn("co2_budget.co2base_value", "co2.budget.base_value")
+
+
+def _migrate_solar_thermal_enable(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Copy legacy ``sector.solar_thermal`` bool to ``sector.solar_thermal_collector.enable``.
+
+    The new collector settings use a separate config key, so the legacy bool no
+    longer replaces the default dict during Snakemake config merging.
+    """
+    sector = config.get("sector", {})
+    if not isinstance(sector.get("solar_thermal"), bool):
+        return
+
+    _set_nested(
+        config,
+        "sector.solar_thermal_collector.enable",
+        sector["solar_thermal"],
+    )
+    warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
+
+
+def migrate_config(
+    config: dict[str, Any],
+    migrations: Sequence[tuple[str, str]] | None = None,
+) -> dict[str, Any]:
+    """Migrate deprecated config keys to the consolidated layout.
+
+    When a deprecated key is present, its value is copied to the new path in
+    the merged config dict. All other keys are left as already merged by
+    Snakemake (defaults from ``config.default.yaml`` plus user overrides).
+
+    Simple renames are listed in ``CONFIG_MIGRATIONS``. The only special
+    handler left is ``co2_budget.co2base_value`` (renames values, not just
+    paths) and ``sector.solar_thermal`` when it is still a legacy bool flag.
+
+    Parameters
+    ----------
+    config : dict
+        Snakemake configuration dictionary (updated in place).
+    migrations : list of (old_path, new_path), optional
+        Dot-separated paths. Defaults to ``CONFIG_MIGRATIONS``.
+
+    Returns
+    -------
+    dict
+        The updated configuration dictionary.
+    """
+
+    def _warn(old: str, new: str) -> None:
+        warnings.warn(
+            f"'{old}' is deprecated, use '{new}' instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
+    _migrate_solar_thermal_enable(config, _warn)
+    _migrate_co2_budget_base_value(config, _warn)
+    _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
+
+    return config
 
 
 def update_cutout_config(config: dict) -> dict:
