@@ -569,7 +569,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 ## Solving
 
-Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, solver presets, and memory limit.
+Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, and memory limit. Named solver presets (`solving.solver_options`) live in ``configs/solving_presets.default.yaml`` and are selected via ``solving.solver.options``.
 
 ### solver
 
@@ -586,6 +586,14 @@ Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, 
 ```
 
 {{ read_csv('configtables/solving-options.csv') }}
+
+### solver_options
+
+Named presets used by ``solving.solver.options`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
+
+```yaml
+--8<-- "configtables/snippets/solving_solver_options.yaml"
+```
 
 ## Plotting
 
