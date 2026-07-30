@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* * Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
+
 * Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
 
 * Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
@@ -47,6 +49,8 @@ This part of documentation collects descriptive release notes to capture the mai
 **Minor Changes and bug-fixing**
 
 * Enable deep-copy for config migration for back-compatibility [PR #1960](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1960)
+
+* Pin atlite to 0.4.1 in Pixi [PR #1935](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1935)
 
 * Replace hydrobasins for CI testing with a dataset created by Brigham Young University [PR #1944](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1944)
 
