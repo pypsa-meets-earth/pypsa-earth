@@ -12,6 +12,7 @@ logging:
 
 custom_rules: [] # paths to additional .smk files included in the Snakefile
 
+
 # =================== STUDY SETUP ===================
 countries: ["NG", "BJ"] # ISO codes, continent, or custom region
 
