@@ -16,29 +16,16 @@ electricity:
   # ----------------- Existing powerplants -------------------
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
   custom_powerplants:
-    filepaths:
+    filepaths:  # list of custom powerplant files used in "merge" and "replace" options
     - data/custom_powerplants.csv
-    # Applied globally to all configured custom powerplant files:
-    # false: ignore custom files and use only PowerplantMatching data
-    # merge: add custom files to the filtered PowerplantMatching dataset
-    # replace: discard the complete PowerplantMatching dataset and use only
-    #          the configured custom files
-    method: false
+    method: false  # "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
-  # Example with different country-specific outcomes:
-  #
-  # powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn) and Country != 'US'
-  #
+  # If you wish to replace the data for just one country (e.g. United States), you can use the option powerplants_filter as follows:
+  # powerplants_filter: ... and (Country != 'United States')
   # custom_powerplants:
   #   filepaths:
   #   - data/custom_powerplants_US.csv
-  #   - data/custom_powerplants_CA.csv
   #   method: merge
-  #
-  # Result:
-  # - US: custom data only, because US plants are excluded from PPM
-  # - CA: PPM and custom data are merged
-  # - MX: PPM data only, because no custom file is provided
 
   estimate_renewable_capacities:
     stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
