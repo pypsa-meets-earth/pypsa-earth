@@ -168,16 +168,44 @@ def _set_nested(mapping: dict[str, Any], path: str, value: Any) -> None:
     current[keys[-1]] = value
 
 
+def _deep_merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Recursively merge ``override`` into ``base`` and return the result.
+
+    Keys present only in ``base`` are kept. Keys present in both that are
+    themselves dicts are merged recursively. Any other key in ``override``
+    replaces the value in ``base``.
+    """
+    merged = dict(base)
+    for key, value in override.items():
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+            merged[key] = _deep_merge_dicts(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
 def _migrate_simple_keys(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]],
     warn: Callable[[str, str], None],
 ) -> None:
-    """Copy each deprecated leaf key to its new path, overriding only that value."""
+    """Copy each deprecated key to its new path.
+
+    A user's config typically only overrides a few keys of a renamed
+    section (e.g. ``cluster_options.simplify_network`` with just one or two
+    thresholds set), while the new path already holds the full defaults from
+    ``config.default.yaml``. If both values are dicts, they are deep-merged
+    so those untouched defaults survive; otherwise the old value simply
+    replaces the new one, as before.
+    """
     for old_path, new_path in migrations:
         if not _has_nested(config, old_path):
             continue
-        _set_nested(config, new_path, _get_nested(config, old_path))
+        old_value = _get_nested(config, old_path)
+        new_value = _get_nested(config, new_path)
+        if isinstance(old_value, dict) and isinstance(new_value, dict):
+            old_value = _deep_merge_dicts(new_value, old_value)
+        _set_nested(config, new_path, old_value)
         warn(old_path, new_path)
 
 
