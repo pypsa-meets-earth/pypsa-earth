@@ -21,8 +21,6 @@ Inputs
 
 - ``networks/elec_s{simpl}_{clusters}_pre_augmentation.nc``: Input network before augmentation.
 - ``resources/costs_{year}.csv``: Technology cost assumptions.
-- ``data/line_type_mapping_ac.csv``: Country-specific AC voltage-to-line-type mappings.
-- ``data/line_type_mapping_dc.csv``: Country-specific DC voltage-to-line-type mappings.
 
 
 Outputs
@@ -50,39 +48,29 @@ logger = create_logger(__name__)
 
 
 # Functions
-def _load_linetypes_from_csv(path):
-    """
-    Load voltage-to-line-type mappings from a CSV file.
-    """
-    linetypes = pd.read_csv(path, index_col=0)
-    linetypes.index = linetypes.index.astype(float)
-
-    if "default" not in linetypes.columns:
-        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
-
-    return linetypes
-
-
 def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
     """
     Return the closest available line type for a voltage and country.
     """
-    if country in linetypes.columns:
-        mapping = linetypes[country].dropna()
-    else:
-        mapping = pd.Series(dtype=object)
+    if "default" not in linetypes:
+        raise ValueError("Missing 'default' line type mapping.")
 
-    if mapping.empty:
-        mapping = linetypes["default"].dropna()
+    mapping = {
+        **linetypes["default"],
+        **linetypes.get(country, {}),
+    }
 
-    if mapping.empty:
+    if not mapping:
         raise ValueError(
             f"No line type mapping found for voltage {v_nom} kV "
             f"and country '{country}'."
         )
 
-    voltage = min(mapping.index, key=lambda value: abs(value - v_nom))
-    return mapping.at[voltage]
+    voltage = min(
+        mapping,
+        key=lambda candidate: abs(float(candidate) - float(v_nom)),
+    )
+    return mapping[voltage]
 
 
 def haversine(p):
@@ -177,8 +165,8 @@ if __name__ == "__main__":
     )
 
     #  add new lines to the network
-    ac_linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_ac)
-    dc_linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_dc)
+    ac_linetypes = snakemake.params.lines["ac_types"]
+    dc_linetypes = snakemake.params.lines["dc_types"]
 
     dc_linetype = _get_linetype_by_voltage_and_country(
         500,

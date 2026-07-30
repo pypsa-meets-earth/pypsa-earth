@@ -262,32 +262,6 @@ def _load_transformers_from_osm(fp_osm_transformers, buses):
     return transformers
 
 
-def _load_linetypes_from_csv(path):
-    """
-    Load voltage-to-line-type mappings from a CSV file.
-
-    The CSV must use voltages as index and countries as columns. The
-    ``default`` column reproduces the current PyPSA-Earth mapping.
-
-    Parameters
-    ----------
-    path : str
-        Path to the CSV file containing the line type mapping.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Line type mapping with nominal voltages in kV as index and countries as columns.
-    """
-    linetypes = pd.read_csv(path, index_col=0)
-    linetypes.index = linetypes.index.astype(float)
-
-    if "default" not in linetypes.columns:
-        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
-
-    return linetypes
-
-
 def _add_custom_line_types(n, path):
     """
     Add custom line-type definitions to the PyPSA line-type register.
@@ -338,33 +312,32 @@ def _add_custom_line_types(n, path):
 def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
     """
     Return the closest available line type for a voltage and country.
-
-    Country-specific values override the default mapping at the corresponding
-    voltage. Missing country-specific values fall back to the default mapping.
     """
-    mapping = linetypes["default"]
+    if "default" not in linetypes:
+        raise ValueError("Missing 'default' line type mapping.")
 
-    if country in linetypes.columns:
-        mapping = linetypes[country].combine_first(mapping)
+    mapping = {
+        **linetypes["default"],
+        **linetypes.get(country, {}),
+    }
 
-    mapping = mapping.dropna()
-
-    if mapping.empty:
+    if not mapping:
         raise ValueError(
             f"No line type mapping found for voltage {v_nom} kV "
             f"and country '{country}'."
         )
 
-    voltage = min(mapping.index, key=lambda value: abs(value - v_nom))
-    return mapping.at[voltage]
+    voltage = min(
+        mapping,
+        key=lambda candidate: abs(float(candidate) - float(v_nom)),
+    )
+    return mapping[voltage]
 
 
-def _set_electrical_parameters_ac_lines(lines_config, buses, lines, line_type_mapping):
+def _set_electrical_parameters_ac_lines(lines_config, buses, lines, linetypes):
     if lines.empty:
         lines["type"] = []
         return lines
-
-    linetypes = _load_linetypes_from_csv(line_type_mapping)
 
     lines["carrier"] = "AC"
     lines["dc"] = False
@@ -380,12 +353,10 @@ def _set_electrical_parameters_ac_lines(lines_config, buses, lines, line_type_ma
     return lines
 
 
-def _set_electrical_parameters_dc_lines(lines_config, buses, lines, line_type_mapping):
+def _set_electrical_parameters_dc_lines(lines_config, buses, lines, linetypes):
     if lines.empty:
         lines["type"] = []
         return lines
-
-    linetypes = _load_linetypes_from_csv(line_type_mapping)
 
     lines["carrier"] = "DC"
     lines["dc"] = True
@@ -550,14 +521,14 @@ def base_network(
         lines_config,
         buses,
         lines_ac,
-        inputs.line_type_mapping_ac,
+        lines_config["ac_types"],
     )
 
     lines_dc = _set_electrical_parameters_dc_lines(
         lines_config,
         buses,
         lines_dc,
-        inputs.line_type_mapping_dc,
+        lines_config["dc_types"],
     )
 
     transformers = _set_electrical_parameters_transformers(

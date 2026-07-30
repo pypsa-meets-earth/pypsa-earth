@@ -46,7 +46,6 @@ Inputs
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
 - ``resources/regions_offshore.geojson``: confer :ref:`busregions`
 - ``networks/elec.nc``: confer :ref:`electricity`
-- ``data/line_type_mapping_ac.csv``: Country-specific voltage-to-line-type mappings.
 
 Outputs
 -------
@@ -111,39 +110,29 @@ sys.settrace
 logger = create_logger(__name__)
 
 
-def _load_linetypes_from_csv(path):
-    """
-    Load voltage-to-line-type mappings from a CSV file.
-    """
-    linetypes = pd.read_csv(path, index_col=0)
-    linetypes.index = linetypes.index.astype(float)
-
-    if "default" not in linetypes.columns:
-        raise ValueError(f"Missing 'default' column in line type mapping file: {path}")
-
-    return linetypes
-
-
 def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
     """
     Return the closest available line type for a voltage and country.
     """
-    if country in linetypes.columns:
-        mapping = linetypes[country].dropna()
-    else:
-        mapping = pd.Series(dtype=object)
+    if "default" not in linetypes:
+        raise ValueError("Missing 'default' line type mapping.")
 
-    if mapping.empty:
-        mapping = linetypes["default"].dropna()
+    mapping = {
+        **linetypes["default"],
+        **linetypes.get(country, {}),
+    }
 
-    if mapping.empty:
+    if not mapping:
         raise ValueError(
             f"No line type mapping found for voltage {v_nom} kV "
             f"and country '{country}'."
         )
 
-    voltage = min(mapping.index, key=lambda value: abs(value - v_nom))
-    return mapping.at[voltage]
+    voltage = min(
+        mapping,
+        key=lambda candidate: abs(float(candidate) - float(v_nom)),
+    )
+    return mapping[voltage]
 
 
 def simplify_network_to_base_voltage(n, linetypes, base_voltage):
@@ -161,8 +150,8 @@ def simplify_network_to_base_voltage(n, linetypes, base_voltage):
     ----------
     n : pypsa.Network
         Network to simplify.
-    linetypes : pandas.DataFrame
-        Voltage-to-line-type mappings with countries as columns.
+    linetypes : dict
+        Line-type mappings by country and nominal voltage.
     base_voltage : float
         Common nominal voltage assigned to buses and lines.
 
@@ -1111,7 +1100,7 @@ if __name__ == "__main__":
     add_year_suffix_to_carriers(n)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetypes = _load_linetypes_from_csv(snakemake.input.line_type_mapping_ac)
+    linetypes = snakemake.params.config_lines["ac_types"]
     exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
         "exclude_carriers", []
     )
