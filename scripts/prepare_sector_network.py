@@ -2094,7 +2094,7 @@ def add_industry(
     co2 = (
         n.loads.loc[spatial.nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
-    )
+    )  # No division by 8760 because p_set is already in MW
 
     n.add(
         "Load",
