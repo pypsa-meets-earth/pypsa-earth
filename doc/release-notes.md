@@ -46,6 +46,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Replace hydrobasins for CI testing with a dataset created by Brigham Young University [PR #1944](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1944)
+
 * Add `custom_powerplants` into params to make sure change of the config reruns the workflow [PR #1927](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1927)
 
 * Fix misleading linetype voltage warning in `base_network.py` [PR #1883](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1883)
@@ -179,6 +181,10 @@ This part of documentation collects descriptive release notes to capture the mai
 **Minor Changes and bug-fixing**
 
 * Recommend dedicated regional models for supported countries [#PR 1925](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1925)
+
+* Fix the Conda CI setup to consistently use the dynamically selected environment file [PR #1952](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1952)
+
+* Avoid excessive warnings when normalising hydrobasins [PR #1951](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1951)
 
 * Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river [PR #1684](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1684)
 
