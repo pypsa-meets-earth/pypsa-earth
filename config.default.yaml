@@ -228,7 +228,7 @@ electricity:
           # from the Generator list below, as these offshore wind technologies require coastline access.
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2, li-ion, vanadium, lfp, lair, pair, iron-air
-    Store: [battery, H2]
+    Store: [battery, H2] # li-ion, vanadium, lfp, lair, pair, iron-air
     Link: [] # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
