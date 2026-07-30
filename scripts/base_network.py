@@ -309,7 +309,12 @@ def _add_custom_line_types(n, path):
         )
 
     line_types = line_types[required_columns]
-    n.add("LineType", line_types.index, **line_types)
+    for name, attributes in line_types.iterrows():
+        n.add(
+            "LineType",
+            name,
+            **attributes.dropna().to_dict(),
+        )
 
     logger.info("Added %s custom line types from %s.", len(line_types), path)
 
