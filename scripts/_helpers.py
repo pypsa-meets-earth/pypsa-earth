@@ -2298,7 +2298,7 @@ def sanitize_locations(n: pypsa.Network) -> None:
         )
 
 
-def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
+def get_linetype_by_voltage_and_country(v_nom, country, linetypes):
     """
     Return the closest available line type for a voltage and country.
     """
