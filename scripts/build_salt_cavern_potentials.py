@@ -6,7 +6,7 @@
 """
 # Build salt cavern potentials for hydrogen storage.
 
-https://dx.doi.org/10.2139/ssrn.6307406
+https://doi.org/10.1016/j.energy.2026.141729
 
 This module computes the technical hydrogen storage potential in underground
 salt caverns based on global potash deposit data.
