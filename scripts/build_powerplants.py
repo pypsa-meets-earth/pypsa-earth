@@ -444,17 +444,25 @@ if __name__ == "__main__":
         config["main_query"] = ""
 
     custom_powerplants = snakemake.params.custom_powerplants
+    custom_method = custom_powerplants["method"]
 
-    ppl = (
-        pm.powerplants(from_url=True, config_update=config)
-        .powerplant.fill_missing_decommissioning_years()
-        .query("Country in @countries_names")
-    )
+    if custom_method == "replace":
+        ppl = pd.DataFrame()
+    else:
+        ppl = (
+            pm.powerplants(
+                from_url=False,
+                update=True,
+                config_update=config,
+            )
+            .powerplant.fill_missing_decommissioning_years()
+            .query("Country in @countries_names")
+        )
 
     ppl = add_custom_powerplants(
         ppl=ppl,
         custom_powerplants_files=list(snakemake.input.custom_powerplants),
-        method=custom_powerplants["method"],
+        method=custom_method,
     )
 
     ppl = ppl.powerplant.convert_country_to_alpha2()
