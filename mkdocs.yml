@@ -18,6 +18,7 @@ watch:
 
 hooks:
 - doc/assets/hooks/cleanup.py
+- doc/assets/hooks/fetch_validation_dashboard.py
 
 # Navigation
 nav:
@@ -74,6 +75,10 @@ nav:
       - Solve Network: user-guide/rules-reference/solving/solve-network.md
 - Educational Materials:
   - Optimization: user-guide/optimization.md
+
+- Validation:
+  - Overview: validation/overview.md
+  - Detailed Statistics: validation/statistics.md
 
 - Features:
   - Monte Carlo: utilities/monte-carlo.md
