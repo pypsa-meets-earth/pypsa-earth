@@ -80,7 +80,7 @@ This covers the retrieval of additional raw data from online resources and prepr
 
 This triggers a workflow of multiple preceding jobs that depend on each rule's inputs and outputs:
 
-![Sector Overnight Workflow](../img/gen_rulegraph-sector.svg)
+![Sector Overnight Workflow](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph-sector.svg)
 
 In the terminal, this will show up as a list of jobs to be run:
 
@@ -193,7 +193,7 @@ snakemake solve_sector_networks -j2 --configfile test/config.myopic.yaml
 
 which will result in additional jobs snakemake wants to run, which translates to the following workflow diagram which nicely outlines how the sequential pathway optimisation with myopic foresight is implemented in the workflow:
 
-![Sector Myopic Workflow](../img/gen_rulegraph-myopic.svg)
+![Sector Myopic Workflow](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph-myopic.svg)
 
 In the terminal, this will show up as a list of jobs to be run:
 

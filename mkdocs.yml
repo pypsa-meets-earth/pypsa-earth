@@ -17,7 +17,6 @@ watch:
 - scripts
 
 hooks:
-- doc/gen_dags.py
 - doc/assets/hooks/cleanup.py
 
 # Navigation
@@ -76,7 +75,7 @@ nav:
 - Educational Materials:
   - Optimization: user-guide/optimization.md
 
-- Utilities:
+- Features:
   - Monte Carlo: utilities/monte-carlo.md
 
 - Community & Resources:

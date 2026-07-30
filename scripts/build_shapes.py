@@ -1182,7 +1182,7 @@ def sum_values_using_geomask(
 ) -> pd.DataFrame:
     """
     Function that sums all the population values in np_pop_val into the correct
-    GADM_ID It uses np_pop_xy to access the key stored in region_geomask[x][y]
+    GADM_ID It uses ``np_pop_xy`` to access the key stored in ``region_geomask[x][y]``
 
     The relation of this key to GADM_ID is stored in id_mapping
 

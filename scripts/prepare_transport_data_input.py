@@ -10,7 +10,7 @@ from pathlib import Path
 import country_converter as coco
 import numpy as np
 import pandas as pd
-from _helpers import BASE_DIR
+from _helpers import BASE_DIR, read_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def download_number_of_vehicles():
     storage_options = {"User-Agent": "Mozilla/5.0"}
     url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
     try:
-        vehicles_gho = pd.read_csv(
+        vehicles_gho = read_csv_nafix(
             url, storage_options=storage_options, encoding="utf8"
         )
         print("File read successfully.")
