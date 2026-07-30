@@ -39,7 +39,11 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_linetype_by_voltage_and_country,
+)
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
@@ -48,31 +52,6 @@ logger = create_logger(__name__)
 
 
 # Functions
-def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
-    """
-    Return the closest available line type for a voltage and country.
-    """
-    if "default" not in linetypes:
-        raise ValueError("Missing 'default' line type mapping.")
-
-    mapping = {
-        **linetypes["default"],
-        **linetypes.get(country, {}),
-    }
-
-    if not mapping:
-        raise ValueError(
-            f"No line type mapping found for voltage {v_nom} kV "
-            f"and country '{country}'."
-        )
-
-    voltage = min(
-        mapping,
-        key=lambda candidate: abs(float(candidate) - float(v_nom)),
-    )
-    return mapping[voltage]
-
-
 def haversine(p):
     coord0 = n.buses.loc[p.bus0, ["x", "y"]].values
     coord1 = n.buses.loc[p.bus1, ["x", "y"]].values
@@ -168,7 +147,7 @@ if __name__ == "__main__":
     ac_linetypes = snakemake.params.lines["ac_types"]
     dc_linetypes = snakemake.params.lines["dc_types"]
 
-    dc_linetype = _get_linetype_by_voltage_and_country(
+    dc_linetype = get_linetype_by_voltage_and_country(
         500,
         None,
         dc_linetypes,
@@ -177,7 +156,7 @@ if __name__ == "__main__":
     new_kedge_lines["country"] = new_kedge_lines["bus0"].map(n.buses["country"])
     new_kedge_lines["v_nom"] = new_kedge_lines["bus0"].map(n.buses["v_nom"])
     new_kedge_lines["type"] = new_kedge_lines.apply(
-        lambda line: _get_linetype_by_voltage_and_country(
+        lambda line: get_linetype_by_voltage_and_country(
             line.v_nom,
             line.country,
             ac_linetypes,

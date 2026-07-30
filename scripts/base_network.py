@@ -65,7 +65,12 @@ import pypsa
 import scipy as sp
 import shapely.prepared
 import shapely.wkt
-from _helpers import configure_logging, create_logger, read_csv_nafix
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_linetype_by_voltage_and_country,
+    read_csv_nafix,
+)
 from shapely.ops import unary_union
 
 logger = create_logger(__name__)
@@ -304,34 +309,9 @@ def _add_custom_line_types(n, path):
         )
 
     line_types = line_types[required_columns]
-    n.line_types = pd.concat([n.line_types, line_types])
+    n.add("LineType", line_types.index, **line_types)
 
     logger.info("Added %s custom line types from %s.", len(line_types), path)
-
-
-def _get_linetype_by_voltage_and_country(v_nom, country, linetypes):
-    """
-    Return the closest available line type for a voltage and country.
-    """
-    if "default" not in linetypes:
-        raise ValueError("Missing 'default' line type mapping.")
-
-    mapping = {
-        **linetypes["default"],
-        **linetypes.get(country, {}),
-    }
-
-    if not mapping:
-        raise ValueError(
-            f"No line type mapping found for voltage {v_nom} kV "
-            f"and country '{country}'."
-        )
-
-    voltage = min(
-        mapping,
-        key=lambda candidate: abs(float(candidate) - float(v_nom)),
-    )
-    return mapping[voltage]
 
 
 def _set_electrical_parameters_ac_lines(lines_config, buses, lines, linetypes):
@@ -344,7 +324,7 @@ def _set_electrical_parameters_ac_lines(lines_config, buses, lines, linetypes):
     lines["country"] = lines["bus0"].map(buses["country"])
 
     lines.loc[:, "type"] = lines.apply(
-        lambda x: _get_linetype_by_voltage_and_country(x.v_nom, x.country, linetypes),
+        lambda x: get_linetype_by_voltage_and_country(x.v_nom, x.country, linetypes),
         axis=1,
     )
 
@@ -363,7 +343,7 @@ def _set_electrical_parameters_dc_lines(lines_config, buses, lines, linetypes):
     lines["country"] = lines["bus0"].map(buses["country"])
 
     lines.loc[:, "type"] = lines.apply(
-        lambda x: _get_linetype_by_voltage_and_country(x.v_nom, x.country, linetypes),
+        lambda x: get_linetype_by_voltage_and_country(x.v_nom, x.country, linetypes),
         axis=1,
     )
 
