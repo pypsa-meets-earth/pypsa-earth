@@ -1077,7 +1077,7 @@ if __name__ == "__main__":
 
     base_voltage = snakemake.params.electricity["base_voltage"]
     linetypes = snakemake.params.config_lines["ac_types"]
-    exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
+    exclude_carriers = snakemake.params.clustering["simplify_network"].get(
         "exclude_carriers", []
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
