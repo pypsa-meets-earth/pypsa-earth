@@ -1312,9 +1312,7 @@ rule prepare_sector_network:
             + SECDIR
             + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
         ),
-        energy_totals="resources/"
-        + SECDIR
-        + "energy_totals_{planning_horizons}.csv",
+        energy_totals="resources/" + SECDIR + "energy_totals_{planning_horizons}.csv",
         airports=branch(
             sector_enable["aviation"],
             "resources/" + SECDIR + "airports.csv",
@@ -1550,9 +1548,7 @@ rule prepare_energy_totals:
         district_heating="data/demand/district_heating.csv",
         fuel_shares="data/demand/fuel_shares.csv",
     output:
-        energy_totals="resources/"
-        + SECDIR
-        + "energy_totals_{planning_horizons}.csv",
+        energy_totals="resources/" + SECDIR + "energy_totals_{planning_horizons}.csv",
     script:
         "scripts/prepare_energy_totals.py"
 
@@ -2066,11 +2062,7 @@ rule build_base_industry_totals:  #default data
     resources:
         mem_mb=1000,
     benchmark:
-        (
-            "benchmarks/"
-            + SECDIR
-            + "build_base_industry_totals_{planning_horizons}"
-        )
+        ("benchmarks/" + SECDIR + "build_base_industry_totals_{planning_horizons}")
     script:
         "scripts/build_base_industry_totals.py"
 
