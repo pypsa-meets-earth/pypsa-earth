@@ -14,6 +14,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
+* Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
+
 * Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
 
 * Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
