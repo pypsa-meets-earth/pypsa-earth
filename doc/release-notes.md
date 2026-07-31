@@ -12,7 +12,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Load transmission line type mappings from CSV files and add Australian custom mapping [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
+* Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 * Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
 
