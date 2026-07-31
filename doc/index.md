@@ -64,7 +64,10 @@ There are multiple ways to get involved and learn more about our work:
 
 ### Tutorials
 
-- [Tutorials](tutorials/tutorial-overview.md) - Check out tutorials on how to use PyPSA-Earth
+- [Tutorials](tutorials/tutorial-overview.md) - Overview of learning paths
+    - [Use-case: baseline model](tutorials/use-cases/1-baseline-model.md) - Build and calibrate a country model
+    - [Electricity model](tutorials/generic-examples/electricity-model.md) - Quick electricity-only tutorial
+    - [Sector-coupled model](tutorials/generic-examples/sector-coupled-model.md) - Sector-coupled model including heat, transport, industry, hydrogen, and more.
 
 ### User Guide
 
