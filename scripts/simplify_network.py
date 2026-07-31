@@ -1097,6 +1097,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
+    source_line_types = n.line_types.copy()
 
     # Add year suffix to carrier names for clustering
     add_year_suffix_to_carriers(n)
@@ -1305,6 +1306,32 @@ if __name__ == "__main__":
 
     # Restore base carrier names (remove year suffixes) before saving
     restore_base_carrier_names(n)
+
+    # Restore line types lost when clustering creates a new network.
+    used_line_types = pd.Index(
+        n.lines["type"].dropna().loc[lambda values: values != ""].unique()
+    )
+    missing_line_types = used_line_types.difference(n.line_types.index)
+
+    unavailable_line_types = missing_line_types.difference(source_line_types.index)
+    if not unavailable_line_types.empty:
+        raise ValueError(
+            "The following line types are used by lines but are unavailable in "
+            f"the source network: {unavailable_line_types.tolist()}"
+        )
+
+    for line_type in missing_line_types:
+        n.add(
+            "LineType",
+            line_type,
+            **source_line_types.loc[line_type].dropna().to_dict(),
+        )
+
+    if not missing_line_types.empty:
+        logger.info(
+            "Restored line types removed during network clustering: %s",
+            missing_line_types.tolist(),
+        )
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
