@@ -360,7 +360,6 @@ if __name__ == "__main__":
             "build_base_energy_totals",
             simpl="",
             clusters=4,
-            demand="AB",
             planning_horizons=2030,
         )
 

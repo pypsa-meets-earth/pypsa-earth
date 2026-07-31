@@ -51,9 +51,9 @@ scenario:
   - 2030
   sopts:
   - "144h"
-  demand:
-  - "AB"
 ```
+
+Demand scenario label (formerly the `{demand}` wildcard) lives under ``demand_data.scenario`` as a **single** string (default ``"AB"``). Hydrogen export volume is the **single** scalar ``export.h2export`` (TWh/year). These are no longer filename wildcards; a multi-value list raises an error. To sweep several values, use separate config files or ``run.name``.
 
 !!! note
  For allowed wildcard values, refer to [wildcards](../user-guide/wildcards.md).
@@ -166,8 +166,15 @@ scenario:
   ll: ["c1"]
   opts: ["Co2L-24H"]
   sopts: ["144h"]
-  demand: ["DF"]
 
+```
+
+```yaml
+demand_data:
+  scenario: "DF"
+
+export:
+  h2export: 120
 ```
 
 For allowed wildcard values, refer to [wildcards].
