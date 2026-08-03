@@ -14,6 +14,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and ``solving.solver_options`` presets to ``configs/solving_presets.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml`` [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
 
+* Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
+
+* Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
+
 * Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
 
 * Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
@@ -47,6 +51,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Add plotting and summary visualization page in documentation [PR #1765](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1765)
+
+* Pin atlite to 0.4.1 in Pixi [PR #1935](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1935)
 
 * Replace hydrobasins for CI testing with a dataset created by Brigham Young University [PR #1944](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1944)
 
