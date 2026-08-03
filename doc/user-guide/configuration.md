@@ -569,7 +569,7 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 ## Solving
 
-Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, and memory limit. Named solver presets (`solving.solver_options`) live in ``configs/solving_presets.default.yaml`` and are selected via ``solving.solver.options``.
+Solver choice stays under the **SOLVING** banner in ``config.default.yaml``. Optimization options (``solving.options``), memory limit (``solving.mem``), and named solver presets (``solving.solver_options``) live in ``configs/solving_presets.default.yaml`` and merge via Snakemake ``configfile:``. Select a preset with ``solving.solver.options`` (for example ``gurobi-default``).
 
 ### solver
 

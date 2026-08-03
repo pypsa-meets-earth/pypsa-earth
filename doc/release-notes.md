@@ -12,7 +12,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and ``solving.solver_options`` presets to ``configs/solving_presets.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml`` [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
+* Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and solving defaults (``solving.options``, ``solving.mem``, ``solving.solver_options``) to ``configs/solving_presets.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml``. ``config.default.yaml`` keeps only ``solving.solver`` (name and preset choice) [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
 
 * Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
 

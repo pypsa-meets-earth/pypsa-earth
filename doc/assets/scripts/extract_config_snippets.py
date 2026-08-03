@@ -115,7 +115,7 @@ def main():
         "solving_solver": ["solving", "solver"],
         "solving_options": {
             "start": "# ------------------- Optimization options",
-            "end": "# Solver presets",
+            "end": "# ------------------- Named solver presets",
         },
         "solving_solver_options": ["solver_options"],
         "plotting": ["plotting"],
