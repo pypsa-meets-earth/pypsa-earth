@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 The `retrieve_emissions` rule downloads the EDGAR v6.0 CO2 emissions dataset used by the workflow to automatically derive electricity-sector CO2 limits.
 
-It retrieves the EDGAR archive from the Joint Research Centre open-data server, stores the downloaded ZIP file under `data/co2_emissions/`, and unpacks the Excel workbook consumed by `build_co2_emissions`.
+EDGAR archive was created by the Joint Research Centre and is downloaded as zip file and placed under `data/co2_emissions/`. After that it is unpacked into the Excel workbook used as an input by `build_co2_emissions`.
 
 This rule is active when `electricity.automatic_emission` is enabled.
 
@@ -18,4 +18,4 @@ This rule is active when `electricity.automatic_emission` is enabled.
 
 ## Downstream Rules
 
-- [`build_co2_emissions`](../populate/build-co2-emissions.md) filters the retrieved workbook to public electricity and heat production emissions and writes the cleaned CSV used by `prepare_network`.
+- [`build_co2_emissions`](../populate/build-co2-emissions.md) filters the retrieved CO2 dataset to electricity sector emissions and stores the cleaned dataset as a csv file used by `prepare_network`.
