@@ -181,16 +181,16 @@ Relevant Settings
 Inputs
 ------
 
-- ``resources/{SECDIR}/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Transport demand per node and carrier for transport sectors (road, rail, aviation, shipping) if enabled.
-- ``resources/{SECDIR}/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Availability profiles for the transport sector if enabled.
-- ``resources/{SECDIR}/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Demand-side management profiles for the transport sector if enabled.
-- ``resources/{SECDIR}/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal transport demand data for transport sectors if enabled.
+- ``resources/{SECDIR}/demand/transport_s{simpl}_{clusters}_{planning_horizons}.csv``: Transport demand per node and carrier for transport sectors (road, rail, aviation, shipping) if enabled.
+- ``resources/{SECDIR}/pattern_profiles/avail_profile_s{simpl}_{clusters}_{planning_horizons}.csv``: Availability profiles for the transport sector if enabled.
+- ``resources/{SECDIR}/pattern_profiles/dsm_profile_s{simpl}_{clusters}_{planning_horizons}.csv``: Demand-side management profiles for the transport sector if enabled.
+- ``resources/{SECDIR}/demand/nodal_transport_data_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal transport demand data for transport sectors if enabled.
 
-- ``resources/{SECDIR}/demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Heat demand per node for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for air source heat pumps for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for ground source heat pumps for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal availability profiles for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: District heat share per node for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/heat_demand_s{simpl}_{clusters}_{planning_horizons}.csv``: Heat demand per node for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/ashp_cop_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for air source heat pumps for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/gshp_cop_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for ground source heat pumps for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/solar_thermal_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal availability profiles for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/district_heat_share_s{simpl}_{clusters}_{planning_horizons}.csv``: District heat share per node for heat sector if enabled.
 
 - ``resources/{RDIR}/solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv``: Solar rooftop layout per country if enabled.
 
@@ -200,13 +200,13 @@ Inputs
 
 - ``data/hydrogen_salt_cavern_potentials.csv``: Hydrogen salt cavern potentials per country.
 
-- ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal energy totals if rail transport or agriculture sector is enabled.
+- ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal energy totals if rail transport or agriculture sector is enabled.
 
 - ``resources/{SECDIR}/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv``: Population layout per node.
 
-- ``resources/{SECDIR}/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Industrial energy demand per node if industry sector is enabled.
+- ``resources/{SECDIR}/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv``: Industrial energy demand per node if industry sector is enabled.
 
-- ``resources/{SECDIR}/energy_totals_{demand}_{planning_horizons}.csv``: Energy totals per sector
+- ``resources/{SECDIR}/energy_totals_{planning_horizons}.csv``: Energy totals per sector
 
 - ``resources/{SECDIR}/airports.csv``: Airport locations if aviation sector is enabled.
 
@@ -220,7 +220,7 @@ Inputs
 
 Outputs
 -------
-- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc``: Prepared network file after adding sectoral technologies,
+- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc``: Prepared network file after adding sectoral technologies,
 
 
 Description
@@ -3872,7 +3872,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
         )
 
     # Load population layout
@@ -3909,7 +3908,7 @@ if __name__ == "__main__":
 
     # Fetch wildcards
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
-    demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
+    demand_sc = snakemake.params.demand_scenario
 
     # Prepare the costs dataframe
     costs = read_csv_nafix(snakemake.input.costs, index_col=0)
