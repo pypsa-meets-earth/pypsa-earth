@@ -28,15 +28,22 @@ nav:
   - Quick Start: home/quick-start.md
 
 - Tutorials:
-  - Electricity Model: tutorials/electricity-model.md
-  - Sector-Coupled Model: tutorials/sector-coupled-model.md
+  - tutorials/tutorial-overview.md
+  - How to build and validate PyPSA-Earth model for a new country:
+    - Part 1 Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
+    - Part 2 Analyse Results: tutorials/use-cases/2-analyze-results.md
+    - Part 3 Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
+    - Part 4 Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
+  - Generic Tutorials:
+    - Electricity Model: tutorials/generic-examples/electricity-model.md
+    - Sector-Coupled Model: tutorials/generic-examples/sector-coupled-model.md
+    - Examples: tutorials/generic-examples/examples.md
   - Model Customization:
     - General Modeling Guidelines: user-guide/model-customization.md
     - Basic Setup: user-guide/customization/basic-setup.md
     - Copernicus Data: user-guide/customization/copernicus-data.md
     - Validation: user-guide/customization/validation.md
     - Running Models: user-guide/customization/running-models.md
-  - Examples: tutorials/examples.md
 
 - User Guide:
   - Structure: user-guide/structure.md
@@ -46,6 +53,7 @@ nav:
   - Costs: user-guide/costs.md
   - Custom Data Integration: user-guide/custom-data.md
   - Rules Overview: user-guide/rules-overview.md
+  - Plotting & Visualization: user-guide/plotting.md
   - Rules Reference:
     - Download & Filter:
       - Overview: user-guide/rules-reference/download-and-filter/index.md
@@ -85,6 +93,7 @@ nav:
   - Talks & Papers: community/talks-and-papers.md
   - Learning Materials: community/learning-materials.md
   - Software Hints: community/software-hints.md
+  - FAQ: community/faq.md
 
 - API Reference:
   - Overview: api-reference/index.md
@@ -111,7 +120,6 @@ theme:
   features:
   - navigation.tabs
   - navigation.tabs.sticky
-  - navigation.sections
   - navigation.tracking
   - navigation.indexes
   - navigation.top
@@ -148,6 +156,7 @@ extra_javascript:
 - assets/javascripts/mathjax.js
 - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 - assets/javascripts/mermaid-init.js
+- assets/javascripts/tutorial-cards.js
 
 
 markdown_extensions:
@@ -165,6 +174,8 @@ markdown_extensions:
     permalink: true
     toc_depth: 4
 - footnotes
+- attr_list
+- md_in_html
 
   # PyMdown Extensions
 - pymdownx.arithmatex:
