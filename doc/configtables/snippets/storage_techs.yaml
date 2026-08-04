@@ -1,4 +1,5 @@
 storage_techs:
+  # All technology abbreviations are defined in https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#storage-technologies
   battery:
     store: "battery storage"
     bicharger: "battery inverter"

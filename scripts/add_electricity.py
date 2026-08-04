@@ -1164,7 +1164,9 @@ def attach_existing_batteries(
         lookup_discharge = battery_techs["discharger"]
 
     discharge_capital_cost = (
-        0.0 if "bicharger" in battery_techs else costs.at[lookup_discharge, "capital_cost"]
+        0.0
+        if "bicharger" in battery_techs
+        else costs.at[lookup_discharge, "capital_cost"]
     )
 
     if "battery" in extendable_carriers["Store"]:
