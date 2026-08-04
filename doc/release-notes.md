@@ -52,6 +52,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Enable deep-copy for config migration for back-compatibility [PR #1960](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1960)
+
 * Add plotting and summary visualization page in documentation [PR #1765](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1765)
 
 * Pin atlite to 0.4.1 in Pixi [PR #1935](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1935)
