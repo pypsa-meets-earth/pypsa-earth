@@ -674,6 +674,7 @@ rule add_electricity:
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
         existing_capacities=config["existing_capacities"],
+        battery_techs=config["storage_techs"]["battery"],
     input:
         **{
             f"profile_{tech}": "resources/"

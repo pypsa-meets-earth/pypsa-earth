@@ -1120,6 +1120,7 @@ def attach_existing_batteries(
     costs: pd.DataFrame,
     ppl: pd.DataFrame,
     extendable_carriers: dict,
+    battery_techs: dict,
     max_hours: float,
 ) -> None:
     """
@@ -1135,6 +1136,8 @@ def attach_existing_batteries(
         Power plant DataFrame.
     extendable_carriers : dict
         Dictionary of extendable carriers for different component types.
+    battery_techs: dict
+        A dictionary mapping of battery and its technology parameters.
     max_hours: float
         Amount of time it takes to fully charge batteries from empty if done at maximum power rate.
 
@@ -1151,6 +1154,18 @@ def attach_existing_batteries(
 
     # Aggregate batteries by (bus, carrier, grouping_year)
     batteries_grouped = aggregate_ppl_by_bus_carrier_year(batteries)
+
+    # In the future when different storage technologies exist, use this framework.
+    lookup_store = battery_techs["store"]
+    if "bicharger" in battery_techs:
+        lookup_charge = lookup_discharge = battery_techs["bicharger"]
+    else:
+        lookup_charge = battery_techs["charger"]
+        lookup_discharge = battery_techs["discharger"]
+
+    discharge_capital_cost = (
+        0.0 if "bicharger" in battery_techs else costs.at[lookup_discharge, "capital_cost"]
+    )
 
     if "battery" in extendable_carriers["Store"]:
         battery_def = "Stores and Links"
@@ -1173,7 +1188,7 @@ def attach_existing_batteries(
             e_nom_extendable=False,
             e_nom=batteries_grouped["p_nom"] * max_hours,
             carrier="battery",
-            capital_cost=costs.at["battery storage", "capital_cost"],
+            capital_cost=costs.at[lookup_store, "capital_cost"],
             build_year=batteries_grouped["build_year"],
             lifetime=batteries_grouped["lifetime"],
         )
@@ -1189,9 +1204,10 @@ def attach_existing_batteries(
             p_nom=batteries_grouped["p_nom"].values,
             p_nom_extendable=False,
             carrier="battery charger",
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            capital_cost=costs.at["battery inverter", "capital_cost"],
-            lifetime=costs.at["battery inverter", "lifetime"],
+            efficiency=costs.at[lookup_charge, "efficiency"] ** 0.5,
+            capital_cost=costs.at[lookup_charge, "capital_cost"],
+            marginal_cost=costs.at[lookup_charge, "marginal_cost"],
+            lifetime=costs.at[lookup_charge, "lifetime"],
             build_year=batteries_grouped["build_year"].values,
         )
 
@@ -1206,9 +1222,10 @@ def attach_existing_batteries(
             p_nom=batteries_grouped["p_nom"].values,
             p_nom_extendable=False,
             carrier="battery discharger",
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            marginal_cost=costs.at["battery", "marginal_cost"],
-            lifetime=costs.at["battery inverter", "lifetime"],
+            efficiency=costs.at[lookup_discharge, "efficiency"] ** 0.5,
+            capital_cost=discharge_capital_cost,
+            marginal_cost=costs.at[lookup_discharge, "marginal_cost"],
+            lifetime=costs.at[lookup_discharge, "lifetime"],
             build_year=batteries_grouped["build_year"].values,
         )
 
@@ -1226,8 +1243,8 @@ def attach_existing_batteries(
             p_nom_max=batteries_grouped["p_nom"],
             capital_cost=costs.at["battery", "capital_cost"],
             max_hours=max_hours,
-            efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
-            efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
+            efficiency_store=costs.at[lookup_charge, "efficiency"] ** 0.5,
+            efficiency_dispatch=costs.at[lookup_discharge, "efficiency"] ** 0.5,
             cyclic_state_of_charge=True,
             marginal_cost=costs.at["battery", "marginal_cost"],
             build_year=batteries_grouped["build_year"],
@@ -1346,6 +1363,7 @@ if __name__ == "__main__":
         costs,
         ppl,
         extendable_carriers,
+        snakemake.params.battery_techs,
         snakemake.params.electricity["max_hours"]["battery"],
     )
     apply_nuclear_p_max_pu(

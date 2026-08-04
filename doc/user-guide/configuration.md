@@ -417,6 +417,8 @@ Specifies storage technologies mapping. Specifies storage technologies mapping. 
 
 The following storage technologies are available for implementation in the model. Users may also define additional storage technologies, provided that the necessary technology cost data is included:
 
+{{ read_csv('configtables/storage_techs_abb.csv') }}
+
 ```yaml
 --8<-- "configtables/snippets/storage_techs.yaml"
 ```
