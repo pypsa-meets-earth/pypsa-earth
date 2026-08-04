@@ -5,7 +5,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Rule `retrieve_emissions`
 
-The `retrieve_emissions` rule downloads the EDGAR v6.0 fossil CO2 emissions dataset used to derive automatic electricity-sector CO2 limits.
+The `retrieve_emissions` rule downloads the EDGAR v6.0 CO2 emissions dataset used by the workflow to automatically derive electricity-sector CO2 limits.
 
 It retrieves the EDGAR archive from the Joint Research Centre open-data server, stores the downloaded ZIP file under `data/co2_emissions/`, and unpacks the Excel workbook consumed by `build_co2_emissions`.
 
