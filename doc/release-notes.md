@@ -14,6 +14,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
+* Remove `demand` and `h2export` wildcards from sector model [PR #1962](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1962)
+
 * Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
 
 * Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
@@ -51,6 +53,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Enable deep-copy for config migration for back-compatibility [PR #1960](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1960)
 
 * Add plotting and summary visualization page in documentation [PR #1765](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1765)
 
@@ -151,6 +155,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add module-level and missing function docstrings and type hints to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
 
 * Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
+
+* Polishing time-dependent quantities in prepare sector network [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
 
 # PyPSA-Earth 0.8.0
 

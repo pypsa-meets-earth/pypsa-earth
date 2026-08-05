@@ -168,17 +168,96 @@ def _set_nested(mapping: dict[str, Any], path: str, value: Any) -> None:
     current[keys[-1]] = value
 
 
+def _deep_merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Recursively merge ``override`` into ``base`` and return the result.
+
+    Keys present only in ``base`` are kept. Keys present in both that are
+    themselves dicts are merged recursively. Any other key in ``override``
+    replaces the value in ``base``.
+    """
+    merged = dict(base)
+    for key, value in override.items():
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+            merged[key] = _deep_merge_dicts(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
 def _migrate_simple_keys(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]],
     warn: Callable[[str, str], None],
 ) -> None:
-    """Copy each deprecated leaf key to its new path, overriding only that value."""
+    """Copy each deprecated key to its new path.
+
+    A user's config typically only overrides a few keys of a renamed
+    section (e.g. ``cluster_options.simplify_network`` with just one or two
+    thresholds set), while the new path already holds the full defaults from
+    ``config.default.yaml``. If both values are dicts, they are deep-merged
+    so those untouched defaults survive; otherwise the old value simply
+    replaces the new one, as before.
+    """
     for old_path, new_path in migrations:
         if not _has_nested(config, old_path):
             continue
-        _set_nested(config, new_path, _get_nested(config, old_path))
+        old_value = _get_nested(config, old_path)
+        new_value = _get_nested(config, new_path)
+        if isinstance(old_value, dict) and isinstance(new_value, dict):
+            old_value = _deep_merge_dicts(new_value, old_value)
+        _set_nested(config, new_path, old_value)
         warn(old_path, new_path)
+
+
+def _require_single_value(path: str, value: Any) -> Any:
+    """Return a scalar config value; reject multi-value lists from former wildcards.
+
+    A one-element list/tuple is unwrapped (legacy ``scenario.demand: ["AB"]`` /
+    ``export.h2export: [10]``). Multiple values raise ``ValueError``: these keys
+    are no longer wildcards and cannot be swept in one run.
+    """
+    if isinstance(value, (list, tuple)):
+        if len(value) != 1:
+            raise ValueError(
+                f"'{path}' must be a single value (got {list(value)!r}). "
+                f"The former {{{path.split('.')[-1]}}} wildcard was removed; "
+                "run separate configs or set run.name for each scenario."
+            )
+        return value[0]
+    return value
+
+
+def _migrate_demand_and_h2export(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Migrate former ``{demand}`` / ``{h2export}`` wildcards to plain params.
+
+    ``scenario.demand`` moves to ``demand_data.scenario`` and is removed from
+    ``scenario`` so ``expand(**config["scenario"])`` no longer iterates a dead
+    wildcard. One-element legacy lists are unwrapped to scalars; multiple values
+    raise ``ValueError`` (these are no longer expandable wildcards).
+    """
+    scenario = config.get("scenario")
+    if isinstance(scenario, dict) and "demand" in scenario:
+        raw = scenario.pop("demand")
+        demand = _require_single_value("scenario.demand", raw)
+        _set_nested(config, "demand_data.scenario", demand)
+        warn("scenario.demand", "demand_data.scenario")
+
+    export = config.get("export")
+    if isinstance(export, dict) and "h2export" in export:
+        raw = export["h2export"]
+        was_list = isinstance(raw, (list, tuple))
+        export["h2export"] = _require_single_value("export.h2export", raw)
+        if was_list:
+            warn("export.h2export (list)", "export.h2export (scalar)")
+
+    # Validate new-style key (not covered by the scenario.demand migration above).
+    demand_data = config.get("demand_data")
+    if isinstance(demand_data, dict) and "scenario" in demand_data:
+        demand_data["scenario"] = _require_single_value(
+            "demand_data.scenario", demand_data["scenario"]
+        )
 
 
 def _migrate_co2_budget_base_value(
@@ -252,7 +331,10 @@ def migrate_config(
     Simple renames (including whole option dicts such as OSM settings) are listed
     in ``CONFIG_MIGRATIONS``. Special handlers cover ``co2_budget.co2base_value``
     (renames values, not just paths), ``sector.solar_thermal`` when it is still
-    a legacy bool flag, and ``fossil_reserves.{carrier}`` reserve values.
+    a legacy bool flag, ``fossil_reserves.{carrier}`` reserve values, and the
+    former ``{demand}`` / ``{h2export}`` wildcards
+    (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
+    scalar).
 
     Parameters
     ----------
@@ -277,6 +359,7 @@ def migrate_config(
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_fossil_reserves(config, _warn)
+    _migrate_demand_and_h2export(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
 
     return config
