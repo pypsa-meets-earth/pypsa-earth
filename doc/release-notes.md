@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Remove `demand` and `h2export` wildcards from sector model [PR #1962](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1962)
+
 * Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
 
 * Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
@@ -153,6 +155,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add module-level and missing function docstrings and type hints to `scripts/_helpers.py` [PR #1857](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1857)
 
 * Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
+
+* Polishing time-dependent quantities in prepare sector network [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
 
 # PyPSA-Earth 0.8.0
 
