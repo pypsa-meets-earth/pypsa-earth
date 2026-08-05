@@ -121,7 +121,7 @@ CCGT           24.57    4.44        0.580           46.80
 OCGT           24.57    4.76        0.410           64.68
 ```
 
-**Gas fuel (~24.6 EUR/MWh<sub>th</sub>) is about 2.6× coal fuel (~9.6 EUR/MWh<sub>th</sub>)**: that gap is the root cause. CCGT and OCGT both pay the gas price, but OCGT's lower **efficiency (0.41 vs CCGT's 0.58)** stretches the same fuel cost over less electrical output, pushing its marginal cost well above CCGT's.
+**Gas fuel cost (~24.6 EUR/MWh<sub>th</sub>) is about 2.6 times coal fuel cost (~9.6 EUR/MWh<sub>th</sub>)**: that gap is the root cause. CCGT and OCGT both pay the gas price, but OCGT's lower efficiency than CCGT's **(OCGT - 0.41 ; CCGT - 0.58)** stretches the same fuel cost over less electrical output, pushing its marginal cost well above CCGT's.
 
 ---
 
@@ -278,9 +278,9 @@ Generator    Onshore Wind            1.34
 | Load shedding | Roughly **unchanged** from Part 4 (~7.7 TWh), a **network** issue (isolated buses), not a costs issue; fixed in [Part 6](6-network-topology.md) |
 | Hydro / VRE | Largely unchanged (near-zero marginal cost; constrained by profiles) |
 
-That is the honest result: sourced Kazakhstan fuel and O&amp;M data still make coal the cheaper option on the margin, so this model does **not** reproduce KEGOC's observed ~22 TWh/yr of gas generation through costs alone; if anything, gas supply drops slightly further. In practice much of Kazakhstan's gas fleet is combined-heat-and-power (CHP) serving district heat demand, or otherwise committed under contracts rather than pure economic merit order: behaviour a marginal-cost override cannot capture. Closing this gap credibly would mean modelling that constraint directly (for example a must-run floor or heat-linked dispatch for gas CHP), not further fuel-price tuning; that is a candidate for a future tutorial, alongside a policy-driven CO₂ price.
+That is the honest result: sourced Kazakhstan fuel and O&amp;M data still make coal the cheaper option on the margin. This model does **not** reproduce KEGOC's real ~22 TWh/yr of gas generation through costs alone; if anything, gas supply drops slightly further. In practice much of Kazakhstan's gas fleet is combined-heat-and-power (CHP) serving district heat demand, or otherwise committed under contracts rather than pure economic merit order: a behaviour that marginal-cost override cannot capture. Closing this gap credibly would mean modelling that constraint directly (for example a must-run floor or heat-linked dispatch for gas CHP), not further fuel-price tuning.
 
-A second confound sits in the network, not the costs: by default PyPSA-Earth lets the solver expand every line at capital cost (`scenario.ll: ["copt"]`), so coal can reach any bus without a local gas plant ever needing to run. [Part 7](7-transmission-network.md#step-5-stop-lines-from-being-cost-optimized-past-their-rating) turns that off.
+A second confusion that is not cost-related sits in the network. By default, PyPSA-Earth lets the solver expand every transmission line at capital cost (`scenario.ll: ["copt"]`). Therefore, coal can reach any bus without a local gas plant ever needing to dispatch. This is further discussed in [Part 7](7-transmission-network.md#step-5-stop-lines-from-being-cost-optimized-past-their-rating) where this setting is turned off.
 
 ---
 
