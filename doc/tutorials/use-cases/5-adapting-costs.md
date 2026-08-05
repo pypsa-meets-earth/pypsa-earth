@@ -11,7 +11,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-By the end of [Part 4](4-generation-data.md) the model has the right **demand** and **fleet size**: installed coal and gas capacity sit near KEGOC 2020. Dispatch does **not**: the model runs almost entirely on coal, and on top of that still sheds **~7.7 TWh** of load on electrically isolated buses, a **network** problem addressed in [Part 6](6-network-topology.md) and [Part 7](7-transmission-network.md). This tutorial checks the piece that is independent of network topology: **is the coal-over-gas dispatch actually explained by fuel and O&amp;M costs?** Rather than assume the answer, we replace the generic **technology-data** defaults with real Kazakhstan-specific fuel and O&amp;M data and let the numbers speak.
+By the end of [Part 4](4-generation-data.md) the model has the right **demand** and **fleet size**: installed coal and gas capacity sit near KEGOC 2020. Dispatch does **not**: the model runs almost entirely on coal. This tutorial checks the piece that is independent of network topology: **is the coal-over-gas dispatch actually explained by fuel and O&amp;M costs?** Rather than assume the answer, we replace the generic **technology-data** defaults with real Kazakhstan-specific fuel and O&amp;M data and let the numbers speak.
 
 After the custom fleet, annual **Supply** still looks roughly like:
 
