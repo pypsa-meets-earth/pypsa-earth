@@ -243,15 +243,11 @@ Add sector based technologies to the PyPSA network, including:
 import logging
 import os
 import re
-from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
 import pypsa
-import pytz
-import ruamel.yaml
-import xarray as xr
 from _helpers import (
     BASE_DIR,
     create_dummy_data,
@@ -263,11 +259,8 @@ from _helpers import (
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
 )
 from prepare_network import add_co2limit
-from prepare_transport_data import prepare_transport_data
 
 logger = logging.getLogger(__name__)
 
@@ -1272,21 +1265,6 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
             carrier="solid biomass transport",
         )
 
-    # n.madd(
-    #         "Link",
-    #         urban_central + " urban central solid biomass CHP",
-    #         bus0=spatial.biomass.df.loc[urban_central, "nodes"].values,
-    #         bus1=urban_central,
-    #         bus2=urban_central + " urban central heat",
-    #         carrier="urban central solid biomass CHP",
-    #         p_nom_extendable=True,
-    #         capital_cost=costs.at[key, "fixed"] * costs.at[key, "efficiency"],
-    #         marginal_cost=costs.at[key, "VOM"],
-    #         efficiency=costs.at[key, "efficiency"],
-    #         efficiency2=costs.at[key, "efficiency-heat"],
-    #         lifetime=costs.at[key, "lifetime"],
-    #     )
-
     # AC buses with district heating
     urban_central = n.buses.index[n.buses.carrier == "urban central heat"]
     if not urban_central.empty and options["chp"]:
@@ -1934,8 +1912,6 @@ def add_industry(
 
     # 1e6 to convert TWh to MWh
 
-    # industrial_demand.reset_index(inplace=True)
-
     # Add carrier Biomass
 
     n.madd(
@@ -2027,9 +2003,7 @@ def add_industry(
     n.madd(
         "Link",
         spatial.gas.industry,
-        # bus0="Earth gas",
         bus0=spatial.gas.nodes,
-        # bus1="gas for industry",
         bus1=spatial.gas.industry,
         bus2="co2 atmosphere",
         carrier="gas for industry",
@@ -2041,8 +2015,6 @@ def add_industry(
         n.madd(
             "Link",
             spatial.gas.industry_cc,
-            # suffix=" gas for industry CC",
-            # bus0="Earth gas",
             bus0=spatial.gas.nodes,
             bus1=spatial.gas.industry,
             bus2="co2 atmosphere",
@@ -2071,7 +2043,7 @@ def add_industry(
             suffix=" H2 for industry",
             bus=spatial.nodes + " H2",
             carrier="H2 for industry",
-            p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
+            p_set=industrial_demand["hydrogen"] / 8760,
         )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -2094,9 +2066,7 @@ def add_industry(
     co2 = (
         n.loads.loc[spatial.nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
-        # - industrial_demand["process emission from feedstock"].sum()
-        # / 8760
-    )
+    )  # No division by 8760 because p_set is already in MW
 
     n.add(
         "Load",
@@ -2516,8 +2486,7 @@ def add_land_transport(
         co2 = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].sum().sum()
-            / 8760
+            * transport[spatial.nodes].mean().sum()
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -3326,8 +3295,7 @@ def add_residential(
         p_set=p_set_oil,
     )
 
-    # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
+    co2 = p_set_oil.mean().sum() * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3354,8 +3322,7 @@ def add_residential(
         p_set=p_set_gas,
     )
 
-    # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
+    co2 = p_set_gas.mean().sum() * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3670,18 +3637,12 @@ def add_custom_water_cost(n: pypsa.Network) -> None:
             )
         )
         water_costs = water_costs.filter(like=country, axis=0).loc[spatial.nodes]
-        electrolysis_links = n.links.filter(like=country, axis=0).filter(
-            like="lectrolysis", axis=0
-        )
 
         elec_index = n.links[
             (n.links.carrier == "H2 Electrolysis")
             & (n.links.bus0.str.contains(country))
         ].index
         n.links.loc[elec_index, "marginal_cost"] = water_costs.values
-        # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0)["marginal_cost"] = water_costs.values
-        # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).apply(lambda x: water_costs[x.index], axis=0)
-        # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
 
 def add_rail_transport(
@@ -3867,11 +3828,12 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            ll="copt",
+            opts="CCL-Co2L-24h",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="144h",
             discountrate=0.071,
+            configfile="test/config.sector.yaml",
         )
 
     # Load population layout

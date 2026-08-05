@@ -154,6 +154,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
 
+* Polishing time-dependent quantities in prepare sector network [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
