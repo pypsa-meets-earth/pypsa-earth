@@ -1134,7 +1134,7 @@ def attach_existing_batteries(
     -------
     None
     """
-    batteries = ppl.query('carrier == "battery"')
+    batteries = ppl.query('carrier == "battery" and technology == "Li"')
     if batteries.empty:
         logger.info("No existing batteries found in powerplants.csv.")
         return
