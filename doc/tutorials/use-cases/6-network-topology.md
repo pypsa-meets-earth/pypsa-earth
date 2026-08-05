@@ -11,7 +11,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities. [Part 5](5-adapting-costs.md) then replaced generic technology-data costs with sourced Kazakhstan fuel and O&M data, and found that real economics still favor coal, so the coal/gas split is not primarily a costs problem. The model still **sheds about 7.7 TWh of load**, though: roughly 7–8% of Kazakhstan's annual demand, essentially unchanged since Part 4. Load shedding means the optimiser could not serve demand at some buses in some hours, so it "dropped" that load at a very high penalty price. A validated fleet with real dispatch economics that still sheds load is a signal that the problem is **not generation or dispatch economics** but the **network** the generation sits on.
+By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities. [Part 5](5-adapting-costs.md) then replaced generic technology-data costs with sourced Kazakhstan fuel and O&M data, and found that country-specific economics still favor coal, so the coal/gas split is not primarily a costs problem. The model still **sheds about 7.7 TWh of load**, though: roughly 7–8% of Kazakhstan's annual demand, essentially unchanged since Part 4. Load shedding means the optimiser could not serve demand at some buses in some hours, so it "dropped" that load at a very high penalty price. A validated fleet with country-specific dispatch economics that still sheds load is a signal that the problem is **not generation or dispatch economics** but the **network** the generation sits on.
 
 In this tutorial we diagnose the cause, one or more **electrically isolated sub-networks**, and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
@@ -116,7 +116,7 @@ Simplification has three settings for isolated sub-networks under **`clustering.
 |---|---|---|
 | `p_threshold_drop_isolated` | **MW** (mean load) | **Deletes** islands whose total mean load is below the threshold. The load *disappears* from the model. |
 | `p_threshold_merge_isolated` | **MW** (mean load) | Collapses small islands into **one isolated bus per country**, still disconnected from the backbone. |
-| `s_threshold_fetch_isolated` | **share** of country load | Attaches islands whose share is below the threshold to the **nearest backbone bus**, creating a real electrical connection. |
+| `s_threshold_fetch_isolated` | **share** of country load | Attaches islands whose share is below the threshold to the **nearest backbone bus**, creating an electrical connection. |
 
 The critical distinction:
 
@@ -126,8 +126,8 @@ The critical distinction:
 
 **Defaults in `config.default.yaml`:** merge is **on** (`300` MW) and fetch is **off** (`false`). Nothing reconnects stranded islands, which is why load shedding persists after Part 4 (and Part 5's cost update does not change that; it is a connectivity problem, not a price problem).
 
-!!! note "This is a modelling simplification, not a real line"
-    `fetch` does **not** build a physical line. It re-assigns the stranded load (and any generation) to the geographically nearest connected bus so the linear program can balance it. The load is served, but its electrical location is approximated: a modelling shortcut, not a real grid connection.
+!!! note "This is a modelling simplification, not a physical line"
+    `fetch` does **not** build a physical line. It re-assigns the stranded load (and any generation) to the geographically nearest connected bus so the linear program can balance it. The load is served, but its electrical location is approximated: a modelling shortcut, not a physical grid connection.
 
 ---
 

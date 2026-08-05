@@ -11,7 +11,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 ## Introduction
 
-By the end of [Part 4](4-generation-data.md) the model has the right **demand** and **fleet size**: installed coal and gas capacity sit near KEGOC 2020. Dispatch does **not**: the model runs almost entirely on coal. This tutorial checks the piece that is independent of network topology: **is the coal-over-gas dispatch actually explained by fuel and O&amp;M costs?** Rather than assume the answer, we replace the generic **technology-data** defaults with real Kazakhstan-specific fuel and O&amp;M data and let the numbers speak.
+By the end of [Part 4](4-generation-data.md) the model has the right **demand** and **fleet size**: installed coal and gas capacity sit near KEGOC 2020. Dispatch does **not**: the model runs almost entirely on coal. This tutorial checks the piece that is independent of network topology: **is the coal-over-gas dispatch actually explained by fuel and O&amp;M costs?** Rather than assume the answer, we replace the generic [technology-data](https://github.com/PyPSA/technology-data) defaults (European reference assumptions) with Kazakhstan-specific fuel and O&amp;M data and let the numbers speak.
 
 After the custom fleet, annual **Supply** still looks roughly like:
 
@@ -22,14 +22,14 @@ After the custom fleet, annual **Supply** still looks roughly like:
 | Hydro | ~7 | ~9.5 |
 | Solar / wind | ~1 / ~1.3 | ~1.3 / ~1.1 |
 
-**~5.2 GW** of gas capacity sits in the network, but the optimiser barely uses it. With a fixed fleet, the underlying **linear program (LP)** is a **merit-order** problem: generators with lower **marginal cost** (EUR/MWh) are dispatched first. Default **technology-data** fuel prices make **coal cheaper than gas**, so coal fills most hours. That holds regardless of network topology (the merit order applies wherever generation and demand can reach each other), so it is worth checking against real Kazakhstan cost data now, before Parts 6–7 rebuild the grid.
+**~5.2 GW** of gas capacity sits in the network, but the optimiser barely uses it. With a fixed fleet, the underlying **linear program (LP)** is a **merit-order** problem: generators with lower **marginal cost** (EUR/MWh) are dispatched first. Default **technology-data** fuel prices make **coal cheaper than gas**, so coal fills most hours. That holds regardless of network topology, because cost ranking rather than connectivity decides dispatch order between connected buses, so it is worth checking against Kazakhstan-specific cost data now, before Parts 6–7 rebuild the grid.
 
 In this tutorial we:
 
-1. Inspect the cost database and the marginal costs attached to generators.
-2. Compute real **marginal costs** for Kazakhstan from sourced fuel and O&amp;M data.
-3. Override **`costs.marginal_cost`** with those values.
-4. Re-solve and check whether real-world costs actually explain the coal/gas split.
+1. Inspect the default **marginal costs** on the generators in the solved network.
+2. Compute country-specific **marginal costs** for Kazakhstan from sourced fuel and O&amp;M data.
+3. Override **`costs.marginal_cost`** with computed marginal costs from step 2.
+4. Re-solve and check whether country-specific costs actually explain the coal/gas split.
 
 Everything lives under **`costs`** in the config. Changing it re-runs **`process_cost_data`** and everything that consumes `resources/KZ/costs_*_elec.csv`, including `add_electricity` and the solve.
 
@@ -58,11 +58,14 @@ add_electricity      →  attaches generators with those marginal costs
 **Formula used for thermal plants:**
 
 \[
-\text{marginal_cost} = \text{VOM} + \frac{\text{fuel}}{\text{efficiency}}
+\text{marginal_cost} = \text{VOM} + \frac{\text{fuel cost}}{\text{efficiency}}
 \]
 
 
-Fuel is in **EUR/MWh<sub>th</sub>**; efficiency converts it to electrical MWh. CCGT and OCGT inherit the **`gas`** fuel price; coal uses the **`coal`** fuel price.
+- **Fuel cost** (`fuel` in the cost tables) is in **EUR/MWh<sub>th</sub>**.
+- **Efficiency** converts that thermal fuel cost to electrical MWh.
+- **CCGT** and **OCGT** inherit the **`gas`** fuel price.
+- **Coal** uses the **`coal`** fuel price.
 
 See the [costs user guide](../../user-guide/costs.md) and [configuration reference](../../user-guide/configuration.md#costs).
 
@@ -77,23 +80,24 @@ import pypsa
 
 n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
 
-print(n.generators.groupby("carrier")[["marginal_cost", "capital_cost"]].mean())
+print(n.generators.groupby("carrier")["marginal_cost"].mean())
 ```
 
-With European defaults you should see something like (**EUR/MWh** for `marginal_cost`):
+With European defaults you should see something like (**EUR/MWh**):
 
 ```
-               marginal_cost   capital_cost
 carrier
-CCGT                46.81         104788
-OCGT                64.69          47719
-coal                30.11         337208
-load shedding   100000.01              0
-offwind-ac           0.03         208151
-offwind-dc           0.02         221309
-onwind               0.02         101644
-solar                0.02          39296
+CCGT                46.81
+OCGT                64.69
+coal                30.11
+load shedding   100000.01
+offwind-ac           0.03
+offwind-dc           0.02
+onwind               0.02
+solar                0.02
 ```
+
+Generators also carry a **`capital_cost`** (annuitized investment), but with the Part 4 locked fleet it does not enter the objective; see the note in Step 4 for when it would matter.
 
 **Coal (~30)** is cheaper than **CCGT (~47)** and much cheaper than **OCGT (~65)**. Renewables are near zero. **`load shedding`** sits at the default penalty price (**100,000 EUR/MWh**): it only dispatches when nothing else can meet demand, which is why it stays out of the normal merit order entirely. With no CO₂ price and no heat demand for CHPs, the optimiser runs coal first and leaves gas idle, exactly the Part 4 generation gap.
 
@@ -130,11 +134,11 @@ costs:
   year: 2020
 ```
 
-This switches which `costs_{year}.csv` is retrieved and processed. Absolute fuel numbers may shift slightly by vintage; the **relative** coal-vs-gas gap usually remains. You still need Step 3 to bring in country-specific cost data.
+This switches which `costs_{year}.csv` is retrieved and processed. The fuel prices in the 2020 file may differ a little from the 2030 defaults, but coal usually stays cheaper than gas relative to each other. You still need Step 3 to bring in country-specific cost data.
 
 ---
 
-## Step 3: Compute real marginal costs for Kazakhstan
+## Step 3: Compute country-specific marginal costs for Kazakhstan
 
 Generic technology-data defaults are a reasonable starting point, but country-specific data is better when you can find it. As an example, [Gasilov (2025), "Cost-optimal energy system development pathways for Kazakhstan," QazaqGreen](https://qazaqgreen.com/en/journal-qazaqgreen/industry-news/2994/) gives, for existing plants:
 
@@ -146,23 +150,24 @@ Generic technology-data defaults are a reasonable starting point, but country-sp
 
 with 1 USD ≈ 500 KZT (the article's own exchange rate).
 
-**Watch the units.** This fuel price already accounts for efficiency, unlike the `fuel` term in Step 1's formula (`VOM + fuel/η`), which is EUR/MWh<sub>th</sub> *before* efficiency. So rather than overriding `costs.fuel`, we compute `marginal_cost` ourselves and override that directly.
+**Watch the units.** This fuel price already accounts for efficiency, unlike the fuel-cost term in the formula above (`VOM + fuel cost / η`), which is EUR/MWh<sub>th</sub> *before* efficiency. So rather than overriding `costs.fuel`, we compute `marginal_cost` ourselves and override that directly.
 
 Since Fuel and O&amp;M are already on an electricity basis, no efficiency division is needed: just add them together to get the marginal cost:
 
-| Carrier | Marginal cost | → USD/MWh (×2, since 1 KZT/kWh = 1,000 KZT/MWh ÷ 500 KZT/USD) | → EUR/MWh\* |
+| Carrier | Marginal cost | → USD/MWh | → EUR/MWh |
 |---|---|---|---|
 | Coal | 2.8 + 6.0 = 8.8 KZT/kWh | 17.6 | ≈ 16 |
 | CCGT | 24.5 + 3.0 = 27.5 KZT/kWh | 55.0 | ≈ 51 |
 | OCGT | 29.9 + 4.0 = 33.9 KZT/kWh | 67.8 | ≈ 62 |
 
-\*Illustrative EUR conversion (`output_currency` default is **EUR**); use your own current USD→EUR rate for real work.
+!!! note "Unit conversion"
+    Multiply KZT/kWh by **2** to get USD/MWh: 1 KZT/kWh = 1,000 KZT/MWh, and 1,000 ÷ 500 KZT/USD = 2 USD/MWh. The EUR column is an exemplary conversion (`output_currency` default is **EUR**); use your own current USD→EUR rate for your study.
 
-**This does not flip the merit order.** Coal (~16 EUR/MWh) is still roughly **3×** cheaper than CCGT (~51), an even wider gap than the technology-data default (~30 vs ~47 in Step 1), mainly because real coal costs come in *below* the default, not because gas is pricier. Real Kazakhstan fuel and O&amp;M data do not, on their own, explain why KEGOC dispatches ~22 TWh/yr of gas.
+**This does not flip the merit order.** Coal (~16 EUR/MWh) is still roughly **3×** cheaper than CCGT (~51). That gap is even wider than with technology-data defaults (~30 vs ~47 in Step 1), because the sourced Kazakhstan coal price is lower than the European default, while gas is not much higher. So Kazakhstan-specific fuel and O&amp;M data alone do not explain why KEGOC dispatches ~22 TWh/yr of gas.
 
 ---
 
-## Step 4: Apply the real costs with `costs.marginal_cost`
+## Step 4: Apply the country-specific costs with `costs.marginal_cost`
 
 Because the sourced numbers are already electricity-basis EUR/MWh<sub>el</sub> values (not a thermal fuel price), write them under **`costs.marginal_cost`** rather than `costs.fuel`. This runs **after** the fuel formula and **replaces** the computed marginal cost for that technology. **`costs.capital_cost`** works the same way: a direct override of the annuitized investment cost, if you have a sourced CAPEX/annuity figure instead of raw `investment` / `lifetime` / `FOM`:
 
@@ -189,7 +194,7 @@ The same per-technology override pattern works for **`costs.VOM`**, **`costs.FOM
 
 ## Step 5: Complete your config
 
-Merge with Parts 3–4 (`load_options`, `electricity`, …):
+Merge the `costs` changes above with your Parts 3–4 settings (`load_options`, `electricity`, and so on). The combined config looks like:
 
 ```yaml
 --8<-- "tutorials/use-cases/snippets/config.KZ.costs.yaml"
@@ -203,7 +208,7 @@ The new block is only **`costs`**. Everything else should already be in your wor
 
 ## Step 6: Re-run the workflow
 
-Cost changes invalidate **`process_cost_data`** and every downstream rule that reads the elec cost table (including **`add_electricity`** and **`solve_network`**). Cutouts and OSM stay cached:
+We now re-run the electricity workflow with the updated `config.KZ.yaml`. Because the `costs` options changed, Snakemake will re-execute **`process_cost_data`** and every downstream rule that reads the elec cost table (including **`add_electricity`** and **`solve_network`**). Cutouts and OSM stay cached:
 
 ```bash
 snakemake --cores 4 solve_all_networks --configfile config.KZ.yaml
@@ -224,7 +229,7 @@ If the numbers don't match, check for a typo in the carrier name or config inden
 
 ## Step 7: Verify the generation mix
 
-Reload the solved network and compare **Supply** (TWh) and **marginal costs**:
+To check whether the country-specific costs changed the coal/gas dispatch, and to compare the resulting energy balance with KEGOC 2020, reload the solved network and inspect **marginal costs** and **Supply** (TWh):
 
 ```python
 import pypsa
@@ -267,13 +272,13 @@ Generator    Onshore Wind            1.34
 
 | Check | Expectation |
 |---|---|
-| Merit order | `coal.marginal_cost` (~16 EUR/MWh) still **below** `CCGT`/`OCGT` (~51 / ~62 EUR/MWh); confirmed, real data does **not** flip it |
-| Gas supply | Stays low (**~0.2 TWh** above), even lower than Part 4's ~0.6 TWh; real costs do not push gas up |
+| Merit order | `coal.marginal_cost` (~16 EUR/MWh) still **below** `CCGT`/`OCGT` (~51 / ~62 EUR/MWh); confirmed, country-specific data does **not** flip it |
+| Gas supply | Stays low (**~0.2 TWh** above), even lower than Part 4's ~0.6 TWh; country-specific costs do not push gas up |
 | Coal supply | Stays close to **~89 TWh** |
 | Load shedding | Roughly **unchanged** from Part 4 (~7.7 TWh), a **network** issue (isolated buses), not a costs issue; fixed in [Part 6](6-network-topology.md) |
 | Hydro / VRE | Largely unchanged (near-zero marginal cost; constrained by profiles) |
 
-That is the honest result: sourced Kazakhstan fuel and O&amp;M data still make coal the cheaper option on the margin, so this model does **not** reproduce KEGOC's real ~22 TWh/yr of gas generation through costs alone; if anything, gas supply drops slightly further. In practice much of Kazakhstan's gas fleet is combined-heat-and-power (CHP) serving district heat demand, or otherwise committed under contracts rather than pure economic merit order: behaviour a marginal-cost override cannot capture. Closing this gap credibly would mean modelling that constraint directly (for example a must-run floor or heat-linked dispatch for gas CHP), not further fuel-price tuning; that is a candidate for a future tutorial, alongside a policy-driven CO₂ price.
+That is the honest result: sourced Kazakhstan fuel and O&amp;M data still make coal the cheaper option on the margin, so this model does **not** reproduce KEGOC's observed ~22 TWh/yr of gas generation through costs alone; if anything, gas supply drops slightly further. In practice much of Kazakhstan's gas fleet is combined-heat-and-power (CHP) serving district heat demand, or otherwise committed under contracts rather than pure economic merit order: behaviour a marginal-cost override cannot capture. Closing this gap credibly would mean modelling that constraint directly (for example a must-run floor or heat-linked dispatch for gas CHP), not further fuel-price tuning; that is a candidate for a future tutorial, alongside a policy-driven CO₂ price.
 
 A second confound sits in the network, not the costs: by default PyPSA-Earth lets the solver expand every line at capital cost (`scenario.ll: ["copt"]`), so coal can reach any bus without a local gas plant ever needing to run. [Part 7](7-transmission-network.md#step-5-stop-lines-from-being-cost-optimized-past-their-rating) turns that off.
 
@@ -284,7 +289,7 @@ A second confound sits in the network, not the costs: by default PyPSA-Earth let
 | Step | Config key | Role |
 |---|---|---|
 | 2 | `costs.year` | Use **2020** technology-data for the validation year |
-| 3 | *(sourced Kazakhstan fuel + O&amp;M data)* | Compute the real marginal cost per technology (already EUR/MWh<sub>el</sub>) |
+| 3 | *(sourced Kazakhstan fuel + O&amp;M data)* | Compute the country-specific marginal cost per technology (already EUR/MWh<sub>el</sub>) |
 | 4 | `costs.marginal_cost.*` | Apply the computed values, replacing technology-data's generic figures |
 
-Marginal costs now reflect sourced Kazakhstan fuel and O&amp;M data instead of generic technology-data defaults, but the coal/gas dispatch split barely moves, because real costs still favor coal. The gap to KEGOC's observed gas generation is therefore **not primarily an economics problem** in this model. The model still sheds **~7.7 TWh** of load on electrically isolated buses; that is a separate **network** problem. **[Part 6](6-network-topology.md)** diagnoses and fixes those isolated sub-networks, and **[Part 7](7-transmission-network.md)** then rebuilds the transmission network itself with Kazakhstan-specific voltage levels and line ratings.
+Marginal costs now reflect sourced Kazakhstan fuel and O&amp;M data instead of generic technology-data defaults, but the coal/gas dispatch split barely moves, because country-specific costs still favor coal. The gap to KEGOC's observed gas generation is therefore **not primarily an economics problem** in this model. The model still sheds **~7.7 TWh** of load on electrically isolated buses; that is a separate **network** problem. **[Part 6](6-network-topology.md)** diagnoses and fixes those isolated sub-networks, and **[Part 7](7-transmission-network.md)** then rebuilds the transmission network itself with Kazakhstan-specific voltage levels and line ratings.

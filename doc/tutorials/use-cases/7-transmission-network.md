@@ -20,7 +20,7 @@ In this tutorial we improve the **base transmission network** that PyPSA-Earth b
 3. **KZ line types**: conductor ratings that reflect older, single-circuit lines at 110 kV and 220 kV.
 4. **Non-extendable lines**: stop the solver from cost-optimizing past the ratings from (3).
 
-These settings live upstream in the workflow (`clean_osm_data`, `base_network`, `electricity`, `lines`, `scenario.ll`). Changing them triggers a **full rebuild** of the grid, slower than Part 6, but it gives a base topology and line capacities that are closer to Kazakhstan's real network before clustering and solving.
+These settings live upstream in the workflow (`clean_osm_data`, `base_network`, `electricity`, `lines`, `scenario.ll`). Changing them triggers a **full rebuild** of the grid, slower than Part 6, but it gives a base topology and line capacities that are closer to Kazakhstan's physical network before clustering and solving.
 
 Keep the Part 6 **`clustering`** block and the Part 5 **`costs`** block. Even with a better OSM grid, some small islands may remain; `merge` off, `fetch` on, and `drop` off still help preserve both served load and island generation. The `costs.marginal_cost` overrides from Part 5 are generator attributes, independent of topology, so they carry through the rebuild unchanged.
 
@@ -195,7 +195,7 @@ The solved network is written to `results/KZ/networks/elec_s_10_ec_lv1.0_6h.nc`.
 
 ## Step 8: Verify the solve
 
-Reload the solved network in `analyze_kz.ipynb`. The OSM rebuild changes line capacities and topology, so check whether [Part 6](6-network-topology.md#step-7-verify-the-fix)'s zero-shedding result still holds now that lines carry realistic, non-extendable ratings, and that demand lands on the KEGOC target. Since `scale: 0.994` already carried over from [Part 6](6-network-topology.md#step-8-final-calibration-of-scale), no further calibration is needed here:
+Reload the solved network in `analyze_kz.ipynb`. The OSM rebuild changes line capacities and topology, so check whether [Part 6](6-network-topology.md#step-7-verify-the-fix)'s zero-shedding result still holds now that lines carry country-specific, non-extendable ratings, and that demand lands on the KEGOC target. Since `scale: 0.994` already carried over from [Part 6](6-network-topology.md#step-8-final-calibration-of-scale), no further calibration is needed here:
 
 ```python
 weights = n.snapshot_weightings.generators
@@ -234,7 +234,7 @@ Generator    Open-Cycle Gas         2.34
              Load shedding          0.08
 ```
 
-| Carrier | KEGOC 2020 | Part 5 (costs only) | Part 7 (+ real transmission) |
+| Carrier | KEGOC 2020 | Part 5 (costs only) | Part 7 (+ country-specific transmission) |
 |---|---|---|---|
 | Coal | ~74.5 TWh | 89.89 TWh | **75.02 TWh** |
 | Gas (CCGT + OCGT) | **~21.7 TWh** | 0.20 TWh | **21.89 TWh** |
@@ -244,7 +244,7 @@ Generator    Open-Cycle Gas         2.34
 | Load shedding | n/a | 7.72 TWh | 0.08 TWh |
 | **Total** | **~108.1 TWh** | ~107.3 TWh | **107.35 TWh** |
 
-This is the payoff of Part 7: Part 5 already showed that sourced Kazakhstan costs alone do **not** explain KEGOC's gas dispatch; coal stayed cheaper on the margin regardless. Once lines carry realistic KZ ratings (Step 4) and can no longer be cost-optimized around (Step 5), the picture flips: **gas lands at ~21.9 TWh**, matching KEGOC's ~21.7 TWh almost exactly, and coal drops by ~15 TWh. The gap was predominantly a **transmission-congestion** problem, not an economics problem: coal-heavy corridors simply can't deliver everywhere once the grid is realistically rated, so local gas plants pick up the difference. The residual **0.08 TWh** load shedding is the honest cost of that realism: a still-imperfect base network occasionally can't route around a binding line at all.
+This is the payoff of Part 7: Part 5 already showed that sourced Kazakhstan costs alone do **not** explain KEGOC's gas dispatch; coal stayed cheaper on the margin regardless. Once lines carry country-specific KZ ratings (Step 4) and can no longer be cost-optimized around (Step 5), the picture flips: **gas lands at ~21.9 TWh**, matching KEGOC's ~21.7 TWh almost exactly, and coal drops by ~15 TWh. The gap was predominantly a **transmission-congestion** problem, not an economics problem: coal-heavy corridors simply can't deliver everywhere once the grid uses those ratings, so local gas plants pick up the difference. The residual **0.08 TWh** load shedding is the honest cost of that fidelity: a still-imperfect base network occasionally can't route around a binding line at all.
 
 ---
 
@@ -262,4 +262,4 @@ This is the payoff of Part 7: Part 5 already showed that sourced Kazakhstan cost
 
 The base grid now reflects Kazakhstan's post-Soviet voltage scale and more conservative line ratings. Part 6's simplification settings (merge off, fetch on, drop off) remain a useful safety net for OSM gaps that 35 kV alone cannot close, and `scale: 0.994` carries through unchanged since Part 6 already finalized it.
 
-Demand, fleet, real-world costs (Part 5), network topology (Part 6), and now transmission detail are all grounded in Kazakhstan-specific data and KEGOC 2020 evidence. And the coal/gas dispatch split, the open question since Part 4, is now resolved: Part 5 showed costs alone don't explain it (coal stays cheaper on the margin), but with realistic, non-extendable transmission (Steps 4–5 here), gas lands close to KEGOC's ~22 TWh target. The dispatch gap was a **network** problem, not an economics problem. A small residual of load shedding remains as the honest cost of that realism, and a natural follow-up would be exploring must-run/CHP-style constraints or a CO₂ price/limit on top of this validated baseline.
+Demand, fleet, country-specific costs (Part 5), network topology (Part 6), and now transmission detail are all grounded in Kazakhstan-specific data and KEGOC 2020 evidence. And the coal/gas dispatch split, the open question since Part 4, is now resolved: Part 5 showed costs alone don't explain it (coal stays cheaper on the margin), but with country-specific, non-extendable transmission (Steps 4–5 here), gas lands close to KEGOC's ~22 TWh target. The dispatch gap was a **network** problem, not an economics problem. A small residual of load shedding remains as the honest cost of that fidelity, and a natural follow-up would be exploring must-run/CHP-style constraints or a CO₂ price/limit on top of this validated baseline.
