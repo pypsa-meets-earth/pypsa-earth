@@ -192,6 +192,7 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
 """
 import functools
 import os
+import sys
 import time
 from math import isnan
 
@@ -638,6 +639,7 @@ if __name__ == "__main__":
             xr.DataArray(
                 dims=["plant", "time"], coords={"plant": []}, name="inflow"
             ).to_netcdf(snakemake.output.profile)
+            sys.exit(0)
         else:
             # otherwise perform the calculations
             inflow = correction_factor * func(capacity_factor=True, **resource)
