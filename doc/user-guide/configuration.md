@@ -45,6 +45,8 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `build_osm_network` | `osm.build_osm_network` |
 | `cluster_options` | `clustering` |
 | `fossil_reserves.{carrier}` | `sector.{carrier}.reserves` |
+| `scenario.demand` *(list/string wildcard)* | `demand_data.scenario` *(single string; lists with more than one value error)* |
+| `export.h2export` *(list)* | `export.h2export` *(single scalar TWh/year; multi-value lists error)* |
 
 `{carrier}` is the fuel name (e.g. `oil`, `coal`, `gas`, `lignite`, `biomass`). Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
 
