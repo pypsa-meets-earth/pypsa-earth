@@ -4,8 +4,9 @@
 
 ### CHANGES TO CONFIG.TUTORIAL.YAML ###
 run:
-  name: "monte-carlo"
+  name: "test"
 
 monte_carlo:
   options:
     add_to_snakefile: true
+    samples: 5
