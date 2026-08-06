@@ -198,6 +198,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Recommend dedicated regional models for supported countries [#PR 1925](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1925)
+
 * Fix the Conda CI setup to consistently use the dynamically selected environment file [PR #1952](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1952)
 
 * Avoid excessive warnings when normalising hydrobasins [PR #1951](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1951)

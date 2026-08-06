@@ -51,6 +51,12 @@ config.update({"git_commit": get_last_commit_message(".")})
 # convert country list according to the desired region
 config["countries"] = create_country_list(config["countries"])
 
+print(
+    "The PyPSA meets Earth initiative also supports dedicated regional models. "
+    "See the documentation at "
+    "https://pypsa-earth.readthedocs.io/en/latest/user-guide/customization/basic-setup/"
+)
+
 # create a list of iteration steps, required to solve the experimental design
 # each value is used as wildcard input e.g. solution_{unc}
 config["scenario"]["unc"] = [
