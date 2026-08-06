@@ -1145,6 +1145,7 @@ def attach_existing_batteries(
     -------
     None
     """
+    # TODO: support more battery technologies beyond Li
     batteries = ppl.query('carrier == "battery" and technology == "Li"')
     if batteries.empty:
         logger.info("No existing batteries found in powerplants.csv.")
