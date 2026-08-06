@@ -29,7 +29,7 @@ fully_included_sources:
 - GEM
 - EESI: Fueltype != 'Hydro'  # European dataset (JRC); keeps Battery + Heat/Mechanical/Hydrogen Storage,
                              # excludes Hydro (Pumped Storage) to avoid double-counting with GEO/GPD/GEM.
-                             # Only 'battery' carrier is consumed today (add_electricity.py::attach_existing_batteries);
+                             # Only 'battery' carrier is currently supported (add_electricity.py::attach_existing_batteries);
                              # the rest are pre-staged for future storage-attachment work.
                              # Non-European countries get no data from this source.
 # - EXTERNAL_DATABASE
