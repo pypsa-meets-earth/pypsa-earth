@@ -5,4 +5,3 @@ clusters,--,cf. wildcards,``{clusters}`` spatial wildcard in ``cluster_network``
 opts,--,cf. wildcards,"``{opts}`` option wildcard (combine with ``-``): ``Co2L`` applies annual CO2 cap from ``co2.limit`` (default run is emission-constrained); temporal/gas limits in ``prepare_network``; CCL/EQ/BAU/SAFE in ``solve_network``; see opts.csv."
 planning_horizons,--,list of years,``{planning_horizons}`` year wildcard: investment year in ``prepare_sector_network``; brownfield grouping and myopic sequencing in ``solve_network``; costs year for overnight sector runs.
 sopts,--,cf. wildcards,``{sopts}`` sector-only wildcard in ``prepare_sector_network``: same role as ``nH`` in ``{opts}`` (e.g. ``144h`` resamples snapshots via ``average_every_nhours``).
-demand,--,cf. wildcards,``{demand}`` sector-only wildcard: labels sector demand inputs (energy totals transport industry shares) in resource file paths.
