@@ -27,6 +27,8 @@ The PyPSA meets Earth initiative also supports dedicated regional models:
 | BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN | [PyPSA-ASEAN](https://github.com/pypsa-meets-earth/pypsa-asean) |
 | US | [PyPSA-NorthAmerica](https://github.com/pypsa-meets-earth/pypsa-northamerica) |
 
+These community-maintained models are soft forks of PyPSA-Earth. Users are encouraged to test and contribute to them, and developers of other regional soft forks are welcome to have their models listed here.
+
 ## Configure `enable` section to download/build data
 
 For a successful model run, ensure the download of essential open-source data, including databundle and cost data, is activated in the `enable` section:
