@@ -26,6 +26,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add pixi as an alternative package manager for environment and dependency management, alongside the existing conda-based setup. [PR #1789](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1789)
 
+* Add docstrings and type hints to base_network.py [PR #1915](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1915)
+
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
@@ -197,6 +199,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation [PR #1610](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610)
 
 **Minor Changes and bug-fixing**
+
+* Recommend dedicated regional models for supported countries [#PR 1925](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1925)
 
 * Fix the Conda CI setup to consistently use the dynamically selected environment file [PR #1952](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1952)
 
