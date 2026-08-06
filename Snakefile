@@ -530,6 +530,7 @@ rule process_cost_data:
     params:
         costs=config["costs"],
         max_hours=config["electricity"]["max_hours"],
+        storage_techs=config["storage_techs"],
     input:
         network="networks/" + RDIR + "base.nc",
         costs=branch(
@@ -677,6 +678,7 @@ rule add_electricity:
         renewable=config["renewable"],
         length_factor=config["lines"]["length_factor"],
         existing_capacities=config["existing_capacities"],
+        battery_techs=config["storage_techs"]["battery"],
     input:
         **{
             f"profile_{tech}": "resources/"
@@ -883,7 +885,10 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
 
 rule add_extra_components:
     params:
+        storage_techs=config["storage_techs"],
         transmission_efficiency=config["sector"]["transmission_efficiency"],
+        electricity=config["electricity"],
+        csp_model=config["renewable"]["csp"]["csp_model"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
