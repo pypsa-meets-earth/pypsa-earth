@@ -15,6 +15,9 @@ By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capa
 
 In this tutorial we diagnose the cause, one or more **electrically isolated sub-networks**, and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
+!!! note "A PyPSA sub-network"
+    After `n.determine_network_topology()`, every bus is labelled with a `sub_network`. Buses in the same `sub_network` are electrically connected; buses in different sub-networks cannot exchange power. A healthy country model has **one** dominant AC sub-network (the "backbone") carrying almost all load.
+
 Everything in this part lives under **`clustering.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the Part 5 cost overrides.
 
 ---
@@ -23,7 +26,7 @@ Everything in this part lives under **`clustering.simplify_network`** in the con
 
 PyPSA-Earth builds the transmission grid from **[OpenStreetMap (OSM)](https://www.openstreetmap.org/)**, volunteer-mapped substations and power lines, downloaded in [Part 1](1-baseline-model.md). The model topology is derived from OSM data when it was downloaded, not an official KEGOC schematic.
 
-Two facts about the workflow combine to create the problem:
+The relevant rules in the workflow are as follows:
 
 ```
 build_demand_profiles  →  splits national demand across every substation bus
@@ -33,13 +36,12 @@ simplify_network       →  merges/clusters buses, then handles leftover islands
 … cluster, prepare, solve …
 ```
 
+Two facts about that workflow combine to create the isolation:
+
 1. **`build_demand_profiles`** takes the national annual total and distributes it across **all** substation buses using population and GDP weights, regardless on whether they are connected or not to the grid. Note that isolated networks may exist and appropriate tuning is recommended to capture the actual network under consideration.
 2. If OSM has no information of some lines or some geometries are incomplete, the OSM-derived network may artificially disconnect a portion of the network from another portion. In this case, each independent region defines its own **sub-network** (an electrical island). It still carries its share of demand, but no energy exchange is enabled and as such the demand of each sub-network must be fed with the generation available in the same sub-network.
 
 When an island's local generation cannot cover its local demand, the optimiser has no way to import power across the missing lines, so it **sheds** the unmet load. Nationally the capacity and demand totals look fine, but part of the country is starved.
-
-!!! note "A PyPSA sub-network"
-    After `n.determine_network_topology()`, every bus is labelled with a `sub_network`. Buses in the same `sub_network` are electrically connected; buses in different sub-networks cannot exchange power. A healthy country model has **one** dominant AC sub-network (the "backbone") carrying almost all load.
 
 ---
 
