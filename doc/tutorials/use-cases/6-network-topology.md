@@ -7,18 +7,18 @@ SPDX-License-Identifier: CC-BY-4.0
 # Part 6: Fix Isolated Nodes and Load Shedding
 
 !!! note
-    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 5](5-adapting-costs.md). Your `config.KZ.yaml` should include the Part 3 demand settings, the Part 4 generation fleet, and the Part 5 `costs` overrides, and you should have a solved network at `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
+    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 5](5-adapting-costs.md). Your `config.KZ.yaml` should include the Part 3 demand settings, the Part 4 generation fleet, and the Part 5 cost overrides. Lastly, you should have a solved network at `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
 
 ## Introduction
 
-By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities. [Part 5](5-adapting-costs.md) then replaced generic technology-data costs with sourced Kazakhstan fuel and O&M data, and found that country-specific economics still favor coal, so the coal/gas split is not primarily a costs problem. The model still **sheds about 7.7 TWh of load**, though: roughly 7–8% of Kazakhstan's annual demand, essentially unchanged since Part 4. Load shedding means the optimiser could not serve demand at some buses in some hours, so it "dropped" that load at a very high penalty price. A validated fleet with country-specific dispatch economics that still sheds load is a signal that the problem is **not generation or dispatch economics** but the **network** the generation sits on.
+By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capacities. [Part 5](5-adapting-costs.md) then replaced generic technology-data costs with sourced Kazakhstan fuel and O&M data, and found that country-specific economics still favor coal, so the coal/gas split is not primarily a costs problem. The model still **sheds about 7.7 TWh of load** which is roughly 7–8% of Kazakhstan's annual demand, essentially unchanged since Part 4. Load shedding means that the optimiser could not serve demand at some buses in some hours, so it "dropped" the load for these hours at a very high penalty price. A validated fleet with country-specific dispatch economics that still sheds load is a signal that the problem is **not generation or dispatch economics** but the **network** the generation sits on.
 
 In this tutorial we diagnose the cause, one or more **electrically isolated sub-networks**, and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
 !!! note "A PyPSA sub-network"
     After `n.determine_network_topology()`, every bus is labelled with a `sub_network`. Buses in the same `sub_network` are electrically connected; buses in different sub-networks cannot exchange power. A healthy country model has **one** dominant AC sub-network (the "backbone") carrying almost all load.
 
-Everything in this part lives under **`clustering.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the Part 5 cost overrides.
+Everything in this part lives under **`clustering.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the cost overrides.
 
 ---
 
