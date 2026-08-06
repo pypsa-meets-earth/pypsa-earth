@@ -101,7 +101,6 @@ if __name__ == "__main__":
             "build_industrial_distribution_key",
             clusters="4",
             planning_horizons=2030,
-            demand="AB",
             simpl="",
         )
 

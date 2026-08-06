@@ -2,8 +2,9 @@ electricity:
   # ----------------- Electricity generation -------------------
   extendable_carriers:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT] # Remove 'offwind-ac' and 'offwind-dc' for landlocked countries (e.g., Jordan, Austria, Switzerland)
-    StorageUnit: [] # battery, H2
-    Store: [battery, H2]
+    StorageUnit: [] # battery, H2, li-ion, vanadium, lfp, lair, pair, iron-air and more
+    Store: [battery, H2] # li-ion, vanadium, lfp, lair, pair, iron-air and more
+    # See all available options for Store and StorageUnit in https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#storage-technologies
     Link: [] # H2 pipeline
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
@@ -11,6 +12,12 @@ electricity:
 
   max_hours: # Storage duration [h]: fill time at max power for extendable battery/H2 storage
     battery: 6
+    "li-ion": 6
+    lfp: 6
+    vanadium: 10
+    lair: 12
+    pair: 24
+    "iron-air": 100
     H2: 168
 
   # ----------------- Existing powerplants -------------------
