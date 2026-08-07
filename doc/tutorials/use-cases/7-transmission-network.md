@@ -262,4 +262,19 @@ This is the payoff of Part 7: Part 5 already showed that sourced Kazakhstan cost
 
 The base grid now reflects Kazakhstan's post-Soviet voltage scale and more conservative line ratings. Part 6's simplification settings (merge off, fetch on, drop off) remain a useful safety net for OSM gaps that 35 kV alone cannot close, and `scale: 0.994` carries through unchanged since Part 6 already finalized it.
 
-Demand, fleet, country-specific costs (Part 5), network topology (Part 6), and now transmission detail are all grounded in Kazakhstan-specific data and KEGOC 2020 evidence. And the coal/gas dispatch split, the open question since Part 4, is now resolved: Part 5 showed costs alone don't explain it (coal stays cheaper on the margin), but with country-specific, non-extendable transmission (Steps 4–5 here), gas lands close to KEGOC's ~22 TWh target. The dispatch gap was a **network** problem, not an economics problem. A small residual of load shedding remains as the honest cost of that fidelity, and a natural follow-up would be exploring must-run/CHP-style constraints or a CO₂ price/limit on top of this validated baseline.
+Demand, fleet, country-specific costs (Part 5), network topology (Part 6), and now transmission detail are all grounded in Kazakhstan-specific data and KEGOC 2020 evidence. The coal/gas dispatch split, the open question since Part 4, is now resolved: Part 5 showed costs alone don't explain it (coal stays cheaper on the margin), but with country-specific, non-extendable transmission (Steps 4–5 here), gas lands close to KEGOC's ~22 TWh target. The dispatch gap was a **network** problem, not an economics problem. A small residual of load shedding remains as the honest cost of that fidelity.
+
+---
+
+## Conclusion
+
+This completes Parts 1–7 of the Kazakhstan use-case series: from a baseline solve through demand and fleet calibration, country-specific costs, isolated-node fixes, and transmission detail. You now have a validated electricity-only model grounded in KEGOC 2020 evidence.
+
+For other countries or further studies you may want to try options not covered here, for example:
+
+- **CO₂ limits or prices**, applied via `scenario.opts` (e.g. `Co2L`) and the `co2` block
+- **A custom busmap**, a user-supplied bus-to-cluster mapping instead of the algorithm-based clustering used so far, applied via `enable.custom_busmap`
+- **Alternative clustering**, grouping buses by administrative regions (e.g. GADM) instead of the electrical-distance clustering used so far, applied via `clustering.alternative_clustering`
+- **Capacity expansion**, re-enabled via `electricity.extendable_carriers` and `scenario.ll: ["copt"]`, once the baseline is trusted
+
+See the [configuration](../../user-guide/configuration.md) and [wildcards](../../user-guide/wildcards.md) guides for details. Feel free to experiment with these on your own.

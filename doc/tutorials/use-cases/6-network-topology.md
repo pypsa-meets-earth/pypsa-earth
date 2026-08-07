@@ -16,7 +16,7 @@ By the end of [Part 4](4-generation-data.md) the fleet matched KEGOC's 2020 capa
 In this tutorial we diagnose the cause, one or more **electrically isolated sub-networks**, and fix it by changing **how simplification handles islands**. This is the fastest lever: it re-runs in minutes and does not touch the OSM base network.
 
 !!! note "A PyPSA sub-network"
-    After `n.determine_network_topology()`, every bus is labelled with a `sub_network`. Buses in the same `sub_network` are electrically connected; buses in different sub-networks cannot exchange power. A healthy country model has **one** dominant AC sub-network (the "backbone") carrying almost all load.
+    Using `n.determine_network_topology()`, each bus in the network is assigned a `sub_network` label. Buses in the same `sub_network` are electrically connected; buses in different sub-networks cannot exchange power. A healthy country model has **one** dominant AC sub-network (the "backbone") carrying almost all load.
 
 Everything in this part lives under **`clustering.simplify_network`** in the config and the **`simplify_network`** rule. It does not change the demand, the fleet, or the cost overrides.
 
