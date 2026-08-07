@@ -216,7 +216,7 @@ Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-resu
 
 ![Kazakhstan network after fix, all buses on main grid](figures/kz_subnetworks_fixed.png)
 
-*All green; no isolated buses after `fetch`.*
+*All green; no isolated buses after `fetch`. The map may also show a different line layout than the before-fix figure: that is expected. Keeping the former islands and attaching their load and generation to nearby backbone buses changes how buses are grouped in later clustering, so the displayed topology can change.*
 
 ---
 
