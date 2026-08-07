@@ -504,7 +504,7 @@ def show_questionnaire(option: str) -> None:
 
         # Prompt the user to run the model with the updated config file
         model_run = display_choice_menu(
-            "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
+            "Do you want to run the model ? (If skipped, the model can also be run later using option 4 (Run Model) from the main menu of the CLI.)",
             ["No", "Yes"],
             3,
         ).lower()
