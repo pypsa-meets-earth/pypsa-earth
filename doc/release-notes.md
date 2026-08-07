@@ -14,6 +14,14 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Integrate `planning_horizon` wildcard into electricity-only networks [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
 
+* Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
+
+* Remove `demand` and `h2export` wildcards from sector model [PR #1962](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1962)
+
+* Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
+
+* Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
+
 * Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
 
 * Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
@@ -47,6 +55,12 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Enable deep-copy for config migration for back-compatibility [PR #1960](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1960)
+
+* Add plotting and summary visualization page in documentation [PR #1765](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1765)
+
+* Pin atlite to 0.4.1 in Pixi [PR #1935](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1935)
 
 * Replace hydrobasins for CI testing with a dataset created by Brigham Young University [PR #1944](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1944)
 
@@ -144,6 +158,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
 
+* Polishing time-dependent quantities in prepare sector network [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
+
 # PyPSA-Earth 0.8.0
 
 **New Features and Major Changes**
@@ -181,6 +197,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation [PR #1610](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610)
 
 **Minor Changes and bug-fixing**
+
+* Fix the Conda CI setup to consistently use the dynamically selected environment file [PR #1952](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1952)
+
+* Avoid excessive warnings when normalising hydrobasins [PR #1951](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1951)
 
 * Add heuristics to infer missing hydropower technologies: if the energy-to-capacity ratio exceeds the threshold defined in `hydro_min_inflow_pu`, the plant is classified as a reservoir. Otherwise, it is treated as run-of-river [PR #1684](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1684)
 
