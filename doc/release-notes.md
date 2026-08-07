@@ -56,6 +56,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Enable battery fetch from powerplantmatching [PR #1970](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1970)
 
 * Add links to national-scale cutouts for a few countries (Bolivia, Colombia, Zambia) [PR #1756](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1756)
 
