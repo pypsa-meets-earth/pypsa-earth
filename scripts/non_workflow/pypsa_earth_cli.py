@@ -356,7 +356,7 @@ def config_setup():
             if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
-            if isinstance(updated_config[choice][subchoice], bool):
+            if isinstance(updated_config[choice], bool):
                 updated_value = True if updated_value == "True" else False
             updated_config[choice] = updated_value
 
