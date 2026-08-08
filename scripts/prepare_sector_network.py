@@ -298,18 +298,13 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> Non
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
     # initial fossil reserves
-    e_initial = (
-        snakemake.params.sector_options.get(carrier, {}).get("reserves", 0)
-    ) * 1e6
-    # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
     n.madd(
         "Store",
         nodes + " Store",
         bus=nodes,
         e_nom_extendable=True,
-        e_cyclic=True if e_initial == 0 else False,
+        e_cyclic=True,
         carrier=carrier,
-        e_initial=e_initial,
     )
     n.madd(
         "Generator",
