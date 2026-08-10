@@ -194,7 +194,7 @@ Inputs
 
 - ``resources/{RDIR}/solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv``: Solar rooftop layout per country if enabled.
 
-- ``networks/{RDIR}/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: PyPSA network file for electricity sector.
+- ``networks/{RDIR}/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: PyPSA network file for electricity sector.
 
 - ``resources/{RDIR}/costs_{planning_horizons}_sec.csv``: Cost parameters for sector technologies.
 

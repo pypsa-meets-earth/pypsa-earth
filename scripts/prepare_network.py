@@ -48,7 +48,7 @@ Inputs
 Outputs
 -------
 
-- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
+- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
 
 Description
 -----------

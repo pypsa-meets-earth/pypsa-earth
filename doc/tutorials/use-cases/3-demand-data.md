@@ -182,7 +182,7 @@ Snakemake compares your config with the last run and **rebuilds only what change
 When the run finishes, the updated solved network overwrites the same file you analysed in Part 2:
 
 ```
-results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
+results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc
 ```
 
 **Expected runtime:** much faster than Part 1, on the order of **7-10 minutes** with HiGHS, because most upstream rules are skipped.
@@ -196,7 +196,7 @@ Reopen the notebook from Part 2 and reload the network. Total demand should matc
 ```python
 import pypsa
 
-n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
+n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc")
 weights = n.snapshot_weightings.generators
 total_TWh = n.loads_t.p_set.multiply(weights, axis=0).sum().sum() / 1e6
 print(f"Total annual demand: {total_TWh:.1f} TWh")
