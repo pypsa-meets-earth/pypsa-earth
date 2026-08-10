@@ -2,6 +2,24 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+Downloads and prepares country-level input data for the land transport
+sector: the number of registered vehicles and an estimate of the average
+fuel efficiency.
+
+Outputs
+-------
+
+- ``resources/transport_data.csv``: number of registered cars and average fuel efficiency per country (ISO2 code), used as input to :mod:`prepare_transport_data`.
+
+Description
+-----------
+
+If either of the two source datasets fails to download, the hard-coded
+fallback ``data/temp_hard_coded/transport_data.csv`` is copied to the output
+path instead.
+"""
+
 import logging
 import os
 import shutil
@@ -15,10 +33,21 @@ from _helpers import BASE_DIR, read_csv_nafix
 logger = logging.getLogger(__name__)
 
 
-def add_iso2_country_code(df):
+def add_iso2_country_code(df: pd.DataFrame) -> pd.DataFrame:
     """
     Converts 'Country' names to ISO2 codes in a new 'country' column.
     Cleans DataFrame by removing rows with invalid 'country' values.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing a 'Country' column with country names.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with an added 'country' column of ISO2 codes, with rows
+        that could not be matched to a country removed.
     """
 
     cc = coco.CountryConverter()
@@ -34,7 +63,7 @@ def add_iso2_country_code(df):
     return df
 
 
-def download_number_of_vehicles():
+def download_number_of_vehicles() -> pd.DataFrame:
     """
     Downloads and returns the number of registered vehicles as tabular data
     from the Global Health Observatory (GHO) repository data and from Wikipedia.
@@ -45,9 +74,29 @@ def download_number_of_vehicles():
     Therefore, the number of vehicles per country table from Wikipedia
     is also imported for completion (prio 2):
     'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita'.
+
+    Returns
+    -------
+    pd.DataFrame
+        Number of registered vehicles ('number cars') per country, with
+        Wikipedia data used to fill in countries missing from the WHO data.
+        Empty if the WHO source could not be read.
     """
 
-    def _clean_data(df):
+    def _clean_data(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Drops rows with a missing 'number cars' value and casts it to int.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame containing a 'number cars' column.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with rows dropped where 'number cars' is missing.
+        """
         df = df.dropna(subset=["number cars"])
         df.loc[:, "number cars"] = df.loc[:, "number cars"].astype(int)
         return df  # [["Country", "number cars"]]
@@ -112,7 +161,7 @@ def download_number_of_vehicles():
     return nbr_vehicles
 
 
-def download_CO2_emissions():
+def download_CO2_emissions() -> pd.DataFrame:
     """
     Downloads the CO2 emissions from transport in % of total fuel combustion.
     The data is used to estimate the average fuel consumption of land transport.
@@ -121,6 +170,12 @@ def download_CO2_emissions():
 
     The live API of the World Bank has stopped providing the dataset since October 2024.
     So this link is used: https://web.archive.org/web/20240527231108/https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
+
+    Returns
+    -------
+    pd.DataFrame
+        CO2 emissions from transport (as 'average fuel efficiency' proxy) per
+        country, for the year 2014. Empty if the source could not be read.
     """
     url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 
