@@ -14,7 +14,12 @@ boilers,bool,"{true, false}",Add option for transforming gas into heat using gas
 oil_boilers,bool,"{true, false}",Add option for transforming oil into heat using boilers.
 chp,bool,"{true, false}",Add option for using Combined Heat and Power (CHP).
 micro_chp,bool,"{true, false}",Add option for using gas-fired Combined Heat and Power (CHP) for decentral areas.
-solar_thermal,bool,"{true, false}",Add option for using solar thermal to generate heat.
+solar_thermal_collector,  ,  ,Solar thermal collector settings for heat sector profiles and network build-out.
+-- enable,bool,"{true, false}",Add option for using solar thermal to generate heat.
+-- cf_correction,float,,Correction factor applied to atlite's raw solar thermal output to match observed collector yields.
+-- clearsky_model,str,"{simple, enhanced}",Clearsky irradiance model for diffuse irradiation. ``'enhanced'`` also uses ambient temperature and relative humidity.
+-- orientation,  ,  ,"  "
+-- -- slope,float,"[0, 90]",Tilt angle of solar thermal collector.
+-- -- azimuth,float,"[0, 360]",Azimuth angle of solar thermal collector (180 = south-facing).
 heat_pump_sink_T,celsius,,The temperature heat sink used in heat pumps based on DTU / large area radiators. The value is conservatively high to cover hot water and space heating in poorly-insulated buildings.
 time_dep_hp_cop,bool,"{true, false}",Consider the time dependent coefficient of performance (COP) of the heat pump.
-solar_cf_correction,float,,The correction factor for the value provided by the solar thermal profile calculations.
