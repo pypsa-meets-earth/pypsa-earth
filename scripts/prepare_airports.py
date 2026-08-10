@@ -2,6 +2,36 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+Prepares airport location and size data used for the aviation sector.
+
+Relevant Settings
+-----------------
+
+```yaml
+custom_data:
+    airports:
+
+sector:
+    airport_sizing_factor:
+```
+
+Outputs
+-------
+
+- ``resources/airports.csv``: medium and large scheduled airports per country, with a per-country size fraction based on ``airport_sizing_factor``.
+
+Description
+-----------
+
+If ``custom_data.airports`` is enabled, the user-provided
+``data/custom/airports.csv`` is copied to the output path. Otherwise, the
+global OurAirports dataset is downloaded, filtered to commercial airports
+with a scheduled service, and combined with runway information. Each
+airport is assigned a size fraction relative to the other airports in its
+country, weighting large airports by ``sector.airport_sizing_factor``
+relative to medium airports.
+"""
 
 import shutil
 from pathlib import Path
@@ -16,7 +46,7 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_airports():
+def download_airports() -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Downloads the world airports as .csv File in addition to runnways
     information.
@@ -24,6 +54,13 @@ def download_airports():
     The following csv file was downloaded from the webpage
     https://ourairports.com/data/
     as a .csv file. The dataset contains 74844 airports.
+
+    Returns
+    -------
+    airports_csv : pd.DataFrame
+        World airports, one row per airport.
+    runways_csv : pd.DataFrame
+        World runways, one row per runway.
     """
     fn = "https://davidmegginson.github.io/ourairports-data/airports.csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
@@ -40,9 +77,21 @@ def download_airports():
     return (airports_csv, runways_csv)
 
 
-def preprocess_airports(df):
+def preprocess_airports(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Preprocess the airports data
+    Preprocess the airports data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Merged airports and runways data, as returned by :func:`download_airports`.
+
+    Returns
+    -------
+    pd.DataFrame
+        Medium and large scheduled, commercial airports with a per-country
+        size fraction (column ``fraction``) and country codes renamed to
+        the ``country`` column.
     """
 
     # Keep only airports that are of type medium and large
