@@ -18,9 +18,6 @@ Relevant Settings
         simplify:
         aggregation_strategies:
 
-    costs:
-        output_currency:
-
     lines:
         length_factor:
 
@@ -33,13 +30,12 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`costs_cf`, :ref:`electricity_cf`, :ref:`renewable_cf`,
+    :ref:`electricity_cf`, :ref:`renewable_cf`,
     :ref:`lines_cf`, :ref:`links_cf`, :ref:`solving_cf`
 
 Inputs
 ------
 
-- ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
 - ``resources/regions_offshore.geojson``: confer :ref:`busregions`
 - ``networks/elec.nc``: confer :ref:`electricity`
@@ -70,7 +66,7 @@ The rule :mod:`simplify_network` does up to four things:
 
 1. Create an equivalent transmission network in which all voltage levels are mapped to the 380 kV level by the function ``simplify_network(...)``.
 
-2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the capital costs of the generator.
+2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. Displacement connection length for offshore wind is stored on generators so that ``assign_costs`` can apply horizon-specific connection capital costs later.
 
 3. Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
 
@@ -159,113 +155,173 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
     return n, trafo_map
 
 
-def _prepare_connection_costs_per_link(
-    n, costs, renewable_config, hvdc_as_lines, lines_length_factor
-):
+def _prepare_connection_lengths_per_link(
+    n: pypsa.Network,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    lines_length_factor: float,
+) -> dict:
+    """
+    Return per-link connection *lengths* (km) for offshore techs.
+
+    Same structure as the former cost-weighted helper, but without unit costs so
+    that ``assign_costs`` can monetise the path with horizon-specific prices.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    lines_length_factor : float
+        Factor to scale line lengths by.
+
+    Returns
+    -------
+    dict
+        Dictionary of per-link connection lengths for offshore techs.
+    """
     if n.links.empty:
         return {}
 
-    connection_costs_per_link = {}
+    connection_lengths_per_link = {}
 
-    # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
+    # initialize dc_lengths by the hvdc_as_lines option
     if hvdc_as_lines:
         dc_lengths = n.lines.length
-        unterwater_fractions = n.lines.underwater_fraction
     else:
         dc_lengths = n.links.length
-        unterwater_fractions = n.links.underwater_fraction
 
     for tech in renewable_config:
         if tech.startswith("offwind"):
-            connection_costs_per_link[tech] = (
-                dc_lengths
-                * lines_length_factor
-                * (
-                    unterwater_fractions
-                    * costs.at[tech + "-connection-submarine", "capital_cost"]
-                    + (1.0 - unterwater_fractions)
-                    * costs.at[tech + "-connection-underground", "capital_cost"]
-                )
-            )
+            # length only — underwater share uses generator underwater_fraction later
+            connection_lengths_per_link[tech] = dc_lengths * lines_length_factor
 
-    return connection_costs_per_link
+    return connection_lengths_per_link
 
 
-def _compute_connection_costs_to_bus(
-    n,
-    busmap,
-    costs,
-    renewable_config,
-    hvdc_as_lines,
-    lines_length_factor,
-    connection_costs_per_link=None,
-    buses=None,
-):
-    if connection_costs_per_link is None:
-        connection_costs_per_link = _prepare_connection_costs_per_link(
-            n, costs, renewable_config, hvdc_as_lines, lines_length_factor
+def _compute_connection_lengths_to_bus(
+    n: pypsa.Network,
+    busmap: pd.Series,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    lines_length_factor: float,
+    connection_lengths_per_link: dict = None,
+    buses: pd.Index = None,
+) -> pd.DataFrame:
+    """
+    Compute connection lengths to buses for offshore techs.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    busmap : pd.Series
+        Mapping from previous bus names to new bus names.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    lines_length_factor : float
+        Factor to scale line lengths by.
+    connection_lengths_per_link : dict
+        Dictionary of per-link connection lengths for offshore techs.
+    buses : pd.Index
+        Indices of buses to compute connection lengths to.
+
+    Returns
+    -------
+    pd.DataFrame
+        Connection lengths to buses for offshore techs.
+        Index is the indices of the buses, columns are the offshore techs.
+    """
+    if connection_lengths_per_link is None:
+        connection_lengths_per_link = _prepare_connection_lengths_per_link(
+            n, renewable_config, hvdc_as_lines, lines_length_factor
         )
 
     if buses is None:
         buses = busmap.index[busmap.index != busmap.values]
 
-    connection_costs_to_bus = pd.DataFrame(index=buses)
+    connection_lengths_to_bus = pd.DataFrame(index=buses)
 
-    for tech in connection_costs_per_link:
+    for tech in connection_lengths_per_link:
         adj = n.adjacency_matrix(
             weights=pd.concat(
                 dict(
-                    Link=connection_costs_per_link[tech]
+                    Link=connection_lengths_per_link[tech]
                     .reindex(n.links.index)
                     .astype(float),
                     Line=pd.Series(0.0, n.lines.index),
                 )
             )
         )
-        costs_between_buses = dijkstra(
+        lengths_between_buses = dijkstra(
             adj, directed=False, indices=n.buses.index.get_indexer(buses)
         )
-        connection_costs_to_bus[tech] = costs_between_buses[
+        connection_lengths_to_bus[tech] = lengths_between_buses[
             np.arange(len(buses)), n.buses.index.get_indexer(busmap.loc[buses])
         ]
-    return connection_costs_to_bus
+    return connection_lengths_to_bus
 
 
-def _adjust_capital_costs_using_connection_costs(
-    n, connection_costs_to_bus, output, currency
-):
-    connection_costs = {}
-    for tech in connection_costs_to_bus:
+def _adjust_capital_costs_using_connection_lengths(
+    n: pypsa.Network,
+    connection_lengths_to_bus: pd.DataFrame,
+) -> None:
+    """
+    Store displacement connection length on generators (no monetisation).
+
+    Formerly added CAPEX into ``capital_cost`` and wrote ``connection_costs`` CSV.
+    Monetisation is deferred to ``assign_costs`` for per-horizon consistency.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    connection_lengths_to_bus : pd.DataFrame
+        Displacement connection length per bus (from Dijkstra on DC links).
+
+    Returns
+    -------
+    None
+    """
+    if "displacement_length" not in n.generators.columns:
+        n.generators["displacement_length"] = 0.0
+
+    for tech in connection_lengths_to_bus:
         tech_b = n.generators.carrier == tech
-        costs = (
+        lengths = (
             n.generators.loc[tech_b, "bus"]
-            .map(connection_costs_to_bus[tech])
+            .map(connection_lengths_to_bus[tech])
             .loc[lambda s: s > 0]
         )
-        if not costs.empty:
-            n.generators.loc[costs.index, "capital_cost"] += costs
+        if not lengths.empty:
+            n.generators.loc[lengths.index, "displacement_length"] = (
+                n.generators.loc[lengths.index, "displacement_length"].fillna(0.0)
+                + lengths
+            )
             logger.info(
-                "Displacing {} generator(s) and adding connection costs to capital_costs: {} ".format(
+                "Displacing {} generator(s) and storing connection length: {}".format(
                     tech,
                     ", ".join(
-                        "{:.0f} {}/MW/a for `{}`".format(d, currency, b)
-                        for b, d in costs.items()
+                        "{:.1f} km for `{}`".format(d, b) for b, d in lengths.items()
                     ),
                 )
             )
-            connection_costs[tech] = costs
-    pd.DataFrame(connection_costs).to_csv(output.connection_costs)
 
 
 def _aggregate_and_move_components(
-    n,
-    busmap,
-    connection_costs_to_bus,
-    output,
-    aggregate_one_ports={"Load", "StorageUnit"},
-    aggregation_strategies=dict(),
-    exclude_carriers=[],
-):
+    n: pypsa.Network,
+    busmap: pd.Series,
+    connection_lengths_to_bus: pd.DataFrame,
+    output: object,
+    aggregate_one_ports: set = {"Load", "StorageUnit"},
+    aggregation_strategies: dict = dict(),
+    exclude_carriers: list = [],
+) -> None:
     """
     Aggregate and move components according to busmap.
 
@@ -279,8 +335,8 @@ def _aggregate_and_move_components(
         The network to modify.
     busmap : pd.Series
         Mapping from previous bus names to new bus names.
-    connection_costs_to_bus : pd.DataFrame
-        Connection costs per bus.
+    connection_lengths_to_bus : pd.DataFrame
+        Displacement connection length per bus (from Dijkstra on DC links).
     output : object
         Snakemake output object.
     aggregate_one_ports : set
@@ -299,12 +355,7 @@ def _aggregate_and_move_components(
             if not df.empty:
                 import_series_from_dataframe(n, df, c, attr)
 
-    _adjust_capital_costs_using_connection_costs(
-        n,
-        connection_costs_to_bus,
-        snakemake.output,
-        snakemake.params.output_currency,
-    )
+    _adjust_capital_costs_using_connection_lengths(n, connection_lengths_to_bus)
 
     generator_strategies = aggregation_strategies["generators"]
     one_port_strategies = aggregation_strategies["one_ports"]
@@ -352,7 +403,6 @@ def contains_ac(ls):
 
 def simplify_links(
     n: pypsa.Network,
-    costs: pd.DataFrame,
     renewable_config: dict,
     hvdc_as_lines: bool,
     config_lines: dict,
@@ -368,8 +418,6 @@ def simplify_links(
     ----------
     n : pypsa.Network
         The PyPSA network to be simplified.
-    costs : pd.DataFrame
-        DataFrame containing technology costs.
     renewable_config : dict
         Configuration dictionary for renewable technologies.
     hvdc_as_lines : bool
@@ -394,8 +442,6 @@ def simplify_links(
     logger.info("Simplifying connected link components")
 
     if n.links.empty:
-        with open(output.connection_costs, "w") as fp:
-            pass
         return n, n.buses.index.to_series()
 
     dc_as_links = not (n.lines.carrier == "DC").any()
@@ -459,11 +505,11 @@ def simplify_links(
 
     busmap = n.buses.index.to_series()
 
-    connection_costs_per_link = _prepare_connection_costs_per_link(
-        n, costs, renewable_config, hvdc_as_lines, config_lines["length_factor"]
+    connection_lengths_per_link = _prepare_connection_lengths_per_link(
+        n, renewable_config, hvdc_as_lines, config_lines["length_factor"]
     )
-    connection_costs_to_bus = pd.DataFrame(
-        0.0, index=n.buses.index, columns=list(connection_costs_per_link)
+    connection_lengths_to_bus = pd.DataFrame(
+        0.0, index=n.buses.index, columns=list(connection_lengths_per_link)
     )
 
     for lbl in labels.value_counts().loc[lambda s: s > 2].index:
@@ -478,14 +524,13 @@ def simplify_links(
                 n.buses.loc[b, ["x", "y"]], n.buses.loc[buses[1:-1], ["x", "y"]]
             )
             busmap.loc[buses] = b[np.r_[0, m.argmin(axis=0), 1]]
-            connection_costs_to_bus.loc[buses] += _compute_connection_costs_to_bus(
+            connection_lengths_to_bus.loc[buses] += _compute_connection_lengths_to_bus(
                 n,
                 busmap,
-                costs,
                 renewable_config,
                 hvdc_as_lines,
-                config_lines,
-                connection_costs_per_link,
+                config_lines["length_factor"],
+                connection_lengths_per_link,
                 buses,
             )
 
@@ -555,7 +600,7 @@ def simplify_links(
     _aggregate_and_move_components(
         n,
         busmap,
-        connection_costs_to_bus,
+        connection_lengths_to_bus,
         output,
         aggregation_strategies=aggregation_strategies,
         exclude_carriers=exclude_carriers,
@@ -564,15 +609,41 @@ def simplify_links(
 
 
 def remove_stubs(
-    n,
-    costs,
-    cluster_config,
-    renewable_config,
-    hvdc_as_lines,
-    lines_length_factor,
-    output,
-    aggregation_strategies=dict(),
+    n: pypsa.Network,
+    cluster_config: dict,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    lines_length_factor: float,
+    output: object,
+    aggregation_strategies: dict = dict(),
 ):
+    """
+    Remove stubs from the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    cluster_config : dict
+        Configuration dictionary for cluster configuration.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    lines_length_factor : float
+        Factor to scale line lengths by.
+    output : object
+        Output Snakemake object to write to.
+    aggregation_strategies : dict
+        Strategies for aggregating components.
+
+    Returns
+    -------
+    n : pypsa.Network
+        The network with stubs removed.
+    busmap : pd.Series
+        Mapping from previous bus names to new bus names.
+    """
     logger.info("Removing stubs")
 
     across_borders = cluster_config.get("remove_stubs_across_borders", True)
@@ -580,10 +651,9 @@ def remove_stubs(
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
-    connection_costs_to_bus = _compute_connection_costs_to_bus(
+    connection_lengths_to_bus = _compute_connection_lengths_to_bus(
         n,
         busmap,
-        costs,
         renewable_config,
         hvdc_as_lines,
         lines_length_factor,
@@ -594,7 +664,7 @@ def remove_stubs(
     _aggregate_and_move_components(
         n,
         busmap,
-        connection_costs_to_bus,
+        connection_lengths_to_bus,
         output,
         aggregation_strategies=aggregation_strategies,
         exclude_carriers=exclude_carriers,
@@ -1076,13 +1146,8 @@ if __name__ == "__main__":
 
     n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
 
-    Nyears = n.snapshot_weightings.objective.sum() / 8760
-
-    technology_costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
-
     n, simplify_links_map = simplify_links(
         n,
-        technology_costs,
         snakemake.params.renewable,
         hvdc_as_lines,
         snakemake.params.config_lines,
@@ -1100,7 +1165,6 @@ if __name__ == "__main__":
     if cluster_config.get("remove_stubs", True):
         n, stub_map = remove_stubs(
             n,
-            technology_costs,
             cluster_config,
             renewable_config,
             hvdc_as_lines,

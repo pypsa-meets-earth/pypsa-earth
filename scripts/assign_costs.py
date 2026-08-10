@@ -40,6 +40,9 @@ Outputs
 
 - ``networks/elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc``: Same network
   with costs assigned for the given planning horizon.
+- ``resources/bus_regions/connection_costs_s{simpl}_{clusters}_{planning_horizons}.csv``:
+  Horizon-specific displacement connection CAPEX for offshore generators moved
+  during ``simplify_network`` (from stored path geometry).
 
 Description
 -----------
@@ -290,7 +293,8 @@ def update_generator_costs(
     costs: pd.DataFrame,
     renewable_carriers: set,
     length_factor: float,
-) -> None:
+    output_currency: str = "EUR",
+) -> pd.DataFrame:
     """
     Update cost-vintage-dependent attributes on all generators in-place.
 
@@ -307,8 +311,9 @@ def update_generator_costs(
 
     Offshore wind capital_cost is recomputed from ``average_distance`` and
     ``underwater_fraction`` stored on generators at build time, via
-    :func:`_offwind_connection_cost`, keeping the formula consistent with
-    :func:`calculate_renewable_capital_cost`.
+    :func:`_offwind_connection_cost`. If ``displacement_length`` is present
+    (from ``simplify_network`` bus moves), that extra path length is monetised
+    with the same formula and the same ``underwater_fraction``.
 
     Carriers absent from the cost table are silently skipped.
 
@@ -319,7 +324,18 @@ def update_generator_costs(
         Horizon-specific cost table indexed by technology.
     renewable_carriers : set of str
     length_factor : float
+    output_currency : str
+        Currency label used only for logging.
+
+    Returns
+    -------
+    pd.DataFrame
+        Displacement connection costs [currency/MW/a] indexed by generator,
+        with one column per offshore carrier that had a positive surcharge.
+        Empty if no displacement geometry is present.
     """
+    displacement_connection_costs = {}
+
     for carrier in n.generators.carrier.unique():
         supcarrier = carrier.split("-", 2)[0]
         cost_key = "offwind" if supcarrier == "offwind" else carrier
@@ -357,17 +373,48 @@ def update_generator_costs(
             )
 
             if supcarrier == "offwind" and has_geometry:
-                conn_cost = _offwind_connection_cost(
+                connection_cost = _offwind_connection_cost(
                     carrier,
                     avg_dist=n.generators.loc[sub, "average_distance"],
                     uw_frac=n.generators.loc[sub, "underwater_fraction"],
                     costs=costs,
                     length_factor=length_factor,
                 )
+                # displacement_length already includes length_factor from simplify_network
+                if "displacement_length" in n.generators.columns:
+                    displacement_length = n.generators.loc[
+                        sub, "displacement_length"
+                    ].fillna(0.0)
+                    if displacement_length.gt(0).any():
+                        displacement_connection_cost = _offwind_connection_cost(
+                            carrier,
+                            avg_dist=displacement_length,
+                            uw_frac=n.generators.loc[sub, "underwater_fraction"],
+                            costs=costs,
+                            length_factor=1.0,
+                        )
+                        connection_cost = connection_cost + displacement_connection_cost
+                        positive_displacement_costs = displacement_connection_cost[
+                            displacement_connection_cost > 0
+                        ]
+                        if not positive_displacement_costs.empty:
+                            displacement_connection_costs[carrier] = (
+                                positive_displacement_costs
+                            )
+                            logger.info(
+                                "Added displacement connection cost of {:.0f}-{:.0f} "
+                                "{}/MW/a to {} generators of carrier {}".format(
+                                    positive_displacement_costs.min(),
+                                    positive_displacement_costs.max(),
+                                    output_currency,
+                                    len(positive_displacement_costs),
+                                    carrier,
+                                )
+                            )
                 n.generators.loc[sub, "capital_cost"] = (
                     costs.at["offwind", "capital_cost"]
                     + costs.at[carrier + "-station", "capital_cost"]
-                    + conn_cost
+                    + connection_cost
                 )
             elif supcarrier == "offwind":
                 logger.warning(
@@ -388,6 +435,8 @@ def update_generator_costs(
                 efficiency=costs.at[carrier, "efficiency"],
                 lifetime=costs.at[carrier, "lifetime"],
             )
+
+    return pd.DataFrame(displacement_connection_costs)
 
 
 def update_storage_unit_costs(
@@ -635,7 +684,8 @@ def update_electricity_costs(
     renewable_carriers,
     length_factor: float = 1.0,
     hydro_capital_cost: bool = False,
-) -> None:
+    output_currency: str = "EUR",
+) -> pd.DataFrame:
     """
     Re-apply all cost-vintage-dependent attributes on an already-built
     electricity network, without rebuilding it.
@@ -660,10 +710,13 @@ def update_electricity_costs(
         Transmission/offshore connection length factor.
     hydro_capital_cost : bool
         Whether hydro reservoirs carry a capital cost.
+    output_currency : str
+        Currency label used only for logging.
 
     Returns
     -------
-    None
+    pd.DataFrame
+        Displacement connection costs written by :func:`update_generator_costs`.
     """
     renewable_carriers = set(renewable_carriers)
 
@@ -671,11 +724,12 @@ def update_electricity_costs(
     update_transmission_costs(n, costs, length_factor=length_factor)
 
     # Updating generator costs
-    update_generator_costs(
+    displacement_connection_costs = update_generator_costs(
         n,
         costs,
         renewable_carriers,
         length_factor,
+        output_currency=output_currency,
     )
 
     # Updating storage unit costs
@@ -686,6 +740,8 @@ def update_electricity_costs(
 
     # Updating link costs (chargers, dischargers, pipelines)
     update_link_costs(n, costs)
+
+    return displacement_connection_costs
 
 
 if __name__ == "__main__":
@@ -705,13 +761,16 @@ if __name__ == "__main__":
 
     costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
 
-    update_electricity_costs(
+    displacement_connection_costs = update_electricity_costs(
         n,
         costs,
         renewable_carriers=snakemake.params.electricity["renewable_carriers"],
         length_factor=snakemake.params.length_factor,
         hydro_capital_cost=snakemake.params.hydro_capital_cost,
+        output_currency=snakemake.params.output_currency,
     )
+
+    displacement_connection_costs.to_csv(snakemake.output.connection_costs)
 
     logger.info(
         "Assigned costs from planning horizon %s to network %s.",

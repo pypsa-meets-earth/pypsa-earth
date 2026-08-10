@@ -729,14 +729,12 @@ rule simplify_network:
         countries=config["countries"],
         build_shape_options=config["build_shape_options"],
         electricity=config["electricity"],
-        output_currency=config["costs"]["output_currency"],
         config_lines=config["lines"],
         config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
     input:
         **retrieve_subregion("simplify_network"),
         network="networks/" + RDIR + "elec.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
     output:
@@ -748,9 +746,6 @@ rule simplify_network:
         + RDIR
         + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
         busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
-        connection_costs="resources/"
-        + RDIR
-        + "bus_regions/connection_costs_s{simpl}.csv",
     log:
         "logs/" + RDIR + "simplify_network/elec_s{simpl}.log",
     benchmark:
@@ -913,6 +908,7 @@ rule assign_costs:
         electricity=config["electricity"],
         length_factor=config["lines"]["length_factor"],
         hydro_capital_cost=config["renewable"]["hydro"].get("hydro_capital_cost", False),
+        output_currency=config["costs"]["output_currency"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",  # {scope} from process_cost_data
@@ -920,6 +916,9 @@ rule assign_costs:
         network="networks/"
         + RDIR
         + "elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc",
+        connection_costs="resources/"
+        + RDIR
+        + "bus_regions/connection_costs_s{simpl}_{clusters}_{planning_horizons}.csv",
     log:
         "logs/" + RDIR + "assign_costs/elec_s{simpl}_{clusters}_{planning_horizons}.log",
     benchmark:
