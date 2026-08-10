@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+# -*- coding: utf-8 -*-
 """
 Creates the network topology from a OpenStreetMap.
 
