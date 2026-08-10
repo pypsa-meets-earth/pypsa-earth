@@ -888,22 +888,20 @@ rule add_extra_components:
 if config["electricity"]["automatic_emission"]:
 
     rule retrieve_emissions:
+        input:
+            HTTP.remote(
+                "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
+                keep_local=True,
+            ),
         output:
+            edgar_folder=directory("data/co2_emissions/"),
             edgar_zip="data/co2_emissions/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
             edgar_xlsx="data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
         run:
-            edgar_url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
-            try:
-                content = content_retrieve(edgar_url)
-            except Exception as e:
-                raise Exception(
-                    f"Emissions dataset EDGAR failed to be download ({e})."
-                )
-            with open(output.edgar_zip, "wb") as f:
-                f.write(content.read())
-            unpack_archive(output.edgar_zip, extract_dir="data/co2_emissions/")
+            move(input[0], output.edgar_zip)
+            unpack_archive(output.edgar_zip, extract_dir=output.edgar_folder)
 
     rule build_co2_emissions:
         input:
