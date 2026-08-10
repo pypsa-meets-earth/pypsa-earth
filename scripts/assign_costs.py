@@ -3,29 +3,63 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Cost helpers and the ``assign_costs`` Snakemake rule.
+Assign horizon-specific technology costs to an already-built electricity network.
 
-This module is the single source of truth for electricity cost assignment.
-It owns:
+The ``assign_costs`` Snakemake rule loads a clustered network that already
+contains topology, capacities, and time series, and updates only the economic
+attributes that depend on the planning horizon (``capital_cost``,
+``marginal_cost``, ``efficiency``, ``lifetime``). Network structure and
+existing-plant build years are left unchanged.
 
-- :func:`attach_dc_costs` — capital cost formula for DC lines/links.
-- :func:`update_transmission_costs` — applies AC/DC capital costs to a network.
-- :func:`calculate_renewable_capital_cost` — per-bus capital cost for a
-  renewable carrier, including distance-dependent offshore connection costs.
-- :func:`update_electricity_costs` — re-applies all cost-vintage-dependent
-  attributes (capital_cost, marginal_cost, efficiency, lifetime) to an
-  already-built electricity network without touching its structure.
+This module is also the shared implementation for cost assignment helpers used
+elsewhere in the electricity workflow.
 
-The electricity build pipeline is split into two phases:
+Relevant Settings
+-----------------
 
-1. **Structure** (built once per scenario, shared across all horizons):
-   ``add_electricity`` → ``simplify_network`` → ``cluster_network`` →
-   ``add_extra_components`` → ``elec_s{simpl}_{clusters}_ec.nc``
+.. code:: yaml
 
-2. **Costs** (assigned once per planning horizon, cheap):
-   ``assign_costs`` → ``elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc``
+    electricity:
+      renewable_carriers:
+    lines:
+      length_factor:
+    renewable:
+      hydro:
+        hydro_capital_cost:
 
-The ``__main__`` block at the bottom of this file implements phase 2.
+Inputs
+------
+
+- ``networks/elec_s{simpl}_{clusters}_ec.nc``: Clustered electricity network
+  with components and profiles, but without horizon-specific costs.
+- ``resources/costs_{planning_horizons}_elec.csv``: Technology cost table for
+  the planning horizon.
+
+Outputs
+-------
+
+- ``networks/elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc``: Same network
+  with costs assigned for the given planning horizon.
+
+Description
+-----------
+
+When multiple planning horizons are modelled, building the full network for
+each year is expensive. The workflow therefore separates **structure**
+(``add_electricity`` → ``simplify_network`` → ``cluster_network`` →
+``add_extra_components``) from **cost assignment** (this rule). This
+script reads the shared structure network and the horizon-specific cost
+table, calls :func:`update_electricity_costs`, and writes the
+horizon-tagged output network.
+
+Main functions in this module:
+
+- :func:`update_electricity_costs` — re-cost generators, storage, stores,
+  links, and transmission in place.
+- :func:`update_transmission_costs` — refresh AC/DC ``capital_cost`` from the
+  cost table.
+- :func:`calculate_renewable_capital_cost` — per-bus renewable capital cost,
+  including offshore connection costs.
 """
 
 from typing import Any
@@ -71,13 +105,13 @@ def attach_dc_costs(
 
     dc_b = lines_or_links.carrier == "DC"
     if simple_hvdc_costs:
-        cap = (
+        capital_costs = (
             lines_or_links.loc[dc_b, "length"]
             * length_factor
             * costs.at["HVDC overhead", "capital_cost"]
         )
     else:
-        cap = (
+        capital_costs = (
             lines_or_links.loc[dc_b, "length"]
             * length_factor
             * (
@@ -88,7 +122,7 @@ def attach_dc_costs(
             )
             + costs.at["HVDC inverter pair", "capital_cost"]
         )
-    lines_or_links.loc[dc_b, "capital_cost"] = cap
+    lines_or_links.loc[dc_b, "capital_cost"] = capital_costs
 
 
 def update_transmission_costs(

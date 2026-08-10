@@ -84,6 +84,7 @@ wildcard_constraints:
     sopts=r"[-+a-zA-Z0-9\.\s]*",
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     planning_horizons="20[2-9][0-9]|2100",
+    scope="elec|sec",  # process_cost_data: costs_{year}_{scope}.csv (elec=electricity, sec=sector)
 
 
 if config["custom_rules"] is not []:
@@ -914,7 +915,7 @@ rule assign_costs:
         hydro_capital_cost=config["renewable"]["hydro"].get("hydro_capital_cost", False),
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
-        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",  # {scope} from process_cost_data
     output:
         network="networks/"
         + RDIR
