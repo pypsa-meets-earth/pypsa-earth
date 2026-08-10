@@ -18,7 +18,10 @@ from _helpers import configure_logging, create_logger, three_2_two_digits_countr
 logger = create_logger(__name__)
 
 
-def process_edgar_emission_data(excel_file: str) -> pd.DataFrame:
+def process_edgar_emission_data(
+    excel_file: str,
+    target_sheet: str = "v6.0_EM_CO2_fossil_IPCC2006",
+) -> pd.DataFrame:
     """
     Process EDGAR CO2 emission Excel data into a clean DataFrame.
 
@@ -31,6 +34,9 @@ def process_edgar_emission_data(excel_file: str) -> pd.DataFrame:
     ----------
     excel_file : str
         Path to the EDGAR CO2 emission Excel file (.xls or .xlsx).
+    target_sheet : str, optional
+        Name of the sheet in the Excel file to process. Defaults to
+        'v6.0_EM_CO2_fossil_IPCC2006'.
 
     Returns
     -------
@@ -39,21 +45,6 @@ def process_edgar_emission_data(excel_file: str) -> pd.DataFrame:
         country_code_a2 (two-letter ISO code), country_name (full country name),
         and Y_YYYY columns for each available year.
     """
-    xl = pd.ExcelFile(excel_file)
-    sheet_names = xl.sheet_names
-
-    target_sheet = None
-    for sheet in sheet_names:
-        if "EM_CO2_fossil" in sheet:
-            target_sheet = sheet
-            break
-
-    if target_sheet is None:
-        raise ValueError(
-            "Could not find CO2 fossil emissions sheet in EDGAR data. "
-            f"Available sheets: {sheet_names}"
-        )
-
     logger.info(f"Processing EDGAR emission data from sheet: '{target_sheet}'")
 
     df = pd.read_excel(excel_file, sheet_name=target_sheet, skiprows=8)
@@ -62,7 +53,7 @@ def process_edgar_emission_data(excel_file: str) -> pd.DataFrame:
     df = df.loc[
         df["ipcc_code_2006_for_standard_report_name"]
         == "Main Activity Electricity and Heat Production"
-    ]
+    ]  # TODO: extend filter to other relevant sectors
 
     year_cols = [
         col for col in df.columns if isinstance(col, str) and col.startswith("Y_")
