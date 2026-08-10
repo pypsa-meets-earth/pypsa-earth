@@ -69,9 +69,12 @@ def process_edgar_emission_data(
     df = df[["country_code_a3", "country_code_a2", "country_name"] + year_cols]
     df[year_cols] = df[year_cols].astype(float).ffill(axis=1).bfill(axis=1)
 
+    # rename year columns to remove 'Y_' prefix
+    df = df.rename(columns={col: col[2:] for col in year_cols})
+
     logger.info(
         f"Processed emission data for {len(df)} countries, "
-        f"years {year_cols[0]}–{year_cols[-1]}."
+        f"years {year_cols[0][2:]}–{year_cols[-1][2:]}."
     )
     return df
 

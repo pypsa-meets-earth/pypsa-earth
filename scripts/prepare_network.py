@@ -73,7 +73,9 @@ idx = pd.IndexSlice
 logger = create_logger(__name__)
 
 
-def emission_extractor(emission_csv, emission_year, country_names):
+def emission_extractor(
+    emission_csv: str, emission_year: int | str, country_names: np.ndarray | list
+) -> pd.Series:
     """
     Extracts CO2 emission values for given country codes from the pre-processed
     emission CSV file.
@@ -98,21 +100,23 @@ def emission_extractor(emission_csv, emission_year, country_names):
     emission_year = int(emission_year)
     df = pd.read_csv(emission_csv).set_index("country_code_a2")
 
-    year_col = f"Y_{emission_year}"
-    if year_col not in df.columns:
-        available_years = sorted(
-            int(col[2:]) for col in df.columns if col.startswith("Y_")
-        )
-        closest_year = min(available_years, key=lambda y: abs(y - emission_year))
+    # track the available years
+    available_years = sorted(
+        df.columns.difference(
+            ["country_code_a3", "country_code_a2", "country_name"]
+        ).map(int)
+    )
+    # find the closest available year: if present, distance is 0, otherwise the closest year is used
+    closest_year = min(available_years, key=lambda y: abs(y - emission_year))
+    if emission_year not in available_years:
         logger.warning(
             f"Emission year {emission_year} not found in data. "
             f"Using closest available year {closest_year} instead."
         )
-        year_col = f"Y_{closest_year}"
 
     country_codes = np.atleast_1d(country_names).tolist()
     available_countries = df.index.intersection(country_codes)
-    emission_by_country = df.loc[available_countries, year_col]
+    emission_by_country = df.loc[available_countries, str(emission_year)]
     if emission_by_country.index.has_duplicates:
         duplicate_countries = emission_by_country.index[
             emission_by_country.index.duplicated()
@@ -328,8 +332,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="4",
-            ll="c1",
+            clusters="6",
+            ll="copt",
             opts="Co2L-4H",
             # configfile="test/config.sector.yaml",
         )
