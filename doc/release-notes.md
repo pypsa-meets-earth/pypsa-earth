@@ -50,6 +50,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add module level docstrings and typehints to transport scripts [PR #1981](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1981)
+
 * Add plotting and summary visualization page in documentation [PR #1765](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1765)
 
 * Pin atlite to 0.4.1 in Pixi [PR #1935](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1935)
