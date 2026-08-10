@@ -14,6 +14,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
+* Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
+
 * Remove `demand` and `h2export` wildcards from sector model [PR #1962](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1962)
 
 * Add use-case tutorials to the documentation [PR #1955](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1955)
@@ -25,6 +27,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
 
 * Add pixi as an alternative package manager for environment and dependency management, alongside the existing conda-based setup. [PR #1789](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1789)
+
+* Add docstrings and type hints to base_network.py [PR #1915](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1915)
 
 * Advance CI: add docs and lint workflows, skip test CI for doc-only PRs [PR #1790](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1790)
 
@@ -53,6 +57,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Enable battery fetch from powerplantmatching [PR #1970](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1970)
+
+* Add links to national-scale cutouts for a few countries (Bolivia, Colombia, Zambia) [PR #1756](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1756)
 
 * Enable deep-copy for config migration for back-compatibility [PR #1960](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1960)
 
@@ -195,6 +203,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Revise CCL constraint and enhance it with an option to include existing capacities in the calculation [PR #1610](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1610)
 
 **Minor Changes and bug-fixing**
+
+* Recommend dedicated regional models for supported countries [#PR 1925](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1925)
 
 * Fix the Conda CI setup to consistently use the dynamically selected environment file [PR #1952](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1952)
 
