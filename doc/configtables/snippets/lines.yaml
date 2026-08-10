@@ -1,4 +1,5 @@
 lines:
+  use_country_specific_types: false
   ac_types:
     default:
       132.: "243-AL1/39-ST1A 110.0"

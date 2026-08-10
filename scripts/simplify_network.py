@@ -71,7 +71,7 @@ Description
 
 The rule :mod:`simplify_network` does up to four things:
 
-1. Create an equivalent transmission network in which all voltage levels are mapped to the configured base-voltage layer by ``simplify_network_to_base_voltage(...)``. The closest country-specific line type is used when available; otherwise, the default mapping is applied.
+1. Create an equivalent transmission network in which all voltage levels are mapped to the configured base-voltage layer by ``simplify_network_to_base_voltage(...)``. Country-specific line-type mappings are used only when enabled and when mappings are available for every configured country for every configured country. Otherwise, the complete default mapping is used. AC and DC mappings are evaluated separately.
 
 2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the capital costs of the generator.
 
@@ -111,13 +111,19 @@ sys.settrace
 logger = create_logger(__name__)
 
 
-def simplify_network_to_base_voltage(n, linetypes, base_voltage):
+def simplify_network_to_base_voltage(
+    n,
+    ac_types,
+    dc_types,
+    base_voltage,
+    use_country_specific_ac_types,
+    use_country_specific_dc_types,
+):
     """
     Map all lines to a common voltage while preserving country-specific types.
 
     Each line is assigned the closest available line type for the country of
-    its first bus. The default mapping is used when no country-specific mapping
-    is available. Transmission capacity is preserved by recalculating the
+    its first bus. Transmission capacity is preserved by recalculating the
     number of parallel bundles after updating the voltage and line type.
     Transformers are removed and connected components are moved from their
     starting bus to their ending bus.
@@ -126,10 +132,16 @@ def simplify_network_to_base_voltage(n, linetypes, base_voltage):
     ----------
     n : pypsa.Network
         Network to simplify.
-    linetypes : dict
-        Line-type mappings by country and nominal voltage.
+    ac_types : dict
+        AC line-type mappings by country and nominal voltage.
+    dc_types : dict
+        DC line-type mappings by country and nominal voltage.
     base_voltage : float
         Common nominal voltage assigned to buses and lines.
+    use_country_specific_ac_types : bool
+        Whether to use country-specific AC mappings.
+    use_country_specific_dc_types : bool
+        Whether to use country-specific DC mappings.
 
     Returns
     -------
@@ -141,11 +153,25 @@ def simplify_network_to_base_voltage(n, linetypes, base_voltage):
     n.buses["v_nom"] = base_voltage
 
     line_countries = n.lines["bus0"].map(n.buses["country"])
-    n.lines["type"] = line_countries.map(
+
+    ac_lines = n.lines["carrier"] == "AC"
+    dc_lines = n.lines["carrier"] == "DC"
+
+    n.lines.loc[ac_lines, "type"] = line_countries.loc[ac_lines].map(
         lambda country: get_linetype_by_voltage_and_country(
             base_voltage,
             country,
-            linetypes,
+            ac_types,
+            use_country_specific_ac_types,
+        )
+    )
+
+    n.lines.loc[dc_lines, "type"] = line_countries.loc[dc_lines].map(
+        lambda country: get_linetype_by_voltage_and_country(
+            base_voltage,
+            country,
+            dc_types,
+            use_country_specific_dc_types,
         )
     )
 
@@ -1076,7 +1102,24 @@ if __name__ == "__main__":
     add_year_suffix_to_carriers(n)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetypes = snakemake.params.config_lines["ac_types"]
+    lines_config = snakemake.params.config_lines
+    countries = snakemake.config["countries"]
+
+    use_country_specific_types = lines_config.get(
+        "use_country_specific_types",
+        False,
+    )
+
+    ac_types = lines_config["ac_types"]
+    dc_types = lines_config["dc_types"]
+
+    use_country_specific_ac_types = use_country_specific_types and all(
+        country in ac_types for country in countries
+    )
+
+    use_country_specific_dc_types = use_country_specific_types and all(
+        country in dc_types for country in countries
+    )
     exclude_carriers = snakemake.params.clustering["simplify_network"].get(
         "exclude_carriers", []
     )
@@ -1102,8 +1145,11 @@ if __name__ == "__main__":
 
     n, trafo_map = simplify_network_to_base_voltage(
         n,
-        linetypes,
+        ac_types,
+        dc_types,
         base_voltage,
+        use_country_specific_ac_types,
+        use_country_specific_dc_types,
     )
 
     Nyears = n.snapshot_weightings.objective.sum() / 8760

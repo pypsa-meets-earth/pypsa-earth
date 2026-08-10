@@ -32,7 +32,10 @@ Outputs
 Description
 -----------
 
-New HVAC connections use the closest country-specific line type available for the country and nominal voltage of their first bus. The default mapping is used when no country-specific mapping is available.
+New HVAC connections use country-specific line-type mappings only when enabled
+and when mappings are available for every configured country. Otherwise,
+the complete default mapping is used. Availability is evaluated separately
+for AC and DC mappings.
 """
 
 import networkx as nx
@@ -144,13 +147,23 @@ if __name__ == "__main__":
     )
 
     #  add new lines to the network
-    ac_linetypes = snakemake.params.lines["ac_types"]
-    dc_linetypes = snakemake.params.lines["dc_types"]
+    lines_config = snakemake.params.lines
+    countries = snakemake.config["countries"]
 
-    dc_linetype = get_linetype_by_voltage_and_country(
-        500,
-        None,
-        dc_linetypes,
+    ac_linetypes = lines_config["ac_types"]
+    dc_linetypes = lines_config["dc_types"]
+
+    use_country_specific_types = lines_config.get(
+        "use_country_specific_types",
+        False,
+    )
+
+    use_country_specific_ac_types = use_country_specific_types and all(
+        country in ac_linetypes for country in countries
+    )
+
+    use_country_specific_dc_types = use_country_specific_types and all(
+        country in dc_linetypes for country in countries
     )
 
     new_kedge_lines["country"] = new_kedge_lines["bus0"].map(n.buses["country"])
@@ -160,6 +173,19 @@ if __name__ == "__main__":
             line.v_nom,
             line.country,
             ac_linetypes,
+            use_country_specific_ac_types,
+        ),
+        axis=1,
+    )
+
+    new_long_lines["country"] = new_long_lines["bus0"].map(n.buses["country"])
+    new_long_lines["v_nom"] = new_long_lines["bus0"].map(n.buses["v_nom"])
+    new_long_lines["type"] = new_long_lines.apply(
+        lambda line: get_linetype_by_voltage_and_country(
+            line.v_nom,
+            line.country,
+            dc_linetypes,
+            use_country_specific_dc_types,
         ),
         axis=1,
     )
@@ -171,7 +197,7 @@ if __name__ == "__main__":
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=dc_linetype,
+            type=new_long_lines["type"],
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,

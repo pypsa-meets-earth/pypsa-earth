@@ -2381,22 +2381,27 @@ def sanitize_locations(n: pypsa.Network) -> None:
         )
 
 
-def get_linetype_by_voltage_and_country(v_nom, country, linetypes):
-    """
-    Return the closest available line type for a voltage and country.
-    """
+def get_linetype_by_voltage_and_country(
+    v_nom,
+    country,
+    linetypes,
+    use_country_specific_types,
+):
+    """Return the closest line type from the selected mapping."""
     if "default" not in linetypes:
         raise ValueError("Missing 'default' line type mapping.")
 
-    mapping = {
-        **linetypes["default"],
-        **linetypes.get(country, {}),
-    }
+    mapping_name = country if use_country_specific_types else "default"
+
+    if mapping_name not in linetypes:
+        raise ValueError(f"Missing line type mapping for country '{mapping_name}'.")
+
+    mapping = linetypes[mapping_name]
 
     if not mapping:
         raise ValueError(
             f"No line type mapping found for voltage {v_nom} kV "
-            f"and country '{country}'."
+            f"in mapping '{mapping_name}'."
         )
 
     voltage = min(
