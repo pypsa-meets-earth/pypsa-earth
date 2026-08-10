@@ -2,6 +2,34 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+Prepares port location and size data used for the shipping and hydrogen
+export sectors.
+
+Relevant Settings
+-----------------
+
+```yaml
+custom_data:
+    export_ports:
+```
+
+Outputs
+-------
+
+- ``resources/ports.csv``: world ports per country, with a per-country harbor size fraction.
+- ``resources/export_ports.csv``: largest port per country, used for hydrogen/derivative export; or the user-provided ``data/custom/export_ports.csv`` if ``custom_data.export_ports`` is enabled.
+
+Description
+-----------
+
+Downloads the World Port Index, drops entries that could not be matched to
+an ISO2 country code (e.g. small islands), and assigns each port a harbor
+size fraction relative to the other ports in its country, weighting large,
+medium and small harbors as 3, 2 and 1 respectively. The largest port per
+country is then selected as the candidate export port.
+"""
+
 import logging
 import os
 import shutil
@@ -18,7 +46,7 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_ports():
+def download_ports() -> pd.DataFrame:
     """
     Downloads the world ports index csv File and NOT as shape or other because
     it is updated on a monthly basis.
@@ -26,6 +54,11 @@ def download_ports():
     The following csv file was downloaded from the webpage
     https://msi.nga.mil/Publications/WPI
     as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
+
+    Returns
+    -------
+    pd.DataFrame
+        World Port Index, one row per port.
     """
     fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
     wpi_csv = read_csv_nafix(fn, index_col=0)
@@ -33,10 +66,22 @@ def download_ports():
     return wpi_csv
 
 
-def filter_ports(dataframe):
+def filter_ports(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Filters ports based on their harbor size and returns a DataFrame containing
     only the largest port for each country.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        Ports data with a 'Harbor Size' column ('Large', 'Medium' or 'Small')
+        and a 'country' column.
+
+    Returns
+    -------
+    pd.DataFrame
+        Single largest port per country, preferring large over medium over
+        small harbors.
     """
     # Filter large sized ports
     large_ports = dataframe[dataframe["Harbor Size"] == "Large"]
