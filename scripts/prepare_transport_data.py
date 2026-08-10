@@ -326,7 +326,6 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             planning_horizons="2030",
-            demand="AB",
         )
 
     n = pypsa.Network(snakemake.input.network)
