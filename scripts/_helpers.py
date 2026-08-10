@@ -51,8 +51,6 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
-cc = coco.CountryConverter()
-
 
 def check_config_version(config, fp_config=CONFIG_DEFAULT_PATH):
     """
@@ -652,39 +650,45 @@ def convert_country_codes(
         ("SN-GM", "ISO3"): "SEN-GMB",
     }
 
+    unique_codes = (
+        set(country_codes)
+        if isinstance(country_codes, list)
+        else set(country_codes.unique())
+    )
+
     if isinstance(country_codes, pd.Series):
-        input_codes = country_codes
-        return_series = True
+        unique_codes = list(set(country_codes))
     elif isinstance(country_codes, list):
-        input_codes = pd.Series(country_codes)
-        return_series = False
+        unique_codes = list(set(country_codes))
     else:
         raise ValueError(
             "Input must be a pandas Series or list containing country codes."
         )
 
-    converted_country_codes = pd.Series(index=input_codes.index, dtype=object)
-    custom_code_values = input_codes.map(lambda code: custom_codes.get((code, to)))
-    custom_mask = custom_code_values.notna()
+    # convert only the unique codes to avoid redundant conversions
+    converted_codes = coco.convert(
+        names=unique_codes,
+        src=src,
+        to=to,
+    )
 
-    converted_country_codes.loc[custom_mask] = custom_code_values.loc[custom_mask]
+    # replace custom codes in the converted codes
+    for (custom_code, target_format), custom_value in custom_codes.items():
+        if target_format.lower() != to.lower():
+            continue
+        for id, cvalue in enumerate(unique_codes):
+            if cvalue.lower() == custom_code.lower():
+                converted_codes[id] = custom_codes[(custom_code, target_format)]
 
-    convert_mask = ~custom_mask
-    if convert_mask.any():
-        converted_codes = cc.convert(
-            names=input_codes.loc[convert_mask].to_list(),
-            src=src,
-            to=to,
-        )
-        if isinstance(converted_codes, str):
-            converted_codes = [converted_codes]
-        converted_country_codes.loc[convert_mask] = converted_codes
+    replace_dict = dict(zip(unique_codes, converted_codes))
 
-    if return_series:
-        converted_country_codes.name = country_codes.name
-        return converted_country_codes
+    # prepare output
+    if isinstance(country_codes, pd.Series):
+        converted_country_codes = country_codes.map(replace_dict)
+    elif isinstance(country_codes, list):
+        converted_country_codes = [replace_dict[code] for code in country_codes]
 
-    return converted_country_codes.to_list()
+    return converted_country_codes
 
 
 def three_2_two_digits_countries(
