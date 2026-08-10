@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """
-Process EDGAR CO2 emission data from the raw Excel file into a clean CSV.
+Process global EDGAR CO2 emission data from the raw Excel file into a clean CSV.
 
 Reads the EDGAR CO2 fossil fuel emission Excel file, filters to
 'Public electricity and heat production' entries, and saves the result
