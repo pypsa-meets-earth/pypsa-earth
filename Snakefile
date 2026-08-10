@@ -905,7 +905,7 @@ rule add_extra_components:
         "scripts/add_extra_components.py"
 
 
-if config["electricity"]["automatic_emission"]:
+if config["co2"]["automatic_emission"]["enable"]:
 
     rule retrieve_emissions:
         input:
@@ -948,7 +948,7 @@ rule prepare_network:
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         **branch(
-            config["electricity"]["automatic_emission"],
+            config["co2"]["automatic_emission"]["enable"],
             {"emissions": "resources/" + RDIR + "co2_emissions_elec_and_heat.csv"},
         ),
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",

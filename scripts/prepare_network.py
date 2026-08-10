@@ -367,9 +367,7 @@ if __name__ == "__main__":
             m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if snakemake.params.co2["automatic_emission"]["enable"]:
                 country_names = n.buses.country.unique()
-                emission_year = snakemake.params.electricity[
-                    "automatic_emission_base_year"
-                ]
+                emission_year = snakemake.params.co2["automatic_emission"]["base_year"]
                 co2limit = emission_extractor(
                     snakemake.input.emissions, emission_year, country_names
                 ).sum()
