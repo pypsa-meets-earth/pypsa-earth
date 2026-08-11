@@ -993,7 +993,7 @@ sector:
 
 # =================== SOLVING ===================
 # Optimization options, memory limit, and named solver presets live in
-# configs/solving_presets.default.yaml (merged via Snakefile configfile:).
+# configs/solving.default.yaml (merged via Snakefile configfile:).
 solving:
   # ------------------- Solver -------------------
   solver:

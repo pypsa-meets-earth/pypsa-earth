@@ -4,7 +4,7 @@ Extract YAML sections from config.default.yaml and save them as individual snipp
 These snippets are embedded in the documentation (e.g., configuration.md) via pymdownx.snippets.
 
 Sections split out of config.default.yaml into their own file (e.g.
-configs/plotting.default.yaml, configs/solving_presets.default.yaml; see the
+configs/plotting.default.yaml, configs/solving.default.yaml; see the
 repeated `configfile:` entries in the Snakefile) are listed in CONFIG_FILES and
 concatenated before extraction, so they can still be found by name like any
 other section.
@@ -30,7 +30,7 @@ from pathlib import Path
 CONFIG_FILES = [
     Path("config.default.yaml"),
     Path("configs/plotting.default.yaml"),
-    Path("configs/solving_presets.default.yaml"),
+    Path("configs/solving.default.yaml"),
 ]
 
 
