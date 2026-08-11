@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Update databundle links to zenodo release [PR #1984](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1984)
+
 * Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
 
 * Remove `demand` and `h2export` wildcards from sector model [PR #1962](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1962)
