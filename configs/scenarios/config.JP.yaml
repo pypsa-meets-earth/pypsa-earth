@@ -1,0 +1,190 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["JP"]
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
+
+enable:
+  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
+  retrieve_databundle_sector: true
+  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
+  retrieve_cutout: false # only available for weather year 2013 - be careful when using this as both snapshots start and end, and load_options.weather_year need to be adjusted accordingly
+  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
+  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
+  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
+  build_cutout: true # Use build_cutout for weather year 2023
+  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
+  # requires cds API key https://cds.climate.copernicus.eu/how-to-api
+  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
+  progress_bar: true # show progress bar during downloading routines and other long-running tasks
+  custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
+
+
+run:
+  name: "JP_po2023_cy2020_wy2023_dc2023" # use this to keep track of runs with different settings
+  sector_name: "JP" # use this to keep track of sector scenario runs
+  shared_cutouts: true # set to true to share the default cutout(s) across runs
+  # Note: value false requires build_cutout to be enabled
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scnenario fails
+
+scenario:
+  simpl: [""]
+  ll: ["v1"]
+  clusters: [20]
+  opts: [Co2L-1h]
+  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  - 2023
+  sopts:
+  - "1h"
+  demand:
+  - "AB"
+
+snapshots:
+  start: "2023-01-01"
+  end: "2024-01-01"
+  inclusive: "left" # end is not inclusive
+
+co2:
+  limit: 9.348e+8     # annual cap [tCO2/year]
+  base: 4.465e+8     # power sector emissions JP 2023 https://www.iea.org/countries/japan/emissions, 2020: 4.800e+8 [tCO2/year], 2023: 4.465e+8 [tCO2/year]
+  emission_price: 0. # [currency/tCO2]; active via Ep wildcard
+  automatic_emission: # derive co2.limit from historical emission data instead of the value above
+    enable: false
+    base_year: 1990  # any year from 1970 to 2018
+  budget:            # year-by-year reduction trajectory; used in all sector-coupled runs
+    enable: false
+    override_co2opt: true
+    base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
+    year:
+      2020: 1.0
+      2025: 0.85
+      2030: 0.70
+      2035: 0.55
+      2040: 0.40
+      2045: 0.25
+      2050: 0.1
+
+# To be checked
+electricity:
+  base_voltage: 380.
+  voltages: [132., 220., 300., 380., 500., 750.]
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
+  hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
+
+  # To be checked
+  powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  custom_powerplants: replace #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+
+  conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  extendable_carriers:
+      # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
+          # from the Generator list below, as these offshore wind technologies require coastline access.
+    Generator: []
+    StorageUnit: [] # battery, H2
+    Store: []
+    Link: [] # H2 pipeline
+
+# To be checked
+lines:
+  ac_types:
+    132.: "243-AL1/39-ST1A 20.0"
+    220.: "Al/St 240/40 2-bundle 220.0"
+    300.: "Al/St 240/40 3-bundle 300.0"
+    380.: "Al/St 240/40 4-bundle 380.0"
+    500.: "Al/St 240/40 4-bundle 380.0"
+    750.: "Al/St 560/50 4-bundle 750.0"
+  dc_types:
+    500.: "HVDC XLPE 1000"
+  s_max_pu: 0.7
+  s_nom_max: .inf
+  s_nom_max_min: -.inf
+  length_factor: 1.25
+  under_construction: "zero" # 'zero': set capacity to zero, 'remove': remove, 'keep': with full capacity
+
+# Costs Configuration
+costs:
+  year: 2020 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
+  technology_data_version: v0.15.0
+  discountrate: [0.071] #, 0.086, 0.111]
+  country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
+  # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
+  cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
+  financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
+  # Management of output currencies and exchange rates
+  output_currency: "JPY" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
+  default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  future_exchange_rate_strategy: "reference" # reference uses the exchange rate from `reference_year` for all conversions, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
+  rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    CO2 intensity: 0
+    discount rate: 0.07
+  marginal_cost: # EUR/MWh
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    battery: 0.
+    battery inverter: 0.
+  # investment: # EUR/MW
+  #   CCGT: 830000
+  # FOM: # %/year
+  #   nuclear: 10
+  # VOM:
+  #   CCGT: 4.2
+  fuel: # EUR/MWh
+  #  coal: 1780 # 2020, JPY2025/MWh_th / 10.53 EUR2025/MWh_th, Japan CIF coal import price (Ministry of Finance Trade Statistics / METI Energy White Paper 2020)
+  #  oil: 4250 # 2020, JPY2025/MWh_th / 25.15 EUR2025/MWh_th, Japan Crude Cocktail (JCC) average import price (Ministry of Finance Trade Statistics / METI)
+  #  gas: 4825 # 2020, JPY2025/MWh_th / 28.55 EUR2025/MWh_th, Japan average LNG import price 2020 (JOGMEC / Ministry of Finance Trade Statistics)
+  #  nuclear: 630 # 2020, JPY2025/MWh_th / 3.73 EUR2025/MWh_th, METI Power Generation Cost Verification WG (fuel cycle cost = 1.7 JPY/kWh_e, converted with eff=0.33)
+    coal: 3020 # 2023, JPY2025/MWh_th / 17.87 EUR2025/MWh_th, Japan CIF coal import price (Ministry of Finance Trade Statistics / METI Energy White Paper 2023)
+    oil: 7480 # 2023, JPY2025/MWh_th / 44.25 EUR2025/MWh_th, Japan Crude Cocktail (JCC) average import price (Ministry of Finance Trade Statistics / JOGMEC)
+    gas: 6810 # 2023, JPY2025/MWh_th / 40.29 EUR2025/MWh_th, Japan average LNG import price 2023 (JOGMEC / Ministry of Finance Trade Statistics)
+    nuclear: 630 # 2023, JPY2025/MWh_th / 3.73 EUR2025/MWh_th, METI Power Generation Cost Verification WG (fuel cycle cost = 1.7 JPY/kWh_e, converted with eff=0.33)
+  # lifetime: # years
+  #   CCGT: 25.0
+  efficiency: # per unit
+    CCGT: 0.48 # METI
+    oil: 0.38 # METI
+    coal: 0.41 # METI
+
+# DemandCast and GEGIS are two available options
+# DemandCast covers 2000-2024
+# GEGIS dataset provides data for 2011, 2013, 2018
+# Details and comparison are provided in
+# https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
+load_options:
+  source: "demcast" # "demcast" or "gegis"
+  weather_year: 2023 # Weather year of the load profile
+  prediction_year: 2030 # Valid only if "gegis" used as a source
+  scale: 1 # scales all load time-series, i.e. 2 = doubles load
+
+existing_capacities:
+  grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2023, 2025, 2030]
+
+fossil_reserves:
+  oil: 0
+
+sector:
+  land_transport_fuel_cell_share:
+    AB_2023: 0.0
+
+  land_transport_electric_share:
+    AB_2023: 0.0
+
+  shipping_hydrogen_share:
+    AB_2023: 0.0
