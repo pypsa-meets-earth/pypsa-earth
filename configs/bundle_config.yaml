@@ -51,7 +51,7 @@ databundles:
     countries: [NG, BJ]
     tutorial: true
     category: global_buildings
-    destination: "data"
+    destination: "data/global_buildings"
     urls:
       zenodo: https://zenodo.org/records/18032587/files/global_buildings.zip?download=1
       gdrive: https://drive.google.com/file/d/1byLXjaL4Vp_-xW9sbx70PnXz1jNCijlj/view?usp=drive_link
