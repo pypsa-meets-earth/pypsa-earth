@@ -98,10 +98,9 @@ databundles:
     category: hydrobasins
     destination: "data/hydrobasins_hydroshare"
     urls:
-      # TODO Double-check if rehosting is needed
+      zenodo: https://zenodo.org/records/18032587/files/africa-geoglows-catchment.zip?download=1
+      gdrive: https://drive.google.com/file/d/19IpXSlChTnrqGm57GLT3rjQiAnDcvGR0/view?usp=drive_link
       #direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
-      zenodo: https://sandbox.zenodo.org/records/565987/files/africa-geoglows-catchment.zip?download=1
-    #output: [data/hydrobasins_hydroshare/africa-geoglows-catchment.shp]
     output: [data/hydrobasins_hydroshare/africa-geoglows-atlite.shp]
 
   # tutorial bundle specific for Nigeria and Benin only
