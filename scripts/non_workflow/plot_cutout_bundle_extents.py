@@ -3,12 +3,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Inspect cutout databundles and map their spatial coverage.
+Inspect cutout databundles and record their spatial and temporal coverage.
 
 The script reads ``configs/bundle_config.yaml``, selects Zenodo-backed cutout
 bundles, downloads each archive into a temporary workspace, extracts only
-NetCDF cutout files, records their lon/lat extent in one CSV file, plots the
-same extents on a world map, and removes temporary data.
+NetCDF cutout files, records their lon/lat extent and time range in one CSV file,
+plots the spatial extents on a world map, and removes temporary data.
 
 Examples
 --------
@@ -64,18 +64,22 @@ logger = logging.getLogger(__name__)
 GROUPS = ("tutorial", "default")
 X_COORDS = ("x", "lon", "longitude")
 Y_COORDS = ("y", "lat", "latitude")
+TIME_COORDS = ("time",)
 
-EXTENT_COLUMNS = [
+CSV_COLUMNS = [
     "bundle",
     "group",
     "countries",
     "zenodo_url",
     "cutout_member",
+    "time_start",
+    "time_end",
     "x_min",
     "x_max",
     "y_min",
     "y_max",
 ]
+PLOT_COLUMNS = ["bundle", "group", "x_min", "x_max", "y_min", "y_max"]
 FAILURE_COLUMNS = ["bundle", "group", "zenodo_url", "error"]
 
 
@@ -93,7 +97,9 @@ def parse_args() -> argparse.Namespace:
     """Parse command-line options and validate temp-file handling."""
 
     parser = argparse.ArgumentParser(
-        description="Download cutout bundles, collect extents, and plot coverage."
+        description=(
+            "Download cutout bundles, collect metadata, and plot spatial coverage."
+        )
     )
     parser.add_argument(
         "--config",
@@ -273,16 +279,41 @@ def coordinate_bounds(dataset: xr.Dataset, coord_name: str) -> tuple[float, floa
     return float(np.nanmin(values)), float(np.nanmax(values))
 
 
-def cutout_extent(cutout_path: Path) -> dict:
-    """Read lon/lat bounds from a NetCDF cutout file."""
+def format_date(value: object) -> str:
+    """Format a decoded NetCDF time value as DD-MM-YYYY."""
 
-    with xr.open_dataset(cutout_path, decode_times=False) as dataset:
+    if isinstance(value, np.datetime64):
+        value = pd.Timestamp(value)
+    if hasattr(value, "strftime"):
+        return value.strftime("%d-%m-%Y")
+    raise TypeError(f"Unsupported time value: {value!r}")
+
+
+def time_bounds(dataset: xr.Dataset) -> tuple[str, str]:
+    """Return date-formatted bounds for a cutout time coordinate."""
+
+    time_coord = coordinate_name(dataset, TIME_COORDS)
+    values = np.asarray(dataset[time_coord].values).reshape(-1)
+    values = [value for value in values if not pd.isna(value)]
+    if not values:
+        raise ValueError("The time coordinate does not contain any valid values.")
+
+    return format_date(min(values)), format_date(max(values))
+
+
+def cutout_metadata(cutout_path: Path) -> dict:
+    """Read spatial and temporal bounds from a NetCDF cutout file."""
+
+    with xr.open_dataset(cutout_path) as dataset:
         x_coord = coordinate_name(dataset, X_COORDS)
         y_coord = coordinate_name(dataset, Y_COORDS)
         x_min, x_max = coordinate_bounds(dataset, x_coord)
         y_min, y_max = coordinate_bounds(dataset, y_coord)
+        time_start, time_end = time_bounds(dataset)
 
     return {
+        "time_start": time_start,
+        "time_end": time_end,
         "x_min": x_min,
         "x_max": x_max,
         "y_min": y_min,
@@ -296,7 +327,7 @@ def process_bundle(
     disable_progress: bool,
     keep_temp: bool,
 ) -> list[dict]:
-    """Download one bundle and return extent records for its NetCDF cutouts."""
+    """Download one bundle and return metadata records for its NetCDF cutouts."""
 
     bundle_dir = work_dir / bundle.name
     zip_path = bundle_dir / f"{bundle.name}.zip"
@@ -321,7 +352,7 @@ def process_bundle(
                         "countries": ",".join(bundle.countries),
                         "zenodo_url": bundle.url,
                         "cutout_member": member,
-                        **cutout_extent(cutout_path),
+                        **cutout_metadata(cutout_path),
                     }
                 )
             finally:
@@ -335,7 +366,7 @@ def process_bundle(
             shutil.rmtree(bundle_dir, ignore_errors=True)
 
 
-def collect_extents(
+def collect_metadata(
     bundles: list[CutoutBundle],
     work_dir: Path,
     disable_progress: bool,
@@ -363,7 +394,7 @@ def collect_extents(
             )
 
     return (
-        pd.DataFrame(records, columns=EXTENT_COLUMNS),
+        pd.DataFrame(records, columns=CSV_COLUMNS),
         pd.DataFrame(failures, columns=FAILURE_COLUMNS),
     )
 
@@ -471,11 +502,11 @@ def plot_group_extents(extents: pd.DataFrame, group: str, output_path: Path) -> 
     plt.close(fig)
 
 
-def write_extent_csv(extents: pd.DataFrame, csv_path: Path) -> None:
-    """Write extent records without replacing an existing CSV."""
+def write_metadata_csv(metadata: pd.DataFrame, csv_path: Path) -> None:
+    """Write cutout metadata without replacing an existing CSV."""
 
     csv_path.parent.mkdir(parents=True, exist_ok=True)
-    extents.to_csv(csv_path, index=False, mode="x")
+    metadata.to_csv(csv_path, index=False, mode="x")
 
 
 def create_plots_from_csv(
@@ -491,7 +522,7 @@ def create_plots_from_csv(
         )
 
     extents = pd.read_csv(csv_path)
-    missing_columns = set(EXTENT_COLUMNS).difference(extents.columns)
+    missing_columns = set(PLOT_COLUMNS).difference(extents.columns)
     if missing_columns:
         missing = ", ".join(sorted(missing_columns))
         raise ValueError(f"Extent CSV is missing required columns: {missing}")
@@ -510,11 +541,11 @@ def collect_with_workspace(
     bundles: list[CutoutBundle],
     args: argparse.Namespace,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Collect extents in either a user-provided or auto-cleaned workspace."""
+    """Collect metadata in either a user-provided or auto-cleaned workspace."""
 
     if args.work_dir:
         args.work_dir.mkdir(parents=True, exist_ok=True)
-        return collect_extents(
+        return collect_metadata(
             bundles,
             args.work_dir.resolve(),
             args.disable_progress,
@@ -522,7 +553,7 @@ def collect_with_workspace(
         )
 
     with tempfile.TemporaryDirectory(prefix="cutout_bundle_extents_") as tmpdir:
-        return collect_extents(
+        return collect_metadata(
             bundles,
             Path(tmpdir),
             args.disable_progress,
@@ -530,15 +561,18 @@ def collect_with_workspace(
         )
 
 
-def create_extent_csv(
+def create_metadata_csv(
     args: argparse.Namespace,
     groups: tuple[str, ...],
     csv_path: Path,
 ) -> None:
-    """Download selected bundles and write their extents to CSV."""
+    """Download selected bundles and write their metadata to CSV."""
 
     if csv_path.exists():
-        raise FileExistsError(f"Output file already exists. Refusing to overwrite existing extent CSV: {csv_path}")
+        raise FileExistsError(
+            "Output file already exists. Refusing to overwrite existing metadata "
+            f"CSV: {csv_path}"
+        )
 
     bundles, skipped = load_cutout_bundles(args.config.resolve())
     bundles, skipped = filter_groups(bundles, skipped, groups)
@@ -551,9 +585,9 @@ def create_extent_csv(
         sum(bundle.group == "default" for bundle in bundles),
     )
 
-    extents, failures = collect_with_workspace(bundles, args)
-    write_extent_csv(extents, csv_path)
-    logger.info("Wrote extent CSV to %s", csv_path)
+    metadata, failures = collect_with_workspace(bundles, args)
+    write_metadata_csv(metadata, csv_path)
+    logger.info("Wrote cutout metadata CSV to %s", csv_path)
 
     if not failures.empty:
         logger.warning(
@@ -577,7 +611,7 @@ def run(args: argparse.Namespace) -> None:
     csv_path = output_dir / "cutout_bundle_extents.csv"
 
     if not args.skip_csv:
-        create_extent_csv(args, groups, csv_path)
+        create_metadata_csv(args, groups, csv_path)
 
     if not args.skip_plots:
         create_plots_from_csv(csv_path, output_dir, groups)
