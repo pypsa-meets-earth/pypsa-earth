@@ -13,6 +13,7 @@ Relevant Settings
 
     electricity:
       powerplants_filter:
+      fill_missing_hydro_tech:
       custom_powerplants:
         filepaths:
         method:
@@ -397,6 +398,54 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     df["Fueltype"] = np.where(fueltype, df["Technology"], df["Fueltype"])
     return df
 
+def fill_missing_hydro_tech(ppl: pd.DataFrame, fill_missing_hydro_tech: str):
+    """
+    Fill missing hydro technologies in the powerplants.csv based on the specified methodology:
+    - ``ror``: Assign "Run-Of-River" to all hydro powerplants with missing technology.
+    - ``reservoir``: Assign "Reservoir" to all hydro powerplants with missing technology.
+    - ``reservoir-X``: Assign "Reservoir" to hydro powerplants with capacity greater than or equal to X MW, and "Run-Of-River" to those with capacity less than X MW.
+    - ``false``: Do not fill missing hydro technologies.
+    
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Powerplantmatching dataframe.
+    fill_missing_hydro_tech : str
+        Methodology to fill missing hydro technologies. Accepted values are "ror", "reservoir", "reservoir-X", or false.
+    
+    Returns
+    -------
+    pd.DataFrame
+        Powerplant dataframe with filled hydro technologies.
+    """
+    if not fill_missing_hydro_tech:
+        return ppl
+    configmap = {
+        "ror": "Run-Of-River",
+        "reservoir": "Reservoir",
+    }
+    codes = fill_missing_hydro_tech.split("-")
+    method = codes[0]
+    min_capacity = float(codes[1]) if len(codes) > 1 else -np.inf
+    if fill_missing_hydro_tech not in configmap:
+        raise ValueError(
+            f"Unknown fill_missing_hydro_tech value: {fill_missing_hydro_tech}. "
+            "Accepted values are 'ror', 'reservoir', 'reservoir-X', or false."
+        )
+    hydro_b = ppl["Fueltype"] == "Hydro"
+    hydro_missing_tech_b = hydro_b & ppl["Technology"].isnull()
+    if hydro_missing_tech_b.any():
+        n_missing_hydro = hydro_missing_tech_b.sum()
+        n_total_hydro = hydro_b.sum()
+        logger.info(
+            f"Filling missing hydro technology for {n_missing_hydro} "
+            f"out of {n_total_hydro} hydro powerplants."
+        )
+        ror_idx = hydro_b & (ppl["Capacity"] < min_capacity)
+        reservoir_idx = hydro_b & (ppl["Capacity"] >= min_capacity)
+        ppl.loc[ror_idx, "Technology"] = configmap["ror"]
+        ppl.loc[reservoir_idx, "Technology"] = configmap["reservoir"]
+    return ppl
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -502,5 +551,8 @@ if __name__ == "__main__":
             snakemake.params.alternative_clustering,
             col_out="region_id",
         ).rename(columns={"x": "lon", "y": "lat", "country": "Country"})
+
+    # Fill missing hydro technologies
+    ppl = fill_missing_hydro_tech(ppl, snakemake.params.fill_missing_hydro_tech)
 
     ppl.to_csv(snakemake.output.powerplants)
