@@ -416,9 +416,31 @@ def rescale_hydro(plants, runoff, normalize_using_yearly, normalization_year):
             f"Missing hydro statistics for year {normalization_year}; no normalization performed."
         )
     else:
-        # get buses that have installed hydro capacity to be used to compute
-        # the normalization
-        normalization_buses = plants[plants.installed_hydro == True].index
+        p_nom = xr.DataArray(
+            plants["p_nom"],
+            dims=("plant",),
+            coords={"plant": plants.index},
+        )
+        country_of_plant = xr.DataArray(
+            plants["countries"],
+            dims=("plant",),
+            coords={"plant": plants.index},
+        )
+
+        reservoir_buses = plants.query(
+            "technology not in ['Run-of-River', 'Pumped Storage']"
+        ).index  # Note: this implicitly induce the unknown hydro technologies to be treated as reservoirs
+
+        mask_reservoirs = runoff["plant"].isin(reservoir_buses)
+
+        # expected energy
+        common_countries = normalize_using_yearly.columns.intersection(country_of_plant)
+
+        exp_en_by_cnt = xr.DataArray(
+            normalize_using_yearly.loc[ref_year, common_countries].values,
+            dims=("country",),
+            coords={"country": common_countries.values},
+        )
 
         # check nans
         share_nans = float(runoff.isnull().sum() / runoff.shape[0] / runoff.shape[1])
