@@ -60,7 +60,7 @@ These data are used in the `build_renewable_profiles` rule. [GEBCO](https://www.
 
 * **hydrobasins** datasets on watershed boundaries and basins, as available from HydroBASINS. These data are used to estimate the hydropower generation in the `build_renewable_profiles` rule.
 
-* **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. The `landcover` dataset was used to generate a `natura.tiff` raster. Nowadays the pre-compiled `natura.tiff` raster has global coverage, so there is no need to re-calculate it locally to being able run the modeling workflow.
+* **landcover** describes the shapes of world protected areas that are needed to identify in what areas no (renewable) assets can be installed. The `landcover` dataset was used to generate a `natura.tiff` raster. Nowadays the `natura.tiff` raster has global coverage, so there is no need to re-calculate it locally to being able run the modeling workflow.
 
 ### Economical
 
@@ -76,14 +76,27 @@ These data are used in the `build_renewable_profiles` rule. [GEBCO](https://www.
 
 * **eia_hydro_annual_generation.csv** contains data on total energy production of existing plants as reported per country by the open US Energy Information Administration [EIA platforms](https://www.eia.gov/international/data/world). Is used to calibrate the runoff time series are obtained from the global reanalysis data.
 
-### 4. Pre-calculated datasets
+## 4. Pre-calculated datasets
 
 There are some datasets which were prepared to ensure smooth run of the model. However, they may (and, in some cases, must) be replaced by custom ones.
 
-* **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as a mask to exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
+### Protected areas (**natura.tiff**)
 
-Currently the pre-build file is calculated for Africa, global `natura.tiff` raster is under development.
+**natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as a mask to exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
 
-* **electricity demand profiles** are provided by PyPSA-Earth as globally hourly demand loads corresponding to Shared Socioeconomic Pathways [SSP](https://doi.org/10.1016/j.gloenvcha.2016.05.009) for 2030, 2040, 2050 and 2100 and weather conditions years of 2011, 2013 and 2018. Pre-calculated data on electricity demand are placed in `data/{ssp_scenario_id}/{ssp_year}/era5_2013/{continent_name}.nc` folder and loaded automatically during the model run.
+Currently the pre-build file is the global `natura.tiff` as available from [Khoury, C. K., et al. (2019](https://doi.org/10.1016/j.dib.2018.11.125) and stored in the [databundles](https://zenodo.org/records/18033571).
 
-The demand time series were modeled by [synde package](https://github.com/euronion/synde)  which implements a workflow management system to extract the demand data created with the open source Global-Energy GIS [GEGIS](http://dx.doi.org/10.1016/j.esr.2020.100606) package. GEGIS produces hourly demand time series by applying machine learning methods using as predictors temperature profiles, population, GDP.
+### **Electricity demand profiles**
+
+Electricity demand profiles are provided by PyPSA-Earth as globally hourly demand loads from two sources: the [synde package](https://github.com/euronion/synde) and [DemandCast](https://zenodo.org/records/18374352)
+
+* **Synde package**: provides data corresponding to Shared Socioeconomic Pathways [SSP](https://doi.org/10.1016/j.gloenvcha.2016.05.009) for 2030, 2040, 2050 and 2100 and weather conditions years of 2011, 2013 and 2018. Pre-calculated data on electricity demand are placed in `data/{ssp_scenario_id}/{ssp_year}/era5_2013/{continent_name}.nc` folder and loaded automatically during the model run. The demand time series were modeled by [synde package](https://github.com/euronion/synde) which implements a workflow management system to extract the demand data created with the open source Global-Energy GIS [GEGIS](http://dx.doi.org/10.1016/j.esr.2020.100606) package. GEGIS produces hourly demand time series by applying machine learning methods using as predictors temperature profiles, population, GDP. Pre-computed data are available in the [zenodo repository](https://zenodo.org/records/18374352).
+
+* **DemandCast**: provides data with global coverage for the years 2000-2024 using the [DemandCast repository](https://github.com/open-energy-transition/demandcast). Pre-calculated data on electricity demand are placed in `data/demandcast` as retrieved from the [DemandCast repository](https://zenodo.org/records/18374352)
+
+
+### **Weather data for renewable generation** (or cutouts)
+
+Pre-computed weather data for renewable generation are provided by PyPSA-Earth as cutouts. The cutouts are pre-calculated datasets of the weather variables needed to calculate the renewable potential using [atlite package](https://atlite.readthedocs.io/en/latest/) with information from global weather services, such as the [ERA5 reanalysis dataset](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview). The cutouts are stored in the `data/cutouts` folder and loaded automatically during the model run.
+
+A number of pre-computed cutouts are available as detailed in the following list.
