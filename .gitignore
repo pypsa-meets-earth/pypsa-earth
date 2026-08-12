@@ -20,6 +20,7 @@
 *.done
 *.tif
 *.csv
+!doc/assets/data/cutout_bundle_info.csv
 *.geojson
 *.nc
 *.xls

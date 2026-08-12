@@ -111,7 +111,12 @@ def parse_args() -> argparse.Namespace:
         "--output-dir",
         default="resources/cutout_bundle_extents",
         type=Path,
-        help="Directory where the extent CSV and plots are written.",
+        help="Directory where the metadata CSV and plots are written.",
+    )
+    parser.add_argument(
+        "--csv-path",
+        type=Path,
+        help="CSV input/output path. Defaults to <output-dir>/cutout_bundle_info.csv.",
     )
     parser.add_argument(
         "--work-dir",
@@ -608,7 +613,11 @@ def run(args: argparse.Namespace) -> None:
 
     groups = selected_groups(args.tutorial_only)
     output_dir = args.output_dir.resolve()
-    csv_path = output_dir / "cutout_bundle_info.csv"
+    csv_path = (
+        args.csv_path.resolve()
+        if args.csv_path
+        else output_dir / "cutout_bundle_info.csv"
+    )
 
     if not args.skip_csv:
         create_metadata_csv(args, groups, csv_path)

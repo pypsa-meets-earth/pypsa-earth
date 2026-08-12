@@ -1,0 +1,12 @@
+bundle,group,countries,zenodo_url,cutout_member,time_start,time_end,x_min,x_max,y_min,y_max
+bundle_cutouts_tutorial_NGBJ,tutorial,"NG,BJ",https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_NGBJ.zip?download=1,cutout-2013-era5-tutorial.nc,01-03-2013,06-03-2013,0.3,15.0,1.5,14.4
+bundle_cutouts_tutorial_BW,tutorial,BW,https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_BW.zip?download=1,cutout-2013-era5-tutorial.nc,01-03-2013,06-03-2013,19.5,29.7,-27.3,-17.4
+bundle_cutouts_tutorial_MA,tutorial,MA,https://zenodo.org/records/18851102/files/bundle_cutouts_tutorial_MA.zip?download=1,cutout-2013-era5-tutorial.nc,01-03-2013,06-03-2013,-14.1,-0.6,27.3,36.6
+bundle_cutouts_test_KZ,tutorial,KZ,https://zenodo.org/records/18851102/files/bundle_tutorial_cutouts_KZ.zip?download=1,cutout-2013-era5-tutorial.nc,01-01-2013,01-01-2013,45.9,87.9,40.2,55.8
+bundle_cutouts_mainland_africa,default,Africa,https://sandbox.zenodo.org/records/323567/files/bundle_cutouts_africa.zip?download=1,cutout-2013-era5.nc,01-01-2013,31-12-2013,-19.5,67.5,-37.5,39.3
+bundle_cutouts_northamerica,default,NorthAmerica,https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_northamerica.zip?download=1,cutout-2013-era5.nc,01-01-2013,01-01-2014,-171.9,-47.1,1.5,73.8
+bundle_cutouts_europe,default,Europe,https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_europe.zip?download=1,cutout-2013-era5.nc,01-01-2013,31-12-2013,-31.8,60.0,1.5,73.8
+bundle_cutouts_oceania,default,Oceania,https://sandbox.zenodo.org/records/418864/files/bundle_cutouts_oceania.zip?download=1,cutout-2013-era5.nc,01-01-2013,31-12-2013,80.1,179.7,-49.8,19.8
+bundle_cutouts_asia,default,"KVR,WAS,FEAR,SEAR,CASR,SASR,ASEAN,MEAR",https://sandbox.zenodo.org/records/418866/files/bundle_cutouts_asia.zip?download=1,cutout-2013-era5.nc,01-01-2013,31-12-2013,24.9,158.10001,-14.4,55.8
+bundle_cutouts_southamerica,default,SouthAmerica,https://sandbox.zenodo.org/records/418859/files/bundle_cutouts_southamerica.zip?download=1,cutout-2013-era5.nc,01-01-2013,31-12-2013,-109.8,-25.5,-60.3,17.1
+bundle_cutouts_westernasia,default,WAS,https://sandbox.zenodo.org/records/418694/files/bundle_cutouts_westasia.zip?download=1,cutout-2013-era5.nc,01-01-2013,31-12-2013,24.9,63.9,8.4,44.1
