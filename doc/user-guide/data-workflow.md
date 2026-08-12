@@ -119,10 +119,10 @@ The table lists their geographic coverage and available weather-data period.
     The command downloads every configured Zenodo-backed cutout bundle and may
     require considerable time, bandwidth, and temporary disk space.
 
-#### Tutorial cutouts
-
-[![Spatial coverage of tutorial cutout bundles](../assets/images/cutout_bundle_extents_tutorial.png)](../assets/images/cutout_bundle_extents_tutorial.png)
-
 #### Default cutouts
 
 [![Spatial coverage of default cutout bundles](../assets/images/cutout_bundle_extents_default.png)](../assets/images/cutout_bundle_extents_default.png)
+
+#### Tutorial cutouts
+
+[![Spatial coverage of tutorial cutout bundles](../assets/images/cutout_bundle_extents_tutorial.png)](../assets/images/cutout_bundle_extents_tutorial.png)
