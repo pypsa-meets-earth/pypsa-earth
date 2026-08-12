@@ -56,6 +56,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update Data workflow section to update databundles, include cutouts details and script to collect cutout info [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
+
 * Add docstrings to build_natura_raster script [PR ##1844](https://github.com/
 pypsa-meets-earth/pypsa-earth/pull/#1844)
 
