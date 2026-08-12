@@ -604,11 +604,11 @@ def create_metadata_csv(
 
 
 def run(args: argparse.Namespace) -> None:
-    """Create the extent CSV and plots unless either step is skipped."""
+    """Create the metadata CSV and plots unless either step is skipped."""
 
     groups = selected_groups(args.tutorial_only)
     output_dir = args.output_dir.resolve()
-    csv_path = output_dir / "cutout_bundle_extents.csv"
+    csv_path = output_dir / "cutout_bundle_info.csv"
 
     if not args.skip_csv:
         create_metadata_csv(args, groups, csv_path)
