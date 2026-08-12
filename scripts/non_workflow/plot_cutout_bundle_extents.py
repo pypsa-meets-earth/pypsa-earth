@@ -119,13 +119,6 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Only download, analyze, and plot tutorial cutout bundles.",
     )
-    parser.add_argument(
-        "--log-level",
-        default="INFO",
-        choices=("DEBUG", "INFO", "WARNING", "ERROR"),
-        help="Console logging level.",
-    )
-
     args = parser.parse_args()
     if args.keep_temp and args.work_dir is None:
         parser.error("--keep-temp requires --work-dir.")
@@ -536,7 +529,7 @@ def run(args: argparse.Namespace) -> None:
 def main() -> None:
     args = parse_args()
     logging.basicConfig(
-        level=getattr(logging, args.log_level),
+        level=logging.INFO,
         format="%(levelname)s:%(name)s:%(message)s",
     )
     run(args)
