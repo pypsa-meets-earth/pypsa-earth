@@ -357,7 +357,7 @@ def collect_extents(
 def bundle_label(bundle_name: str) -> str:
     """Convert a bundle identifier into a compact plot label."""
 
-    return bundle_name.removeprefix("bundle_cutouts_").replace("_", " ")
+    return bundle_name
 
 
 def add_world_map(ax) -> ccrs.PlateCarree:
