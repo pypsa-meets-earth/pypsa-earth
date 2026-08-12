@@ -625,7 +625,7 @@ Snakemake merges ``configfile:`` entries in order (see the Snakefile): ``config.
 
 ### solver_options
 
-Named presets used by ``solving.solver.options`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
+Named presets used by ``solving.solver.options`` in ``configs/solving.default.yaml‎`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
 
 ```yaml
 --8<-- "configtables/snippets/solving_solver_options.yaml"
