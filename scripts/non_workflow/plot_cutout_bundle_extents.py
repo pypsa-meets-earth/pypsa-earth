@@ -19,6 +19,14 @@ Run all cutout bundles:
 Run only tutorial cutouts:
 
     python scripts/non_workflow/plot_cutout_bundle_extents.py --tutorial-only
+
+Create only the CSV:
+
+    python scripts/non_workflow/plot_cutout_bundle_extents.py --skip-plots
+
+Create only the plots from an existing CSV:
+
+    python scripts/non_workflow/plot_cutout_bundle_extents.py --skip-csv
 """
 
 import argparse
@@ -117,9 +125,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--tutorial-only",
         action="store_true",
-        help="Only download, analyze, and plot tutorial cutout bundles.",
+        help="Only process tutorial cutout bundles.",
     )
+    parser.add_argument(
+        "--skip-csv",
+        action="store_true",
+        help="Skip CSV creation and create plots from the existing CSV.",
+    )
+    parser.add_argument(
+        "--skip-plots",
+        action="store_true",
+        help="Create the CSV without creating plots.",
+    )
+
     args = parser.parse_args()
+    if args.skip_csv and args.skip_plots:
+        parser.error("--skip-csv and --skip-plots cannot be used together.")
     if args.keep_temp and args.work_dir is None:
         parser.error("--keep-temp requires --work-dir.")
 
@@ -450,23 +471,39 @@ def plot_group_extents(extents: pd.DataFrame, group: str, output_path: Path) -> 
     plt.close(fig)
 
 
-def write_outputs(
-    extents: pd.DataFrame,
+def write_extent_csv(extents: pd.DataFrame, csv_path: Path) -> None:
+    """Write extent records without replacing an existing CSV."""
+
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    extents.to_csv(csv_path, index=False, mode="x")
+
+
+def create_plots_from_csv(
+    csv_path: Path,
     output_dir: Path,
     groups: tuple[str, ...],
 ) -> None:
-    """Write one extent table and one plot per selected group."""
+    """Read extent records from CSV and create one plot per selected group."""
+
+    if not csv_path.is_file():
+        raise FileNotFoundError(
+            f"Cannot create plots because the extent CSV does not exist: {csv_path}"
+        )
+
+    extents = pd.read_csv(csv_path)
+    missing_columns = set(EXTENT_COLUMNS).difference(extents.columns)
+    if missing_columns:
+        missing = ", ".join(sorted(missing_columns))
+        raise ValueError(f"Extent CSV is missing required columns: {missing}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    extents.to_csv(output_dir / "cutout_bundle_extents.csv", index=False)
-
     for group in groups:
         plot_group_extents(
             extents,
             group,
             output_dir / f"cutout_bundle_extents_{group}.png",
         )
+    logger.info("Wrote extent plots to %s", output_dir)
 
 
 def collect_with_workspace(
@@ -493,10 +530,16 @@ def collect_with_workspace(
         )
 
 
-def run(args: argparse.Namespace) -> None:
-    """Run the full download, inspection, and plotting workflow."""
+def create_extent_csv(
+    args: argparse.Namespace,
+    groups: tuple[str, ...],
+    csv_path: Path,
+) -> None:
+    """Download selected bundles and write their extents to CSV."""
 
-    groups = selected_groups(args.tutorial_only)
+    if csv_path.exists():
+        raise FileExistsError(f"Output file already exists. Refusing to overwrite existing extent CSV: {csv_path}")
+
     bundles, skipped = load_cutout_bundles(args.config.resolve())
     bundles, skipped = filter_groups(bundles, skipped, groups)
 
@@ -509,8 +552,8 @@ def run(args: argparse.Namespace) -> None:
     )
 
     extents, failures = collect_with_workspace(bundles, args)
-    write_outputs(extents, args.output_dir.resolve(), groups)
-    logger.info("Wrote extent CSV and plots to %s", args.output_dir.resolve())
+    write_extent_csv(extents, csv_path)
+    logger.info("Wrote extent CSV to %s", csv_path)
 
     if not failures.empty:
         logger.warning(
@@ -524,6 +567,20 @@ def run(args: argparse.Namespace) -> None:
             len(skipped),
             ", ".join(record["bundle"] for record in skipped),
         )
+
+
+def run(args: argparse.Namespace) -> None:
+    """Create the extent CSV and plots unless either step is skipped."""
+
+    groups = selected_groups(args.tutorial_only)
+    output_dir = args.output_dir.resolve()
+    csv_path = output_dir / "cutout_bundle_extents.csv"
+
+    if not args.skip_csv:
+        create_extent_csv(args, groups, csv_path)
+
+    if not args.skip_plots:
+        create_plots_from_csv(csv_path, output_dir, groups)
 
 
 def main() -> None:
