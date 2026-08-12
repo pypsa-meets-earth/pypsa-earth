@@ -398,6 +398,7 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     df["Fueltype"] = np.where(fueltype, df["Technology"], df["Fueltype"])
     return df
 
+
 def fill_missing_hydro_tech(ppl: pd.DataFrame, fill_missing_hydro_tech: str):
     """
     Fill missing hydro technologies in the powerplants.csv based on the specified methodology:
@@ -405,14 +406,14 @@ def fill_missing_hydro_tech(ppl: pd.DataFrame, fill_missing_hydro_tech: str):
     - ``reservoir``: Assign "Reservoir" to all hydro powerplants with missing technology.
     - ``reservoir-X``: Assign "Reservoir" to hydro powerplants with capacity greater than or equal to X MW, and "Run-Of-River" to those with capacity less than X MW.
     - ``false``: Do not fill missing hydro technologies.
-    
+
     Parameters
     ----------
     ppl : pd.DataFrame
         Powerplantmatching dataframe.
     fill_missing_hydro_tech : str
         Methodology to fill missing hydro technologies. Accepted values are "ror", "reservoir", "reservoir-X", or false.
-    
+
     Returns
     -------
     pd.DataFrame
@@ -446,6 +447,7 @@ def fill_missing_hydro_tech(ppl: pd.DataFrame, fill_missing_hydro_tech: str):
         ppl.loc[ror_idx, "Technology"] = configmap["ror"]
         ppl.loc[reservoir_idx, "Technology"] = configmap["reservoir"]
     return ppl
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
