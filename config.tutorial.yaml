@@ -24,8 +24,9 @@ snapshots:
   end: "2013-03-7"
 
 
-clean_osm_data_options:
-  threshold_voltage: 35000
+osm:
+  clean_osm_data:
+    threshold_voltage: 35000
 
 base_network:
   min_voltage_substation_offshore: 35000

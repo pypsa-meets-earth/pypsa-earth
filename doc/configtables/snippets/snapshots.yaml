@@ -1,4 +1,2 @@
 snapshots:
   inclusive: "left" # end is not inclusive; start and end are automatically derived from `weather_year`
-
-# definition of the Coordinate Reference Systems

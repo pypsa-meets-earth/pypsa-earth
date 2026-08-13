@@ -1,4 +1,4 @@
 load_options:
-  source: "gegis" # "demcast" or "gegis"
-  prediction_year: 2030 # Valid only if "gegis" is used as source
-  scale: 1 # scales all load time series, i.e. 2 doubles load
+  source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2024 available): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
+  prediction_year: 2030 # Valid only if "gegis" used as a source
+  scale: 1 # scales all load time-series, i.e. 2 = doubles load

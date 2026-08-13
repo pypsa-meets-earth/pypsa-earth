@@ -68,7 +68,7 @@ according to the following rules:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`
+    :ref:`meta_cf`
 
 **Outputs**
 
@@ -936,6 +936,10 @@ def normalise_hydrobasins(config_hydrobasin: dict) -> None:
         for column, default in defaults.items():
             if column not in hydrobasins.columns:
                 hydrobasins[column] = default
+
+        required_columns = ["HYBAS_ID", "DIST_MAIN", "NEXT_DOWN", "geometry"]
+        hydrobasins = hydrobasins[required_columns]
+
     hydrobasins.to_file(output_fl, driver="ESRI Shapefile")
 
 
