@@ -111,9 +111,9 @@ A number of pre-computed cutouts are available as shown in the following images.
 
 #### Detailed information on cutout bundles
 
-The table lists the details of the geographic coverage and available weather-data period.
+The table lists the geographic coverage, compressed download size, and available weather-data period.
 
-{{ read_csv('user-guide/data/cutout_bundle_info.csv', usecols=[0, 1, 2, 5, 6], header=0, names=['Bundle', 'Group', 'Coverage', 'Start date', 'End date']) }}
+{{ read_csv('user-guide/data/cutout_bundle_info.csv', usecols=[0, 1, 2, 5, 7, 8], header=0, names=['Bundle', 'Group', 'Coverage', 'ZIP size (GB)', 'Start date', 'End date']) }}
 
 !!! note "Re-create the cutout bundle information"
     CSV creation intentionally refuses to overwrite an existing file. From the

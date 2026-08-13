@@ -7,8 +7,9 @@ Inspect cutout databundles and record their spatial and temporal coverage.
 
 The script reads ``configs/bundle_config.yaml``, selects Zenodo-backed cutout
 bundles, downloads each archive into a temporary workspace, extracts only
-NetCDF cutout files, records their lon/lat extent and time range in one CSV file,
-plots the spatial extents on a world map, and removes temporary data.
+NetCDF cutout files, records their lon/lat extent, time range, and archive
+sizes in one CSV file, plots the spatial extents on a world map, and
+removes temporary data.
 
 Examples
 --------
@@ -65,6 +66,7 @@ GROUPS = ("tutorial", "default")
 X_COORDS = ("x", "lon", "longitude")
 Y_COORDS = ("y", "lat", "latitude")
 TIME_COORDS = ("time",)
+BYTES_PER_GB = 1_000_000_000
 
 CSV_COLUMNS = [
     "bundle",
@@ -72,6 +74,8 @@ CSV_COLUMNS = [
     "countries",
     "zenodo_url",
     "cutout_member",
+    "zip_size_gb",
+    "unzipped_size_gb",
     "time_start",
     "time_end",
     "x_min",
@@ -242,15 +246,23 @@ def download(url: str, destination: Path, disable_progress: bool) -> None:
         urlretrieve(url, destination, reporthook=report)
 
 
-def zip_netcdfs(zip_path: Path) -> list[str]:
-    """List NetCDF members in a downloaded bundle archive."""
+def size_gb(size_bytes: int) -> float:
+    """Convert bytes to decimal gigabytes with milligigabyte precision."""
+
+    return round(size_bytes / BYTES_PER_GB, 3)
+
+
+def zip_metadata(zip_path: Path) -> tuple[list[str], float]:
+    """Return NetCDF members and the archive uncompressed size in GB."""
 
     with ZipFile(zip_path) as archive:
-        return [
-            member.filename
-            for member in archive.infolist()
-            if not member.is_dir() and member.filename.endswith(".nc")
-        ]
+        files = [member for member in archive.infolist() if not member.is_dir()]
+
+    netcdf_members = [
+        member.filename for member in files if member.filename.endswith(".nc")
+    ]
+    unzipped_size_gb = size_gb(sum(member.file_size for member in files))
+    return netcdf_members, unzipped_size_gb
 
 
 def extract_zip_member(zip_path: Path, member: str, output_dir: Path) -> Path:
@@ -343,7 +355,8 @@ def process_bundle(
         logger.info("Downloading %s from %s", bundle.name, bundle.url)
         download(bundle.url, zip_path, disable_progress)
 
-        members = zip_netcdfs(zip_path)
+        members, unzipped_size_gb = zip_metadata(zip_path)
+        zip_size_gb = size_gb(zip_path.stat().st_size)
         if not members:
             raise ValueError("No NetCDF cutouts found in downloaded zip file.")
 
@@ -357,6 +370,8 @@ def process_bundle(
                         "countries": ",".join(bundle.countries),
                         "zenodo_url": bundle.url,
                         "cutout_member": member,
+                        "zip_size_gb": zip_size_gb,
+                        "unzipped_size_gb": unzipped_size_gb,
                         **cutout_metadata(cutout_path),
                     }
                 )
