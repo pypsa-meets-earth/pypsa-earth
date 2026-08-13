@@ -58,6 +58,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove oil reserves [PR #1971](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1971)
 
+* Add docstrings to build_natura_raster script [PR ##1844](https://github.com/pypsa-meets-earth/pypsa-earth/pull/#1844)
+
 * Enable battery fetch from powerplantmatching [PR #1970](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1970)
 
 * Add links to national-scale cutouts for a few countries (Bolivia, Colombia, Zambia) [PR #1756](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1756)
