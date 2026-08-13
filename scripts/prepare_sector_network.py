@@ -297,7 +297,6 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> Non
 
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
-    # initial fossil reserves
     n.madd(
         "Store",
         nodes + " Store",
