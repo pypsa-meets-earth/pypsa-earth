@@ -15,7 +15,7 @@ Inputs
 ------
 
 - ``networks/{RDIR}/elec_s{simpl}_{clusters}.nc``: Clustered PyPSA network
-- ``resources/{SECDIR}/energy_totals_{demand}_{planning_horizons}.csv``: Energy totals for each sector
+- ``resources/{SECDIR}/energy_totals_{planning_horizons}.csv``: Energy totals for each sector
 - ``resources/{SECDIR}/population_shares/pop_layout_elec_s{simpl}_{clusteres}_{planning_horizons}.csv``: Population shares indexed by node
 - ``resources/{SECDIR}/temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc``: Hourly air temperature times series
 - ``resources/{SECDIR}/cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc``: Ground/soil source heat pump COP time series aligned to the network snapshots.
@@ -27,12 +27,12 @@ Inputs
 Outputs
 -------
 
-- ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: per node annual energy totals CSV
-- ``resources/{SECDIR}/demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: hourly heat demand time series
-- ``resources/{SECDIR}/demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: air source heat pump COP time series CSV
-- ``resources/{SECDIR}/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: ground source heat pump COP time series CSV
-- ``resources/{SECDIR}/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal demand time series CSV
-- ``resources/{SECDIR}/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: per node district heat share CSV
+- ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_s{simpl}_{clusters}_{planning_horizons}.csv``: per node annual energy totals CSV
+- ``resources/{SECDIR}/demand/heat/heat_demand_s{simpl}_{clusters}_{planning_horizons}.csv``: hourly heat demand time series
+- ``resources/{SECDIR}/demand/heat/ashp_cop_s{simpl}_{clusters}_{planning_horizons}.csv``: air source heat pump COP time series CSV
+- ``resources/{SECDIR}/demand/heat/gshp_cop_s{simpl}_{clusters}_{planning_horizons}.csv``: ground source heat pump COP time series CSV
+- ``resources/{SECDIR}/demand/heat/solar_thermal_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal demand time series CSV
+- ``resources/{SECDIR}/demand/heat/district_heat_share_s{simpl}_{clusters}_{planning_horizons}.csv``: per node district heat share CSV
 
 Description
 -----------
@@ -230,7 +230,6 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             planning_horizons=2030,
-            demand="AB",
         )
 
     n = pypsa.Network(snakemake.input.network)

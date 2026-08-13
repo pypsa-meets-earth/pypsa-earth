@@ -95,6 +95,7 @@ def main():
         "renewable_solar": ["renewable", "solar"],
         "renewable_hydro": ["renewable", "hydro"],
         "renewable_csp": ["renewable", "csp"],
+        "storage_techs": ["storage_techs"],
         "costs": ["costs"],
         "co2": ["co2"],
         "monte_carlo": ["monte_carlo"],

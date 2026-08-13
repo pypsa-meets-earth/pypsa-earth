@@ -323,20 +323,11 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>GridGrapher</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/drifter089">
                     <img src="https://avatars.githubusercontent.com/u/93286254?v=4" width="100;" alt="drifter089"/>
                     <br />
                     <sub><b>drifter089</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/martacki">
-                    <img src="https://avatars.githubusercontent.com/u/53824825?v=4" width="100;" alt="martacki"/>
-                    <br />
-                    <sub><b>martacki</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -421,27 +412,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/SermishaNarayana">
-                    <img src="https://avatars.githubusercontent.com/u/156903227?v=4" width="100;" alt="SermishaNarayana"/>
-                    <br />
-                    <sub><b>SermishaNarayana</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/Tooblippe">
-                    <img src="https://avatars.githubusercontent.com/u/805313?v=4" width="100;" alt="Tooblippe"/>
-                    <br />
-                    <sub><b>Tooblippe</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/Femkemilene">
-                    <img src="https://avatars.githubusercontent.com/u/26096675?v=4" width="100;" alt="Femkemilene"/>
-                    <br />
-                    <sub><b>Femkemilene</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/wingerter">
                     <img src="https://avatars.githubusercontent.com/u/6619839?v=4" width="100;" alt="wingerter"/>
                     <br />
@@ -478,6 +448,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>willu47</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/AlexanderMeisinger">
                     <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
@@ -566,6 +538,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Netotse</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/PierreKara1">
                     <img src="https://avatars.githubusercontent.com/u/160237120?v=4" width="100;" alt="PierreKara1"/>
@@ -610,6 +584,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>ollie-bell</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/rsparks3">
                     <img src="https://avatars.githubusercontent.com/u/30065966?v=4" width="100;" alt="rsparks3"/>
@@ -654,6 +630,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>jessLryan</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/jarry7">
                     <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
@@ -698,6 +676,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>flacombe</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/EmreYorat">
                     <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
