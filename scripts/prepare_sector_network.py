@@ -1224,10 +1224,35 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
             keep_default_na=False,
         ).squeeze()
 
-        # add biomass transport
+        # Build biomass transport only between locations represented in the
+        # spatial biomass topology.
         biomass_transport = create_network_topology(
-            n, "biomass transport ", bidirectional=False
+            n,
+            "biomass transport ",
+            bidirectional=False,
         )
+
+        biomass_bus_map = spatial.biomass.df["nodes"]
+
+        valid_biomass_routes = biomass_transport["bus0"].isin(
+            biomass_bus_map.index
+        ) & biomass_transport["bus1"].isin(biomass_bus_map.index)
+
+        if (~valid_biomass_routes).any():
+            logger.warning(
+                "Dropping %d biomass transport routes outside the spatial "
+                "biomass topology:\n%s",
+                (~valid_biomass_routes).sum(),
+                biomass_transport.loc[
+                    ~valid_biomass_routes,
+                    ["bus0", "bus1"],
+                ].to_string(),
+            )
+
+        biomass_transport = biomass_transport.loc[valid_biomass_routes].copy()
+
+        biomass_transport["bus0"] = biomass_transport["bus0"].map(biomass_bus_map)
+        biomass_transport["bus1"] = biomass_transport["bus1"].map(biomass_bus_map)
 
         # costs
         countries_not_in_index = set(countries) - set(biomass_transport.index)
@@ -1256,11 +1281,13 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         n.madd(
             "Link",
             biomass_transport.index,
-            bus0=biomass_transport.bus0 + " solid biomass",
-            bus1=biomass_transport.bus1 + " solid biomass",
+            bus0=biomass_transport["bus0"].to_numpy(),
+            bus1=biomass_transport["bus1"].to_numpy(),
             p_nom_extendable=True,
-            length=biomass_transport.length.values,
-            marginal_cost=biomass_transport.costs * biomass_transport.length.values,
+            length=biomass_transport["length"].to_numpy(),
+            marginal_cost=(
+                biomass_transport["costs"] * biomass_transport["length"]
+            ).to_numpy(),
             capital_cost=1,
             carrier="solid biomass transport",
         )
@@ -1404,7 +1431,35 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
     if co2_network:
 
         logger.info("Adding CO2 network.")
-        co2_links = create_network_topology(n, "CO2 pipeline ")
+
+        # Build CO2 pipelines only between locations represented in the
+        # spatial CO2 topology.
+        co2_links = create_network_topology(
+            n,
+            "CO2 pipeline ",
+        )
+
+        co2_bus_map = spatial.co2.df["nodes"]
+
+        valid_co2_routes = co2_links["bus0"].isin(co2_bus_map.index) & co2_links[
+            "bus1"
+        ].isin(co2_bus_map.index)
+
+        if (~valid_co2_routes).any():
+            logger.warning(
+                "Dropping %d CO2 pipeline routes outside the spatial CO2 "
+                "topology:\n%s",
+                (~valid_co2_routes).sum(),
+                co2_links.loc[
+                    ~valid_co2_routes,
+                    ["bus0", "bus1"],
+                ].to_string(),
+            )
+
+        co2_links = co2_links.loc[valid_co2_routes].copy()
+
+        co2_links["bus0"] = co2_links["bus0"].map(co2_bus_map)
+        co2_links["bus1"] = co2_links["bus1"].map(co2_bus_map)
 
         cost_onshore = (
             (1 - co2_links.underwater_fraction)
@@ -1421,12 +1476,12 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
         n.madd(
             "Link",
             co2_links.index,
-            bus0=co2_links.bus0.values + " co2 stored",
-            bus1=co2_links.bus1.values + " co2 stored",
+            bus0=co2_links["bus0"].to_numpy(),
+            bus1=co2_links["bus1"].to_numpy(),
             p_min_pu=-1,
             p_nom_extendable=True,
-            length=co2_links.length.values,
-            capital_cost=capital_cost.values,
+            length=co2_links["length"].to_numpy(),
+            capital_cost=capital_cost.to_numpy(),
             carrier="CO2 pipeline",
             lifetime=costs.at["CO2 pipeline", "lifetime"],
         )
