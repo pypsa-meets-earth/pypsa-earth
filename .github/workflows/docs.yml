@@ -55,4 +55,4 @@ jobs:
         # FOM = Fixed Operation & Maintenance. splitted appears in auto-generated snippets.
         ignore_words_list: ore,tabacco,fo,FO,vor,fom,FOM,splitted,GES
         path: doc
-        skip: "doc/assets/data/cutout_bundle_info.csv"
+        skip: "doc/user-guide/data/cutout_bundle_info.csv"

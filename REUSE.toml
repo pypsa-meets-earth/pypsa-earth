@@ -68,7 +68,7 @@ SPDX-FileCopyrightText = "The PyPSA-Earth and PyPSA-Eur Authors"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 [[annotations]]
-path = "doc/assets/data/cutout_bundle_info.csv"
+path = "doc/user-guide/data/cutout_bundle_info.csv"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "The PyPSA-Earth Authors"
 SPDX-License-Identifier = "CC-BY-4.0"

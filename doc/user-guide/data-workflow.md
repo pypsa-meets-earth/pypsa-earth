@@ -99,10 +99,21 @@ Electricity demand profiles are provided by PyPSA-Earth as globally hourly deman
 
 Pre-computed weather data for renewable generation are provided by PyPSA-Earth as cutouts. The cutouts are pre-calculated datasets of the weather variables needed to calculate the renewable potential using [atlite package](https://atlite.readthedocs.io/en/latest/) with information from global weather services, such as the [ERA5 reanalysis dataset](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview). The cutouts are stored in the `data/cutouts` folder and loaded automatically during the model run.
 
-A number of pre-computed cutouts are available as detailed in the following table.
-The table lists their geographic coverage and available weather-data period.
+A number of pre-computed cutouts are available as shown in the following images.
 
-{{ read_csv('assets/data/cutout_bundle_info.csv', usecols=[0, 1, 2, 5, 6], header=0, names=['Bundle', 'Group', 'Coverage', 'Start date', 'End date']) }}
+#### Default cutouts
+
+[![Spatial coverage of default cutout bundles](images/cutout_bundle_extents_default.png)](images/cutout_bundle_extents_default.png)
+
+#### Tutorial cutouts
+
+[![Spatial coverage of tutorial cutout bundles](images/cutout_bundle_extents_tutorial.png)](images/cutout_bundle_extents_tutorial.png)
+
+#### Detailed information on cutout bundles
+
+The table lists the details of the geographic coverage and available weather-data period.
+
+{{ read_csv('user-guide/data/cutout_bundle_info.csv', usecols=[0, 1, 2, 5, 6], header=0, names=['Bundle', 'Group', 'Coverage', 'Start date', 'End date']) }}
 
 !!! note "Re-create the cutout bundle information"
     CSV creation intentionally refuses to overwrite an existing file. From the
@@ -110,19 +121,11 @@ The table lists their geographic coverage and available weather-data period.
     step without creating plots:
 
     ```bash
-    rm doc/assets/data/cutout_bundle_info.csv
+    rm doc/user-guide/data/cutout_bundle_info.csv
     python scripts/non_workflow/extract_cutout_bundle_info.py \
         --skip-plots \
-        --csv-path doc/assets/data/cutout_bundle_info.csv
+        --csv-path doc/user-guide/data/cutout_bundle_info.csv
     ```
 
     The command downloads every configured Zenodo-backed cutout bundle and may
     require considerable time, bandwidth, and temporary disk space.
-
-#### Default cutouts
-
-[![Spatial coverage of default cutout bundles](../assets/images/cutout_bundle_extents_default.png)](../assets/images/cutout_bundle_extents_default.png)
-
-#### Tutorial cutouts
-
-[![Spatial coverage of tutorial cutout bundles](../assets/images/cutout_bundle_extents_tutorial.png)](../assets/images/cutout_bundle_extents_tutorial.png)

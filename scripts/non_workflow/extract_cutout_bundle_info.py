@@ -14,19 +14,19 @@ Examples
 --------
 Run all cutout bundles:
 
-    python scripts/non_workflow/plot_cutout_bundle_extents.py
+    python scripts/non_workflow/extract_cutout_bundle_info.py
 
 Run only tutorial cutouts:
 
-    python scripts/non_workflow/plot_cutout_bundle_extents.py --tutorial-only
+    python scripts/non_workflow/extract_cutout_bundle_info.py --tutorial-only
 
 Create only the CSV:
 
-    python scripts/non_workflow/plot_cutout_bundle_extents.py --skip-plots
+    python scripts/non_workflow/extract_cutout_bundle_info.py --skip-plots
 
 Create only the plots from an existing CSV:
 
-    python scripts/non_workflow/plot_cutout_bundle_extents.py --skip-csv
+    python scripts/non_workflow/extract_cutout_bundle_info.py --skip-csv
 """
 
 import argparse
