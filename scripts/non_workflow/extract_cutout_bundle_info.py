@@ -249,7 +249,7 @@ def download(url: str, destination: Path, disable_progress: bool) -> None:
 def size_gb(size_bytes: int) -> float:
     """Convert bytes to decimal gigabytes with milligigabyte precision."""
 
-    return round(size_bytes / BYTES_PER_GB, 3)
+    return round(size_bytes / BYTES_PER_GB, 2)
 
 
 def zip_metadata(zip_path: Path) -> tuple[list[str], float]:
