@@ -53,10 +53,9 @@ dependencies:
 - tqdm
 - pytz
 - currencyconverter
-- googledrivedownloader>=1.1
 
 # Cloud download
-# - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
+- googledrivedownloader>=1.1
 
 - linopy>=0.6.5,<0.9
 
@@ -82,3 +81,6 @@ dependencies:
 
 # Command Line Interface
 - rich
+
+# Avoid cuda versions of pyarrow
+- pyarrow=*=*cpu*
