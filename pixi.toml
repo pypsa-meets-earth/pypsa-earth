@@ -52,6 +52,8 @@ chaospy = "*"
 geopy = "*"
 tqdm = "*"
 pytz = "*"
+currencyconverter = "*"
+googledrivedownloader = ">=1.1"
 
 # Jupyter notebook requirements
 ipykernel = "*"
@@ -76,10 +78,6 @@ gurobi = "*"
 
 # Command Line Interface
 rich = "*"
-
-[pypi-dependencies]
-currencyconverter = "*"
-googledrivedownloader = ">=1.1"
 
 [environments]
 pypsa-earth = ["default"]

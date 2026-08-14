@@ -52,6 +52,8 @@ dependencies:
 - geopy
 - tqdm
 - pytz
+- currencyconverter
+- googledrivedownloader>=1.1
 
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
@@ -80,7 +82,3 @@ dependencies:
 
 # Command Line Interface
 - rich
-
-- pip:
-  - currencyconverter
-  - googledrivedownloader>=1.1
