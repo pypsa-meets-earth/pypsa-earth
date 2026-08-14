@@ -15,8 +15,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 In this tutorial we improve the **base transmission network** that PyPSA-Earth builds from OpenStreetMap (OSM):
 
-1. **Kazakhstan's voltage hierarchy**: post-Soviet levels instead of European defaults.
-2. **A lower OSM voltage floor (35 kV)**: keep regional sub-transmission links that the default 51 kV cutoff drops.
+1. **Kazakhstan's voltage hierarchy**: represent its post-Soviet/CIS voltage levels.
+2. **A suitable OSM voltage floor (35 kV for KZ)**: retain regional sub-transmission links that a higher cutoff would drop.
 3. **KZ line types**: conductor ratings that reflect older, single-circuit lines at 110 kV and 220 kV.
 4. **Non-extendable lines**: stop the solver from cost-optimizing past the ratings from (3).
 
@@ -58,17 +58,17 @@ See the [configuration reference](../../user-guide/configuration.md) for every k
 
 ## Step 1: See why KZ uses a different voltage scale
 
-Kazakhstan follows the **post-Soviet/CIS** voltage scale, not the European one PyPSA-Earth uses by default:
+Kazakhstan follows the **post-Soviet/CIS** voltage scale:
 
-| Role | Kazakhstan (typical) | PyPSA-Earth default |
+| Role | Kazakhstan (typical) | PyPSA-Earth default nominal levels |
 |---|---|---|
-| Sub-transmission / regional mesh | **35 kV**, **110 kV** | *(35 kV dropped; 132 kV)* |
+| Sub-transmission / regional mesh | **35 kV**, **110 kV** | 132 kV |
 | Transmission | **220 kV** | 220 kV, 300 kV, 380 kV |
 | Extra-high-voltage backbone | **500 kV** | 500 kV, 750 kV |
 
 **35 kV** is the critical layer for connectivity: in many regions it is the voltage that ties smaller substations into the wider grid. **110 kV** carries regional load between cities; **220 kV** and **500 kV** form the long-distance backbone.
 
-PyPSA-Earth defaults assume a **European** stack (`electricity.voltages: [132, 220, 300, 380, 500, 750]`) and discard OSM assets below **51 kV** (`threshold_voltage: 51000`). For KZ that removes much of the sub-transmission mesh, one reason western pockets appeared as electrical islands in Parts 4–6.
+The minimum voltage used to retain OSM lines and substations is configured with **`osm.clean_osm_data.threshold_voltage`**; check its current default in `config.default.yaml`. Cross-check this value against the voltage hierarchy and OSM data quality of the country being modelled. For Kazakhstan, **35 kV** provides better results because a higher threshold drops additional lines that connect some regions, removing parts of the sub-transmission mesh and contributing to the electrical islands observed in Parts 4–6.
 
 ---
 
