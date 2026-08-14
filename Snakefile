@@ -639,6 +639,7 @@ rule build_powerplants:
         alternative_clustering=config["clustering"]["alternative_clustering"],
         powerplants_filter=config["electricity"]["powerplants_filter"],
         custom_powerplants=config["electricity"]["custom_powerplants"],
+        fill_missing_hydro_tech=config["electricity"]["fill_missing_hydro_tech"],
     input:
         base_network="networks/" + RDIR + "base.nc",
         pm_config="configs/powerplantmatching_config.yaml",
