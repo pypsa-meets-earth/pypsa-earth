@@ -58,6 +58,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Attach existing batteries as ``StorageUnit`` rather than Store+Link, so extra battery buses do not inflate the minimum cluster count during simplify/cluster [PR #1990](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1990)
+
 * Add docstrings to build_natura_raster script [PR ##1844](https://github.com/
 pypsa-meets-earth/pypsa-earth/pull/#1844)
 
