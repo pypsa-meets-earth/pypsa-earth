@@ -32,7 +32,7 @@ dependencies:
 - pandas<3
 - geopandas>=1
 - fiona>=1.10
-- xarray>=2024.3.0,<2025.7.0
+- xarray>=2026.1
 - netcdf4
 - libgdal-netcdf
 - networkx
@@ -58,7 +58,7 @@ dependencies:
 # Cloud download
 # - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
 
-- linopy!=0.6.0,!=0.6.1,!=0.6.2,!=0.6.3,!=0.6.4  # linopy 0.6.0-0.6.4 has a bug on scip on windows
+- linopy>=0.6.5,<0.9
 
 # Jupyter notebook requirement
 - ipykernel
