@@ -625,7 +625,7 @@ Snakemake merges ``configfile:`` entries in order (see the Snakefile): ``config.
 
 ### solver_options
 
-Named presets used by ``solving.solver.options`` in ``configs/solving.default.yaml‎`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
+Named presets used by ``solving.solver.options`` in ``configs/solving.default.yaml`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
 
 ```yaml
 --8<-- "configtables/snippets/solving_solver_options.yaml"
@@ -633,7 +633,9 @@ Named presets used by ``solving.solver.options`` in ``configs/solving.default.ya
 
 ## Plotting
 
-Options under the **PLOTTING** banner in ``config.default.yaml``: map layout, plot thresholds, technology groupings, carrier colours, and display names.
+The dedicated **`configs/plotting.default.yaml`** holds all plotting defaults, including map layout, plot thresholds, technology groupings, carrier colours, and display names.
+
+Snakemake loads **`configs/plotting.default.yaml`** after ``config.default.yaml`` and before your ``config.yaml`` (see the Snakefile). Later files override earlier keys at the same path, so you can override any plotting setting under ``plotting`` in ``config.yaml`` (or with ``snakemake --configfile …``).
 
 ```yaml
 --8<-- "configtables/snippets/plotting.yaml"
