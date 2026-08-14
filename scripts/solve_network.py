@@ -86,7 +86,13 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import PYPSA_V1, configure_logging, create_logger
+from _helpers import (
+    PYPSA_V1,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+)
+from linopy import LinearExpression
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 
 logger = create_logger(__name__)
@@ -217,7 +223,7 @@ def add_CCL_constraints(n, config):
     agg_p_nom_limits = config["electricity"].get("agg_p_nom_limits")
 
     try:
-        agg_p_nom_minmax = pd.read_csv(
+        agg_p_nom_minmax = read_csv_nafix(
             snakemake.input.agg_p_nom_minmax, index_col=list(range(2)), header=[0, 1]
         )[snakemake.wildcards.planning_horizons]
     except IOError:
@@ -736,7 +742,11 @@ def add_h2_network_cap(n, cap):
     n.model.add_constraints(lhs <= rhs, name="h2_network_cap")
 
 
-def hydrogen_temporal_constraint(n, n_ref, time_period):
+def hydrogen_temporal_constraint(
+    n: pypsa.Network,
+    n_ref: pypsa.Network | None,
+    time_period: str,
+) -> None:
     """
     Applies temporal constraints for hydrogen production based on renewable energy sources (RES)
     and electrolysis within a specified time period. The function ensures that the hydrogen production
@@ -818,24 +828,61 @@ def hydrogen_temporal_constraint(n, n_ref, time_period):
         dim=("name" if PYPSA_V1 else "Link")
     )
 
-    # Grouping
-    if time_period == "hour":
-        res = res.groupby("snapshot").sum().rename({"snapshot": "hour"})
-        elec_input = elec_input.groupby("snapshot").sum().rename({"snapshot": "hour"})
-    elif time_period == "month":
-        res = res.groupby("snapshot.month").sum()
-        elec_input = elec_input.groupby("snapshot.month").sum()
-    elif time_period == "year":
-        res = res.groupby("snapshot.year").sum()
-        elec_input = elec_input.groupby("snapshot.year").sum()
+    def _sum_by_period(
+        expr: LinearExpression,
+        period: str,
+    ) -> LinearExpression:
+        """
+        Aggregate a snapshot-indexed Linopy expression to the requested
+        temporal matching resolution.
 
-    # Defining the constraints
-    for label in res.coords[time_period].values:
-        lhs = res.loc[label] + elec_input.loc[label]
-        n.model.add_constraints(lhs >= 0.0, name=f"RESconstraints_{label}")
+        Parameters
+        ----------
+        expr : linopy.LinearExpression
+            Snapshot-indexed expression to aggregate.
+        period : str
+            Temporal aggregation level. Supported values are
+            ``"hour"``, ``"month"``, and ``"year"``.
+
+        Returns
+        -------
+        linopy.LinearExpression
+            Expression indexed by a ``period`` dimension. Passing the returned
+            expression to ``add_constraints`` creates one constraint per period
+            while avoiding explicit Python loops.
+        """
+        if period in ("hour", "hourly"):
+            labels = n.snapshots
+        elif period in ("month", "monthly"):
+            labels = n.snapshots.month
+        elif period in ("year", "yearly"):
+            labels = n.snapshots.year
+        else:
+            raise ValueError(f"Unsupported time period: {period}")
+
+        period_da = xr.DataArray(
+            labels,
+            dims=["snapshot"],
+            coords={"snapshot": n.snapshots},
+            name="period",
+        )
+
+        return expr.groupby(period_da).sum("snapshot")
+
+    # Aggregate RES generation and electrolysis demand to the requested
+    # temporal matching resolution. This preserves one constraint per period.
+    lhs = _sum_by_period(res, time_period) + _sum_by_period(elec_input, time_period)
+
+    n.model.add_constraints(
+        lhs >= 0.0,
+        name="H2_temporal_matching",
+    )
 
 
 def add_chp_constraints(n):
+    if n.links.empty:
+        return
+
     electric_bool = (
         n.links.index.str.contains("urban central")
         & n.links.index.str.contains("CHP")
@@ -889,7 +936,7 @@ def add_chp_constraints(n):
             p.loc[:, heat] * (n.links.efficiency[heat] * n.links.c_b[electric].values)
             - p.loc[:, electric] * n.links.efficiency[electric]
         )
-        n.model.add_constraints(lhs <= rhs, name="chplink-backpressure")
+        n.model.add_constraints(lhs <= 0, name="chplink-backpressure")
 
 
 def add_co2_sequestration_limit(n, sns):
@@ -973,7 +1020,7 @@ def add_existing(n):
             .replace("_presec", "")
             .replace(".nc", ".csv")
         )
-        df = pd.read_csv(directory + "/electrolyzer_caps_" + n_name, index_col=0)
+        df = read_csv_nafix(directory + "/electrolyzer_caps_" + n_name, index_col=0)
         existing_electrolyzers = df.p_nom_opt.values
 
         h2_index = n.links[n.links.carrier == "H2 Electrolysis"].index
@@ -981,10 +1028,10 @@ def add_existing(n):
 
         # n_name = snakemake.input.network.split("/")[-1].replace(str(snakemake.config["scenario"]["clusters"][0]), "").\
         #     replace(".nc", ".csv").replace(str(snakemake.config["costs"]["discountrate"][0]), "")
-        df = pd.read_csv(directory + "/res_caps_" + n_name, index_col=0)
+        df = read_csv_nafix(directory + "/res_caps_" + n_name, index_col=0)
 
         for tech in snakemake.config["custom_data"]["renewables"]:
-            # df = pd.read_csv(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
+            # df = read_csv_nafix(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
             existing_res = df.loc[tech]
             existing_res.index = existing_res.index.str.apply(lambda x: x + tech)
             tech_index = n.generators[n.generators.carrier == tech].index
@@ -1182,9 +1229,7 @@ if __name__ == "__main__":
             opts="Co2L-4H",
             planning_horizons="2030",
             discountrate="0.071",
-            demand="AB",
             sopts="144H",
-            h2export="120",
             configfile="config.tutorial.yaml",
         )
 

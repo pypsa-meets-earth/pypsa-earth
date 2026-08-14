@@ -50,14 +50,10 @@ def build_ship_profile(export_volume, ship_opts):
     ship = ship[: len(snapshots)]
     ship.index = snapshots
 
-    # Scale ship profile to export_volume
-    export_profile = ship / ship.sum() * export_volume * 1e6  # in MWh
+    avg_volume = export_volume * 1e6 / 8760  # convert TWh to MWh
 
-    # Check profile
-    if abs(export_profile.sum() / 1e6 - export_volume) > 0.001:
-        raise ValueError(
-            f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_volume} TWh)"
-        )
+    # Scale ship profile to export_volume
+    export_profile = ship / ship.sum() * avg_volume * len(snapshots)  # in MWh
 
     return export_profile
 
@@ -69,12 +65,11 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_ship_profile",
-            h2export="120",
         )
 
     # Get parameters from config and wildcard
     ship_opts = snakemake.params.ship_opts
-    export_volume = eval(snakemake.wildcards.h2export)
+    export_volume = snakemake.params.h2export
 
     # Create export profile
     if export_volume > 0:

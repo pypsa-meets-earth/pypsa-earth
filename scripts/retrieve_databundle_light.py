@@ -1,26 +1,25 @@
 # -*- coding: utf-8 -*-
-# Copyright 2019-2020 Fabian Hofmann (FIAS)
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5894972.svg
-   :target: https://doi.org/10.5281/zenodo.5894972
 
-The data bundles contains common GIS datasets like EEZ shapes, Copernicus Landcover, Hydrobasins
-and also electricity specific summary statistics like historic per country yearly totals of hydro generation,
-GDP and POP on NUTS3 levels and per-country load time-series.
+The script retrieve common datasets like exclusive economic zone polygons,
+landcover data, hydrobasins, global electrcity demand datasets and
+regional-tailored cutouts.
 
-This rule downloads the data bundle from `zenodo <https://doi.org/10.5281/zenodo.5894972>`_
-or `google drive <https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM>`_
-and extracts it in the ``data``, ``resources`` and ``cutouts`` sub-directory.
-Bundle data are then deleted once downloaded and unzipped.
+This rule downloads the data bundle from zenodo or google drive used as
+a backup option and extracts it in the ``data``, ``resources`` and ``cutouts``
+sub-directory. Temporal bundle data are deleted once downloaded and unzipped.
 
-The :ref:`tutorial_electricity` uses a smaller `data bundle <https://zenodo.org/record/3517921/files/pypsa-eur-tutorial-data-bundle.tar.xz>`_
-than required for the full model (around 500 MB)
+The :ref:`tutorial_electricity` uses a smaller data bundle referred as
+`tutorial` used to run tutorials and tests.
 
-The required bundles are downloaded automatically according to the list names, in agreement to
-the data bundles specified in the bundle configuration file, typically located in the ``config`` folder.
+The required bundles are downloaded automatically according tailoring to
+a requested region when datasets are selected from the data bundles specified
+in the bundle configuration ```bundle_config.yaml` file located in ``config``
+folder.
+
 Each data bundle entry has the following structure:
 
 .. code:: yaml
@@ -59,8 +58,6 @@ according to the following rules:
   as listed in the ``urls`` option of each bundle configuration; when a source fails,
   the following source is used and so on
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3517921.svg
-    :target: https://doi.org/10.5281/zenodo.3517921
 
 **Relevant Settings**
 
@@ -71,7 +68,7 @@ according to the following rules:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`
+    :ref:`meta_cf`
 
 **Outputs**
 
@@ -889,6 +886,9 @@ def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list
 
 
 def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> None:
+    """
+    Merge all hydrobasin files into a global one
+    """
     basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
     output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
 
@@ -904,6 +904,43 @@ def merge_hydrobasins_shape(config_hydrobasin: dict, hydrobasins_level: int) -> 
         subset="HYBAS_ID", ignore_index=True
     )
     fl_merged.to_file(output_fl, driver="ESRI Shapefile")
+
+
+def normalise_hydrobasins(config_hydrobasin: dict) -> None:
+    """
+    Adjust format of a tutorial hydrobasins dataset according to
+    atlite expectations
+    """
+    basins_path = os.path.join(BASE_DIR, config_hydrobasin["destination"])
+    output_fl = os.path.join(BASE_DIR, config_hydrobasin["output"][0])
+
+    hydrobasins = gpd.read_file(basins_path)
+    # In case africa-geoglows-catchment is used
+    # column names and CRS must be adjusted accordingly
+    if config_hydrobasin.get("tutorial", False):
+        hydrobasins = hydrobasins.rename(
+            columns={
+                "HydroID": "HYBAS_ID",
+                "NextDownID": "NEXT_DOWN",
+                "Shape_Leng": "DIST_MAIN",
+            }
+        )
+        hydrobasins = hydrobasins.to_crs("EPSG:4326")
+
+        defaults = {
+            "HYBAS_ID": 1,
+            "DIST_MAIN": 1.0,
+            "NEXT_DOWN": 0,
+        }
+
+        for column, default in defaults.items():
+            if column not in hydrobasins.columns:
+                hydrobasins[column] = default
+
+        required_columns = ["HYBAS_ID", "DIST_MAIN", "NEXT_DOWN", "geometry"]
+        hydrobasins = hydrobasins[required_columns]
+
+    hydrobasins.to_file(output_fl, driver="ESRI Shapefile")
 
 
 def retrieve_databundle(
@@ -950,7 +987,8 @@ def retrieve_databundle(
         b_name for b_name in bundles_to_download if "hydrobasins" in b_name
     ]
     if len(hydrobasin_bundles) > 0:
-        config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
+        if not config_bundles[hydrobasin_bundles[0]]["tutorial"]:
+            config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
 
     # initialize downloaded and missing bundles
     downloaded_bundles = []
@@ -982,10 +1020,14 @@ def retrieve_databundle(
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
     if len(hydrobasin_bundles) > 0:
-        logger.info("Merging regional hydrobasins files into a global shapefile")
-        merge_hydrobasins_shape(
-            config_bundles[hydrobasin_bundles[0]], hydrobasins_level
-        )
+        if not config_bundles[hydrobasin_bundles[0]]["tutorial"]:
+            logger.info("Merging regional hydrobasins files into a global shapefile")
+            merge_hydrobasins_shape(
+                config_bundles[hydrobasin_bundles[0]], hydrobasins_level
+            )
+        else:
+            logger.info("Transforming geoglows hydrobasins into atlite format")
+            normalise_hydrobasins(config_bundles[hydrobasin_bundles[0]])
 
     # log the downloaded and missing bundles
     logger.info(
