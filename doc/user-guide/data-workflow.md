@@ -84,7 +84,7 @@ There are some datasets which were prepared to ensure smooth run of the model. H
 
 **natura.tiff** contains geo-spatial data on location of protected and reserved areas and may be used as a mask to exclude such areas when calculating the renewable potential by `build_renewable_profiles` rule. The `natura` flag in the configuration file allows to switch-on this option while presence of the `natura.tiff` in the `resources` folder is needed to run the model.
 
-Currently the pre-build file is the global `natura.tiff` as available from [Khoury, C. K., et al. (2019](https://doi.org/10.1016/j.dib.2018.11.125) and stored in the [databundles](https://zenodo.org/records/18033571).
+Currently the pre-build file is the global `natura.tiff` as available from [Sosa Arango, Chrystian Camilo, 2020, "Protected areas (WDPA)"](https://doi.org/10.7910/DVN/XIV9BL), derived from [Khoury, C. K., et al. (2019](https://doi.org/10.1016/j.dib.2018.11.125) and stored in the [databundles](https://zenodo.org/records/18033571).
 
 ### **Electricity demand profiles**
 
@@ -97,7 +97,8 @@ Electricity demand profiles are provided by PyPSA-Earth as globally hourly deman
 
 ### **Weather data for renewable generation** (or cutouts)
 
-Pre-computed weather data for renewable generation are provided by PyPSA-Earth as cutouts. The cutouts are pre-calculated datasets of the weather variables needed to calculate the renewable potential using [atlite package](https://atlite.readthedocs.io/en/latest/) with information from global weather services, such as the [ERA5 reanalysis dataset](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview). The cutouts are stored in the `data/cutouts` folder and loaded automatically during the model run.
+
+Pre-computed weather data are provided by PyPSA-Earth as so called cutouts. The cutouts are archives of the weather variables needed to calculate energy-related parameters, such as the renewable capacity factors. Cutouts are calculated using [atlite package](https://atlite.readthedocs.io/en/latest/) with information taken from global weather services, specifically [ERA5 reanalysis dataset](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview). The cutouts are stored in the `data/cutouts` folder and loaded automatically during the model run.
 
 A number of pre-computed cutouts are available as shown in the following images.
 
@@ -115,10 +116,8 @@ The table lists the geographic coverage, compressed download size, and available
 
 {{ read_csv('user-guide/data/cutout_bundle_info.csv', usecols=[0, 1, 2, 5, 7, 8], header=0, names=['Bundle', 'Group', 'Coverage', 'ZIP size (GB)', 'Start date', 'End date']) }}
 
-!!! note "Re-create the cutout bundle information"
-    CSV creation intentionally refuses to overwrite an existing file. From the
-    repository root, remove the current documentation CSV and run the extraction
-    step without creating plots:
+!!! note "Re-create the cutout bundle information (for maintainers)"
+    To reproduce the CSV file, run the following command in the root of the repository:
 
     ```bash
     rm doc/user-guide/data/cutout_bundle_info.csv
@@ -126,6 +125,3 @@ The table lists the geographic coverage, compressed download size, and available
         --skip-plots \
         --csv-path doc/user-guide/data/cutout_bundle_info.csv
     ```
-
-    The command downloads every configured Zenodo-backed cutout bundle and may
-    require considerable time, bandwidth, and temporary disk space.
