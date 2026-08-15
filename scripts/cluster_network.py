@@ -313,9 +313,9 @@ def distribute_clusters(
             n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
         )
 
-    distribution_factor.index.set_names(["country", "sub_network"], inplace=True)
+    distribution_factor.index.name = "cluster"
 
-    N = n.buses.groupby(["country", "sub_network"]).size()
+    N = n.buses.groupby(["country", "sub_network"]).size()[distribution_factor.index]
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
