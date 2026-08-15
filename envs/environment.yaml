@@ -83,4 +83,4 @@ dependencies:
 - rich
 
 # Avoid cuda versions of pyarrow
-- pyarrow=*=*cpu*
+- pyarrow-core=*=*cpu*
