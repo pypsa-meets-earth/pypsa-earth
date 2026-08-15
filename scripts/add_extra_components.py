@@ -144,7 +144,7 @@ def attach_stores(
         if carrier not in n.carriers.index:
             n.add("Carrier", carrier)
 
-        n.madd(
+        n.add(
             "Bus",
             bus_names,
             location=buses_i,
@@ -153,7 +153,7 @@ def attach_stores(
             y=n.buses.loc[list(buses_i)].y.values,
         )
 
-        n.madd(
+        n.add(
             "Store",
             bus_names,
             bus=bus_names,
@@ -164,9 +164,9 @@ def attach_stores(
             lifetime=costs.at[lookup_store, "lifetime"],
         )
 
-        n.madd("Carrier", [f"{carrier} {charge_name}", f"{carrier} {discharge_name}"])
+        n.add("Carrier", [f"{carrier} {charge_name}", f"{carrier} {discharge_name}"])
 
-        n.madd(
+        n.add(
             "Link",
             bus_names,
             suffix=f" {charge_name}",
@@ -180,7 +180,7 @@ def attach_stores(
             lifetime=costs.at[lookup_charge, "lifetime"],
         )
 
-        n.madd(
+        n.add(
             "Link",
             bus_names,
             suffix=f" {discharge_name}",
@@ -246,7 +246,7 @@ def attach_storageunits(
         if carrier not in n.carriers.index:
             n.add("Carrier", carrier)
 
-        n.madd(
+        n.add(
             "StorageUnit",
             buses_i + f" {carrier}",
             bus=buses_i,
@@ -289,7 +289,7 @@ def attach_advance_csp(
     """
     # add separate buses for csp
     main_buses = n.generators.query("carrier == 'csp'").bus
-    csp_buses_i = n.madd(
+    csp_buses_i = n.add(
         "Bus",
         main_buses + " csp",
         carrier="csp",
@@ -300,7 +300,7 @@ def attach_advance_csp(
     n.generators.loc[main_buses.index, "bus"] = csp_buses_i
 
     # add stores for csp
-    n.madd(
+    n.add(
         "Store",
         csp_buses_i,
         bus=csp_buses_i,
@@ -312,7 +312,7 @@ def attach_advance_csp(
     )
 
     # add links for csp
-    n.madd(
+    n.add(
         "Link",
         csp_buses_i,
         bus0=csp_buses_i,
@@ -371,7 +371,7 @@ def attach_hydrogen_pipelines(
     h2_links.index = h2_links.apply(lambda c: f"H2 pipeline {c.bus0}-{c.bus1}", axis=1)
 
     # add pipelines
-    n.madd(
+    n.add(
         "Link",
         h2_links.index,
         bus0=h2_links.bus0.values + " H2",
