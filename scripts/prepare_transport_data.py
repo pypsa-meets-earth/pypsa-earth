@@ -87,13 +87,13 @@ def transport_degree_factor(
     temperature : pd.DataFrame
         Air temperature per node (columns) and snapshot (index), in degree Celsius.
     deadband_lower : float
-        Temperature below which heating demand starts to increase (default 15).
+        Temperature below which heating demand starts to increase (default 15C).
     deadband_upper : float
-        Temperature above which cooling demand starts to increase (default 20).
+        Temperature above which cooling demand starts to increase (default 20C).
     lower_degree_factor : float
-        Percentage increase in demand per degree below ``deadband_lower`` (default 0.5).
+        Percentage increase in demand per degree C below ``deadband_lower`` (default 0.5).
     upper_degree_factor : float
-        Percentage increase in demand per degree above ``deadband_upper`` (default 1.6).
+        Percentage increase in demand per degree C above ``deadband_upper`` (default 1.6).
 
     Returns
     -------
