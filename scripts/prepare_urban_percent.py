@@ -2,6 +2,24 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+Prepares the urban population share per country, used to split population-
+dependent demand between urban and rural nodes.
+
+Outputs
+-------
+
+- ``resources/urban_percent.csv``: urban population as a percentage of total population, per country (ISO2 code) and year (2020 onwards).
+
+Description
+-----------
+
+Downloads the United Nations "Total and urban population, annual" dataset,
+keeps years from 2020 onwards, maps country/economy names to ISO2 codes, and
+averages the urban percentage where multiple entries map to the same
+country and year.
+"""
+
 import os
 
 import country_converter as coco
@@ -16,7 +34,7 @@ from _helpers import read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_urban_percent():
+def download_urban_percent() -> pd.DataFrame:
     """
     Downloads the United Nations "Total and urban population, annual" .7z File
     and extracts it as csv File.
@@ -24,6 +42,12 @@ def download_urban_percent():
     The above file was downloaded from the webpage
     https://unctadstat.unctad.org/datacentre/
     as a .7z file. The dataset contains urban percent for most countries from 1950 and predictions until 2050.
+
+    Returns
+    -------
+    pd.DataFrame
+        Total and urban population per country and year, as published by
+        the United Nations.
     """
     url = "https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal"
 
