@@ -12,7 +12,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
+* Add part 1 of the CLI to accompany use-case documentation page 1 to develop a baseline model [PR #1918](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1918)
+
+* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1882](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1882)
+
+* Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and solving defaults (``solving.options``, ``solving.mem``, ``solving.solver_options``) to ``configs/solving.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml``. ``config.default.yaml`` keeps only ``solving.solver`` (name and preset choice) [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
+
+* Update databundle links to point to the new zenodo release [PR #1984](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1984)
 
 * Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
 
@@ -57,6 +63,9 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Add docstrings to build_natura_raster script [PR ##1844](https://github.com/
+pypsa-meets-earth/pypsa-earth/pull/#1844)
 
 * Enable battery fetch from powerplantmatching [PR #1970](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1970)
 
