@@ -8,6 +8,7 @@ It uses the `rich` library to display markdown and tables in the console, making
 The script checks the configuration of the databundles, identifies missing files, and offers options for retrieving them either automatically or manually.
 It also allows users to update the checklist after retrieving files to ensure that all necessary data is available for their snakemake workflow.
 """
+
 import os
 import sys
 import textwrap
@@ -180,8 +181,7 @@ def databundle_check(bundles_to_download: list, config_databundles: dict) -> lis
                 f"""The databundle **{", ".join(unextractable_bundle)}** can only be retrieved automatically."""
             )
 
-    console_markdown(
-        f"""
+    console_markdown(f"""
     Options:
 
     - **check**: update the checklist table to see if the file is now included
@@ -189,16 +189,14 @@ def databundle_check(bundles_to_download: list, config_databundles: dict) -> lis
     - **rerun**: get all databundles again: **{", ".join(bundles_to_download)}**
     - **bundle_...**: get selected databundles, can be more than one
     - Press **ENTER** to exit
-    """
-    )
+    """)
 
     return missing_bundles
 
 
 if __name__ == "__main__":
 
-    console_markdown(
-        """
+    console_markdown("""
 
     # PyPSA-Earth Databundle Retrieval Command-Line Interface (CLI)
 
@@ -207,8 +205,7 @@ if __name__ == "__main__":
 
     - Set `retrieve_databundle` as false
 
-    """
-    )
+    """)
 
     log_path = "logs/databundle_cli.yaml"
     rootpath = "."
