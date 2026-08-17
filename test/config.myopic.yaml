@@ -31,7 +31,6 @@ scenario:
   ll: ["c1"]
   opts: ["Co2L-24h"]
   sopts: ["144h"]
-  demand: ["DF"]
 
 co2:
   limit: 7.75e+7
@@ -42,14 +41,14 @@ co2:
     year:
       2030: 1.0
 
-cluster_options:
+clustering:
   alternative_clustering: false
 
 countries: ['NG', 'BJ']
 
 export:
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store. "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
-  h2export: [120] # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
+  h2export: 120 # Yearly export demand in TWh. Only considered, if ["export"]["endogenous"] is set to false
   export_profile: "ship" # use "ship" or "constant". Only considered, if ["export"]["endogenous"] is set to false
 
 electricity:
@@ -84,3 +83,6 @@ snapshots:
 solving:
   solver:
     name: glpk
+
+demand_data:
+  scenario: "DF"
