@@ -42,6 +42,7 @@ Relevant Settings
     Documentation of the configuration file ``config.yaml`` at :ref:`costs_cf`,
     :ref:`electricity_cf`
 """
+
 import logging
 
 import pandas as pd
