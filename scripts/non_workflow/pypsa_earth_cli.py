@@ -403,7 +403,7 @@ def show_questionnaire(option: str) -> None:
 
     answer_dict = {}
 
-    type_dict = {"str": str, "int": int}
+    type_dict = {"str": str, "int": int, "float": float, "bool": bool, "list": list}
 
     def not_matching(a, b):
         if isinstance(b, (list, tuple, set)):
@@ -525,26 +525,25 @@ def show_questionnaire(option: str) -> None:
             if solver == "highs":
                 config_dict["solving.solver.name"] = "highs"
                 config_dict["solving.solver.options"] = "highs-default"
-
-            # Save the updated config file
-            save_config_path = use_case["config_path"]
-            existing_config_path = "config.cli_base.yaml"
-            existing_config_dict = {}
-            if Path(existing_config_path).is_file():
-                existing_config_dict = load_config_file(existing_config_path)
-                if existing_config_dict == None:
-                    existing_config_dict = {}
-            save_config_file(
-                config_path=save_config_path,
-                config_data=unflatten_dict(existing_config_dict | config_dict),
-            )
-
-            run_model(save_config_path)
         else:
-            save_config_path = use_case["config_path"]
-            save_config_file(
-                config_path=save_config_path, config_data=unflatten_dict(config_dict)
-            )
+            # Assigning a default run name for the model
+            config_dict["run.name"] = "test-KZ-demand"
+
+        # Save the updated config file
+        save_config_path = use_case["config_path"]
+        existing_config_path = "config.cli_base.yaml"
+        existing_config_dict = {}
+        if Path(existing_config_path).is_file():
+            existing_config_dict = load_config_file(existing_config_path)
+            if existing_config_dict == None:
+                existing_config_dict = {}
+        save_config_file(
+            config_path=save_config_path,
+            config_data=unflatten_dict(existing_config_dict | config_dict),
+        )
+
+        if model_run == "yes":
+            run_model(save_config_path)
 
 
 @app.command("quiz_zone")
