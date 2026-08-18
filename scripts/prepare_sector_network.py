@@ -302,7 +302,8 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> Non
         nodes + " Store",
         bus=nodes,
         e_nom_extendable=True,
-        e_cyclic=True,
+        e_initial=0.0,
+        e_cyclic=carrier != "oil",
         carrier=carrier,
     )
     n.madd(
