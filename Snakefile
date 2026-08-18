@@ -39,6 +39,8 @@ copy_default_files()
 
 
 configfile: "config.default.yaml"
+configfile: "configs/plotting.default.yaml"
+configfile: "configs/solving.default.yaml"
 configfile: "configs/bundle_config.yaml"
 configfile: "configs/powerplantmatching_config.yaml"
 configfile: "config.yaml"
