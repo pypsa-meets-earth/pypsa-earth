@@ -8,18 +8,14 @@ import glob
 import logging
 import os
 import shutil
-import sys
 from io import BytesIO
 from pathlib import Path
 from urllib.request import urlopen
 from zipfile import ZipFile
 
 import country_converter as coco
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import py7zr
-import requests
 from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors, read_csv_nafix
 from googledrivedownloader import download_file_from_google_drive as download_gdrive
 
@@ -360,7 +356,6 @@ if __name__ == "__main__":
             "build_base_energy_totals",
             simpl="",
             clusters=4,
-            demand="AB",
             planning_horizons=2030,
         )
 

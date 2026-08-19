@@ -78,19 +78,15 @@ Details (and errors introduced through this heuristic) are discussed in the pape
     the rule :mod:`solve_network`.
 """
 import logging
-import os
 import re
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
 from _helpers import configure_logging, create_logger, read_csv_nafix
-from linopy import LinearExpression, merge
+from linopy import LinearExpression
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.optimization.abstract import optimize_transmission_expansion_iteratively
-from pypsa.optimization.optimize import optimize
 
 logger = create_logger(__name__)
 pypsa.pf.logger.setLevel(logging.WARNING)
@@ -1208,9 +1204,7 @@ if __name__ == "__main__":
             opts="Co2L-4H",
             planning_horizons="2030",
             discountrate="0.071",
-            demand="AB",
             sopts="144H",
-            h2export="120",
             configfile="config.tutorial.yaml",
         )
 

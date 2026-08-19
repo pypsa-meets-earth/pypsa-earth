@@ -8,15 +8,12 @@ horizon.
 """
 
 import logging
-import os
 from types import SimpleNamespace
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
-import powerplantmatching as pm
 import pypsa
-import xarray as xr
 from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
 
 # from _helpers import (
@@ -242,8 +239,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
-            h2export="120",
         )
 
     # configure_logging(snakemake)

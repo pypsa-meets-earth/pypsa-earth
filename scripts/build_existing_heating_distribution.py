@@ -39,7 +39,6 @@ References:
 - "Mapping and analyses of the current and future (2020 - 2030) heating/cooling fuel deployment (fossil/renewables)" (https://energy.ec.europa.eu/publications/mapping-and-analyses-current-and-future-2020-2030-heatingcooling-fuel-deployment-fossilrenewables-1_en)
 """
 import logging
-import os
 
 import country_converter as coco
 import numpy as np
@@ -175,7 +174,6 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             planning_horizons=2030,
-            demand="AB",
         )
 
     build_existing_heating()

@@ -211,7 +211,7 @@ from _helpers import (
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point, box
+from shapely.geometry import LineString, box
 
 cc = coco.CountryConverter()
 
@@ -595,8 +595,8 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
-        resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
+        resource["hydrobasins"] = hydrobasins
         ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
