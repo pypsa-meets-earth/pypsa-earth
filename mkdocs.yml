@@ -48,6 +48,7 @@ nav:
 - User Guide:
   - Structure: user-guide/structure.md
   - Data Workflow: user-guide/data-workflow.md
+  - Data API: user-guide/data_api.md
   - Configuration: user-guide/configuration.md
   - Wildcards: user-guide/wildcards.md
   - Costs: user-guide/costs.md
