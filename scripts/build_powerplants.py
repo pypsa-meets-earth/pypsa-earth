@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# -*- coding: utf-8 -*-
 """
-Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to amend the powerplant database with custom entries provided in ``data/custom_powerplants.csv``.
+Retrieves conventional powerplant capacities and locations from `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_, assigns these to buses and creates a ``.csv`` file. It is possible to merge the powerplant database with, or replace it using, one or more custom powerplant files.
 
 Relevant Settings
 -----------------
@@ -15,6 +14,8 @@ Relevant Settings
     electricity:
       powerplants_filter:
       custom_powerplants:
+        filepaths:
+        method:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
@@ -24,7 +25,7 @@ Inputs
 ------
 
 - ``networks/base.nc``: confer :ref:`base`.
-- ``data/custom_powerplants.csv``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as OSM extractor generates
+- Files listed under ``custom_powerplants.filepaths``: custom powerplants in the same format as `powerplantmatching <https://github.com/FRESNA/powerplantmatching>`_ provides or as the OSM extractor generates.
 
 Outputs
 -------
@@ -39,65 +40,126 @@ Outputs
 Description
 -----------
 
-The configuration options ``electricity: powerplants_filter`` and ``electricity: custom_powerplants`` can be used to control whether data should be retrieved from the original powerplants database or from custom amendments. These specify `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ commands.
+The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ command applied to the original powerplantmatching database. Country conditions must therefore use the full country names found in the original database, such as ``United States``. Country values are converted to ISO alpha-2 codes after the custom powerplant files have been applied.
 
-1. Adding all powerplants from custom:
+The ``electricity: custom_powerplants`` section specifies the custom files and how they are applied. ``method`` accepts ``false``, ``merge``, or ``replace`` and is applied once to the complete set of configured files. ``merge`` appends all configured custom powerplants to the filtered powerplantmatching dataset, while ``replace`` discards the complete powerplantmatching dataset and uses all configured custom files instead.
 
-    .. code:: yaml
-
-        powerplants_filter: false
-        custom_powerplants: true
-
-2. Replacing powerplants in e.g. Germany by custom data:
+1. Using only powerplantmatching data:
 
     .. code:: yaml
 
-        powerplants_filter: Country not in ['Germany']
-        custom_powerplants: true
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants.csv
+          method: false
 
-    or
-
-    .. code:: yaml
-
-        powerplants_filter: Country not in ['Germany']
-        custom_powerplants: Country in ['Germany']
-
-3. Adding additional built year constraints:
+2. Adding all powerplants from a custom file:
 
     .. code:: yaml
 
-        powerplants_filter: Country not in ['Germany'] and YearCommissioned <= 2015
-        custom_powerplants: YearCommissioned <= 2015
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants.csv
+          method: merge
 
-Format required for the custom_powerplants.csv should be similar to the powerplantmatching format with some additional considerations:
+3. Replacing the complete powerplantmatching dataset:
 
-Columns required: [id, Name, Fueltype, Technology, Set, Country, Capacity, Efficiency, DateIn, DateRetrofit, DateOut, lat, lon, Duration, Volume_Mm3, DamHeight_m, StorageCapacity_MWh, EIC, projectID]
+    .. code:: yaml
 
-Tagging considerations for columns in the file:
+        custom_powerplants:
+          filepaths:
+          - data/custom_powerplants.csv
+          method: replace
 
-- FuelType: 'Natural Gas' has to be tagged either as 'OCGT', 'CCGT'
-- Technology: 'Reservoir' has to be set as 'ror' if hydro powerplants are to be considered as 'Generators' and not 'StorageUnits'
-- Country:  Country name has to be defined with its alpha2 code ('NG' for Nigeria,'BO' for Bolivia, 'FR' for France, etc.
+4. Combining multiple custom files:
 
-The following assumptions were done to map custom OSM-extracted power plants with powerplantmatching format.
+   Multiple custom powerplant files can be provided. A single ``method`` is
+   applied to the complete set of configured files.
 
-1. The benchmark PPM keys values were taken as follows:
-        'Fueltype': ['Hydro', 'Hard Coal', 'Natural Gas', 'Lignite', 'Nuclear', 'Oil', 'Bioenergy'
-            'Wind', 'Geothermal', 'Solar', 'Waste', 'Other']
+   .. code:: yaml
 
-        'Technology': ['Reservoir', 'Pumped Storage', 'Run-Of-River', 'Steam Turbine', 'CCGT', 'OCGT'
-            'Pv', 'CCGT, Thermal', 'Offshore', 'Storage Technologies']
+       custom_powerplants:
+         filepaths:
+         - data/custom_powerplants_US.csv
+         - data/custom_powerplants_CA.csv
+         method: merge
 
-        'Set': ['Store', 'PP', 'CHP']
+   The available methods are:
 
-2. OSM-extracted features were mapped into PPM ones using a (quite arbitrary) set of rules:
-        'coal': 'Hard Coal'
-        'wind_turbine': 'Onshore',
-        'horizontal_axis' : 'Onshore',
-        'vertical_axis' : 'Offhore',
-        'nuclear': 'Steam Turbine'
-3. All hydro OSM-extracted objects were interpreted as generation technologies, although ["Run-Of-River", "Pumped Storage", "Reservoir"] in PPM can belong to 'Storage Technologies', too.
-4. OSM extraction was supposed to be ignoring non-generation features like CHP and Natural Gas storage (in contrast to PPM).
+   - ``false``: ignore the custom files and use only powerplantmatching data.
+   - ``merge``: add all configured custom files to the filtered
+     powerplantmatching dataset.
+   - ``replace``: discard the complete powerplantmatching dataset and use only
+     the configured custom files.
+
+5. Obtaining different outcomes for different countries:
+
+   Country-specific replacement can be achieved by excluding the corresponding country from ``powerplants_filter`` and then merging the custom files.
+
+   .. code:: yaml
+
+       powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn) and Country != 'United States'
+
+       custom_powerplants:
+         filepaths:
+         - data/custom_powerplants_US.csv
+         - data/custom_powerplants_CA.csv
+         method: merge
+
+   In this example:
+
+   - US plants are taken only from ``custom_powerplants_US.csv`` because US
+     plants are excluded from powerplantmatching.
+   - CA plants from ``custom_powerplants_CA.csv`` are added to the existing
+     powerplantmatching data.
+   - Countries without a custom file, such as MX, use only powerplantmatching
+     data.
+
+Custom powerplant file format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Custom powerplant CSV files should follow the powerplantmatching format, with some additional considerations.
+
+Required columns:
+
+``id``, ``Name``, ``Fueltype``, ``Technology``, ``Set``, ``Country``,
+``Capacity``, ``Efficiency``, ``DateIn``, ``DateRetrofit``, ``DateOut``,
+``lat``, ``lon``, ``Duration``, ``Volume_Mm3``, ``DamHeight_m``,
+``StorageCapacity_MWh``, ``EIC``, and ``projectID``.
+
+Considerations for column values:
+
+- ``Fueltype`` should use the corresponding powerplantmatching fuel category, such as ``Natural Gas``.
+- Natural-gas plants should specify ``OCGT`` or ``CCGT`` in the ``Technology`` column.
+- Hydro plants with ``Technology`` set to ``Reservoir`` are represented as storage units. Use ``ror`` for hydro plants that should be represented as generators.
+- ``Country`` values are converted to ISO 3166-1 alpha-2 codes after the custom files have been applied. Both full country names and alpha-2 codes are therefore accepted in custom files.
+
+OSM mapping assumptions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The following assumptions were made when mapping custom OSM-extracted power plants to the powerplantmatching format:
+
+1. The benchmark powerplantmatching values were taken as follows:
+
+   - ``Fueltype``: ``Hydro``, ``Hard Coal``, ``Natural Gas``, ``Lignite``,
+     ``Nuclear``, ``Oil``, ``Bioenergy``, ``Wind``, ``Geothermal``, ``Solar``,
+     ``Waste``, and ``Other``.
+   - ``Technology``: ``Reservoir``, ``Pumped Storage``, ``Run-Of-River``,
+     ``Steam Turbine``, ``CCGT``, ``OCGT``, ``PV``, ``CCGT, Thermal``,
+     ``Offshore``, and ``Storage Technologies``.
+   - ``Set``: ``Store``, ``PP``, and ``CHP``.
+
+2. OSM-extracted features were mapped to powerplantmatching values using the following rules:
+
+   - ``coal`` -> ``Hard Coal``
+   - ``wind_turbine`` -> ``Onshore``
+   - ``horizontal_axis`` -> ``Onshore``
+   - ``vertical_axis`` -> ``Offshore``
+   - ``nuclear`` -> ``Steam Turbine``
+
+3. All hydro objects extracted from OSM were interpreted as generation technologies, although ``Run-Of-River``, ``Pumped Storage``, and ``Reservoir`` may also belong to ``Storage Technologies`` in powerplantmatching.
+
+4. The OSM extraction was assumed to ignore non-generation features such as CHP plants and natural-gas storage, unlike powerplantmatching.
 """
 
 import os
@@ -241,23 +303,66 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
     return add_ppls
 
 
-def add_custom_powerplants(ppl, inputs, config):
-    if "custom_powerplants" not in config["electricity"]:
+def add_custom_powerplants(
+    ppl: pd.DataFrame,
+    custom_powerplants_files: list[str],
+    method: bool | str,
+) -> pd.DataFrame:
+    """
+    Merge or replace powerplantmatching data with custom powerplant files.
+
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Powerplantmatching dataframe.
+    custom_powerplants_files : list[str]
+        Paths to custom powerplant CSV files.
+    method : bool or str
+        Method applied to all custom files together. Accepted values are
+        ``False``, ``"merge"``, and ``"replace"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        Powerplant dataframe after applying the custom files.
+    """
+    allowed_methods = {False, "merge", "replace"}
+    if method not in allowed_methods:
+        raise ValueError(
+            "electricity.custom_powerplants.method must be false, "
+            f"'merge', or 'replace'; found {method!r}."
+        )
+
+    if method is False:
         return ppl
 
-    custom_ppl_query = config["electricity"]["custom_powerplants"]
-    if not custom_ppl_query:
-        return ppl
-    add_ppls = read_csv_nafix(
-        inputs.custom_powerplants, index_col=0, dtype={"bus": "str"}
+    if not custom_powerplants_files:
+        raise ValueError(
+            "At least one filepath must be configured when "
+            "electricity.custom_powerplants.method is 'merge' or 'replace'."
+        )
+
+    custom_ppls = pd.concat(
+        [
+            read_csv_nafix(
+                filepath,
+                index_col=0,
+                dtype={"bus": "str"},
+            )
+            for filepath in custom_powerplants_files
+        ],
+        ignore_index=True,
+        sort=False,
     )
 
-    if custom_ppl_query == "merge":
-        return pd.concat(
-            [ppl, add_ppls], sort=False, ignore_index=True, verify_integrity=True
-        )
-    elif custom_ppl_query == "replace":
-        return add_ppls
+    if method == "replace":
+        return custom_ppls
+
+    return pd.concat(
+        [ppl, custom_ppls],
+        ignore_index=True,
+        sort=False,
+    )
 
 
 def replace_natural_gas_technology(df: pd.DataFrame):
@@ -338,20 +443,31 @@ if __name__ == "__main__":
     else:
         config["main_query"] = ""
 
-    if snakemake.config["electricity"]["custom_powerplants"] != "replace":
+    custom_powerplants = snakemake.params.custom_powerplants
+    custom_method = custom_powerplants["method"]
+
+    if custom_method == "replace":
+        ppl = pd.DataFrame()
+    else:
         ppl = (
-            pm.powerplants(from_url=False, update=True, config_update=config)
+            pm.powerplants(
+                from_url=False,
+                update=True,
+                config_update=config,
+            )
             .powerplant.fill_missing_decommissioning_years()
             .query("Country in @countries_names")
-            .powerplant.convert_country_to_alpha2()
-            .pipe(replace_natural_gas_technology)
         )
-    else:
-        ppl = pd.DataFrame()
 
-    ppl = add_custom_powerplants(ppl, snakemake.input, snakemake.config).query(
-        ppl_query
-    )  # add carriers from own powerplant files
+    ppl = add_custom_powerplants(
+        ppl=ppl,
+        custom_powerplants_files=list(snakemake.input.custom_powerplants),
+        method=custom_method,
+    )
+
+    ppl = ppl.powerplant.convert_country_to_alpha2().pipe(
+        replace_natural_gas_technology
+    )
 
     # define unique index
     ppl = ppl.reset_index(drop=True)

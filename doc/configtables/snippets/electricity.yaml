@@ -1,34 +1,38 @@
 electricity:
-  base_voltage: 380.
-  voltages: [132., 220., 300., 380., 500., 750.]
-  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
-    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
-    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
-  hvdc_as_lines: false # should HVDC lines be modeled as `Line` or as `Link` component?
-
-  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
-    activate: false
-    epsilon_load: 0.02 # share of total load
-    epsilon_vres: 0.02 # share of total renewable supply
-    contingency: 0 # fixed capacity in MW
-
-  max_hours:
-    battery: 6
-    H2: 168
-
+  # ----------------- Electricity generation -------------------
   extendable_carriers:
-      # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
-          # from the Generator list below, as these offshore wind technologies require coastline access.
-    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
-    StorageUnit: [] # battery, H2
-    Store: [battery, H2]
+    Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT] # Remove 'offwind-ac' and 'offwind-dc' for landlocked countries (e.g., Jordan, Austria, Switzerland)
+    StorageUnit: [] # battery, H2, li-ion, vanadium, lfp, lair, pair, iron-air and more
+    Store: [battery, H2] # li-ion, vanadium, lfp, lair, pair, iron-air and more
+    # See all available options for Store and StorageUnit in https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#storage-technologies
     Link: [] # H2 pipeline
-
-  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
-  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
+
+  max_hours: # Storage duration [h]: fill time at max power for extendable battery/H2 storage
+    battery: 6
+    "li-ion": 6
+    lfp: 6
+    vanadium: 10
+    lair: 12
+    pair: 24
+    "iron-air": 100
+    H2: 168
+
+  # ----------------- Existing powerplants -------------------
+  powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  custom_powerplants:
+    filepaths:  # list of custom powerplant files used in "merge" and "replace" options
+    - data/custom_powerplants.csv
+    method: false  # "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+
+  # If you wish to replace the data for just one country (e.g. United States), you can use the option powerplants_filter as follows:
+  # powerplants_filter: ... and (Country != 'United States')
+  # custom_powerplants:
+  #   filepaths:
+  #   - data/custom_powerplants_US.csv
+  #   method: merge
 
   estimate_renewable_capacities:
     stats: "irena" # False, = greenfield expansion, 'irena' uses IRENA stats to add expansion limits
@@ -40,3 +44,19 @@ electricity:
       Offshore: [offwind-ac, offwind-dc]
       Onshore: [onwind]
       PV: [solar]
+
+  # ----------------- Grid topology -------------------
+  base_voltage: 380.
+  voltages: [132., 220., 300., 380., 500., 750.]
+  hvdc_as_lines: false # false: HVDC as Link; true: HVDC as Line
+
+  # ----------------- Constraints & reserve -------------------
+  agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
+    file: data/agg_p_nom_minmax.csv # path to csv file containing country-wise generation capacity limits
+    include_existing: false # false: only new built capacities are constrained; true: existing capacities are accounted in the constraints
+
+  operational_reserve: # like https://genxproject.github.io/GenX.jl/stable/Model_Reference/core/#Operational-Reserves
+    activate: false
+    epsilon_load: 0.02 # share of total load
+    epsilon_vres: 0.02 # share of total renewable supply
+    contingency: 0 # fixed capacity in MW
