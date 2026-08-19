@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import os
 
 import numpy as np
 import pandas as pd
