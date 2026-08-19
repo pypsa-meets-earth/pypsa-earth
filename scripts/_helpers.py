@@ -32,11 +32,9 @@ grouped roughly as follows:
   ``rename_techs``, ``safe_divide``.
 """
 
-import calendar
 import io
 import logging
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -44,7 +42,6 @@ import time
 import warnings
 import zipfile
 from collections.abc import Callable, Iterable, Sequence
-from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Any
