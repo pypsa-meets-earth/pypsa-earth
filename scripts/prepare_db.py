@@ -16,10 +16,8 @@ Created on Tue May  4 10:22:36 2021
 @author: haz43975
 """
 
-import os
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import pypsa
 
