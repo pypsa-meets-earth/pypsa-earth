@@ -9,8 +9,8 @@ tutorial = true
 countries = "NG, BJ"
 url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_NGBJ.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L107)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
 
 [[cutout]]
 name = "cutout_tutorial_bw"
@@ -19,8 +19,8 @@ tutorial = true
 countries = "BW"
 url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_BW.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L120)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
 
 [[cutout]]
 name = "cutout_tutorial_ma"
@@ -29,8 +29,8 @@ tutorial = true
 countries = "MA"
 url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_MA.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L133)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
 
 [[cutout]]
 name = "cutout_tutorial_kz"
@@ -39,8 +39,8 @@ tutorial = true
 countries = "KZ"
 url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_KZ.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_test_KZ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L146)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
 
 [[cutout]]
 name = "cutout_mainland_africa"
@@ -49,8 +49,8 @@ tutorial = false
 countries = "Africa"
 url = "https://zenodo.org/records/18032151/files/bundle_cutouts_africa.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_mainland_africa](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L305)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032151"
 
 [[cutout]]
 name = "cutout_northamerica"
@@ -59,8 +59,8 @@ tutorial = false
 countries = "NorthAmerica"
 url = "https://zenodo.org/records/18186603/files/bundle_cutouts_northamerica.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_northamerica](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L331)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18186603"
 
 [[cutout]]
 name = "cutout_europe"
@@ -69,8 +69,8 @@ tutorial = false
 countries = "Europe"
 url = "https://zenodo.org/records/18034282/files/bundle_cutouts_europe.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_europe](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L344)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18034282"
 
 [[cutout]]
 name = "cutout_oceania"
@@ -79,8 +79,8 @@ tutorial = false
 countries = "Oceania"
 url = "https://zenodo.org/records/18038936/files/bundle_cutouts_oceania.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_oceania](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L357)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18038936"
 
 [[cutout]]
 name = "cutout_asia"
@@ -89,8 +89,8 @@ tutorial = false
 countries = "KVR, WAS, FEAR, SEAR, CASR, SASR, ASEAN, MEAR"
 url = "https://zenodo.org/records/18039581/files/bundle_cutouts_asia.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_asia](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L382)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18039581"
 
 [[cutout]]
 name = "cutout_southamerica"
@@ -99,8 +99,8 @@ tutorial = false
 countries = "SouthAmerica"
 url = "https://zenodo.org/records/19661490/files/bundle_cutouts_southamerica.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_southamerica](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L408)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/19661490"
 
 [[cutout]]
 name = "cutout_westernasia"
@@ -109,8 +109,8 @@ tutorial = false
 countries = "WAS"
 url = "https://zenodo.org/records/18033563/files/bundle_cutouts_westasia.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_westernasia](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L421)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18033563"
 
 [[cutout]]
 name = "cutout_asean"
@@ -119,8 +119,8 @@ tutorial = false
 countries = "ASEAN"
 url = "https://zenodo.org/records/20325289/files/bundle_cutouts_asean.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_asean](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L434)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/20325289"
 
 [[cutout]]
 name = "cutout_northeurasia"
@@ -129,8 +129,8 @@ tutorial = false
 countries = "LT, LV, EE, BY, RU, KZ, MN, GE"
 url = "https://zenodo.org/records/18920577/files/bundle_cutouts_northeurasia.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_northeurasia](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L447)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18920577"
 
 [[cutout]]
 name = "cutout_zambia"
@@ -139,8 +139,8 @@ tutorial = false
 countries = "ZM"
 url = "https://sandbox.zenodo.org/records/470328/files/bundle_cutouts_zm_2013.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_africa_zm](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L460)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://sandbox.zenodo.org/records/470328"
 
 [[cutout]]
 name = "cutout_bolivia"
@@ -149,8 +149,8 @@ tutorial = false
 countries = "BO"
 url = "https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_bo.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_bo](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L473)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://sandbox.zenodo.org/records/470372"
 
 [[cutout]]
 name = "cutout_colombia"
@@ -159,5 +159,5 @@ tutorial = false
 countries = "CO"
 url = "https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_co.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_cutouts_co](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L484)"
-license = ""
-license_link = ""
+license = "CC BY 4.0"
+license_link = "https://sandbox.zenodo.org/records/470372"
