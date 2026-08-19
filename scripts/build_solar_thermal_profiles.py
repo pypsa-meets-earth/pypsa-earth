@@ -22,6 +22,7 @@ if __name__ == "__main__":
             "build_solar_thermal_profiles",
             simpl="",
             clusters="4",
+            planning_horizons="2030",
         )
 
     config = snakemake.params.solar_thermal_config
@@ -30,12 +31,9 @@ if __name__ == "__main__":
     cutout_config = snakemake.input.cutout
     cutout = atlite.Cutout(cutout_config).sel(time=time)
 
-    clustered_regions = (
-        gpd.read_file(snakemake.input.regions_onshore)
-        .set_index("name")
-        .buffer(0)
-        .squeeze()
-    )
+    regions_gdf = gpd.read_file(snakemake.input.regions_onshore).set_index("name")
+
+    clustered_regions = regions_gdf.geometry.buffer(0)
 
     I = cutout.indicatormatrix(clustered_regions)
 
@@ -50,7 +48,10 @@ if __name__ == "__main__":
         M_tilde = M / nonzero_sum
 
         solar_thermal = cutout.solar_thermal(
-            **config, matrix=M_tilde.T, index=clustered_regions.index
+            clearsky_model=config["clearsky_model"],
+            orientation=config["orientation"],
+            matrix=M_tilde.T,
+            index=clustered_regions.index,
         )
 
         solar_thermal.to_netcdf(snakemake.output[f"solar_thermal_{area}"])

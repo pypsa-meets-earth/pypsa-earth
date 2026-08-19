@@ -59,10 +59,7 @@ The diagram below depicts one representative clustered node for the sector-coupl
 
 ## Livetracker. Most popular global models:
 
-<p align="center">
-<a href="https://star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&SGIModel/MUSE_OS&etsap-TIMES/TIMES_model&Date">
-    <img src="https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,SGIModel/MUSE_OS,etsap-TIMES/TIMES_model&type=Date" width="75%">
-<a/>
+[![Star History Chart](https://api.star-history.com/svg?repos=pypsa-meets-earth/pypsa-earth,OSeMOSYS/osemosys_global,niclasmattsson/Supergrid,EnergySystemsModellingLab/MUSE_OS,etsap-TIMES/TIMES_model&type=Date&legend=top-left)](https://www.star-history.com/#pypsa-meets-earth/pypsa-earth&OSeMOSYS/osemosys_global&niclasmattsson/Supergrid&EnergySystemsModellingLab/MUSE_OS&etsap-TIMES/TIMES_model&Date)
 
 ## How to get involved
 
@@ -112,9 +109,16 @@ There are multiple ways to get involved and learn more about our work:
    ```bash
    (base) conda install -c conda-forge mamba
 
-   .../pypsa-earth % mamba env create -f envs/{{your operating system}}64.lock.yaml.yaml
+   .../pypsa-earth % mamba env create -f envs/{{your operating system}}64.lock.yaml
    ```
 
+   Alternatively, you can use [pixi](https://pixi.prefix.dev/latest/) for faster and simpler dependency management (no separate lock files per OS):
+
+   ```bash
+   # install pixi: https://pixi.prefix.dev/latest/#installation
+   .../pypsa-earth % pixi install
+   .../pypsa-earth % pixi shell  # opens a shell with all dependencies available
+   ```
 3. (optional) In step 2, three solvers are installed: HiGHs, glpk and gurobi. HiGHs is the recommended open-source solver. Gurobi is generally faster, but requires a license for full functionality, which is [freely available to academics](https://www.gurobi.com/features/academic-named-user-license/) (see instructions website).
 
 4. To use jupyter lab (new jupyter notebooks) **continue** with the [ipython kernel installation](http://echrislynch.com/2019/02/01/adding-an-environment-to-jupyter-notebooks/) and test if your jupyter lab works:
@@ -313,14 +317,28 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/virio-andreyana">
+                    <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
+                    <br />
+                    <sub><b>virio-andreyana</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/doneachh">
                     <img src="https://avatars.githubusercontent.com/u/132910766?v=4" width="100;" alt="doneachh"/>
                     <br />
                     <sub><b>doneachh</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+            <td align="center">
+                <a href="https://github.com/SermishaNarayana">
+                    <img src="https://avatars.githubusercontent.com/u/156903227?v=4" width="100;" alt="SermishaNarayana"/>
+                    <br />
+                    <sub><b>SermishaNarayana</b></sub>
+                </a>
+            </td>
             <td align="center">
                 <a href="https://github.com/danielelerede-oet">
                     <img src="https://avatars.githubusercontent.com/u/175011591?v=4" width="100;" alt="danielelerede-oet"/>
@@ -343,19 +361,14 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/virio-andreyana">
-                    <img src="https://avatars.githubusercontent.com/u/114650479?v=4" width="100;" alt="virio-andreyana"/>
-                    <br />
-                    <sub><b>virio-andreyana</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/Tomkourou">
                     <img src="https://avatars.githubusercontent.com/u/5240283?v=4" width="100;" alt="Tomkourou"/>
                     <br />
                     <sub><b>Tomkourou</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/Eric-Nitschke">
                     <img src="https://avatars.githubusercontent.com/u/152230633?v=4" width="100;" alt="Eric-Nitschke"/>
@@ -363,8 +376,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Eric-Nitschke</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/GridGrapher">
                     <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
@@ -400,6 +411,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Emre-Yorat89</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/giacfalk">
                     <img src="https://avatars.githubusercontent.com/u/36954873?v=4" width="100;" alt="giacfalk"/>
@@ -407,8 +420,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>giacfalk</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/Ekaterina-Vo">
                     <img src="https://avatars.githubusercontent.com/u/99509555?v=4" width="100;" alt="Ekaterina-Vo"/>
@@ -444,6 +455,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Tooblippe</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/Femkemilene">
                     <img src="https://avatars.githubusercontent.com/u/26096675?v=4" width="100;" alt="Femkemilene"/>
@@ -451,13 +464,11 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Femkemilene</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
-                <a href="https://github.com/SermishaNarayana">
-                    <img src="https://avatars.githubusercontent.com/u/156903227?v=4" width="100;" alt="SermishaNarayana"/>
+                <a href="https://github.com/wingerter">
+                    <img src="https://avatars.githubusercontent.com/u/6619839?v=4" width="100;" alt="wingerter"/>
                     <br />
-                    <sub><b>SermishaNarayana</b></sub>
+                    <sub><b>wingerter</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -482,6 +493,15 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/willu47">
+                    <img src="https://avatars.githubusercontent.com/u/3727919?v=4" width="100;" alt="willu47"/>
+                    <br />
+                    <sub><b>willu47</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/AlexanderMeisinger">
                     <img src="https://avatars.githubusercontent.com/u/91368938?v=4" width="100;" alt="AlexanderMeisinger"/>
                     <br />
@@ -495,13 +515,18 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>asolavi</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/rajesh-ieg">
                     <img src="https://avatars.githubusercontent.com/u/120284682?v=4" width="100;" alt="rajesh-ieg"/>
                     <br />
                     <sub><b>rajesh-ieg</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Mwiche96">
+                    <img src="https://avatars.githubusercontent.com/u/101918223?v=4" width="100;" alt="Mwiche96"/>
+                    <br />
+                    <sub><b>Mwiche96</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -518,11 +543,20 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>choiHenry</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/gianvicolux">
                     <img src="https://avatars.githubusercontent.com/u/123154558?v=4" width="100;" alt="gianvicolux"/>
                     <br />
                     <sub><b>gianvicolux</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/darsh-mishr">
+                    <img src="https://avatars.githubusercontent.com/u/51883443?v=4" width="100;" alt="darsh-mishr"/>
+                    <br />
+                    <sub><b>darsh-mishr</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -533,14 +567,19 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/kwaku-duah">
+                    <img src="https://avatars.githubusercontent.com/u/74660152?v=4" width="100;" alt="kwaku-duah"/>
+                    <br />
+                    <sub><b>kwaku-duah</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/milyas009">
                     <img src="https://avatars.githubusercontent.com/u/144870279?v=4" width="100;" alt="milyas009"/>
                     <br />
                     <sub><b>milyas009</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/Netotse">
                     <img src="https://avatars.githubusercontent.com/u/89367243?v=4" width="100;" alt="Netotse"/>
@@ -548,6 +587,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>Netotse</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/PierreKara1">
                     <img src="https://avatars.githubusercontent.com/u/160237120?v=4" width="100;" alt="PierreKara1"/>
@@ -583,8 +624,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>juli-a-ko</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/ollie-bell">
                     <img src="https://avatars.githubusercontent.com/u/56110893?v=4" width="100;" alt="ollie-bell"/>
@@ -592,6 +631,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>ollie-bell</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/rsparks3">
                     <img src="https://avatars.githubusercontent.com/u/30065966?v=4" width="100;" alt="rsparks3"/>
@@ -604,6 +645,20 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <img src="https://avatars.githubusercontent.com/u/228767710?v=4" width="100;" alt="saikumarvasa100-hash"/>
                     <br />
                     <sub><b>saikumarvasa100-hash</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Lianting-Wang">
+                    <img src="https://avatars.githubusercontent.com/u/53719791?v=4" width="100;" alt="Lianting-Wang"/>
+                    <br />
+                    <sub><b>Lianting-Wang</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/juliusmeier">
+                    <img src="https://avatars.githubusercontent.com/u/66074166?v=4" width="100;" alt="juliusmeier"/>
+                    <br />
+                    <sub><b>juliusmeier</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -620,6 +675,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>jessLryan</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/jarry7">
                     <img src="https://avatars.githubusercontent.com/u/27745389?v=4" width="100;" alt="jarry7"/>
@@ -627,8 +684,13 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>jarry7</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+            <td align="center">
+                <a href="https://github.com/JanTautorus">
+                    <img src="https://avatars.githubusercontent.com/u/157734880?v=4" width="100;" alt="JanTautorus"/>
+                    <br />
+                    <sub><b>JanTautorus</b></sub>
+                </a>
+            </td>
             <td align="center">
                 <a href="https://github.com/huyhoang-mike">
                     <img src="https://avatars.githubusercontent.com/u/109945762?v=4" width="100;" alt="huyhoang-mike"/>
@@ -657,6 +719,8 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>flacombe</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/EmreYorat">
                     <img src="https://avatars.githubusercontent.com/u/93644024?v=4" width="100;" alt="EmreYorat"/>
@@ -671,8 +735,6 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                     <sub><b>AndreCNF</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/AlessandroPampado99">
                     <img src="https://avatars.githubusercontent.com/u/156424082?v=4" width="100;" alt="AlessandroPampado99"/>

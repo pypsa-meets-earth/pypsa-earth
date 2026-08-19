@@ -1,4 +1,4 @@
-,Unit,Values,Description
+Parameter,Unit,Values,Description
 **options**,,,
 add_to_snakemake,,"true or false","Set to true to enable Monte-Carlo"
 samples,,"int","Defines the number of total sample networks that will be optimized. If the chosen sampling strategy is scipy,  then a square of a prime number needs to be chosen. E.g. 49 which is (7^2)"

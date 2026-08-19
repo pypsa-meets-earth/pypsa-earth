@@ -1,0 +1,5 @@
+Parameter,Unit,Values,Description
+biomass_transport,bool,"{true, false}",Add option for transporting solid biomass between nodes.
+biomass_transport_default_cost,currency/km/MWh,,The cost of transporting one MWh of biomass per kilometer.
+solid_biomass_potential,TWh/a,,The solid biomass potential in the model per year and investment period.
+biogas_potential,TWh/a,,The biogas potential in the model per year and investment period.

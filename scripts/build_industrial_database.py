@@ -4,13 +4,14 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import math
+import os
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
 import pycountry
 import requests
-from _helpers import content_retrieve
+from _helpers import content_retrieve, read_csv_nafix
 from geopy.geocoders import Nominatim
 
 
@@ -479,6 +480,57 @@ def create_paper_df(fn):
     return industrial_database_paper
 
 
+def create_ammonia_db(ammonia_plants_file: str) -> pd.DataFrame:
+    """
+    Read ammonia plants database from resources.
+
+    The ammonia_plants.csv file is created by build_ammonia_production.py
+    and contains combined US and EU plant data with coordinates.
+
+    Parameters
+    ----------
+    ammonia_plants_file : str
+        Path to the ammonia plants CSV file.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing ammonia plant information with columns:
+        ['country', 'y', 'x', 'location', 'technology', 'capacity', 'unit', 'quality', 'ID'].
+    """
+    # Load ammonia plants data
+    df_ammonia = read_csv_nafix(ammonia_plants_file)
+
+    # Set location to plant name
+    df_ammonia["location"] = df_ammonia["plant"]
+
+    # Set technology to Haber-Bosch (the standard ammonia synthesis process)
+    df_ammonia["technology"] = "Haber-Bosch"
+
+    # Unit is kt/yr (kilotons per annum) of NH3
+    df_ammonia["unit"] = "kt/yr"
+
+    # Quality is exact (from actual plant data)
+    df_ammonia["quality"] = "exact"
+
+    # Use plant index as ID
+    df_ammonia["ID"] = df_ammonia.index
+
+    return df_ammonia[
+        [
+            "country",
+            "y",
+            "x",
+            "location",
+            "technology",
+            "capacity",
+            "unit",
+            "quality",
+            "ID",
+        ]
+    ]
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -492,22 +544,16 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
         )
 
-    steel_fn = snakemake.params.url_steel
-    cement_fn = "data/industry/SFI-Global-Cement-Database-July-2021.xlsx"
+    # Load parameters
+    ammonia_plants_file = snakemake.input.ammonia_plants
 
-    refineries_base_url = "https://services.arcgis.com"
-    refineries_facts = "/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
-    refineries_fn = refineries_base_url + refineries_facts
-
-    paper_fn = "data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx"
-
-    industrial_database_steel = create_steel_db(steel_fn)
-    industrial_database_cement = create_cement_db(cement_fn)
-    industrial_database_refineries = create_refineries_df(refineries_fn)
-    industrial_database_paper = create_paper_df(paper_fn)
+    industrial_database_steel = create_steel_db()
+    industrial_database_cement = create_cement_db()
+    industrial_database_refineries = create_refineries_df()
+    industrial_database_paper = create_paper_df()
+    industrial_database_ammonia = create_ammonia_db(ammonia_plants_file)
 
     industrial_database = pd.concat(
         [
@@ -515,6 +561,7 @@ if __name__ == "__main__":
             industrial_database_cement,
             industrial_database_refineries,
             industrial_database_paper,
+            industrial_database_ammonia,
         ]
     )
 

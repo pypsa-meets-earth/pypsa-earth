@@ -94,7 +94,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_industry_totals",
             planning_horizons=2030,
-            demand="AB",
         )
 
     # Loading config file and wild cards
@@ -103,7 +102,7 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
 
     investment_year = int(snakemake.wildcards.planning_horizons)
-    demand_sc = snakemake.wildcards.demand
+    demand_sc = snakemake.params.demand_scenario
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.params.base_year
     )
@@ -124,7 +123,8 @@ if __name__ == "__main__":
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
-        (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
+        (read_csv_nafix(f, encoding="utf8", sep=";") for f in all_files),
+        ignore_index=True,
     )
 
     # Split 'Commodity', 'Transaction' column to two

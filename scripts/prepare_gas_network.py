@@ -4,6 +4,44 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Prepare gas network.
+
+
+Relevant Settings
+-----------------
+
+```yaml
+
+    sector:
+        gas:
+            spatial_gas:
+            network:
+            network_data:
+            network_data_GGIT_status:
+
+    clustering:
+        alternative_clustering:
+
+    custom_data:
+        gas_network:
+
+```
+
+Inputs
+------
+- ``resources/{RDIR}/bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson``: path to onshore region polygons used to assign pipelines to regions.
+
+Outputs
+-------
+- ``resources/{SECDIR}/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv``: CSV containing aggregated pipeline capacities and lengths between onshore regions.
+
+Description
+-----------
+
+Utilities to download, load and cluster global natural gas pipeline datasets
+for use with PyPSA-Earth. This module supports two source datasets:
+`GGIT` and `IGGIELGN`. It provides helpers to normalise pipeline diameters and
+capacities, clean geometry, assign pipelines to onshore regions, and aggregate
+inter-state pipeline capacities.
 """
 
 import logging
@@ -13,6 +51,7 @@ logger = logging.getLogger(__name__)
 import os
 import zipfile
 from pathlib import Path
+from typing import Any, List, Union
 
 import fiona
 import geopandas as gpd
@@ -30,7 +69,7 @@ from build_shapes import gadm
 from matplotlib.lines import Line2D
 from pyproj import CRS
 from pypsa.geo import haversine_pts
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
@@ -52,7 +91,7 @@ if __name__ == "__main__":
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
 
-def download_IGGIELGN_gas_network():
+def download_IGGIELGN_gas_network() -> None:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
@@ -78,7 +117,7 @@ def download_IGGIELGN_gas_network():
     logger.info(f"Gas infrastructure data available in '{to_fn}'.")
 
 
-def download_GGIT_gas_network():
+def download_GGIT_gas_network() -> pd.DataFrame:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
@@ -97,7 +136,7 @@ def download_GGIT_gas_network():
     return GGIT_gas_pipeline
 
 
-def diameter_to_capacity(pipe_diameter_mm):
+def diameter_to_capacity(pipe_diameter_mm: int) -> int:
     """
     Calculate pipe capacity in MW based on diameter in mm.
 
@@ -108,6 +147,16 @@ def diameter_to_capacity(pipe_diameter_mm):
 
     Based on p.15 of
     https://gasforclimate2050.eu/wp-content/uploads/2020/07/2020_European-Hydrogen-Backbone_Report.pdf
+
+    Parameters
+    ----------
+    pipe_diameter_mm: int
+        Diameter of gas pipeline in mm
+
+    Returns
+    -------
+    int
+        Pipe capacity in MW
     """
     # slopes definitions
     m0 = (1500 - 0) / (500 - 0)
@@ -131,15 +180,47 @@ def diameter_to_capacity(pipe_diameter_mm):
         return a3 + m3 * pipe_diameter_mm
 
 
-def inch_to_mm(len_inch):
+def inch_to_mm(len_inch: float) -> float:
+    """
+    Convert a length from inches to millimetres.
+
+    Parameters
+    ----------
+    len_inch : float
+        Length in inches.
+
+    Returns
+    -------
+    float
+        Length in millimetres.
+    """
     return len_inch / 0.0393701
 
 
-def bcm_to_MW(cap_bcm):
+def bcm_to_MW(cap_bcm: float) -> float:
+    """
+    Convert volumetric capacity in bcm/year to power in MW.
+
+    Parameters
+    ----------
+    cap_bcm : float
+        Capacity in billion cubic metres per year.
+
+    Returns
+    -------
+    float
+        Equivalent average power in MW.
+    """
     return cap_bcm * 9769444.44 / 8760
 
 
-def correct_Diameter_col(value):
+def correct_Diameter_col(value: Any) -> float:
+    """
+    Parse and average compound pipeline diameter values.
+
+    Handles diameter strings containing commas, slashes or dashes by splitting
+    the string into numeric parts and returning the mean.
+    """
     value = str(value)
     # Check if the value contains a comma
     if "," in value:
@@ -162,7 +243,22 @@ def correct_Diameter_col(value):
         return float(value)
 
 
-def prepare_GGIT_data(GGIT_gas_pipeline):
+def prepare_GGIT_data(GGIT_gas_pipeline: pd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    Clean and normalise the GGIT pipeline dataset.
+
+    Parameters
+    ----------
+    GGIT_gas_pipeline : pandas.DataFrame
+        Raw GGIT pipeline table read from the Excel source.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        GeoDataFrame containing valid geometries, corrected diameter values,
+        and capacities expressed in MW.
+    """
+
     df = GGIT_gas_pipeline.copy().reset_index()
 
     # Drop rows containing "--" in the 'WKTFormat' column
@@ -214,7 +310,21 @@ def prepare_GGIT_data(GGIT_gas_pipeline):
     return df
 
 
-def load_IGGIELGN_data(fn):
+def load_IGGIELGN_data(fn: Path) -> gpd.GeoDataFrame:
+    """
+    Load and flatten the IGGIELGN gas pipeline dataset.
+
+    Parameters
+    ----------
+    fn : pathlib.Path
+        Path to the IGGIELGN GeoJSON/GeoPackage file.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        GeoDataFrame with flattened parameter columns and dropped raw
+        metadata fields.
+    """
     df = gpd.read_file(fn)
     param = df.param.apply(pd.Series)
     method = df.method.apply(pd.Series)[["diameter_mm", "max_cap_M_m3_per_d"]]
@@ -227,12 +337,37 @@ def load_IGGIELGN_data(fn):
 
 
 def prepare_IGGIELGN_data(
-    df,
-    length_factor=1.5,
-    correction_threshold_length=4,
-    correction_threshold_p_nom=8,
-    bidirectional_below=10,
-):  # Taken from pypsa-eur and adapted
+    df: gpd.GeoDataFrame,
+    length_factor: float = 1.5,
+    correction_threshold_length: float = 4,
+    correction_threshold_p_nom: float = 8,
+    bidirectional_below: float = 10,
+) -> gpd.GeoDataFrame:  # Taken from pypsa-eur and adapted
+    """
+    Process IGGIELGN pipeline data and infer missing attributes.
+
+    Parameters
+    ----------
+    df : geopandas.GeoDataFrame
+        Raw IGGIELGN pipeline GeoDataFrame.
+    length_factor : float, optional
+        Multiplier applied to haversine-based distances when correcting
+        reported line lengths.
+    correction_threshold_length : float, optional
+        Threshold ratio for when the reported length is replaced by the
+        haversine-based length.
+    correction_threshold_p_nom : float, optional
+        Threshold ratio for when reported capacity is corrected using
+        diameter-based capacity estimates.
+    bidirectional_below : float, optional
+        Line length (km) below which pipelines are assumed bidirectional.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Cleaned pipeline GeoDataFrame with normalized capacity, length, and
+        bidirectionality attributes.
+    """
     # extract start and end from LineString
     df["point0"] = df.geometry.apply(lambda x: Point(x.coords[0]))
     df["point1"] = df.geometry.apply(lambda x: Point(x.coords[-1]))
@@ -307,230 +442,26 @@ def prepare_IGGIELGN_data(
     return df
 
 
-def get_GADM_filename(country_code):
-    """
-    Function to get the GADM filename given the country code.
-    """
-    special_codes_GADM = {
-        "XK": "XKO",  # kosovo
-        "CP": "XCL",  # clipperton island
-        "SX": "MAF",  # sint maartin
-        "TF": "ATF",  # french southern territories
-        "AX": "ALA",  # aland
-        "IO": "IOT",  # british indian ocean territory
-        "CC": "CCK",  # cocos island
-        "NF": "NFK",  # norfolk
-        "PN": "PCN",  # pitcairn islands
-        "JE": "JEY",  # jersey
-        "XS": "XSP",  # spratly
-        "GG": "GGY",  # guernsey
-        "UM": "UMI",  # united states minor outlying islands
-        "SJ": "SJM",  # svalbard
-        "CX": "CXR",  # Christmas island
-    }
-
-    if country_code in special_codes_GADM:
-        return f"gadm41_{special_codes_GADM[country_code]}"
-    else:
-        return f"gadm41_{two_2_three_digits_country(country_code)}"
-
-
-def download_GADM(country_code, update=False, out_logging=False):
-    """
-    Download gpkg file from GADM for a given country code.
-
-    Parameters
-    ----------
-    country_code : str
-        Two letter country codes of the downloaded files
-    update : bool
-        Update = true, forces re-download of files
-
-    Returns
-    -------
-    gpkg file per country
-    """
-
-    GADM_filename = get_GADM_filename(country_code)
-
-    GADM_inputfile_gpkg = os.path.join(
-        BASE_DIR,
-        "data",
-        "gadm",
-        GADM_filename,
-        GADM_filename + ".gpkg",
-    )  # Input filepath gpkg
-
-    return GADM_inputfile_gpkg, GADM_filename
-
-
-def filter_gadm(
-    geodf,
-    layer,
-    cc,
-    contended_flag,
-    output_nonstd_to_csv=False,
-):
-    # identify non standard geodf rows
-    geodf_non_std = geodf[geodf["GID_0"] != two_2_three_digits_country(cc)].copy()
-
-    if not geodf_non_std.empty:
-        logger.info(
-            f"Contended areas have been found for gadm layer {layer}. They will be treated according to {contended_flag} option"
-        )
-
-        # NOTE: in these options GID_0 is not changed because it is modified below
-        if contended_flag == "drop":
-            geodf.drop(geodf_non_std.index, inplace=True)
-        elif contended_flag != "set_by_country":
-            # "set_by_country" option is the default; if this elif applies, the desired option falls back to the default
-            logger.warning(
-                f"Value '{contended_flag}' for option contented_flag is not recognized.\n"
-                + "Fallback to 'set_by_country'"
-            )
-
-    # force GID_0 to be the country code for the relevant countries
-    geodf["GID_0"] = cc
-
-    # country shape should have a single geometry
-    if (layer == 0) and (geodf.shape[0] > 1):
-        logger.warning(
-            f"Country shape is composed by multiple shapes that are being merged in agreement to contented_flag option '{contended_flag}'"
-        )
-        # take the first row only to re-define geometry keeping other columns
-        geodf = geodf.iloc[[0]].set_geometry([geodf.unary_union])
-
-    # debug output to file
-    if output_nonstd_to_csv and not geodf_non_std.empty:
-        geodf_non_std.to_csv(
-            f"resources/non_standard_gadm{layer}_{cc}_raw.csv", index=False
-        )
-
-    return geodf
-
-
-def get_GADM_layer(
-    country_list,
-    layer_id,
-    geo_crs,
-    contended_flag,
-    update=False,
-    outlogging=False,
-):
-    """
-    Function to retrieve a specific layer id of a geopackage for a selection of
-    countries.
-
-    Parameters
-    ----------
-    country_list : str
-        List of the countries
-    layer_id : int
-        Layer to consider in the format GID_{layer_id}.
-        When the requested layer_id is greater than the last available layer, then the last layer is selected.
-        When a negative value is requested, then, the last layer is requested
-    """
-    # initialization of the geoDataFrame
-    geodf_list = []
-
-    for country_code in country_list:
-        # Set the current layer id (cur_layer_id) to global layer_id
-        cur_layer_id = layer_id
-
-        # download file gpkg
-        file_gpkg, name_file = download_GADM(country_code, update, outlogging)
-
-        # get layers of a geopackage
-        list_layers = fiona.listlayers(file_gpkg)
-
-        # get layer name
-        if (cur_layer_id < 0) or (cur_layer_id >= len(list_layers)):
-            # when layer id is negative or larger than the number of layers, select the last layer
-            cur_layer_id = len(list_layers) - 1
-
-        # read gpkg file
-        geodf_temp = gpd.read_file(
-            file_gpkg, layer="ADM_ADM_" + str(cur_layer_id)
-        ).to_crs(geo_crs)
-
-        geodf_temp = filter_gadm(
-            geodf=geodf_temp,
-            layer=cur_layer_id,
-            cc=country_code,
-            contended_flag=contended_flag,
-            output_nonstd_to_csv=False,
-        )
-
-        if layer_id == 0:
-            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-                lambda x: two_2_three_digits_country(x[:2])
-            ) + pd.Series(range(1, geodf_temp.shape[0] + 1)).astype(str)
-        else:
-            # create a subindex column that is useful
-            # in the GADM processing of sub-national zones
-            # Fix issues with missing "." in selected cases
-            geodf_temp["GADM_ID"] = geodf_temp[f"GID_{cur_layer_id}"].apply(
-                lambda x: x if x[3] == "." else x[:3] + "." + x[3:]
-            )
-
-        # append geodataframes
-        geodf_list.append(geodf_temp)
-
-    geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geo_crs)
-
-    return geodf_GADM
-
-
-def gadm(
-    countries,
-    geo_crs,
-    contended_flag,
-    layer_id=2,
-    update=False,
-    out_logging=False,
-    year=2020,
-    nprocesses=None,
-):
-    if out_logging:
-        logger.info("Stage 4/4: Creation GADM GeoDataFrame")
-
-    # download data if needed and get the desired layer_id
-    df_gadm = get_GADM_layer(countries, layer_id, geo_crs, contended_flag, update)
-
-    # select and rename columns
-    df_gadm.rename(columns={"GID_0": "country"}, inplace=True)
-
-    # drop useless columns
-    df_gadm.drop(
-        df_gadm.columns.difference(["country", "GADM_ID", "geometry"]),
-        axis=1,
-        inplace=True,
-        errors="ignore",
-    )
-
-    # renaming 3 letter to 2 letter ISO code before saving GADM file
-    # solves issue: https://github.com/pypsa-meets-earth/pypsa-earth/issues/671
-    # df_gadm["GADM_ID"] = (
-    #     df_gadm["GADM_ID"]
-    #     .str.split(".")
-    #     .apply(lambda id: three_2_two_digits_country(id[0]) + "." + ".".join(id[1:]))
-    # )
-    # df_gadm.set_index("GADM_ID", inplace=True)
-    # df_gadm["geometry"] = df_gadm["geometry"].map(_simplify_polys)
-    df_gadm.geometry = df_gadm.geometry.apply(
-        lambda r: make_valid(r) if not r.is_valid else r
-    )
-    df_gadm = df_gadm[df_gadm.geometry.is_valid & ~df_gadm.geometry.is_empty]
-
-    return df_gadm
-
-
-def load_bus_region(onshore_path, pipelines):
+def load_bus_region(
+    onshore_path: str, pipelines: gpd.GeoDataFrame
+) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Load pypsa-earth-sec onshore regions.
 
     TODO: Think about including Offshore regions but only for states that have offshore pipelines.
+    Parameters
+    ----------
+    onshore_path: str
+        Path to the onshore regions shapefile.
+    pipelines: gpd.GeoDataFrame
+        GeoDataFrame of the pipeline data.
+
+    Returns:
+        bus_regions_onshore: gpd.GeoDataFrame
+            GeoDataFrame of onshore bus regions with a `gadm_id` column.
+        country_borders: gpd.GeoDataFrame
+            Merged onshore region geodataframe.
+
     """
     bus_regions_onshore = gpd.read_file(onshore_path)
     # Convert CRS to EPSG:3857 so we can measure distances
@@ -540,35 +471,6 @@ def load_bus_region(onshore_path, pipelines):
         :, ["gadm_id", "country", "geometry"]
     ]
 
-    if snakemake.params.alternative_clustering:
-        countries_list = snakemake.params.countries_list
-        layer_id = snakemake.params.layer_id
-        update = snakemake.params.update
-        out_logging = snakemake.params.out_logging
-        year = snakemake.params.year
-        nprocesses = snakemake.params.nprocesses
-        contended_flag = snakemake.params.contended_flag
-        geo_crs = snakemake.params.geo_crs
-
-        bus_regions_onshore = gadm(
-            countries_list,
-            geo_crs,
-            contended_flag,
-            layer_id,
-            update,
-            out_logging,
-            year,
-            nprocesses=nprocesses,
-        )
-
-        # bus_regions_onshore = bus_regions_onshore.reset_index()
-        bus_regions_onshore = bus_regions_onshore.rename(columns={"GADM_ID": "gadm_id"})
-        # Conversion of GADM id to from 3 to 2-digit
-        # bus_regions_onshore["gadm_id"] = bus_regions_onshore["gadm_id"].apply(
-        #     lambda x: two_2_three_digits_country(x[:2]) + x[2:]
-        # )
-        bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
-
     country_borders = unary_union(bus_regions_onshore.geometry)
 
     # Create a new GeoDataFrame containing the merged polygon
@@ -577,8 +479,27 @@ def load_bus_region(onshore_path, pipelines):
     return bus_regions_onshore, country_borders
 
 
-def get_states_in_order(pipeline, bus_regions_onshore):
-    states_p = []
+def get_states_in_order(
+    pipeline: Union[LineString, MultiLineString],
+    bus_regions_onshore: gpd.GeoDataFrame,
+) -> list[str]:
+    """
+    Determine the ordered onshore regions traversed by a pipeline.
+
+    Parameters
+    ----------
+    pipeline : shapely.geometry.LineString or MultiLineString
+        Pipeline geometry to sample along its route.
+    bus_regions_onshore : geopandas.GeoDataFrame
+        Onshore region geometries with a `gadm_id` column.
+
+    Returns
+    -------
+    list[str]
+        Ordered list of `gadm_id` values for the regions intersected by the
+        pipeline geometry.
+    """
+    states_p: List[str] = []
 
     if pipeline.geom_type == "LineString":
         # Interpolate points along the LineString with a given step size (e.g., 5)
@@ -616,7 +537,25 @@ def get_states_in_order(pipeline, bus_regions_onshore):
     return states_p
 
 
-def parse_states(pipelines, bus_regions_onshore):
+def parse_states(
+    pipelines: gpd.GeoDataFrame, bus_regions_onshore: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Parse which onshore regions each pipeline traverses.
+
+    Parameters
+    ----------
+    pipelines : geopandas.GeoDataFrame
+        Pipeline geometries with a `geometry` column.
+    bus_regions_onshore : geopandas.GeoDataFrame
+        Onshore regions with a `gadm_id` column.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Input pipeline GeoDataFrame augmented with `states_passed`,
+        `amount_states_passed`, and `nodes` columns.
+    """
     # Parse the states of the points which are connected by the pipeline geometry object
     pipelines["nodes"] = None
     pipelines["states_passed"] = None
@@ -637,7 +576,34 @@ def parse_states(pipelines, bus_regions_onshore):
     return pipelines
 
 
-def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
+def cluster_gas_network(
+    pipelines: gpd.GeoDataFrame,
+    bus_regions_onshore: gpd.GeoDataFrame,
+    length_factor: float,
+) -> pd.DataFrame:
+    """
+    Aggregate interstate gas pipelines to bus-region clusters.
+
+    This function drops purely intrastatal pipelines, splits interstate
+    pipelines by region overlay, aggregates capacity by region pairs, and
+    computes a representative line length and GWkm metric.
+
+    Parameters
+    ----------
+    pipelines : geopandas.GeoDataFrame
+        Pipeline GeoDataFrame with `states_passed` and `amount_states_passed`.
+    bus_regions_onshore : geopandas.GeoDataFrame
+        Onshore region geometries used for overlay.
+    length_factor : float
+        Multiplier applied to the haversine distance between region centroids
+        to estimate pipeline length.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Aggregated pipeline table with columns `bus0`, `bus1`, `capacity`,
+        `length`, and `GWKm`.
+    """
     # drop innerstatal pipelines
     pipelines_interstate = pipelines.drop(
         pipelines.loc[pipelines.amount_states_passed < 2].index
@@ -680,7 +646,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     df_exploded.reset_index(drop=True, inplace=True)
 
     # Custom function to check if value in column 'gadm_id' exists in either column 'bus0' or column 'bus1'
-    def check_existence(row):
+    def check_existence(row: pd.Series) -> bool:
         return row["gadm_id"] in [row["bus0"], row["bus1"]]
 
     # Apply the custom function to each row and keep only the rows that satisfy the condition
@@ -940,6 +906,7 @@ if not snakemake.params.custom_gas_network:
         print("total_system_capacity = ", total_system_capacity)
 
     else:
+        bus_regions_onshore["country"] = bus_regions_onshore["gadm_id"]
         print(
             "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
             + ", ".join(bus_regions_onshore.country.unique().tolist())
