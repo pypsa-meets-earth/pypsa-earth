@@ -680,6 +680,7 @@ name = "irena_statistics"
 long_name = "IRENA renewable energy statistics"
 output = "data/IRENA_Statistics_Extract_2025H2.xlsx"
 description = "IRENA Renewable Energy Statistics: installed capacity, generation, heat production and related indicators, collected via IRENA's annual member questionnaire and desk research; used in build_renewable_profiles.py to derive hydropower generation potentials."
+tutorial = false
 countries = "Earth"
 url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx"
 origin_url = "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx"
