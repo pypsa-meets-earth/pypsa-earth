@@ -122,7 +122,6 @@ _CO2_BUDGET_BASE_VALUE = {
 
 # Simple key moves: add one (old_path, new_path) tuple per rename.
 CONFIG_MIGRATIONS = [
-    ("load_options.weather_year", "weather_year"),
     ("electricity.co2limit", "co2.limit"),
     ("electricity.co2base", "co2.base"),
     ("electricity.automatic_emission", "co2.automatic_emission.enable"),
@@ -405,11 +404,12 @@ def migrate_config(
 
 def resolve_weather_configuration(config: dict) -> dict:
     """
-    Resolve weather-dependent workflow settings from ``weather_year``.
+    Resolve and validate weather-dependent workflow settings.
 
-    This validates the selected weather year against the configured load
-    source, derives the annual snapshot range, and reconstructs the internal
-    atlite cutout configuration expected by the workflow.
+    ``load_options.weather_year`` may be either an explicit integer or
+    ``"derive_from_snapshots"``. With an explicit year, the workflow derives
+    an annual snapshot range. With ``"derive_from_snapshots"``, it preserves
+    the configured snapshots and infers the weather year from their start.
 
     Parameters
     ----------
@@ -421,13 +421,46 @@ def resolve_weather_configuration(config: dict) -> dict:
     dict
         Updated configuration dictionary.
     """
-    weather_year = config["weather_year"]
-    load_source = config["load_options"]["source"]
+    configured_weather_year = config["load_options"]["weather_year"]
+    derive_from_snapshots = configured_weather_year == "derive_from_snapshots"
 
-    if not isinstance(weather_year, int):
+    if derive_from_snapshots:
+        snapshots = config["snapshots"]
+
+        try:
+            snapshot_start = pd.Timestamp(snapshots["start"])
+            snapshot_end = pd.Timestamp(snapshots["end"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(
+                "`weather_year: derive_from_snapshots` requires valid "
+                "`snapshots.start` and `snapshots.end` values."
+            ) from exc
+
+        if snapshot_end <= snapshot_start:
+            raise ValueError("`snapshots.end` must be later than `snapshots.start`.")
+
+        weather_year = snapshot_start.year
+        latest_valid_end = pd.Timestamp(f"{weather_year + 1}-01-01")
+
+        if snapshot_end > latest_valid_end:
+            raise ValueError(
+                "`weather_year: derive_from_snapshots` requires snapshots "
+                "within a single calendar year."
+            )
+
+        config["load_options"]["weather_year"] = weather_year
+    elif isinstance(configured_weather_year, int) and not isinstance(
+        configured_weather_year, bool
+    ):
+        weather_year = configured_weather_year
+    else:
         raise TypeError(
-            f"`weather_year` must be an integer, received {weather_year!r}."
+            "`load_options.weather_year` must be an integer or "
+            "'derive_from_snapshots', received "
+            f"{configured_weather_year!r}."
         )
+
+    load_source = config["load_options"]["source"]
 
     if load_source == "gegis":
         supported_years = {2011, 2013, 2018}
@@ -447,7 +480,7 @@ def resolve_weather_configuration(config: dict) -> dict:
             f"Unknown load source {load_source!r}. Expected `gegis` or `demcast`."
         )
 
-    if not config.get("tutorial", False):
+    if not derive_from_snapshots and not config.get("tutorial", False):
         config["snapshots"]["start"] = f"{weather_year}-01-01"
         config["snapshots"]["end"] = f"{weather_year + 1}-01-01"
 

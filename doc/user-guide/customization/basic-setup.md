@@ -80,7 +80,7 @@ Year-related parameters are also being used when specifying `load_options`:
 
 ```yaml
 load_options:
-  ssp: "ssp2-2.6"
+  source: "gegis"
   weather_year: 2013
   prediction_year: 2030
   scale: 1
@@ -88,6 +88,8 @@ load_options:
 
 The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` corresponds to the point of a [Shared Socioeconomic Pathways (SSP)](https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways) trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
 The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
+
+Alternatively, set `weather_year: derive_from_snapshots` to preserve the configured snapshot range and infer the demand weather year from `snapshots.start`. The snapshot range must belong to a single calendar year, allowing January 1 of the following year as an exclusive end boundary.
 
 ## Use custom demand data
 
@@ -108,7 +110,8 @@ The workflow derives the annual snapshot range and weather cutout automatically 
 The technical cutout parameters are configured under `atlite.cutout`:
 
 ```yaml
-weather_year: 2018
+load_options:
+  weather_year: 2018
 
 atlite:
   nprocesses: 4
@@ -122,7 +125,7 @@ Pre-built cutouts are currently available for weather year 2013 and can be downl
 
 For other supported weather years, disable `retrieve_cutout` and enable `build_cutout`. The resulting cutout is created using the same weather year as the snapshots and weather-dependent demand profiles.
 
-Renewable technologies configured with `cutout: auto` automatically use the cutout derived from `weather_year`; no manual replacement of cutout names is required.
+Renewable technologies configured with `cutout: auto` automatically use the cutout derived from the resolved `load_options.weather_year`; no manual replacement of cutout names is required.
 
 The supported weather years depend on the selected demand source. GEGIS supports 2011, 2013, and 2018, while DemandCast supports weather years from 2000 to 2024.
 

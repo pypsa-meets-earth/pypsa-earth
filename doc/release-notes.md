@@ -12,7 +12,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Derive snapshots and weather cutout configuration automatically from `weather_year`, with validation for supported demand datasets and pre-built cutout availability. [PR #1941](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1941)
+* Resolve snapshots and weather cutout configuration from `load_options.weather_year`, which may be an explicit year or `derive_from_snapshots`; validate supported demand years and pre-built cutout availability [PR #1941](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1941)
 
 * Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and solving defaults (``solving.options``, ``solving.mem``, ``solving.solver_options``) to ``configs/solving.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml``. ``config.default.yaml`` keeps only ``solving.solver`` (name and preset choice) [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
 

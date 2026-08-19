@@ -27,10 +27,6 @@ countries: ["NG", "BJ"] # ISO codes, continent, or custom region
 
 foresight: overnight # "myopic" or "overnight"
 
-# DemandCast covers 2000-2024. GEGIS provides 2011, 2013, and 2018.
-# See https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
-weather_year: 2013 # Used for demand and all weather-dependent profiles
-
 run:
   name: "" # optional; stores intermediate files in a subfolder (e.g. "KZ" → resources/KZ/, results/KZ/); empty = no subfolder
   sector_name: "" # optional; sector-coupling only — subfolder under results_dir/
@@ -48,7 +44,9 @@ scenario:
   - "144h"
 
 snapshots:
-  inclusive: "left" # end is not inclusive; start and end are automatically derived from `weather_year`
+  start: "2013-01-01"
+  end: "2014-01-01"
+  inclusive: "left" # end is not inclusive
 
 results_dir: results/ # solved networks and sector postprocessing (RESDIR in Snakefile)
 summary_dir: results/ # summaries, plots, and copied configs (SDIR in Snakefile)
@@ -191,6 +189,7 @@ base_network:
 # ------------------- Demand -------------------
 load_options:
   source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2024 available): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
+  weather_year: 2013 # Integer or "derive_from_snapshots"
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
@@ -292,7 +291,7 @@ atlite:
     module: era5
     dx: 0.3 # cutout resolution
     dy: 0.3 # cutout resolution
-    # # The cutout time is automatically derived from `weather_year`. See `snapshot:` option above and 'build_cutout.py'.
+    # The cutout time is automatically derived from `snapshots`. See `snapshots:` above and `build_cutout.py`.
     # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
     # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
     # y: [33., 72]    # manual set cutout range
