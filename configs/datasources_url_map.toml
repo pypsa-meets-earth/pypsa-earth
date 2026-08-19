@@ -287,3 +287,182 @@ url = "https://zenodo.org/records/18033571/files/bundle_natura.zip?download=1"
 code_line = "[bundle_config.yaml:bundle_natura_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L259)"
 license = ""
 license_link = ""
+
+[[source]]
+name = "gebco_bathymetry_tutorial_ngbj"
+description = "GEBCO gridded global bathymetry (2025 grid) -- tutorial-scoped copy"
+tutorial = true
+countries = "NG, BJ"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_NGBJ.zip?download=1"
+origin_url = "https://www.gebco.net/data-products/gridded-bathymetry-data"
+code_line = "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
+license = "Public Domain"
+license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use"
+
+[[source]]
+name = "gebco_bathymetry_tutorial_bw"
+description = "GEBCO gridded global bathymetry (2025 grid) -- tutorial-scoped copy"
+tutorial = true
+countries = "BW"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_BW.zip?download=1"
+origin_url = "https://www.gebco.net/data-products/gridded-bathymetry-data"
+code_line = "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
+license = "Public Domain"
+license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use"
+
+[[source]]
+name = "gebco_bathymetry_tutorial_ma"
+description = "GEBCO gridded global bathymetry (2025 grid) -- tutorial-scoped copy"
+tutorial = true
+countries = "MA"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_MA.zip?download=1"
+origin_url = "https://www.gebco.net/data-products/gridded-bathymetry-data"
+code_line = "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
+license = "Public Domain"
+license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use"
+
+[[source]]
+name = "copernicus_landcover_tutorial_ngbj"
+description = "Copernicus Global Land Service 100m land cover (PROBA-V) -- tutorial-scoped copy"
+tutorial = true
+countries = "NG, BJ"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_NGBJ.zip?download=1"
+origin_url = "https://land.copernicus.eu/en/products/global-dynamic-land-cover"
+code_line = "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
+license = "Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)"
+license_link = "https://land.copernicus.eu/en/data-policy"
+
+[[source]]
+name = "copernicus_landcover_tutorial_bw"
+description = "Copernicus Global Land Service 100m land cover (PROBA-V) -- tutorial-scoped copy"
+tutorial = true
+countries = "BW"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_BW.zip?download=1"
+origin_url = "https://land.copernicus.eu/en/products/global-dynamic-land-cover"
+code_line = "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
+license = "Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)"
+license_link = "https://land.copernicus.eu/en/data-policy"
+
+[[source]]
+name = "copernicus_landcover_tutorial_ma"
+description = "Copernicus Global Land Service 100m land cover (PROBA-V) -- tutorial-scoped copy"
+tutorial = true
+countries = "MA"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_MA.zip?download=1"
+origin_url = "https://land.copernicus.eu/en/products/global-dynamic-land-cover"
+code_line = "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
+license = "Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)"
+license_link = "https://land.copernicus.eu/en/data-policy"
+
+[[source]]
+name = "gadm_tutorial_ngbj"
+description = "Global administrative boundaries (GADM v4.1), by country -- tutorial-scoped copy (Nigeria, Benin)"
+tutorial = true
+countries = "NG, BJ"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_NGBJ.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
+license_link = "https://gadm.org/license.html"
+
+[[source]]
+name = "gadm_tutorial_bw"
+description = "Global administrative boundaries (GADM v4.1), by country -- tutorial-scoped copy (Botswana)"
+tutorial = true
+countries = "BW"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_BW.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
+license_link = "https://gadm.org/license.html"
+
+[[source]]
+name = "gadm_tutorial_ma"
+description = "Global administrative boundaries (GADM v4.1), by country -- tutorial-scoped copy (Morocco)"
+tutorial = true
+countries = "MA"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_MA.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
+license_link = "https://gadm.org/license.html"
+
+[[source]]
+name = "gadm_v36_tutorial_ngbj"
+description = "Global administrative boundaries (GADM v3.6) -- tutorial-scoped copy (Nigeria, Benin)"
+tutorial = true
+countries = "NG, BJ"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_NGBJ.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
+license_link = "https://gadm.org/license.html"
+
+[[source]]
+name = "gadm_v36_tutorial_bw"
+description = "Global administrative boundaries (GADM v3.6) -- tutorial-scoped copy (Botswana)"
+tutorial = true
+countries = "BW"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_BW.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
+license_link = "https://gadm.org/license.html"
+
+[[source]]
+name = "gadm_v36_tutorial_ma"
+description = "Global administrative boundaries (GADM v3.6) -- tutorial-scoped copy (Morocco)"
+tutorial = true
+countries = "MA"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_MA.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
+license_link = "https://gadm.org/license.html"
+
+[[source]]
+name = "global_buildings_microsoft_tutorial_ngbj"
+description = "Global building footprints derived from satellite/aerial imagery via ML (Microsoft) -- tutorial-scoped copy (Nigeria, Benin)"
+tutorial = true
+countries = "NG, BJ"
+url = "https://zenodo.org/records/18032587/files/global_buildings.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_NGBJ_global_buildings](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L50)"
+license = "Open Data Commons Open Database License (ODbL)"
+license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license"
+
+[[source]]
+name = "hydrobasins_tutorial_africa_geoglows"
+description = "Derived Hydrography of Africa (rivers, watersheds, basin area) via terrain analysis, supporting GEOGLoWS/ECMWF/RAPID river forecasting -- tutorial-scoped copy replacing HydroBASINS in this bundle (Brigham Young University: Ashby, Nelson, Ames)"
+tutorial = true
+countries = "Africa"
+url = "https://zenodo.org/records/18032587/files/africa-geoglows-catchment.zip?download=1"
+origin_url = "https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b"
+code_line = "[bundle_config.yaml:bundle_tutorial_hydrobasins](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L95)"
+license = "CC BY 4.0"
+license_link = "https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b"
+
+[[source]]
+name = "eez_marineregions_tutorial_africa"
+description = "World EEZ v11 maritime boundaries worldwide (Flanders Marine Institute / VLIZ) -- tutorial-scoped copy"
+tutorial = true
+countries = "Africa"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_general.zip?download=1"
+origin_url = "https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip"
+code_line = "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
+license = "CC BY 4.0"
+license_link = "https://www.marineregions.org/disclaimer.php"
+
+[[source]]
+name = "gegis_demand_projections_tutorial_africa"
+description = "Hourly electricity demand projections by SSP scenario and weather year, generated by the GlobalEnergyGIS (GEGIS) package -- tutorial-scoped copy"
+tutorial = true
+countries = "Africa"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_general.zip?download=1"
+origin_url = "https://github.com/niclasmattsson/GlobalEnergyGIS"
+code_line = "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
+license = "MIT"
+license_link = "https://github.com/niclasmattsson/GlobalEnergyGIS/blob/master/README.md"
+
+[[source]]
+name = "wdpa_protectedplanet_tutorial_africa"
+description = "World Database on Protected Areas (WDPA), UNEP-WCMC/IUCN -- tutorial-scoped copy"
+tutorial = true
+countries = "Africa"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_general.zip?download=1"
+code_line = "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
+license = "Custom (UNEP-WCMC WDPA Data License, non-commercial use only; commercial use and redistribution require permission)"
+license_link = "https://www.unep-wcmc.org/en/wdpa-data-license"
