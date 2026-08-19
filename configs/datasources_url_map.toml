@@ -1,0 +1,123 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[[source]]
+name = "airports"
+description = "Location of airports worldwide"
+license = ""
+url = "https://davidmegginson.github.io/ourairports-data/airports.csv"
+code_line = "[prepare_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_airports.py#L19)"
+license_link = ""
+
+[[source]]
+name = "air_runways"
+description = "Location and length of runways"
+license = ""
+url = "https://davidmegginson.github.io/ourairports-data/runways.csv"
+code_line = "[prepare_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_airports.py#L19)"
+license_link = ""
+
+[[source]]
+name = "edgar"
+description = "Emission database"
+license = "CC BY 4.0"
+url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
+code_line = "[prepare_network:download_emission_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_network.py#L82)"
+license_link = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/copyright.txt"
+
+[[source]]
+name = "gadm"
+description = "Geographic administrative regions"
+license = ""
+url = "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
+code_line = "[build_shapes:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_shapes.py#L71)"
+license_link = ""
+
+[[source]]
+name = "worldpop_maxar"
+description = "Global population raster in high resolution"
+license = ""
+url = "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
+code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_shapes.py#L448C5-L448C31)"
+license_link = ""
+
+[[source]]
+name = "worldpop"
+description = "Global population raster in standard resolution"
+license = ""
+url = "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
+code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_shapes.py#L448C5-L448C31)"
+license_link = ""
+
+[[source]]
+name = "steel_gem"
+description = "Location and capacity of steel-making plants"
+license = "Creative Commons Attribution 4.0 International Public License"
+url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
+code_line = "[build_industrial_database:create_steel_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_industrial_database.py#L67)"
+license_link = "https://globalenergymonitor.org/creative-commons-public-license/"
+
+[[source]]
+name = "pipelines_gem"
+description = "Location and length of gas pipelines"
+license = "Creative Commons Attribution 4.0 International Public License"
+url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+code_line = "[prepare_gas_network:download_GGIT_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_gas_network.py#L81)"
+license_link = "https://globalenergymonitor.org/creative-commons-public-license/"
+
+[[source]]
+name = "refineries"
+description = "Location and capacity of oil refineries"
+license = ""
+url = "https://services.arcgis.com/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
+code_line = "[build_industrial_database:create_refineries_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_industrial_database.py#L301)"
+license_link = ""
+
+[[source]]
+name = "n_vehicles_who"
+description = "Number of vehicles by country"
+license = "CC BY-NC-SA 3.0 IGO + Permission is required for commercial uses and licensing of WHO materials"
+url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
+code_line = "[prepare_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_transport_data_input.py#L37)"
+license_link = "https://www.who.int/about/policies/publishing/copyright"
+
+[[source]]
+name = "vehicles_per_capita_wiki"
+description = "Number of vehicles per capita"
+license = "Creative Commons Attribution-ShareAlike 4.0 License and GNU FDL"
+url = "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita"
+code_line = "[prepare_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_transport_data_input.py#L37)"
+license_link = "https://en.wikipedia.org/wiki/Wikipedia:Copyrights"
+
+[[source]]
+name = "transport_emission_worldbank"
+description = "CO2 emissions from transport (% of total fuel combustion)"
+license = ""
+url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+code_line = "[prepare_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_transport_data_input.py#L115)"
+license_link = ""
+
+[[source]]
+name = "global_buildings_microsoft"
+description = "Global dataset of buildings"
+license = "Open Data Commons Open Database License (ODbL)"
+url = "https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv"
+code_line = "[download_global_buildings:download_global_buildings_url](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/download_global_buildings.py#L27)"
+license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license"
+
+[[source]]
+name = "pop_total_un"
+description = "Percentage of global population"
+license = ""
+url = "https://unctadstat-api.unctad.org/api/reportMetadata/US.PopTotal/bulkfile/355/en"
+code_line = "[prepare_urban_percent:download_urban_percent](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_urban_percent.py#L18)"
+license_link = ""
+
+[[source]]
+name = "sea_ports_nga"
+description = "Location and capacity of sea ports"
+license = "Public Domain"
+url = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
+code_line = "[prepare_ports:download_ports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_ports.py#L21)"
+license_link = "https://www.nga.mil/resources/Public_Release.html"
