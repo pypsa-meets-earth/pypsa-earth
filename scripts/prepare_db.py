@@ -3,14 +3,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Created on Sun May 30 18:11:07 2021.
-
-@author: haz43975
-"""
-
-
-# -*- coding: utf-8 -*-
-"""
 Created on Tue May  4 10:22:36 2021
 
 @author: haz43975
