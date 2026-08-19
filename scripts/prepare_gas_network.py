@@ -45,9 +45,6 @@ inter-state pipeline capacities.
 """
 
 import logging
-
-logger = logging.getLogger(__name__)
-
 import os
 import zipfile
 from pathlib import Path
@@ -72,6 +69,8 @@ from pypsa.geo import haversine_pts
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
+
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
