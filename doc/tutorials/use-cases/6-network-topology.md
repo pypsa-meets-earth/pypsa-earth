@@ -78,7 +78,7 @@ plt.show()
 
 Any **red** bus is electrically isolated from the green backbone: load there cannot import power from the rest of the grid. You may see **one red bus** rather than a whole western region; Step 3 explains why. After the fix in Step 4, re-plot; you should see no red buses.
 
-![Kazakhstan network coloured by sub-network (before fix)](figures/kz_subnetworks.png)
+![Kazakhstan network coloured by sub-network (before fix)](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/kz_subnetworks.png)
 
 *Green = main grid; red = isolated bus. Example from the Part 5 solved network with default simplification settings.*
 
@@ -214,7 +214,7 @@ Load shedding: 0.00 TWh
 
 Optionally, re-run the **installed capacity** check from [Part 2](2-analyze-results.md#installed-capacities) (same `n.statistics()` call). Compare **hydro** against the KEGOC 2020 table; they should stay aligned with the Part 4 fleet. This is a useful sanity check because `p_threshold_drop_isolated` can delete **low-load islands** before `fetch` runs, and that may remove **large hydro plants** that happen to sit on those islands.
 
-![Kazakhstan network after fix, all buses on main grid](figures/kz_subnetworks_fixed.png)
+![Kazakhstan network after fix, all buses on main grid](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/kz_subnetworks_fixed.png)
 
 *All green; no isolated buses after `fetch`. The map may also show a different line layout than the before-fix figure: that is expected. Keeping the former islands and attaching their load and generation to nearby backbone buses changes how buses are grouped in later clustering, so the displayed topology can change.*
 
