@@ -14,7 +14,6 @@ tutorial config.
 """
 import collections.abc
 import copy
-import os
 from pathlib import Path
 
 from ruamel.yaml import YAML
