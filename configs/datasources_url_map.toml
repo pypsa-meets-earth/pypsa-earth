@@ -51,10 +51,27 @@ code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-
 license_link = ""
 
 [[source]]
+name = "worldpop_api"
+description = "Global population raster (100m), resolved dynamically to a per-country download URL via the WorldPop REST API"
+license = ""
+url = "https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}"
+code_line = "[build_shapes:download_WorldPop_API](https://github.com/pypsa-meets-earth/pypsa-earth/blob/3a9147ab03de0e07cb22310a6f6e098835e411d2/scripts/build_shapes.py#L553)"
+license_link = ""
+
+[[source]]
+name = "gadm_v36_legacy"
+description = "Geographic administrative regions (GADM v3.6, legacy endpoint superseded by the gadm entry)"
+license = ""
+url = "https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
+code_line = "[_helpers:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/3a9147ab03de0e07cb22310a6f6e098835e411d2/scripts/_helpers.py#L1313) -- note: this function is not called anywhere in the codebase (dead code)"
+license_link = ""
+
+[[source]]
 name = "steel_gem"
 description = "Location and capacity of steel-making plants"
 license = "Creative Commons Attribution 4.0 International Public License"
-url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
+url = "https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx"
+origin_url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
 code_line = "[build_industrial_database:create_steel_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_industrial_database.py#L67)"
 license_link = "https://globalenergymonitor.org/creative-commons-public-license/"
 
@@ -62,9 +79,18 @@ license_link = "https://globalenergymonitor.org/creative-commons-public-license/
 name = "pipelines_gem"
 description = "Location and length of gas pipelines"
 license = "Creative Commons Attribution 4.0 International Public License"
-url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+origin_url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
 code_line = "[prepare_gas_network:download_GGIT_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_gas_network.py#L81)"
 license_link = "https://globalenergymonitor.org/creative-commons-public-license/"
+
+[[source]]
+name = "gas_network_iggielgn"
+description = "SciGRID-gas IGGIELGN gas network topology dataset"
+license = ""
+url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
+code_line = "[prepare_gas_network:download_IGGIELGN_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/3a9147ab03de0e07cb22310a6f6e098835e411d2/scripts/prepare_gas_network.py#L64)"
+license_link = ""
 
 [[source]]
 name = "refineries"
@@ -73,6 +99,14 @@ license = ""
 url = "https://services.arcgis.com/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
 code_line = "[build_industrial_database:create_refineries_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/build_industrial_database.py#L301)"
 license_link = ""
+
+[[source]]
+name = "osm_nominatim_geocoding"
+description = "Reverse geocoding of refinery coordinates to country codes via OpenStreetMap's Nominatim API"
+license = ""
+url = "https://nominatim.openstreetmap.org"
+code_line = "[build_industrial_database:get_cocode_from_coords](https://github.com/pypsa-meets-earth/pypsa-earth/blob/3a9147ab03de0e07cb22310a6f6e098835e411d2/scripts/build_industrial_database.py#L28)"
+license_link = "https://operations.osmfoundation.org/policies/nominatim/"
 
 [[source]]
 name = "n_vehicles_who"
@@ -107,11 +141,27 @@ code_line = "[download_global_buildings:download_global_buildings_url](https://g
 license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license"
 
 [[source]]
+name = "global_buildings_microsoft_quadrants"
+description = "Per-quadrant GeoJSONL building footprint files, resolved dynamically from the 'Url' column of the global_buildings_microsoft dataset-links.csv index"
+license = "Open Data Commons Open Database License (ODbL)"
+url = ""
+code_line = "[download_global_buildings:get_building_area_center](https://github.com/pypsa-meets-earth/pypsa-earth/blob/3a9147ab03de0e07cb22310a6f6e098835e411d2/scripts/download_global_buildings.py#L105)"
+license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license"
+
+[[source]]
 name = "pop_total_un"
 description = "Percentage of global population"
 license = ""
 url = "https://unctadstat-api.unctad.org/api/reportMetadata/US.PopTotal/bulkfile/355/en"
 code_line = "[prepare_urban_percent:download_urban_percent](https://github.com/pypsa-meets-earth/pypsa-earth/blob/2a23ebe75f3763c14d85ea624bcf12df5e4c7b06/scripts/prepare_urban_percent.py#L18)"
+license_link = ""
+
+[[source]]
+name = "un_energy_balances_unsd"
+description = "Per-country energy balance dataset zip files from the UN Statistics Division, resolved dynamically from the 'Link' column of the unsd_paths input spreadsheet"
+license = ""
+url = ""
+code_line = "[build_base_energy_totals:__main__](https://github.com/pypsa-meets-earth/pypsa-earth/blob/3a9147ab03de0e07cb22310a6f6e098835e411d2/scripts/build_base_energy_totals.py#L389)"
 license_link = ""
 
 [[source]]
