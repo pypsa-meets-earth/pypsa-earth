@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-
+[[source]]
 name = "airports"
 description = "Location and type of airports worldwide"
 url = "https://davidmegginson.github.io/ourairports-data/airports.csv"
