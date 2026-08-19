@@ -81,7 +81,7 @@ def emission_extractor(
 ) -> pd.Series:
     """
     Extracts CO2 emission values for given country codes from the pre-processed
-    emission CSV file.
+    global emission CSV file.
 
     Parameters
     ----------
