@@ -5,6 +5,7 @@
 [[source]]
 name = "airports"
 long_name = "Location and type of airports worldwide"
+output = "resources/airports.csv"
 description = "Global inventory of airports and airfields from the OurAirports open dataset, including active and closed facilities, heliports, and seaplane bases, with coordinates and basic attributes (name, type, ICAO/IATA codes, elevation)."
 tutorial = false
 countries = "Earth"
@@ -18,6 +19,7 @@ license_link = "https://ourairports.com/data/"
 [[source]]
 name = "air_runways"
 long_name = "Location and length of airport runways worldwide"
+output = "resources/airports.csv"
 description = "Runway-level detail from the OurAirports open dataset: length, latitude/longitude and heading for each end of every landing surface at the airports listed in the airports dataset."
 tutorial = false
 countries = "Earth"
@@ -31,6 +33,7 @@ license_link = "https://ourairports.com/data/"
 [[source]]
 name = "edgar"
 long_name = "EDGAR gridded fossil CO2 emissions dataset (v6.0), annual gridmaps for 1970-2018"
+output = "data/v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
 description = "EDGAR (Emissions Database for Global Atmospheric Research) v6.0 gridded inventory of fossil CO2 emissions, excluding short-cycle organic carbon (i.e. biomass burning and LULUCF sources); provided as annual global gridmaps covering 1970-2018, produced by the EU Joint Research Centre."
 tutorial = false
 countries = "Earth"
@@ -44,6 +47,7 @@ license_link = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/
 [[source]]
 name = "gadm"
 long_name = "Global administrative boundaries (GADM), by country"
+output = "data/gadm/{GADM_filename}/{GADM_filename}.gpkg"
 description = "GADM v4.1 database of global administrative boundaries (country, province/state, and county/district levels), used to delineate country and sub-national regions for network clustering; the current, actively maintained GADM release."
 tutorial = false
 countries = "Earth"
@@ -57,6 +61,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "worldpop_maxar"
 long_name = "Constrained 100m-resolution global population raster (WorldPop) built using Maxar, University of Southampton"
+output = "data/WorldPop/{WorldPop_filename}"
 description = "WorldPop constrained population raster at ~100m resolution, restricting population counts to built-up areas using Ecopia/Maxar building-footprint settlement layers rather than the BSGM growth model; produced by the WorldPop research group, University of Southampton."
 tutorial = false
 countries = "Earth"
@@ -70,6 +75,7 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "worldpop"
 long_name = "Constrained 100m-resolution global population raster (WorldPop), University of Southampton"
+output = "data/WorldPop/{WorldPop_filename}"
 description = "WorldPop constrained population raster at ~100m resolution, using the Built-Settlement Growth Model (BSGM) to restrict population counts to built-up areas; the standard constrained population product used by default."
 tutorial = false
 countries = "Earth"
@@ -83,6 +89,7 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "worldpop_api"
 long_name = "Unconstrained global population raster 100m/3 arc-sec resolution (WorldPop), University of Southampton"
+output = "data/WorldPop/{WorldPop_filename}"
 description = "WorldPop Global Project (wpgp) unconstrained population raster at ~100m/3 arc-second resolution, spreading population across whole administrative units rather than restricting it to built settlement; resolved dynamically per country via the WorldPop REST API, which returns a second, temporary tif download URL."
 tutorial = false
 countries = "Earth"
@@ -96,6 +103,7 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "gadm_v36"
 long_name = "Global administrative boundaries (GADM v3.6)"
+output = "data/raw/gadm/gadm36_{ISO3}/gadm36_{ISO3}.gpkg"
 description = "GADM v3.6 administrative boundaries, fetched from the older biogeo.ucdavis.edu endpoint; still needed by some sector-coupled model outputs even though the function that fetches it directly (_helpers.download_GADM) is not called anywhere in the current codebase."
 tutorial = false
 countries = "Earth"
@@ -109,6 +117,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "steel_gem"
 long_name = "Location and technology data of iron and steel plants worldwide, GEM Global Steel Plant Tracker"
+output = "resources/industrial_database.csv"
 description = "Global Energy Monitor's Global Steel Plant Tracker (GSPT): location, operating status (operating/proposed/retired), capacity, and production process (blast furnace, EAF, DRI, etc.) of iron and steel plants worldwide with capacity of 0.5 Mtpa or more."
 tutorial = false
 countries = "Earth"
@@ -123,6 +132,7 @@ license_link = "https://globalenergymonitor.org/creative-commons-public-license/
 [[source]]
 name = "pipelines_gem"
 long_name = "Location and technology data of gas pipelines worldwide, GEM Global Gas Infrastructure Tracker"
+output = "resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv"
 description = "Global Energy Monitor's Global Gas Infrastructure Tracker (GGIT) gas pipelines dataset: location, length, diameter, capacity, and status of gas transmission pipelines and pipeline projects worldwide."
 tutorial = false
 countries = "Earth"
@@ -137,6 +147,7 @@ license_link = "https://globalenergymonitor.org/creative-commons-public-license/
 [[source]]
 name = "gas_network_iggielgn"
 long_name = "SciGRID-gas IGGIELGN dataset: European gas transmission network model"
+output = "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
 description = "SciGRID-gas IGGIELGN dataset: a European gas transmission network model combining pipelines, storages, production sites, LNG terminals and interconnection points with capacity, pressure, and diameter attributes. Published on Zenodo by the SciGRID-gas project."
 tutorial = false
 countries = "Earth"
@@ -150,6 +161,7 @@ license_link = "https://zenodo.org/records/4767098"
 [[source]]
 name = "refineries"
 long_name = "Location and daily throughput capacity of oil refineries worldwide"
+output = "resources/industrial_database.csv"
 description = "Global Oil Refinery Complex and Daily Capacity: an Esri ArcGIS-hosted point layer with the location and daily throughput capacity of oil refineries worldwide."
 tutorial = false
 countries = "Earth"
@@ -163,6 +175,7 @@ license_link = ""
 [[source]]
 name = "osm_nominatim_geocoding"
 long_name = "Reverse geocoding of refinery coordinates to country codes via OpenStreetMap's Nominatim API"
+output = "resources/industrial_database.csv"
 description = "Reverse geocoding of refinery point coordinates that are missing a country code, resolved to ISO country codes via OpenStreetMap's Nominatim service. Retriven using the default endpoint of the geopy Nominatim client."
 tutorial = false
 countries = "Earth"
@@ -176,6 +189,7 @@ license_link = "https://www.openstreetmap.org/copyright, https://osmfoundation.o
 [[source]]
 name = "n_vehicles_who"
 long_name = "Number of registered motor vehicles, WHO"
+output = "resources/transport_data.csv"
 description = "WHO Global Health Observatory (GHO) 'Registered vehicles' indicator (RS_194, Road Safety theme): number of registered motor vehicles by country. Fetched via the GHO OData API."
 tutorial = false
 countries = "Earth"
@@ -189,6 +203,7 @@ license_link = "https://www.who.int/about/policies/publishing/copyright"
 [[source]]
 name = "vehicles_per_capita_wiki"
 long_name = "Number of road motor vehicles per capita"
+output = "resources/transport_data.csv"
 description = "Wikipedia's 'List of countries and territories by motor vehicles per capita': road motor vehicles per 1,000 inhabitants by country/territory, used as a fallback/completion source for countries missing from the WHO vehicles dataset."
 tutorial = false
 countries = "Earth"
@@ -202,6 +217,7 @@ license_link = "https://en.wikipedia.org/wiki/Wikipedia:Copyrights"
 [[source]]
 name = "transport_emission_worldbank"
 long_name = "CO2 emissions from transport, World Bank"
+output = "resources/transport_data.csv"
 description = "World Bank indicator EN.CO2.TRAN.ZS ('CO2 emissions from transport, % of total fuel combustion'), used to estimate average land-transport fuel efficiency; the live World Bank API was discontinued in October 2024, so the code fetches an archived Wayback Machine snapshot from 2024-05-21 instead."
 tutorial = false
 countries = "Earth"
@@ -215,6 +231,7 @@ license_link = "https://datacatalog.worldbank.org/public-licenses"
 [[source]]
 name = "global_buildings_microsoft"
 long_name = "Global building footprints, Microsoft"
+output = "data/global_buildings/{country}_global_buildings_raw.parquet"
 description = "Microsoft's Global ML Building Footprints: worldwide building footprint polygons derived from satellite/aerial imagery via machine learning."
 tutorial = false
 countries = "Earth"
@@ -228,6 +245,7 @@ license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=read
 [[source]]
 name = "global_buildings_microsoft_quadrants"
 long_name = "Per-quadkey-partitioned building footprint, Microsoft"
+output = "data/global_buildings/{country}_global_buildings_raw.parquet"
 description = "Per-quadkey-partitioned GeoJSONL building footprint files from Microsoft's Global ML Building Footprints dataset."
 tutorial = false
 countries = "Earth"
@@ -241,6 +259,7 @@ license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=read
 [[source]]
 name = "pop_total_un"
 long_name = "Urban population as a percentage, UNCTAD"
+output = "resources/urban_percent.csv"
 description = "UNCTADstat 'Urban population as percentage of total population' indicator, by country."
 tutorial = false
 countries = "Earth"
@@ -254,6 +273,7 @@ license_link = "https://unctadstat.unctad.org/EN/About.html"
 [[source]]
 name = "un_energy_balances_unsd"
 long_name = "Per-country energy balance dataset, UN"
+output = "resources/energy_totals_base.csv"
 description = "UN Statistics Division per-country energy balance zip files (production, trade, transformation and consumption, in TJ)."
 tutorial = false
 countries = "Earth"
@@ -267,6 +287,7 @@ license_link = "https://data.un.org/Host.aspx?Content=UNdataUse"
 [[source]]
 name = "sea_ports_nga"
 long_name = "Sea port worldwide, NGA World Port Index"
+output = "resources/ports.csv"
 description = "NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency."
 tutorial = false
 countries = "Earth"
@@ -280,6 +301,7 @@ license_link = "https://www.nga.mil/resources/Public_Release.html"
 [[source]]
 name = "wdpa_protectedplanet"
 long_name = "World Database on Protected Areas (WDPA), UNEP-WCMC/IUCN"
+output = "data/landcover/world_protected_areas/*"
 description = "World Database on Protected Areas (WDPA): boundaries of protected areas worldwide, maintained by UNEP-WCMC/IUCN and distributed via Protected Planet's monthly-release."
 tutorial = false
 countries = "Earth"
@@ -293,6 +315,7 @@ license_link = "https://www.unep-wcmc.org/en/wdpa-data-license"
 [[source]]
 name = "hydrobasins"
 long_name = "HydroBASINS global watershed boundaries (HydroSHEDS)"
+output = "data/hydrobasins/hybas_world.shp"
 description = "HydroBASINS (HydroSHEDS project): global watershed boundaries and sub-basin delineations at a standard level, fetched per continental-region suffix from data.hydrosheds.org."
 tutorial = false
 countries = "Earth"
@@ -306,6 +329,7 @@ license_link = "https://www.hydrosheds.org/terms-of-use"
 [[source]]
 name = "eez_marineregions"
 long_name = "World EEZ v11 maritime boundaries worldwide (Flanders Marine Institute / VLIZ)"
+output = "data/eez/eez_v11.gpkg"
 description = "World EEZ v11: global maritime boundary (Exclusive Economic Zone) polygons, published by the Flanders Marine Institute (VLIZ) via marineregions.org."
 tutorial = false
 countries = "Earth"
@@ -320,6 +344,7 @@ license_link = "https://www.marineregions.org/disclaimer.php"
 [[source]]
 name = "gebco_bathymetry"
 long_name = "GEBCO gridded global bathymetry (2025 grid)"
+output = "data/gebco/GEBCO_2025_sub_ice.nc"
 description = "GEBCO_2025 global gridded bathymetry: seafloor depth data compiled from many trackline sources, largely representative of deep-ocean bathymetry rather than detailed shallow-shelf depths."
 tutorial = false
 countries = "Earth"
@@ -334,6 +359,7 @@ license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-
 [[source]]
 name = "copernicus_landcover"
 long_name = "Copernicus Global Land Service 100m land cover (PROBA-V)"
+output = "data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
 description = "Copernicus Global Land Service 100m land cover (Collection 3, PROBA-V, epoch 2019): global annual land cover classification."
 tutorial = false
 countries = "Earth"
@@ -348,6 +374,7 @@ license_link = "https://land.copernicus.eu/en/data-policy"
 [[source]]
 name = "gegis_demand_projections"
 long_name = "GEGIS hourly electricity demand projections by SSP scenario and weather year."
+output = "data/ssp2-2.6/2030/era5_2013/{Continent}.nc"
 description = "Hourly electricity demand projections by continent, generated by the open-source GlobalEnergyGIS (GEGIS) Julia package, which combines historical demand, population/income data, SSP socioeconomic scenarios, and ERA5 weather data; the pypsa-earth bundle currently ships the SSP2-2.6 scenario, prediction year 2030, weather year 2013."
 tutorial = false
 countries = "Earth"
@@ -362,6 +389,7 @@ license_link = "https://github.com/niclasmattsson/GlobalEnergyGIS/blob/master/RE
 [[source]]
 name = "natura_raster"
 long_name = "Rasterized protected-area raster derived from WDPA data generated by PyPSA-Earth. D. Fioriti"
+output = "data/natura/natura.tiff"
 description = "Rasterized protected-area raster derived from WDPA vector data, generated inside PyPSA-Earth by build_natura_raster.py."
 tutorial = false
 countries = "Earth"
@@ -375,6 +403,7 @@ license_link = ""
 [[source]]
 name = "gebco_bathymetry_tutorial_ngbj"
 long_name = "GEBCO gridded global bathymetry (2025 grid). Tutorial-scoped copy"
+output = "data/gebco/GEBCO_2025_sub_ice.nc"
 description = "Tutorial-scoped copy of the GEBCO_2025 global bathymetry grid, bundled together with GADM/Copernicus data specifically for the Nigeria/Benin tutorial."
 tutorial = true
 countries = "NG, BJ"
@@ -389,6 +418,7 @@ license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-
 [[source]]
 name = "gebco_bathymetry_tutorial_bw"
 long_name = "GEBCO gridded global bathymetry (2025 grid). Tutorial-scoped copy"
+output = "data/gebco/GEBCO_2025_sub_ice.nc"
 description = "Tutorial-scoped copy of the GEBCO_2025 global bathymetry grid, bundled together with GADM/Copernicus data specifically for the Botswana tutorial."
 tutorial = true
 countries = "BW"
@@ -403,6 +433,7 @@ license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-
 [[source]]
 name = "gebco_bathymetry_tutorial_ma"
 long_name = "GEBCO gridded global bathymetry (2025 grid). Tutorial-scoped copy"
+output = "data/gebco/GEBCO_2025_sub_ice.nc"
 description = "Tutorial-scoped copy of the GEBCO_2025 global bathymetry grid, bundled together with GADM/Copernicus data specifically for the Morocco tutorial."
 tutorial = true
 countries = "MA"
@@ -417,6 +448,7 @@ license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-
 [[source]]
 name = "copernicus_landcover_tutorial_ngbj"
 long_name = "Copernicus Global Land Service 100m land cover (PROBA-V). Tutorial-scoped copy"
+output = "data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
 description = "Tutorial-scoped copy of the Copernicus Global Land Service 100m land cover product, bundled together with GADM/GEBCO data specifically for the Nigeria/Benin tutorial."
 tutorial = true
 countries = "NG, BJ"
@@ -431,6 +463,7 @@ license_link = "https://land.copernicus.eu/en/data-policy"
 [[source]]
 name = "copernicus_landcover_tutorial_bw"
 long_name = "Copernicus Global Land Service 100m land cover (PROBA-V). Tutorial-scoped copy"
+output = "data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
 description = "Tutorial-scoped copy of the Copernicus Global Land Service 100m land cover product, bundled together with GADM/GEBCO data specifically for the Botswana tutorial."
 tutorial = true
 countries = "BW"
@@ -445,6 +478,7 @@ license_link = "https://land.copernicus.eu/en/data-policy"
 [[source]]
 name = "copernicus_landcover_tutorial_ma"
 long_name = "Copernicus Global Land Service 100m land cover (PROBA-V). Tutorial-scoped copy"
+output = "data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
 description = "Tutorial-scoped copy of the Copernicus Global Land Service 100m land cover product, bundled together with GADM/GEBCO data specifically for the Morocco tutorial."
 tutorial = true
 countries = "MA"
@@ -459,6 +493,7 @@ license_link = "https://land.copernicus.eu/en/data-policy"
 [[source]]
 name = "gadm_tutorial_ngbj"
 long_name = "Global administrative boundaries (GADM v4.1), by country. Tutorial-scoped copy (Nigeria, Benin)"
+output = "data/gadm/gadm41_NGA/gadm41_NGA.gpkg, data/gadm/gadm41_BEN/gadm41_BEN.gpkg"
 description = "Tutorial-scoped copy of GADM v4.1 administrative boundaries for Nigeria and Benin, bundled together with GEBCO/Copernicus data for the NGBJ tutorial."
 tutorial = true
 countries = "NG, BJ"
@@ -472,6 +507,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "gadm_tutorial_bw"
 long_name = "Global administrative boundaries (GADM v4.1), by country. Tutorial-scoped copy (Botswana)"
+output = "data/gadm/gadm41_BWA/gadm41_BWA.gpkg"
 description = "Tutorial-scoped copy of GADM v4.1 administrative boundaries for Botswana, bundled together with GEBCO/Copernicus data for the BW tutorial."
 tutorial = true
 countries = "BW"
@@ -485,6 +521,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "gadm_tutorial_ma"
 long_name = "Global administrative boundaries (GADM v4.1), by country. Tutorial-scoped copy (Morocco)"
+output = "data/gadm/gadm41_MAR/gadm41_MAR.gpkg"
 description = "Tutorial-scoped copy of GADM v4.1 administrative boundaries for Morocco, bundled together with GEBCO/Copernicus data for the MA tutorial."
 tutorial = true
 countries = "MA"
@@ -498,6 +535,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "gadm_v36_tutorial_ngbj"
 long_name = "Global administrative boundaries (GADM v3.6). Tutorial-scoped copy (Nigeria, Benin)"
+output = "data/gadm/gadm36_NGA/gadm36_NGA.gpkg, data/gadm/gadm36_BEN/gadm36_BEN.gpkg"
 description = "Tutorial-scoped copy of legacy GADM v3.6 administrative boundaries for Nigeria and Benin, needed by the sector-coupled model in the NGBJ tutorial."
 tutorial = true
 countries = "NG, BJ"
@@ -511,6 +549,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "gadm_v36_tutorial_bw"
 long_name = "Global administrative boundaries (GADM v3.6). Tutorial-scoped copy (Botswana)"
+output = "data/gadm/gadm36_BWA/gadm36_BWA.gpkg"
 description = "Tutorial-scoped copy of GADM v3.6 administrative boundaries for Botswana, needed by the sector-coupled model in the BW tutorial."
 tutorial = true
 countries = "BW"
@@ -524,6 +563,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "gadm_v36_tutorial_ma"
 long_name = "Global administrative boundaries (GADM v3.6). Tutorial-scoped copy (Morocco)"
+output = "data/gadm/gadm36_MAR/gadm36_MAR.gpkg"
 description = "Tutorial-scoped copy of GADM v3.6 administrative boundaries for Morocco, needed by the sector-coupled model in the MA tutorial."
 tutorial = true
 countries = "MA"
@@ -537,6 +577,7 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "global_buildings_microsoft_tutorial_ngbj"
 long_name = "Global building footprints derived from satellite/aerial imagery via ML (Microsoft). Tutorial-scoped copy (Nigeria, Benin)"
+output = "data/global_buildings/NG_global_buildings_raw.parquet, data/global_buildings/BJ_global_buildings_raw.parquet"
 description = "Tutorial-scoped copy of Microsoft's Global ML Building Footprints, pre-extracted as raw per-country parquet files for Nigeria and Benin."
 tutorial = true
 countries = "NG, BJ"
@@ -550,6 +591,7 @@ license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=read
 [[source]]
 name = "hydrobasins_tutorial_africa_geoglows"
 long_name = "Derived Hydrography of Africa (rivers, watersheds, basin area) via terrain analysis, supporting GEOGLoWS/ECMWF/RAPID river forecasting. Brigham Young University: Ashby, Nelson, Ames"
+output = "data/hydrobasins_hydroshare/africa-geoglows-atlite.shp"
 description = "'Derived Hydrography of Africa': rivers, watersheds and basin-area polygons for Africa, produced via terrain analysis by Brigham Young University (Ashby, Nelson, Ames) to support GEOGLoWS ECMWF-driven streamflow forecasting with the RAPID river routing model. Published on HydroShare and mirrored into the pypsa-earth tutorial databundle."
 tutorial = true
 countries = "Africa"
@@ -564,6 +606,7 @@ license_link = "https://www.hydroshare.org/resource/121bbce392a841178476001843e7
 [[source]]
 name = "eez_marineregions_tutorial_africa"
 long_name = "World EEZ v11 maritime boundaries worldwide (Flanders Marine Institute / VLIZ). Tutorial-scoped copy"
+output = "data/eez/eez_v11.gpkg"
 description = "Tutorial-scoped copy of the World EEZ v11 maritime boundary dataset."
 tutorial = true
 countries = "Africa"
@@ -578,6 +621,7 @@ license_link = "https://www.marineregions.org/disclaimer.php"
 [[source]]
 name = "gegis_demand_projections_tutorial_africa"
 long_name = "GEGIS hourly electricity demand projections by SSP scenario and weather year. Tutorial-scoped copy"
+output = "data/ssp2-2.6/2030/era5_2013/{Continent}.nc"
 description = "Tutorial-scoped copy of the GlobalEnergyGIS (GEGIS) hourly electricity demand projections (SSP2-2.6, prediction year 2030, weather year 2013)."
 tutorial = true
 countries = "Africa"
@@ -592,6 +636,7 @@ license_link = "https://github.com/niclasmattsson/GlobalEnergyGIS/blob/master/RE
 [[source]]
 name = "wdpa_protectedplanet_tutorial_africa"
 long_name = "World Database on Protected Areas (WDPA), UNEP-WCMC/IUCN. Tutorial-scoped copy"
+output = "data/landcover/world_protected_area/protected_areas_tutorial.shp"
 description = "Tutorial-scoped, reduced extract of the World Database on Protected Areas (file literally named protected_areas_tutorial.shp)."
 tutorial = true
 countries = "Africa"
@@ -605,6 +650,7 @@ license_link = "https://www.unep-wcmc.org/en/wdpa-data-license"
 [[source]]
 name = "demandcast_forecasts"
 long_name = "Global Dataset of Forecasted Hourly Electricity Demand from 2000 to 2024 Using DemandCast. E. Antonini, P. Goli, K. Steijn"
+output = "data/demand/forecasts_on_historical_period.parquet"
 description = "DemandCast: machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, combining historical demand data, weather variables and socioeconomic indicators. E. Antonini, P. Goli and K. Steijn."
 tutorial = false
 countries = "Earth"
@@ -618,6 +664,7 @@ license_link = "https://zenodo.org/records/18374352"
 [[source]]
 name = "demandcast_forecasts_tutorial"
 long_name = "Machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, via the DemandCast framework. Tutorial-scoped copy"
+output = "data/demand/forecasts_on_historical_period.parquet"
 description = "Tutorial-scoped copy of the DemandCast hourly electricity demand forecasts."
 tutorial = true
 countries = "Earth"
@@ -631,6 +678,7 @@ license_link = "https://zenodo.org/records/18374352"
 [[source]]
 name = "irena_statistics"
 long_name = "IRENA renewable energy statistics"
+output = "data/IRENA_Statistics_Extract_2025H2.xlsx"
 description = "IRENA Renewable Energy Statistics: installed capacity, generation, heat production and related indicators, collected via IRENA's annual member questionnaire and desk research; used in build_renewable_profiles.py to derive hydropower generation potentials."
 countries = "Earth"
 url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx"
@@ -644,6 +692,7 @@ license_link = "https://www.irena.org/terms-and-conditions"
 [[source]]
 name = "irena_statistics_tutorial"
 long_name = "IRENA renewable energy statistics (installed capacity, generation, heat production and related indicators), tutorial-scoped"
+output = "data/IRENA_Statistics_Extract_2025H2.xlsx"
 description = "Tutorial-scoped entry for IRENA Renewable Energy Statistics."
 tutorial = true
 countries = "Earth"
