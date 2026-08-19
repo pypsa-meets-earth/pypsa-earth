@@ -5,18 +5,18 @@
 [[source]]
 name = "airports"
 description = "Location and type of airports worldwide"
-license = ""
+license = "Public Domain (Unlicense)"
 url = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 code_line = "[prepare_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_airports.py#L19)"
-license_link = ""
+license_link = "https://ourairports.com/data/"
 
 [[source]]
 name = "air_runways"
 description = "Location and length of airport runways worldwide"
-license = ""
+license = "Public Domain (Unlicense)"
 url = "https://davidmegginson.github.io/ourairports-data/runways.csv"
 code_line = "[prepare_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_airports.py#L19)"
-license_link = ""
+license_link = "https://ourairports.com/data/"
 
 [[source]]
 name = "edgar"
@@ -29,42 +29,42 @@ license_link = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/
 [[source]]
 name = "gadm"
 description = "Global administrative boundaries (GADM), by country"
-license = ""
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
 url = "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 code_line = "[build_shapes:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L71)"
-license_link = ""
+license_link = "https://gadm.org/license.html"
 
 [[source]]
 name = "worldpop_maxar"
 description = "Constrained 100m-resolution global population raster (WorldPop) built using Maxar, University of Southampton"
-license = ""
+license = "CC BY 4.0"
 url = "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
 code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L448C5-L448C31)"
-license_link = ""
+license_link = "https://www.worldpop.org/faq/"
 
 [[source]]
 name = "worldpop"
 description = "Constrained 100m-resolution global population raster (WorldPop), University of Southampton"
-license = ""
+license = "CC BY 4.0"
 url = "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
 code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L448C5-L448C31)"
-license_link = ""
+license_link = "https://www.worldpop.org/faq/"
 
 [[source]]
 name = "worldpop_api"
 description = "Unconstrained global population raster 100m/3 arc-sec resolution (WorldPop), University of Southampton"
-license = ""
+license = "CC BY 4.0"
 url = "https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}"
 code_line = "[build_shapes:download_WorldPop_API](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L553)"
-license_link = ""
+license_link = "https://www.worldpop.org/faq/"
 
 [[source]]
 name = "gadm_v36"
 description = "Global administrative boundaries (GADM v3.6)"
-license = ""
+license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
 url = "https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
 code_line = "[_helpers:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/_helpers.py#L1313) -- note: this function is not called anywhere in the codebase (dead code)"
-license_link = ""
+license_link = "https://gadm.org/license.html"
 
 [[source]]
 name = "steel_gem"
@@ -87,10 +87,10 @@ license_link = "https://globalenergymonitor.org/creative-commons-public-license/
 [[source]]
 name = "gas_network_iggielgn"
 description = "SciGRID-gas IGGIELGN dataset: European gas transmission network model"
-license = ""
+license = "CC BY 4.0"
 url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
 code_line = "[prepare_gas_network:download_IGGIELGN_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_gas_network.py#L64)"
-license_link = ""
+license_link = "https://zenodo.org/records/4767098"
 
 [[source]]
 name = "refineries"
@@ -103,10 +103,10 @@ license_link = ""
 [[source]]
 name = "osm_nominatim_geocoding"
 description = "Reverse geocoding of refinery coordinates to country codes via OpenStreetMap's Nominatim API"
-license = ""
+license = "ODbL 1.0"
 url = "https://nominatim.openstreetmap.org"
 code_line = "[build_industrial_database:get_cocode_from_coords](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L28)"
-license_link = "https://operations.osmfoundation.org/policies/nominatim/"
+license_link = "https://www.openstreetmap.org/copyright, https://osmfoundation.org/wiki/Terms_of_Use"
 
 [[source]]
 name = "n_vehicles_who"
@@ -127,10 +127,10 @@ license_link = "https://en.wikipedia.org/wiki/Wikipedia:Copyrights"
 [[source]]
 name = "transport_emission_worldbank"
 description = "CO2 emissions from transport, World Bank"
-license = ""
+license = "CC BY 4.0"
 url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 code_line = "[prepare_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_transport_data_input.py#L115)"
-license_link = ""
+license_link = "https://datacatalog.worldbank.org/public-licenses"
 
 [[source]]
 name = "global_buildings_microsoft"
@@ -151,18 +151,18 @@ license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=read
 [[source]]
 name = "pop_total_un"
 description = "Urban population as a percentage, UNCTAD"
-license = ""
+license = "CC BY 3.0 IGO"
 url = "https://unctadstat-api.unctad.org/api/reportMetadata/US.PopTotal/bulkfile/355/en"
 code_line = "[prepare_urban_percent:download_urban_percent](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_urban_percent.py#L18)"
-license_link = ""
+license_link = "https://unctadstat.unctad.org/EN/About.html"
 
 [[source]]
 name = "un_energy_balances_unsd"
 description = "Per-country energy balance dataset, UN"
-license = ""
+license = "Custom (UNSD attribution, non-commercial)"
 url = ""
 code_line = "[build_base_energy_totals](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_base_energy_totals.py#L389)"
-license_link = ""
+license_link = "https://data.un.org/Host.aspx?Content=UNdataUse"
 
 [[source]]
 name = "sea_ports_nga"
