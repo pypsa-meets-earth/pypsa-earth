@@ -2433,8 +2433,7 @@ def get_linetype_by_voltage_and_country(
 
     if not mapping:
         raise ValueError(
-            f"No line type mapping found for voltage {v_nom} kV "
-            f"in mapping '{mapping_name}'."
+            f"Empty line type mapping found for line mapping '{mapping_name}'."
         )
 
     voltage = min(
