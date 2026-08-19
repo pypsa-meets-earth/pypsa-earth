@@ -5,6 +5,8 @@
 [[source]]
 name = "airports"
 description = "Location and type of airports worldwide"
+tutorial = false
+countries = "Earth"
 url = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 code_line = "[prepare_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_airports.py#L19)"
 license = "Public Domain (Unlicense)"
@@ -13,6 +15,8 @@ license_link = "https://ourairports.com/data/"
 [[source]]
 name = "air_runways"
 description = "Location and length of airport runways worldwide"
+tutorial = false
+countries = "Earth"
 url = "https://davidmegginson.github.io/ourairports-data/runways.csv"
 code_line = "[prepare_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_airports.py#L19)"
 license = "Public Domain (Unlicense)"
@@ -21,6 +25,8 @@ license_link = "https://ourairports.com/data/"
 [[source]]
 name = "edgar"
 description = "EDGAR gridded fossil CO2 emissions dataset (v6.0), annual gridmaps for 1970-2018"
+tutorial = false
+countries = "Earth"
 url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
 code_line = "[prepare_network:download_emission_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_network.py#L82)"
 license = "CC BY 4.0"
@@ -29,6 +35,8 @@ license_link = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/
 [[source]]
 name = "gadm"
 description = "Global administrative boundaries (GADM), by country"
+tutorial = false
+countries = "Earth"
 url = "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg"
 code_line = "[build_shapes:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L71)"
 license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
@@ -37,6 +45,8 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "worldpop_maxar"
 description = "Constrained 100m-resolution global population raster (WorldPop) built using Maxar, University of Southampton"
+tutorial = false
+countries = "Earth"
 url = "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
 code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L448C5-L448C31)"
 license = "CC BY 4.0"
@@ -45,6 +55,8 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "worldpop"
 description = "Constrained 100m-resolution global population raster (WorldPop), University of Southampton"
+tutorial = false
+countries = "Earth"
 url = "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}"
 code_line = "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L448C5-L448C31)"
 license = "CC BY 4.0"
@@ -53,6 +65,8 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "worldpop_api"
 description = "Unconstrained global population raster 100m/3 arc-sec resolution (WorldPop), University of Southampton"
+tutorial = false
+countries = "Earth"
 url = "https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}"
 code_line = "[build_shapes:download_WorldPop_API](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L553)"
 license = "CC BY 4.0"
@@ -61,6 +75,8 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "gadm_v36"
 description = "Global administrative boundaries (GADM v3.6)"
+tutorial = false
+countries = "Earth"
 url = "https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip"
 code_line = "[_helpers:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/_helpers.py#L1313) -- note: this function is not called anywhere in the codebase (dead code)"
 license = "Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)"
@@ -69,6 +85,8 @@ license_link = "https://gadm.org/license.html"
 [[source]]
 name = "steel_gem"
 description = "Location and technology data of iron and steel plants worldwide, GEM Global Steel Plant Tracker"
+tutorial = false
+countries = "Earth"
 url = "https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx"
 origin_url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
 code_line = "[build_industrial_database:create_steel_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L67)"
@@ -78,6 +96,8 @@ license_link = "https://globalenergymonitor.org/creative-commons-public-license/
 [[source]]
 name = "pipelines_gem"
 description = "Location and technology data of gas pipelines worldwide, GEM Global Gas Infrastructure Tracker"
+tutorial = false
+countries = "Earth"
 url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
 origin_url = "https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
 code_line = "[prepare_gas_network:download_GGIT_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_gas_network.py#L81)"
@@ -87,6 +107,8 @@ license_link = "https://globalenergymonitor.org/creative-commons-public-license/
 [[source]]
 name = "gas_network_iggielgn"
 description = "SciGRID-gas IGGIELGN dataset: European gas transmission network model"
+tutorial = false
+countries = "Earth"
 url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
 code_line = "[prepare_gas_network:download_IGGIELGN_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_gas_network.py#L64)"
 license = "CC BY 4.0"
@@ -95,6 +117,8 @@ license_link = "https://zenodo.org/records/4767098"
 [[source]]
 name = "refineries"
 description = "Location and daily throughput capacity of oil refineries worldwide"
+tutorial = false
+countries = "Earth"
 url = "https://services.arcgis.com/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
 code_line = "[build_industrial_database:create_refineries_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L301)"
 license = ""
@@ -103,6 +127,8 @@ license_link = ""
 [[source]]
 name = "osm_nominatim_geocoding"
 description = "Reverse geocoding of refinery coordinates to country codes via OpenStreetMap's Nominatim API"
+tutorial = false
+countries = "Earth"
 url = "https://nominatim.openstreetmap.org"
 code_line = "[build_industrial_database:get_cocode_from_coords](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L28)"
 license = "ODbL 1.0"
@@ -111,6 +137,8 @@ license_link = "https://www.openstreetmap.org/copyright, https://osmfoundation.o
 [[source]]
 name = "n_vehicles_who"
 description = "Number of registered motor vehicles, WHO"
+tutorial = false
+countries = "Earth"
 url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
 code_line = "[prepare_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_transport_data_input.py#L37)"
 license = "CC BY-NC-SA 3.0 IGO + Permission is required for commercial uses and licensing of WHO materials"
@@ -119,6 +147,8 @@ license_link = "https://www.who.int/about/policies/publishing/copyright"
 [[source]]
 name = "vehicles_per_capita_wiki"
 description = "Number of road motor vehicles per capita"
+tutorial = false
+countries = "Earth"
 url = "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita"
 code_line = "[prepare_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_transport_data_input.py#L37)"
 license = "Creative Commons Attribution-ShareAlike 4.0 License and GNU FDL"
@@ -127,6 +157,8 @@ license_link = "https://en.wikipedia.org/wiki/Wikipedia:Copyrights"
 [[source]]
 name = "transport_emission_worldbank"
 description = "CO2 emissions from transport, World Bank"
+tutorial = false
+countries = "Earth"
 url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 code_line = "[prepare_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_transport_data_input.py#L115)"
 license = "CC BY 4.0"
@@ -135,6 +167,8 @@ license_link = "https://datacatalog.worldbank.org/public-licenses"
 [[source]]
 name = "global_buildings_microsoft"
 description = "Global building footprints, Microsoft"
+tutorial = false
+countries = "Earth"
 url = "https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv"
 code_line = "[download_global_buildings:download_global_buildings_url](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_global_buildings.py#L27)"
 license = "Open Data Commons Open Database License (ODbL)"
@@ -143,6 +177,8 @@ license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=read
 [[source]]
 name = "global_buildings_microsoft_quadrants"
 description = "Per-quadkey-partitioned building footprint, Microsoft"
+tutorial = false
+countries = "Earth"
 url = ""
 code_line = "[download_global_buildings:get_building_area_center](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_global_buildings.py#L105)"
 license = "Open Data Commons Open Database License (ODbL)"
@@ -151,6 +187,8 @@ license_link = "https://github.com/microsoft/GlobalMLBuildingFootprints?tab=read
 [[source]]
 name = "pop_total_un"
 description = "Urban population as a percentage, UNCTAD"
+tutorial = false
+countries = "Earth"
 url = "https://unctadstat-api.unctad.org/api/reportMetadata/US.PopTotal/bulkfile/355/en"
 code_line = "[prepare_urban_percent:download_urban_percent](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_urban_percent.py#L18)"
 license = "CC BY 3.0 IGO"
@@ -159,6 +197,8 @@ license_link = "https://unctadstat.unctad.org/EN/About.html"
 [[source]]
 name = "un_energy_balances_unsd"
 description = "Per-country energy balance dataset, UN"
+tutorial = false
+countries = "Earth"
 url = ""
 code_line = "[build_base_energy_totals](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_base_energy_totals.py#L389)"
 license = "Custom (UNSD attribution, non-commercial)"
@@ -167,6 +207,8 @@ license_link = "https://data.un.org/Host.aspx?Content=UNdataUse"
 [[source]]
 name = "sea_ports_nga"
 description = "Sea port worldwide, NGA World Port Index"
+tutorial = false
+countries = "Earth"
 url = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
 code_line = "[prepare_ports:download_ports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_ports.py#L21)"
 license = "Public Domain"
@@ -175,6 +217,8 @@ license_link = "https://www.nga.mil/resources/Public_Release.html"
 [[source]]
 name = "wdpa_protectedplanet"
 description = "World Database on Protected Areas (WDPA), UNEP-WCMC/IUCN"
+tutorial = false
+countries = "Earth"
 url = "https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip"
 code_line = "[bundle_config.yaml:bundle_landcover_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L401)"
 license = "Custom (UNEP-WCMC WDPA Data License, non-commercial use only; commercial use and redistribution require permission)"
@@ -183,6 +227,8 @@ license_link = "https://www.unep-wcmc.org/en/wdpa-data-license"
 [[source]]
 name = "hydrobasins"
 description = "HydroBASINS global watershed boundaries (HydroSHEDS)"
+tutorial = false
+countries = "Earth"
 url = "https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_{region}_lev{level}_v1c.zip"
 code_line = "[bundle_config.yaml:bundle_hydrobasins](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L182)"
 license = "Custom (HydroSHEDS License Agreement, free for scientific/educational/commercial use with required attribution)"
@@ -191,6 +237,8 @@ license_link = "https://www.hydrosheds.org/terms-of-use"
 [[source]]
 name = "eez_marineregions"
 description = "World EEZ v11 maritime boundaries worldwide (Flanders Marine Institute / VLIZ)"
+tutorial = false
+countries = "Earth"
 url = "https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1"
 origin_url = "https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip"
 code_line = "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L189)"
@@ -200,6 +248,8 @@ license_link = "https://www.marineregions.org/disclaimer.php"
 [[source]]
 name = "gebco_bathymetry"
 description = "GEBCO gridded global bathymetry (2025 grid)"
+tutorial = false
+countries = "Earth"
 url = "https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1"
 origin_url = "https://www.gebco.net/data-products/gridded-bathymetry-data"
 code_line = "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L189)"
@@ -209,6 +259,8 @@ license_link = "https://www.gebco.net/data-products/gridded-bathymetry/terms-of-
 [[source]]
 name = "copernicus_landcover"
 description = "Copernicus Global Land Service 100m land cover (PROBA-V)"
+tutorial = false
+countries = "Earth"
 url = "https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1"
 origin_url = "https://land.copernicus.eu/en/products/global-dynamic-land-cover"
 code_line = "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L189)"
@@ -218,6 +270,8 @@ license_link = "https://land.copernicus.eu/en/data-policy"
 [[source]]
 name = "gegis_demand_projections"
 description = "Hourly electricity demand projections by SSP scenario and weather year, generated by the GlobalEnergyGIS (GEGIS) package"
+tutorial = false
+countries = "Earth"
 url = "https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1"
 origin_url = "https://github.com/niclasmattsson/GlobalEnergyGIS"
 code_line = "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L189)"
@@ -227,6 +281,8 @@ license_link = "https://github.com/niclasmattsson/GlobalEnergyGIS/blob/master/RE
 [[source]]
 name = "natura_raster"
 description = "Rasterized protected-area raster derived from WDPA data, generated inside PyPSA-Earth via build_natura_raster.py; a pre-built copy is also distributed through bundle_config.yaml"
+tutorial = false
+countries = "Earth"
 url = "https://sandbox.zenodo.org/records/323567/files/natura_wpda_CC0.zip"
 code_line = "[bundle_config.yaml:bundle_natura_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L208)"
 license = ""
