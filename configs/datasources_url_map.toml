@@ -466,3 +466,45 @@ url = "https://zenodo.org/records/18032587/files/bundle_tutorial_data_general.zi
 code_line = "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
 license = "Custom (UNEP-WCMC WDPA Data License, non-commercial use only; commercial use and redistribution require permission)"
 license_link = "https://www.unep-wcmc.org/en/wdpa-data-license"
+
+[[source]]
+name = "demandcast_forecasts"
+description = "Machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, via the DemandCast framework (Antonini, Goli, Steijn)"
+tutorial = false
+countries = "Earth"
+url = "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+code_line = "[bundle_config.yaml:demandcast_full](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L192)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18374352"
+
+[[source]]
+name = "demandcast_forecasts_tutorial"
+description = "Machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, via the DemandCast framework -- tutorial-scoped copy (currently on Zenodo sandbox, per a TODO in bundle_config.yaml to cross-check with the DemandCast team and move to the full-scale Zenodo record)"
+tutorial = true
+countries = "Earth"
+url = "https://sandbox.zenodo.org/records/493116/files/forecasts_on_historical_period.parquet"
+code_line = "[bundle_config.yaml:demandcast_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L203)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18374352"
+
+[[source]]
+name = "irena_statistics"
+description = "IRENA renewable energy statistics (installed capacity, generation, heat production and related indicators), used in build_renewable_profiles.py to derive hydropower generation potentials"
+tutorial = false
+countries = "Earth"
+url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx"
+origin_url = "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx"
+code_line = "[bundle_config.yaml:bundle_irena_statistics](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L218)"
+license = "Custom (reuse permitted with attribution to IRENA as source/copyright holder)"
+license_link = "https://www.irena.org/terms-and-conditions"
+
+[[source]]
+name = "irena_statistics_tutorial"
+description = "IRENA renewable energy statistics (installed capacity, generation, heat production and related indicators) -- tutorial-scoped entry (currently the same underlying file as irena_statistics; bundle_config.yaml has a TODO to make retrieval independent of the tutorial flag)"
+tutorial = true
+countries = "Earth"
+url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx"
+origin_url = "https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx"
+code_line = "[bundle_config.yaml:bundle_irena_statistics_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L229)"
+license = "Custom (reuse permitted with attribution to IRENA as source/copyright holder)"
+license_link = "https://www.irena.org/terms-and-conditions"
