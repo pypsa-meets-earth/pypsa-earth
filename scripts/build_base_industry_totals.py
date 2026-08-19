@@ -9,14 +9,11 @@ Created on Thu Jul 14 19:01:13 2022.
 """
 
 
-import os
-import re
 from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
 from _helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
-from prepare_sector_network import get
 
 # def calc_industry_base(df):
 
