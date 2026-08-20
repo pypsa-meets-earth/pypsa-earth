@@ -1235,6 +1235,95 @@ def three_2_two_digits_country(three_code_country: str) -> str:
     return two_code_country
 
 
+def convert_country_codes(
+    country_codes: pd.Series | list[str],
+    src: str | None,
+    to: str,
+) -> pd.Series | list[str]:
+    """
+    Convert country codes for a Series or list.
+
+    Parameters
+    ----------
+    country_codes: pandas.Series or list
+        Country codes to convert.
+    src: str or None, default None
+        Source format. If None, country_converter auto-detects the source.
+    to: str, default "ISO3"
+        Target format.
+
+    Returns
+    ----------
+    converted_country_codes: pandas.Series or list
+        Converted country codes.
+    """
+    custom_codes = {
+        ("SEN-GMB", "ISO2"): "SN-GM",
+        ("SEN-GMB", "ISO3"): "SEN-GMB",
+        ("SN-GM", "ISO2"): "SN-GM",
+        ("SN-GM", "ISO3"): "SEN-GMB",
+    }
+
+    unique_codes = (
+        set(country_codes)
+        if isinstance(country_codes, list)
+        else set(country_codes.unique())
+    )
+
+    if isinstance(country_codes, pd.Series):
+        unique_codes = list(set(country_codes))
+    elif isinstance(country_codes, list):
+        unique_codes = list(set(country_codes))
+    else:
+        raise ValueError(
+            "Input must be a pandas Series or list containing country codes."
+        )
+
+    # convert only the unique codes to avoid redundant conversions
+    converted_codes = coco.convert(
+        names=unique_codes,
+        src=src,
+        to=to,
+    )
+
+    # replace custom codes in the converted codes
+    for (custom_code, target_format), custom_value in custom_codes.items():
+        if target_format.lower() != to.lower():
+            continue
+        for id, cvalue in enumerate(unique_codes):
+            if cvalue.lower() == custom_code.lower():
+                converted_codes[id] = custom_codes[(custom_code, target_format)]
+
+    replace_dict = dict(zip(unique_codes, converted_codes))
+
+    # prepare output
+    if isinstance(country_codes, pd.Series):
+        converted_country_codes = country_codes.map(replace_dict)
+    elif isinstance(country_codes, list):
+        converted_country_codes = [replace_dict[code] for code in country_codes]
+
+    return converted_country_codes
+
+
+def three_2_two_digits_countries(
+    three_code_countries: pd.Series | list[str],
+) -> pd.Series | list[str]:
+    """
+    Convert 3-digit to 2-digit country codes for a Series or list.
+
+    Parameters
+    ----------
+    three_code_countries: pandas.Series or list
+        3-digit country names
+
+    Returns
+    ----------
+    two_code_countries: pandas.Series or list
+        2-digit country names
+    """
+    return convert_country_codes(three_code_countries, src=None, to="ISO2")
+
+
 def two_digits_2_name_country(
     two_code_country: str, nocomma: bool = False, remove_start_words: list = []
 ) -> str:
@@ -1706,44 +1795,6 @@ def create_dummy_data(n: pypsa.Network, sector: str, carriers: list) -> pd.DataF
     )  # TODO change 1 with temp. resolution
 
     return pd.DataFrame(data, index=ind, columns=col)
-
-
-# def create_transport_data_dummy(pop_layout,
-#                                 transport_data,
-#                                 cars=4000000,
-#                                 average_fuel_efficiency=0.7):
-
-#     for country in pop_layout.ct.unique():
-
-#         country_data = pd.DataFrame(
-#             data=[[cars, average_fuel_efficiency]],
-#             columns=transport_data.columns,
-#             index=[country],
-#         )
-#         transport_data = pd.concat([transport_data, country_data], axis=0)
-
-#     transport_data_dummy = transport_data
-
-#     return transport_data_dummy
-
-# def create_temperature_dummy(pop_layout, temperature):
-
-#     temperature_dummy = pd.DataFrame(index=temperature.index)
-
-#     for index in pop_layout.index:
-#         temperature_dummy[index] = temperature["ES0 0"]
-
-#     return temperature_dummy
-
-# def create_energy_totals_dummy(pop_layout, energy_totals):
-#     """
-#     Function to add additional countries specified in pop_layout.index to energy_totals, these countries take the same values as Spain
-#     """
-#     # All countries in pop_layout get the same values as Spain
-#     for country in pop_layout.ct.unique():
-#         energy_totals.loc[country] = energy_totals.loc["ES"]
-
-#     return energy_totals
 
 
 def cycling_shift(
