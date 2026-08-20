@@ -370,4 +370,4 @@ Solar and wind generation move close to KEGOC; coal stays too high and gas too l
 | 4b | `electricity.estimate_renewable_capacities` | IRENA **2020** solar/wind totals |
 | Adv. | `electricity.custom_powerplants: replace` | Use **`data/custom_powerplants.csv`** as the full fleet |
 
-Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. In a follow-up tutorial we can tune dispatch and generation statistics against the Part 2 **electricity generation (2020)** table.
+Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. The fleet matches KEGOC, yet dispatch stays coal-heavy and the model still sheds **~8 TWh** of load. **[Part 5](5-adapting-costs.md)** tackles dispatch economics (why gas stays idle despite capacity), and **[Part 6](6-network-topology.md)** then diagnoses and fixes the electrically isolated sub-networks behind the load shedding.
