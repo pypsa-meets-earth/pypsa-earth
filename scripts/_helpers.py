@@ -14,7 +14,9 @@ rule. It is not meant to be run as a standalone Snakemake rule. The helpers are
 grouped roughly as follows:
 
 - **Configuration and logging**: ``check_config_version``,
-  ``update_cutout_config``, ``copy_default_files``, ``create_logger``,
+  ``migrate_config``, ``resolve_weather_configuration``,
+  ``validate_cutout_configuration``,  ``update_cutout_config``,
+  ``copy_default_files``, ``create_logger``,
   ``configure_logging``, ``handle_exception``, ``read_osm_config``,
   ``update_config_dictionary``.
 - **Network aggregation**: ``update_p_nom_max``, ``aggregate_p_nom``,
@@ -79,6 +81,11 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+
+# Cutouts currently available for `retrieve_cutout`. Additional entries can be added here as new pre-built cutouts become available.
+PREBUILT_CUTOUTS = {
+    "cutout-2013-era5",
+}
 
 
 def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
@@ -301,6 +308,35 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
+def _migrate_atlite_cutout(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Migrate the legacy named cutout configuration to the single-cutout format."""
+    atlite_config = config.get("atlite", {})
+    legacy_cutouts = atlite_config.get("cutouts")
+
+    if not isinstance(legacy_cutouts, dict) or not legacy_cutouts:
+        return
+
+    legacy_default = atlite_config.get("default")
+
+    if legacy_default in legacy_cutouts:
+        cutout_config = legacy_cutouts[legacy_default]
+    elif len(legacy_cutouts) == 1:
+        cutout_config = next(iter(legacy_cutouts.values()))
+    else:
+        raise ValueError(
+            "Multiple legacy atlite cutouts are configured. "
+            "Move the selected cutout configuration manually to `atlite.cutout`."
+        )
+
+    atlite_config["cutout"] = cutout_config.copy()
+    atlite_config.pop("cutouts", None)
+    atlite_config.pop("default", None)
+
+    warn("atlite.cutouts/atlite.default", "atlite.cutout")
+
+
 def _migrate_fossil_reserves(
     config: dict[str, Any], warn: Callable[[str, str], None]
 ) -> None:
@@ -358,6 +394,7 @@ def migrate_config(
 
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
+    _migrate_atlite_cutout(config, _warn)
     _migrate_fossil_reserves(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
@@ -365,13 +402,161 @@ def migrate_config(
     return config
 
 
+def resolve_weather_configuration(config: dict) -> dict:
+    """
+    Resolve and validate weather-dependent workflow settings.
+
+    ``load_options.weather_year`` may be either an explicit integer or
+    ``"derive_from_snapshots"``. With an explicit year, the workflow derives
+    an annual snapshot range. With ``"derive_from_snapshots"``, it preserves
+    the configured snapshots and infers the weather year from their start.
+
+    Parameters
+    ----------
+    config : dict
+        Workflow configuration dictionary.
+
+    Returns
+    -------
+    dict
+        Updated configuration dictionary.
+    """
+    configured_weather_year = config["load_options"]["weather_year"]
+    derive_from_snapshots = configured_weather_year == "derive_from_snapshots"
+
+    if derive_from_snapshots:
+        snapshots = config["snapshots"]
+
+        try:
+            snapshot_start = pd.Timestamp(snapshots["start"])
+            snapshot_end = pd.Timestamp(snapshots["end"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(
+                "`weather_year: derive_from_snapshots` requires valid "
+                "`snapshots.start` and `snapshots.end` values."
+            ) from exc
+
+        if snapshot_end <= snapshot_start:
+            raise ValueError("`snapshots.end` must be later than `snapshots.start`.")
+
+        weather_year = snapshot_start.year
+        latest_valid_end = pd.Timestamp(f"{weather_year + 1}-01-01")
+
+        if snapshot_end > latest_valid_end:
+            raise ValueError(
+                "`weather_year: derive_from_snapshots` requires snapshots "
+                "within a single calendar year."
+            )
+
+        config["load_options"]["weather_year"] = weather_year
+    elif isinstance(configured_weather_year, int) and not isinstance(
+        configured_weather_year, bool
+    ):
+        weather_year = configured_weather_year
+    else:
+        raise TypeError(
+            "`load_options.weather_year` must be an integer or "
+            "'derive_from_snapshots', received "
+            f"{configured_weather_year!r}."
+        )
+
+    load_source = config["load_options"]["source"]
+
+    if load_source == "gegis":
+        supported_years = {2011, 2013, 2018}
+        if weather_year not in supported_years:
+            raise ValueError(
+                f"Weather year {weather_year} is not available for the GEGIS "
+                "load source. Supported years are 2011, 2013, and 2018."
+            )
+    elif load_source == "demcast":
+        if not 2000 <= weather_year <= 2024:
+            raise ValueError(
+                f"Weather year {weather_year} is not available for the "
+                "DemandCast load source. Supported years range from 2000 to 2024."
+            )
+    else:
+        raise ValueError(
+            f"Unknown load source {load_source!r}. Expected `gegis` or `demcast`."
+        )
+
+    if not derive_from_snapshots and not config.get("tutorial", False):
+        config["snapshots"]["start"] = f"{weather_year}-01-01"
+        config["snapshots"]["end"] = f"{weather_year + 1}-01-01"
+
+    cutout_config = config["atlite"]["cutout"].copy()
+    module = cutout_config["module"]
+
+    if config.get("tutorial", False):
+        cutout_name = f"cutout-{weather_year}-{module}-tutorial"
+    else:
+        cutout_name = f"cutout-{weather_year}-{module}"
+
+    config["atlite"]["default"] = cutout_name
+    config["atlite"]["cutouts"] = {cutout_name: cutout_config}
+
+    return config
+
+
+def validate_cutout_configuration(config: dict) -> dict:
+    """
+    Validate how the resolved weather cutout is obtained.
+
+    The function prevents conflicting build and retrieve options, checks
+    whether a requested pre-built cutout is available, and warns when the user
+    chooses to build a cutout that can already be retrieved.
+
+    Parameters
+    ----------
+    config : dict
+        Workflow configuration dictionary.
+
+    Returns
+    -------
+    dict
+        Unchanged configuration dictionary.
+    """
+    if config.get("tutorial", False):
+        return config
+
+    build_cutout = config["enable"].get("build_cutout", False)
+    retrieve_cutout = config["enable"].get("retrieve_cutout", False)
+    cutout_name = config["atlite"]["default"]
+
+    if build_cutout and retrieve_cutout:
+        raise ValueError(
+            "`build_cutout` and `retrieve_cutout` cannot both be enabled. Choose one method for obtaining the weather cutout."
+        )
+
+    if retrieve_cutout and cutout_name not in PREBUILT_CUTOUTS:
+        available_cutouts = ", ".join(sorted(PREBUILT_CUTOUTS))
+        raise ValueError(
+            f"`retrieve_cutout` is enabled, but the requested cutout `{cutout_name}` is not available as a pre-built cutout. Available pre-built cutouts: {available_cutouts}. Disable `retrieve_cutout` and enable `build_cutout`."
+        )
+
+    if build_cutout and cutout_name in PREBUILT_CUTOUTS:
+        warnings.warn(
+            f"The requested cutout `{cutout_name}` is available as a pre-built cutout. It will still be built because `build_cutout` is enabled.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    return config
+
+
 def update_cutout_config(config: dict) -> dict:
     """
-    Update renewable cutout settings in the configuration.
+    Replace ``cutout: auto`` entries with the resolved default cutout.
 
-    This function replaces any `"auto"` cutout entries in the
-    `config["renewable"]` section with the default cutout specified in
-    `config["atlite"]["default"]`.
+    Parameters
+    ----------
+    config : dict
+        Workflow configuration dictionary.
+
+    Returns
+    -------
+    dict
+        Updated configuration dictionary.
     """
     cutout_default = config["atlite"]["default"]
 

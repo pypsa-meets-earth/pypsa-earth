@@ -57,7 +57,7 @@ enable:
   # ----------------- Retrieving data -----------------
   retrieve_databundle: true # recommended for first run
   download_osm_data: true # download OpenStreetMap data for the countries specified above
-  retrieve_cutout: true # retrieves the bundled 2013 cutout (cutout-2013-era5); changing load_options.weather_year (default: 2013) requires retrieve_cutout:false and build_cutout: true.
+  retrieve_cutout: true # retrieves the bundled 2013 cutout (cutout-2013-era5); other weather years require retrieve_cutout: false and build_cutout: true
   retrieve_cost_data: true # false: use existing data/costs.csv
   retrieve_databundle_sector: true
   download_global_buildings: false # download GlobalMLBuildingFootprints data for the countries specified above
@@ -189,7 +189,7 @@ base_network:
 # ------------------- Demand -------------------
 load_options:
   source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2024 available): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
-  weather_year: 2013 # Weather year of the load profile
+  weather_year: 2013 # Integer or "derive_from_snapshots"
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
@@ -287,17 +287,14 @@ transformers:
 # ------------------- Weather & renewables -------------------
 atlite:
   nprocesses: 4
-  cutouts:
-    cutout-2013-era5:
-      module: era5
-      dx: 0.3 # cutout resolution
-      dy: 0.3 # cutout resolution
-      # The cutout time is automatically set by the snapshot range. See `snapshot:` option above and 'build_cutout.py'.
-      # time: ["2013-01-01", "2014-01-01"]  # to manually specify a different weather year (~70 years available)
-      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
-      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
-      # y: [33., 72]    # manual set cutout range
-  default: cutout-2013-era5
+  cutout:
+    module: era5
+    dx: 0.3 # cutout resolution
+    dy: 0.3 # cutout resolution
+    # The cutout time is automatically derived from `snapshots`. See `snapshots:` above and `build_cutout.py`.
+    # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
+    # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
+    # y: [33., 72]    # manual set cutout range
 
 renewable:
   onwind:

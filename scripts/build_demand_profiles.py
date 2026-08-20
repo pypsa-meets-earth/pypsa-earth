@@ -114,7 +114,7 @@ def get_load_paths_gegis(ssp_parentfolder, config):
     """
     countries = config.get("countries")
     region_load = get_gegis_regions(countries)
-    weather_year = config.get("load_options")["weather_year"]
+    weather_year = config["load_options"]["weather_year"]
     prediction_year = config.get("load_options")["prediction_year"]
     # legacy option
     ssp = "ssp2-2.6"

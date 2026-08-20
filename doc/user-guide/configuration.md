@@ -289,7 +289,7 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 {{ read_csv('configtables/load_options.csv') }}
 
-The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
+`load_options.weather_year` accepts either an explicit integer or `derive_from_snapshots`. With an explicit year, the workflow derives the corresponding annual snapshot range and weather cutout. With `derive_from_snapshots`, the configured snapshot range is preserved and the weather year is inferred from `snapshots.start`. The snapshot range must remain within one calendar year, although an exclusive end boundary on January 1 of the following year is accepted. In both modes, the resolved year is validated against the selected load data source.
 
 ### electricity
 
