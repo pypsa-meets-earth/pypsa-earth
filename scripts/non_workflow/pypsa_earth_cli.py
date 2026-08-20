@@ -595,8 +595,14 @@ def quiz_zone() -> None:
 
     choice = ask("Select option 1-8 to proceed further")
 
-    if choice != "8":
+    if int(choice) <= 4:
         show_questionnaire(choice)
+        quiz_zone()
+    elif int(choice) <= 7:
+        console.print(
+            "[bold yellow] ⚠️  This module is under development and will be available in the next release. [/bold yellow]"
+        )
+        console.print(style="dim")
         quiz_zone()
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
