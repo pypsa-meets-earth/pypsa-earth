@@ -7,15 +7,12 @@ Build industrial distribution keys from hotmaps database.
 """
 
 import logging
-import os
-import uuid
 from distutils.version import StrictVersion
 from itertools import product
 
 import geopandas as gpd
 import pandas as pd
 from _helpers import locate_bus, read_csv_nafix, three_2_two_digits_country
-from shapely.geometry import Point
 
 logger = logging.getLogger(__name__)
 gpd_version = StrictVersion(gpd.__version__)

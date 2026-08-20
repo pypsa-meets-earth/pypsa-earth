@@ -122,7 +122,6 @@ Exemplary unsolved network clustered to 37 nodes:
 """
 
 import logging
-import os
 from functools import reduce
 
 import geopandas as gpd
@@ -151,7 +150,6 @@ from pypsa.clustering.spatial import (
     get_clustering_from_busmap,
 )
 from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
-from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
