@@ -7,5 +7,3 @@ scenario:
   - 2030
   sopts:
   - "144h"
-  demand:
-  - "AB"

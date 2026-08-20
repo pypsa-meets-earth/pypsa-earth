@@ -1208,9 +1208,7 @@ if __name__ == "__main__":
             opts="Co2L-4H",
             planning_horizons="2030",
             discountrate="0.071",
-            demand="AB",
             sopts="144H",
-            h2export="120",
             configfile="config.tutorial.yaml",
         )
 
