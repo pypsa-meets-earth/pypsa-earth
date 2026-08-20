@@ -20,3 +20,5 @@ Once the download and filtering process is complete, the clean data are then pro
 - **[build_renewable_profiles](build-renewable-profiles.md)** - Builds the hourly capacity factors and installation potentials constrained by land-use in each substation's Voronoi cell for PV, onshore and offshore wind.
 
 - **[build_demand_profiles](build-demand-profiles.md)** - Builds the hourly demand profiles for each substation.
+
+- **[build_co2_emissions](build-co2-emissions.md)** - Builds cleaned EDGAR electricity and heat CO2 emissions used for the automatic CO2 limit.

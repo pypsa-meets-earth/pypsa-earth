@@ -2,34 +2,34 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import sys
 import os
+import sys
 import warnings
-import pathlib
 
 sys.path.append("./scripts")
 
+from pathlib import Path
 from shutil import copyfile, move, unpack_archive
 
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
+from _helpers import branch  # Remove if Snakemake >= 8.3.0
 from _helpers import (
+    BASE_DIR,
+    check_config_version,
+    content_retrieve,
+    copy_default_files,
     create_country_list,
     get_last_commit_message,
-    check_config_version,
-    copy_default_files,
     migrate_config,
     update_cutout_config,
-    BASE_DIR,
-    branch,  # Remove if Snakemake >= 8.3.0
 )
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
 )
-from pathlib import Path
-
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 HTTP = HTTPRemoteProvider()
 
@@ -907,6 +907,39 @@ rule add_extra_components:
         "scripts/add_extra_components.py"
 
 
+if config["co2"]["automatic_emission"]["enable"]:
+
+    rule retrieve_emissions:
+        input:
+            HTTP.remote(
+                "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
+                keep_local=True,
+            ),
+        output:
+            edgar_folder=directory("data/co2_emissions/"),
+            edgar_zip="data/co2_emissions/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
+            edgar_xlsx="data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+        log:
+            "logs/" + RDIR + "retrieve_emissions.log",
+        run:
+            move(input[0], output.edgar_zip)
+            unpack_archive(output.edgar_zip, extract_dir=output.edgar_folder)
+
+    rule build_co2_emissions:
+        input:
+            edgar="data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+        output:
+            emissions="resources/" + RDIR + "co2_emissions_elec_and_heat.csv",
+        log:
+            "logs/" + RDIR + "build_co2_emissions.log",
+        benchmark:
+            "benchmarks/" + RDIR + "build_co2_emissions"
+        resources:
+            mem_mb=2000,
+        script:
+            "scripts/build_co2_emissions.py"
+
+
 rule prepare_network:
     params:
         links=config["links"],
@@ -916,6 +949,10 @@ rule prepare_network:
         co2=config["co2"],
     input:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
+        **branch(
+            config["co2"]["automatic_emission"]["enable"],
+            {"emissions": "resources/" + RDIR + "co2_emissions_elec_and_heat.csv"},
+        ),
         tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
@@ -2372,9 +2409,10 @@ rule run_scenario:
     resources:
         mem_mb=5000,
     run:
-        from build_test_configs import create_test_config
-        import yaml
         from subprocess import run
+
+        import yaml
+        from build_test_configs import create_test_config
 
         # get base configuration file from diff config
         with open(input.diff_config) as f:
