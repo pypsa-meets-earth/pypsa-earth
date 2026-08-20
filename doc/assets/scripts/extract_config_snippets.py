@@ -3,9 +3,15 @@
 Extract YAML sections from config.default.yaml and save them as individual snippet files.
 These snippets are embedded in the documentation (e.g., configuration.md) via pymdownx.snippets.
 
+Sections split out of config.default.yaml into their own file (e.g.
+configs/plotting.default.yaml, configs/solving.default.yaml; see the
+repeated `configfile:` entries in the Snakefile) are listed in CONFIG_FILES and
+concatenated before extraction, so they can still be found by name like any
+other section.
+
 When to edit this script:
     - When a new top-level section is added to config.default.yaml
-    - When a config section is renamed or removed
+    - When a config section is renamed, removed, or split out into its own file
     - When a new subsection needs its own snippet file
     (Note: This script should be updated when modifying the config structure, as guided by the PR template.)
 
@@ -16,6 +22,16 @@ How it runs:
 
 import re
 from pathlib import Path
+
+# config.default.yaml, plus any files sections were split out to (see the
+# repeated `configfile:` entries in the Snakefile). Their contents are
+# concatenated before extraction, so a section can be found by name no matter
+# which of these files it physically lives in.
+CONFIG_FILES = [
+    Path("config.default.yaml"),
+    Path("configs/plotting.default.yaml"),
+    Path("configs/solving.default.yaml"),
+]
 
 
 def extract_yaml_section(yaml_content, section_key, subsection=None):
@@ -53,13 +69,11 @@ def extract_yaml_section(yaml_content, section_key, subsection=None):
 
 
 def main():
-    config_file = Path("config.default.yaml")
     snippets_dir = Path("doc/configtables/snippets")
     snippets_dir.mkdir(exist_ok=True)
 
-    # Read the config file
-    with open(config_file, "r") as f:
-        config_content = f.read()
+    # Read and merge all config files into one blob to extract sections from
+    config_content = "\n".join(f.read_text() for f in CONFIG_FILES)
 
     # Mapping of snippet files to config sections
     sections = {
@@ -102,8 +116,9 @@ def main():
         "solving_solver": ["solving", "solver"],
         "solving_options": {
             "start": "# ------------------- Optimization options",
-            "end": "# ------------------- Solver presets",
+            "end": "# ------------------- Named solver presets",
         },
+        "solving_solver_options": ["solver_options"],
         "plotting": ["plotting"],
         "policy_config": ["policy_config"],
         "export": ["export"],
