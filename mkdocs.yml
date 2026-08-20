@@ -30,10 +30,13 @@ nav:
 - Tutorials:
   - tutorials/tutorial-overview.md
   - How to build and validate PyPSA-Earth model for a new country:
-    - Part 1 Build a Baseline Model: tutorials/use-cases/1-baseline-model.md
-    - Part 2 Analyse Results: tutorials/use-cases/2-analyze-results.md
-    - Part 3 Calibrate Electricity Demand: tutorials/use-cases/3-demand-data.md
-    - Part 4 Calibrate the Generation Fleet: tutorials/use-cases/4-generation-data.md
+    - "Part 1: Build a Baseline Model": tutorials/use-cases/1-baseline-model.md
+    - "Part 2: Analyse Results": tutorials/use-cases/2-analyze-results.md
+    - "Part 3: Calibrate Electricity Demand": tutorials/use-cases/3-demand-data.md
+    - "Part 4: Calibrate the Generation Fleet": tutorials/use-cases/4-generation-data.md
+    - "Part 5: Adapt Fuel and Generation Costs": tutorials/use-cases/5-adapting-costs.md
+    - "Part 6: Fix Isolated Nodes and Load Shedding": tutorials/use-cases/6-network-topology.md
+    - "Part 7: Improve the Transmission Network": tutorials/use-cases/7-transmission-network.md
   - Generic Tutorials:
     - Electricity Model: tutorials/generic-examples/electricity-model.md
     - Sector-Coupled Model: tutorials/generic-examples/sector-coupled-model.md
@@ -59,10 +62,12 @@ nav:
       - Overview: user-guide/rules-reference/download-and-filter/index.md
       - Build Shapes: user-guide/rules-reference/download-and-filter/build-shapes.md
       - Retrieve Data Bundle: user-guide/rules-reference/download-and-filter/retrieve-databundle-light.md
+      - Retrieve Emissions: user-guide/rules-reference/download-and-filter/retrieve-emissions.md
     - Populate Data:
       - Overview: user-guide/rules-reference/populate/index.md
       - Build Bus Regions: user-guide/rules-reference/populate/build-bus-regions.md
       - Build Cutout: user-guide/rules-reference/populate/build-cutout.md
+      - Build CO2 Emissions: user-guide/rules-reference/populate/build-co2-emissions.md
       - Build Demand Profiles: user-guide/rules-reference/populate/build-demand-profiles.md
       - Build Natura Raster: user-guide/rules-reference/populate/build-natura-raster.md
       - Build Powerplants: user-guide/rules-reference/populate/build-powerplants.md
@@ -160,7 +165,7 @@ extra_javascript:
 
 
 markdown_extensions:
-  # Standard Extensions
+# Standard Extensions
 - admonition
 - pymdownx.details
 - pymdownx.superfences:
@@ -177,7 +182,7 @@ markdown_extensions:
 - attr_list
 - md_in_html
 
-  # PyMdown Extensions
+# PyMdown Extensions
 - pymdownx.arithmatex:
     generic: true
 - pymdownx.tabbed:
