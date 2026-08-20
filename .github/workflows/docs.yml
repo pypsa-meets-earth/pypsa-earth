@@ -15,6 +15,7 @@ on:
     - "mkdocs.yml"
     - ".readthedocs.yaml"
     - "doc/requirements.txt"
+    - "scripts/non_workflow/extract_cutout_bundle_info.py"
 
 # Cancel any in-progress runs when a new run is triggered
 concurrency:
@@ -54,3 +55,4 @@ jobs:
         # FOM = Fixed Operation & Maintenance. splitted appears in auto-generated snippets.
         ignore_words_list: ore,tabacco,fo,FO,vor,fom,FOM,splitted,GES
         path: doc
+        skip: "doc/user-guide/data/cutout_bundle_info.csv"
