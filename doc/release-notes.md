@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Inntegrate additional tutorials for use-case documentation [PR #1930](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1930)
+
 * Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and solving defaults (``solving.options``, ``solving.mem``, ``solving.solver_options``) to ``configs/solving.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml``. ``config.default.yaml`` keeps only ``solving.solver`` (name and preset choice) [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
 
 * Update databundle links to point to the new zenodo release [PR #1984](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1984)
