@@ -83,6 +83,14 @@ googledrivedownloader = ">=1.1"
 
 [environments]
 pypsa-earth = ["default"]
+pypsa-earth-cli = ["pypsa-earth-cli"]
 
 [tasks]
 install-kernel = "ipython kernel install --user --name=pypsa-earth"
+
+[feature.pypsa-earth-cli.dependencies]
+inquirerpy = "*"
+typer = "*"
+
+[feature.pypsa-earth-cli.tasks]
+pypsa-earth-cli = "python scripts/non_workflow/pypsa_earth_cli.py"

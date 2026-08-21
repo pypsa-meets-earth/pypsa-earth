@@ -87,6 +87,7 @@ There are multiple ways to get involved and learn more about our work:
 ### Features
 
 - [Monte Carlo](utilities/monte-carlo.md) - Uncertainty quantification and sensitivity analysis
+- [PyPSA-Earth-CLI](utilities/pypsa-earth-cli.md) - CLI for beginners to PyPSA-Earth
 
 ### Community & Resources
 
