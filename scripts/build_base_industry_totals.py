@@ -198,5 +198,11 @@ if __name__ == "__main__":
     # Create the industry totals file
     industry_totals_base = create_industry_base_totals(df_yr)
 
+    # Ensure all expected carriers exist for every configured country
+    for country in countries:
+        for carrier in ["electricity", "gas", "coal", "oil", "biomass", "heat"]:
+            if (country, carrier) not in industry_totals_base.index:
+                industry_totals_base.loc[(country, carrier), :] = 0.0
+
     # Export the industry totals dataframe
     industry_totals_base.to_csv(snakemake.output["base_industry_totals"])
