@@ -603,7 +603,9 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 ## Solving
 
-Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, solver presets, and memory limit.
+Solving defaults are split across two files. The dedicated **`configs/solving.default.yaml`** holds optimization options (``solving.options``), the memory limit (``solving.mem``), and named solver presets (``solving.solver_options``). **`config.default.yaml`** keeps only the active solver choice under **SOLVING** (``solving.solver``: ``name`` and ``options``, for example ``gurobi-default``).
+
+Snakemake merges ``configfile:`` entries in order (see the Snakefile): ``config.default.yaml`` (``solving.solver`` only), then **`configs/solving.default.yaml`**, and finally your ``config.yaml``. Later files override earlier keys at the same path, so you can override any solving setting in ``config.yaml`` (or with ``snakemake --configfile …``).
 
 ### solver
 
@@ -621,9 +623,19 @@ Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, 
 
 {{ read_csv('configtables/solving-options.csv') }}
 
+### solver_options
+
+Named presets used by ``solving.solver.options`` in ``configs/solving.default.yaml`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
+
+```yaml
+--8<-- "configtables/snippets/solving_solver_options.yaml"
+```
+
 ## Plotting
 
-Options under the **PLOTTING** banner in ``config.default.yaml``: map layout, plot thresholds, technology groupings, carrier colours, and display names.
+The dedicated **`configs/plotting.default.yaml`** holds all plotting defaults, including map layout, plot thresholds, technology groupings, carrier colours, and display names.
+
+Snakemake loads **`configs/plotting.default.yaml`** after ``config.default.yaml`` and before your ``config.yaml`` (see the Snakefile). Later files override earlier keys at the same path, so you can override any plotting setting under ``plotting`` in ``config.yaml`` (or with ``snakemake --configfile …``).
 
 ```yaml
 --8<-- "configtables/snippets/plotting.yaml"
