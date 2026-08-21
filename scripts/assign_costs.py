@@ -26,6 +26,7 @@ Relevant Settings
     renewable:
       hydro:
         hydro_capital_cost:
+    storage_techs:
 
 Inputs
 ------
@@ -57,12 +58,19 @@ horizon-tagged output network.
 
 Main functions in this module:
 
-- :func:`update_electricity_costs` — re-cost generators, storage, stores,
-  links, and transmission in place.
+- :func:`update_electricity_costs` — entry point; re-costs generators,
+  storage units, stores, links, and transmission in place.
+- :func:`update_generator_costs` — horizon costs for generators, including
+  offshore farm and displacement connection CAPEX.
+- :func:`update_storage_unit_costs` — horizon costs for StorageUnits
+  (``storage_techs``, plus PHS/hydro special cases).
+- :func:`update_store_costs` — horizon costs for Store energy capacity.
+- :func:`update_link_costs` — horizon costs for charger/discharger links,
+  CSP, and H2 pipelines.
 - :func:`update_transmission_costs` — refresh AC/DC ``capital_cost`` from the
   cost table.
-- :func:`calculate_renewable_capital_cost` — per-bus renewable capital cost,
-  including offshore connection costs.
+- :func:`calculate_renewable_capital_cost` — per-bus renewable capital cost
+  at build time, including offshore connection costs.
 """
 
 from typing import Any
@@ -92,7 +100,7 @@ def attach_dc_costs(
     costs : pd.DataFrame
         DataFrame containing the costs to attach.
     length_factor : float
-        Factor scaling connection distances for offshore wind.
+        Factor scaling DC line/link lengths when computing capital costs.
     simple_hvdc_costs : bool
         Whether to use simple HVDC costs.
 
@@ -144,7 +152,8 @@ def update_transmission_costs(
     costs : pd.DataFrame
         The costs to update the transmission costs for.
     length_factor : float
-        Factor scaling connection distances for offshore wind.
+        Factor scaling AC/DC line and link lengths when computing capital
+        costs.
     simple_hvdc_costs : bool
         Whether to use simple HVDC costs.
 
@@ -296,26 +305,27 @@ def update_generator_costs(
     output_currency: str = "EUR",
 ) -> pd.DataFrame:
     """
-    Update cost-vintage-dependent attributes on all generators in-place.
-
-    Two rules govern what gets updated:
+    Update horizon-specific cost attributes on generators in-place.
 
     - **marginal_cost** is refreshed for **all** generators whose carrier is
-      in the cost table.  Operating costs (fuel, VOM) change per horizon for
-      both existing and new-build units.
-    - **capital_cost, efficiency, lifetime** are refreshed **only for
-      extendable** (new-build) generators.  For non-extendable (existing)
-      plants these attributes are either irrelevant to the optimisation
-      (capital_cost) or were set plant-specifically at build time and must
-      not be overwritten (efficiency, lifetime).
+      in the cost table (operating costs change per horizon for existing and
+      new-build units).
+    - **capital_cost**, **efficiency**, and **lifetime** are refreshed **only
+      for extendable** (new-build) generators. Non-extendable plants keep
+      build-time efficiency and lifetime; their capital_cost is irrelevant to
+      the optimisation.
 
-    Offshore wind capital_cost is recomputed from ``average_distance`` and
-    ``underwater_fraction`` stored on generators at build time, via
-    :func:`_offwind_connection_cost`. If ``displacement_length`` is present
-    (from ``simplify_network`` bus moves), that extra path length is monetised
-    with the same formula and the same ``underwater_fraction``.
+    For offshore wind, extendable ``capital_cost`` is rebuilt as::
 
-    Carriers absent from the cost table are silently skipped.
+        offwind turbine + station + farm_connection + displacement_connection
+
+    where farm and displacement connection costs come from
+    :func:`_offwind_connection_cost` using ``average_distance`` /
+    ``underwater_fraction`` and optional ``displacement_length`` from
+    ``simplify_network``. If offshore geometry is missing, capital_cost is
+    left unchanged and a warning is logged.
+
+    Carriers absent from the cost table are skipped.
 
     Parameters
     ----------
@@ -323,7 +333,9 @@ def update_generator_costs(
     costs : pd.DataFrame
         Horizon-specific cost table indexed by technology.
     renewable_carriers : set of str
+        Renewable generator carriers (routes offshore vs standard re-costing).
     length_factor : float
+        Scalar applied to offshore farm connection distances.
     output_currency : str
         Currency label used only for logging.
 
@@ -373,13 +385,15 @@ def update_generator_costs(
             )
 
             if supcarrier == "offwind" and has_geometry:
-                connection_cost = _offwind_connection_cost(
+                farm_connection_cost = _offwind_connection_cost(
                     carrier,
                     avg_dist=n.generators.loc[sub, "average_distance"],
                     uw_frac=n.generators.loc[sub, "underwater_fraction"],
                     costs=costs,
                     length_factor=length_factor,
                 )
+
+                displacement_connection_cost = 0.0
                 # displacement_length already includes length_factor from simplify_network
                 if "displacement_length" in n.generators.columns:
                     displacement_length = n.generators.loc[
@@ -393,7 +407,6 @@ def update_generator_costs(
                             costs=costs,
                             length_factor=1.0,
                         )
-                        connection_cost = connection_cost + displacement_connection_cost
                         positive_displacement_costs = displacement_connection_cost[
                             displacement_connection_cost > 0
                         ]
@@ -411,10 +424,13 @@ def update_generator_costs(
                                     carrier,
                                 )
                             )
+                total_connection_cost = (
+                    farm_connection_cost + displacement_connection_cost
+                )
                 n.generators.loc[sub, "capital_cost"] = (
                     costs.at["offwind", "capital_cost"]
                     + costs.at[carrier + "-station", "capital_cost"]
-                    + connection_cost
+                    + total_connection_cost
                 )
             elif supcarrier == "offwind":
                 logger.warning(
@@ -443,16 +459,30 @@ def update_storage_unit_costs(
     n: pypsa.Network,
     costs: pd.DataFrame,
     hydro_capital_cost: bool = False,
+    storage_techs: dict | None = None,
 ) -> None:
     """
-    Update cost-vintage-dependent attributes on storage units in-place.
+    Update horizon-specific cost attributes on storage units in-place.
 
     Same rules as :func:`update_generator_costs`:
 
     - **marginal_cost** is refreshed for all units of a carrier.
-    - **capital_cost** and **efficiency** are refreshed only for extendable
-      (new-build) units. Existing PHS, hydro, and battery assets keep their
-      build-time values.
+    - **capital_cost**, charge/dispatch **efficiency**, and **lifetime** are
+      refreshed only for extendable (new-build) units.
+
+    Special cases outside ``storage_techs``:
+
+    - **PHS** — efficiencies from the ``PHS`` cost row (sqrt split); capital
+      cost only if extendable.
+    - **hydro** — marginal cost for all; capital cost only if extendable and
+      ``hydro_capital_cost`` is enabled.
+
+    For carriers added via ``attach_storageunits`` (e.g. ``battery``, ``H2``),
+    charger / discharger / bicharger names come from ``storage_techs``.
+    Combined capital and marginal costs are keyed by carrier name in the
+    processed cost table (see ``calculate_cost_for_storage_units``). Battery /
+    li-ion efficiencies use the same round-trip correction as
+    ``attach_storageunits``.
 
     Parameters
     ----------
@@ -462,7 +492,13 @@ def update_storage_unit_costs(
     hydro_capital_cost : bool
         Whether hydro reservoirs carry a capital cost (mirrors
         ``renewable: hydro: hydro_capital_cost``).
+    storage_techs : dict, optional
+        Mapping of storage carriers to ``store`` / ``charger`` /
+        ``discharger`` / ``bicharger`` technology names. Same structure as
+        ``config["storage_techs"]``.
     """
+    storage_techs = storage_techs or {}
+
     # PHS — typically non-extendable; capital_cost irrelevant for existing units
     is_phs = n.storage_units.carrier == "PHS"
     is_phs_ext = is_phs & n.storage_units.p_nom_extendable
@@ -489,158 +525,253 @@ def update_storage_unit_costs(
         efficiency_dispatch=costs.at["hydro", "efficiency"],
     )
 
-    # Battery — marginal_cost for all; full update for extendable only
-    is_batt = n.storage_units.carrier == "battery"
-    is_batt_ext = is_batt & n.storage_units.p_nom_extendable
-    _assign_component_attrs(
-        n.storage_units,
-        is_batt,
-        marginal_cost=costs.at["battery", "marginal_cost"],
-    )
-    _assign_component_attrs(
-        n.storage_units,
-        is_batt_ext,
-        capital_cost=costs.at["battery", "capital_cost"],
-        efficiency_store=costs.at["battery inverter", "efficiency"],
-        efficiency_dispatch=costs.at["battery inverter", "efficiency"],
-    )
+    # Configurable StorageUnit carriers from storage_techs (battery, H2, …)
+    for carrier in sorted(set(n.storage_units.carrier) & set(storage_techs)):
+        if carrier not in costs.index:
+            logger.warning(
+                f"No cost row for StorageUnit carrier '{carrier}'; skipping re-costing."
+            )
+            continue
 
-    # H2 StorageUnit — only present when config sets
-    # extendable_carriers.StorageUnit: [H2]. When H2 is modelled as
-    # Store+Link instead, this carrier appears in n.stores and is handled by
-    # update_store_costs. The block below is skipped if H2 is absent.
-    is_h2 = n.storage_units.carrier == "H2"
-    is_h2_ext = is_h2 & n.storage_units.p_nom_extendable
-    _assign_component_attrs(
-        n.storage_units,
-        is_h2,
-        marginal_cost=costs.at["H2", "marginal_cost"],
-    )
-    _assign_component_attrs(
-        n.storage_units,
-        is_h2_ext,
-        capital_cost=costs.at["H2", "capital_cost"],
-        efficiency_store=costs.at["electrolysis", "efficiency"],
-        efficiency_dispatch=costs.at["fuel cell", "efficiency"],
-    )
+        lookup = storage_techs[carrier]
+        if "bicharger" in lookup:
+            lookup_charge = lookup_discharge = lookup["bicharger"]
+        else:
+            lookup_charge = lookup["charger"]
+            lookup_discharge = lookup["discharger"]
 
+        # Same round-trip split as attach_storageunits
+        roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
 
-def update_store_costs(n: pypsa.Network, costs: pd.DataFrame) -> None:
-    """
-    Update cost-vintage-dependent attributes on stores in-place.
+        is_carrier = n.storage_units.carrier == carrier
+        is_ext = is_carrier & n.storage_units.p_nom_extendable
 
-    Stores represent energy capacity (MWh) in the Store-Link-Bus model (H2,
-    battery, CSP thermal storage). They use ``e_nom_extendable`` rather than
-    ``p_nom_extendable``.
-
-    - **marginal_cost** is refreshed for all stores of a carrier.
-    - **capital_cost** is refreshed only for extendable stores (new-build
-      energy capacity). In the electricity workflow stores are added by
-      ``add_extra_components`` and are typically all extendable.
-
-    Parameters
-    ----------
-    n : pypsa.Network
-    costs : pd.DataFrame
-        Horizon-specific cost table indexed by technology.
-    """
-    is_h2 = n.stores.carrier == "H2"
-    is_h2_ext = is_h2 & n.stores.e_nom_extendable
-    _assign_component_attrs(
-        n.stores,
-        is_h2_ext,
-        capital_cost=costs.at["hydrogen storage tank", "capital_cost"],
-    )
-
-    is_batt = n.stores.carrier == "battery"
-    is_batt_ext = is_batt & n.stores.e_nom_extendable
-    _assign_component_attrs(
-        n.stores,
-        is_batt,
-        marginal_cost=costs.at["battery", "marginal_cost"],
-    )
-    _assign_component_attrs(
-        n.stores,
-        is_batt_ext,
-        capital_cost=costs.at["battery storage", "capital_cost"],
-    )
-
-    is_csp = n.stores.carrier == "csp"
-    is_csp_ext = is_csp & n.stores.e_nom_extendable
-    _assign_component_attrs(
-        n.stores,
-        is_csp,
-        marginal_cost=costs.at["csp-tower TES", "marginal_cost"],
-    )
-    _assign_component_attrs(
-        n.stores,
-        is_csp_ext,
-        capital_cost=costs.at["csp-tower TES", "capital_cost"],
-    )
-
-
-def update_link_costs(n: pypsa.Network, costs: pd.DataFrame) -> None:
-    """
-    Update cost-vintage-dependent attributes on links in-place.
-
-    Links in the electricity network are charging/discharging converters (H2,
-    battery), CSP discharge links, and optionally H2 pipelines. They use
-    ``p_nom_extendable``.
-
-    - **marginal_cost** is refreshed for all links of a carrier (where defined).
-    - **capital_cost** and **efficiency** are refreshed only for extendable
-      links. Transmission efficiency set from config (not the cost table) is
-      left untouched.
-
-    H2 pipeline ``capital_cost`` scales with link length and is only updated
-    for extendable pipeline links.
-
-    Parameters
-    ----------
-    n : pypsa.Network
-    costs : pd.DataFrame
-        Horizon-specific cost table indexed by technology.
-    """
-    carrier_updates = {
-        "H2 electrolysis": dict(
-            efficiency=costs.at["electrolysis", "efficiency"],
-            capital_cost=costs.at["electrolysis", "capital_cost"],
-            marginal_cost=costs.at["electrolysis", "marginal_cost"],
-        ),
-        "H2 fuel cell": dict(
-            efficiency=costs.at["fuel cell", "efficiency"],
-            capital_cost=costs.at["fuel cell", "capital_cost"]
-            * costs.at["fuel cell", "efficiency"],
-            marginal_cost=costs.at["fuel cell", "marginal_cost"],
-        ),
-        "battery charger": dict(
-            efficiency=costs.at["battery inverter", "efficiency"],
-            capital_cost=costs.at["battery inverter", "capital_cost"],
-            marginal_cost=costs.at["battery inverter", "marginal_cost"],
-        ),
-        "battery discharger": dict(
-            efficiency=costs.at["battery inverter", "efficiency"],
-            marginal_cost=costs.at["battery inverter", "marginal_cost"],
-        ),
-        "csp": dict(
-            efficiency=costs.at["csp-tower", "efficiency"],
-            capital_cost=costs.at["csp-tower", "capital_cost"],
-            marginal_cost=costs.at["csp-tower", "marginal_cost"],
-        ),
-    }
-
-    for carrier, attrs in carrier_updates.items():
-        is_carrier = n.links.carrier == carrier
-        is_ext = is_carrier & n.links.p_nom_extendable
-
-        if "marginal_cost" in attrs:
+        _assign_component_attrs(
+            n.storage_units,
+            is_carrier,
+            marginal_cost=costs.at[carrier, "marginal_cost"],
+        )
+        if is_ext.any():
             _assign_component_attrs(
-                n.links, is_carrier, marginal_cost=attrs["marginal_cost"]
+                n.storage_units,
+                is_ext,
+                capital_cost=costs.at[carrier, "capital_cost"],
+                efficiency_store=costs.at[lookup_charge, "efficiency"]
+                ** roundtrip_correction,
+                efficiency_dispatch=costs.at[lookup_discharge, "efficiency"]
+                ** roundtrip_correction,
+                lifetime=costs.at[carrier, "lifetime"],
             )
 
-        ext_attrs = {k: v for k, v in attrs.items() if k != "marginal_cost"}
-        if ext_attrs:
-            _assign_component_attrs(n.links, is_ext, **ext_attrs)
+
+def update_store_costs(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    storage_techs: dict | None = None,
+) -> None:
+    """
+    Update horizon-specific cost attributes on stores in-place.
+
+    Stores hold energy capacity (MWh) in the Store-Link-Bus model and use
+    ``e_nom_extendable``.
+
+    Same rules as :func:`update_generator_costs`:
+
+    - **marginal_cost** is refreshed for all stores of a carrier.
+    - **capital_cost** and **lifetime** are refreshed only for extendable
+      stores.
+
+    Store technology names are resolved in this order:
+
+    1. Special map (``csp`` → ``csp-tower TES`` from ``attach_advance_csp``)
+    2. ``storage_techs[carrier]["store"]`` (same as ``attach_stores``)
+    3. Carrier name itself if it exists in the cost table
+
+    Carriers without a resolvable cost row are skipped with a warning.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    costs : pd.DataFrame
+        Horizon-specific cost table indexed by technology.
+    storage_techs : dict, optional
+        Mapping of storage carriers to ``store`` / ``charger`` /
+        ``discharger`` / ``bicharger`` technology names. Same structure as
+        ``config["storage_techs"]``.
+    """
+    storage_techs = storage_techs or {}
+    # Carriers not modelled via storage_techs (e.g. CSP TES from attach_advance_csp)
+    special_store_techs = {
+        "csp": "csp-tower TES",
+    }
+
+    for carrier in sorted(n.stores.carrier.unique()):
+        if carrier in special_store_techs:
+            store_tech = special_store_techs[carrier]
+        elif carrier in storage_techs and "store" in storage_techs[carrier]:
+            store_tech = storage_techs[carrier]["store"]
+        elif carrier in costs.index:
+            store_tech = carrier
+        else:
+            logger.warning(
+                f"No store technology mapping for carrier '{carrier}'; "
+                "skipping store re-costing."
+            )
+            continue
+
+        if store_tech not in costs.index:
+            logger.warning(
+                f"No cost row '{store_tech}' for store carrier '{carrier}'; "
+                "skipping store re-costing."
+            )
+            continue
+
+        is_carrier = n.stores.carrier == carrier
+        is_ext = is_carrier & n.stores.e_nom_extendable
+
+        _assign_component_attrs(
+            n.stores,
+            is_carrier,
+            marginal_cost=costs.at[store_tech, "marginal_cost"],
+        )
+        if is_ext.any():
+            _assign_component_attrs(
+                n.stores,
+                is_ext,
+                capital_cost=costs.at[store_tech, "capital_cost"],
+                lifetime=costs.at[store_tech, "lifetime"],
+            )
+
+
+def update_link_costs(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    storage_techs: dict | None = None,
+) -> None:
+    """
+    Update horizon-specific cost attributes on links in-place.
+
+    Covers Store-Link converter links (chargers / dischargers), CSP discharge
+    links, and optional H2 pipelines.
+
+    Same rules as :func:`update_generator_costs`:
+
+    - **marginal_cost** is refreshed for all links of a carrier.
+    - **capital_cost**, **efficiency**, and **lifetime** are refreshed only
+      for extendable (new-build) links.
+
+    For converters added via ``attach_stores``, technology names and link
+    carrier labels (e.g. ``H2 electrolysis``, ``battery charger``) come from
+    ``storage_techs``, matching build-time naming. Battery / li-ion efficiencies
+    use the same round-trip correction as ``attach_stores``. For bicharger
+    techs, CAPEX is applied only on the charger link. Fuel-cell CAPEX is
+    scaled by efficiency (cost is per MWel).
+
+    Special cases outside ``storage_techs``:
+
+    - **CSP** discharge links use the ``csp-tower`` cost row.
+    - **H2 pipeline** CAPEX is ``costs["H2 pipeline"] * length`` for
+      extendable pipeline links only. Length-based transmission efficiency
+      from config is left unchanged.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    costs : pd.DataFrame
+        Horizon-specific cost table indexed by technology.
+    storage_techs : dict, optional
+        Mapping of storage carriers to ``charger`` / ``discharger`` /
+        ``bicharger`` technology names. Same structure as
+        ``config["storage_techs"]``.
+    """
+    storage_techs = storage_techs or {}
+
+    for carrier, lookup in sorted(storage_techs.items()):
+        if "bicharger" in lookup:
+            lookup_charge = lookup_discharge = lookup["bicharger"]
+            is_bicharger = True
+        elif "charger" in lookup and "discharger" in lookup:
+            lookup_charge = lookup["charger"]
+            lookup_discharge = lookup["discharger"]
+            is_bicharger = False
+        else:
+            continue
+
+        # Same link-carrier naming as attach_stores
+        charge_name = "Electrolysis" if lookup_charge == "electrolysis" else "charger"
+        discharge_name = (
+            "Fuel Cell" if lookup_discharge == "fuel cell" else "discharger"
+        )
+        charge_carrier = f"{carrier} {charge_name.lower()}"
+        discharge_carrier = f"{carrier} {discharge_name.lower()}"
+
+        # storage_techs lists many carriers; skip those with no links on this network
+        if not (
+            (n.links.carrier == charge_carrier).any()
+            or (n.links.carrier == discharge_carrier).any()
+        ):
+            continue
+
+        roundtrip_correction = 0.5 if carrier in ["battery", "li-ion"] else 1
+
+        for link_carrier, tech, role in (
+            (charge_carrier, lookup_charge, "charger"),
+            (discharge_carrier, lookup_discharge, "discharger"),
+        ):
+            if tech not in costs.index:
+                logger.warning(
+                    f"No cost row '{tech}' for link carrier '{link_carrier}'; "
+                    "skipping link re-costing."
+                )
+                continue
+
+            is_carrier = n.links.carrier == link_carrier
+            if not is_carrier.any():
+                continue
+            is_ext = is_carrier & n.links.p_nom_extendable
+
+            _assign_component_attrs(
+                n.links,
+                is_carrier,
+                marginal_cost=costs.at[tech, "marginal_cost"],
+            )
+
+            if is_ext.any():
+                efficiency = costs.at[tech, "efficiency"] ** roundtrip_correction
+                _assign_component_attrs(
+                    n.links,
+                    is_ext,
+                    efficiency=efficiency,
+                    lifetime=costs.at[tech, "lifetime"],
+                )
+                # Bicharger CAPEX sits on the charger link only (discharger CAPEX = 0)
+                if not (role == "discharger" and is_bicharger):
+                    capital_cost = costs.at[tech, "capital_cost"]
+                    # Fuel cell investment cost is per MWel (same as attach_stores)
+                    if tech == "fuel cell":
+                        capital_cost = capital_cost * costs.at[tech, "efficiency"]
+                    _assign_component_attrs(
+                        n.links,
+                        is_ext,
+                        capital_cost=capital_cost,
+                    )
+
+    # CSP TES discharge link (from attach_advance_csp; not in storage_techs)
+    is_csp = n.links.carrier == "csp"
+    if is_csp.any() and "csp-tower" in costs.index:
+        is_csp_ext = is_csp & n.links.p_nom_extendable
+        _assign_component_attrs(
+            n.links,
+            is_csp,
+            marginal_cost=costs.at["csp-tower", "marginal_cost"],
+        )
+        _assign_component_attrs(
+            n.links,
+            is_csp_ext,
+            efficiency=costs.at["csp-tower", "efficiency"],
+            capital_cost=costs.at["csp-tower", "capital_cost"],
+            lifetime=costs.at["csp-tower", "lifetime"],
+        )
 
     h2_pipe = n.links.carrier.str.startswith("H2 pipeline", na=False)
     h2_pipe_ext = h2_pipe & n.links.p_nom_extendable
@@ -648,6 +779,7 @@ def update_link_costs(n: pypsa.Network, costs: pd.DataFrame) -> None:
         n.links.loc[h2_pipe_ext, "capital_cost"] = (
             costs.at["H2 pipeline", "capital_cost"] * n.links.loc[h2_pipe_ext, "length"]
         )
+        n.links.loc[h2_pipe_ext, "lifetime"] = costs.at["H2 pipeline", "lifetime"]
 
 
 def _assign_component_attrs(
@@ -685,18 +817,19 @@ def update_electricity_costs(
     length_factor: float = 1.0,
     hydro_capital_cost: bool = False,
     output_currency: str = "EUR",
+    storage_techs: dict | None = None,
 ) -> pd.DataFrame:
     """
-    Re-apply all cost-vintage-dependent attributes on an already-built
+    Re-apply all horizon-specific cost attributes on an already-built
     electricity network, without rebuilding it.
 
     This is the single entry point for per-horizon re-costing. The structural
     network (topology, installed capacities, renewable profiles, build years,
     and the plant-specific efficiencies/lifetimes of *existing* units) is built
     once by ``add_electricity`` + ``add_extra_components``; this function then
-    overwrites only the economic attributes that depend on the cost year, using
-    a horizon-specific ``costs`` table. Attributes that do NOT
-    depend on the cost vintage are deliberately left untouched.
+    overwrites only the economic attributes that depend on the planning
+    horizon, using a horizon-specific ``costs`` table. Attributes that do NOT
+    depend on the planning horizon are deliberately left untouched.
 
     Parameters
     ----------
@@ -712,6 +845,9 @@ def update_electricity_costs(
         Whether hydro reservoirs carry a capital cost.
     output_currency : str
         Currency label used only for logging.
+    storage_techs : dict, optional
+        Mapping of storage carriers to technology names
+        (``config["storage_techs"]``).
 
     Returns
     -------
@@ -733,13 +869,18 @@ def update_electricity_costs(
     )
 
     # Updating storage unit costs
-    update_storage_unit_costs(n, costs, hydro_capital_cost=hydro_capital_cost)
+    update_storage_unit_costs(
+        n,
+        costs,
+        hydro_capital_cost=hydro_capital_cost,
+        storage_techs=storage_techs,
+    )
 
     # Updating store costs (Store-Link-Bus energy capacity)
-    update_store_costs(n, costs)
+    update_store_costs(n, costs, storage_techs=storage_techs)
 
     # Updating link costs (chargers, dischargers, pipelines)
-    update_link_costs(n, costs)
+    update_link_costs(n, costs, storage_techs=storage_techs)
 
     return displacement_connection_costs
 
@@ -752,7 +893,7 @@ if __name__ == "__main__":
             "assign_costs",
             simpl="",
             clusters="4",
-            planning_horizons=2030,
+            planning_horizons="2030",
         )
 
     configure_logging(snakemake)
@@ -768,6 +909,7 @@ if __name__ == "__main__":
         length_factor=snakemake.params.length_factor,
         hydro_capital_cost=snakemake.params.hydro_capital_cost,
         output_currency=snakemake.params.output_currency,
+        storage_techs=snakemake.params.storage_techs,
     )
 
     displacement_connection_costs.to_csv(snakemake.output.connection_costs)

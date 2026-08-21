@@ -911,6 +911,7 @@ rule assign_costs:
         length_factor=config["lines"]["length_factor"],
         hydro_capital_cost=config["renewable"]["hydro"].get("hydro_capital_cost", False),
         output_currency=config["costs"]["output_currency"],
+        storage_techs=config["storage_techs"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
         tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",  # {scope} from process_cost_data
