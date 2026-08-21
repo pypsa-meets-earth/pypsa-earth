@@ -318,6 +318,40 @@ def _migrate_fossil_reserves(
         warn(old_path, new_path)
 
 
+def _migrate_line_type_mappings(
+    config: dict[str, Any],
+    warn: Callable[[str, str], None],
+) -> None:
+    """Move legacy voltage mappings under the ``default`` key."""
+    lines = config.get("lines")
+    if not isinstance(lines, dict):
+        return
+
+    for key in ("ac_types", "dc_types"):
+        mappings = lines.get(key)
+        if not isinstance(mappings, dict):
+            continue
+
+        legacy_mapping = {
+            voltage: line_type
+            for voltage, line_type in mappings.items()
+            if not isinstance(line_type, dict)
+        }
+
+        if not legacy_mapping:
+            continue
+
+        migrated_mappings = {
+            name: mapping
+            for name, mapping in mappings.items()
+            if isinstance(mapping, dict)
+        }
+        migrated_mappings["default"] = legacy_mapping
+
+        lines[key] = migrated_mappings
+        warn(f"lines.{key}", f"lines.{key}.default")
+
+
 def migrate_config(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]] | None = None,
@@ -331,10 +365,11 @@ def migrate_config(
     Simple renames (including whole option dicts such as OSM settings) are listed
     in ``CONFIG_MIGRATIONS``. Special handlers cover ``co2_budget.co2base_value``
     (renames values, not just paths), ``sector.solar_thermal`` when it is still
-    a legacy bool flag, ``fossil_reserves.{carrier}`` reserve values, and the
-    former ``{demand}`` / ``{h2export}`` wildcards
+    a legacy bool flag, ``fossil_reserves.{carrier}`` reserve values, the former
+    ``{demand}`` / ``{h2export}`` wildcards
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
-    scalar).
+    scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
+    mappings, which are moved under their respective ``default`` keys.
 
     Parameters
     ----------
@@ -356,6 +391,7 @@ def migrate_config(
             stacklevel=2,
         )
 
+    _migrate_line_type_mappings(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_fossil_reserves(config, _warn)
@@ -2430,3 +2466,31 @@ def sanitize_locations(n: pypsa.Network) -> None:
             n.buses.country.ne("") & n.buses.country.notnull(),
             n.buses.location.map(n.buses.country),
         )
+
+
+def get_linetype_by_voltage_and_country(
+    v_nom,
+    country,
+    linetypes,
+    use_country_specific_types,
+):
+    """Return the closest line type from the selected mapping."""
+    if "default" not in linetypes:
+        raise ValueError("Missing 'default' line type mapping.")
+
+    mapping_name = (
+        country if use_country_specific_types and (country in linetypes) else "default"
+    )
+
+    mapping = linetypes[mapping_name]
+
+    if not mapping:
+        raise ValueError(
+            f"Empty line type mapping found for line mapping '{mapping_name}'."
+        )
+
+    voltage = min(
+        mapping,
+        key=lambda candidate: abs(float(candidate) - float(v_nom)),
+    )
+    return mapping[voltage]
