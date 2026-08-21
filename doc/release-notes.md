@@ -61,9 +61,10 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
-* Remove oil reserves [PR #1971](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1971)
 
-* Add docstrings to build_natura_raster script [PR ##1844](https://github.com/pypsa-meets-earth/pypsa-earth/pull/#1844)
+* Remove default initial oil reserves and fix transport profile weighting and temporal aggregation in sector-coupled networks [PR #1971](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1971)
+
+* Add docstrings to build_natura_raster script [PR #1844](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1844)
 
 * Fix broken EDGAR v6.0 download URL and externalize CO2 emission data retrieval into dedicated `retrieve_emissions` and `build_co2_emissions` Snakemake rules; update `emission_extractor` in `prepare_network.py` to read the pre-built CSV [PR #1877](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1877)
 
