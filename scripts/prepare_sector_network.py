@@ -1720,7 +1720,6 @@ def add_shipping(
             [oil_bus + " Store" for oil_bus in spatial.oil.nodes],
             bus=spatial.oil.nodes,
             e_nom_extendable=True,
-            e_initial=0.0,
             e_cyclic=True,
             carrier="oil",
         )
