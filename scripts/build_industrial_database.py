@@ -65,11 +65,11 @@ def get_cocode_from_coords(df):
     return df
 
 
-def create_steel_db():
+def create_steel_db(fn):
     # Global Steel Plant Tracker data set you requested from Global Energy Monitor from the link below:
 
     # The original data are available from https://globalenergymonitor.org/
-    url = "https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx"
+    url = fn
 
     df_steel = pd.read_excel(
         content_retrieve(url),
@@ -211,13 +211,13 @@ def create_steel_db():
     ].dropna()
 
 
-def create_cement_db():
+def create_cement_db(fn):
     # -------------
     # CEMENT
     # -------------
     # The following excel file was downloaded from the following webpage https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/.
     # The dataset contains 3117 cement plants globally.
-    fn = "data/industry/SFI-Global-Cement-Database-July-2021.xlsx"
+    fn = fn
     cement_orig = pd.read_excel(
         fn,
         index_col=0,
@@ -295,7 +295,7 @@ def create_cement_db():
     ]
 
 
-def create_refineries_df():
+def create_refineries_df(fn):
     # -------------
     # OIL REFINERIES
     # -------------
@@ -304,11 +304,7 @@ def create_refineries_df():
     # and https://www.arcgis.com/home/item.html?id=a917ac2766bc47e1877071f0201b6280
 
     # The dataset contains 536 global Oil refineries.
-
-    base_url = "https://services.arcgis.com"
-    facts = "/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D"
-
-    first_response = requests.get(base_url + facts)
+    first_response = requests.get(fn)
     response_list = first_response.json()
 
     data = []
@@ -378,13 +374,13 @@ def create_refineries_df():
     ]
 
 
-def create_paper_df():
+def create_paper_df(fn):
     # -------------
     # Paper
     # -------------
     # The following excel file was downloaded from the following webpage https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/ . The dataset contains 3117 cement plants globally.
 
-    fn = "data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx"
+    fn = fn
 
     paper_orig = pd.read_excel(
         fn,
