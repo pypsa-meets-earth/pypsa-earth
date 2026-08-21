@@ -522,10 +522,6 @@ demand_data:
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
 
-
-fossil_reserves:
-  oil: 100 #TWh Maybe redundant
-
 export:
   endogenous: false # If true, the export demand is endogenously determined by the model
   endogenous_price: 400 # EUR/MWh # Market price, for which the hydrogen for endogenous exports is sold. Only considered, if ["export"]["endogenous"] is set to true.
