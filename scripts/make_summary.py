@@ -50,7 +50,8 @@ import os
 import pandas as pd
 import pypsa
 from _helpers import configure_logging
-from add_electricity import create_logger, update_transmission_costs
+from add_electricity import create_logger
+from assign_costs import update_transmission_costs
 
 idx = pd.IndexSlice
 
