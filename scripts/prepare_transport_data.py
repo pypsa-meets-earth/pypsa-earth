@@ -80,7 +80,8 @@ def transport_degree_factor(
     cooling.
 
     There is a deadband where there is no increase. Degree factors are %
-    increase in demand compared to no heating/cooling fuel consumption.
+    increase in demand per degree Celsius outside the deadband, compared to
+    no heating/cooling fuel consumption.
 
     Parameters
     ----------
@@ -98,7 +99,11 @@ def transport_degree_factor(
     Returns
     -------
     pd.DataFrame
-        Per unit increase in demand for each node and snapshot.
+        Fractional increase in transport energy demand for each node (columns)
+        and snapshot (index), relative to demand with no heating or cooling.
+        The value is dimensionless: it already accounts for the temperature
+        deviation from the deadband, so 0.05 means 5% additional demand rather
+        than 5% per degree Celsius.
     """
 
     dd = temperature.copy()
