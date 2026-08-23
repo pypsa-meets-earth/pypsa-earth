@@ -14,4 +14,5 @@
 "data/industrial_database.csv","CC4.0","x",,,,https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/
 "data/industrial_database.csv","CC4.0","x",,,,https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/
 "data/airports.csv","Public Domain",,,,,https://ourairports.com/data/
+"data/ports.csv","Custom","x",,,,https://www.nga.mil/resources/Privacy_Policy.html
 "data/potash_gis/*", "Public Domain",,,,,https://doi.org/10.3133/sir20105090S

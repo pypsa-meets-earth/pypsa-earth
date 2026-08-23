@@ -17,17 +17,34 @@ custom_data:
 Outputs
 -------
 
-- ``resources/ports.csv``: world ports per country, with a per-country harbor size fraction.
-- ``resources/export_ports.csv``: largest port per country, used for hydrogen/derivative export; or the user-provided ``data/custom/export_ports.csv`` if ``custom_data.export_ports`` is enabled.
+- ``resources/ports.csv``: world ports per country. The ``fraction`` column gives
+  each port's share of its country's total harbor size weighting.
+- ``resources/export_ports.csv``: the ports of each country's largest available
+  harbor size class, used as candidate hydrogen/derivative export locations; or the
+  user-provided ``data/custom/export_ports.csv`` if ``custom_data.export_ports`` is
+  enabled.
 
 Description
 -----------
 
 Downloads the World Port Index, drops entries that could not be matched to
-an ISO2 country code (e.g. small islands), and assigns each port a harbor
-size fraction relative to the other ports in its country, weighting large,
-medium and small harbors as 3, 2 and 1 respectively. The largest port per
-country is then selected as the candidate export port.
+an ISO2 country code (e.g. small islands), and weights each port by harbor
+size as 3 (large), 2 (medium) or 1 (small). The ``fraction`` column is that
+weight divided by the sum of the weights of all ports in the same country, so
+the fractions within a country sum to one. Candidate export ports are then
+selected per country by taking all ports of the largest harbor size present in
+that country: all large ports if any exist, otherwise all medium ports,
+otherwise all small ones.
+
+References
+----------
+
+- World Port Index (Publication 150), U.S. National Geospatial-Intelligence
+  Agency, Maritime Safety Office, updated monthly
+  (https://msi.nga.mil/Publications/WPI). NGA states that information it
+  presents is public information and may be distributed or copied unless
+  otherwise specified, with appropriate credit requested
+  (https://www.nga.mil/resources/Privacy_Policy.html).
 """
 
 import logging
@@ -48,12 +65,12 @@ from _helpers import BASE_DIR, read_csv_nafix
 
 def download_ports() -> pd.DataFrame:
     """
-    Downloads the world ports index csv File and NOT as shape or other because
-    it is updated on a monthly basis.
+    Download the World Port Index as a csv file.
 
-    The following csv file was downloaded from the webpage
-    https://msi.nga.mil/Publications/WPI
-    as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
+    The csv format is used rather than a shapefile or other format because the
+    publication is updated monthly. The table is fetched live, so the number of
+    ports it contains changes as the upstream publication is updated. See the
+    module-level References section for the data source.
 
     Returns
     -------
@@ -68,8 +85,13 @@ def download_ports() -> pd.DataFrame:
 
 def filter_ports(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
-    Filters ports based on their harbor size and returns a DataFrame containing
-    only the largest port for each country.
+    Select, for each country, the ports of the largest harbor size present in
+    that country.
+
+    Countries with at least one large port contribute all of their large ports;
+    countries without any large port contribute all of their medium ports, and
+    countries with neither contribute all of their small ports. A country may
+    therefore appear several times in the result.
 
     Parameters
     ----------
@@ -80,8 +102,8 @@ def filter_ports(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        Single largest port per country, preferring large over medium over
-        small harbors.
+        All ports of each country's largest available harbor size class, with
+        one row per port.
     """
     # Filter large sized ports
     large_ports = dataframe[dataframe["Harbor Size"] == "Large"]
