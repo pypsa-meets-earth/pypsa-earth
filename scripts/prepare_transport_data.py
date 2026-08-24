@@ -136,6 +136,10 @@ def generate_periodic_profiles(
     country for the period dt_index, taking account of time zones and summer
     time.
 
+    Each snapshot is converted to the local time of the node's country to
+    decide which hour of ``weekly_profile`` applies, so the same snapshot can
+    select different profile hours for nodes in different time zones.
+
     Parameters
     ----------
     dt_index : pd.DatetimeIndex
@@ -145,12 +149,18 @@ def generate_periodic_profiles(
     weekly_profile : np.ndarray
         24*7 long array of hourly values for a typical week, indexed by ``24 * weekday + hour``.
     localize : str | None
-        Timezone to localize the resulting index to (default None, i.e. tz-naive).
+        Timezone to attach to the index of the result. The default ``None``
+        strips the timezone instead, preserving the wall-clock time of
+        ``dt_index``. Local time is therefore used only to look up the profile
+        hour, not for the index of the result.
 
     Returns
     -------
     pd.DataFrame
-        Weekly profile per node (columns) and snapshot (index).
+        Weekly profile per node (columns) and snapshot (index). With the
+        default ``localize=None`` the index holds the same instants as
+        ``dt_index`` with no timezone attached, so passing UTC snapshots
+        returns UTC times rather than local ones.
     """
 
     weekly_profile = pd.Series(weekly_profile, range(24 * 7))
