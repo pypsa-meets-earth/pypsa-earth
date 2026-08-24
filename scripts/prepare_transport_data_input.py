@@ -66,11 +66,15 @@ def add_iso2_country_code(df: pd.DataFrame) -> pd.DataFrame:
 def download_number_of_vehicles() -> pd.DataFrame:
     """
     Downloads and returns the number of registered vehicles as tabular data
-    from the Global Health Observatory (GHO) repository data and from Wikipedia.
+    from the Global Health Observatory and from Wikipedia.
 
-    The csv data from the WHO website is imported
-    from 'https://apps.who.int/gho/data/node.main.A995'.
-    A few countries are missing in the WHO list (e.g. South Africa, Algeria).
+    The Global Health Observatory (GHO) is the data repository of the World
+    Health Organization (WHO), which is why its addresses sit under the
+    ``who.int`` domain. The vehicle counts are GHO indicator ``RS_194``,
+    described at 'https://apps.who.int/gho/data/node.main.A995' and retrieved
+    here as csv through the GHO Athena API.
+
+    A few countries are missing from the GHO list (e.g. South Africa, Algeria).
     Therefore, the number of vehicles per country table from Wikipedia
     is also imported for completion (prio 2):
     'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita'.
@@ -79,8 +83,8 @@ def download_number_of_vehicles() -> pd.DataFrame:
     -------
     pd.DataFrame
         Number of registered vehicles ('number cars') per country, with
-        Wikipedia data used to fill in countries missing from the WHO data.
-        Empty if the WHO source could not be read.
+        Wikipedia data used to fill in countries missing from the GHO data.
+        Empty if the GHO source could not be read.
     """
 
     def _clean_data(df: pd.DataFrame) -> pd.DataFrame:
