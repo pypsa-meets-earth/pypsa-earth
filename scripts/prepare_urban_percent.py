@@ -14,10 +14,18 @@ Outputs
 Description
 -----------
 
-Downloads the United Nations "Total and urban population, annual" dataset,
-keeps years from 2020 onwards, maps country/economy names to ISO2 codes, and
-averages the urban percentage where multiple entries map to the same
-country and year.
+Downloads the UNCTAD "Total and urban population, annual" dataset, keeps years
+from 2020 onwards, maps country/economy names to ISO2 codes, and averages the
+urban percentage where multiple entries map to the same country and year.
+
+References
+----------
+
+- Total and urban population, annual (``US.PopTotal``), United Nations Trade and
+  Development Data Hub (UNCTADstat), https://unctadstat.unctad.org/datacentre/.
+  Licensed under Creative Commons Attribution 3.0 IGO, with UNCTAD asking that
+  "United Nations Trade and Development Data Hub" be cited as the source
+  (https://unctadstat.unctad.org/EN/About.html#TERMS_OF_USE).
 """
 
 import os
@@ -36,18 +44,21 @@ from _helpers import read_csv_nafix
 
 def download_urban_percent() -> pd.DataFrame:
     """
-    Downloads the United Nations "Total and urban population, annual" .7z File
-    and extracts it as csv File.
+    Downloads the UNCTAD "Total and urban population, annual" .7z File and
+    extracts it as csv File.
 
-    The above file was downloaded from the webpage
-    https://unctadstat.unctad.org/datacentre/
-    as a .7z file. The dataset contains urban percent for most countries from 1950 and predictions until 2050.
+    The dataset is UNCTADstat series ``US.PopTotal``, browsable at
+    https://unctadstat.unctad.org/datacentre/ and retrieved here through the
+    bulk download endpoint, which serves it as ``US_PopTotal.csv.7z``. It
+    covers urban percent for most countries from 1950 with projections to
+    2050; this script keeps 2020 onwards. See the module-level References
+    section for the citation requested by UNCTAD.
 
     Returns
     -------
     pd.DataFrame
         Total and urban population per country and year, as published by
-        the United Nations.
+        UNCTAD.
     """
     url = "https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal"
 
