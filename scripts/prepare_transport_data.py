@@ -3,8 +3,8 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Prepares the nodal demand, availability and demand-side management profiles
-for the (land) transport sector.
+Prepares the nodal energy demand, vehicle availability and demand-side
+management profiles for the (land) transport sector.
 
 Relevant Settings
 -----------------
@@ -28,11 +28,17 @@ sector:
     bev_dsm_restriction_time:
 ```
 
+The remaining keys of the ``sector`` land transport block in
+``config.default.yaml`` (``v2g``, ``bev_dsm``, ``bev_energy``,
+``bev_availability``, ``transport_fuel_cell_efficiency`` and
+``transport_internal_combustion_efficiency``) are not read here; they are
+consumed by ``prepare_sector_network``.
+
 Inputs
 ------
 
 - ``networks/elec_s{simpl}_{clusters}.nc``: clustered base network.
-- ``resources/energy_totals_{demand}_{planning_horizons}.csv``: yearly energy totals per country, including road and rail transport demand.
+- ``resources/energy_totals_{planning_horizons}.csv``: yearly energy totals per country, including road and rail transport demand.
 - ``data/emobility/KFZ__count``: weekly traffic count profile for all motor vehicles, used to shape the overall transport demand time series.
 - ``data/emobility/Pkw__count``: weekly traffic count profile for cars (Pkw), used to derive the BEV plugged-in availability profile.
 - ``resources/transport_data.csv``: number of registered cars and average fuel efficiency per country.
@@ -42,10 +48,10 @@ Inputs
 Outputs
 -------
 
-- ``resources/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: nodal transport demand time series.
-- ``resources/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: share of the battery electric vehicle (BEV) fleet available to the grid, per node and timestep.
-- ``resources/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: restrictions on the state of charge of BEVs for demand-side management (DSM).
-- ``resources/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: nodal data on number of cars and average fuel efficiency.
+- ``resources/demand/transport_s{simpl}_{clusters}_{planning_horizons}.csv``: hourly land transport energy demand per node, in MWh.
+- ``resources/pattern_profiles/avail_profile_s{simpl}_{clusters}_{planning_horizons}.csv``: share of the battery electric vehicle (BEV) fleet available to the grid, per node and timestep.
+- ``resources/pattern_profiles/dsm_profile_s{simpl}_{clusters}_{planning_horizons}.csv``: restrictions on the state of charge of BEVs for demand-side management (DSM).
+- ``resources/demand/nodal_transport_data_s{simpl}_{clusters}_{planning_horizons}.csv``: nodal data on number of cars and average fuel efficiency.
 
 Description
 -----------
