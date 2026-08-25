@@ -463,10 +463,7 @@ if __name__ == "__main__":
         ppl=ppl,
         custom_powerplants_files=list(snakemake.input.custom_powerplants),
         method=custom_method,
-    )
-
-    if isinstance(ppl_query, str) and ppl_query.strip():
-        ppl = ppl.query(ppl_query)
+    ).query(ppl_query)
 
     ppl = ppl.powerplant.convert_country_to_alpha2().pipe(
         replace_natural_gas_technology
