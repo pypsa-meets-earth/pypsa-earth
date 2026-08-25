@@ -1126,7 +1126,8 @@ def attach_existing_batteries(
     Add existing battery storage units from powerplants.csv to the network.
 
     Currently existing batteries are attached as ``StorageUnit`` components on
-    the parent AC bus (see issue #1983).
+    the parent AC bus (see issue #1983 and PR #1990). Revert to a Store+Link
+    representation once clustering supports stores and links.
 
     Parameters
     ----------
