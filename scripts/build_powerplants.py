@@ -472,10 +472,6 @@ if __name__ == "__main__":
         replace_natural_gas_technology
     )
 
-    ppl = ppl.powerplant.convert_country_to_alpha2().pipe(
-        replace_natural_gas_technology
-    )
-
     # define unique index
     ppl = ppl.reset_index(drop=True)
 
