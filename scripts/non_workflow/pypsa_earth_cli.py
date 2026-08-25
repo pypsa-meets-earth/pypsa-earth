@@ -356,7 +356,7 @@ def config_setup():
             if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
-            if isinstance(updated_config[choice][subchoice], bool):
+            if isinstance(updated_config[choice], bool):
                 updated_value = True if updated_value == "True" else False
             updated_config[choice] = updated_value
 
@@ -403,7 +403,7 @@ def show_questionnaire(option: str) -> None:
 
     answer_dict = {}
 
-    type_dict = {"str": str, "int": int}
+    type_dict = {"str": str, "int": int, "float": float, "bool": bool, "list": list}
 
     def not_matching(a, b):
         if isinstance(b, (list, tuple, set)):
@@ -504,7 +504,7 @@ def show_questionnaire(option: str) -> None:
 
         # Prompt the user to run the model with the updated config file
         model_run = display_choice_menu(
-            "Do you want to run the model ? (If skipped, the model can also be run later using option 3 and option 4 from the main menu of the CLI.)",
+            "Do you want to run the model ? (If skipped, the model can also be run later using option 4 (Run Model) from the main menu of the CLI.)",
             ["No", "Yes"],
             3,
         ).lower()
@@ -525,26 +525,25 @@ def show_questionnaire(option: str) -> None:
             if solver == "highs":
                 config_dict["solving.solver.name"] = "highs"
                 config_dict["solving.solver.options"] = "highs-default"
-
-            # Save the updated config file
-            save_config_path = use_case["config_path"]
-            existing_config_path = "config.cli_base.yaml"
-            existing_config_dict = {}
-            if Path(existing_config_path).is_file():
-                existing_config_dict = load_config_file(existing_config_path)
-                if existing_config_dict == None:
-                    existing_config_dict = {}
-            save_config_file(
-                config_path=save_config_path,
-                config_data=unflatten_dict(existing_config_dict | config_dict),
-            )
-
-            run_model(save_config_path)
         else:
-            save_config_path = use_case["config_path"]
-            save_config_file(
-                config_path=save_config_path, config_data=unflatten_dict(config_dict)
-            )
+            # Assigning a default run name for the model
+            config_dict["run.name"] = "test-KZ-demand"
+
+        # Save the updated config file
+        save_config_path = use_case["config_path"]
+        existing_config_path = "config.cli_base.yaml"
+        existing_config_dict = {}
+        if Path(existing_config_path).is_file():
+            existing_config_dict = load_config_file(existing_config_path)
+            if existing_config_dict == None:
+                existing_config_dict = {}
+        save_config_file(
+            config_path=save_config_path,
+            config_data=unflatten_dict(existing_config_dict | config_dict),
+        )
+
+        if model_run == "yes":
+            run_model(save_config_path)
 
 
 @app.command("quiz_zone")
@@ -596,8 +595,14 @@ def quiz_zone() -> None:
 
     choice = ask("Select option 1-8 to proceed further")
 
-    if choice != "8":
+    if int(choice) <= 4:
         show_questionnaire(choice)
+        quiz_zone()
+    elif int(choice) <= 7:
+        console.print(
+            "[bold yellow] ⚠️  This module is under development and will be available in the next release. [/bold yellow]"
+        )
+        console.print(style="dim")
         quiz_zone()
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")

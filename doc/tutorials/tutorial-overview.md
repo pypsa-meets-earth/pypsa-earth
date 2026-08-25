@@ -35,6 +35,12 @@ SPDX-License-Identifier: CC-BY-4.0
 
     [4. Calibrate generation](use-cases/4-generation-data.md)
 
+    [5. Adapt costs](use-cases/5-adapting-costs.md)
+
+    [6. Fix isolated nodes](use-cases/6-network-topology.md)
+
+    [7. Improve transmission](use-cases/7-transmission-network.md)
+
 -   **Want to explore generic tutorial examples?**
 
     Reference Guide
