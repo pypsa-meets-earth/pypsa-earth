@@ -13,6 +13,7 @@ The CLI has the following modules:
 4. Run snakemake - Feature to run a snakemake workflow
 
 """
+import ast
 import os
 import random
 import re
@@ -29,8 +30,6 @@ from InquirerPy.base import Choice
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-
-import ast
 
 # On Windows, the legacy console codepage (e.g. cp1252) cannot encode some of the
 # emojis used in the CLI output, which raises a UnicodeEncodeError as soon as
