@@ -297,19 +297,13 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> Non
 
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
-    # initial fossil reserves
-    e_initial = (
-        snakemake.params.sector_options.get(carrier, {}).get("reserves", 0)
-    ) * 1e6
-    # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
     n.madd(
         "Store",
         nodes + " Store",
         bus=nodes,
         e_nom_extendable=True,
-        e_cyclic=True if e_initial == 0 else False,
+        e_cyclic=True,
         carrier=carrier,
-        e_initial=e_initial,
     )
     n.madd(
         "Generator",
@@ -2202,6 +2196,57 @@ Missing data:
 """
 
 
+def align_transport_profile(
+    profile: pd.DataFrame,
+    snapshots: pd.Index,
+    aggregation: str,
+) -> pd.DataFrame:
+    """
+    Align a transport profile to the network snapshots.
+
+    Profiles at a finer regular resolution are aggregated before being
+    reindexed. Mismatched irregular snapshots raise an error instead of being
+    silently sampled.
+    """
+    if profile.index.equals(snapshots):
+        return profile
+
+    if not isinstance(profile.index, pd.DatetimeIndex) or not isinstance(
+        snapshots, pd.DatetimeIndex
+    ):
+        raise ValueError("Cannot align transport profiles with non-datetime snapshots.")
+
+    target_frequency = snapshots.freqstr
+
+    if target_frequency is None and len(snapshots) >= 3:
+        target_frequency = pd.infer_freq(snapshots)
+
+    if target_frequency is None:
+        raise ValueError(
+            "Cannot infer the network snapshot frequency required "
+            "to align transport profiles."
+        )
+
+    resampler = profile.resample(target_frequency)
+
+    if aggregation == "mean":
+        aligned = resampler.mean()
+    elif aggregation == "max":
+        aligned = resampler.max()
+    else:
+        raise ValueError(f"Unsupported transport-profile aggregation: {aggregation}")
+
+    missing_snapshots = snapshots.difference(aligned.index)
+
+    if not missing_snapshots.empty:
+        raise ValueError(
+            "Transport profiles do not cover all network snapshots. "
+            f"Missing: {missing_snapshots.tolist()}"
+        )
+
+    return aligned.reindex(snapshots)
+
+
 def add_land_transport(
     n: pypsa.Network,
     costs: pd.DataFrame,
@@ -2234,13 +2279,46 @@ def add_land_transport(
     """
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    transport = read_csv_nafix(transport_fn, index_col=0, parse_dates=True).reindex(
-        columns=spatial.nodes, fill_value=0.0
+    transport = read_csv_nafix(
+        transport_fn,
+        index_col=0,
+        parse_dates=True,
+    ).reindex(columns=spatial.nodes, fill_value=0.0)
+
+    avail_profile = read_csv_nafix(
+        avail_profile_fn,
+        index_col=0,
+        parse_dates=True,
     )
 
-    avail_profile = read_csv_nafix(avail_profile_fn, index_col=0, parse_dates=True)
-    dsm_profile = read_csv_nafix(dsm_profile_fn, index_col=0, parse_dates=True)
-    nodal_transport_data = read_csv_nafix(nodal_transport_data_fn, index_col=0)
+    dsm_profile = read_csv_nafix(
+        dsm_profile_fn,
+        index_col=0,
+        parse_dates=True,
+    )
+
+    transport = align_transport_profile(
+        transport,
+        n.snapshots,
+        aggregation="mean",
+    )
+
+    avail_profile = align_transport_profile(
+        avail_profile,
+        n.snapshots,
+        aggregation="mean",
+    )
+
+    dsm_profile = align_transport_profile(
+        dsm_profile,
+        n.snapshots,
+        aggregation="max",
+    )
+
+    nodal_transport_data = read_csv_nafix(
+        nodal_transport_data_fn,
+        index_col=0,
+    )
     # TODO nodal_transport_data only includes no. of cars, change name to something descriptive?
     # TODO options?
 
