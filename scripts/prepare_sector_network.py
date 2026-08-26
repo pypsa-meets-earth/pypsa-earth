@@ -1116,10 +1116,7 @@ def define_spatial(nodes: list, options: dict) -> SimpleNamespace:
 
 
 def add_biomass(
-    n: pypsa.Network,
-    costs: pd.DataFrame,
-    options: dict,
-    pop_layout: pd.DataFrame,
+    n: pypsa.Network, costs: pd.DataFrame, options: dict, pop_layout: pd.DataFrame
 ) -> None:
     """
     Add biomass and biogas potentials to the network.
@@ -1147,38 +1144,44 @@ def add_biomass(
     None
     """
     logger.info("adding biomass")
-    biomass_default = options["biomass_default_carrier"]
 
     n.add("Carrier", "biogas")
-    n.add("Carrier", "solid biomass") if biomass_source == "solid biomass" else None
+    n.add("Carrier", "solid biomass")
 
     n.madd(
         "Bus", spatial.gas.biogas, location=spatial.biomass.locations, carrier="biogas"
     )
 
-    # Update biomass components to use the default biomass carrier
-    biomass_source = n.generators[n.generators.bus.isin(spatial.biomass.nodes)].index
-    n.buses.loc[spatial.biomass.nodes, "carrier"] = biomass_default
-    n.generators.loc[biomass_source, "carrier"] = biomass_default
-    n.generators.loc[biomass_source, "marginal_cost"] = costs.at[
-        biomass_default, "fuel"
-    ]
+    n.madd(
+        "Bus",
+        spatial.biomass.nodes,
+        location=spatial.biomass.locations,
+        carrier="solid biomass",
+    )
+
+    # Drop existing biomass sources in favor of the options below
+    drop_gen = n.generators[n.generators.carrier == "biomass"].index
+    n.mremove("Generator", drop_gen)
 
     # Write loggers
-    logger_biomass = f"Adding global {biomass_default} "
+    logger_biomass = "Adding global biomass "
     logger_biogas = "Adding global biogas "
 
     biomass_pot = options["solid_biomass_potential"]
     if math.isinf(biomass_pot):
-        # No limits to solid biomass.
+        # No limits to solid biomass
+        n.madd(
+            "Generator",
+            spatial.biomass.nodes,
+            bus=spatial.biomass.nodes,
+            p_nom_extendable=True,
+            carrier="solid biomass",
+            marginal_cost=costs.at["solid biomass", "fuel"],
+        )
         logger_biomass += "sources"
-
     elif biomass_pot:
         # Set limits to the use of solid biomass
         logger_biomass += f"potential of {biomass_pot} TWh/a"
-
-        # remove infinite biomass source
-        n.mremove("Generator", biomass_source)
 
         if len(spatial.biomass.nodes) > 1:
             logger_biomass += ", distributed based on population"
@@ -1189,15 +1192,15 @@ def add_biomass(
         else:
             pop_spatial = 1
 
-        biomass_pot_spatial = biomass_pot * 1e6 / pop_spatial  # MWh
+        biomass_pot_spatial = biomass_pot * 1e6 * pop_spatial  # MWh
 
         n.madd(
             "Store",
             spatial.biomass.nodes,
             bus=spatial.biomass.nodes,
-            carrier=biomass_default,
+            carrier="solid biomass",
             e_nom=biomass_pot_spatial,
-            marginal_cost=costs.at[biomass_default, "fuel"],
+            marginal_cost=costs.at["solid biomass", "fuel"],
             e_initial=biomass_pot_spatial,
         )
     else:
@@ -1205,7 +1208,6 @@ def add_biomass(
 
     biogas_pot = options["biogas_potential"]
     if math.isinf(biogas_pot):
-        logger_biogas += "sources"
         # No limits to biogas
         n.madd(
             "Generator",
@@ -1215,6 +1217,7 @@ def add_biomass(
             carrier="biogas",
             marginal_cost=costs.at["biogas", "fuel"],
         )
+        logger_biogas += "sources"
     elif biogas_pot:
         # Set limits to the use of biogas
         logger_biogas += f"potential of {biogas_pot} TWh/a"
@@ -1228,7 +1231,7 @@ def add_biomass(
         else:
             pop_spatial = 1
 
-        biogas_pot_spatial = biogas_pot * 1e6 / pop_spatial  # MWh
+        biogas_pot_spatial = biogas_pot * 1e6 * pop_spatial  # MWh
 
         n.madd(
             "Store",
