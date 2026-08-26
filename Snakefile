@@ -335,6 +335,8 @@ rule base_network:
         hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
         countries=config["countries"],
         base_network=config["base_network"],
+        alternative_clustering=config["clustering"]["alternative_clustering"],
+        crs=config["crs"],
     input:
         osm_buses="resources/" + RDIR + "base_network/all_buses_build_network.csv",
         osm_lines="resources/" + RDIR + "base_network/all_lines_build_network.csv",
@@ -346,6 +348,7 @@ rule base_network:
         + "base_network/all_transformers_build_network.csv",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
     output:
         "networks/" + RDIR + "base.nc",
     log:

@@ -66,6 +66,8 @@ import scipy as sp
 import shapely.prepared
 import shapely.wkt
 from _helpers import configure_logging, create_logger, read_csv_nafix
+from pypsa.geo import haversine_pts
+from shapely.geometry import LineString, MultiPoint, Point
 from shapely.ops import unary_union
 
 logger = create_logger(__name__)
@@ -299,6 +301,172 @@ def _load_lines_from_osm(fp_osm_lines: str) -> pd.DataFrame:
     # lines = _remove_dangling_branches(lines, buses)  # TODO: add dangling branch removal?
 
     return lines
+
+
+def ensure_gadm_bus_coverage(
+    buses: pd.DataFrame,
+    lines: pd.DataFrame,
+    gadm_shapes_path: str | None,
+    countries: list[str],
+    geo_crs: str = "EPSG:4326",
+    distance_crs: str = "EPSG:3857",
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+    """Add connected AC buses for GADM regions without an LV bus."""
+    if not gadm_shapes_path:
+        raise ValueError("A GADM shapes path is required for GADM bus coverage.")
+
+    buses = buses.copy()
+    lines = lines.copy()
+    buses.index = buses.index.astype(str)
+    for column in ("bus0", "bus1"):
+        if column in lines:
+            lines[column] = lines[column].astype(str)
+
+    gadm_shapes = gpd.read_file(gadm_shapes_path)
+    if "GADM_ID" not in gadm_shapes.columns:
+        raise ValueError(
+            f"GADM input {gadm_shapes_path} must contain a `GADM_ID` column."
+        )
+    gadm_shapes = gadm_shapes.set_index("GADM_ID")
+    gadm_shapes.index = gadm_shapes.index.astype(str)
+    gadm_shapes = gadm_shapes.loc[
+        gadm_shapes.country.isin(countries)
+    ].loc[lambda frame: ~frame.index.duplicated(keep="first")]
+    if gadm_shapes.empty:
+        return buses, lines, []
+
+    if gadm_shapes.crs is None:
+        gadm_shapes = gadm_shapes.set_crs(geo_crs)
+    else:
+        gadm_shapes = gadm_shapes.to_crs(geo_crs)
+    gadm_shapes_metric = gadm_shapes.to_crs(distance_crs)
+
+    existing_lv_buses = buses.loc[
+        buses.country.isin(countries)
+        & buses.carrier.eq("AC")
+        & buses.substation_lv.fillna(False).astype(bool)
+    ]
+    existing_regions = []
+    for country in countries:
+        country_buses = existing_lv_buses.loc[
+            existing_lv_buses.country.eq(country)
+        ]
+        country_shapes = gadm_shapes_metric.loc[
+            gadm_shapes_metric.country.eq(country)
+        ]
+        if country_buses.empty or country_shapes.empty:
+            continue
+        bus_points = gpd.GeoDataFrame(
+            country_buses[["x", "y", "country"]],
+            geometry=gpd.points_from_xy(country_buses.x, country_buses.y),
+            crs=geo_crs,
+        ).to_crs(distance_crs)
+        joined = gpd.sjoin_nearest(
+            bus_points, country_shapes, how="left"
+        )
+        joined = joined[~joined.index.duplicated(keep="first")]
+        existing_regions.extend(joined["GADM_ID"].dropna().astype(str))
+    existing_regions = pd.Index(existing_regions, dtype=str).unique()
+
+    missing_regions = gadm_shapes.index.difference(existing_regions).sort_values()
+    if missing_regions.empty:
+        return buses, lines, []
+
+    existing_ac_buses = buses.loc[
+        buses.country.isin(countries) & buses.carrier.eq("AC")
+    ]
+    if existing_ac_buses.empty:
+        raise ValueError(
+            "Cannot add GADM buses because no existing AC bus is available "
+            "as a connection point."
+        )
+
+    existing_ac_points = gpd.GeoDataFrame(
+        existing_ac_buses[["x", "y", "country"]],
+        geometry=gpd.points_from_xy(existing_ac_buses.x, existing_ac_buses.y),
+        crs=geo_crs,
+    ).to_crs(distance_crs)
+
+    new_buses = {}
+    new_lines = {}
+    for gadm_id in missing_regions:
+        country = gadm_shapes.at[gadm_id, "country"]
+        country_ac_buses = existing_ac_buses.loc[
+            existing_ac_buses.country.eq(country)
+        ]
+        if country_ac_buses.empty:
+            raise ValueError(
+                f"Cannot add GADM region {gadm_id}: no existing AC bus in country {country}."
+            )
+
+        region_point = gadm_shapes.at[gadm_id, "geometry"].representative_point()
+        region_point_metric = gpd.GeoSeries(
+            [region_point], crs=geo_crs
+        ).to_crs(distance_crs).iloc[0]
+        anchor_bus = existing_ac_points.loc[country_ac_buses.index].distance(
+            region_point_metric
+        ).idxmin()
+        bus_name = f"{gadm_id}_AC"
+        if bus_name in buses.index or bus_name in new_buses:
+            raise ValueError(f"Bus name {bus_name} already exists.")
+
+        bus = buses.loc[anchor_bus].copy()
+        bus_values = {
+            "x": region_point.x,
+            "y": region_point.y,
+            "lon": region_point.x,
+            "lat": region_point.y,
+            "country": country,
+            "carrier": "AC",
+            "substation_lv": True,
+            "substation_off": False,
+            "geometry": Point(region_point.x, region_point.y).wkt,
+        }
+        for column, value in bus_values.items():
+            if column in bus.index:
+                bus[column] = value
+        new_buses[bus_name] = bus
+
+        line_name = f"gadm_{gadm_id}_connection"
+        while line_name in lines.index or line_name in new_lines:
+            line_name += "_"
+        anchor = buses.loc[anchor_bus]
+        line = lines.iloc[0].copy() if not lines.empty else pd.Series(dtype=object)
+        line_values = {
+            "bus0": bus_name,
+            "bus1": anchor_bus,
+            "length": float(
+                haversine_pts(
+                    [region_point.x, region_point.y],
+                    [anchor.x, anchor.y],
+                )
+            ),
+            "v_nom": anchor.v_nom,
+            "num_parallel": 1.0,
+            "dc": False,
+            "geometry": LineString(
+                [(region_point.x, region_point.y), (anchor.x, anchor.y)]
+            ).wkt,
+            "bounds": MultiPoint(
+                [(region_point.x, region_point.y), (anchor.x, anchor.y)]
+            ).wkt,
+        }
+        for column, value in line_values.items():
+            line[column] = value
+        new_lines[line_name] = line
+
+    buses = pd.concat(
+        [buses, pd.DataFrame.from_dict(new_buses, orient="index")], axis=0
+    )
+    lines = pd.concat(
+        [lines, pd.DataFrame.from_dict(new_lines, orient="index")], axis=0
+    )
+    logger.info(
+        "Added %d AC buses to cover missing GADM regions: %s",
+        len(new_buses),
+        ", ".join(sorted(new_buses)),
+    )
+    return buses, lines, list(new_lines)
 
 
 # TODO Seems to be not needed anymore
@@ -798,6 +966,10 @@ def base_network(
     snapshots_config: dict,
     transformers_config: dict,
     voltages_config: list,
+    gadm_shapes=None,
+    alternative_clustering=False,
+    geo_crs="EPSG:4326",
+    distance_crs="EPSG:3857",
 ) -> "pypsa.Network":
     """Build the base PyPSA network from OSM-derived component tables.
 
@@ -810,10 +982,8 @@ def base_network(
 
     Parameters
     ----------
-    inputs : snakemake.io.Namedlist
-        Snakemake input paths: ``osm_buses``, ``osm_lines``,
-        ``osm_transformers``, ``osm_converters``, ``country_shapes``,
-        ``offshore_shapes``.
+    inputs : object
+        Snakemake input paths for OSM network data and geographic shapes.
     base_network_config : dict
         ``base_network`` section of ``config.yaml``.
     countries_config : list
@@ -830,6 +1000,14 @@ def base_network(
         ``transformers`` section of ``config.yaml``.
     voltages_config : list
         Nominal voltages (kV) to retain.
+    gadm_shapes : str | None, optional
+        Path to the GADM shapes file used for alternative clustering.
+    alternative_clustering : bool, optional
+        Whether to add buses for GADM regions without an existing LV bus.
+    geo_crs : str, optional
+        Coordinate reference system used for geographic coordinates.
+    distance_crs : str, optional
+        Projected coordinate reference system used for distance calculations.
 
     Returns
     -------
@@ -839,6 +1017,16 @@ def base_network(
     """
     buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
     lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
+    gadm_connection_lines = []
+    if alternative_clustering:
+        buses, lines, gadm_connection_lines = ensure_gadm_bus_coverage(
+            buses,
+            lines,
+            gadm_shapes,
+            countries_config,
+            geo_crs=geo_crs,
+            distance_crs=distance_crs,
+        )
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
@@ -887,6 +1075,13 @@ def base_network(
     n.lines.drop(columns="under_construction", inplace=True, errors="ignore")
 
     _set_lines_s_nom_from_linetypes(n)
+    if gadm_connection_lines:
+        n.lines.loc[gadm_connection_lines, "s_nom"] = 1.0
+        n.lines.loc[gadm_connection_lines, "s_nom_extendable"] = True
+        n.lines.loc[gadm_connection_lines, "s_nom_min"] = 1.0
+        n.lines.loc[gadm_connection_lines, "s_nom_max"] = lines_config.get(
+            "s_nom_max", np.inf
+        )
 
     _set_countries_and_substations(inputs, base_network_config, countries_config, n)
 
@@ -915,6 +1110,8 @@ if __name__ == "__main__":
     snapshots = snakemake.params.snapshots
     transformers = snakemake.params.transformers
     voltages = snakemake.params.voltages
+    alternative_clustering = snakemake.params.alternative_clustering
+    crs = snakemake.params.crs
 
     n = base_network(
         inputs,
@@ -926,6 +1123,10 @@ if __name__ == "__main__":
         snapshots,
         transformers,
         voltages,
+        gadm_shapes=snakemake.input.gadm_shapes,
+        alternative_clustering=alternative_clustering,
+        geo_crs=crs["geo_crs"],
+        distance_crs=crs["distance_crs"],
     )
 
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
