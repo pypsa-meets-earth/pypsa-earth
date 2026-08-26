@@ -62,6 +62,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Attach existing batteries as ``StorageUnit`` rather than Store+Link, so extra battery buses do not inflate the minimum cluster count during simplify/cluster [PR #1990](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1990)
+
 * Apply powerplant filter to custom datasets [PR #1995](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1995)
 
 * Remove configurable initial fossil-fuel reserves and fix transport profile weighting and temporal aggregation in sector-coupled networks [PR #1971](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1971)
