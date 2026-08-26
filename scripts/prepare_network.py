@@ -25,16 +25,19 @@ Relevant Settings
 
     lines:
 
-    costs:
-        emission_prices:
+    co2:
+        limit:
+        base:
+        emission_price:
+        automatic_emission:
+        budget:
 
     electricity:
-        co2limit:
         max_hours:
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`costs_cf`, :ref:`electricity_cf`
+    :ref:`co2_cf`, :ref:`electricity_cf`
 
 Inputs
 ------
@@ -55,17 +58,12 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
-import os
 import re
-from zipfile import ZipFile
 
-import country_converter as cc
 import numpy as np
 import pandas as pd
 import pypsa
-import requests
 from _helpers import (
-    BASE_DIR,
     configure_logging,
     create_logger,
     sanitize_carriers,
@@ -78,72 +76,72 @@ idx = pd.IndexSlice
 logger = create_logger(__name__)
 
 
-def download_emission_data():
+def emission_extractor(
+    emission_csv: str, emission_year: int | str, country_names: np.ndarray | list
+) -> pd.Series:
     """
-    Download emission file from EDGAR.
-
-    Returns
-    -------
-    global emission file for all countries in the world.
-    """
-
-    try:
-        url = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip"
-        with requests.get(url) as rq:
-            with open(os.path.join(BASE_DIR, "data/co2.zip"), "wb") as file:
-                file.write(rq.content)
-        file_path = os.path.join(BASE_DIR, "data/co2.zip")
-        with ZipFile(file_path, "r") as zipObj:
-            zipObj.extract(
-                "v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
-                os.path.join(BASE_DIR, "data"),
-            )
-        os.remove(file_path)
-        return "v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
-    except:
-        logger.error(f"Failed download resource from '{url}'.")
-        return False
-
-
-def emission_extractor(filename, emission_year, country_names):
-    """
-    Extracts CO2 emission values for given country codes from the global
-    emission file.
+    Extracts CO2 emission values for given country codes from the pre-processed
+    global emission CSV file.
 
     Parameters
     ----------
-    filename : str
-        Global emission filename
-    emission_year : int
-        Year of CO2 emissions
+    emission_csv : str
+        Path to the CSV file produced by build_co2_emissions. The file has
+        columns country_code_a3 (three-letter ISO code), country_code_a2
+        (two-letter ISO code), country_name (full country name), and year columns
+        named Y_YYYY.
+    emission_year : int or str
+        Year of CO2 emissions.
     country_names : numpy.ndarray
         Two letter country codes of analysed countries.
 
     Returns
     -------
-    CO2 emission values of studied countries.
+    pd.Series
+        CO2 emission values (in kt CO2) of studied countries for the given year.
     """
+    emission_year = int(emission_year)
+    df = pd.read_csv(emission_csv).set_index("country_code_a2")
 
-    # data reading process
-    datapath = os.path.join(BASE_DIR, "data", filename)
-    df = pd.read_excel(datapath, sheet_name="v6.0_EM_CO2_fossil_IPCC1996", skiprows=8)
-    df.columns = df.iloc[0]
-    df = df.set_index("Country_code_A3")
-    df = df.loc[
-        df["IPCC_for_std_report_desc"] == "Public electricity and heat production"
-    ]
-    df = df.loc[:, "Y_1970":"Y_2018"].astype(float).ffill(axis=1)
-    df = df.loc[:, "Y_1970":"Y_2018"].astype(float).bfill(axis=1)
-    cc_iso3 = cc.convert(names=country_names, to="ISO3")
-    if len(country_names) == 1:
-        cc_iso3 = [cc_iso3]
-    emission_by_country = df.loc[
-        df.index.intersection(cc_iso3), "Y_" + str(emission_year)
-    ]
-    missing_ccs = np.setdiff1d(cc_iso3, df.index.intersection(cc_iso3))
+    # track the available years
+    available_years = sorted(
+        df.columns.difference(
+            ["country_code_a3", "country_code_a2", "country_name"]
+        ).map(int)
+    )
+    # find the closest available year: if present, distance is 0, otherwise the closest year is used
+    closest_year = min(available_years, key=lambda y: abs(y - emission_year))
+    if emission_year not in available_years:
+        logger.warning(
+            f"Emission year {emission_year} not found in data. "
+            f"Using closest available year {closest_year} instead."
+        )
+
+    country_codes = np.atleast_1d(country_names).tolist()
+    available_countries = df.index.intersection(country_codes)
+    emission_by_country = df.loc[available_countries, str(emission_year)]
+    if emission_by_country.index.has_duplicates:
+        duplicate_countries = emission_by_country.index[
+            emission_by_country.index.duplicated()
+        ].unique()
+        logger.warning(
+            "Multiple emission values found for the following countries: "
+            f"{list(duplicate_countries)}. Summing duplicate entries."
+        )
+        emission_by_country = emission_by_country.groupby(level=0).sum()
+
+    missing_ccs = np.setdiff1d(country_codes, available_countries)
     if missing_ccs.size:
         logger.warning(
             f"The emission value for the following countries has not been found: {missing_ccs}"
+        )
+    if emission_by_country.empty:
+        raise ValueError(
+            f"No CO2 emission data could be extracted from '{emission_csv}' for year "
+            f"{emission_year} and countries {country_codes}. "
+            "The automatic CO2 limit cannot be derived from an empty result. "
+            "Please check the emission data file, the requested base year, or the "
+            "configured countries."
         )
     return emission_by_country
 
@@ -171,12 +169,9 @@ def add_gaslimit(n, gaslimit, Nyears=1.0):
     )
 
 
-def add_emission_prices(n, emission_prices={"co2": 0.0}, exclude_co2=False):
-    if exclude_co2:
-        emission_prices.pop("co2")
+def add_emission_prices(n, co2_price=0.0):
     ep = (
-        pd.Series(emission_prices).rename(lambda x: x + "_emissions")
-        * n.carriers.filter(like="_emissions")
+        pd.Series({"co2_emissions": co2_price}) * n.carriers.filter(like="_emissions")
     ).sum(axis=1)
     gen_ep = n.generators.carrier.map(ep) / n.generators.efficiency
     n.generators["marginal_cost"] += gen_ep
@@ -337,8 +332,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_network",
             simpl="",
-            clusters="4",
-            ll="c1",
+            clusters="6",
+            ll="copt",
             opts="Co2L-4H",
             # configfile="test/config.sector.yaml",
         )
@@ -370,23 +365,20 @@ if __name__ == "__main__":
     for o in opts:
         if "Co2L" in o:
             m = re.findall(r"[0-9]*\.?[0-9]+$", o)
-            if snakemake.params.electricity["automatic_emission"]:
+            if snakemake.params.co2["automatic_emission"]["enable"]:
                 country_names = n.buses.country.unique()
-                emission_year = snakemake.params.electricity[
-                    "automatic_emission_base_year"
-                ]
-                filename = download_emission_data()
+                emission_year = snakemake.params.co2["automatic_emission"]["base_year"]
                 co2limit = emission_extractor(
-                    filename, emission_year, country_names
+                    snakemake.input.emissions, emission_year, country_names
                 ).sum()
                 if len(m) > 0:
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
             elif len(m) > 0:
-                co2limit = float(m[0]) * float(snakemake.params.electricity["co2base"])
+                co2limit = float(m[0]) * float(snakemake.params.co2["base"])
                 logger.info("Setting CO2 limit according to wildcard value.")
             else:
-                co2limit = float(snakemake.params.electricity["co2limit"])
+                co2limit = float(snakemake.params.co2["limit"])
                 logger.info("Setting CO2 limit according to config value.")
             add_co2limit(n, co2limit, Nyears)
             break
@@ -428,10 +420,10 @@ if __name__ == "__main__":
             m = re.findall(r"[0-9]*\.?[0-9]+$", o)
             if len(m) > 0:
                 logger.info("Setting emission prices according to wildcard value.")
-                add_emission_prices(n, dict(co2=float(m[0])))
+                add_emission_prices(n, float(m[0]))
             else:
                 logger.info("Setting emission prices according to config value.")
-                add_emission_prices(n, snakemake.params.emission_prices)
+                add_emission_prices(n, snakemake.params.co2["emission_price"])
             break
 
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]

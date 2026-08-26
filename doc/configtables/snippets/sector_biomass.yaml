@@ -1,5 +1,4 @@
-  # ------------------- BIOMASS SECTOR -------------------
-
+  # ------------------- Biomass sector -------------------
   biomass_transport: true # biomass transport between nodes
   biomass_transport_default_cost: 0.1 #EUR/km/MWh
   biomass_default_carrier: "solid biomass" # Can be either "solid biomass" or "biomass"

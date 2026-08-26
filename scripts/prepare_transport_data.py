@@ -9,6 +9,7 @@ import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
+from _helpers import BASE_DIR, read_csv_nafix
 
 
 def transport_degree_factor(
@@ -67,7 +68,7 @@ def prepare_transport_data(n):
     Function to prepare the data required for the (land) transport sector.
     """
 
-    energy_totals = pd.read_csv(
+    energy_totals = read_csv_nafix(
         snakemake.input.energy_totals_name,
         index_col=0,
         keep_default_na=False,
@@ -82,7 +83,7 @@ def prepare_transport_data(n):
 
     # Get overall demand curve for all vehicles
 
-    traffic = pd.read_csv(
+    traffic = read_csv_nafix(
         snakemake.input.traffic_data_KFZ, skiprows=2, usecols=["count"]
     ).squeeze("columns")
 
@@ -93,10 +94,23 @@ def prepare_transport_data(n):
         weekly_profile=traffic.values,
     )
 
-    nodal_transport_shape = transport_shape / transport_shape.sum().sum()
-    transport_shape = transport_shape / transport_shape.sum()
+    snapshot_weights = n.snapshot_weightings.generators.reindex(transport_shape.index)
 
-    transport_data = pd.read_csv(
+    if snapshot_weights.isna().any():
+        raise ValueError(
+            "Transport-profile snapshots do not match the network snapshot weights."
+        )
+
+    weighted_sum = transport_shape.mul(snapshot_weights, axis=0).sum(axis=0)
+
+    if (weighted_sum <= 0).any():
+        raise ValueError(
+            "Transport profiles must have a positive weighted sum for every node."
+        )
+
+    transport_shape = transport_shape.div(weighted_sum, axis=1)
+
+    transport_data = read_csv_nafix(
         snakemake.input.transport_name, index_col=0, keep_default_na=False
     )
 
@@ -144,7 +158,11 @@ def prepare_transport_data(n):
 
     # divide out the heating/cooling demand from ICE totals
     # and multiply back in the heating/cooling demand for EVs
-    ice_correction = (transport_shape * (1 + dd_ICE)).sum() / transport_shape.sum()
+    weighted_transport_shape = transport_shape.mul(snapshot_weights, axis=0)
+
+    ice_correction = (
+        weighted_transport_shape.mul(1 + dd_ICE).sum() / weighted_transport_shape.sum()
+    )
 
     if snakemake.config["custom_data"]["transport_demand"]:
         energy_totals_transport = nodal_energy_totals["total road"]
@@ -164,7 +182,7 @@ def prepare_transport_data(n):
 
     # derive plugged-in availability for PKW's (cars)
 
-    traffic = pd.read_csv(
+    traffic = read_csv_nafix(
         snakemake.input.traffic_data_Pkw, skiprows=2, usecols=["count"]
     ).squeeze("columns")
 
@@ -211,13 +229,12 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             planning_horizons="2030",
-            demand="AB",
         )
 
     n = pypsa.Network(snakemake.input.network)
 
     # Get population layout
-    pop_layout = pd.read_csv(
+    pop_layout = read_csv_nafix(
         snakemake.input.clustered_pop_layout,
         index_col=0,
         keep_default_na=False,

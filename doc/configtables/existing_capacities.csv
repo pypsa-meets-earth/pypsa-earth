@@ -1,0 +1,6 @@
+Parameter,Unit,Values,Description
+grouping_years_power,list of years,,Vintage grouping years for existing power plant capacities in ``add_existing_baseyear`` and ``add_electricity``.
+grouping_years_heat,list of years,,Vintage grouping years for existing heating capacities; should not extend beyond 2020.
+threshold_capacity,MW,,Minimum installed capacity [MW] for an asset to be included when building existing capacities.
+default_heating_lifetime,years,,Default lifetime [years] for existing heating assets when missing from input data.
+conventional_carriers,list,,Carriers listed for existing-capacity handling alongside brownfield data.
