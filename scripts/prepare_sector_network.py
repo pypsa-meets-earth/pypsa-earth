@@ -1130,14 +1130,13 @@ def add_biomass(
     Parameters
     ----------
     n : pypsa.Network
-        The PyPSA network container object
+        The PyPSA network to which the biomass and biogas potentials will be added.
     costs : pd.DataFrame
         DataFrame containing the costs for the biomass and biogas technologies.
     options : dict
-        Dictionary of configuration options
+        Dictionary containing the options for biomass implementation in the sector network.
     pop_layout : pd.DataFrame
-        DataFrame containing population layout information
-        The PyPSA network to which the biomass and biogas potentials will be added.
+        DataFrame containing population layout information.
 
     Returns
     -------
