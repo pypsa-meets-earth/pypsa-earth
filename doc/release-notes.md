@@ -11,9 +11,8 @@ Release Notes
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
-* Add part 1 of the CLI to accompany use-case documentation page 1 to develop a baseline model [PR #1918](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1918)
 
-* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1882](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1882)
+* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
 
 * Inntegrate additional tutorials for use-case documentation [PR #1930](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1930)
 
