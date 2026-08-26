@@ -329,9 +329,9 @@ def ensure_gadm_bus_coverage(
         )
     gadm_shapes = gadm_shapes.set_index("GADM_ID")
     gadm_shapes.index = gadm_shapes.index.astype(str)
-    gadm_shapes = gadm_shapes.loc[
-        gadm_shapes.country.isin(countries)
-    ].loc[lambda frame: ~frame.index.duplicated(keep="first")]
+    gadm_shapes = gadm_shapes.loc[gadm_shapes.country.isin(countries)].loc[
+        lambda frame: ~frame.index.duplicated(keep="first")
+    ]
     if gadm_shapes.empty:
         return buses, lines, []
 
@@ -348,12 +348,8 @@ def ensure_gadm_bus_coverage(
     ]
     existing_regions = []
     for country in countries:
-        country_buses = existing_lv_buses.loc[
-            existing_lv_buses.country.eq(country)
-        ]
-        country_shapes = gadm_shapes_metric.loc[
-            gadm_shapes_metric.country.eq(country)
-        ]
+        country_buses = existing_lv_buses.loc[existing_lv_buses.country.eq(country)]
+        country_shapes = gadm_shapes_metric.loc[gadm_shapes_metric.country.eq(country)]
         if country_buses.empty or country_shapes.empty:
             continue
         bus_points = gpd.GeoDataFrame(
@@ -361,9 +357,7 @@ def ensure_gadm_bus_coverage(
             geometry=gpd.points_from_xy(country_buses.x, country_buses.y),
             crs=geo_crs,
         ).to_crs(distance_crs)
-        joined = gpd.sjoin_nearest(
-            bus_points, country_shapes, how="left"
-        )
+        joined = gpd.sjoin_nearest(bus_points, country_shapes, how="left")
         joined = joined[~joined.index.duplicated(keep="first")]
         existing_regions.extend(joined["GADM_ID"].dropna().astype(str))
     existing_regions = pd.Index(existing_regions, dtype=str).unique()
@@ -391,21 +385,21 @@ def ensure_gadm_bus_coverage(
     new_lines = {}
     for gadm_id in missing_regions:
         country = gadm_shapes.at[gadm_id, "country"]
-        country_ac_buses = existing_ac_buses.loc[
-            existing_ac_buses.country.eq(country)
-        ]
+        country_ac_buses = existing_ac_buses.loc[existing_ac_buses.country.eq(country)]
         if country_ac_buses.empty:
             raise ValueError(
                 f"Cannot add GADM region {gadm_id}: no existing AC bus in country {country}."
             )
 
         region_point = gadm_shapes.at[gadm_id, "geometry"].representative_point()
-        region_point_metric = gpd.GeoSeries(
-            [region_point], crs=geo_crs
-        ).to_crs(distance_crs).iloc[0]
-        anchor_bus = existing_ac_points.loc[country_ac_buses.index].distance(
-            region_point_metric
-        ).idxmin()
+        region_point_metric = (
+            gpd.GeoSeries([region_point], crs=geo_crs).to_crs(distance_crs).iloc[0]
+        )
+        anchor_bus = (
+            existing_ac_points.loc[country_ac_buses.index]
+            .distance(region_point_metric)
+            .idxmin()
+        )
         bus_name = f"{gadm_id}_AC"
         if bus_name in buses.index or bus_name in new_buses:
             raise ValueError(f"Bus name {bus_name} already exists.")
