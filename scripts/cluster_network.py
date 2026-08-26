@@ -758,9 +758,11 @@ if __name__ == "__main__":
         busmap = n.buses.index.to_series()
         linemap = n.lines.index.to_series()
         clustering = pypsa.clustering.spatial.Clustering(n, busmap, linemap)
-    elif len(n.buses) < n_clusters:
-        logger.error(
-            f"Desired number of clusters ({n_clusters}) higher than the number of buses ({len(n.buses)})"
+    elif len(n.buses) < n_clusters and not alternative_clustering:
+        raise ValueError(
+            f"Desired number of clusters ({n_clusters}) cannot be higher than "
+            f"the number of buses ({len(n.buses)}). Set `scenario.clusters` "
+            "to a value between 1 and the number of buses."
         )
     else:
         line_length_factor = snakemake.params.length_factor
