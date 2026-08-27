@@ -1243,7 +1243,7 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
                 ].to_string(),
             )
 
-        biomass_transport = biomass_transport.loc[valid_biomass_routes].copy()
+        biomass_transport = biomass_transport.loc[valid_biomass_routes]
 
         biomass_transport["bus0"] = biomass_transport["bus0"].map(biomass_bus_map)
         biomass_transport["bus1"] = biomass_transport["bus1"].map(biomass_bus_map)
@@ -1275,13 +1275,11 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         n.madd(
             "Link",
             biomass_transport.index,
-            bus0=biomass_transport["bus0"].to_numpy(),
-            bus1=biomass_transport["bus1"].to_numpy(),
+            bus0=biomass_transport["bus0"],
+            bus1=biomass_transport["bus1"],
             p_nom_extendable=True,
-            length=biomass_transport["length"].to_numpy(),
-            marginal_cost=(
-                biomass_transport["costs"] * biomass_transport["length"]
-            ).to_numpy(),
+            length=biomass_transport["length"],
+            marginal_cost=biomass_transport["costs"] * biomass_transport["length"],
             capital_cost=1,
             carrier="solid biomass transport",
         )
@@ -1450,7 +1448,7 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
                 ].to_string(),
             )
 
-        co2_links = co2_links.loc[valid_co2_routes].copy()
+        co2_links = co2_links.loc[valid_co2_routes]
 
         co2_links["bus0"] = co2_links["bus0"].map(co2_bus_map)
         co2_links["bus1"] = co2_links["bus1"].map(co2_bus_map)
@@ -1470,8 +1468,8 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
         n.madd(
             "Link",
             co2_links.index,
-            bus0=co2_links["bus0"].to_numpy(),
-            bus1=co2_links["bus1"].to_numpy(),
+            bus0=co2_links["bus0"],
+            bus1=co2_links["bus1"],
             p_min_pu=-1,
             p_nom_extendable=True,
             length=co2_links["length"].to_numpy(),
