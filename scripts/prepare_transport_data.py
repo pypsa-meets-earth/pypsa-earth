@@ -94,8 +94,21 @@ def prepare_transport_data(n):
         weekly_profile=traffic.values,
     )
 
-    nodal_transport_shape = transport_shape / transport_shape.sum().sum()
-    transport_shape = transport_shape / transport_shape.sum()
+    snapshot_weights = n.snapshot_weightings.generators.reindex(transport_shape.index)
+
+    if snapshot_weights.isna().any():
+        raise ValueError(
+            "Transport-profile snapshots do not match the network snapshot weights."
+        )
+
+    weighted_sum = transport_shape.mul(snapshot_weights, axis=0).sum(axis=0)
+
+    if (weighted_sum <= 0).any():
+        raise ValueError(
+            "Transport profiles must have a positive weighted sum for every node."
+        )
+
+    transport_shape = transport_shape.div(weighted_sum, axis=1)
 
     transport_data = read_csv_nafix(
         snakemake.input.transport_name, index_col=0, keep_default_na=False
@@ -145,7 +158,11 @@ def prepare_transport_data(n):
 
     # divide out the heating/cooling demand from ICE totals
     # and multiply back in the heating/cooling demand for EVs
-    ice_correction = (transport_shape * (1 + dd_ICE)).sum() / transport_shape.sum()
+    weighted_transport_shape = transport_shape.mul(snapshot_weights, axis=0)
+
+    ice_correction = (
+        weighted_transport_shape.mul(1 + dd_ICE).sum() / weighted_transport_shape.sum()
+    )
 
     if snakemake.config["custom_data"]["transport_demand"]:
         energy_totals_transport = nodal_energy_totals["total road"]
