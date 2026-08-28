@@ -179,14 +179,35 @@ def get_building_area_center(df, crs):
 
 def download_global_buildings(country_code, country_buildings_fn, crs, update=False):
     """
-    Downloads global building data for a specific country and writes the processed
-    result incrementally to a single parquet file.
+    Download global building data for a country and write results incrementally.
 
-    Compared to the original implementation, this avoids
+    Fetches Microsoft Global Buildings quadrant URLs for the specified country,
+    processes each quadrant using ``get_building_area_center``, and streams the
+    processed building records directly into a Parquet file to avoid keeping all
+    quadrants in RAM at once.
 
-        pd.concat(list(...))
+    Parameters
+    ----------
+    country_code : str
+        Country code used to filter building download URLs (e.g. 'NG', 'DE').
+    country_buildings_fn : str or path-like
+        Output file path where the final Parquet file will be saved.
+    crs : dict
+        Dictionary containing CRS definitions with keys 'geo_crs', 'area_crs',
+        and 'distance_crs'.
+    update : bool, optional
+        Whether to force updating/re-downloading the building dataset index URL
+        file (default is False).
 
-    and therefore does not keep all building quadrants in RAM at once.
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    Exception
+        Re-raises any error encountered during processing after cleaning up
+        temporary output files.
     """
     logger.info(f"Downloading Global Buildings for {country_code}")
 
