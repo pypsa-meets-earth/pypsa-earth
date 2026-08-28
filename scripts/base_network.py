@@ -311,7 +311,45 @@ def ensure_gadm_bus_coverage(
     geo_crs: str = "EPSG:4326",
     distance_crs: str = "EPSG:3857",
 ) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
-    """Add connected AC buses for GADM regions without an LV bus."""
+    """Ensure that each selected GADM region has a connected AC/LV bus.
+
+    Regions are considered covered when an existing AC bus marked as an LV
+    substation is nearest to the region in the projected coordinate system.
+    For every missing region, the function places a new bus at the geometry's
+    representative point, copies the remaining bus attributes from the
+    nearest existing AC bus in the same country, and connects the new bus to
+    that anchor with an AC line.  GADM geometries are first normalised to
+    ``geo_crs`` and then transformed to ``distance_crs`` for nearest-neighbour
+    calculations. 
+
+    Parameters
+    ----------
+    buses : pd.DataFrame
+        Bus table indexed by bus ID.  It must contain ``x``, ``y``,
+        ``country``, ``carrier``, and ``substation_lv`` columns so that
+        existing LV buses and same-country AC anchor buses can be identified.
+    lines : pd.DataFrame
+        Line table containing ``bus0`` and ``bus1`` columns. 
+    gadm_shapes_path : str | None
+        Path to a GADM vector file containing a ``GADM_ID`` column, a
+        ``country`` column, and polygon geometries.
+    countries : list[str]
+        ISO 3166-1 alpha-2 country codes whose GADM regions should be checked
+        and, when necessary, supplemented with new buses.
+    geo_crs : str, optional
+        CRS used for bus and GADM geographic coordinates. GADM files without
+        a CRS are assigned this CRS; files with a CRS are reprojected to it.
+    distance_crs : str, optional
+        Projected CRS used for nearest-neighbour and anchor-distance
+        calculations.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, list[str]]
+        The updated bus table, the updated line table, and the IDs of the
+        generated GADM connection lines. Empty input coverage or no missing
+        regions returns the copied input tables and an empty list.
+    """
     if not gadm_shapes_path:
         raise ValueError("A GADM shapes path is required for GADM bus coverage.")
 
@@ -960,10 +998,10 @@ def base_network(
     snapshots_config: dict,
     transformers_config: dict,
     voltages_config: list,
-    gadm_shapes=None,
-    alternative_clustering=False,
-    geo_crs="EPSG:4326",
-    distance_crs="EPSG:3857",
+    gadm_shapes: str | None = None,
+    alternative_clustering: bool = False,
+    geo_crs: str = "EPSG:4326",
+    distance_crs: str = "EPSG:3857",
 ) -> "pypsa.Network":
     """Build the base PyPSA network from OSM-derived component tables.
 
@@ -1070,9 +1108,9 @@ def base_network(
 
     _set_lines_s_nom_from_linetypes(n)
     if gadm_connection_lines:
-        n.lines.loc[gadm_connection_lines, "s_nom"] = 1.0
+        n.lines.loc[gadm_connection_lines, "s_nom"] = 0.0
         n.lines.loc[gadm_connection_lines, "s_nom_extendable"] = True
-        n.lines.loc[gadm_connection_lines, "s_nom_min"] = 1.0
+        n.lines.loc[gadm_connection_lines, "s_nom_min"] = 0.0
         n.lines.loc[gadm_connection_lines, "s_nom_max"] = lines_config.get(
             "s_nom_max", np.inf
         )
