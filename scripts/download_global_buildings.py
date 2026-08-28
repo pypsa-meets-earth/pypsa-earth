@@ -84,11 +84,34 @@ def download_global_buildings_url(update=False):
 
 def get_building_area_center(df, crs):
     """
-    Calculates the area and centroid of buildings from Microsoft Global Buildings
-    quadrant files.
+    Calculate the footprint area and centroid coordinates of buildings.
 
-    This version processes one quadrant at a time and explicitly frees memory
-    after each quadrant.
+    Processes Microsoft Global Buildings quadrant files sequentially (one quadrant
+    at a time) to keep memory usage low. Converts raw JSON geometries into spatial
+    geometries, reprojects them to derive accurate surface area and centroid coordinates,
+    and yields the results chunk-by-chunk.
+
+    Required columns
+    ----------------
+    Url : str
+        URL or file path to the Microsoft Global Buildings JSON/GeoJSON-Lines quadrant file.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing links to building quadrant files in a 'Url' column.
+    crs : dict
+        Dictionary containing CRS definitions with keys 'geo_crs' (geographic CRS,
+        e.g., EPSG:4326), 'area_crs' (equal-area projection for area calculation),
+        and 'distance_crs' (projected CRS for centroid calculations).
+
+    Yields
+    ------
+    pandas.DataFrame
+        Dataframe for a single quadrant containing:
+        - area (int64): Building footprint area.
+        - x (float64): Centroid longitude/x-coordinate in geographic CRS.
+        - y (float64): Centroid latitude/y-coordinate in geographic CRS.
     """
     tqdm_kwargs = dict(
         ascii=False,
