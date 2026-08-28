@@ -101,7 +101,7 @@ There are multiple ways to get involved and learn more about our work:
 ### Releases
 
 - [Release Notes](releases/release-notes.md) - List of new features and changes for each release of PyPSA-Earth model
-- [Maintenance](releases/maintainance-notes.md) - Technical notes of code and data maintenance
+- [Maintenance](releases/maintenance-notes.md) - Technical notes of code and data maintenance
 
 ### API Reference
 
