@@ -101,10 +101,29 @@ def get_h2_target_buses(n, import_nodes):
 
 def add_pipeline_h2_imports(n, import_nodes):
     """
-    Add pipeline-based H2 import generators.
+    Add pipeline-based H2 import generators to the network.
 
-    Pipeline imports are modeled as extendable generators with
-    ``p_nom_max = p_nom_max_pipeline``.
+    Pipeline imports are modeled as extendable generators attached to
+    the H2 buses of the specified import nodes, using ``p_nom_max_pipeline``
+    as their maximum nominal capacity limit.
+
+    Required columns
+    ----------------
+    bus : str
+        Base bus name without the H2 suffix.
+    p_nom_max_pipeline : float
+        Maximum pipeline-based H2 import capacity at the node.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network to which the pipeline-based H2 import generators will be added.
+    import_nodes : pandas.DataFrame
+        DataFrame containing prepared H2 import node information.
+
+    Returns
+    -------
+    None
     """
     sources = snakemake.params.imports_config["sources"]
     if "pipelines" not in sources:
