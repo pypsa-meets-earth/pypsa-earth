@@ -189,7 +189,7 @@ if config["enable"].get("retrieve_databundle", True):
             el_demand_out,
         run:
             logger.info(f"Saving dataset to {output[0]}")
-            copyfile(input.remote, output[0])
+            copyfile(input.remote[0], output[0])
 
 
 if config["enable"].get("download_global_buildings", True):
