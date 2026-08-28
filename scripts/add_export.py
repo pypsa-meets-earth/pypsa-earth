@@ -228,8 +228,6 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     countries = list(n.buses.country.unique())
 
-    
-
     # Create export profile
     export_profile = create_export_profile()
 
