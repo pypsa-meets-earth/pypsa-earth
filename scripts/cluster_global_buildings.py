@@ -3,11 +3,43 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-This script processes global building data to calculate solar rooftop area.
+Calculate usable solar rooftop area per region from global building data.
 
-Memory-efficient version:
-The input parquet file is read in batches and each batch is spatially joined to
-the onshore regions. Only the aggregated rooftop area per region is kept in RAM.
+This script processes global building footprint data in Parquet format and
+aggregates the estimated usable rooftop area for each onshore bus region in a
+specified country.
+
+To process large datasets memory-efficiently:
+1. The building Parquet file is read sequentially in batches.
+2. Useful rooftop areas are calculated via a pre-compiled lookup table.
+3. Buildings are mapped to onshore region geometries using spatial joins
+   (point-in-polygon with a nearest-neighbor fallback for near-border points).
+4. Results are accumulated incrementally per region, keeping memory consumption low.
+
+Inputs
+------
+snakemake.input.country_buildings : str
+    Path to the Parquet file containing building data with columns 'area', 'x', and 'y'.
+snakemake.input.regions_onshore : str
+    Path to the vector dataset (GeoJSON/GPKG/SHP) containing onshore regions.
+
+Outputs
+-------
+snakemake.output.solar_rooftop_layout : str
+    Path to the output CSV file containing aggregated useful rooftop area per region.
+
+Parameters
+----------
+snakemake.params.crs : dict
+    Dictionary with keys 'distance_crs' (projected CRS) and 'geo_crs' (geographic CRS).
+snakemake.params.install_ratio : dict
+    Mapping of building area thresholds to usable rooftop fractions.
+snakemake.params.solar_rooftop_enable : bool
+    Flag indicating whether to execute the calculation or output an empty CSV.
+snakemake.params.tolerance : float
+    Maximum distance in km to assign unmatched buildings to the nearest region.
+GLOBAL_BUILDINGS_BATCH_SIZE : env variable, optional
+    Number of rows per Parquet batch (default: 250,000).
 """
 
 import gc
