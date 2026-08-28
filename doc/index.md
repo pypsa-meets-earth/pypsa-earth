@@ -98,6 +98,11 @@ There are multiple ways to get involved and learn more about our work:
 - [Software Hints](community/software-hints.md) providing tips and troubleshooting
 - [FAQ](community/faq.md) listing common run errors and fixes
 
+### Releases
+
+- [Release Notes](releases/release-notes.md) - List of new features and changes for each release of PyPSA-Earth model
+- [Maintainance](releases/maintainance-notes.md) - Technical notes of code and data maintainance
+
 ### API Reference
 
 - [API Documentation](api-reference/index.md) - Complete API reference
