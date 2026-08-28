@@ -2,6 +2,48 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+Prepares airport location and size data used for the aviation sector.
+
+Relevant Settings
+-----------------
+
+```yaml
+custom_data:
+    airports:
+
+sector:
+    airport_sizing_factor:
+```
+
+Outputs
+-------
+
+- ``resources/airports.csv``: medium and large scheduled airports per country. The
+  ``fraction`` column gives each airport's share of its country's aviation demand,
+  derived from the size weights set by ``airport_sizing_factor``.
+
+Description
+-----------
+
+If ``custom_data.airports`` is enabled, the user-provided
+``data/custom/airports.csv`` is copied to the output path. Otherwise, the
+global OurAirports dataset is downloaded, filtered to commercial airports
+with a scheduled service, and combined with runway information. Each
+airport is assigned a size weight of 1 if medium and
+``sector.airport_sizing_factor`` if large. The ``fraction`` column is that
+weight divided by the sum of the weights of all airports in the same
+country, so the fractions within a country sum to one. Downstream,
+``prepare_sector_network`` multiplies this fraction by the national aviation
+demand to obtain the demand served by each airport.
+
+References
+----------
+
+- OurAirports, maintained by David Megginson: global airport and runway database,
+  released to the public domain (https://ourairports.com/data/). Downloaded from
+  the mirror at https://davidmegginson.github.io/ourairports-data/.
+"""
 
 import shutil
 from pathlib import Path
@@ -16,14 +58,20 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_airports():
+def download_airports() -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Downloads the world airports as .csv File in addition to runnways
-    information.
+    Download the global airport and runway tables from OurAirports.
 
-    The following csv file was downloaded from the webpage
-    https://ourairports.com/data/
-    as a .csv file. The dataset contains 74844 airports.
+    The tables are fetched live from the OurAirports mirror, so the number of
+    airports and runways they contain changes as the upstream dataset is
+    updated. See the module-level References section for the data source.
+
+    Returns
+    -------
+    airports_csv : pd.DataFrame
+        World airports, one row per airport.
+    runways_csv : pd.DataFrame
+        World runways, one row per runway.
     """
     fn = "https://davidmegginson.github.io/ourairports-data/airports.csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
@@ -40,9 +88,22 @@ def download_airports():
     return (airports_csv, runways_csv)
 
 
-def preprocess_airports(df):
+def preprocess_airports(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Preprocess the airports data
+    Preprocess the airports data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Merged airports and runways data, as returned by :func:`download_airports`.
+
+    Returns
+    -------
+    pd.DataFrame
+        Medium and large scheduled, commercial airports. The ``fraction``
+        column holds each airport's size weight divided by the total weight
+        of all airports in the same country, and ``iso_country`` is renamed
+        to ``country``.
     """
 
     # Keep only airports that are of type medium and large
