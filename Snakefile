@@ -178,6 +178,8 @@ if config["enable"].get("retrieve_databundle", True):
     el_demand_out = el_demand_cfg["output"][0]
 
     rule retrieve_el_demand:
+        message:
+            "Retrieving electricity demand data {el_demand_bundle} from {el_demand_url}"
         input:
             remote=HTTP.remote(
                 el_demand_url,
@@ -186,6 +188,7 @@ if config["enable"].get("retrieve_databundle", True):
         output:
             el_demand_out,
         run:
+            logger.info(f"Saving dataset to {output[0]}")
             copyfile(input.remote, output[0])
 
 
