@@ -154,8 +154,29 @@ def add_port_h2_imports(n, import_nodes):
     """
     Add port-based H2 import generators.
 
-    Port imports are modeled as extendable generators with
-    ``p_nom_max = p_nom_max_port``.
+    Port imports are modeled as extendable generators attached to
+    the H2 buses of the specified import nodes, using ``p_nom_max_port``
+    as their maximum nominal capacity limit.
+
+    Required columns
+    ----------------
+    bus : str
+        Base bus name without the H2 suffix.
+    h2_bus : str
+        Name of the H2 bus to which the generator is attached.
+    p_nom_max_port : float
+        Maximum port-based H2 import capacity at the node.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network to which the port-based H2 import generators will be added.
+    import_nodes : pandas.DataFrame
+        DataFrame containing prepared H2 import node information.
+
+    Returns
+    -------
+    None
     """
     sources = snakemake.params.imports_config["sources"]
     if "ports" not in sources:
