@@ -21,7 +21,6 @@ Relevant Settings
         marginal_cost:
         capital_cost:
         conventional_carriers:
-        co2limit:
         extendable_carriers:
         include_renewable_capacities_from_OPSD:
         estimate_renewable_capacities_from_capacity_stats:
@@ -1048,7 +1047,7 @@ def attach_hydro(
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = (
-            pd.read_csv(
+            read_csv_nafix(
                 snakemake.input.hydro_capacities,
                 comment="#",
                 na_values=["-"],
@@ -1172,95 +1171,6 @@ def attach_existing_batteries(
     )
 
 
-def attach_extendable_generators(
-    n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
-) -> None:
-    """
-    Add extendable conventional generators (OCGT, CCGT, nuclear) with zero capacity.
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        The PyPSA network to modify.
-    costs : pd.DataFrame
-        DataFrame containing technology costs.
-    ppl : pd.DataFrame
-        Power plant DataFrame.
-
-    Returns
-    -------
-    None
-    """
-    logger.warning("The function is deprecated with the next release")
-    elec_opts = snakemake.params.electricity
-    carriers = pd.Index(elec_opts["extendable_carriers"]["Generator"])
-
-    _add_missing_carriers_from_costs(n, costs, carriers)
-
-    for tech in carriers:
-        if tech.startswith("OCGT"):
-            ocgt = (
-                ppl.query("carrier in ['OCGT', 'CCGT']")
-                .groupby("bus", as_index=False)
-                .first()
-            )
-            n.madd(
-                "Generator",
-                ocgt.index,
-                suffix=" OCGT",
-                bus=ocgt["bus"],
-                carrier=tech,
-                p_nom_extendable=True,
-                p_nom=0.0,
-                capital_cost=costs.at["OCGT", "capital_cost"],
-                marginal_cost=costs.at["OCGT", "marginal_cost"],
-                efficiency=costs.at["OCGT", "efficiency"],
-            )
-
-        elif tech.startswith("CCGT"):
-            ccgt = (
-                ppl.query("carrier in ['OCGT', 'CCGT']")
-                .groupby("bus", as_index=False)
-                .first()
-            )
-            n.madd(
-                "Generator",
-                ccgt.index,
-                suffix=" CCGT",
-                bus=ccgt["bus"],
-                carrier=tech,
-                p_nom_extendable=True,
-                p_nom=0.0,
-                capital_cost=costs.at["CCGT", "capital_cost"],
-                marginal_cost=costs.at["CCGT", "marginal_cost"],
-                efficiency=costs.at["CCGT", "efficiency"],
-            )
-
-        elif tech.startswith("nuclear"):
-            nuclear = (
-                ppl.query("carrier == 'nuclear'").groupby("bus", as_index=False).first()
-            )
-            n.madd(
-                "Generator",
-                nuclear.index,
-                suffix=" nuclear",
-                bus=nuclear["bus"],
-                carrier=tech,
-                p_nom_extendable=True,
-                p_nom=0.0,
-                capital_cost=costs.at["nuclear", "capital_cost"],
-                marginal_cost=costs.at["nuclear", "marginal_cost"],
-                efficiency=costs.at["nuclear", "efficiency"],
-            )
-
-        else:
-            raise NotImplementedError(
-                f"Adding extendable generators for carrier "
-                "'{tech}' is not implemented, yet. "
-                "Only OCGT, CCGT and nuclear are allowed at the moment."
-            )
-
-
 def add_nice_carrier_names(n: pypsa.Network, config: dict) -> None:
     """
     Add nice names and colors to carriers.
@@ -1307,7 +1217,7 @@ if __name__ == "__main__":
     # Snakemake imports:
     demand_profiles = snakemake.input["demand_profiles"]
 
-    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.tech_costs, index_col=0)
     ppl = load_powerplants(
         snakemake.input.powerplants,
         costs,
@@ -1364,7 +1274,7 @@ if __name__ == "__main__":
     attach_existing_batteries(n, costs, ppl)
     apply_nuclear_p_max_pu(
         n,
-        pd.read_csv(snakemake.input.nuclear_p_max_pu),
+        read_csv_nafix(snakemake.input.nuclear_p_max_pu),
     )
 
     update_p_nom_max(n)

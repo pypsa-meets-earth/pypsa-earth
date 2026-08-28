@@ -4,6 +4,59 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Prepares brownfield data from previous planning horizon.
+
+Relevant Settings
+-----------------
+
+```yaml
+
+    sector:
+        hydrogen:
+            network:
+            H2_retrofit_capacity_per_CH4:
+            network_limit:
+            network_routes:
+            gas_network_repurposing:
+            underground_storage:
+            hydrogen_colors:
+            set_color_shares:
+            blue_share:
+            pink_share:
+            production_technologies:
+
+    existing_capacities
+        grouping_years_power:
+        grouping_years_heat:
+        threshold_capacity:
+        default_heating_lifetime:
+        conventional_carriers:
+
+    snapshots:
+        start:
+        end:
+        inclusive:
+
+    electricity:
+        renewable_carriers:
+```
+Inputs
+------
+- ``resources/{RDIR}/bus_regions/busmap_elec_s{simpl}.csv``: Busmap after simplifying the network
+- ``resources/{RDIR}/bus_regions/busmap_elec_s{simpl}_{clusters}.csv``: Busmap after clustering the network
+- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc``: prenetwork file obtained prior to solving
+- ``solved_previous_horizon``: Network solved at previous time step
+- ``resources/{RDIR}/costs_{planning_horizons}_sec.csv``: Technology costs data
+- ``resources/{SECDIR}/cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc``: Ground/soil source heat pump COP time series aligned to the network snapshots
+- ``resources/{SECDIR}/cops/cop_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc``: Air source heat pump COP time series aligned to the network snapshots
+
+Output
+------
+- ``{RESDIR}/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc``: Brownfield prenetwork file
+
+Description
+-----------
+To prepare network for brownfield expansion
+
 """
 
 import logging
@@ -12,7 +65,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import sanitize_carriers, sanitize_locations
+from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
 from add_existing_baseyear import add_build_year_to_new_assets
 
 # from pypsa.clustering.spatial import normed_or_uniform
@@ -197,8 +250,8 @@ def disable_grid_expansion_if_limit_hit(n: pypsa.Network) -> None:
 #     """
 
 #     # spatial clustering
-#     cluster_busmap = pd.read_csv(snakemake.input.cluster_busmap, index_col=0).squeeze()
-#     simplify_busmap = pd.read_csv(
+#     cluster_busmap = read_csv_nafix(snakemake.input.cluster_busmap, index_col=0).squeeze()
+#     simplify_busmap = read_csv_nafix(
 #         snakemake.input.simplify_busmap, index_col=0
 #     ).squeeze()
 #     clustermaps = simplify_busmap.map(cluster_busmap)
