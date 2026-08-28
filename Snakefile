@@ -174,15 +174,17 @@ if config["enable"].get("retrieve_databundle", True):
         include_categories=["el_demand"],
     )
     el_demand_cfg = config["databundles"][el_demand_bundle[0]]
+    el_demand_url = el_demand_cfg["urls"]["direct"]
+    el_demand_out = el_demand_cfg["output"][0]
 
     rule retrieve_el_demand:
         input:
             remote=HTTP.remote(
-                el_demand_cfg["urls"]["direct"],
+                el_demand_url,
                 keep_local=True,
             ),
         output:
-            el_demand_cfg["output"][0],
+            el_demand_out,
         run:
             copyfile(input.remote, output[0])
 
