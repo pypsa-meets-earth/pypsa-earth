@@ -150,7 +150,7 @@ rule plot_all_summaries:
 if config["enable"].get("retrieve_databundle", True):
 
     bundles_to_download = get_best_bundles_in_snakemake(
-        config, exclude_categories=["cutouts"]
+        config, exclude_categories=["cutouts", "el_demand"]
     )
 
     rule retrieve_databundle_light:
@@ -168,6 +168,23 @@ if config["enable"].get("retrieve_databundle", True):
             "benchmarks/" + RDIR + "retrieve_databundle_light"
         script:
             "scripts/retrieve_databundle_light.py"
+
+    el_demand_bundle = get_best_bundles_in_snakemake(
+        config,
+        category=["el_demand"],
+    )
+    el_demand_cfg = config["databundles"][el_demand_bundle]
+
+    rule retrieve_el_demand:
+        input:
+            remote=HTTP.remote(
+                el_demand_cfg["urls"]["direct"],
+                keep_local=True,
+            ),
+        output:
+            el_demand_cfg["output"],
+        run:
+            copyfile(input.remote, output[0])
 
 
 if config["enable"].get("download_global_buildings", True):
