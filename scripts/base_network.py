@@ -320,7 +320,7 @@ def ensure_gadm_bus_coverage(
     nearest existing AC bus in the same country, and connects the new bus to
     that anchor with an AC line.  GADM geometries are first normalised to
     ``geo_crs`` and then transformed to ``distance_crs`` for nearest-neighbour
-    calculations. 
+    calculations.
 
     Parameters
     ----------
@@ -329,7 +329,7 @@ def ensure_gadm_bus_coverage(
         ``country``, ``carrier``, and ``substation_lv`` columns so that
         existing LV buses and same-country AC anchor buses can be identified.
     lines : pd.DataFrame
-        Line table containing ``bus0`` and ``bus1`` columns. 
+        Line table containing ``bus0`` and ``bus1`` columns.
     gadm_shapes_path : str | None
         Path to a GADM vector file containing a ``GADM_ID`` column, a
         ``country`` column, and polygon geometries.
