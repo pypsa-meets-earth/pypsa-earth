@@ -301,57 +301,6 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
-def _migrate_fossil_reserves(
-    config: dict[str, Any], warn: Callable[[str, str], None]
-) -> None:
-    """Move ``fossil_reserves.{carrier}`` to ``sector.{carrier}.reserves``."""
-    fossil_reserves = config.get("fossil_reserves")
-    if not isinstance(fossil_reserves, dict):
-        return
-
-    for carrier, reserves in fossil_reserves.items():
-        if not isinstance(carrier, str):
-            continue
-        old_path = f"fossil_reserves.{carrier}"
-        new_path = f"sector.{carrier}.reserves"
-        _set_nested(config, new_path, reserves)
-        warn(old_path, new_path)
-
-
-def _migrate_line_type_mappings(
-    config: dict[str, Any],
-    warn: Callable[[str, str], None],
-) -> None:
-    """Move legacy voltage mappings under the ``default`` key."""
-    lines = config.get("lines")
-    if not isinstance(lines, dict):
-        return
-
-    for key in ("ac_types", "dc_types"):
-        mappings = lines.get(key)
-        if not isinstance(mappings, dict):
-            continue
-
-        legacy_mapping = {
-            voltage: line_type
-            for voltage, line_type in mappings.items()
-            if not isinstance(line_type, dict)
-        }
-
-        if not legacy_mapping:
-            continue
-
-        migrated_mappings = {
-            name: mapping
-            for name, mapping in mappings.items()
-            if isinstance(mapping, dict)
-        }
-        migrated_mappings["default"] = legacy_mapping
-
-        lines[key] = migrated_mappings
-        warn(f"lines.{key}", f"lines.{key}.default")
-
-
 def migrate_config(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]] | None = None,
@@ -365,8 +314,7 @@ def migrate_config(
     Simple renames (including whole option dicts such as OSM settings) are listed
     in ``CONFIG_MIGRATIONS``. Special handlers cover ``co2_budget.co2base_value``
     (renames values, not just paths), ``sector.solar_thermal`` when it is still
-    a legacy bool flag, ``fossil_reserves.{carrier}`` reserve values, the former
-    ``{demand}`` / ``{h2export}`` wildcards
+    a legacy bool flag and the former ``{demand}`` / ``{h2export}`` wildcards
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
     scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
     mappings, which are moved under their respective ``default`` keys.
@@ -394,7 +342,6 @@ def migrate_config(
     _migrate_line_type_mappings(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
-    _migrate_fossil_reserves(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
 
