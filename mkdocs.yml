@@ -112,7 +112,9 @@ nav:
   - Monte Carlo: api-reference/monte-carlo.md
   - Utilities: api-reference/utilities.md
 
-- Release Notes: release-notes.md
+- Releases
+  - Release Notes: releases/release-notes.md
+  - Maintenance: releases/maintainance-notes.md
 
 # Theme settings
 theme:
