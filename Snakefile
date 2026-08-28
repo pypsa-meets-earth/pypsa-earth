@@ -171,7 +171,7 @@ if config["enable"].get("retrieve_databundle", True):
 
     el_demand_bundle = get_best_bundles_in_snakemake(
         config,
-        category=["el_demand"],
+        include_categories=["el_demand"],
     )
     el_demand_cfg = config["databundles"][el_demand_bundle]
 
