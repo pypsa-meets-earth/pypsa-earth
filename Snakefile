@@ -173,7 +173,7 @@ if config["enable"].get("retrieve_databundle", True):
         config,
         include_categories=["el_demand"],
     )
-    el_demand_cfg = config["databundles"][el_demand_bundle]
+    el_demand_cfg = config["databundles"][el_demand_bundle[0]]
 
     rule retrieve_el_demand:
         input:
@@ -182,7 +182,7 @@ if config["enable"].get("retrieve_databundle", True):
                 keep_local=True,
             ),
         output:
-            el_demand_cfg["output"],
+            el_demand_cfg["output"][0],
         run:
             copyfile(input.remote, output[0])
 
