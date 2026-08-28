@@ -158,7 +158,11 @@ def download_and_unzip_zenodo(
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
-    destination = os.path.join(BASE_DIR, config["destination"])
+    destination = (
+        os.path.dirname(snakemake.output[0])
+        if resource == "cutouts"
+        else os.path.join(BASE_DIR, config["destination"])
+    )
     url = config["urls"]["zenodo"]
 
     if hot_run:
@@ -205,7 +209,11 @@ def download_and_unzip_gdrive(
     """
     resource = config["category"]
     file_path = os.path.join(rootpath, "tempfile.zip")
-    destination = os.path.join(BASE_DIR, config["destination"])
+    destination = (
+        os.path.dirname(snakemake.output[0])
+        if resource == "cutouts"
+        else os.path.join(BASE_DIR, config["destination"])
+    )
     url = config["urls"]["gdrive"]
 
     # retrieve file_id from path
