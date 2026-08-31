@@ -306,6 +306,9 @@ def build_line_types(branches: pd.DataFrame) -> pd.DataFrame:
     """
     valid = filter_valid_branches(branches)
 
+    # ACTIVSg82k does not provide categorical line-type identifiers. Derive one
+    # representative synthetic parameter set per voltage level using medians,
+    # which limit the influence of outliers in the individual branch parameters.
     line_types = (
         valid.groupby("v_nom")
         .agg(
