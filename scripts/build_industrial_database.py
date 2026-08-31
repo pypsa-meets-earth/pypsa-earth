@@ -519,10 +519,12 @@ if __name__ == "__main__":
     # Load parameters
     ammonia_plants_file = snakemake.input.ammonia_plants
 
-    industrial_database_steel = create_steel_db()
-    industrial_database_cement = create_cement_db()
-    industrial_database_refineries = create_refineries_df()
-    industrial_database_paper = create_paper_df()
+    industrial_database_steel = create_steel_db(snakemake.params.url_steel)
+    industrial_database_cement = create_cement_db(snakemake.params.url_cement)
+    industrial_database_refineries = create_refineries_df(
+        snakemake.params.url_refineries
+    )
+    industrial_database_paper = create_paper_df(snakemake.params.url_paper)
     industrial_database_ammonia = create_ammonia_db(ammonia_plants_file)
 
     industrial_database = pd.concat(
