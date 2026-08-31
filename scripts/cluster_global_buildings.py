@@ -384,7 +384,6 @@ if __name__ == "__main__":
         )
 
     configure_logging(snakemake)
-
     country_code = snakemake.wildcards.country
 
     logger.info(f"Reading Global Buildings for {country_code}")
