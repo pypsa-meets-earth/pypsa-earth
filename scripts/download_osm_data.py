@@ -66,8 +66,7 @@ def country_list_to_geofk(country_list):
     full_codes_list : list
         Example ["NG","ZA"]
     """
-    full_codes_list = [convert_iso_to_geofk(
-        c_code) for c_code in set(country_list)]
+    full_codes_list = [convert_iso_to_geofk(c_code) for c_code in set(country_list)]
 
     return full_codes_list
 
@@ -304,8 +303,7 @@ if __name__ == "__main__":
     # Rename and move osm files to the resources folder output
     for name in names:
         for f in out_formats:
-            new_file_name = Path.joinpath(
-                store_path_resources, f"all_raw_{name}s.{f}")
+            new_file_name = Path.joinpath(store_path_resources, f"all_raw_{name}s.{f}")
             old_files = list(Path(out_path).glob(f"*{name}.{f}"))
             # if file is missing, create empty file, otherwise rename it an move it
             if not old_files:

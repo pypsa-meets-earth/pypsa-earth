@@ -52,7 +52,7 @@ renewable:
       hydrobasins: data/hydrobasins_hydroshare/africa-geoglows-atlite.shp
 
 custom_data:
-    osm_data: false # if "True" then custom file for osm (pbf and power files) must be placed in "data/custom/osm" folder. 
+  osm_data: false   # if "True" then custom file for osm (pbf and power files) must be placed in "data/custom/osm" folder.
 
 # OpenStreetMap (OSM) data configuration
 osm_data:
