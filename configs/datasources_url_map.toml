@@ -519,7 +519,7 @@ license_link = "https://www.worldpop.org/faq/"
 [[source]]
 name = "edgar"
 long_name = "EDGAR gridded fossil CO2 emissions dataset (v6.0), annual gridmaps for 1970-2018"
-output = "data/v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
+output = "data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls"
 description = "EDGAR (Emissions Database for Global Atmospheric Research) v6.0 gridded inventory of fossil CO2 emissions, excluding short-cycle organic carbon (i.e. biomass burning and LULUCF sources); provided as annual global gridmaps covering 1970-2018, produced by the EU Joint Research Centre."
 tutorial = false
 countries = "Earth"
@@ -717,7 +717,7 @@ license_link = "https://datacatalog.worldbank.org/public-licenses"
 [[source]]
 name = "cgfi_paper_db"
 long_name = "Pulp and Paper Mill Database for Latin America, CGFI Spatial Finance Initiative"
-output = "resources/industrial_database.csv"
+output = "data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx"
 description = "The Spatial Finance Initiative Global Pulp and Paper Mill Database provides information on pulp and paper production facilities around the world. The database contains 3,403 facilities with information about location, operating status, plant type, product type, capacity, fuel, certification status and ownership where available. Dropping the null capacities reduces the dataframe from 3000+  rows to 1672 rows."
 tutorial = false
 countries = "Latin America"
