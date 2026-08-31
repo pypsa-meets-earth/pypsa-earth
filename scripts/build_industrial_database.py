@@ -66,13 +66,8 @@ def get_cocode_from_coords(df):
 
 
 def create_steel_db(fn):
-    # Global Steel Plant Tracker data set you requested from Global Energy Monitor from the link below:
-
-    # The original data are available from https://globalenergymonitor.org/
-    url = fn
-
     df_steel = pd.read_excel(
-        content_retrieve(url),
+        content_retrieve(fn),
         index_col=0,
         sheet_name="Steel Plants",
         header=0,
@@ -212,12 +207,6 @@ def create_steel_db(fn):
 
 
 def create_cement_db(fn):
-    # -------------
-    # CEMENT
-    # -------------
-    # The following excel file was downloaded from the following webpage https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/.
-    # The dataset contains 3117 cement plants globally.
-    fn = fn
     cement_orig = pd.read_excel(
         fn,
         index_col=0,
@@ -296,14 +285,6 @@ def create_cement_db(fn):
 
 
 def create_refineries_df(fn):
-    # -------------
-    # OIL REFINERIES
-    # -------------
-    # The data were downloaded directly from arcgis server using a query found on this webpage:
-    # https://www.arcgis.com/home/item.html?id=a6979b6bccbf4e719de3f703ea799259&sublayer=0#data
-    # and https://www.arcgis.com/home/item.html?id=a917ac2766bc47e1877071f0201b6280
-
-    # The dataset contains 536 global Oil refineries.
     first_response = requests.get(fn)
     response_list = first_response.json()
 
@@ -375,12 +356,6 @@ def create_refineries_df(fn):
 
 
 def create_paper_df(fn):
-    # -------------
-    # Paper
-    # -------------
-    # The following excel file was downloaded from the following webpage https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/ . The dataset contains 3117 cement plants globally.
-
-    fn = fn
 
     paper_orig = pd.read_excel(
         fn,
@@ -420,15 +395,10 @@ def create_paper_df(fn):
         lambda x: x if type(x) == int or type(x) == int == float else np.nan
     )
 
-    # Keep only operating steel plants
-    # df_paper = df_paper.loc[df_paper["status"] == "Operating"]
-
-    # Create a column with iso2 country code
     cc = coco.CountryConverter()
     iso3 = pd.Series(df_paper["iso3"])
     df_paper["country"] = cc.pandas_convert(series=iso3, to="ISO2")
 
-    # Dropping the null capacities reduces the dataframe from 3000+  rows to 1672 rows
     na_index = df_paper[df_paper.capacity.isna()].index
     print(
         "There are {} out of {} total paper plants with unknown capacities, setting value to country average".format(
