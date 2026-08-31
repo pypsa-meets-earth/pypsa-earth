@@ -73,7 +73,8 @@ from _helpers import (
 logger = create_logger(__name__)
 
 
-CRF = 0.09 # calculated with 0.08 interest rate see Franzmann et al.
+CRF = 0.09 # calculated with 0.08 interest rate, assumtion from Franzmann et al. (https://doi.org/10.1016/j.renene.2025.123199) for calculation of the LCOE's. 
+# To calculate the CAPEX based on the paper, this exact value must be used. 
 
 
 def read_network_regions(network_regions_file):
@@ -213,7 +214,7 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
     capex = (
         df['LCOE_EUR_per_MWh']
         * df['Leistung_MWh']
-        / (CRF + 0.02)
+        / ( + 0.02)
     )
 
     # PowerSust in GW 
