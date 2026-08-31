@@ -16,7 +16,7 @@ from _helpers import read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_urban_percent():
+def download_urban_percent(fn):
     """
     Downloads the United Nations "Total and urban population, annual" .7z File
     and extracts it as csv File.
@@ -25,10 +25,8 @@ def download_urban_percent():
     https://unctadstat.unctad.org/datacentre/
     as a .7z file. The dataset contains urban percent for most countries from 1950 and predictions until 2050.
     """
-    url = "https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal"
-
     # Make a GET request to the URL
-    response = requests.get(url)
+    response = requests.get(fn)
 
     # Check if the request was successful (status code 200)
     if response.status_code == 200:
@@ -75,7 +73,9 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("prepare_urban_percent")
 
-    df = download_urban_percent().copy()
+    df = download_urban_percent(
+        "https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal"
+    ).copy()
 
     # Select the columns that we need to keep
     df = df[
