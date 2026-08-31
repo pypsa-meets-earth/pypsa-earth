@@ -815,7 +815,7 @@ def build_h2_pipeline_import_nodes_from_GGIT(
     bus_regions_onshore,
     h2_capacity_factor,
     target_country_name,
-    entry_scope="country",   # "country" = erster onshore Bus, "model" = erster on/offshore Bus
+    entry_scope="country",   # "country" = first onshore Bus, "model" = first on/offshore Bus
 ):
     """
     Build hydrogen pipeline import nodes from GGIT pipeline data.
@@ -824,17 +824,6 @@ def build_h2_pipeline_import_nodes_from_GGIT(
     country or model region, assigns each valid pipeline to the first bus region at
     the selected entry boundary, converts the reported pipeline capacity to hydrogen
     import capacity, and aggregates the resulting capacities by model node.
-def cluster_gas_network(
-    pipelines: gpd.GeoDataFrame,
-    bus_regions_onshore: gpd.GeoDataFrame,
-    length_factor: float,
-) -> pd.DataFrame:
-    """
-    Aggregate interstate gas pipelines to bus-region clusters.
-
-    This function drops purely intrastatal pipelines, splits interstate
-    pipelines by region overlay, aggregates capacity by region pairs, and
-    computes a representative line length and GWkm metric.
 
     Parameters
     ----------
@@ -861,12 +850,6 @@ def cluster_gas_network(
         assigns the pipeline to the first onshore bus region entered within the
         target country. ``"model"`` assigns the pipeline to the first bus region
         entered within the full model domain, including offshore regions.
-        Pipeline GeoDataFrame with `states_passed` and `amount_states_passed`.
-    bus_regions_onshore : geopandas.GeoDataFrame
-        Onshore region geometries used for overlay.
-    length_factor : float
-        Multiplier applied to the haversine distance between region centroids
-        to estimate pipeline length.
 
     Returns
     -------
@@ -1002,9 +985,6 @@ def cluster_gas_network(
 
 
 def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
-        Aggregated pipeline table with columns `bus0`, `bus1`, `capacity`,
-        `length`, and `GWKm`.
-    """
     # drop innerstatal pipelines
     pipelines_interstate = pipelines.drop(
         pipelines.loc[pipelines.amount_states_passed < 2].index
@@ -1047,7 +1027,7 @@ def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     df_exploded.reset_index(drop=True, inplace=True)
 
     # Custom function to check if value in column 'gadm_id' exists in either column 'bus0' or column 'bus1'
-    def check_existence(row: pd.Series) -> bool:
+    def check_existence(row):
         return row["gadm_id"] in [row["bus0"], row["bus1"]]
 
     # Apply the custom function to each row and keep only the rows that satisfy the condition
