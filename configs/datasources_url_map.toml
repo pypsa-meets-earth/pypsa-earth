@@ -655,8 +655,8 @@ url = "https://services.arcgis.com/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_
 version = ""
 checksum = ""
 code_line = "[build_industrial_database:create_refineries_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L301)"
-license = ""
-license_link = ""
+license = "Custom (FracTracker Alliance, non-commercial with attribution)"
+license_link = "https://hub.arcgis.com/maps/a6979b6bccbf4e719de3f703ea799259_0/about"
 
 [[source]]
 name = "osm_nominatim_geocoding"
