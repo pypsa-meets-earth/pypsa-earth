@@ -20,6 +20,7 @@ from _helpers import (
     content_retrieve,
     copy_default_files,
     create_country_list,
+    get_datasource_url,
     get_last_commit_message,
     migrate_config,
     update_cutout_config,
@@ -2027,10 +2028,10 @@ rule plot_sector_summary:
 
 rule build_industrial_database:
     params:
-        url_steel="https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx",
-        url_cement="https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/",
-        url_refineries="https://services.arcgis.com/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D",
-        url_paper="https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/",
+        url_steel=get_datasource_url("steel_gem"),
+        url_cement=get_datasource_url("cgfi_cement_db"),
+        url_refineries=get_datasource_url("refineries"),
+        url_paper=get_datasource_url("cgfi_paper_db"),
     input:
         ammonia_plants="resources/ammonia_plants.csv",
     output:
