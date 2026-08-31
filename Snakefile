@@ -1196,6 +1196,8 @@ rule prepare_airports:
 
 
 rule prepare_urban_percent:
+    params:
+        url_urban_percent="https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal",
     output:
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:

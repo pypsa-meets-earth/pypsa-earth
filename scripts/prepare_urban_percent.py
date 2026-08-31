@@ -73,9 +73,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("prepare_urban_percent")
 
-    df = download_urban_percent(
-        "https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal"
-    ).copy()
+    df = download_urban_percent(snakemake.params.url_urban_percent).copy()
 
     # Select the columns that we need to keep
     df = df[
