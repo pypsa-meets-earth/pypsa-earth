@@ -118,6 +118,41 @@ def _calculate_useful_area(area, keys, values):
 def _prepare_shapes_country(shapes, country_code, distance_crs):
     """
     Prepare country-specific region geometries for spatial joins.
+
+    Filters the input region shapes by country code, ensures the required
+    'name' column exists, and reprojects the geometries to the target coordinate
+    reference system (CRS).
+
+    Required columns
+    ----------------
+    country : str
+        Country code used to filter the regions.
+    geometry : geometry
+        Geospatial geometries of the regions.
+    name : str
+        Region identifiers (can also be present as the index).
+
+    Parameters
+    ----------
+    shapes : geopandas.GeoDataFrame
+        GeoDataFrame containing region shapes for one or multiple countries.
+    country_code : str
+        Country code to filter for (e.g. 'DE', 'FR').
+    distance_crs : str, int, or pyproj.CRS
+        Coordinate reference system to project the output geometries into.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        Filtered and reprojected GeoDataFrame containing only the 'name',
+        'country', and 'geometry' columns for the specified country.
+
+    Raises
+    ------
+    ValueError
+        If no regions are found for the given country code.
+    KeyError
+        If no 'name' column or index exists in the input GeoDataFrame.
     """
     shapes_country = shapes[shapes.country == country_code].copy()
 
