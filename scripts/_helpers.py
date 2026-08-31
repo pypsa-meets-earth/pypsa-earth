@@ -104,10 +104,10 @@ def get_datasource_url(dataset_name: str, toml_path: str = TOML_INVENTORY_PATH) 
     with open(toml_path, "rb") as f:
         dataset_url = {s["name"]: s["url"] for s in tomli.load(f)["source"]}
 
-    if name not in dataset_url:
-        raise KeyError(f"No entry named '{name}' found in {fp_toml}")
+    if dataset_name not in dataset_url:
+        raise KeyError(f"No entry named '{dataset_name}' found in {toml_path}")
 
-    return dataset_url[name]
+    return dataset_url[dataset_name]
 
 
 def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
