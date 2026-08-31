@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
-import os
+
 import shutil
 from pathlib import Path
 
@@ -60,9 +60,7 @@ def download_number_of_vehicles():
         )
         print("File read successfully.")
     except Exception as e:
-        logger.warning(
-            f"Failed to read the file. Falling back on hard-coded data. \nError: {e}"
-        )
+        logger.warning(f"Failed to read the vehicle data. Falling back on hard-coded data: {e}")
         return pd.DataFrame()
 
     vehicles_gho = vehicles_gho.rename(
@@ -87,7 +85,7 @@ def download_number_of_vehicles():
         )[0]
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file.", e)
+        logger.warning(f"Failed to read the vehicle data from Wikipedia: {e}")
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
 
     vehicles_wiki.rename(
@@ -129,7 +127,9 @@ def download_CO2_emissions():
         CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
         print("File read successfully.")
     except Exception as e:
-        logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
+        logger.warning(
+            f"Failed to read the CO2 data. Falling back on hard-coded data: {e}"
+        )
         return pd.DataFrame()
 
     CO2_emissions = CO2_emissions[
@@ -176,25 +176,43 @@ if __name__ == "__main__":
         transport = pd.merge(nbr_vehicles, CO2_emissions, on="country")
         transport = transport[["country", "number cars", "average fuel efficiency"]]
 
-        missing = transport.index[transport["average fuel efficiency"].isna()]
-        if not missing.empty:
+        missing_fuel_efficiency = transport.index[transport["average fuel efficiency"].isna()]
+        if not missing_fuel_efficiency.empty:
             print(
                 "Missing data on fuel efficiency from:\n",
-                f"{list(transport.loc[missing].country)}.",
+                f"{list(transport.loc[missing_fuel_efficiency].country)}.",
                 "\nFilling gaps with averaged data.",
             )
 
             fill_value = transport["average fuel efficiency"].mean()
-            transport.loc[missing, "average fuel efficiency"] = fill_value
+            transport.loc[missing_fuel_efficiency, "average fuel efficiency"] = fill_value
 
         transport.loc[:, "average fuel efficiency"] = transport[
             "average fuel efficiency"
         ].round(3)
 
-        transport.to_csv(
+        configured_countries = pd.Index(snakemake.params["countries"], name="country")
+        hard_coded_transport_data = read_csv_nafix(
+            Path(BASE_DIR) / "data/temp_hard_coded/transport_data.csv",
+            index_col=0,
+        )
+        transport = transport.set_index("country").combine_first(
+            hard_coded_transport_data.reindex(configured_countries).dropna(
+                subset=["number cars", "average fuel efficiency"]
+            )
+        )
+
+        missing_countries = configured_countries.difference(transport.index)
+        if not missing_countries.empty:
+            raise ValueError(
+                "Transport data is missing for configured countries: "
+                f"{list(missing_countries)}. Add them to data/temp_hard_coded/transport_data.csv."
+            )
+
+        transport.reset_index().to_csv(
             snakemake.output.transport_data_input,
             sep=",",
             encoding="utf-8",
-            header="true",
+            header=True,
             index=False,
         )
