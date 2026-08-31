@@ -87,7 +87,23 @@ def _calculate_useful_area(area, keys, values):
     Calculate useful rooftop area from building footprint area.
 
     The largest threshold <= building area is used, matching the logic of the
-    original get_ratio() implementation.
+    original get_ratio() implementation. Vectorized using binary search on the
+    pre-sorted lookup arrays.
+
+    Parameters
+    ----------
+    area : array-like
+        Building footprint area values (convertible to a float64 NumPy array).
+    keys : numpy.ndarray
+        Sorted 1D array of threshold keys, as prepared by
+        ``_prepare_install_ratio_lookup``.
+    values : numpy.ndarray
+        1D array of install ratios corresponding to ``keys``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of calculated useful rooftop areas (in the same unit as input area).
     """
     area = np.asarray(area, dtype="float64")
     idx = np.searchsorted(keys, area, side="right") - 1
