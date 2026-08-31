@@ -175,8 +175,30 @@ def _prepare_shapes_country(shapes, country_code, distance_crs):
 
 
 def _add_grouped_area(accumulator, joined):
-    """
+ """
     Add grouped useful_area values from one spatial join result to accumulator.
+
+    Groups the spatial join results by region name, sums the useful rooftop area
+    per region, and adds the result element-wise to the existing accumulator Series.
+
+    Required columns
+    ----------------
+    name : str
+        Region identifier used for grouping.
+    usefull_area : float
+        Calculated useful rooftop area values to sum up.
+
+    Parameters
+    ----------
+    accumulator : pandas.Series
+        Series mapping region names to their accumulated useful rooftop area.
+    joined : geopandas.GeoDataFrame or pandas.DataFrame
+        Result of a spatial join containing matched building/grid features and regions.
+
+    Returns
+    -------
+    pandas.Series
+        Updated accumulator Series with added useful rooftop areas.
     """
     if joined.empty or "name" not in joined.columns:
         return accumulator
