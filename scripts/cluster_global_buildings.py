@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# -*- coding: utf-8 -*-
 """
 Calculate usable solar rooftop area per region from global building data.
 
