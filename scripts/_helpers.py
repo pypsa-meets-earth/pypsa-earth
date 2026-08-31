@@ -301,6 +301,40 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
+def _migrate_line_type_mappings(
+    config: dict[str, Any],
+    warn: Callable[[str, str], None],
+) -> None:
+    """Move legacy voltage mappings under the ``default`` key."""
+    lines = config.get("lines")
+    if not isinstance(lines, dict):
+        return
+
+    for key in ("ac_types", "dc_types"):
+        mappings = lines.get(key)
+        if not isinstance(mappings, dict):
+            continue
+
+        legacy_mapping = {
+            voltage: line_type
+            for voltage, line_type in mappings.items()
+            if not isinstance(line_type, dict)
+        }
+
+        if not legacy_mapping:
+            continue
+
+        migrated_mappings = {
+            name: mapping
+            for name, mapping in mappings.items()
+            if isinstance(mapping, dict)
+        }
+        migrated_mappings["default"] = legacy_mapping
+
+        lines[key] = migrated_mappings
+        warn(f"lines.{key}", f"lines.{key}.default")
+
+
 def migrate_config(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]] | None = None,
