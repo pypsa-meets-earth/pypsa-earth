@@ -222,11 +222,46 @@ def calculate_solar_rooftop_area(
     batch_size=250_000,
 ):
     """
-    Calculate usable solar rooftop area per region from global building data.
+    Calculates the usable solar rooftop area for buildings within a country, considering
+    that only a portion of each rooftop can be allocated for PV installation based on its size.
+    Smaller buildings are less likely to host PV systems, while larger buildings can dedicate
+    a greater share of their rooftop to PVs.
 
     This memory-efficient implementation avoids loading all buildings into RAM.
     It reads the parquet file in batches, performs the spatial join batch-wise,
-    and keeps only one aggregated Series in memory.
+    and keeps only one aggregated Series in memory. Based on the methodology
+    described in a paper by Hideaki Obane (https://eneken.ieej.or.jp/data/12710.pdf).
+
+    Parameters
+    ----------
+    country_buildings : str or path-like
+        Path to the Parquet file containing building footprint data.
+        Must contain 'area', 'x', and 'y' columns.
+    country_code : str
+        Country code used to filter the regions (e.g. 'DE', 'FR').
+    shapes : geopandas.GeoDataFrame
+        GeoDataFrame containing region shapes for one or multiple countries.
+    output : str or path-like
+        File path where the resulting CSV file will be saved.
+    crs : dict
+        Dictionary containing CRS definitions with keys 'distance_crs'
+        (projected CRS for spatial ops) and 'geo_crs' (geographic CRS for input coordinates).
+    install_ratio : dict
+        Mapping of building area thresholds to rooftop install ratio values.
+    tolerance : float, optional
+        Maximum distance in kilometers to match buildings to the nearest region
+        if they are not directly inside one (default is 100).
+    batch_size : int, optional
+        Number of building records to process per iteration (default is 250,000).
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    KeyError
+        If required columns ('area', 'x', 'y') are missing in the Parquet file schema.
     """
     distance_crs = crs["distance_crs"]
     geo_crs = crs["geo_crs"]
