@@ -483,27 +483,8 @@ def load_bus_regions(onshore_path, offshore_path=None):
     ------
     KeyError
         If offshore regions are provided without a ``name`` or ``gadm_id`` column.
-def load_bus_region(
-    onshore_path: str, pipelines: gpd.GeoDataFrame
-) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
-    
-    Load pypsa-earth-sec onshore regions.
-
-    TODO: Think about including Offshore regions but only for states that have offshore pipelines.
-    Parameters
-    ----------
-    onshore_path: str
-        Path to the onshore regions shapefile.
-    pipelines: gpd.GeoDataFrame
-        GeoDataFrame of the pipeline data.
-
-    Returns:
-        bus_regions_onshore: gpd.GeoDataFrame
-            GeoDataFrame of onshore bus regions with a `gadm_id` column.
-        country_borders: gpd.GeoDataFrame
-            Merged onshore region geodataframe.
-
     """
+    
     bus_regions_onshore = gpd.read_file(onshore_path).to_crs(epsg=3857)
     bus_regions_onshore = (
         bus_regions_onshore.rename(columns={"name": "gadm_id"})
