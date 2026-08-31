@@ -61,6 +61,9 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
+
 * Fix invalid biomass transport and CO2 pipeline connections [PR #1987](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1987)
 
 * Attach existing batteries as ``StorageUnit`` rather than Store+Link, so extra battery buses do not inflate the minimum cluster count during simplify/cluster [PR #1990](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1990)
