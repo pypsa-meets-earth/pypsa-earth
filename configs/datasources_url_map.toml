@@ -727,3 +727,17 @@ checksum = ""
 code_line = "[build_industrial_database:create_paper_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L369)"
 license = "CC BY 4.0"
 license_link = "https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/"
+
+[[source]]
+name = "cgfi_cement_db"
+long_name = "Global Database of Cement Production Assets, CGFI Spatial Finance Initiative"
+output = "data/industry/SFI-Global-Cement-Database-July-2021.xlsx"
+description = "The Spatial Finance Initiative Global Database of Cement Production Assets provides information on cement production facilities worldwide. The database contains 3,117 cement plants with exact geolocation, covering both integrated clinker-producing plants and independent grinding facilities, with ownership, production type, capacity and startup year where available. Cite: McCarten, M., Bayaraa, M., Caldecott, B., Christiaen, C., Foster, P., Hickey, C., Kampmann, D., Layman, C., Rossi, C., Scott, K., Tang, K., Tkachenko, N., and Yoken, D. 2021. Global Database of Cement Production Assets."
+tutorial = false
+countries = "Earth"
+url = "https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/"
+version = ""
+checksum = ""
+code_line = "[build_industrial_database:create_cement_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L214)"
+license = "CC BY 4.0"
+license_link = "https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/"
