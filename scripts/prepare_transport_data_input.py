@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
-
 import shutil
 from pathlib import Path
 
@@ -60,7 +59,9 @@ def download_number_of_vehicles():
         )
         print("File read successfully.")
     except Exception as e:
-        logger.warning(f"Failed to read the vehicle data. Falling back on hard-coded data: {e}")
+        logger.warning(
+            f"Failed to read the vehicle data. Falling back on hard-coded data: {e}"
+        )
         return pd.DataFrame()
 
     vehicles_gho = vehicles_gho.rename(
@@ -176,7 +177,9 @@ if __name__ == "__main__":
         transport = pd.merge(nbr_vehicles, CO2_emissions, on="country")
         transport = transport[["country", "number cars", "average fuel efficiency"]]
 
-        missing_fuel_efficiency = transport.index[transport["average fuel efficiency"].isna()]
+        missing_fuel_efficiency = transport.index[
+            transport["average fuel efficiency"].isna()
+        ]
         if not missing_fuel_efficiency.empty:
             print(
                 "Missing data on fuel efficiency from:\n",
@@ -185,7 +188,9 @@ if __name__ == "__main__":
             )
 
             fill_value = transport["average fuel efficiency"].mean()
-            transport.loc[missing_fuel_efficiency, "average fuel efficiency"] = fill_value
+            transport.loc[missing_fuel_efficiency, "average fuel efficiency"] = (
+                fill_value
+            )
 
         transport.loc[:, "average fuel efficiency"] = transport[
             "average fuel efficiency"

@@ -1202,7 +1202,7 @@ rule prepare_urban_percent:
 
 
 rule prepare_transport_data_input:
-    params: 
+    params:
         countries=config["countries"],
     output:
         transport_data_input="resources/" + SECDIR + "transport_data.csv",
