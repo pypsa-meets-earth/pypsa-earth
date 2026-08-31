@@ -59,6 +59,22 @@ logger = create_logger(__name__)
 def _prepare_install_ratio_lookup(install_ratio):
     """
     Prepare sorted threshold arrays for vectorized lookup of install ratios.
+
+    Converts the input dictionary into two synchronized 1D NumPy arrays sorted
+    by threshold key, enabling fast 1D array operations (e.g. via ``np.searchsorted``).
+
+    Parameters
+    ----------
+    install_ratio : dict
+        Mapping of capacity/threshold keys to their corresponding install ratios
+        (keys and values must be convertible to float).
+
+    Returns
+    -------
+    keys : numpy.ndarray
+        Sorted 1D array of float64 keys/thresholds.
+    values : numpy.ndarray
+        1D array of float64 values corresponding to the sorted keys.
     """
     install_ratio = {float(k): float(v) for k, v in install_ratio.items()}
     keys = np.array(sorted(install_ratio.keys()), dtype="float64")
