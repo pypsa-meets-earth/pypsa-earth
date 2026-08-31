@@ -3,12 +3,21 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """
-Derives representative US transmission line types from the ACTIVSg82k network.
+Derive representative US transmission line types from the ACTIVSg82k network.
 
-The script parses the PSS/E v33 RAW representation of the ACTIVSg82k synthetic
-transmission network, converts branch electrical parameters into the units
-required by PyPSA, and derives one representative transmission line type for
-each supported nominal voltage level.
+ACTIVSg82k is a synthetic 82,000-bus transmission network representing the
+contiguous United States. It is distributed through the Texas A&M Electric
+Grid Test Case Repository:
+
+https://electricgrids.engr.tamu.edu/electric-grid-test-cases/activsg82k/
+
+Download and extract the ACTIVSg82k dataset manually, then place the included
+``SyntheticUSA.RAW`` file at ``data/SyntheticUSA.RAW`` before running this
+script. The generated line-type table is written to
+``data/custom_line_types.csv``.
+
+This is a non-workflow utility. The raw ACTIVSg82k dataset is not distributed
+with this repository.
 
 Inputs
 ------
