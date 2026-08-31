@@ -713,3 +713,17 @@ checksum = ""
 code_line = "[prepare_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/prepare_transport_data_input.py#L115)"
 license = "CC BY 4.0"
 license_link = "https://datacatalog.worldbank.org/public-licenses"
+
+[[source]]
+name = "cgfi_pulp_db"
+long_name = "Pulp and Paper Mill Database for Latin America, CGFI Spatial Finance Initiative"
+output = "resources/industrial_database.csv"
+description = "The Spatial Finance Initiative Global Pulp and Paper Mill Database provides information on pulp and paper production facilities around the world. The database contains 3,403 facilities with information about location, operating status, plant type, product type, capacity, fuel, certification status and ownership where available."
+tutorial = false
+countries = "Latin America"
+url = "https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/"
+version = ""
+checksum = ""
+code_line = "[build_industrial_database:create_paper_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L369) -- url passed via Snakemake params.url_paper, Snakefile#L2033"
+license = "CC BY 4.0"
+license_link = "https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/"
