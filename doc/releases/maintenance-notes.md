@@ -17,7 +17,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 * Update version number in `default.config.yaml`, `tutorial.config.yaml` and `test/config.*.yaml`.
 
-* Open and review pull request for branch `release-v0.x.x`. Run `pre-commit run --all`` locally and fix any issues.
+* Open a pull request for branch `release-v0.x.x`, review and fix all remaining issues (usually, release notes require some additional attention). Run `pre-commit run --all`` locally and fix any issues.
 
 * Update and checkout your local `main` and tag a release with `git tag v0.x.x`, `git push`, `git push --tags`.
 
