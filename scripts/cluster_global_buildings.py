@@ -175,7 +175,7 @@ def _prepare_shapes_country(shapes, country_code, distance_crs):
 
 
 def _add_grouped_area(accumulator, joined):
- """
+    """
     Add grouped useful_area values from one spatial join result to accumulator.
 
     Groups the spatial join results by region name, sums the useful rooftop area
