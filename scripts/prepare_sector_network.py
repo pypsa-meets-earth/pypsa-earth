@@ -181,16 +181,16 @@ Relevant Settings
 Inputs
 ------
 
-- ``resources/{SECDIR}/demand/transport_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Transport demand per node and carrier for transport sectors (road, rail, aviation, shipping) if enabled.
-- ``resources/{SECDIR}/pattern_profiles/avail_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Availability profiles for the transport sector if enabled.
-- ``resources/{SECDIR}/pattern_profiles/dsm_profile_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Demand-side management profiles for the transport sector if enabled.
-- ``resources/{SECDIR}/demand/nodal_transport_data_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal transport demand data for transport sectors if enabled.
+- ``resources/{SECDIR}/demand/transport_s{simpl}_{clusters}_{planning_horizons}.csv``: Transport demand per node and carrier for transport sectors (road, rail, aviation, shipping) if enabled.
+- ``resources/{SECDIR}/pattern_profiles/avail_profile_s{simpl}_{clusters}_{planning_horizons}.csv``: Availability profiles for the transport sector if enabled.
+- ``resources/{SECDIR}/pattern_profiles/dsm_profile_s{simpl}_{clusters}_{planning_horizons}.csv``: Demand-side management profiles for the transport sector if enabled.
+- ``resources/{SECDIR}/demand/nodal_transport_data_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal transport demand data for transport sectors if enabled.
 
-- ``resources/{SECDIR}/demand/heat/heat_demand_{demand}_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Heat demand per node for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/ashp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for air source heat pumps for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/gshp_cop_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for ground source heat pumps for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/solar_thermal_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal availability profiles for heat sector if enabled.
-- ``resources/{SECDIR}/demand/heat/district_heat_share_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: District heat share per node for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/heat_demand_s{simpl}_{clusters}_{planning_horizons}.csv``: Heat demand per node for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/ashp_cop_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for air source heat pumps for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/gshp_cop_s{simpl}_{clusters}_{planning_horizons}.csv``: Coefficient of performance for ground source heat pumps for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/solar_thermal_s{simpl}_{clusters}_{planning_horizons}.csv``: Solar thermal availability profiles for heat sector if enabled.
+- ``resources/{SECDIR}/demand/heat/district_heat_share_s{simpl}_{clusters}_{planning_horizons}.csv``: District heat share per node for heat sector if enabled.
 
 - ``resources/{RDIR}/solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv``: Solar rooftop layout per country if enabled.
 
@@ -200,13 +200,13 @@ Inputs
 
 - ``data/hydrogen_salt_cavern_potentials.csv``: Hydrogen salt cavern potentials per country.
 
-- ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_{demand}_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal energy totals if rail transport or agriculture sector is enabled.
+- ``resources/{SECDIR}/demand/heat/nodal_energy_heat_totals_s{simpl}_{clusters}_{planning_horizons}.csv``: Nodal energy totals if rail transport or agriculture sector is enabled.
 
 - ``resources/{SECDIR}/population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv``: Population layout per node.
 
-- ``resources/{SECDIR}/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}_{demand}.csv``: Industrial energy demand per node if industry sector is enabled.
+- ``resources/{SECDIR}/demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv``: Industrial energy demand per node if industry sector is enabled.
 
-- ``resources/{SECDIR}/energy_totals_{demand}_{planning_horizons}.csv``: Energy totals per sector
+- ``resources/{SECDIR}/energy_totals_{planning_horizons}.csv``: Energy totals per sector
 
 - ``resources/{SECDIR}/airports.csv``: Airport locations if aviation sector is enabled.
 
@@ -220,7 +220,7 @@ Inputs
 
 Outputs
 -------
-- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc``: Prepared network file after adding sectoral technologies,
+- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc``: Prepared network file after adding sectoral technologies,
 
 
 Description
@@ -243,15 +243,11 @@ Add sector based technologies to the PyPSA network, including:
 import logging
 import os
 import re
-from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
 import pypsa
-import pytz
-import ruamel.yaml
-import xarray as xr
 from _helpers import (
     BASE_DIR,
     create_dummy_data,
@@ -263,11 +259,8 @@ from _helpers import (
     safe_divide,
     sanitize_carriers,
     sanitize_locations,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
 )
 from prepare_network import add_co2limit
-from prepare_transport_data import prepare_transport_data
 
 logger = logging.getLogger(__name__)
 
@@ -304,19 +297,13 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> Non
 
     n.madd("Bus", nodes, location=location, carrier=carrier)
 
-    # initial fossil reserves
-    e_initial = (
-        snakemake.params.sector_options.get(carrier, {}).get("reserves", 0)
-    ) * 1e6
-    # capital cost could be corrected to e.g. 0.2 EUR/kWh * annuity and O&M
     n.madd(
         "Store",
         nodes + " Store",
         bus=nodes,
         e_nom_extendable=True,
-        e_cyclic=True if e_initial == 0 else False,
+        e_cyclic=True,
         carrier=carrier,
-        e_initial=e_initial,
     )
     n.madd(
         "Generator",
@@ -1246,10 +1233,35 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
             keep_default_na=False,
         ).squeeze()
 
-        # add biomass transport
+        # Build biomass transport only between locations represented in the
+        # spatial biomass topology.
         biomass_transport = create_network_topology(
-            n, "biomass transport ", bidirectional=False
+            n,
+            "biomass transport ",
+            bidirectional=False,
         )
+
+        biomass_bus_map = spatial.biomass.df["nodes"]
+
+        valid_biomass_routes = biomass_transport["bus0"].isin(
+            biomass_bus_map.index
+        ) & biomass_transport["bus1"].isin(biomass_bus_map.index)
+
+        if (~valid_biomass_routes).any():
+            logger.warning(
+                "Dropping %d biomass transport routes outside the spatial "
+                "biomass topology:\n%s",
+                (~valid_biomass_routes).sum(),
+                biomass_transport.loc[
+                    ~valid_biomass_routes,
+                    ["bus0", "bus1"],
+                ].to_string(),
+            )
+
+        biomass_transport = biomass_transport.loc[valid_biomass_routes]
+
+        biomass_transport["bus0"] = biomass_transport["bus0"].map(biomass_bus_map)
+        biomass_transport["bus1"] = biomass_transport["bus1"].map(biomass_bus_map)
 
         # costs
         countries_not_in_index = set(countries) - set(biomass_transport.index)
@@ -1278,29 +1290,14 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         n.madd(
             "Link",
             biomass_transport.index,
-            bus0=biomass_transport.bus0 + " solid biomass",
-            bus1=biomass_transport.bus1 + " solid biomass",
+            bus0=biomass_transport["bus0"],
+            bus1=biomass_transport["bus1"],
             p_nom_extendable=True,
-            length=biomass_transport.length.values,
-            marginal_cost=biomass_transport.costs * biomass_transport.length.values,
+            length=biomass_transport["length"],
+            marginal_cost=biomass_transport["costs"] * biomass_transport["length"],
             capital_cost=1,
             carrier="solid biomass transport",
         )
-
-    # n.madd(
-    #         "Link",
-    #         urban_central + " urban central solid biomass CHP",
-    #         bus0=spatial.biomass.df.loc[urban_central, "nodes"].values,
-    #         bus1=urban_central,
-    #         bus2=urban_central + " urban central heat",
-    #         carrier="urban central solid biomass CHP",
-    #         p_nom_extendable=True,
-    #         capital_cost=costs.at[key, "fixed"] * costs.at[key, "efficiency"],
-    #         marginal_cost=costs.at[key, "VOM"],
-    #         efficiency=costs.at[key, "efficiency"],
-    #         efficiency2=costs.at[key, "efficiency-heat"],
-    #         lifetime=costs.at[key, "lifetime"],
-    #     )
 
     # AC buses with district heating
     urban_central = n.buses.index[n.buses.carrier == "urban central heat"]
@@ -1441,7 +1438,35 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
     if co2_network:
 
         logger.info("Adding CO2 network.")
-        co2_links = create_network_topology(n, "CO2 pipeline ")
+
+        # Build CO2 pipelines only between locations represented in the
+        # spatial CO2 topology.
+        co2_links = create_network_topology(
+            n,
+            "CO2 pipeline ",
+        )
+
+        co2_bus_map = spatial.co2.df["nodes"]
+
+        valid_co2_routes = co2_links["bus0"].isin(co2_bus_map.index) & co2_links[
+            "bus1"
+        ].isin(co2_bus_map.index)
+
+        if (~valid_co2_routes).any():
+            logger.warning(
+                "Dropping %d CO2 pipeline routes outside the spatial CO2 "
+                "topology:\n%s",
+                (~valid_co2_routes).sum(),
+                co2_links.loc[
+                    ~valid_co2_routes,
+                    ["bus0", "bus1"],
+                ].to_string(),
+            )
+
+        co2_links = co2_links.loc[valid_co2_routes]
+
+        co2_links["bus0"] = co2_links["bus0"].map(co2_bus_map)
+        co2_links["bus1"] = co2_links["bus1"].map(co2_bus_map)
 
         cost_onshore = (
             (1 - co2_links.underwater_fraction)
@@ -1458,12 +1483,12 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
         n.madd(
             "Link",
             co2_links.index,
-            bus0=co2_links.bus0.values + " co2 stored",
-            bus1=co2_links.bus1.values + " co2 stored",
+            bus0=co2_links["bus0"],
+            bus1=co2_links["bus1"],
             p_min_pu=-1,
             p_nom_extendable=True,
-            length=co2_links.length.values,
-            capital_cost=capital_cost.values,
+            length=co2_links["length"].to_numpy(),
+            capital_cost=capital_cost.to_numpy(),
             carrier="CO2 pipeline",
             lifetime=costs.at["CO2 pipeline", "lifetime"],
         )
@@ -1552,150 +1577,6 @@ def add_aviation(
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
-    )
-
-
-def add_storage(n: pypsa.Network, costs: pd.DataFrame) -> None:
-    """
-    Function to add battery storage to the sector network, including
-    carry-over of existing capacities from the electricity network.
-
-    This function performs the following steps:
-    1. Retrieves existing battery storage units from the electricity network, if available.
-    2. Removes existing battery storage units and stores from the electricity network to avoid double counting.
-    3. Adds a new "battery" carrier to the network.
-    4. Adds new battery storage units and corresponding charger/discharger links for each node in the spatial network, using the existing capacities as a starting point.
-    5. Configures the new battery storage units to be extendable for future capacity additions
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        The PyPSA network to which battery storage will be added.
-    costs : pd.DataFrame
-        A DataFrame containing cost parameters for the battery storage technologies.
-
-    Returns
-    -------
-    None
-    """
-    # Get existing battery capacities from electricity network if available
-    existing_batteries = n.storage_units[n.storage_units.carrier == "battery"].copy()
-
-    # Remove existing battery storage units and stores from the electricity network to avoid double counting
-    remove_carrier_related_components(n, carriers_to_drop=["battery"])
-
-    logger.info("Add battery storage")
-
-    n.add("Carrier", "battery")
-
-    n.madd(
-        "Bus",
-        spatial.nodes + " battery",
-        location=spatial.nodes,
-        carrier="battery",
-        x=n.buses.loc[list(spatial.nodes)].x.values,
-        y=n.buses.loc[list(spatial.nodes)].y.values,
-    )
-
-    if not existing_batteries.empty:
-        total_cap = existing_batteries["p_nom"].sum() / 1e3
-        n_units = len(existing_batteries)
-        logger.info(
-            f"Battery carry-over from electricity-only network: {total_cap:.2f} GW, {n_units} units"
-        )
-    else:
-        logger.info("No existing batteries found in electricity-only network")
-
-    # Use configured max_hours for battery duration
-    default_max_hours = snakemake.params.electricity["max_hours"]["battery"]
-
-    if not existing_batteries.empty:
-        # Convert each battery StorageUnit to a Store and Link in the sector network, carrying over capacities
-        max_hours = existing_batteries.get("max_hours", default_max_hours)
-        e_nom = existing_batteries["p_nom"] * max_hours
-
-        # Add Stores for existing battery energy capacity
-        n.madd(
-            "Store",
-            existing_batteries.index,
-            bus=existing_batteries["bus"] + " battery",
-            e_cyclic=True,
-            e_nom_extendable=False,
-            e_nom=e_nom,
-            carrier="battery",
-            capital_cost=costs.at["battery storage", "fixed"],
-            build_year=existing_batteries["build_year"],
-            lifetime=existing_batteries["lifetime"],
-        )
-
-        # Add charger Links for existing battery power capacity
-        n.madd(
-            "Link",
-            existing_batteries.index.map(
-                lambda x: x.replace(" battery", " battery charger")
-            ),
-            bus0=existing_batteries["bus"].values,
-            bus1=(existing_batteries["bus"] + " battery").values,
-            p_nom=existing_batteries["p_nom"].values,
-            p_nom_extendable=False,
-            carrier="battery charger",
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            capital_cost=costs.at["battery inverter", "fixed"],
-            lifetime=costs.at["battery inverter", "lifetime"],
-            build_year=existing_batteries["build_year"].values,
-        )
-
-        # Add discharger Links for existing battery power capacity
-        n.madd(
-            "Link",
-            existing_batteries.index.map(
-                lambda x: x.replace(" battery", " battery discharger")
-            ),
-            bus0=(existing_batteries["bus"] + " battery").values,
-            bus1=existing_batteries["bus"].values,
-            p_nom=existing_batteries["p_nom"].values,
-            p_nom_extendable=False,
-            carrier="battery discharger",
-            efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-            marginal_cost=options["marginal_cost_storage"],
-            lifetime=costs.at["battery inverter", "lifetime"],
-            build_year=existing_batteries["build_year"].values,
-        )
-
-    # Add extendable batteries at all nodes (for new capacity additions)
-    n.madd(
-        "Store",
-        spatial.nodes + " battery",
-        bus=spatial.nodes + " battery",
-        e_cyclic=True,
-        e_nom_extendable=True,
-        carrier="battery",
-        capital_cost=costs.at["battery storage", "fixed"],
-        lifetime=costs.at["battery storage", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery charger",
-        bus0=spatial.nodes,
-        bus1=spatial.nodes + " battery",
-        carrier="battery charger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        capital_cost=costs.at["battery inverter", "fixed"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
-    )
-
-    n.madd(
-        "Link",
-        spatial.nodes + " battery discharger",
-        bus0=spatial.nodes + " battery",
-        bus1=spatial.nodes,
-        carrier="battery discharger",
-        efficiency=costs.at["battery inverter", "efficiency"] ** 0.5,
-        marginal_cost=options["marginal_cost_storage"],
-        p_nom_extendable=True,
-        lifetime=costs.at["battery inverter", "lifetime"],
     )
 
 
@@ -1949,8 +1830,6 @@ def add_industry(
 
     # 1e6 to convert TWh to MWh
 
-    # industrial_demand.reset_index(inplace=True)
-
     # Add carrier Biomass
 
     n.madd(
@@ -2042,9 +1921,7 @@ def add_industry(
     n.madd(
         "Link",
         spatial.gas.industry,
-        # bus0="Earth gas",
         bus0=spatial.gas.nodes,
-        # bus1="gas for industry",
         bus1=spatial.gas.industry,
         bus2="co2 atmosphere",
         carrier="gas for industry",
@@ -2056,8 +1933,6 @@ def add_industry(
         n.madd(
             "Link",
             spatial.gas.industry_cc,
-            # suffix=" gas for industry CC",
-            # bus0="Earth gas",
             bus0=spatial.gas.nodes,
             bus1=spatial.gas.industry,
             bus2="co2 atmosphere",
@@ -2086,7 +1961,7 @@ def add_industry(
             suffix=" H2 for industry",
             bus=spatial.nodes + " H2",
             carrier="H2 for industry",
-            p_set=industrial_demand["hydrogen"].apply(lambda frac: frac / 8760),
+            p_set=industrial_demand["hydrogen"] / 8760,
         )
 
     # CARRIER = LIQUID HYDROCARBONS
@@ -2109,9 +1984,7 @@ def add_industry(
     co2 = (
         n.loads.loc[spatial.nodes + co2_release, "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
-        # - industrial_demand["process emission from feedstock"].sum()
-        # / 8760
-    )
+    )  # No division by 8760 because p_set is already in MW
 
     n.add(
         "Load",
@@ -2336,6 +2209,57 @@ Missing data:
 """
 
 
+def align_transport_profile(
+    profile: pd.DataFrame,
+    snapshots: pd.Index,
+    aggregation: str,
+) -> pd.DataFrame:
+    """
+    Align a transport profile to the network snapshots.
+
+    Profiles at a finer regular resolution are aggregated before being
+    reindexed. Mismatched irregular snapshots raise an error instead of being
+    silently sampled.
+    """
+    if profile.index.equals(snapshots):
+        return profile
+
+    if not isinstance(profile.index, pd.DatetimeIndex) or not isinstance(
+        snapshots, pd.DatetimeIndex
+    ):
+        raise ValueError("Cannot align transport profiles with non-datetime snapshots.")
+
+    target_frequency = snapshots.freqstr
+
+    if target_frequency is None and len(snapshots) >= 3:
+        target_frequency = pd.infer_freq(snapshots)
+
+    if target_frequency is None:
+        raise ValueError(
+            "Cannot infer the network snapshot frequency required "
+            "to align transport profiles."
+        )
+
+    resampler = profile.resample(target_frequency)
+
+    if aggregation == "mean":
+        aligned = resampler.mean()
+    elif aggregation == "max":
+        aligned = resampler.max()
+    else:
+        raise ValueError(f"Unsupported transport-profile aggregation: {aggregation}")
+
+    missing_snapshots = snapshots.difference(aligned.index)
+
+    if not missing_snapshots.empty:
+        raise ValueError(
+            "Transport profiles do not cover all network snapshots. "
+            f"Missing: {missing_snapshots.tolist()}"
+        )
+
+    return aligned.reindex(snapshots)
+
+
 def add_land_transport(
     n: pypsa.Network,
     costs: pd.DataFrame,
@@ -2368,13 +2292,46 @@ def add_land_transport(
     """
     # Get the data required for land transport
     # TODO Leon, This contains transport demand, right? if so let's change it to transport_demand?
-    transport = read_csv_nafix(transport_fn, index_col=0, parse_dates=True).reindex(
-        columns=spatial.nodes, fill_value=0.0
+    transport = read_csv_nafix(
+        transport_fn,
+        index_col=0,
+        parse_dates=True,
+    ).reindex(columns=spatial.nodes, fill_value=0.0)
+
+    avail_profile = read_csv_nafix(
+        avail_profile_fn,
+        index_col=0,
+        parse_dates=True,
     )
 
-    avail_profile = read_csv_nafix(avail_profile_fn, index_col=0, parse_dates=True)
-    dsm_profile = read_csv_nafix(dsm_profile_fn, index_col=0, parse_dates=True)
-    nodal_transport_data = read_csv_nafix(nodal_transport_data_fn, index_col=0)
+    dsm_profile = read_csv_nafix(
+        dsm_profile_fn,
+        index_col=0,
+        parse_dates=True,
+    )
+
+    transport = align_transport_profile(
+        transport,
+        n.snapshots,
+        aggregation="mean",
+    )
+
+    avail_profile = align_transport_profile(
+        avail_profile,
+        n.snapshots,
+        aggregation="mean",
+    )
+
+    dsm_profile = align_transport_profile(
+        dsm_profile,
+        n.snapshots,
+        aggregation="max",
+    )
+
+    nodal_transport_data = read_csv_nafix(
+        nodal_transport_data_fn,
+        index_col=0,
+    )
     # TODO nodal_transport_data only includes no. of cars, change name to something descriptive?
     # TODO options?
 
@@ -2531,8 +2488,7 @@ def add_land_transport(
         co2 = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].sum().sum()
-            / 8760
+            * transport[spatial.nodes].mean().sum()
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -3341,8 +3297,7 @@ def add_residential(
         p_set=p_set_oil,
     )
 
-    # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
+    co2 = p_set_oil.mean().sum() * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3369,8 +3324,7 @@ def add_residential(
         p_set=p_set_gas,
     )
 
-    # TODO: check 8760 compatibility with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
+    co2 = p_set_gas.mean().sum() * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3685,18 +3639,12 @@ def add_custom_water_cost(n: pypsa.Network) -> None:
             )
         )
         water_costs = water_costs.filter(like=country, axis=0).loc[spatial.nodes]
-        electrolysis_links = n.links.filter(like=country, axis=0).filter(
-            like="lectrolysis", axis=0
-        )
 
         elec_index = n.links[
             (n.links.carrier == "H2 Electrolysis")
             & (n.links.bus0.str.contains(country))
         ].index
         n.links.loc[elec_index, "marginal_cost"] = water_costs.values
-        # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0)["marginal_cost"] = water_costs.values
-        # n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).apply(lambda x: water_costs[x.index], axis=0)
-        # print(n.links.filter(like=country, axis=0).filter(like='lectrolysis', axis=0).marginal_cost)
 
 
 def add_rail_transport(
@@ -4153,12 +4101,12 @@ if __name__ == "__main__":
             "prepare_sector_network",
             simpl="",
             clusters="4",
-            ll="c1",
-            opts="Co2L-4H",
+            ll="copt",
+            opts="CCL-Co2L-24h",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="144h",
             discountrate=0.071,
-            demand="AB",
+            configfile="test/config.sector.yaml",
         )
 
     # Load population layout
@@ -4195,7 +4143,7 @@ if __name__ == "__main__":
 
     # Fetch wildcards
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
-    demand_sc = snakemake.wildcards.demand  # loading the demand scenario wildcard
+    demand_sc = snakemake.params.demand_scenario
 
     # Prepare the costs dataframe
     costs = read_csv_nafix(snakemake.input.costs, index_col=0)
@@ -4223,9 +4171,6 @@ if __name__ == "__main__":
 
     # Add hydrogen related technologies
     add_hydrogen(n, costs)
-
-    # Add storage using carried-over capacities
-    add_storage(n, costs)
 
     if options["fischer_tropsch"]:
         H2_liquid_fossil_conversions(n, costs)

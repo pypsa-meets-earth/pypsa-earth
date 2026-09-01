@@ -1116,10 +1116,18 @@ def attach_hydro(
 
 
 def attach_existing_batteries(
-    n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame,
+    battery_techs: dict,
+    max_hours: float,
 ) -> None:
     """
     Add existing battery storage units from powerplants.csv to the network.
+
+    Currently existing batteries are attached as ``StorageUnit`` components on
+    the parent AC bus (see issue #1983 and PR #1990). Revert to a Store+Link
+    representation once clustering supports stores and links.
 
     Parameters
     ----------
@@ -1129,12 +1137,17 @@ def attach_existing_batteries(
         DataFrame containing technology costs.
     ppl : pd.DataFrame
         Power plant DataFrame.
+    battery_techs: dict
+        A dictionary mapping of battery and its technology parameters.
+    max_hours: float
+        Amount of time it takes to fully charge batteries from empty if done at maximum power rate.
 
     Returns
     -------
     None
     """
-    batteries = ppl.query('carrier == "battery"')
+    # TODO: support more battery technologies beyond Li
+    batteries = ppl.query('carrier == "battery" and technology == "Li"')
     if batteries.empty:
         logger.info("No existing batteries found in powerplants.csv.")
         return
@@ -1144,7 +1157,12 @@ def attach_existing_batteries(
     # Aggregate batteries by (bus, carrier, grouping_year)
     batteries_grouped = aggregate_ppl_by_bus_carrier_year(batteries)
 
-    max_hours = snakemake.params.electricity["max_hours"]["battery"]
+    lookup_inverter = battery_techs["bicharger"]
+    inverter_efficiency = costs.at[lookup_inverter, "efficiency"] ** 0.5
+
+    # TODO: make existing-battery representation selectable (StorageUnit
+    # or Store+Link). Currently StorageUnit only, because Store+Link extra buses
+    # are treated as isolated AC islands during clustering. See issue #1983.
 
     n.madd(
         "StorageUnit",
@@ -1157,8 +1175,8 @@ def attach_existing_batteries(
         p_nom_max=batteries_grouped["p_nom"],
         capital_cost=costs.at["battery", "capital_cost"],
         max_hours=max_hours,
-        efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
-        efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
+        efficiency_store=inverter_efficiency,
+        efficiency_dispatch=inverter_efficiency,
         cyclic_state_of_charge=True,
         marginal_cost=costs.at["battery", "marginal_cost"],
         build_year=batteries_grouped["build_year"],
@@ -1166,8 +1184,10 @@ def attach_existing_batteries(
     )
 
     logger.info(
-        f"Added {len(batteries_grouped)} existing batteries with total capacity "
-        f"{batteries_grouped.p_nom.sum()/1e3:.2f} GW (max_hours={max_hours})."
+        "Added {} existing batteries defined as StorageUnit with total capacity "
+        "{:.2f} GW (max_hours={}).".format(
+            len(batteries_grouped), batteries_grouped.p_nom.sum() / 1e3, max_hours
+        )
     )
 
 
@@ -1271,7 +1291,14 @@ if __name__ == "__main__":
     attach_hydro(
         n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
     )
-    attach_existing_batteries(n, costs, ppl)
+
+    attach_existing_batteries(
+        n,
+        costs,
+        ppl,
+        snakemake.params.battery_techs,
+        snakemake.params.electricity["max_hours"]["battery"],
+    )
     apply_nuclear_p_max_pu(
         n,
         read_csv_nafix(snakemake.input.nuclear_p_max_pu),

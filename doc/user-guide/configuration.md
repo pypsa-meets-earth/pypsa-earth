@@ -44,9 +44,10 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `clean_osm_data_options` | `osm.clean_osm_data` |
 | `build_osm_network` | `osm.build_osm_network` |
 | `cluster_options` | `clustering` |
-| `fossil_reserves.{carrier}` | `sector.{carrier}.reserves` |
+| `scenario.demand` *(list/string wildcard)* | `demand_data.scenario` *(single string; lists with more than one value error)* |
+| `export.h2export` *(list)* | `export.h2export` *(single scalar TWh/year; multi-value lists error)* |
 
-`{carrier}` is the fuel name (e.g. `oil`, `coal`, `gas`, `lignite`, `biomass`). Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
+Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
 
 ## Top-level configuration
 
@@ -393,6 +394,38 @@ Specifies the options to obtain renewable potentials in every cutout. These are 
 
 {{ read_csv('configtables/csp.csv') }}
 
+### storage technologies
+
+Specifies storage technologies mapping. Specifies storage technologies mapping. Each storage carrier can either be defined either as Stores or StorageUnit as shown in `electricity: extendable_carriers:`
+
+!!! note
+    When those carrier are defined as Store:
+
+    - The storage component is represented by a dedicated storage component with its own bus, as well as separate charging and discharging links. Each component has its own costs and efficiencies.
+    - Charging and discharging capacities are optimized independently from the storage energy capacity (except for the default `battery` configuration).
+    - The optimized storage capacity is expressed in MWh.
+    - A Store is best suited for technologies where charging and discharging power can be sized independently of the storage energy capacity.
+
+    When those carrier are defined as StorageUnit:
+
+    - The storage component is represented as a single component, with charging, discharging, and storage costs combined.
+    - Charging and discharging capacities are tied to the storage capacity through the `max_hours` parameter.
+    - The optimized capacity is expressed in MW. To obtain the corresponding energy capacity in MWh, multiply the optimized capacity by `max_hours`.
+    - A StorageUnit is best suited for technologies where charging and discharging power have a fixed relationship to the storage energy capacity.
+
+!!! warning
+    In order to define storages as StorageUnit, define it's `max_hours` in `electricity: max_hours:`
+
+The following storage technologies are available for implementation in the model. Users may also define additional storage technologies, provided that the necessary technology cost data is included:
+
+{{ read_csv('configtables/storage_techs_abb.csv') }}
+
+```yaml
+--8<-- "configtables/snippets/storage_techs.yaml"
+```
+
+{{ read_csv('configtables/storage_techs.csv') }}
+
 ### costs
 
 Specifies the cost assumptions of the technologies considered. Cost information is obtained from the config file and the file `data/costs.csv`, which can also be modified manually.
@@ -493,7 +526,7 @@ Specifies the options for sector coupling, i.e. the integration of the electrici
 
 #### top-level
 
-Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted. The former top-level ``fossil_reserves`` block is deprecated — see [Renamed keys](#renamed-keys).
+Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia.
 
 ```yaml
 --8<-- "configtables/snippets/sector_toplevel.yaml"
@@ -569,7 +602,9 @@ Solar thermal collector settings live under ``sector.solar_thermal_collector`` (
 
 ## Solving
 
-Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, linear formulation, load shedding, iteration settings, solver presets, and memory limit.
+Solving defaults are split across two files. The dedicated **`configs/solving.default.yaml`** holds optimization options (``solving.options``), the memory limit (``solving.mem``), and named solver presets (``solving.solver_options``). **`config.default.yaml`** keeps only the active solver choice under **SOLVING** (``solving.solver``: ``name`` and ``options``, for example ``gurobi-default``).
+
+Snakemake merges ``configfile:`` entries in order (see the Snakefile): ``config.default.yaml`` (``solving.solver`` only), then **`configs/solving.default.yaml`**, and finally your ``config.yaml``. Later files override earlier keys at the same path, so you can override any solving setting in ``config.yaml`` (or with ``snakemake --configfile …``).
 
 ### solver
 
@@ -587,9 +622,19 @@ Options under the **SOLVING** banner in ``config.default.yaml``: solver choice, 
 
 {{ read_csv('configtables/solving-options.csv') }}
 
+### solver_options
+
+Named presets used by ``solving.solver.options`` in ``configs/solving.default.yaml`` (for example ``gurobi-default`` or ``highs-default``). Override individual keys from ``config.yaml`` if needed.
+
+```yaml
+--8<-- "configtables/snippets/solving_solver_options.yaml"
+```
+
 ## Plotting
 
-Options under the **PLOTTING** banner in ``config.default.yaml``: map layout, plot thresholds, technology groupings, carrier colours, and display names.
+The dedicated **`configs/plotting.default.yaml`** holds all plotting defaults, including map layout, plot thresholds, technology groupings, carrier colours, and display names.
+
+Snakemake loads **`configs/plotting.default.yaml`** after ``config.default.yaml`` and before your ``config.yaml`` (see the Snakefile). Later files override earlier keys at the same path, so you can override any plotting setting under ``plotting`` in ``config.yaml`` (or with ``snakemake --configfile …``).
 
 ```yaml
 --8<-- "configtables/snippets/plotting.yaml"
