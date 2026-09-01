@@ -73,7 +73,7 @@ from shapely.geometry import Polygon
 logger = create_logger(__name__)
 
 
-CRF = 0.09  # calculated with 0.08 interest rate, assumtion from Franzmann et al. (https://doi.org/10.1016/j.renene.2025.123199) for calculation of the LCOE's.
+CRF = 0.09  # calculated with 0.08 interest rate, assumption from Franzmann et al. (https://doi.org/10.1016/j.renene.2025.123199) for calculation of the LCOE's.
 # To calculate the CAPEX based on the paper, this exact value must be used.
 
 
