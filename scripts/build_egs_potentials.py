@@ -62,19 +62,19 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
-from shapely.geometry import Polygon
 from _helpers import (
     configure_logging,
     create_logger,
     mock_snakemake,
     two_2_three_digits_country,
 )
+from shapely.geometry import Polygon
 
 logger = create_logger(__name__)
 
 
-CRF = 0.09 # calculated with 0.08 interest rate, assumtion from Franzmann et al. (https://doi.org/10.1016/j.renene.2025.123199) for calculation of the LCOE's. 
-# To calculate the CAPEX based on the paper, this exact value must be used. 
+CRF = 0.09  # calculated with 0.08 interest rate, assumtion from Franzmann et al. (https://doi.org/10.1016/j.renene.2025.123199) for calculation of the LCOE's.
+# To calculate the CAPEX based on the paper, this exact value must be used.
 
 
 def read_network_regions(network_regions_file):
@@ -99,14 +99,15 @@ def read_network_regions(network_regions_file):
     """
     regions = gpd.read_file(network_regions_file)
 
-    if 'name' not in regions.columns:
+    if "name" not in regions.columns:
         raise ValueError(
             f"Network regions file '{network_regions_file}' does not contain a 'name' column."
         )
 
-    regions = regions.set_index('name', drop=True).set_crs(epsg=4326, allow_override=True)
+    regions = regions.set_index("name", drop=True).set_crs(
+        epsg=4326, allow_override=True
+    )
     return regions
-
 
 
 def prepare_egs_data(egs_file, countries, network_regions_file):
@@ -149,15 +150,15 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
     df = pd.read_csv(egs_file)
 
     required_columns = {
-        'lon',
-        'lat',
-        'gid1',
-        'Pout_Gringarten_MW',
-        'LCOE_Gringarten_Eurct_per_kWh',
-        'Pout_VolumeMethod_MW',
-        'LCOE_VolumeMethod_Eurct_per_kWh',
-        'Pout_Sustainable_MW',
-        'LCOE_Sustainable_Eurct_per_kWh',
+        "lon",
+        "lat",
+        "gid1",
+        "Pout_Gringarten_MW",
+        "LCOE_Gringarten_Eurct_per_kWh",
+        "Pout_VolumeMethod_MW",
+        "LCOE_VolumeMethod_Eurct_per_kWh",
+        "Pout_Sustainable_MW",
+        "LCOE_Sustainable_Eurct_per_kWh",
     }
     missing_columns = sorted(required_columns - set(df.columns))
     if missing_columns:
@@ -170,16 +171,16 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
     countries = [str(c).upper() for c in countries]
     df = df.drop(
         columns=[
-            'Pout_VolumeMethod_MW',
-            'LCOE_VolumeMethod_Eurct_per_kWh',
-            'Pout_Sustainable_MW',
-            'LCOE_Sustainable_Eurct_per_kWh',
+            "Pout_VolumeMethod_MW",
+            "LCOE_VolumeMethod_Eurct_per_kWh",
+            "Pout_Sustainable_MW",
+            "LCOE_Sustainable_Eurct_per_kWh",
         ]
     )
 
-    df['gid1'] = df['gid1'].astype(str).str.strip().str.upper()
-    df['country_code'] = df['gid1'].str.extract(r'^([A-Z]{3})', expand=False)
-    df = df.loc[df['country_code'].isin(countries)].copy()
+    df["gid1"] = df["gid1"].astype(str).str.strip().str.upper()
+    df["country_code"] = df["gid1"].str.extract(r"^([A-Z]{3})", expand=False)
+    df = df.loc[df["country_code"].isin(countries)].copy()
 
     if df.empty:
         raise ValueError(
@@ -188,106 +189,101 @@ def prepare_egs_data(egs_file, countries, network_regions_file):
 
     df = df.rename(
         columns={
-            'lon': 'Lon',
-            'lat': 'Lat',
-            'Pout_Gringarten_MW': 'PowerSust_MW',
-            'LCOE_Gringarten_Eurct_per_kWh': 'LCOE_Eur_per_kWh',
+            "lon": "Lon",
+            "lat": "Lat",
+            "Pout_Gringarten_MW": "PowerSust_MW",
+            "LCOE_Gringarten_Eurct_per_kWh": "LCOE_Eur_per_kWh",
         }
     )
 
-    df = df.dropna(subset=['Lon', 'Lat', 'PowerSust_MW', 'LCOE_Eur_per_kWh'])
-    df = df.loc[df['PowerSust_MW'] > 0.0].copy()
+    df = df.dropna(subset=["Lon", "Lat", "PowerSust_MW", "LCOE_Eur_per_kWh"])
+    df = df.loc[df["PowerSust_MW"] > 0.0].copy()
 
     if df.empty:
         raise ValueError(
-            'No valid EGS rows left after dropping invalid or zero-output rows.'
+            "No valid EGS rows left after dropping invalid or zero-output rows."
         )
 
     # EUR/kWh => EUR/MWh
-    df['LCOE_EUR_per_MWh'] = df['LCOE_Eur_per_kWh'] * 1000.0
+    df["LCOE_EUR_per_MWh"] = df["LCOE_Eur_per_kWh"] * 1000.0
 
     # Energy produced per year in MWh
-    df['Leistung_MWh'] = df['PowerSust_MW'] * 8760.0
+    df["Leistung_MWh"] = df["PowerSust_MW"] * 8760.0
 
     # Annualized CAPEX-like quantity
     # Assumption: 2 % of CAPEX as OPEX, -> CRF + 0.02
-    capex = (
-        df['LCOE_EUR_per_MWh']
-        * df['Leistung_MWh']
-        / ( + 0.02)
-    )
+    capex = df["LCOE_EUR_per_MWh"] * df["Leistung_MWh"] / (+0.02)
 
-    # PowerSust in GW 
-    df['PowerSust'] = df['PowerSust_MW'] / 1000.0  # MW -> GW
+    # PowerSust in GW
+    df["PowerSust"] = df["PowerSust_MW"] / 1000.0  # MW -> GW
 
     # CAPEX in EUR/GW
-    df['CAPEX'] = capex / df['PowerSust']
+    df["CAPEX"] = capex / df["PowerSust"]
 
     point_gdf = gpd.GeoDataFrame(
-        df[['gid1', 'country_code', 'Lon', 'Lat', 'CAPEX', 'PowerSust']],
-        geometry=gpd.points_from_xy(df['Lon'], df['Lat']),
-        crs='EPSG:4326',
+        df[["gid1", "country_code", "Lon", "Lat", "CAPEX", "PowerSust"]],
+        geometry=gpd.points_from_xy(df["Lon"], df["Lat"]),
+        crs="EPSG:4326",
     )
 
-    regions = read_network_regions(network_regions_file).reset_index()[['name', 'geometry']]
+    regions = read_network_regions(network_regions_file).reset_index()[
+        ["name", "geometry"]
+    ]
 
     # Assign each point directly to a network region
     joined = gpd.sjoin(
         point_gdf,
         regions,
-        how='left',
-        predicate='intersects',
-    ).rename(columns={'name': 'region'})
+        how="left",
+        predicate="intersects",
+    ).rename(columns={"name": "region"})
 
-    missing_regions = int(joined['region'].isna().sum())
+    missing_regions = int(joined["region"].isna().sum())
     if missing_regions > 0:
         logger.warning(
             f"{missing_regions} EGS points could not be assigned to any network region and will be dropped."
         )
 
-    joined = joined.dropna(subset=['region']).copy()
+    joined = joined.dropna(subset=["region"]).copy()
 
     if joined.empty:
         raise ValueError(
-            'No EGS points could be assigned to the provided network regions.'
+            "No EGS points could be assigned to the provided network regions."
         )
 
     # ------------------------------------------------------------
     # Power-weighted CAPEX by region
     # ------------------------------------------------------------
     def weighted_average_capex(group):
-        weights = group['PowerSust'].fillna(0.0)
+        weights = group["PowerSust"].fillna(0.0)
 
         if weights.sum() <= 0:
-            return group['CAPEX'].mean()
+            return group["CAPEX"].mean()
 
         return np.average(
-            group['CAPEX'],
+            group["CAPEX"],
             weights=weights,
         )
 
     # Aggregate standard sizes first
     region_agg = (
-        joined.groupby('region', as_index=True)
+        joined.groupby("region", as_index=True)
         .agg(
-            PowerSust=('PowerSust', 'sum'),
-            n_points=('region', 'size'),
+            PowerSust=("PowerSust", "sum"),
+            n_points=("region", "size"),
         )
         .sort_index()
     )
 
     # Then add CAPEX on a performance-weighted basis
     weighted_capex = (
-        joined
-        .groupby('region')
-        .apply(weighted_average_capex)
-        .rename('CAPEX')
+        joined.groupby("region").apply(weighted_average_capex).rename("CAPEX")
     )
 
     region_agg = region_agg.join(weighted_capex)
 
-    region_agg.index.name = 'region'
-    region_agg['p_nom_max'] = region_agg['PowerSust']
+    region_agg.index.name = "region"
+    region_agg["p_nom_max"] = region_agg["PowerSust"]
 
     return region_agg
 
@@ -343,7 +339,9 @@ def get_capacity_factors(network_regions_file, air_temperatures_file, snapshots=
     x = np.hstack((lower_x, x, upper_x))
     y = np.hstack((lower_y, y, upper_y))
 
-    network_regions = gpd.read_file(network_regions_file).set_crs(epsg=4326, allow_override=True)
+    network_regions = gpd.read_file(network_regions_file).set_crs(
+        epsg=4326, allow_override=True
+    )
     region_names = network_regions["name"]
 
     air_temp = xr.open_dataset(air_temperatures_file)
@@ -360,6 +358,7 @@ def get_capacity_factors(network_regions_file, air_temperatures_file, snapshots=
     capacity_factors.index.name = "snapshot"
     return capacity_factors
 
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         snakemake = mock_snakemake(
@@ -374,14 +373,12 @@ if __name__ == "__main__":
         network_regions_file=snakemake.input.regions,
     )
 
-    egs_data["p_nom_max"] = egs_data["PowerSust"] 
+    egs_data["p_nom_max"] = egs_data["PowerSust"]
 
-    egs_data[[ "p_nom_max", "CAPEX"]].to_csv(
-        snakemake.output.egs_potentials
-    )
+    egs_data[["p_nom_max", "CAPEX"]].to_csv(snakemake.output.egs_potentials)
 
     if hasattr(snakemake.input, "temp_air_total") and hasattr(
-    snakemake.output, "egs_capacity_factors"
+        snakemake.output, "egs_capacity_factors"
     ):
         snapshots = pd.date_range(
             freq="h",

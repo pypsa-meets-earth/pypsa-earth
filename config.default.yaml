@@ -649,9 +649,9 @@ export:
 import:
   enable: true
   limit: [470]  #TWh/a
-  sources: ["ports", "pipelines"] #it takes only existing pipelines and ports into account 
+  sources: ["ports", "pipelines"] #it takes only existing pipelines and ports into account
   price:
-    H2_pipe: 30 # EUR/MWh 
+    H2_pipe: 30 # EUR/MWh
     H2_ship: 60  # EUR/MWh can be calculated by multiplying the price per tonne by the LHV of hydrogen (33.3333 MWh/t_H2)
 
 # ------------------- Sector-coupled demand data -------------------
@@ -780,7 +780,7 @@ sector:
     max_hours: 240      # Storage duration of the geothermal heat reservoir in hours, relative to its nominal power capacity.
     max_boost: 0.25     # Maximum short-term discharge boost from the reservoir, expressed as a fraction of nominal capacity.
     production_technologies: # H2 production carriers from costs data; uncomment lines to enable
-    
+
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded

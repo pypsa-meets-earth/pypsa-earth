@@ -82,6 +82,14 @@ sector:
     # - Coal gasification CC
     # - Heavy oil partial oxidation
 
+  enhanced_geothermal:
+    enable: true        # Enable Enhanced Geothermal Systems (EGS) in the sector network.
+    var_cf: true        # Use time-varying regional capacity factors for EGS; requires an EGS capacity-factor input file.
+    flexible: true      # Add a geothermal heat reservoir StorageUnit to allow flexible shifting of heat output.
+    max_hours: 240      # Storage duration of the geothermal heat reservoir in hours, relative to its nominal power capacity.
+    max_boost: 0.25     # Maximum short-term discharge boost from the reservoir, expressed as a fraction of nominal capacity.
+    production_technologies: # H2 production carriers from costs data; uncomment lines to enable
+
   coal:
     spatial_coal: true
     shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded

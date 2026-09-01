@@ -65,7 +65,6 @@ from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -120,7 +119,6 @@ def load_pipeline_import_nodes(path):
         )
 
     return df
-    
 
 
 def load_ports(path):
@@ -145,10 +143,10 @@ def load_ports(path):
         If required columns are missing or negative ``fraction`` values are found.
     """
     ports = pd.read_csv(
-            path,
-            index_col=None,
-            keep_default_na=False,
-        ).copy()
+        path,
+        index_col=None,
+        keep_default_na=False,
+    ).copy()
 
     required_columns = {"country", "x", "y", "fraction"}
     missing_columns = required_columns.difference(ports.columns)
@@ -360,7 +358,9 @@ def map_import_locations_to_nodes(df, regions_or_buses):
     matched_port_ids = set(strict_matches["port_id"].tolist())
 
     # 2) fallback: nearest only for still-unmatched ports
-    unmatched_points = gdf_points.loc[~gdf_points["port_id"].isin(matched_port_ids)].copy()
+    unmatched_points = gdf_points.loc[
+        ~gdf_points["port_id"].isin(matched_port_ids)
+    ].copy()
 
     if not unmatched_points.empty:
         nearest_matches = gpd.sjoin_nearest(
@@ -377,9 +377,7 @@ def map_import_locations_to_nodes(df, regions_or_buses):
     gdf_joined = gdf_joined.dropna(subset=["bus"]).copy()
 
     # IMPORTANT: enforce exactly one mapping per original port
-    gdf_joined = gdf_joined.sort_values(
-        ["port_id", "distance_to_region", "bus"]
-    )
+    gdf_joined = gdf_joined.sort_values(["port_id", "distance_to_region", "bus"])
     gdf_joined = gdf_joined.drop_duplicates(subset=["port_id"], keep="first")
 
     return pd.DataFrame(
@@ -388,8 +386,8 @@ def map_import_locations_to_nodes(df, regions_or_buses):
             errors="ignore",
         )
     )
- 
- 
+
+
 def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_max_total, tol=1e-6):
     """
     Aggregate pipeline- and port-based hydrogen import capacities by model node.
@@ -436,8 +434,7 @@ def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_max_total, tol=
     missing_ports = port_required.difference(ports.columns)
     if missing_ports:
         raise ValueError(
-            "Missing required columns in ports dataframe: "
-            f"{sorted(missing_ports)}"
+            "Missing required columns in ports dataframe: " f"{sorted(missing_ports)}"
         )
 
     pipeline_agg = (
@@ -484,7 +481,7 @@ def aggregate_h2_import_by_node(pipelines, ports, pipeline_p_nom_max_total, tol=
 
     return df
 
-    
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -501,10 +498,14 @@ if __name__ == "__main__":
     else:
         pipelines = pd.DataFrame(columns=["bus", "country", "p_nom"])
 
-    pipeline_p_nom_max_total = pd.to_numeric(
-        pipelines.get("p_nom", pd.Series(dtype=float)),
-        errors="coerce",
-    ).fillna(0.0).sum()
+    pipeline_p_nom_max_total = (
+        pd.to_numeric(
+            pipelines.get("p_nom", pd.Series(dtype=float)),
+            errors="coerce",
+        )
+        .fillna(0.0)
+        .sum()
+    )
 
     if "ports" in sources:
         ports = load_ports(snakemake.input.export_ports)

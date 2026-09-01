@@ -6,13 +6,13 @@
 """
 This script handles the downloading and processing of global building data.
 """
+import gc
 import os
+from pathlib import Path
 
 import country_converter as coco
 import geopandas as gpd
 import pandas as pd
-import gc
-from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 from _helpers import (
@@ -81,6 +81,7 @@ def download_global_buildings_url(update=False):
         df_url = pd.read_csv(global_buildings_path, index_col=0)
 
     return df_url
+
 
 def get_building_area_center(df, crs):
     """
@@ -153,10 +154,8 @@ def get_building_area_center(df, crs):
         gc.collect()
 
         # Calculate centroids and transform back to geographic CRS
-        center = (
-            gdf.to_crs(crs["distance_crs"])
-            .geometry.centroid
-            .to_crs(crs["geo_crs"])
+        center = gdf.to_crs(crs["distance_crs"]).geometry.centroid.to_crs(
+            crs["geo_crs"]
         )
 
         result = pd.DataFrame(
@@ -298,6 +297,7 @@ def download_global_buildings(country_code, country_buildings_fn, crs, update=Fa
             tmp_output_path.unlink()
 
         raise
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():

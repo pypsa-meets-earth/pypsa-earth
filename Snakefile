@@ -1277,8 +1277,8 @@ if not config["custom_data"]["gas_network"]:
             clustered_gas_network="resources/"
             + SECDIR
             + "gas_networks/gas_network_elec_s{simpl}_{clusters}.csv",
-            h2_pipeline_import_nodes="resources/" 
-            + SECDIR 
+            h2_pipeline_import_nodes="resources/"
+            + SECDIR
             + "gas_networks/h2_pipeline_import_nodes_elec_s{simpl}_{clusters}.csv",
             # TODO: Should be a own snakemake rule
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
@@ -1387,8 +1387,12 @@ rule prepare_sector_network:
         shapes_path="resources/"
         + RDIR
         + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        egs_potentials="resources/" + RDIR + "egs_potentials{simpl}_{clusters}_{planning_horizons}.csv",
-        egs_capacity_factors="resources/" + RDIR + "egs_capacity_factors{simpl}_{clusters}_{planning_horizons}.csv",
+        egs_potentials="resources/"
+        + RDIR
+        + "egs_potentials{simpl}_{clusters}_{planning_horizons}.csv",
+        egs_capacity_factors="resources/"
+        + RDIR
+        + "egs_capacity_factors{simpl}_{clusters}_{planning_horizons}.csv",
         pipelines=branch(
             config["sector"]["hydrogen"]["network"],
             branch(
@@ -1438,9 +1442,7 @@ rule prepare_import:
         h2_pipeline_import_nodes="resources/"
         + SECDIR
         + "gas_networks/h2_pipeline_import_nodes_elec_s{simpl}_{clusters}.csv",
-        export_ports="resources/"
-        + SECDIR
-        + "export_ports.csv",
+        export_ports="resources/" + SECDIR + "export_ports.csv",
     output:
         h2_import_nodes="resources/"
         + SECDIR
@@ -1448,14 +1450,18 @@ rule prepare_import:
     script:
         "scripts/prepare_import.py"
 
+
 if config["import"].get("enable", False):
+
     rule add_import:
         params:
             imports_config=config["import"],
         input:
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}.nc",
-            h2_import_nodes="resources/" + SECDIR + "h2_import_nodes_elec_s{simpl}_{clusters}_{h2import}import.csv",
+            h2_import_nodes="resources/"
+            + SECDIR
+            + "h2_import_nodes_elec_s{simpl}_{clusters}_{h2import}import.csv",
         output:
             RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2import}import.nc",
@@ -1947,7 +1953,7 @@ rule make_sector_summary:
         h2export_qty=config["export"]["h2export"],
         h2import_qty=config["import"]["limit"],
         foresight=config["foresight"],
-        ll=config["scenario"]["ll"]
+        ll=config["scenario"]["ll"],
     input:
         networks=expand(
             RESDIR
@@ -1959,8 +1965,8 @@ rule make_sector_summary:
         ),
         #costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         costs=expand(
-        "resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
-        planning_horizons=config["scenario"]["planning_horizons"],
+            "resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            planning_horizons=config["scenario"]["planning_horizons"],
         ),
         plots=expand(
             RESDIR
@@ -2463,6 +2469,7 @@ if config["foresight"] == "myopic":
                 **config["costs"],
             ),
 
+
 rule retrieve_egs_data:
     input:
         egs_gz=HTTP.remote(
@@ -2479,8 +2486,10 @@ rule retrieve_egs_data:
         with gzip.open(str(input.egs_gz), "rb") as f_in:
             with open(output_file, "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
-        #unpack_archive(str(input.egs_zip),output["egs_dir"]) 
-        #shell("mv data/egs_data/allPlacements_POL-lowV2_Doublette_xED8.csv {output.egs_file}")
+                # unpack_archive(str(input.egs_zip),output["egs_dir"])
+                # shell("mv data/egs_data/allPlacements_POL-lowV2_Doublette_xED8.csv {output.egs_file}")
+
+
 
 
 rule build_egs_potentials:
@@ -2490,14 +2499,22 @@ rule build_egs_potentials:
         snapshots=config["snapshots"],
     input:
         egs_input="data/egs_data/egs_input_dataset.csv",
-        regions="resources/" + RDIR + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
-        temp_air_total="resources/" + SECDIR + "temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
+        regions="resources/"
+        + RDIR
+        + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+        temp_air_total="resources/"
+        + SECDIR
+        + "temperatures/temp_air_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
     output:
-        egs_potentials="resources/" + RDIR + "egs_potentials{simpl}_{clusters}_{planning_horizons}.csv",
-        egs_capacity_factors="resources/" + RDIR + "egs_capacity_factors{simpl}_{clusters}_{planning_horizons}.csv",
+        egs_potentials="resources/"
+        + RDIR
+        + "egs_potentials{simpl}_{clusters}_{planning_horizons}.csv",
+        egs_capacity_factors="resources/"
+        + RDIR
+        + "egs_capacity_factors{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 1
     resources:
-        mem_mb=2000
+        mem_mb=2000,
     script:
         "scripts/build_egs_potentials.py"
 
@@ -2544,7 +2561,6 @@ rule run_scenario:
             check=not config["run"]["allow_scenario_failure"],
         )
         copyfile("config.yaml", output.copyconfig)
-
 
 
 rule run_all_scenarios:

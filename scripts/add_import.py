@@ -221,15 +221,14 @@ if __name__ == "__main__":
 
     import_nodes = load_h2_import_nodes(snakemake.input.h2_import_nodes)
 
-    import_nodes = get_h2_target_buses(n,import_nodes)
+    import_nodes = get_h2_target_buses(n, import_nodes)
 
-    add_pipeline_h2_imports(n,import_nodes)
+    add_pipeline_h2_imports(n, import_nodes)
 
-    add_port_h2_imports(n,import_nodes)
+    add_port_h2_imports(n, import_nodes)
 
     sanitize_carriers(n, snakemake.config)
 
     n.export_to_netcdf(snakemake.output[0])
-    
+
     logger.info("Network successfully exported")
-    

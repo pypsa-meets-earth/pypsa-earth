@@ -695,21 +695,21 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
         * costs.at["fuel cell", "efficiency"],
         lifetime=costs.at["fuel cell", "lifetime"],
     )
-    
+
     if snakemake.params.sector_options["hydrogen"].get("h2_turbine", False):
         n.madd(
-                "Link",
-                spatial.nodes + " H2 turbine",
-                bus0=spatial.nodes + " H2",
-                bus1=spatial.nodes,
-                p_nom_extendable=True,
-                carrier="H2 turbine",
-                efficiency=costs.at["OCGT", "efficiency"],
-                capital_cost=costs.at["OCGT", "fixed"]
-                * costs.at["OCGT", "efficiency"],  # NB: fixed cost is per MWel
-                marginal_cost=costs.at["OCGT", "VOM"],
-                lifetime=costs.at["OCGT", "lifetime"],
-            )
+            "Link",
+            spatial.nodes + " H2 turbine",
+            bus0=spatial.nodes + " H2",
+            bus1=spatial.nodes,
+            p_nom_extendable=True,
+            carrier="H2 turbine",
+            efficiency=costs.at["OCGT", "efficiency"],
+            capital_cost=costs.at["OCGT", "fixed"]
+            * costs.at["OCGT", "efficiency"],  # NB: fixed cost is per MWel
+            marginal_cost=costs.at["OCGT", "VOM"],
+            lifetime=costs.at["OCGT", "lifetime"],
+        )
 
     if snakemake.params.sector_options["hydrogen"].get("h2_turbine", False):
         # Assumption:
@@ -2734,7 +2734,7 @@ def add_heat(
                 h_nodes[name] + f" {name} water tanks charger",
                 bus0=h_nodes[name] + f" {name} heat",
                 bus1=h_nodes[name] + f" {name} water tanks",
-                efficiency= 1.0, #costs.at["water tank charger", "efficiency"],
+                efficiency=1.0,  # costs.at["water tank charger", "efficiency"],
                 carrier=name + " water tanks charger",
                 p_nom_extendable=True,
             )
@@ -2745,7 +2745,7 @@ def add_heat(
                 bus0=h_nodes[name] + f" {name} water tanks",
                 bus1=h_nodes[name] + f" {name} heat",
                 carrier=name + " water tanks discharger",
-                efficiency= 1.0, #costs.at["water tank discharger", "efficiency"],
+                efficiency=1.0,  # costs.at["water tank discharger", "efficiency"],
                 p_nom_extendable=True,
             )
 
@@ -3822,6 +3822,7 @@ def remove_carrier_related_components(
     )
     n.mremove("Link", links_to_remove)
 
+
 def annuity(n, r):
     """
     Calculate the annuity factor for an asset with lifetime n years and.
@@ -3836,6 +3837,7 @@ def annuity(n, r):
         return r / (1.0 - 1.0 / (1.0 + r) ** n)
     else:
         return 1 / n
+
 
 def add_enhanced_geothermal(
     n,
@@ -3898,7 +3900,9 @@ def add_enhanced_geothermal(
     egs_potentials = egs_potentials.loc[egs_potentials["p_nom_max"] > 0].copy()
 
     if egs_potentials.empty:
-        logger.warning("No positive EGS potential left after filtering to network buses.")
+        logger.warning(
+            "No positive EGS potential left after filtering to network buses."
+        )
         return
 
     # cost assumptions
@@ -3913,7 +3917,9 @@ def add_enhanced_geothermal(
     orc_capex = costs.at["organic rankine cycle", "investment"]
     orc_lt = costs.at["organic rankine cycle", "lifetime"]
     orc_annuity = annuity(orc_lt, dr)
-    orc_capital_cost = (orc_annuity + geothermal_fom / (1.0 + geothermal_fom)) * orc_capex * Nyears
+    orc_capital_cost = (
+        (orc_annuity + geothermal_fom / (1.0 + geothermal_fom)) * orc_capex * Nyears
+    )
 
     efficiency_orc = costs.at["organic rankine cycle", "electricity-input"]
     efficiency_dh = costs.at["geothermal", "district heat-input"]
@@ -3927,7 +3933,6 @@ def add_enhanced_geothermal(
         )
 
     logger.info(f"Applying EGS cost factor: {egs_cost_factor}")
-    
 
     # CAPEX from your build_egs_potentials script is EUR/GW_el -> convert to EUR/MW_el
     # and subtract ORC cost because ORC is represented as a separate link,
@@ -3937,7 +3942,6 @@ def add_enhanced_geothermal(
         * (egs_potentials["CAPEX"] * 1e-3 - orc_capex)
         * Nyears
     )
-    
 
     if (egs_potentials["capital_cost"] <= 0).any():
         bad = egs_potentials.index[egs_potentials["capital_cost"] <= 0].tolist()
@@ -4003,7 +4007,9 @@ def add_enhanced_geothermal(
 
     as_chp = "urban central heat" in n.loads.carrier.unique()
     if as_chp:
-        logger.info("Adding EGS as combined electricity / district-heat option where urban central heat buses exist.")
+        logger.info(
+            "Adding EGS as combined electricity / district-heat option where urban central heat buses exist."
+        )
     else:
         logger.info("Adding EGS as electricity-only option.")
 
@@ -4093,6 +4099,7 @@ def add_enhanced_geothermal(
                 max_hours=max_hours,
                 cyclic_state_of_charge=True,
             )
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -4260,21 +4267,22 @@ if __name__ == "__main__":
             n = average_every_nhours(n, m.group(0))
             break
 
-
-    if snakemake.params.sector_options.get("enhanced_geothermal", {}).get("enable", False):
+    if snakemake.params.sector_options.get("enhanced_geothermal", {}).get(
+        "enable", False
+    ):
         add_enhanced_geothermal(
-           n=n,
-           costs=costs,
-           costs_config=snakemake.config["costs"],
-           egs_potentials=snakemake.input.egs_potentials,
-           egs_config=snakemake.params.sector_options["enhanced_geothermal"],
-           egs_capacity_factors=(
+            n=n,
+            costs=costs,
+            costs_config=snakemake.config["costs"],
+            egs_potentials=snakemake.input.egs_potentials,
+            egs_config=snakemake.params.sector_options["enhanced_geothermal"],
+            egs_capacity_factors=(
                 snakemake.input.egs_capacity_factors
                 if hasattr(snakemake.input, "egs_capacity_factors")
                 else None
-           ),
+            ),
         )
-  
+
     co2_budget = snakemake.params.co2_budget
     if co2_budget["enable"]:
         add_co2_budget(
