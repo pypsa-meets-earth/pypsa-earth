@@ -19,7 +19,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 * Open a pull request for branch `release-v0.x.x`, review and fix all remaining issues (usually, release notes require some additional attention). Run `pre-commit run --all`` locally and fix any issues.
 
-* Update and checkout your local `main` and tag a release with `git tag v0.x.x`, `git push`, `git push --tags`.
+* Update and checkout your local `main`. Add and push a release tag with `git tag v0.x.x`, `git push`, `git push --tags`.
 
 * Create a draft release using GitHub interface with `Draft release` under https://github.com/pypsa-meets-earth/pypsa-earth/releases. Review and fix the release notes.
 
