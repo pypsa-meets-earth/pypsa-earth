@@ -168,9 +168,13 @@ def _prepare_shapes_country(shapes, country_code, distance_crs):
         shapes_country = shapes_country.reset_index()
 
     if "name" not in shapes_country.columns:
-        raise KeyError("The regions_onshore file must contain a 'name' column or index.")
+        raise KeyError(
+            "The regions_onshore file must contain a 'name' column or index."
+        )
 
-    shapes_country = shapes_country[["name", "country", "geometry"]].to_crs(distance_crs)
+    shapes_country = shapes_country[["name", "country", "geometry"]].to_crs(
+        distance_crs
+    )
     return shapes_country
 
 
