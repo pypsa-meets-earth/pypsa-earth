@@ -940,6 +940,56 @@ def add_co2_sequestration_limit(n, sns):
 
     n.model.add_constraints(lhs <= rhs, name=f"GlobalConstraint-{name}")
 
+def _co2_factor_for_links(n, link_names, co2_bus_names):
+    """For each link, find which bus slot feeds the CO2 bus and return the
+    matching efficiency as a per-unit emissions factor (t CO2 / MWh of p)."""
+    links = n.links.loc[link_names]
+    factor = pd.Series(0.0, index=link_names)
+    for i in range(1, 4):  # bus1, bus2, bus3 — extend if your override goes further
+        bus_col, eff_col = f"bus{i}", ("efficiency" if i == 1 else f"efficiency{i}")
+        if bus_col not in links.columns:
+            continue
+        hit = links[links[bus_col].isin(co2_bus_names)]
+        factor.loc[hit.index] = hit[eff_col].fillna(0.0)
+    return factor
+
+def add_co2_sector_limits(n, policy_file):
+    sector_carrier_mapping = {
+        "land_transport": ["land transport oil emissions"],
+        "heat": ["urban central gas CHP", "urban central gas CHP CC", " micro gas CHP"],
+        "aviation": ["kerosene for aviation"],
+    }
+
+    try:
+        # Load the policy file
+        co2_policy = pd.read_csv(policy_file, index_col=0)
+    except KeyError:
+        logger.error("No sector specific co2 policy constraint file found - global constraints will still be applied.")
+        return
+    
+    m = n.model
+    weight = n.snapshot_weightings.generators.loc[snapshots]
+    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    co2_bus_names = n.buses.index[n.buses.carrier.str.contains("co2", case=False, na=False)]
+
+    for sector in co2_policy.index:
+        limit = float(co2_policy.loc[sector].iloc[0])
+        carriers = sector_carrier_mapping.get(sector, [])
+        link_names = n.links.index[n.links.carrier.isin(carriers)]
+        if link_names.empty:
+            logger.warning(f"No links matched sector '{sector}' (carriers={carriers}) - skipping.")
+            continue
+
+        factor = _co2_factor_for_links(n, link_names, co2_bus_names)
+        active = factor[factor != 0].index
+        if active.empty:
+            logger.warning(f"Links for sector '{sector}' don't connect to a CO2 bus - check the mapping/columns.")
+            continue
+
+        p = m["Link-p"].sel(name=active, snapshot=snapshots)
+        lhs = (p * factor.loc[active] * weight).sum()
+        rhs = limit * Nyears  # scale by years
+        n.model.add_constraints(lhs <= rhs, name=f"co2_{sector}_limit")
 
 def set_h2_colors(n):
     blue_h2 = n.model["Link-p"].loc[
@@ -1150,6 +1200,10 @@ def extra_functionality(n, snapshots):
     if snakemake.config["sector"]["hydrogen"]["set_color_shares"]:
         logger.info("setting H2 color mix")
         set_h2_colors(n)
+
+    if snakemake.config["co2"]["sector_policy"]["enable"]:
+        logger.info("setting sector specific co2 limits")
+        add_co2_sector_limits(n, snakemake.config["co2"]["sector_policy"]["policy_file"])
 
     add_co2_sequestration_limit(n, snapshots)
 
