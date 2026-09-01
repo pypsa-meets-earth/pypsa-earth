@@ -70,7 +70,7 @@ from matplotlib.lines import Line2D
 from pyproj import CRS
 from pypsa.geo import haversine_pts
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.ops import unary_union
+from shapely.ops import linemerge, unary_union
 from shapely.validation import make_valid
 
 if __name__ == "__main__":
@@ -80,7 +80,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "prepare_gas_network",
             simpl="",
-            clusters="4",
+            clusters="10",
+            H2_retrofit_capacity_per_CH4="10",
         )
 
     # configure_logging(snakemake)
@@ -126,6 +127,7 @@ def download_GGIT_gas_network() -> pd.DataFrame:
     The dataset contains 3144 pipelines.
     """
     url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+
     GGIT_gas_pipeline = pd.read_excel(
         content_retrieve(url),
         index_col=0,
@@ -442,41 +444,109 @@ def prepare_IGGIELGN_data(
     return df
 
 
-def load_bus_region(
-    onshore_path: str, pipelines: gpd.GeoDataFrame
-) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
+def load_bus_regions(onshore_path, offshore_path=None):
     """
-    Load pypsa-earth-sec onshore regions.
+    Load onshore and optional offshore bus regions.
 
-    TODO: Think about including Offshore regions but only for states that have offshore pipelines.
+    The function reads onshore bus regions, converts them to EPSG:3857, standardizes
+    the region identifier column to ``gadm_id``, and marks them as onshore. If an
+    offshore regions file is provided, it is converted to the same CRS, standardized
+    to the same column layout, and marked as offshore. The onshore and offshore
+    regions are then combined and dissolved into model and country border
+    geometries.
+
     Parameters
     ----------
-    onshore_path: str
-        Path to the onshore regions shapefile.
-    pipelines: gpd.GeoDataFrame
-        GeoDataFrame of the pipeline data.
+    onshore_path : str or path-like
+        Path to the onshore bus regions file. The file must contain ``name``,
+        ``country`` and ``geometry`` columns.
+    offshore_path : str or path-like, optional
+        Path to the offshore bus regions file. If provided, the file must contain
+        either a ``name`` or ``gadm_id`` column and a geometry column. If no
+        ``country`` column is present, it is filled with ``None``.
 
-    Returns:
-        bus_regions_onshore: gpd.GeoDataFrame
-            GeoDataFrame of onshore bus regions with a `gadm_id` column.
-        country_borders: gpd.GeoDataFrame
-            Merged onshore region geodataframe.
+    Returns
+    -------
+    tuple
+        Tuple containing ``bus_regions_onshore``, ``bus_regions_offshore``,
+        ``bus_regions_all``, ``model_borders`` and ``country_borders``.
 
+        ``bus_regions_onshore`` and ``bus_regions_offshore`` contain standardized
+        bus regions with ``gadm_id``, ``country``, ``geometry`` and
+        ``is_offshore`` columns. ``bus_regions_all`` contains the combined non-empty
+        onshore and offshore regions. ``model_borders`` contains the dissolved
+        geometry of all model regions, while ``country_borders`` contains the
+        dissolved geometry of the onshore regions.
+
+    Raises
+    ------
+    KeyError
+        If offshore regions are provided without a ``name`` or ``gadm_id`` column.
     """
-    bus_regions_onshore = gpd.read_file(onshore_path)
-    # Convert CRS to EPSG:3857 so we can measure distances
-    bus_regions_onshore = bus_regions_onshore.to_crs(epsg=3857)
 
-    bus_regions_onshore = bus_regions_onshore.rename({"name": "gadm_id"}, axis=1).loc[
-        :, ["gadm_id", "country", "geometry"]
-    ]
+    bus_regions_onshore = gpd.read_file(onshore_path).to_crs(epsg=3857)
+    bus_regions_onshore = (
+        bus_regions_onshore.rename(columns={"name": "gadm_id"})
+        .loc[:, ["gadm_id", "country", "geometry"]]
+        .copy()
+    )
+    bus_regions_onshore["is_offshore"] = False
 
-    country_borders = unary_union(bus_regions_onshore.geometry)
+    if offshore_path is not None:
+        bus_regions_offshore = gpd.read_file(offshore_path).to_crs(
+            bus_regions_onshore.crs
+        )
 
-    # Create a new GeoDataFrame containing the merged polygon
-    country_borders = gpd.GeoDataFrame(geometry=[country_borders], crs=pipelines.crs)
+        if (
+            "name" in bus_regions_offshore.columns
+            and "gadm_id" not in bus_regions_offshore.columns
+        ):
+            bus_regions_offshore = bus_regions_offshore.rename(
+                columns={"name": "gadm_id"}
+            )
+        elif "gadm_id" not in bus_regions_offshore.columns:
+            raise KeyError("Offshore regions need a 'name' or 'gadm_id' column")
 
-    return bus_regions_onshore, country_borders
+        if "country" not in bus_regions_offshore.columns:
+            bus_regions_offshore["country"] = None
+
+        bus_regions_offshore = bus_regions_offshore.loc[
+            :, ["gadm_id", "country", "geometry"]
+        ].copy()
+        bus_regions_offshore["is_offshore"] = True
+    else:
+        bus_regions_offshore = gpd.GeoDataFrame(
+            columns=["gadm_id", "country", "geometry", "is_offshore"],
+            geometry="geometry",
+            crs=bus_regions_onshore.crs,
+        )
+
+    bus_regions_all = gpd.GeoDataFrame(
+        pd.concat([bus_regions_onshore, bus_regions_offshore], ignore_index=True),
+        geometry="geometry",
+        crs=bus_regions_onshore.crs,
+    )
+    bus_regions_all = bus_regions_all[
+        bus_regions_all.geometry.notna() & ~bus_regions_all.geometry.is_empty
+    ].copy()
+
+    # Important: CRS of borders = CRS of the underlying geometries
+    model_borders = gpd.GeoDataFrame(
+        geometry=[unary_union(bus_regions_all.geometry)],
+        crs=bus_regions_all.crs,
+    )
+    country_borders = gpd.GeoDataFrame(
+        geometry=[unary_union(bus_regions_onshore.geometry)],
+        crs=bus_regions_onshore.crs,
+    )
+
+    return (
+        bus_regions_onshore,
+        bus_regions_offshore,
+        bus_regions_all,
+        model_borders,
+        country_borders,
+    )
 
 
 def get_states_in_order(
@@ -525,9 +595,12 @@ def get_states_in_order(
             )  # Add the last point
             interpolated_points.extend(interpolated_points_line)
 
+    else:
+        return states_p  # Return an empty list if the geometry type is not supported
+
     # Check each interpolated point against the state geometries
     for point in interpolated_points:
-        for index, state_row in bus_regions_onshore.iterrows():
+        for _, state_row in bus_regions_onshore.iterrows():
             if state_row.geometry.contains(point):
                 gadm_id = state_row["gadm_id"]
                 if gadm_id not in states_p:
@@ -576,34 +649,350 @@ def parse_states(
     return pipelines
 
 
-def cluster_gas_network(
-    pipelines: gpd.GeoDataFrame,
-    bus_regions_onshore: gpd.GeoDataFrame,
-    length_factor: float,
-) -> pd.DataFrame:
+def _countries_from_row(row):
     """
-    Aggregate interstate gas pipelines to bus-region clusters.
+    Extract country names associated with a GGIT pipeline record.
 
-    This function drops purely intrastatal pipelines, splits interstate
-    pipelines by region overlay, aggregates capacity by region pairs, and
-    computes a representative line length and GWkm metric.
+    The function collects country names from the ``StartCountry`` and
+    ``EndCountry`` columns and additionally parses comma-separated entries from the
+    ``Countries`` column. Missing values and empty country names are ignored.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        GGIT pipeline record containing country metadata.
+
+    Returns
+    -------
+    set of str
+        Unique country names associated with the pipeline record.
+    """
+    countries = set()
+
+    for col in ["StartCountry", "EndCountry"]:
+        val = row.get(col)
+        if pd.notna(val):
+            countries.add(str(val).strip())
+
+    val = row.get("Countries")
+    if pd.notna(val):
+        countries.update(c.strip() for c in str(val).split(",") if c.strip())
+
+    return countries
+
+
+def _iter_lines(geom):
+    """
+    Iterate over valid line geometries contained in a geometry object.
+
+    The function yields a single ``LineString`` directly, or merges and yields the
+    individual line parts of a ``MultiLineString``. Empty or missing geometries are
+    ignored.
+
+    Parameters
+    ----------
+    geom : shapely geometry
+        Geometry to iterate over. Supported geometry types are ``LineString`` and
+        ``MultiLineString``.
+
+    Yields
+    ------
+    shapely.geometry.LineString
+        Valid line geometries extracted from the input geometry.
+    """
+    if geom is None or geom.is_empty:
+        return
+
+    if geom.geom_type == "LineString":
+        yield geom
+
+    elif geom.geom_type == "MultiLineString":
+        merged = linemerge(geom)
+
+        if merged.geom_type == "LineString":
+            yield merged
+        elif merged.geom_type == "MultiLineString":
+            for part in merged.geoms:
+                if part is not None and not part.is_empty:
+                    yield part
+
+
+def _orient_from_outside(line, polygon):
+    """
+    Orient a line from outside to inside a polygon.
+
+    The function checks whether exactly one endpoint of the line lies inside or on
+    the polygon boundary. If the line starts outside and ends inside, it is returned
+    unchanged. If it starts inside and ends outside, the coordinate order is
+    reversed. Lines with both endpoints inside, both endpoints outside, or fewer
+    than two coordinates are ignored.
+
+    Parameters
+    ----------
+    line : shapely.geometry.LineString
+        Line geometry to orient.
+    polygon : shapely geometry
+        Polygon or multipolygon used to determine whether the line endpoints are
+        inside the target area.
+
+    Returns
+    -------
+    shapely.geometry.LineString or None
+        Line oriented from outside to inside the polygon, or ``None`` if no clear
+        entry direction can be determined.
+    """
+    coords = list(line.coords)
+    if len(coords) < 2:
+        return None
+
+    start = Point(coords[0])
+    end = Point(coords[-1])
+
+    start_in = polygon.covers(start)
+    end_in = polygon.covers(end)
+
+    # Only one clear case of entry: exactly one end outside, the other inside
+    if (not start_in) and end_in:
+        return line
+
+    if start_in and (not end_in):
+        return LineString(coords[::-1])
+
+    return None
+
+
+def _first_inside_point(line, polygon, eps_m=1000.0):
+    """
+    Return a point slightly inside a polygon along an oriented line.
+
+    The line is expected to be oriented from outside to inside the polygon. The
+    function intersects the line with the polygon, selects the first line segment
+    inside the polygon along the original line direction, and interpolates a point
+    slightly after the entry point. This avoids selecting a point exactly on the
+    polygon boundary.
+
+    Parameters
+    ----------
+    line : shapely.geometry.LineString
+        Pipeline geometry oriented from outside to inside the polygon.
+    polygon : shapely geometry
+        Polygon or multipolygon used to determine the inside section of the line.
+    eps_m : float, default 1000.0
+        Maximum inward offset distance along the line. The distance uses the units
+        of the input geometries.
+
+    Returns
+    -------
+    shapely.geometry.Point or None
+        Point located slightly inside the polygon along the line, or ``None`` if
+        the line does not enter the polygon with a valid line segment.
+    """
+    inside = line.intersection(polygon)
+    if inside.is_empty:
+        return None
+
+    if inside.geom_type == "LineString":
+        segments = [inside]
+    elif inside.geom_type == "MultiLineString":
+        segments = [seg for seg in inside.geoms if not seg.is_empty]
+    else:
+        # only point contact or similar
+        return None
+
+    first_seg = None
+    first_proj = None
+
+    for seg in segments:
+        p0 = Point(seg.coords[0])
+        p1 = Point(seg.coords[-1])
+
+        proj = min(line.project(p0), line.project(p1))
+        if first_proj is None or proj < first_proj:
+            first_proj = proj
+            first_seg = seg
+
+    if first_seg is None:
+        return None
+
+    # move slightly inward so that the point lies securely within a region
+    step = min(eps_m, max(first_seg.length * 0.01, 1.0))
+    dist = min(first_proj + step, line.length)
+
+    return line.interpolate(dist)
+
+
+def build_h2_pipeline_import_nodes_from_GGIT(
+    pipelines,
+    bus_regions_all,
+    bus_regions_onshore,
+    h2_capacity_factor,
+    target_country_name,
+    entry_scope="country",  # "country" = first onshore Bus, "model" = first on/offshore Bus
+):
+    """
+    Build hydrogen pipeline import nodes from GGIT pipeline data.
+
+    The function identifies international pipeline projects that enter the target
+    country or model region, assigns each valid pipeline to the first bus region at
+    the selected entry boundary, converts the reported pipeline capacity to hydrogen
+    import capacity, and aggregates the resulting capacities by model node.
 
     Parameters
     ----------
     pipelines : geopandas.GeoDataFrame
-        Pipeline GeoDataFrame with `states_passed` and `amount_states_passed`.
+        GGIT pipeline geometries. The dataframe must contain a geometry column,
+        pipeline capacity in ``capacity [MW]``, and country information readable by
+        ``_countries_from_row``. The optional column ``ProjectID`` is retained as
+        project metadata.
+    bus_regions_all : geopandas.GeoDataFrame
+        Onshore and offshore model bus regions. The dataframe must contain
+        ``geometry`` and ``gadm_id`` columns. Optional columns include ``country``
+        and ``is_offshore``.
     bus_regions_onshore : geopandas.GeoDataFrame
-        Onshore region geometries used for overlay.
-    length_factor : float
-        Multiplier applied to the haversine distance between region centroids
-        to estimate pipeline length.
+        Onshore model bus regions used to define the country entry polygon. The
+        dataframe must contain a geometry column and should use the same region
+        identifiers as ``bus_regions_all``.
+    h2_capacity_factor : float
+        Factor used to convert the reported pipeline capacity in MW to hydrogen
+        import capacity.
+    target_country_name : str
+        Name of the target country, for example ``"Japan"`` or ``"Germany"``.
+    entry_scope : {"country", "model"}, default "country"
+        Boundary used to determine the first entry point of a pipeline. ``"country"``
+        assigns the pipeline to the first onshore bus region entered within the
+        target country. ``"model"`` assigns the pipeline to the first bus region
+        entered within the full model domain, including offshore regions.
 
     Returns
     -------
     pandas.DataFrame
-        Aggregated pipeline table with columns `bus0`, `bus1`, `capacity`,
-        `length`, and `GWKm`.
+        Aggregated hydrogen pipeline import nodes with the columns ``bus``,
+        ``p_nom``, ``source``, ``is_offshore``, ``country`` and ``project_id``.
+        ``project_id`` contains a list of GGIT project IDs contributing to each
+        aggregated node.
+
+    Raises
+    ------
+    ValueError
+        If ``entry_scope`` is neither ``"country"`` nor ``"model"``.
     """
+    if pipelines.crs != bus_regions_all.crs:
+        pipelines = pipelines.to_crs(bus_regions_all.crs)
+
+    if bus_regions_onshore.crs != bus_regions_all.crs:
+        bus_regions_onshore = bus_regions_onshore.to_crs(bus_regions_all.crs)
+
+    model_geom = unary_union(bus_regions_all.geometry)
+    country_geom = unary_union(bus_regions_onshore.geometry)
+
+    if entry_scope == "model":
+        entry_polygon = model_geom
+        search_regions = bus_regions_all.copy()
+    elif entry_scope == "country":
+        entry_polygon = country_geom
+        search_regions = bus_regions_onshore.copy()
+    else:
+        raise ValueError("entry_scope must be either 'country' or 'model'")
+
+    search_regions = search_regions[
+        search_regions["gadm_id"].notna()
+        & search_regions.geometry.notna()
+        & ~search_regions.geometry.is_empty
+    ].copy()
+
+    sindex = search_regions.sindex
+    records = []
+
+    for _, row in pipelines.iterrows():
+        geom = row.geometry
+        if geom is None or geom.is_empty:
+            continue
+
+        # 1) Consider only international lines
+        countries = _countries_from_row(row)
+        if target_country_name not in countries:
+            continue
+        if len(countries) < 2:
+            continue
+
+        # 2) The capacity must be known
+        capacity = row.get("capacity [MW]")
+        if capacity is None or pd.isna(capacity):
+            continue
+
+        matched_region = None
+
+        for part in _iter_lines(geom):
+            line = _orient_from_outside(part, entry_polygon)
+            if line is None:
+                continue
+
+            if not line.intersects(entry_polygon):
+                continue
+
+            sample_point = _first_inside_point(line, entry_polygon, eps_m=1000.0)
+            if sample_point is None:
+                continue
+
+            # Search by region using the spatial index
+            cand_idx = list(sindex.intersection(sample_point.bounds))
+            if not cand_idx:
+                continue
+
+            candidates = search_regions.iloc[cand_idx]
+            candidates = candidates[
+                candidates.geometry.apply(lambda g: g.covers(sample_point))
+            ]
+
+            if candidates.empty:
+                continue
+
+            # When creating a model entry, optionally select "offshore" if the item is not yet "onshore"
+            if entry_scope == "model" and "is_offshore" in candidates.columns:
+                if not country_geom.covers(sample_point):
+                    candidates = candidates.sort_values("is_offshore", ascending=False)
+                else:
+                    candidates = candidates.sort_values("is_offshore", ascending=True)
+
+            matched_region = candidates.iloc[0]
+            break
+
+        if matched_region is None:
+            continue
+
+        records.append(
+            {
+                "bus": matched_region["gadm_id"],
+                "p_nom": float(capacity) * h2_capacity_factor,
+                "source": "pipeline",
+                "is_offshore": bool(matched_region.get("is_offshore", False)),
+                "country": matched_region.get("country", None),
+                "project_id": row.get("ProjectID", None),
+            }
+        )
+
+    if not records:
+        return pd.DataFrame(
+            columns=["bus", "p_nom", "source", "is_offshore", "country", "project_id"]
+        )
+
+    df = pd.DataFrame(records)
+
+    df = df.groupby(
+        ["bus", "source", "is_offshore", "country"],
+        as_index=False,
+        dropna=False,
+    ).agg(
+        {
+            "p_nom": "sum",
+            "project_id": lambda x: [v for v in x if pd.notna(v)],
+        }
+    )
+
+    return df
+
+
+def cluster_gas_network(pipelines, bus_regions_onshore, length_factor):
     # drop innerstatal pipelines
     pipelines_interstate = pipelines.drop(
         pipelines.loc[pipelines.amount_states_passed < 2].index
@@ -646,7 +1035,7 @@ def cluster_gas_network(
     df_exploded.reset_index(drop=True, inplace=True)
 
     # Custom function to check if value in column 'gadm_id' exists in either column 'bus0' or column 'bus1'
-    def check_existence(row: pd.Series) -> bool:
+    def check_existence(row):
         return row["gadm_id"] in [row["bus0"], row["bus1"]]
 
     # Apply the custom function to each row and keep only the rows that satisfy the condition
@@ -871,33 +1260,60 @@ if not snakemake.params.custom_gas_network:
         pipelines = load_IGGIELGN_data(gas_network)
         pipelines = prepare_IGGIELGN_data(pipelines)
 
-    bus_regions_onshore = load_bus_region(snakemake.input.regions_onshore, pipelines)[0]
-    bus_regions_onshore.geometry = bus_regions_onshore.geometry.buffer(0)
-    country_borders = load_bus_region(snakemake.input.regions_onshore, pipelines)[1]
+    (
+        bus_regions_onshore,
+        bus_regions_offshore,
+        bus_regions_all,
+        model_borders,
+        country_borders,
+    ) = load_bus_regions(
+        snakemake.input.regions_onshore,
+        snakemake.input.regions_offshore,
+    )
+
+    bus_regions_onshore.geometry = bus_regions_onshore.geometry.apply(make_valid)
+    bus_regions_offshore.geometry = bus_regions_offshore.geometry.apply(make_valid)
+    bus_regions_all.geometry = bus_regions_all.geometry.apply(make_valid)
+    model_borders.geometry = model_borders.geometry.apply(make_valid)
+    country_borders.geometry = country_borders.geometry.apply(make_valid)
+
+    if snakemake.params.gas_config["network_data"] == "GGIT":
+
+        h2_pipeline_import_nodes = build_h2_pipeline_import_nodes_from_GGIT(
+            pipelines=pipelines,
+            bus_regions_all=bus_regions_all,
+            bus_regions_onshore=bus_regions_onshore,
+            h2_capacity_factor=snakemake.params.hydrogen_config[
+                "H2_retrofit_capacity_per_CH4"
+            ],
+            target_country_name=bus_regions_onshore["country"].dropna().iloc[0],
+            entry_scope="country",
+        )
+    else:
+        h2_pipeline_import_nodes = pd.DataFrame(
+            columns=[
+                "bus",
+                "p_nom",
+                "source",
+                "is_offshore",
+                "country",
+                "project_id",
+            ]
+        )
+
+    h2_pipeline_import_nodes.to_csv(
+        snakemake.output.h2_pipeline_import_nodes,
+        index=False,
+    )
 
     pipelines = parse_states(pipelines, bus_regions_onshore)
 
     if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
-        # TODO: plotting should be a extra rule!
-        # plot_gas_network(pipelines, country_borders, bus_regions_onshore)
-
         pipelines = cluster_gas_network(
             pipelines, bus_regions_onshore, length_factor=1.25
         )
 
-        # Conversion of GADM id to from 3 to 2-digit
-        # pipelines["bus0"] = pipelines["bus0"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
-
-        # pipelines["bus1"] = pipelines["bus1"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
-
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
-
-        # TODO: plotting should be a extra rule!
-        # plot_clustered_gas_network(pipelines, bus_regions_onshore)
 
         average_length = pipelines["length"].mean()
         print("average_length = ", average_length)
@@ -912,8 +1328,7 @@ if not snakemake.params.custom_gas_network:
             + ", ".join(bus_regions_onshore.country.unique().tolist())
         )
 
-        # Create an empty DataFrame with the specified column names
-        pipelines = {"bus0": [], "bus1": [], "capacity": [], "length": [], "GWKm": []}
-
-        pipelines = pd.DataFrame(pipelines)
+        pipelines = pd.DataFrame(
+            {"bus0": [], "bus1": [], "capacity": [], "length": [], "GWKm": []}
+        )
         pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)

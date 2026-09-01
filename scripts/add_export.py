@@ -39,6 +39,15 @@ def select_ports(n):
         keep_default_na=False,
     ).squeeze()
 
+    countries = sorted(
+        set(c for c in n.buses.country.unique() if isinstance(c, str) and c.strip())
+    )
+    countries = [
+        c
+        for c in countries
+        if c in set(ports["country"].dropna().astype(str).str.strip())
+    ]  # sort out of buses without country
+
     gadm_layer_id = snakemake.params.gadm_layer_id
 
     ports = locate_bus(
