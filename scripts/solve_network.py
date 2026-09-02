@@ -986,7 +986,7 @@ def add_co2_sector_limits(n, policy_file):
             logger.warning(f"Links for sector '{sector}' don't connect to a CO2 bus - check the mapping/columns.")
             continue
 
-        p = m["Link-p"].sel(name=active)
+        p = n.model["Link-p"].sel(Link=active)
         lhs = (p * factor.loc[active] * weight).sum()
         rhs = limit * Nyears  # scale by years
         n.model.add_constraints(lhs <= rhs, name=f"co2_{sector}_limit")
