@@ -289,9 +289,10 @@ def attach_advance_csp(
     """
     # add separate buses for csp
     main_buses = n.generators.query("carrier == 'csp'").bus
-    csp_buses_i = n.add(
+    csp_buses_i = main_buses + " csp"
+    n.add(
         "Bus",
-        main_buses + " csp",
+        csp_buses_i,
         carrier="csp",
         x=n.buses.loc[main_buses, "x"].values,
         y=n.buses.loc[main_buses, "y"].values,
