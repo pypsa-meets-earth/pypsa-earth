@@ -63,6 +63,8 @@ This part of documentation collects descriptive release notes to capture the mai
 **Minor Changes and bug-fixing**
 * Fix missing GADM regions in alternative clustering by adding synthetic AC buses and expandable connecting lines for regions without existing base-grid coverage [PR #1998](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1998)
 
+* Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
+
 * Fix invalid biomass transport and CO2 pipeline connections [PR #1987](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1987)
 
 * Attach existing batteries as ``StorageUnit`` rather than Store+Link, so extra battery buses do not inflate the minimum cluster count during simplify/cluster [PR #1990](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1990)
