@@ -968,7 +968,7 @@ def add_co2_sector_limits(n, policy_file):
         return
     
     m = n.model
-    weight = n.snapshot_weightings.generators.loc[snapshots]
+    weight = n.snapshot_weightings.generators
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     co2_bus_names = n.buses.index[n.buses.carrier.str.contains("co2", case=False, na=False)]
 
@@ -986,7 +986,7 @@ def add_co2_sector_limits(n, policy_file):
             logger.warning(f"Links for sector '{sector}' don't connect to a CO2 bus - check the mapping/columns.")
             continue
 
-        p = m["Link-p"].sel(name=active, snapshot=snapshots)
+        p = m["Link-p"].sel(name=active)
         lhs = (p * factor.loc[active] * weight).sum()
         rhs = limit * Nyears  # scale by years
         n.model.add_constraints(lhs <= rhs, name=f"co2_{sector}_limit")
