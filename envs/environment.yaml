@@ -16,7 +16,7 @@ dependencies:
 - atlite=0.4.1
 - dask
 - powerplantmatching>=0.8
-- earth-osm>=2.3.post1
+- earth-osm>=3.0.2
 
 # Dependencies of the workflow itself
 - xlrd
