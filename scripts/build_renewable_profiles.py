@@ -223,22 +223,56 @@ GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
+def _format_bounds(bounds):
+    """Format spatial bounds for a user-facing message."""
+    return "(" + ", ".join(f"{float(value):.15g}" for value in bounds) + ")"
+
+
 def check_cutout_match(cutout, regions):
-    cutout_box = box(*cutout.bounds)
-    region_box = box(*regions.total_bounds)
+    """
+    Check whether a weather cutout covers the requested regions.
+
+    Raise an ``AssertionError`` if the bounding boxes do not overlap. Log a
+    warning when coverage is partial.
+    """
+    cutout_bounds = tuple(float(value) for value in cutout.bounds)
+    region_bounds = tuple(float(value) for value in regions.total_bounds)
+    cutout_box = box(*cutout_bounds)
+    region_box = box(*region_bounds)
+
+    outside_sides = [
+        side
+        for side, outside in (
+            ("west", region_bounds[0] < cutout_bounds[0]),
+            ("south", region_bounds[1] < cutout_bounds[1]),
+            ("east", region_bounds[2] > cutout_bounds[2]),
+            ("north", region_bounds[3] > cutout_bounds[3]),
+        )
+        if outside
+    ]
+    bounds_details = (
+        "Bounds use (x_min, y_min, x_max, y_max).\n"
+        f"Cutout bounds: {_format_bounds(cutout_bounds)}\n"
+        f"Requested region bounds: {_format_bounds(region_bounds)}\n"
+        "Requested region exceeds cutout bounds on: "
+        f"{', '.join(outside_sides)}."
+    )
 
     assert not region_box.intersection(cutout_box).is_empty, (
-        "The requested region is completely out of the cutout area.\n\r"
-        "Check please the provided cutout.\n\r"
-        "More details on cutout generation are available in docs:\n\r"
-        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
+        "The requested region does not overlap the cutout.\n"
+        f"{bounds_details}\n"
+        "This usually means the cutout was generated for a different region.\n"
+        "More details on cutout generation are available in the documentation:\n"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
     )
 
     if not region_box.covered_by(cutout_box):
         logger.warning(
-            "Weather data does not fully cover the requester region.\n\r"
-            "It's recommended to check the provided cutout.\n\r"
-            "More details on cutout generation are available in docs:\n\r"
+            "Weather data only partially covers the requested region.\n"
+            f"{bounds_details}\n"
+            "Partial coverage can be intentional; check that the uncovered area "
+            "is acceptable.\n"
+            "More details on cutout generation are available in the documentation:\n"
             "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
         )
 

@@ -6,6 +6,7 @@
 
 test:
 	set -e
+	PYTHONPATH=scripts python -m unittest discover -s test -p "test_*.py"
 	# this runs test scenario in test/config.test.yaml
 	snakemake solve_all_networks -call --configfile config.tutorial.yaml test/config.test.yaml
 	# add custom config to tutorial config
