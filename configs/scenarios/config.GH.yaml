@@ -8,7 +8,7 @@
 # set retrieve_databundle: true and retrieve_databundle_sector: true,
 # then revert to false for subsequent modelling runs.
 
-version: 0.8.0
+version: 0.9.0
 tutorial: false
 
 logging:
@@ -521,10 +521,6 @@ demand_data:
 
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
-
-
-fossil_reserves:
-  oil: 100 #TWh Maybe redundant
 
 export:
   endogenous: false # If true, the export demand is endogenously determined by the model
