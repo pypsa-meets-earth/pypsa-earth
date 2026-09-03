@@ -150,7 +150,7 @@ rule plot_all_summaries:
 if config["enable"].get("retrieve_databundle", True):
 
     bundles_to_download = get_best_bundles_in_snakemake(
-        config, exclude_categories=["cutouts"]
+        config, exclude_categories=["cutouts", "el_demand"]
     )
 
     rule retrieve_databundle_light:
@@ -168,6 +168,28 @@ if config["enable"].get("retrieve_databundle", True):
             "benchmarks/" + RDIR + "retrieve_databundle_light"
         script:
             "scripts/retrieve_databundle_light.py"
+
+    el_demand_bundle = get_best_bundles_in_snakemake(
+        config,
+        include_categories=["el_demand"],
+    )
+    el_demand_cfg = config["databundles"][el_demand_bundle[0]]
+    el_demand_url = el_demand_cfg["urls"]["direct"]
+    el_demand_out = el_demand_cfg["output"][0]
+
+    rule retrieve_el_demand:
+        message:
+            "Retrieving electricity demand data {el_demand_bundle} from {el_demand_url}"
+        input:
+            remote=HTTP.remote(
+                el_demand_url,
+                keep_local=True,
+            ),
+        output:
+            el_demand_out,
+        run:
+            logger.info(f"Saving dataset to {output[0]}")
+            copyfile(input.remote[0], output[0])
 
 
 if config["enable"].get("download_global_buildings", True):
