@@ -20,6 +20,7 @@ from _helpers import (
     content_retrieve,
     copy_default_files,
     create_country_list,
+    get_datasource_url,
     get_last_commit_message,
     migrate_config,
     update_cutout_config,
@@ -2026,6 +2027,11 @@ rule plot_sector_summary:
 
 
 rule build_industrial_database:
+    params:
+        url_steel=get_datasource_url("steel_gem"),
+        url_cement=get_datasource_url("cgfi_cement_db"),
+        url_refineries=get_datasource_url("refineries"),
+        url_paper=get_datasource_url("cgfi_paper_db"),
     input:
         ammonia_plants="resources/ammonia_plants.csv",
     output:

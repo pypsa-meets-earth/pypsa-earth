@@ -18,6 +18,7 @@ dependencies:
 - earth-osm>=2.3.post1
 
 # Dependencies of the workflow itself
+- tomli  # TODO Check if needed. If support can be dropped for python 3.10
 - xlrd
 - openpyxl
 - seaborn
