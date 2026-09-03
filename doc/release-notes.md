@@ -11,6 +11,7 @@ Release Notes
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
+* Add support for existing rooftop PV capacity in Australia based on the Clean Energy Regulator (CER) dataset [PR #1923](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1923)
 
 *
 
