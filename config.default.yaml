@@ -668,6 +668,28 @@ custom_data:
   export_ports: false # If "True" then a custom .csv file must be placed in "data/custom/export_ports.csv"
   airports: false # If "True" then a custom .csv file must be placed in "data/custom/airports.csv". Data format for aiports must be in the format of the airports.csv file in the data folder.
 
+# OpenStreetMap (OSM) data configuration
+# Unified configuration for OSM data source and options
+osm_data:
+  source: "latest" # Options: "latest" (latest OSM), "historical" (specific date), or "custom" (user-provided files)
+
+  # Custom data options - used when source: "custom"
+  # Custom OSM files must be placed in the specified paths
+  # pbf files (required): Raw OpenStreetMap data files
+  #   - Files must follow the naming pattern: <country>-latest.osm.pbf
+  #   - Example: bolivia-latest.osm.pbf, nigeria-latest.osm.pbf
+  #   - Country codes should match those specified in the 'countries' list above
+  # power files (optional): Pre-processed power infrastructure JSON files
+  custom_path:
+    pbf: "data/custom/osm/pbf"  # Path to pbf files (required if source: "custom")
+    power: "data/custom/osm/power"  # Path to power JSON files (optional, will use pbf if not set)
+
+  # Historical data options - used when source: "historical"
+  # Set target date for OSM data download in YYYY-MM-DD format
+  # Available dates depend on OpenStreetMap historical data availability (generally from ~2012 onwards)
+  # Examples: "2018-01-01", "2020-06-15", "2022-12-31"
+  target_date: # "2020-01-01"
+
 # ------------------- Brownfield capacities -------------------
 existing_capacities:
   grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030]
