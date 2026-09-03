@@ -13,7 +13,7 @@ dependencies:
 - setuptools<81
 
 - pypsa>=0.33
-- atlite=0.4.1
+- atlite
 - dask
 - powerplantmatching>=0.8
 - earth-osm>=3.0.2
