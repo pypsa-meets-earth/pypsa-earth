@@ -981,6 +981,7 @@ def retrieve_databundle(
     hydrobasins_level: int,
     rootpath: str = ".",
     disable_progress: bool = False,
+    output_path: str | None = None,
 ) -> None:
     """
     Retrieve the specified databundles and unzip them.
@@ -998,6 +999,9 @@ def retrieve_databundle(
         The root path for the downloaded files.
     disable_progress : bool
         Whether to disable the progress bar.
+    output_path : str, optional
+        Snakemake rule output path. When set, cutout bundles unpack to its
+        parent directory (supports ``shared_cutouts: false``).
 
     Returns
     -------
@@ -1014,6 +1018,11 @@ def retrieve_databundle(
     )
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
+
+    if output_path:
+        for b_name in bundles_to_download:
+            if config_bundles[b_name]["category"] == "cutouts":
+                config_bundles[b_name]["destination"] = os.path.dirname(output_path)
 
     hydrobasin_bundles = [
         b_name for b_name in bundles_to_download if "hydrobasins" in b_name
@@ -1164,6 +1173,7 @@ if __name__ == "__main__":
         hydrobasins_level,
         rootpath=rootpath,
         disable_progress=disable_progress,
+        output_path=snakemake.output[0],
     )
 
     if snakemake.input:
