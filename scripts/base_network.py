@@ -884,14 +884,6 @@ def base_network(
     ac_types = lines_config["ac_types"]
     dc_types = lines_config["dc_types"]
 
-    use_country_specific_ac_types = use_country_specific_types and all(
-        country in ac_types for country in countries_config
-    )
-
-    use_country_specific_dc_types = use_country_specific_types and all(
-        country in dc_types for country in countries_config
-    )
-
     lines_ac = lines[~lines.dc].copy()
     lines_dc = lines[lines.dc].copy()
 
