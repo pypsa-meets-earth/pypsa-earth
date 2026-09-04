@@ -22,6 +22,7 @@ electricity:
 
   # ----------------- Existing powerplants -------------------
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  fill_missing_hydro_tech: false # Methodology to fill missing technology for hydro powerplants. Accepted values: "ror" (run-of-river) to assume run-of-river technology, "reservoir" for hydro reservoirs, "reservoir-X" for reservoirs with at least X MW capacity and ror for the others, and false for a heuristic based on the hydro inflows.
   custom_powerplants:
     filepaths:  # list of custom powerplant files used in "merge" and "replace" options
     - data/custom_powerplants.csv
