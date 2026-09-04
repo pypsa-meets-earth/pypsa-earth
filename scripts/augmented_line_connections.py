@@ -168,7 +168,7 @@ if __name__ == "__main__":
             line.v_nom,
             line.country,
             ac_linetypes,
-            use_country_specific_ac_types,
+            use_country_specific_types,
         ),
         axis=1,
     )
