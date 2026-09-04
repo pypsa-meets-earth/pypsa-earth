@@ -974,59 +974,226 @@ def _co2_factor_for_links(n, link_names):
     return factor
 
 
-def add_co2_sector_limits(n, policy_file, snapshots):
-    sector_carrier_mapping = {
-        "land_transport": ["land transport oil emissions"],
-        "heat": ["urban central gas CHP", "urban central gas CHP CC", " micro gas CHP"],
-        "aviation": ["kerosene for aviation"],
-    }
+def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
+    """Add annual direct CO2 limits by sector and optional subsector.
 
+    The policy file requires ``year``, ``sector`` and
+    ``limit_tco2_per_year`` columns. ``year`` must correspond to the
+    planning horizon being solved. ``subsector`` is optional; a blank
+    subsector applies the limit to the entire sector, while a populated
+    subsector applies it only to that sector/subsector combination.
+    A limit of ``inf`` disables the corresponding policy constraint.
+    """
     try:
-        # Load the policy file
-        co2_policy = pd.read_csv(policy_file, index_col=0)
-
+        co2_policy = pd.read_csv(policy_file)
     except FileNotFoundError:
         logger.error(
-            "No sector specific co2 policy constraint file found - global constraints will still be applied."
+            "No sector specific co2 policy constraint file found - "
+            "global constraints will still be applied."
         )
         return
 
-    weight = n.snapshot_weightings.generators
-    Nyears = n.snapshot_weightings.objective.sum() / 8760.0
+    required_columns = {"year", "sector", "limit_tco2_per_year"}
+    missing_columns = required_columns - set(co2_policy.columns)
+    if missing_columns:
+        raise ValueError(
+            "CO2 sector policy file is missing required columns: "
+            + ", ".join(sorted(missing_columns))
+        )
 
-    for sector in co2_policy.index:
-        # link co2 emissions
-        limit = float(co2_policy.loc[sector].iloc[0])
-        link_names = n.links.index[n.links.sector == sector]
-        if link_names.empty:
-            logger.info(f"No links matched sector '{sector}'.")
+    if "subsector" not in co2_policy.columns:
+        co2_policy["subsector"] = ""
 
-        factor = _co2_factor_for_links(n, link_names)
-        active = factor[factor != 0].index
-        if active.empty:
-            logger.info(
-                f"Links for sector '{sector}' don't connect to a CO2 bus - check the mapping/columns."
+    co2_policy["sector"] = co2_policy["sector"].fillna("").astype(str).str.strip()
+    co2_policy["subsector"] = co2_policy["subsector"].fillna("").astype(str).str.strip()
+
+    if co2_policy["sector"].eq("").any():
+        raise ValueError("CO2 sector policy contains an empty sector.")
+
+    policy_year = pd.to_numeric(co2_policy["year"], errors="coerce")
+    invalid_year = policy_year.isna() | (policy_year % 1 != 0)
+    if invalid_year.any():
+        invalid_values = co2_policy.loc[invalid_year, "year"].tolist()
+        raise ValueError(
+            "CO2 sector policy contains invalid years: "
+            + ", ".join(map(str, invalid_values))
+        )
+
+    co2_policy["year"] = policy_year.astype(int)
+
+    duplicated = co2_policy.duplicated(
+        ["year", "sector", "subsector"],
+        keep=False,
+    )
+    if duplicated.any():
+        duplicate_rows = co2_policy.loc[
+            duplicated, ["year", "sector", "subsector"]
+        ].drop_duplicates()
+        raise ValueError(
+            "Duplicate CO2 policy entries found for: "
+            + ", ".join(
+                f"{row.year}:{row.sector}/{row.subsector or '*'}"
+                for row in duplicate_rows.itertuples(index=False)
+            )
+        )
+
+    planning_horizon = int(planning_horizon)
+    co2_policy = co2_policy.loc[co2_policy["year"].eq(planning_horizon)].copy()
+
+    if co2_policy.empty:
+        logger.info(
+            "No sector specific CO2 policy entries found for planning "
+            f"horizon {planning_horizon}."
+        )
+        return
+
+    weight = n.snapshot_weightings.generators.loc[snapshots]
+    Nyears = n.snapshot_weightings.objective.loc[snapshots].sum() / 8760.0
+
+    link_sector = (
+        n.links.get(
+            "sector",
+            pd.Series("", index=n.links.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    link_subsector = (
+        n.links.get(
+            "subsector",
+            pd.Series("", index=n.links.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    load_sector = (
+        n.loads.get(
+            "sector",
+            pd.Series("", index=n.loads.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    load_subsector = (
+        n.loads.get(
+            "subsector",
+            pd.Series("", index=n.loads.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    for policy in co2_policy.itertuples(index=False):
+        sector = policy.sector
+        subsector = policy.subsector
+        limit = float(policy.limit_tco2_per_year)
+
+        label = f"{sector}/{subsector}" if subsector else sector
+
+        if np.isnan(limit):
+            raise ValueError(
+                f"CO2 policy '{label}' for {planning_horizon} has a NaN limit."
             )
 
-        p_link = n.model["Link-p"].sel(Link=active)
-        lhs_link = (p_link * factor.loc[active] * weight).sum()
+        if limit < 0:
+            raise ValueError(
+                f"CO2 policy '{label}' for {planning_horizon} " "has a negative limit."
+            )
 
-        # load co2 emissions
-        load_names = n.loads.index[n.loads.sector == sector]
+        if np.isinf(limit):
+            logger.info(
+                f"CO2 policy '{label}' for {planning_horizon} "
+                "has no finite limit. Skipping."
+            )
+            continue
+
+        link_mask = link_sector.eq(sector)
+        load_mask = load_sector.eq(sector) & n.loads.bus.eq("co2 atmosphere")
+
+        if subsector:
+            link_mask &= link_subsector.eq(subsector)
+            load_mask &= load_subsector.eq(subsector)
+
+        link_names = n.links.index[link_mask]
+        load_names = n.loads.index[load_mask]
+
+        factor = _co2_factor_for_links(n, link_names)
+        active_links = factor[factor != 0].index
+
         if load_names.empty:
-            logger.info(f"No loads matched sector '{sector}'.")
+            fixed_emissions = 0.0
+        else:
+            p_load = get_as_dense(
+                n,
+                "Load",
+                "p_set",
+                snapshots=snapshots,
+                inds=load_names,
+            )
+            fixed_emissions = -(p_load.mul(weight, axis=0)).sum().sum()
 
-        p_load = get_as_dense(
-            n,
-            "Load",
-            "p_set",
-            snapshots=snapshots,
-            inds=load_names,
+        rhs = limit * Nyears
+
+        if active_links.empty:
+            if load_names.empty:
+                logger.warning(
+                    f"No direct CO2 emissions matched policy '{label}' "
+                    f"for {planning_horizon}. Skipping constraint."
+                )
+                continue
+
+            if fixed_emissions > rhs:
+                raise ValueError(
+                    f"Fixed CO2 emissions for '{label}' in {planning_horizon} "
+                    f"({fixed_emissions} tCO2) exceed the policy limit "
+                    f"({rhs} tCO2)."
+                )
+
+            logger.info(
+                f"CO2 policy '{label}' for {planning_horizon} contains "
+                "only fixed emissions within the specified limit; "
+                "no optimization constraint is required."
+            )
+            continue
+
+        p_link = n.model["Link-p"].sel(
+            snapshot=snapshots,
+            Link=active_links,
         )
-        lhs_load = -(p_load.mul(weight.loc[snapshots], axis=0)).sum().sum()
 
-        rhs = limit * Nyears  # scale by years
-        n.model.add_constraints(lhs_link + lhs_load <= rhs, name=f"co2_{sector}_limit")
+        link_factor = xr.DataArray(
+            factor.loc[active_links].to_numpy(),
+            dims=["Link"],
+            coords={"Link": active_links},
+        )
+
+        snapshot_weight = xr.DataArray(
+            weight.to_numpy(),
+            dims=["snapshot"],
+            coords={"snapshot": snapshots},
+        )
+
+        lhs_link = (p_link * link_factor * snapshot_weight).sum()
+
+        constraint_label = re.sub(
+            r"[^0-9A-Za-z_]+",
+            "_",
+            (
+                f"{planning_horizon}_{sector}_{subsector}"
+                if subsector
+                else f"{planning_horizon}_{sector}"
+            ),
+        )
+
+        n.model.add_constraints(
+            lhs_link + fixed_emissions <= rhs,
+            name=f"co2_{constraint_label}_limit",
+        )
 
 
 def set_h2_colors(n):
@@ -1245,6 +1412,7 @@ def extra_functionality(n, snapshots):
             n,
             snakemake.config["co2"]["sector_policy"]["policy_file"],
             snapshots,
+            snakemake.wildcards["planning_horizons"],
         )
 
     add_co2_sequestration_limit(n, snapshots)
