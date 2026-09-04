@@ -469,7 +469,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             ]
             / costs.at["H2 production solid biomass steam reforming", "wood-input"],
             "efficiency3": costs.at["solid biomass", "CO2 intensity"],
-            "sector": "hydrogen",
         },
         "Biomass gasification": {
             "cost_name": "H2 production biomass gasification",
@@ -484,7 +483,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             ]
             / costs.at["H2 production biomass gasification", "wood-input"],
             "efficiency3": costs.at["solid biomass", "CO2 intensity"],
-            "sector": "hydrogen",
         },
         "Biomass gasification CC": {
             "cost_name": "H2 production biomass gasification CC",
@@ -503,7 +501,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             * (1 - options["cc_fraction"]),
             "efficiency4": costs.at["solid biomass", "CO2 intensity"]
             * options["cc_fraction"],
-            "sector": "hydrogen",
         },
         "SMR": {
             "cost_name": "SMR",
@@ -512,7 +509,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "bus2": "co2 atmosphere",
             "efficiency": costs.at["SMR", "efficiency"],
             "efficiency2": costs.at["gas", "CO2 intensity"],
-            "sector": "hydrogen",
         },
         "SMR CC": {
             "cost_name": "SMR CC",
@@ -524,7 +520,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "efficiency2": costs.at["gas", "CO2 intensity"]
             * (1 - options["cc_fraction"]),
             "efficiency3": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-            "sector": "hydrogen",
         },
         "Natural gas steam reforming": {
             "cost_name": "H2 production natural gas steam reforming",
@@ -539,7 +534,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             ]
             / costs.at["H2 production natural gas steam reforming", "gas-input"],
             "efficiency3": costs.at["gas", "CO2 intensity"],
-            "sector": "hydrogen",
         },
         "Natural gas steam reforming CC": {
             "cost_name": "H2 production natural gas steam reforming CC",
@@ -557,7 +551,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "efficiency3": costs.at["gas", "CO2 intensity"]
             * (1 - options["cc_fraction"]),
             "efficiency4": costs.at["gas", "CO2 intensity"] * options["cc_fraction"],
-            "sector": "hydrogen",
         },
         "Coal gasification": {
             "cost_name": "H2 production coal gasification",
@@ -571,7 +564,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             ]
             / costs.at["H2 production coal gasification", "coal-input"],
             "efficiency3": costs.at["coal", "CO2 intensity"],
-            "sector": "hydrogen",
         },
         "Coal gasification CC": {
             "cost_name": "H2 production coal gasification CC",
@@ -589,7 +581,6 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "efficiency3": costs.at["coal", "CO2 intensity"]
             * (1 - options["cc_fraction"]),
             "efficiency4": costs.at["coal", "CO2 intensity"] * options["cc_fraction"],
-            "sector": "hydrogen",
         },
         "Heavy oil partial oxidation": {
             "cost_name": "H2 production heavy oil partial oxidation",
@@ -604,38 +595,50 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             ]
             / costs.at["H2 production heavy oil partial oxidation", "oil-input"],
             "efficiency3": costs.at["oil", "CO2 intensity"],
-            "sector": "hydrogen",
         },
     }
 
-    if options["hydrogen"].get("hydrogen_colors", False):
-        color_techs = {
-            "grid H2": [
-                "H2 Electrolysis",
-                "Alkaline electrolyzer large",
-                "Alkaline electrolyzer medium",
-                "Alkaline electrolyzer small",
-                "PEM electrolyzer",
-                "SOEC",
-            ],
-            "green H2": [
-                "Solid biomass steam reforming",
-                "Biomass gasification",
-                "Biomass gasification CC",
-            ],
-            "grey H2": [
-                "SMR",
-                "Natural gas steam reforming",
-                "Coal gasification",
-                "Heavy oil partial oxidation",
-            ],
-            "blue H2": [
-                "SMR CC",
-                "Natural gas steam reforming CC",
-                "Coal gasification CC",
-            ],
-        }
+    color_techs = {
+        "grid H2": [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC",
+        ],
+        "green H2": [
+            "Solid biomass steam reforming",
+            "Biomass gasification",
+            "Biomass gasification CC",
+        ],
+        "grey H2": [
+            "SMR",
+            "Natural gas steam reforming",
+            "Coal gasification",
+            "Heavy oil partial oxidation",
+        ],
+        "blue H2": [
+            "SMR CC",
+            "Natural gas steam reforming CC",
+            "Coal gasification CC",
+        ],
+    }
 
+    h2_subsectors = {
+        tech: color.lower().replace(" ", "_")
+        for color, techs in color_techs.items()
+        for tech in techs
+    }
+
+    missing_h2_subsectors = set(h2_techs) - set(h2_subsectors)
+    if missing_h2_subsectors:
+        raise ValueError(
+            "Missing hydrogen subsector mapping for: "
+            + ", ".join(sorted(missing_h2_subsectors))
+        )
+
+    if options["hydrogen"].get("hydrogen_colors", False):
         for color, techs in color_techs.items():
             if set(h2_techs) & set(techs):
                 n.madd(
@@ -673,6 +676,8 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "bus1": bus1,
             "p_nom_extendable": True,
             "carrier": h2_tech,
+            "sector": "hydrogen",
+            "subsector": h2_subsectors[h2_tech],
             "efficiency": params["efficiency"],
             "capital_cost": costs.at[params["cost_name"], "fixed"],
             "lifetime": costs.at[params["cost_name"], "lifetime"],
