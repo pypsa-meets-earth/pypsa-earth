@@ -1218,7 +1218,6 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         marginal_cost=costs.loc["biogas upgrading", "VOM"],
         efficiency2=-costs.at["gas", "CO2 intensity"],
         p_nom_extendable=True,
-        sector="biogas",
     )
 
     if options["biomass_transport"]:
