@@ -5,7 +5,7 @@ monte_carlo:
   options:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
-    sampling_strategy: "chaospy" # "pydoe2", "chaospy", "scipy", packages that are supported
+    sampling_strategy: "chaospy" # "chaospy", "scipy", packages that are supported
     seed: 42 # set seedling for reproducibilty
   # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
   # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
