@@ -892,7 +892,7 @@ def base_network(
         buses,
         lines_ac,
         ac_types,
-        use_country_specific_ac_types,
+        use_country_specific_types,
     )
 
     lines_dc = _set_electrical_parameters_dc_lines(
