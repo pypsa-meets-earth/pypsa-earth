@@ -974,7 +974,7 @@ def _co2_factor_for_links(n, link_names):
     return factor
 
 
-def add_co2_sector_limits(n, policy_file):
+def add_co2_sector_limits(n, policy_file, snapshots):
     sector_carrier_mapping = {
         "land_transport": ["land transport oil emissions"],
         "heat": ["urban central gas CHP", "urban central gas CHP CC", " micro gas CHP"],
@@ -1016,8 +1016,14 @@ def add_co2_sector_limits(n, policy_file):
         if load_names.empty:
             logger.info(f"No loads matched sector '{sector}'.")
 
-        p_load = n.model["Load-p_set"].sel(Load=load_names)
-        lhs_load = (p_load * weight).sum()
+        p_load = get_as_dense(
+            n,
+            "Load",
+            "p_set",
+            snapshots=snapshots,
+            inds=load_names,
+        )
+        lhs_load = -(p_load.mul(weight.loc[snapshots], axis=0)).sum().sum()
 
         rhs = limit * Nyears  # scale by years
         n.model.add_constraints(lhs_link + lhs_load <= rhs, name=f"co2_{sector}_limit")
@@ -1236,7 +1242,9 @@ def extra_functionality(n, snapshots):
     if snakemake.config["co2"]["sector_policy"]["enable"]:
         logger.info("setting sector specific co2 limits")
         add_co2_sector_limits(
-            n, snakemake.config["co2"]["sector_policy"]["policy_file"]
+            n,
+            snakemake.config["co2"]["sector_policy"]["policy_file"],
+            snapshots,
         )
 
     add_co2_sequestration_limit(n, snapshots)
