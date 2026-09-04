@@ -2803,6 +2803,18 @@ def add_heat(
 
             key = f"{name_type} gas boiler"
 
+            if name == "urban central":
+                emission_sector = "power_and_heat_generation"
+                emission_subsector = "heat"
+            elif name.startswith("residential"):
+                emission_sector = "residential"
+                emission_subsector = ""
+            elif name.startswith("services"):
+                emission_sector = "services"
+                emission_subsector = ""
+            else:
+                raise ValueError(f"Unknown heat system: {name}")
+
             n.madd(
                 "Link",
                 h_nodes[name] + f" {name} gas boiler",
@@ -2815,7 +2827,8 @@ def add_heat(
                 efficiency2=costs.at["gas", "CO2 intensity"],
                 capital_cost=costs.at[key, "efficiency"] * costs.at[key, "fixed"],
                 lifetime=costs.at[key, "lifetime"],
-                sector="heat",
+                sector=emission_sector,
+                subsector=emission_subsector,
             )
 
         if options["solar_thermal_collector"]["enable"]:
