@@ -3799,6 +3799,8 @@ def convert_conventional_generators_to_links(
             bus1=carrier_gens["bus"],
             bus2="co2 atmosphere",
             carrier=carrier,
+            sector="power_and_heat_generation",
+            subsector="power",
             p_nom=carrier_gens["p_nom"] / carrier_gens["efficiency"],
             p_nom_extendable=carrier_gens["p_nom_extendable"],
             efficiency=carrier_gens["efficiency"],
