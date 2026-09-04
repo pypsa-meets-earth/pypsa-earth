@@ -71,6 +71,7 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be deprecated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+* Fix missing GADM regions in alternative clustering by adding synthetic AC buses and expandable connecting lines for regions without existing base-grid coverage [PR #1998](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1998)
 
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
 
