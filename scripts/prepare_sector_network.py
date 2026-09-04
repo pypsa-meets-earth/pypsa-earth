@@ -3712,6 +3712,18 @@ def add_rail_transport(
         p_set=p_set_elec * 1e6 / 8760,
     )
 
+    co2 = (p_set_oil * 1e6 / 8760 * costs.at["oil", "CO2 intensity"]).sum()
+
+    n.add(
+        "Load",
+        "rail transport oil emissions",
+        bus="co2 atmosphere",
+        carrier="rail transport oil emissions",
+        p_set=-co2,
+    )
+    n.loads.loc["rail transport oil emissions", "sector"] = "transport"
+    n.loads.loc["rail transport oil emissions", "subsector"] = "non_road_rail"
+
 
 def convert_conventional_generators_to_links(
     n: pypsa.Network, costs: pd.DataFrame
