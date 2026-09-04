@@ -89,7 +89,7 @@ def emission_extractor(
         Path to the CSV file produced by build_co2_emissions. The file has
         columns country_code_a3 (three-letter ISO code), country_code_a2
         (two-letter ISO code), country_name (full country name), and year columns
-        named Y_YYYY.
+        named YYYY.
     emission_year : int or str
         Year of CO2 emissions.
     country_names : numpy.ndarray
@@ -119,7 +119,7 @@ def emission_extractor(
 
     country_codes = np.atleast_1d(country_names).tolist()
     available_countries = df.index.intersection(country_codes)
-    emission_by_country = df.loc[available_countries, str(emission_year)]
+    emission_by_country = df.loc[available_countries, str(closest_year)]
     if emission_by_country.index.has_duplicates:
         duplicate_countries = emission_by_country.index[
             emission_by_country.index.duplicated()
