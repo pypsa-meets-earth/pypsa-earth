@@ -1574,8 +1574,8 @@ def add_aviation(
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
-        sector="aviation",
     )
+    n.loads.loc["aviation oil emissions", "sector"] = "aviation"
 
 
 def h2_hc_conversions(n: pypsa.Network, costs: pd.DataFrame) -> None:
@@ -1774,8 +1774,8 @@ def add_shipping(
             bus="co2 atmosphere",
             carrier="shipping oil emissions",
             p_set=-co2,
-            sector="shipping",
         )
+        n.loads.loc["shipping oil emissions", "sector"] = "shipping"
 
     if "oil" not in n.buses.carrier.unique():
         n.madd("Bus", spatial.oil.nodes, location=spatial.oil.locations, carrier="oil")
@@ -1994,8 +1994,8 @@ def add_industry(
         bus="co2 atmosphere",
         carrier="industry oil emissions",
         p_set=-co2,
-        sector="industry",
     )
+    n.loads.loc["industry oil emissions", "sector"] = "industry"
 
     co2 = (
         industrial_demand["coal"].sum()
@@ -2010,8 +2010,8 @@ def add_industry(
         bus="co2 atmosphere",
         carrier="industry coal emissions",
         p_set=-co2,
-        sector="industry",
     )
+    n.loads.loc["industry coal emissions", "sector"] = "industry"
 
     ########################################################### CARRIER = HEAT
     # TODO simplify bus expression
@@ -2079,8 +2079,8 @@ def add_industry(
         carrier="process emissions",
         p_nom_extendable=True,
         efficiency=1.0,
-        sector="industry",
     )
+    n.links.loc["process emissions", "sector"] = "industry"
 
     # assume enough local waste heat for CC
     if snakemake.params.sector_options["cc"]:
@@ -2504,8 +2504,8 @@ def add_land_transport(
             bus="co2 atmosphere",
             carrier="land transport oil emissions",
             p_set=-co2,
-            sector="land transport",
         )
+        n.loads.loc["land transport oil emissions", "sector"] = "land_transport"
 
 
 def create_nodes_for_heat_sector(district_heat_share: pd.DataFrame) -> tuple:
@@ -3078,6 +3078,7 @@ def add_services(
         carrier="oil emissions",
         p_set=-co2,
     )
+    n.loads.loc["services oil emissions", "sector"] = "services"
 
     p_set_gas = p_set_from_scaling(
         "services gas", profile_residential, energy_totals, temporal_resolution
@@ -3101,8 +3102,8 @@ def add_services(
         bus="co2 atmosphere",
         carrier="gas emissions",
         p_set=-co2,
-        sector="services",
     )
+    n.loads.loc["services gas emissions", "sector"] = "services"
 
 
 def add_agriculture(
@@ -3163,8 +3164,8 @@ def add_agriculture(
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
-        secctor="agriculture",
     )
+    n.loads.loc["agriculture oil emissions", "sector"] = "agriculture"
 
 
 def normalize_by_country(df, droplevel=False):
@@ -3318,8 +3319,8 @@ def add_residential(
         bus="co2 atmosphere",
         carrier="oil emissions",
         p_set=-co2,
-        sector="residential",
     )
+    n.loads.loc["residential oil emissions", "sector"] = "residential"
     n.madd(
         "Load",
         spatial.nodes,
@@ -3346,8 +3347,8 @@ def add_residential(
         bus="co2 atmosphere",
         carrier="gas emissions",
         p_set=-co2,
-        sector="residential",
     )
+    n.loads.loc["residential gas emissions", "sector"] = "residential"
 
     for country in countries:
         rem_heat_demand = (
