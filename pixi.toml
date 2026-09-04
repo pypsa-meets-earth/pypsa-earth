@@ -11,12 +11,12 @@ platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 python = ">=3.10,<3.12"  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 pip = "*"
 
-pypsa = ">=0.25.1,<=0.30.3"
-linopy = "<0.6"
+pypsa = ">=0.33"
+linopy = ">=0.6.5,<0.9"
 atlite = "==0.4.1" # in versions >0.4.1 the computation of availability matrix in `build_renewable_profiles` fails due to https://github.com/PyPSA/atlite/issues/301 https://github.com/PyPSA/atlite/issues/514 for countries whose cutouts span over geometries crossing the antimeridian
 dask = "*"
 powerplantmatching = ">=0.8"
-earth-osm = ">=2.3.post1"
+earth-osm = ">=3.0.2"
 
 # Dependencies of the workflow itself
 xlrd = "*"
@@ -24,19 +24,19 @@ openpyxl = "*"
 seaborn = "*"
 snakemake-minimal = "<8"
 memory_profiler = "*"
-"ruamel.yaml" = "<=0.17.26"
+"ruamel.yaml" = ">=0.17"
 pytables = "*"
 pyscipopt = "*"
 lxml = "*"
 numpy = "<2"
-pandas = "*"
+pandas = "<3"
 geopandas = ">=1"
 fiona = ">=1.10"
-xarray = ">=2023.11.0,<=2025.01.2"
+xarray = ">=2026.1"
 netcdf4 = "*"
 libgdal-netcdf = "*"
 networkx = "*"
-scipy = "<1.16"
+scipy = "*"
 pydoe2 = "*"
 shapely = "!=2.0.4"
 pre-commit = "*"
@@ -52,6 +52,8 @@ chaospy = "*"
 geopy = "*"
 tqdm = "*"
 pytz = "*"
+currencyconverter = "*"
+googledrivedownloader = ">=1.1"
 
 # Jupyter notebook requirements
 ipykernel = "*"
@@ -76,10 +78,6 @@ gurobi = "*"
 
 # Command Line Interface
 rich = "*"
-
-[pypi-dependencies]
-currencyconverter = "*"
-googledrivedownloader = ">=1.1"
 
 [environments]
 pypsa-earth = ["default"]

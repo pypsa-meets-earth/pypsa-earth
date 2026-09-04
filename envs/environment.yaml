@@ -10,12 +10,13 @@ channels:
 dependencies:
 - python>=3.10, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
 - pip
+- setuptools<81
 
-- pypsa>=0.25.1, <=0.30.3
-- atlite=0.4.1 # in versions >0.4.1 the computation of availability matrix in `build_renewable_profiles` fails due to https://github.com/PyPSA/atlite/issues/301 https://github.com/PyPSA/atlite/issues/514 for countries whose cutouts span over geometries crossing the antimeridian
+- pypsa>=0.33
+- atlite=0.4.1
 - dask
 - powerplantmatching>=0.8
-- earth-osm>=2.3.post1
+- earth-osm>=3.0.2
 
 # Dependencies of the workflow itself
 - xlrd
@@ -23,7 +24,7 @@ dependencies:
 - seaborn
 - snakemake-minimal<8
 - memory_profiler
-- ruamel.yaml<=0.17.26
+- ruamel.yaml>=0.18
 - pytables
 - pyscipopt
 - lxml
@@ -31,11 +32,11 @@ dependencies:
 - pandas<3
 - geopandas>=1
 - fiona>=1.10
-- xarray>=2023.11.0, <=2025.01.2
+- xarray>=2026.1
 - netcdf4
 - libgdal-netcdf
 - networkx
-- scipy<1.16
+- scipy
 - pydoe2
 - shapely!=2.0.4
 - pre-commit
@@ -51,9 +52,12 @@ dependencies:
 - geopy
 - tqdm
 - pytz
+- currencyconverter
 
 # Cloud download
-# - googledrivedownloader  # Commented until https://github.com/conda-forge/googledrivedownloader-feedstock/pull/7 is merged
+- googledrivedownloader>=1.1
+
+- linopy>=0.6.5,<0.9
 
 # Jupyter notebook requirement
 - ipykernel
@@ -78,6 +82,5 @@ dependencies:
 # Command Line Interface
 - rich
 
-- pip:
-  - currencyconverter
-  - googledrivedownloader>=1.1
+# Avoid cuda versions of pyarrow
+- pyarrow-core=*=*cpu*
