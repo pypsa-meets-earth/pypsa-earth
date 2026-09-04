@@ -604,6 +604,7 @@ co2:
       2050: 0.1
   sector_policy:
     enable: false
+    policy_file: "configs/policy/co2_sector_limits.csv"
 
 # ------------------- Uncertainty -------------------
 monte_carlo:
