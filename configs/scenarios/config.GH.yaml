@@ -8,7 +8,7 @@
 # set retrieve_databundle: true and retrieve_databundle_sector: true,
 # then revert to false for subsequent modelling runs.
 
-version: 0.8.0
+version: 0.9.0
 tutorial: false
 
 logging:
