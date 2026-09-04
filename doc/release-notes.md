@@ -12,7 +12,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-*
+* Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
 **Minor Changes and bug-fixing**
 
