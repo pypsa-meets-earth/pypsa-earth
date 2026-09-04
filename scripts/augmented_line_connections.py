@@ -180,7 +180,7 @@ if __name__ == "__main__":
             line.v_nom,
             line.country,
             dc_linetypes,
-            use_country_specific_dc_types,
+            use_country_specific_types,
         ),
         axis=1,
     )
