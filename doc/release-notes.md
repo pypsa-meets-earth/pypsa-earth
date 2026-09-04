@@ -72,6 +72,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Retry failed Zenodo databundle downloads to improve retrieval reliability [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
+
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
 
 * Fix invalid biomass transport and CO2 pipeline connections [PR #1987](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1987)

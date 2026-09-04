@@ -132,11 +132,17 @@ def load_databundle_config(config: dict | str) -> dict:
 
 
 def download_and_unzip_zenodo(
-    config: dict, rootpath: str, hot_run: bool = True, disable_progress: bool = False
+    config: dict,
+    rootpath: str,
+    hot_run: bool = True,
+    disable_progress: bool = False,
+    max_retries: int = 3,
 ) -> bool:
     """
-    download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True,
-    disable_progress=False)
+    download_and_unzip_zenodo(
+        config, rootpath, dest_path, hot_run=True, disable_progress=False,
+        max_retries=3
+    )
 
     Function to download and unzip the data from zenodo
 
@@ -151,6 +157,8 @@ def download_and_unzip_zenodo(
         When false, the workflow is run without downloading and unzipping
     disable_progress : bool (default False)
         When true the progress bar to download data is disabled
+    max_retries : int (default 3)
+        Maximum number of download attempts
 
     Returns
     -------
@@ -162,18 +170,42 @@ def download_and_unzip_zenodo(
     url = config["urls"]["zenodo"]
 
     if hot_run:
-        try:
-            logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
-            logger.info(f"Extracting resources")
-            with ZipFile(file_path, "r") as zipObj:
-                # Extract all the contents of zip file in current directory
-                zipObj.extractall(path=destination)
-            os.remove(file_path)
-            logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
-            return False
+        for attempt in range(1, max_retries + 1):
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+                logger.info(
+                    f"Downloading resource '{resource}' from cloud '{url}' "
+                    f"(attempt {attempt}/{max_retries})"
+                )
+                progress_retrieve(
+                    url,
+                    file_path,
+                    disable_progress=disable_progress,
+                )
+                logger.info("Extracting resources")
+                with ZipFile(file_path, "r") as zipObj:
+                    # Extract all the contents of zip file in current directory
+                    zipObj.extractall(path=destination)
+
+                os.remove(file_path)
+                logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
+                return True
+
+            except Exception as exc:
+                logger.warning(
+                    f"Failed download resource '{resource}' from cloud '{url}' "
+                    f"on attempt {attempt}/{max_retries}: {exc}"
+                )
+
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+                if attempt < max_retries:
+                    time.sleep(10 * attempt)
+
+        return False
 
     return True
 
