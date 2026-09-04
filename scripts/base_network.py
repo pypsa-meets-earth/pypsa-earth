@@ -900,7 +900,7 @@ def base_network(
         buses,
         lines_dc,
         dc_types,
-        use_country_specific_dc_types,
+        use_country_specific_types,
     )
 
     transformers = _set_electrical_parameters_transformers(
