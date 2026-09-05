@@ -977,12 +977,14 @@ def _co2_factor_for_links(n, link_names):
 def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
     """Add annual direct CO2 limits by sector and optional subsector.
 
-    The policy file requires ``year``, ``sector`` and
+    The policy file requires ``year``, ``country``, ``sector`` and
     ``limit_tco2_per_year`` columns. ``year`` must correspond to the
-    planning horizon being solved. ``subsector`` is optional; a blank
-    subsector applies the limit to the entire sector, while a populated
-    subsector applies it only to that sector/subsector combination.
-    A limit of ``inf`` disables the corresponding policy constraint.
+    planning horizon being solved. ``country`` identifies the country
+    whose direct emissions are constrained. ``subsector`` is optional;
+    a blank subsector applies the limit to the entire sector, while a
+    populated subsector applies it only to that sector/subsector
+    combination. A limit of ``inf`` disables the corresponding policy
+    constraint.
     """
     try:
         co2_policy = pd.read_csv(policy_file)
@@ -993,7 +995,12 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
         )
         return
 
-    required_columns = {"year", "sector", "limit_tco2_per_year"}
+    required_columns = {
+        "year",
+        "country",
+        "sector",
+        "limit_tco2_per_year",
+    }
     missing_columns = required_columns - set(co2_policy.columns)
     if missing_columns:
         raise ValueError(
@@ -1004,8 +1011,14 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
     if "subsector" not in co2_policy.columns:
         co2_policy["subsector"] = ""
 
+    co2_policy["country"] = (
+        co2_policy["country"].fillna("").astype(str).str.strip().str.upper()
+    )
     co2_policy["sector"] = co2_policy["sector"].fillna("").astype(str).str.strip()
     co2_policy["subsector"] = co2_policy["subsector"].fillna("").astype(str).str.strip()
+
+    if co2_policy["country"].eq("").any():
+        raise ValueError("CO2 sector policy contains an empty country.")
 
     if co2_policy["sector"].eq("").any():
         raise ValueError("CO2 sector policy contains an empty sector.")
@@ -1022,17 +1035,18 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
     co2_policy["year"] = policy_year.astype(int)
 
     duplicated = co2_policy.duplicated(
-        ["year", "sector", "subsector"],
+        ["year", "country", "sector", "subsector"],
         keep=False,
     )
     if duplicated.any():
         duplicate_rows = co2_policy.loc[
-            duplicated, ["year", "sector", "subsector"]
+            duplicated,
+            ["year", "country", "sector", "subsector"],
         ].drop_duplicates()
         raise ValueError(
             "Duplicate CO2 policy entries found for: "
             + ", ".join(
-                f"{row.year}:{row.sector}/{row.subsector or '*'}"
+                f"{row.year}:{row.country}:{row.sector}/" f"{row.subsector or '*'}"
                 for row in duplicate_rows.itertuples(index=False)
             )
         )
@@ -1050,6 +1064,16 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
     weight = n.snapshot_weightings.generators.loc[snapshots]
     Nyears = n.snapshot_weightings.objective.loc[snapshots].sum() / 8760.0
 
+    link_country = (
+        n.links.get(
+            "country",
+            pd.Series("", index=n.links.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
     link_sector = (
         n.links.get(
             "sector",
@@ -1069,6 +1093,16 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
         .str.strip()
     )
 
+    load_country = (
+        n.loads.get(
+            "country",
+            pd.Series("", index=n.loads.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
     load_sector = (
         n.loads.get(
             "sector",
@@ -1089,11 +1123,14 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
     )
 
     for policy in co2_policy.itertuples(index=False):
+        country = policy.country
         sector = policy.sector
         subsector = policy.subsector
         limit = float(policy.limit_tco2_per_year)
 
-        label = f"{sector}/{subsector}" if subsector else sector
+        label = (
+            f"{country}/{sector}/{subsector}" if subsector else f"{country}/{sector}"
+        )
 
         if np.isnan(limit):
             raise ValueError(
@@ -1112,8 +1149,12 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
             )
             continue
 
-        link_mask = link_sector.eq(sector)
-        load_mask = load_sector.eq(sector) & n.loads.bus.eq("co2 atmosphere")
+        link_mask = link_country.eq(country) & link_sector.eq(sector)
+        load_mask = (
+            load_country.eq(country)
+            & load_sector.eq(sector)
+            & n.loads.bus.eq("co2 atmosphere")
+        )
 
         if subsector:
             link_mask &= link_subsector.eq(subsector)
@@ -1184,9 +1225,9 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
             r"[^0-9A-Za-z_]+",
             "_",
             (
-                f"{planning_horizon}_{sector}_{subsector}"
+                f"{planning_horizon}_{country}_{sector}_{subsector}"
                 if subsector
-                else f"{planning_horizon}_{sector}"
+                else f"{planning_horizon}_{country}_{sector}"
             ),
         )
 
