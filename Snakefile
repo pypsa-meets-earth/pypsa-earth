@@ -5,6 +5,7 @@
 import os
 import sys
 import warnings
+import yaml
 
 sys.path.append("./scripts")
 
@@ -73,6 +74,69 @@ CDIR = RDIR if not run.get("shared_cutouts") else ""
 SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
+
+
+def get_available_cost_years():
+    metadata = checkpoints.retrieve_technology_data_config.get().output[0]
+
+    with metadata.open() as f:
+        technology_data_config = yaml.safe_load(f)
+
+    years = technology_data_config.get("years")
+    if not years:
+        raise ValueError(
+            "No cost years found in the configured technology-data release."
+        )
+
+    return sorted(map(int, years))
+
+
+def get_closest_cost_year(year):
+    year = int(year)
+
+    if not config["enable"].get("retrieve_cost_data", True):
+        return year
+
+    available_years = get_available_cost_years()
+
+    if year in available_years:
+        return year
+
+    closest_year = min(
+        available_years,
+        key=lambda available_year: abs(available_year - year),
+    )
+
+    warnings.warn(
+        f"Cost year {year} is not available in technology-data. "
+        f"Using closest available year {closest_year} instead."
+    )
+
+    return closest_year
+
+
+def get_sector_costs(wildcards):
+    if config["foresight"] == "overnight":
+        year = config["costs"]["year"]
+    else:
+        year = get_closest_cost_year(wildcards.planning_horizons)
+
+    return f"resources/{RDIR}costs_{year}_sec.csv"
+
+
+def get_all_sector_costs(wildcards):
+    if config["foresight"] == "overnight":
+        return f"resources/{RDIR}costs_{config['costs']['year']}_sec.csv"
+
+    years = sorted(
+        {
+            get_closest_cost_year(year)
+            for year in config["scenario"]["planning_horizons"]
+        }
+    )
+
+    return [f"resources/{RDIR}costs_{year}_sec.csv" for year in years]
+
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
@@ -508,6 +572,20 @@ else:
 
 
 if config["enable"].get("retrieve_cost_data", True):
+
+    checkpoint retrieve_technology_data_config:
+        input:
+            HTTP.remote(
+                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/config.yaml",
+                keep_local=True,
+            ),
+        output:
+            "resources/"
+            + RDIR
+            + f"technology_data_config_{config['costs']['technology_data_version']}.yaml",
+        run:
+            Path(output[0]).parent.mkdir(parents=True, exist_ok=True)
+            copyfile(input[0], output[0])
 
     rule retrieve_cost_data:
         params:
@@ -1346,7 +1424,7 @@ rule prepare_sector_network:
             },
         ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        costs=get_sector_costs,
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
             "resources/"
@@ -1421,7 +1499,7 @@ rule add_export:
         h2export=config["export"]["h2export"],
     input:
         export_ports="resources/" + SECDIR + "export_ports.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        costs=get_sector_costs,
         ship_profile="resources/" + SECDIR + "ship_profile.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
@@ -1851,7 +1929,7 @@ if config["foresight"] == "overnight":
         input:
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            costs=get_sector_costs,
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
@@ -1898,7 +1976,7 @@ rule make_sector_summary:
             **config["scenario"],
             **config["costs"],
         ),
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        costs=get_all_sector_costs,
         plots=expand(
             RESDIR
             + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}.pdf",
@@ -2140,7 +2218,7 @@ rule build_industry_demand:  #default data
         + "demand/base_industry_totals_{planning_horizons}.csv",
         industrial_database="resources/industrial_database.csv",
         ammonia_production="resources/ammonia_production.csv",
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        costs=get_sector_costs,
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
         industrial_energy_demand_per_node="resources/"
@@ -2258,7 +2336,7 @@ if config["foresight"] == "myopic":
             # clustered_pop_layout="resources/"
             # + SECDIR
             # + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            costs=get_sector_costs,
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
@@ -2319,7 +2397,7 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            costs=get_sector_costs,
             cop_soil_total="resources/"
             + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -2358,7 +2436,7 @@ if config["foresight"] == "myopic":
         input:
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
-            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            costs=get_sector_costs,
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
