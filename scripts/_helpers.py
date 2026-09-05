@@ -419,9 +419,6 @@ def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger
     traceback from exceptions emerging during the workflow.
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(level)
-    handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
     sys.excepthook = handle_exception
     return logger
 
