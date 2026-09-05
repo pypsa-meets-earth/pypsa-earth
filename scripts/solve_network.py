@@ -1447,11 +1447,15 @@ def extra_functionality(n, snapshots):
         logger.info("setting H2 color mix")
         set_h2_colors(n)
 
-    if snakemake.config["co2"]["sector_policy"]["enable"]:
-        logger.info("setting sector specific co2 limits")
+    co2_limit_active = any(option.startswith("Co2L") for option in opts)
+    sector_policy = config.get("co2", {}).get("sector_policy") or {}
+    policy_file = sector_policy.get("policy_file")
+
+    if co2_limit_active and policy_file:
+        logger.info("setting country and sector specific CO2 limits")
         add_co2_sector_limits(
             n,
-            snakemake.config["co2"]["sector_policy"]["policy_file"],
+            policy_file,
             snapshots,
             snakemake.wildcards["planning_horizons"],
         )
