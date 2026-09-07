@@ -292,7 +292,7 @@ rule build_shapes:
         countries=config["countries"],
         subregion=config["subregion"],
     input:
-        **branch(config["tutorial"], rules.retrieve_databundle_common.output),
+        **branch(config["tutorial"], rules.retrieve_databundle_data.output),
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
         # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
