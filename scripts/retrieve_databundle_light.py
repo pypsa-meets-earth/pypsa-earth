@@ -904,7 +904,7 @@ def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list
         List of output files from the bundles to download
     """
 
-    listoutputs = list(
+    listoutputs = sorted(
         set(
             [
                 inneroutput

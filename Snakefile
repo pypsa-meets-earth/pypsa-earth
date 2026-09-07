@@ -172,6 +172,9 @@ if config["enable"].get("retrieve_databundle", True):
         output_files = datafiles_retrivedatabundle(config, bundles)
         contains_landcover = any([f for f in output_files if "landcover" in f])
 
+        if not bundles:
+            continue
+
         rule:
             name:
                 f"retrieve_databundle_{category}"
@@ -289,6 +292,7 @@ rule build_shapes:
         countries=config["countries"],
         subregion=config["subregion"],
     input:
+        **branch(config["tutorial"], rules.retrieve_databundle_common.output),
         # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
         # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
         # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
