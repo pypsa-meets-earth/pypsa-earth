@@ -2196,7 +2196,7 @@ def add_industry(
         carrier="process emissions",
         p_nom_extendable=True,
         efficiency=1.0,
-        sector="industry",
+        sector="industry_process_emissions",
         subsector="",
     )
 
@@ -2217,7 +2217,8 @@ def add_industry(
             efficiency=1 - costs.at["cement capture", "capture_rate"],
             efficiency2=costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
-            sector="industry",
+            sector="industry_process_emissions",
+            subsector="",
         )
 
 
