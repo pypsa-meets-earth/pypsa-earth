@@ -27,4 +27,6 @@ SPDX-License-Identifier: CC-BY-4.0
 
 * Merge the release pull request for branch `release-v0.x.x`.
 
+* Publish release using GitHub interface.
+
 * Send announcement on the [PyPSA-Earth Discord channel](https://discord.gg/AnuJBk23FU) and LinkedIn.
