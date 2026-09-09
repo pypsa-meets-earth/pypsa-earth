@@ -40,7 +40,7 @@ Outputs
 Description
 -----------
 
-The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html>`_ command applied to the original powerplantmatching database. Country conditions must therefore use the full country names found in the original database, such as ``United States``. Country values are converted to ISO alpha-2 codes after the custom powerplant files have been applied.
+The configuration option ``electricity: powerplants_filter`` specifies a `pandas.query` command applied to the complete powerplant dataset, including both powerplantmatching and custom powerplants.
 
 The ``electricity: custom_powerplants`` section specifies the custom files and how they are applied. ``method`` accepts ``false``, ``merge``, or ``replace`` and is applied once to the complete set of configured files. ``merge`` appends all configured custom powerplants to the filtered powerplantmatching dataset, while ``replace`` discards the complete powerplantmatching dataset and uses all configured custom files instead.
 
@@ -463,7 +463,7 @@ if __name__ == "__main__":
         ppl=ppl,
         custom_powerplants_files=list(snakemake.input.custom_powerplants),
         method=custom_method,
-    )
+    ).query(ppl_query)
 
     ppl = ppl.powerplant.convert_country_to_alpha2().pipe(
         replace_natural_gas_technology

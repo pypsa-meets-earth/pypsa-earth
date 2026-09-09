@@ -13,6 +13,7 @@ The CLI has the following modules:
 4. Run snakemake - Feature to run a snakemake workflow
 
 """
+import ast
 import os
 import random
 import re
@@ -416,7 +417,7 @@ def show_questionnaire(option: str) -> None:
         score = 1
         answer = question["answer"]
         if isinstance(answer, str) and answer.startswith("["):
-            answer = eval(answer)
+            answer = ast.literal_eval(answer)
         user_answer = ""
         # While the user answer is not equal to the correct answer, keep prompting the user for an answer
         while not_matching(user_answer, answer):
@@ -607,52 +608,6 @@ def quiz_zone() -> None:
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
-
-
-@app.command("run-model")
-def run_model(config_path="") -> None:
-    """
-    Run the PyPSA-Earth model using snakemake
-
-    Parameters
-    ----------
-    config_path: str
-        Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
-
-    Returns
-    -------
-    None
-    """
-
-    # Load existing config files if not passed to the function
-    if config_path == "":
-        config_path = display_config_files()
-
-    # the tutorial use-case is designed as an elec-only model, so we will use the solve_all_networks rule to run the model
-    target_rule = "solve_all_networks"
-
-    # Prompt user for number of cores to use to run the model
-    cores = ask("Enter the number of cores to run the model")
-
-    # Prompt user for environment type to use - pixi / conda
-    env = display_choice_menu(
-        "Do you want to use a pixi / conda environment", ["pixi", "conda"], 3
-    )
-    if env == "pixi":
-        env_command = "pixi run"
-    elif env == "conda":
-        env_command = "conda run -n pypsa-earth"
-
-    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
-
-    console.print(style="dim")
-    console.print(
-        f"[bold cyan] The following command will be run to execute the model:\n\n \t [/bold cyan] [bold magenta]{snakemake_command} [/bold magenta]"
-    )
-
-    subprocess.run(snakemake_command.split(" "))
-
-    display_main_menu()
 
 
 @app.command("run-model")
