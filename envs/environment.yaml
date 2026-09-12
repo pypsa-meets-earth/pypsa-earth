@@ -8,7 +8,7 @@ channels:
 - bioconda
 - gurobi
 dependencies:
-- python>=3.10,,<3.14
+- python>=3.10,<3.14
 - pip
 
 - pypsa>=0.33
