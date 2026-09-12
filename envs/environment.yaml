@@ -10,7 +10,6 @@ channels:
 dependencies:
 - python>=3.10,,<3.14
 - pip
-- setuptools<81
 
 - pypsa>=0.33
 - atlite=0.4.1
