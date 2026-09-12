@@ -42,6 +42,8 @@ jobs:
 
 
     - name: Generate lockfiles for all platforms
+      env:
+        CONDA_OVERRIDE_OSX: "13.0"
       run: |
         conda-lock -f ${{ env.BASE_ENV }} \
         -p linux-64 -p osx-64 -p win-64 -p osx-arm64 \
