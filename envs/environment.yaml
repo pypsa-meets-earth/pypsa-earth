@@ -28,7 +28,7 @@ dependencies:
 - pytables
 - pyscipopt
 - lxml
-- numpy<2
+- numpy>=1.26.4
 - pandas<3
 - geopandas>=1
 - fiona>=1.10
