@@ -34,16 +34,7 @@ jobs:
       run: |
         conda install -c conda-forge conda-lock
 
-    - name: Clean conda caches
-      run: |
-        conda clean --all --yes || true
-        rm -rf /home/runner/conda_pkgs_dir/* || true
-        rm -rf /tmp/conda-lock-pkgs-* || true
-
-
     - name: Generate lockfiles for all platforms
-      env:
-        CONDA_OVERRIDE_OSX: "13.0"
       run: |
         conda-lock -f ${{ env.BASE_ENV }} \
         -p linux-64 -p osx-64 -p win-64 -p osx-arm64 \
