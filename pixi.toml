@@ -8,7 +8,7 @@ channels = ["conda-forge", "bioconda", "gurobi"]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
 [dependencies]
-python = ">=3.10"
+python = ">=3.10,<3.14"
 pip = "*"
 
 pypsa = ">=0.33"
