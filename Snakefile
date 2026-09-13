@@ -162,10 +162,8 @@ if config["enable"].get("retrieve_databundle", True):
     print("\n====================================================")
     print("Selected bundles for each category:")
     for category, bundles in bundle_dict.items():
-        print(f"\t{category}: {bundles}")
-        # output files for each category
-        output_files = datafiles_retrivedatabundle(config, bundles)
-        print(f"\t\tOutput files: {output_files}")
+        if bundles:
+            print(f"\t{category}: {bundles}")
     print("====================================================\n")
 
     for category, bundles in bundle_dict.items():
