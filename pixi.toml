@@ -55,6 +55,7 @@ tqdm = "*"
 pytz = "*"
 currencyconverter = "*"
 googledrivedownloader = ">=1.1"
+scip = "!=10.0.3"
 
 # Jupyter notebook requirements
 ipykernel = "*"
