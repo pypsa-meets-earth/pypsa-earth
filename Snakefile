@@ -11,9 +11,9 @@ sys.path.append("./scripts")
 from pathlib import Path
 from shutil import copyfile, move, unpack_archive
 
-from _helpers import branch  # Remove if Snakemake >= 8.3.0
 from _helpers import (
     BASE_DIR,
+    branch,
     check_config_version,
     content_retrieve,
     copy_default_files,
@@ -86,6 +86,8 @@ wildcard_constraints:
     sopts=r"[-+a-zA-Z0-9\.\s]*",
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     planning_horizons="20[2-9][0-9]|2100",
+    demand=r"[-+a-zA-Z0-9\.\s]*",
+    h2export="[0-9]+m?|all",
 
 
 if config["custom_rules"] is not []:
