@@ -164,7 +164,7 @@ if config["enable"].get("retrieve_databundle", True):
     print("\n====================================================")
     print("Selected bundles for each category:")
     for category, bundles in bundle_dict.items():
-        if bundles:
+        if len(bundles) >= 1:
             print(f"\t{category}: {bundles}")
     print("====================================================\n")
 
