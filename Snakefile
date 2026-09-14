@@ -92,28 +92,7 @@ include: "rules/common.smk"
 include: "rules/retrieve.smk"
 include: "rules/build_electricity.smk"
 include: "rules/build_sector.smk"
-include: "rules/scenarios.smk"
-
-
-if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
-
-    include: "rules/monte_carlo.smk"
-
-else:
-
-    include: "rules/solve_electricity.smk"
-
-
-if config["foresight"] == "overnight":
-
-    include: "rules/solve_overnight.smk"
-
-
-if config["foresight"] == "myopic":
-
-    include: "rules/solve_myopic.smk"
-
-
+include: "rules/solve.smk"
 include: "rules/postprocess.smk"
 include: "rules/collect.smk"
 

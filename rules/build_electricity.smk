@@ -651,3 +651,31 @@ rule prepare_network:
         mem_mb=4000,
     script:
         scripts("prepare_network.py")
+
+
+if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
+
+    rule monte_carlo:
+        params:
+            monte_carlo=config["monte_carlo"],
+        input:
+            network=rules.prepare_network.output.network,
+        output:
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+        log:
+            "logs/"
+            + RDIR
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
+        benchmark:
+            (
+                "benchmarks/"
+                + RDIR
+                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+            )
+        threads: 1
+        resources:
+            mem_mb=4000,
+        script:
+            scripts("monte_carlo.py")
