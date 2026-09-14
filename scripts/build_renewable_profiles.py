@@ -230,30 +230,30 @@ def _format_bounds(bounds):
 
 def check_cutout_match(cutout, regions):
     """
-    Check whether a weather cutout covers the requested regions.
+    Check whether a weather cutout covers the requested regions and report details.
 
-    Raise an ``AssertionError`` if the bounding boxes do not overlap. Log a
-    warning when coverage is partial.
+    A lack of overlap likely indicates that the cutout was created for a
+    different region. Partial coverage triggers a warning because excluding
+    remote areas may be intentional.
     """
-    cutout_bounds = tuple(float(value) for value in cutout.bounds)
-    region_bounds = tuple(float(value) for value in regions.total_bounds)
-    cutout_box = box(*cutout_bounds)
-    region_box = box(*region_bounds)
+    cutout_box = box(*cutout.bounds)
+    region_box = box(*regions.total_bounds)
 
     outside_sides = [
         side
         for side, outside in (
-            ("west", region_bounds[0] < cutout_bounds[0]),
-            ("south", region_bounds[1] < cutout_bounds[1]),
-            ("east", region_bounds[2] > cutout_bounds[2]),
-            ("north", region_bounds[3] > cutout_bounds[3]),
+            ("west", region_box.bounds[0] < cutout_box.bounds[0]),
+            ("south", region_box.bounds[1] < cutout_box.bounds[1]),
+            ("east", region_box.bounds[2] > cutout_box.bounds[2]),
+            ("north", region_box.bounds[3] > cutout_box.bounds[3]),
         )
         if outside
     ]
     bounds_details = (
-        "Bounds use (x_min, y_min, x_max, y_max).\n"
-        f"Cutout bounds: {_format_bounds(cutout_bounds)}\n"
-        f"Requested region bounds: {_format_bounds(region_bounds)}\n"
+        "Bounds use (minimum longitude, minimum latitude, maximum longitude, "
+        "maximum latitude).\n"
+        f"Cutout bounds: {_format_bounds(cutout_box.bounds)}\n"
+        f"Requested region bounds: {_format_bounds(region_box.bounds)}\n"
         "Requested region exceeds cutout bounds on: "
         f"{', '.join(outside_sides)}."
     )
