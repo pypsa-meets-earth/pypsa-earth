@@ -6,6 +6,24 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Description of datasets used by workflow
 
+## OpenStreetMap
+
+**Output:** `resources/osm/raw/all_raw_cables.geojson, resources/osm/raw/all_raw_generators.geojson, resources/osm/raw/all_raw_generators.csv, resources/osm/raw/all_raw_lines.geojson, resources/osm/raw/all_raw_substations.geojson`
+
+OpenStreetMap database used as a primary source of power-infrastructure data on substations, lines, cables, generators. OSM data are fetched for requested countries via the earth-osm package (github.com/pypsa-meets-earth/earth-osm) which downloads regional .osm.pbf extracts from Geofabrik and filters them to power-tagged features. For each country, url are resolved dynamically from Geofabrik's index. Cite: © OpenStreetMap contributors, data extracted via Geofabrik (https://download.geofabrik.de/).
+
+## ERA5 hourly reanalysis on single levels from 1940 to present, Copernicus/ECMWF
+
+**Output:** `cutouts/{cutout}.nc`
+
+ERA5 hourly data on single levels from 1940 to present. Atmospheric reanalysis produced by European Centre for Medium-Range Weather Forecasts (ECMWF). Retrieved from Copernicus Climate Change Service (C3S) using atlite package to build weather cutouts for the wind, influx, temperature and runoff features. Cite: Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horanyi, A., Munoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thepaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). DOI: https://doi.org/10.24381/cds.adbb2d47
+
+## Surface Radiation Data Set - Heliosat (SARAH), Edition 3, EUMETSAT CM SAF
+
+**Output:** `cutouts/{cutout}.nc`
+
+SARAH-3 (Surface Radiation Data Set - Heliosat, Edition 3): satellite-based climate data record of surface solar irradiance (SIS/SID) at 0.05 deg x 0.05 deg resolution, with 30-minute/daily/monthly time steps, covering Europe, Africa, parts of South America and adjacent oceans from 1983 to near-present. Produced by EUMETSAT's Satellite Application Facility on Climate Monitoring (CM SAF). The raw files must be obtained manually via the CM SAF Web User Interface or the EUMETSAT Data Store, atlite is used to build a cutout. Cite: Pfeifroth, U., Kothe, S., Drucke, J., Trentmann, J., Schroder, M., Selbach, N., Hollmann, R. (2023): Surface Radiation Data Set - Heliosat (SARAH) - Edition 3. Satellite Application Facility on Climate Monitoring (CM SAF). DOI: https://doi.org/10.5676/EUM_SAF_CM/SARAH/V003
+
 ## Global administrative boundaries (GADM), by country
 
 **Output:** `data/gadm/{GADM_filename}/{GADM_filename}.gpkg`
@@ -86,7 +104,7 @@ HydroBASINS (HydroSHEDS project): global watershed boundaries and sub-basin deli
 
 ## EDGAR gridded fossil CO2 emissions dataset (v6.0), annual gridmaps for 1970-2018
 
-**Output:** `data/v60_CO2_excl_short-cycle_org_C_1970_2018.xls`
+**Output:** `data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls`
 
 EDGAR (Emissions Database for Global Atmospheric Research) v6.0 gridded inventory of fossil CO2 emissions, excluding short-cycle organic carbon (i.e. biomass burning and LULUCF sources); provided as annual global gridmaps covering 1970-2018, produced by the EU Joint Research Centre.
 
@@ -118,13 +136,13 @@ UN Statistics Division per-country energy balance zip files (production, trade, 
 
 **Output:** `resources/urban_percent.csv`
 
-UNCTADstat 'Urban population as percentage of total population' indicator, by country.
+UNCTADstat 'Urban population as percentage of total population' indicator, by country. The dataset is downloaded as a .7z file and contains urban percent for most countries from 1950 and predictions until 2050.
 
 ## Location and type of airports worldwide
 
 **Output:** `resources/airports.csv`
 
-Global inventory of airports and airfields from the OurAirports open dataset, including active and closed facilities, heliports, and seaplane bases, with coordinates and basic attributes (name, type, ICAO/IATA codes, elevation).
+Global inventory of airports and airfields from the OurAirports open dataset, including active and closed facilities, heliports, and seaplane bases, with coordinates and basic attributes (name, type, ICAO/IATA codes, elevation). The dataset contains 74844 airports.
 
 ## Location and length of airport runways worldwide
 
@@ -142,7 +160,7 @@ Global Energy Monitor's Global Steel Plant Tracker (GSPT): location, operating s
 
 **Output:** `resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv`
 
-Global Energy Monitor's Global Gas Infrastructure Tracker (GGIT) gas pipelines dataset: location, length, diameter, capacity, and status of gas transmission pipelines and pipeline projects worldwide.
+Global Energy Monitor's Global Gas Infrastructure Tracker (GGIT) gas pipelines dataset: location, length, diameter, capacity, and status of gas transmission pipelines and pipeline projects worldwide. The dataset contains 3144 pipelines.
 
 ## SciGRID-gas IGGIELGN dataset: European gas transmission network model
 
@@ -154,7 +172,7 @@ SciGRID-gas IGGIELGN dataset: a European gas transmission network model combinin
 
 **Output:** `resources/industrial_database.csv`
 
-Global Oil Refinery Complex and Daily Capacity: an Esri ArcGIS-hosted point layer with the location and daily throughput capacity of oil refineries worldwide.
+Global Oil Refinery Complex and Daily Capacity: an Esri ArcGIS-hosted point layer with the location and daily throughput capacity of oil refineries worldwide. The dataset contains 536 global Oil refineries.
 
 ## Reverse geocoding of refinery coordinates to country codes via OpenStreetMap's Nominatim API
 
@@ -166,7 +184,7 @@ Reverse geocoding of refinery point coordinates that are missing a country code,
 
 **Output:** `resources/transport_data.csv`
 
-WHO Global Health Observatory (GHO) 'Registered vehicles' indicator (RS_194, Road Safety theme): number of registered motor vehicles by country. Fetched via the GHO OData API.
+WHO Global Health Observatory (GHO) 'Registered vehicles' indicator (RS_194, Road Safety theme): number of registered motor vehicles by country. Fetched via the GHO OData API. A few countries are missing from this list (e.g. South Africa, Algeria).
 
 ## Number of road motor vehicles per capita
 
@@ -184,4 +202,16 @@ World Bank indicator EN.CO2.TRAN.ZS ('CO2 emissions from transport, % of total f
 
 **Output:** `resources/ports.csv`
 
-NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency.
+NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency. The dataset is updated monthly and contains 3711 ports.
+
+## Pulp and Paper Mill Database for Latin America, CGFI Spatial Finance Initiative
+
+**Output:** `data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx`
+
+The Spatial Finance Initiative Global Pulp and Paper Mill Database provides information on pulp and paper production facilities around the world. The database contains 3,403 facilities with information about location, operating status, plant type, product type, capacity, fuel, certification status and ownership where available. Dropping the null capacities reduces the dataframe from 3000+  rows to 1672 rows.
+
+## Global Database of Cement Production Assets, CGFI Spatial Finance Initiative
+
+**Output:** `data/industry/SFI-Global-Cement-Database-July-2021.xlsx`
+
+The Spatial Finance Initiative Global Database of Cement Production Assets provides information on cement production facilities worldwide. The database contains 3,117 cement plants with exact geolocation, covering both integrated clinker-producing plants and independent grinding facilities, with ownership, production type, capacity and startup year where available. Cite: McCarten, M., Bayaraa, M., Caldecott, B., Christiaen, C., Foster, P., Hickey, C., Kampmann, D., Layman, C., Rossi, C., Scott, K., Tang, K., Tkachenko, N., and Yoken, D. 2021. Global Database of Cement Production Assets.
