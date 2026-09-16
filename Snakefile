@@ -1208,6 +1208,10 @@ rule prepare_urban_percent:
 
 
 rule prepare_transport_data_input:
+    params:
+        url_n_vehicles_who="https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv",
+        url_vehicles_per_capita_wiki="https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita",
+        url_transport_emission_worldbank="https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel",
     output:
         transport_data_input="resources/" + SECDIR + "transport_data.csv",
     script:

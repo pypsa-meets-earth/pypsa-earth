@@ -156,12 +156,12 @@ if __name__ == "__main__":
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
     nbr_vehicles = download_number_of_vehicles(
-        "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv",
-        "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita",
+        snakemake.params.url_n_vehicles_who,
+        snakemake.params.url_vehicles_per_capita_wiki,
     ).copy()
 
     CO2_emissions = download_CO2_emissions(
-        "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+        snakemake.params.url_transport_emission_worldbank
     ).copy()
 
     if nbr_vehicles.empty or CO2_emissions.empty:
