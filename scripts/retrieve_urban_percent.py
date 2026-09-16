@@ -15,9 +15,8 @@ def download_urban_percent(fn):
     Downloads the United Nations "Total and urban population, annual" .7z File
     and extracts it as csv File.
 
-    The above file was downloaded from the webpage
-    https://unctadstat.unctad.org/datacentre/
-    as a .7z file. The dataset contains urban percent for most countries from 1950 and predictions until 2050.
+    Data on urban population as a percentage worldwide ("pop_total_un"
+    dataset).
     """
     # Make a GET request to the URL
     response = requests.get(fn)

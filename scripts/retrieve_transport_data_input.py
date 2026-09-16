@@ -41,12 +41,8 @@ def download_number_of_vehicles(fn_who, fn_wiki):
     Downloads and returns the number of registered vehicles as tabular data
     from the Global Health Observatory (GHO) repository data and from Wikipedia.
 
-    The csv data from the WHO website is imported
-    from 'https://apps.who.int/gho/data/node.main.A995'.
-    A few countries are missing in the WHO list (e.g. South Africa, Algeria).
-    Therefore, the number of vehicles per country table from Wikipedia
-    is also imported for completion (prio 2):
-    'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita'.
+    Data on the number of registered motor vehicles worldwide
+    ("n_vehicles_who" and "vehicles_per_capita_wiki" datasets).
     """
 
     def _clean_data(df):
@@ -119,8 +115,8 @@ def download_CO2_emissions(fn):
     It is until the year 2014. # TODO: Maybe search for more recent years or another proxy to
     estimating the average fuel efficiency (MWh/100km).
 
-    The live API of the World Bank has stopped providing the dataset since October 2024.
-    So this link is used: https://web.archive.org/web/20240527231108/https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
+    Data on CO2 emissions from transport worldwide
+    ("transport_emission_worldbank" dataset).
     """
     # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:

@@ -11,9 +11,7 @@ def download_ports(fn):
     Downloads the world ports index csv File and NOT as shape or other because
     it is updated on a monthly basis.
 
-    The following csv file was downloaded from the webpage
-    https://msi.nga.mil/Publications/WPI
-    as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
+    Data on sea ports worldwide ("sea_ports_nga" dataset).
     """
     wpi_csv = read_csv_nafix(fn, index_col=0)
 

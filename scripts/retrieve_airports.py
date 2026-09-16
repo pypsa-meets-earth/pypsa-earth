@@ -11,9 +11,7 @@ def download_airports(fn_airports, fn_runways):
     Downloads the world airports as .csv File in addition to runnways
     information.
 
-    The following csv file was downloaded from the webpage
-    https://ourairports.com/data/
-    as a .csv file. The dataset contains 74844 airports.
+    Data on airports worldwide ("airports" and "air_runways" datasets).
     """
     storage_options = {"User-Agent": "Mozilla/5.0"}
     airports_csv = read_csv_nafix(

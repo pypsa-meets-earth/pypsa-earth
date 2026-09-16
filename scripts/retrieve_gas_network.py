@@ -21,9 +21,8 @@ def download_IGGIELGN_gas_network(fn) -> None:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
-    The following xlsx file was downloaded from the webpage
-    https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
-    The dataset contains 3144 pipelines.
+    Data on the European gas transmission network ("gas_network_iggielgn"
+    dataset).
     """
 
     # Save locations
@@ -45,9 +44,7 @@ def download_GGIT_gas_network(fn) -> pd.DataFrame:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
-    The following xlsx file was downloaded from the webpage
-    https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
-    The dataset contains 3144 pipelines.
+    Data on gas pipelines worldwide ("pipelines_gem" dataset).
     """
     GGIT_gas_pipeline = pd.read_excel(
         content_retrieve(fn),
