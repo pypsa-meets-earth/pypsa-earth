@@ -1178,6 +1178,7 @@ rule solve_sector_networks:
 rule prepare_ports:
     params:
         custom_export=config["custom_data"]["export_ports"],
+        url_ports="https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv",
     output:
         ports="resources/" + SECDIR + "ports.csv",
         export_ports="resources/" + SECDIR + "export_ports.csv",

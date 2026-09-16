@@ -76,9 +76,7 @@ if __name__ == "__main__":
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    df = download_ports(
-        "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
-    ).copy()
+    df = download_ports(snakemake.params.url_ports).copy()
 
     # Add ISO2 country code for each country
     df = df.rename(
