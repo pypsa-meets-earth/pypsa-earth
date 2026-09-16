@@ -1263,6 +1263,8 @@ if not config["custom_data"]["gas_network"]:
             gas_config=config["sector"]["gas"],
             alternative_clustering=config["clustering"]["alternative_clustering"],
             custom_gas_network=config["custom_data"]["gas_network"],
+            url_ggit="https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx",
+            url_iggielgn="https://zenodo.org/record/4767098/files/IGGIELGN.zip",
         input:
             regions_onshore="resources/"
             + RDIR
