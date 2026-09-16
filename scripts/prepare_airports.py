@@ -16,7 +16,7 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_airports():
+def download_airports(fn_airports, fn_runways):
     """
     Downloads the world airports as .csv File in addition to runnways
     information.
@@ -25,16 +25,14 @@ def download_airports():
     https://ourairports.com/data/
     as a .csv file. The dataset contains 74844 airports.
     """
-    fn = "https://davidmegginson.github.io/ourairports-data/airports.csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
     airports_csv = read_csv_nafix(
-        fn, index_col=0, storage_options=storage_options, encoding="utf8"
+        fn_airports, index_col=0, storage_options=storage_options, encoding="utf8"
     )
 
-    fn = "https://davidmegginson.github.io/ourairports-data/runways.csv"
     storage_options = {"User-Agent": "Mozilla/5.0"}
     runways_csv = read_csv_nafix(
-        fn, index_col=0, storage_options=storage_options, encoding="utf8"
+        fn_runways, index_col=0, storage_options=storage_options, encoding="utf8"
     )
 
     return (airports_csv, runways_csv)
@@ -99,7 +97,10 @@ if __name__ == "__main__":
         shutil.copy(custom_airports, snakemake.output[0])
     else:
         # Prepare downloaded data
-        download_data = download_airports()
+        download_data = download_airports(
+            "https://davidmegginson.github.io/ourairports-data/airports.csv",
+            "https://davidmegginson.github.io/ourairports-data/runways.csv",
+        )
 
         airports_csv = download_data[0].copy()
         airports_csv = airports_csv[
