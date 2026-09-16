@@ -215,3 +215,15 @@ The Spatial Finance Initiative Global Pulp and Paper Mill Database provides info
 **Output:** `data/industry/SFI-Global-Cement-Database-July-2021.xlsx`
 
 The Spatial Finance Initiative Global Database of Cement Production Assets provides information on cement production facilities worldwide. The database contains 3,117 cement plants with exact geolocation, covering both integrated clinker-producing plants and independent grinding facilities, with ownership, production type, capacity and startup year where available. Cite: McCarten, M., Bayaraa, M., Caldecott, B., Christiaen, C., Foster, P., Hickey, C., Kampmann, D., Layman, C., Rossi, C., Scott, K., Tang, K., Tkachenko, N., and Yoken, D. 2021. Global Database of Cement Production Assets.
+
+## Historical annual ammonia (nitrogen) production statistics, USGS Minerals Yearbook
+
+**Output:** `data/industry/USGS_ammonia_dataset.xlsx`
+
+US Geological Survey (USGS) National Minerals Information Center 'Nitrogen Statistics and Information' Minerals Yearbook: historical annual ammonia production by country/plant, used to derive per-country ammonia production. See also the "ammonia_production_usgs_archive" entry for the pypsa.org-hosted fallback mirror used if this primary USGS source is unavailable.
+
+## Historical annual ammonia (nitrogen) production statistics, USGS Minerals Yearbook (pypsa.org archived mirror)
+
+**Output:** `data/industry/USGS_ammonia_dataset.xlsx`
+
+Archived pypsa.org-hosted mirror of the USGS Minerals Yearbook nitrogen statistics file, used as a fallback when the primary USGS S3-hosted source ("ammonia_production_usgs") is unavailable.
