@@ -6,6 +6,48 @@
 # The TOML file remains the source of truth consumed by get_datasource_url().
 
 source:
+- name: osm_power_geofabrik
+  long_name: OpenStreetMap
+  output: resources/osm/raw/all_raw_cables.geojson, resources/osm/raw/all_raw_generators.geojson, resources/osm/raw/all_raw_generators.csv, resources/osm/raw/all_raw_lines.geojson, resources/osm/raw/all_raw_substations.geojson
+  description: 'OpenStreetMap database used as a primary source of power-infrastructure data on substations, lines, cables, generators. OSM data are fetched for requested countries via the earth-osm package (github.com/pypsa-meets-earth/earth-osm) which downloads regional .osm.pbf extracts from Geofabrik and filters them to power-tagged features. For each country, url are resolved dynamically from Geofabrik''s index. Cite: © OpenStreetMap contributors, data extracted via Geofabrik (https://download.geofabrik.de/).'
+  tutorial: false
+  countries: Earth
+  url: https://download.geofabrik.de/index-v1.json
+  origin_url: https://download.geofabrik.de/
+  version: ''
+  checksum: ''
+  code_line: '[download_osm_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_osm_data.py#L108)'
+  license: ODbL 1.0
+  license_link: https://www.openstreetmap.org/copyright, https://osmfoundation.org/wiki/Terms_of_Use
+
+- name: era5
+  long_name: ERA5 hourly reanalysis on single levels from 1940 to present, Copernicus/ECMWF
+  output: cutouts/{cutout}.nc
+  description: 'ERA5 hourly data on single levels from 1940 to present. Atmospheric reanalysis produced by European Centre for Medium-Range Weather Forecasts (ECMWF). Retrieved from Copernicus Climate Change Service (C3S) using atlite package to build weather cutouts for the wind, influx, temperature and runoff features. Cite: Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horanyi, A., Munoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thepaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). DOI: https://doi.org/10.24381/cds.adbb2d47'
+  tutorial: false
+  countries: Earth
+  url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+  origin_url: https://doi.org/10.24381/cds.adbb2d47
+  version: reanalysis-era5-single-levels
+  checksum: ''
+  code_line: '[atlite:era5.retrieve_data](https://github.com/PyPSA/atlite/blob/master/atlite/datasets/era5.py#L465) -- fetched by build_cutout.py via atlite.Cutout.prepare(), not a pypsa-earth script'
+  license: Licence to use Copernicus Products (CC-BY-compatible; attribution to the Copernicus Climate Change Service and ECMWF required)
+  license_link: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+
+- name: sarah3
+  long_name: Surface Radiation Data Set - Heliosat (SARAH), Edition 3, EUMETSAT CM SAF
+  output: cutouts/{cutout}.nc
+  description: 'SARAH-3 (Surface Radiation Data Set - Heliosat, Edition 3): satellite-based climate data record of surface solar irradiance (SIS/SID) at 0.05 deg x 0.05 deg resolution, with 30-minute/daily/monthly time steps, covering Europe, Africa, parts of South America and adjacent oceans from 1983 to near-present. Produced by EUMETSAT''s Satellite Application Facility on Climate Monitoring (CM SAF). The raw files must be obtained manually via the CM SAF Web User Interface or the EUMETSAT Data Store, atlite is used to build a cutout. Cite: Pfeifroth, U., Kothe, S., Drucke, J., Trentmann, J., Schroder, M., Selbach, N., Hollmann, R. (2023): Surface Radiation Data Set - Heliosat (SARAH) - Edition 3. Satellite Application Facility on Climate Monitoring (CM SAF). DOI: https://doi.org/10.5676/EUM_SAF_CM/SARAH/V003'
+  tutorial: false
+  countries: Europe, Africa, parts of South America and adjacent oceans
+  url: https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003
+  origin_url: https://doi.org/10.5676/EUM_SAF_CM/SARAH/V003
+  version: Edition 3 (V003)
+  checksum: ''
+  code_line: '[atlite:sarah.get_filenames](https://github.com/PyPSA/atlite/blob/master/atlite/datasets/sarah.py#L44) -- reads pre-downloaded local NetCDF files; retrieval is manual, see [build_cutout.py#L86](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_cutout.py#L86) (NOTE: pypsa-earth''s own build_cutout.py docstring still refers to this as ''SARAH-2''; the current CM SAF product is Edition 3 / SARAH-3)'
+  license: CC BY 4.0
+  license_link: https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003
+
 - name: demandcast_forecasts
   long_name: Global Dataset of Forecasted Hourly Electricity Demand from 2000 to 2024 Using DemandCast. E. Antonini, P. Goli, K. Steijn
   output: data/demand/forecasts_on_historical_period.parquet
