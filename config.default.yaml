@@ -602,6 +602,8 @@ co2:
       2040: 0.40
       2045: 0.25
       2050: 0.1
+  sector_policy:
+    enable: false
 
 # ------------------- Uncertainty -------------------
 monte_carlo:
@@ -794,6 +796,7 @@ sector:
 
   oil:
     spatial_oil: true
+    reserves: 100 # TWh per bus: Maybe redundant
 
   ammonia:
     enable: true
