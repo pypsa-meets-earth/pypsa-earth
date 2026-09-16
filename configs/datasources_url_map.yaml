@@ -727,3 +727,31 @@ source:
   code_line: '[build_industrial_database:create_cement_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L14)'
   license: CC BY 4.0
   license_link: https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/
+
+- name: ammonia_production_usgs
+  long_name: Historical annual ammonia (nitrogen) production statistics, USGS Minerals Yearbook
+  output: data/industry/USGS_ammonia_dataset.xlsx
+  description: 'US Geological Survey (USGS) National Minerals Information Center ''Nitrogen Statistics and Information'' Minerals Yearbook: historical annual ammonia production by country/plant, used to derive per-country ammonia production. See also the "ammonia_production_usgs_archive" entry for the pypsa.org-hosted fallback mirror used if this primary USGS source is unavailable.'
+  tutorial: false
+  countries: Earth
+  url: https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/myb1-2023-nitro-ERT.xlsx
+  origin_url: https://www.usgs.gov/centers/national-minerals-information-center/nitrogen-statistics-and-information
+  version: Minerals Yearbook 2023 (nitrogen)
+  checksum: ''
+  code_line: '[retrieve_ammonia_dataset:download_ammonia_production_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ammonia_dataset.py#L15)'
+  license: Public Domain (U.S. Government Work)
+  license_link: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
+
+- name: ammonia_production_usgs_archive
+  long_name: Historical annual ammonia (nitrogen) production statistics, USGS Minerals Yearbook (pypsa.org archived mirror)
+  output: data/industry/USGS_ammonia_dataset.xlsx
+  description: Archived pypsa.org-hosted mirror of the USGS Minerals Yearbook nitrogen statistics file, used as a fallback when the primary USGS S3-hosted source ("ammonia_production_usgs") is unavailable.
+  tutorial: false
+  countries: Earth
+  url: https://data.pypsa.org/workflows/eur/nitrogen_statistics/2023/myb1-2023-nitro-ERT.xlsx
+  origin_url: https://www.usgs.gov/centers/national-minerals-information-center/nitrogen-statistics-and-information
+  version: Minerals Yearbook 2023 (nitrogen)
+  checksum: ''
+  code_line: '[retrieve_ammonia_dataset:download_ammonia_production_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ammonia_dataset.py#L15)'
+  license: Public Domain (U.S. Government Work)
+  license_link: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
