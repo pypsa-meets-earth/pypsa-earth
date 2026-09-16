@@ -207,6 +207,9 @@ def create_steel_db(fn):
 
 
 def create_cement_db(fn):
+    """
+    Read SFI cement database
+    """
     cement_orig = pd.read_excel(
         fn,
         index_col=0,
@@ -285,6 +288,9 @@ def create_cement_db(fn):
 
 
 def create_refineries_df(fn):
+    """
+    Pre-process refineries data
+    """
     first_response = requests.get(fn)
     response_list = first_response.json()
 
@@ -356,6 +362,9 @@ def create_refineries_df(fn):
 
 
 def create_paper_df(fn):
+    """
+    Pre-process cement database
+    """
 
     paper_orig = pd.read_excel(
         fn,
