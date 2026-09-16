@@ -28,6 +28,9 @@ OUTPUT_MD = REPO_ROOT / "doc" / "user-guide" / "data_api.md"
 # the doc; any dataset name present in the toml but missing here is
 # appended at the end (in its original toml order) rather than dropped.
 DATASET_ORDER = [
+    "osm_geofabrik",
+    "era5",
+    "sarah3",
     "gadm",
     "gadm_v36",
     "worldpop_maxar",
