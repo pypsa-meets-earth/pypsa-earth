@@ -57,7 +57,9 @@ def download_urban_percent(fn):
         os.remove(csv_filename)
 
     else:
-        logger.info(f"Failed to download file: Status code {response.status_code}")
+        raise RuntimeError(
+            f"Failed to download urban percent file from {fn}: status code {response.status_code}"
+        )
 
     return urban_percent_orig
 

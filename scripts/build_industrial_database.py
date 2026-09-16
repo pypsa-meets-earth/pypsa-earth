@@ -96,7 +96,6 @@ def create_paper_df(fn):
     """
     Pre-process cement database
     """
-
     paper_orig = pd.read_excel(
         fn,
         index_col=0,
@@ -260,9 +259,9 @@ if __name__ == "__main__":
     ammonia_plants_file = snakemake.input.ammonia_plants
 
     industrial_database_steel = read_csv_nafix(snakemake.input.steel_raw)
-    industrial_database_cement = create_cement_db(snakemake.params.url_cement)
+    industrial_database_cement = create_cement_db(snakemake.input.cement_raw)
     industrial_database_refineries = read_csv_nafix(snakemake.input.refineries_raw)
-    industrial_database_paper = create_paper_df(snakemake.params.url_paper)
+    industrial_database_paper = create_paper_df(snakemake.input.paper_raw)
     industrial_database_ammonia = create_ammonia_db(ammonia_plants_file)
 
     industrial_database = pd.concat(
