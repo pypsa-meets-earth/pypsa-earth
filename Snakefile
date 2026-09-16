@@ -2049,13 +2049,12 @@ rule plot_sector_summary:
 
 
 rule build_industrial_database:
-    params:
-        url_cement=get_datasource_url("cgfi_cement_db"),
-        url_paper=get_datasource_url("cgfi_paper_db"),
     input:
         ammonia_plants="resources/ammonia_plants.csv",
         steel_raw="data/industry/steel_raw.csv",
         refineries_raw="data/industry/refineries_raw.csv",
+        cement_raw="data/industry/SFI-Global-Cement-Database-July-2021.xlsx",
+        paper_raw="data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx",
     output:
         industrial_database="resources/industrial_database.csv",
     script:
