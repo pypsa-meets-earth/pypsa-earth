@@ -55,7 +55,7 @@ def download_number_of_vehicles(fn_who, fn_wiki):
         vehicles_gho = read_csv_nafix(
             fn_who, storage_options=storage_options, encoding="utf8"
         )
-        print("File read successfully.")
+        logger.info("File read successfully.")
     except Exception as e:
         logger.warning(
             f"Failed to read the file. Falling back on hard-coded data. \nError: {e}"
@@ -81,7 +81,7 @@ def download_number_of_vehicles(fn_who, fn_wiki):
         vehicles_wiki = pd.read_html(
             fn_wiki, storage_options=storage_options, encoding="utf8"
         )[0]
-        print("File read successfully.")
+        logger.info("File read successfully.")
     except Exception as e:
         logger.warning("Failed to read the file.", e)
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
@@ -97,7 +97,9 @@ def download_number_of_vehicles(fn_who, fn_wiki):
 
     # Add missing countries, which are available in the wikipedia source.
     missing_countries = set(vehicles_wiki["country"]) - set(vehicles_gho["country"])
-    print(f"Adding the missing countries {missing_countries} from Wikipedia source.")
+    logger.info(
+        f"Adding the missing countries {missing_countries} from Wikipedia source."
+    )
 
     vehicles_wiki_to_add = vehicles_wiki[
         vehicles_wiki["country"].isin(missing_countries)
@@ -121,7 +123,7 @@ def download_CO2_emissions(fn):
     # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
         CO2_emissions = pd.read_excel(fn, sheet_name="Data", skiprows=[0, 1, 2])
-        print("File read successfully.")
+        logger.info("File read successfully.")
     except Exception as e:
         logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
         return pd.DataFrame()

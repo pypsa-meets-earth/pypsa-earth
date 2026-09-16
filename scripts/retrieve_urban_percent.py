@@ -9,6 +9,8 @@ import py7zr
 import requests
 from _helpers import read_csv_nafix
 
+logger = logging.getLogger(__name__)
+
 
 def download_urban_percent(fn):
     """
@@ -34,13 +36,13 @@ def download_urban_percent(fn):
         with open(filename, "wb") as f:
             f.write(response.content)
 
-        print(f"Urban percent downloaded successfully as {filename}")
+        logger.info(f"Urban percent downloaded successfully as {filename}")
 
         # Extract the downloaded .7z file
         with py7zr.SevenZipFile(filename, "r") as archive:
             archive.extractall()
 
-        print(f"Urban percent extracted successfully")
+        logger.info(f"Urban percent extracted successfully")
 
         # Read the extracted CSV file
         csv_filename = os.path.splitext(filename)[
@@ -48,14 +50,14 @@ def download_urban_percent(fn):
         ]  # Remove the .7z extension to get the CSV filename
         urban_percent_orig = read_csv_nafix(csv_filename)
 
-        print("Urban percent CSV file read successfully:")
+        logger.info("Urban percent CSV file read successfully:")
 
         # Remove the downloaded .7z and .csv files
         os.remove(filename)
         os.remove(csv_filename)
 
     else:
-        print(f"Failed to download file: Status code {response.status_code}")
+        logger.info(f"Failed to download file: Status code {response.status_code}")
 
     return urban_percent_orig
 

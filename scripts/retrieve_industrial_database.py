@@ -14,6 +14,8 @@ import requests
 from _helpers import content_retrieve
 from geopy.geocoders import Nominatim
 
+logger = create_logger(__name__)
+
 
 def get_cocode_from_name(df, country_column_name):
     country_codes = {}
@@ -46,7 +48,7 @@ def get_cocode_from_coords(df):
             except:
                 tries += 1
                 if tries == 10:
-                    print(
+                    logger.error(
                         "Country code of location ({},{}) could not be geocoded after 10 tries.".format(
                             latitude, longitude
                         )
