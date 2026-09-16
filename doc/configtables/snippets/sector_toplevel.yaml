@@ -91,6 +91,7 @@ sector:
 
   oil:
     spatial_oil: true
+    reserves: 100 # TWh per bus: Maybe redundant
 
   ammonia:
     enable: true
