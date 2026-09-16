@@ -49,7 +49,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 import os
-import zipfile
 from pathlib import Path
 from typing import Any, List, Union
 
@@ -60,8 +59,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from _helpers import (
     BASE_DIR,
-    content_retrieve,
-    progress_retrieve,
     three_2_two_digits_country,
     two_2_three_digits_country,
 )
@@ -89,48 +86,6 @@ if __name__ == "__main__":
     # RDIR = run["name"] + "/" if run.get("name") else ""
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
-
-
-def download_IGGIELGN_gas_network(fn) -> None:
-    """
-    Downloads a global dataset for gas networks as .xlsx.
-
-    The following xlsx file was downloaded from the webpage
-    https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
-    The dataset contains 3144 pipelines.
-    """
-
-    # Save locations
-    zip_fn = Path(os.path.join(BASE_DIR, "IGGIELGN.zip"))
-    to_fn = Path(os.path.join(BASE_DIR, "data/gas_network/scigrid-gas"))
-
-    logger.info(f"Downloading databundle from '{fn}'.")
-    progress_retrieve(fn, zip_fn)
-
-    logger.info(f"Extracting databundle.")
-    zipfile.ZipFile(zip_fn).extractall(to_fn)
-
-    zip_fn.unlink()
-
-    logger.info(f"Gas infrastructure data available in '{to_fn}'.")
-
-
-def download_GGIT_gas_network(fn) -> pd.DataFrame:
-    """
-    Downloads a global dataset for gas networks as .xlsx.
-
-    The following xlsx file was downloaded from the webpage
-    https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
-    The dataset contains 3144 pipelines.
-    """
-    GGIT_gas_pipeline = pd.read_excel(
-        content_retrieve(fn),
-        index_col=0,
-        sheet_name="Gas Pipelines 2022-12-16",
-        header=0,
-    )
-
-    return GGIT_gas_pipeline
 
 
 def diameter_to_capacity(pipe_diameter_mm: int) -> int:
@@ -855,12 +810,10 @@ def cluster_gas_network(
 
 if not snakemake.params.custom_gas_network:
     if snakemake.params.gas_config["network_data"] == "GGIT":
-        pipelines = download_GGIT_gas_network(snakemake.params.url_ggit)
+        pipelines = pd.read_csv(snakemake.input.ggit_raw, index_col=0)
         pipelines = prepare_GGIT_data(pipelines)
 
     elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
-        download_IGGIELGN_gas_network(snakemake.params.url_iggielgn)
-
         gas_network = os.path.join(
             BASE_DIR, "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
         )

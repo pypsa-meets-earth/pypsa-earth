@@ -18,20 +18,6 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_ports(fn):
-    """
-    Downloads the world ports index csv File and NOT as shape or other because
-    it is updated on a monthly basis.
-
-    The following csv file was downloaded from the webpage
-    https://msi.nga.mil/Publications/WPI
-    as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
-    """
-    wpi_csv = read_csv_nafix(fn, index_col=0)
-
-    return wpi_csv
-
-
 def filter_ports(dataframe):
     """
     Filters ports based on their harbor size and returns a DataFrame containing
@@ -76,7 +62,7 @@ if __name__ == "__main__":
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    df = download_ports(snakemake.params.url_ports).copy()
+    df = read_csv_nafix(snakemake.input.ports_raw, index_col=0).copy()
 
     # Add ISO2 country code for each country
     df = df.rename(
