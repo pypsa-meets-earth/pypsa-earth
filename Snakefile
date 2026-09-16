@@ -2194,6 +2194,9 @@ rule retrieve_us_cities_dataset:
 
 
 rule retrieve_ammonia_dataset:
+    params:
+        url_primary="https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/myb1-2023-nitro-ERT.xlsx",
+        url_archive="https://data.pypsa.org/workflows/eur/nitrogen_statistics/2023/myb1-2023-nitro-ERT.xlsx",
     output:
         usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
     script:
