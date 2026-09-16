@@ -855,13 +855,11 @@ def cluster_gas_network(
 
 if not snakemake.params.custom_gas_network:
     if snakemake.params.gas_config["network_data"] == "GGIT":
-        pipelines = download_GGIT_gas_network(
-            "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
-        )
+        pipelines = download_GGIT_gas_network(snakemake.params.url_ggit)
         pipelines = prepare_GGIT_data(pipelines)
 
     elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
-        download_IGGIELGN_gas_network("https://zenodo.org/record/4767098/files/IGGIELGN.zip")
+        download_IGGIELGN_gas_network(snakemake.params.url_iggielgn)
 
         gas_network = os.path.join(
             BASE_DIR, "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
