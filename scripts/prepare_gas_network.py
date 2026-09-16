@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
 
-def download_IGGIELGN_gas_network() -> None:
+def download_IGGIELGN_gas_network(fn) -> None:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
@@ -100,14 +100,12 @@ def download_IGGIELGN_gas_network() -> None:
     The dataset contains 3144 pipelines.
     """
 
-    url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
-
     # Save locations
     zip_fn = Path(os.path.join(BASE_DIR, "IGGIELGN.zip"))
     to_fn = Path(os.path.join(BASE_DIR, "data/gas_network/scigrid-gas"))
 
-    logger.info(f"Downloading databundle from '{url}'.")
-    progress_retrieve(url, zip_fn)
+    logger.info(f"Downloading databundle from '{fn}'.")
+    progress_retrieve(fn, zip_fn)
 
     logger.info(f"Extracting databundle.")
     zipfile.ZipFile(zip_fn).extractall(to_fn)
@@ -117,7 +115,7 @@ def download_IGGIELGN_gas_network() -> None:
     logger.info(f"Gas infrastructure data available in '{to_fn}'.")
 
 
-def download_GGIT_gas_network() -> pd.DataFrame:
+def download_GGIT_gas_network(fn) -> pd.DataFrame:
     """
     Downloads a global dataset for gas networks as .xlsx.
 
@@ -125,9 +123,8 @@ def download_GGIT_gas_network() -> pd.DataFrame:
     https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/
     The dataset contains 3144 pipelines.
     """
-    url = "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
     GGIT_gas_pipeline = pd.read_excel(
-        content_retrieve(url),
+        content_retrieve(fn),
         index_col=0,
         sheet_name="Gas Pipelines 2022-12-16",
         header=0,
@@ -858,11 +855,13 @@ def cluster_gas_network(
 
 if not snakemake.params.custom_gas_network:
     if snakemake.params.gas_config["network_data"] == "GGIT":
-        pipelines = download_GGIT_gas_network()
+        pipelines = download_GGIT_gas_network(
+            "https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx"
+        )
         pipelines = prepare_GGIT_data(pipelines)
 
     elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
-        download_IGGIELGN_gas_network()
+        download_IGGIELGN_gas_network("https://zenodo.org/record/4767098/files/IGGIELGN.zip")
 
         gas_network = os.path.join(
             BASE_DIR, "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
