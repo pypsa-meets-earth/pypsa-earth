@@ -98,8 +98,8 @@ if __name__ == "__main__":
     else:
         # Prepare downloaded data
         download_data = download_airports(
-            "https://davidmegginson.github.io/ourairports-data/airports.csv",
-            "https://davidmegginson.github.io/ourairports-data/runways.csv",
+            snakemake.params.url_airports,
+            snakemake.params.url_runways,
         )
 
         airports_csv = download_data[0].copy()

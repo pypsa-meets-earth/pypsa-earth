@@ -1190,6 +1190,8 @@ rule prepare_airports:
     params:
         airport_sizing_factor=config["sector"]["airport_sizing_factor"],
         airport_custom_data=config["custom_data"]["airports"],
+        url_airports="https://davidmegginson.github.io/ourairports-data/airports.csv",
+        url_runways="https://davidmegginson.github.io/ourairports-data/runways.csv",
     output:
         ports="resources/" + SECDIR + "airports.csv",
     script:
