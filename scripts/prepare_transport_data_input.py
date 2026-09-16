@@ -34,7 +34,7 @@ def add_iso2_country_code(df):
     return df
 
 
-def download_number_of_vehicles():
+def download_number_of_vehicles(fn_who, fn_wiki):
     """
     Downloads and returns the number of registered vehicles as tabular data
     from the Global Health Observatory (GHO) repository data and from Wikipedia.
@@ -53,10 +53,9 @@ def download_number_of_vehicles():
         return df  # [["Country", "number cars"]]
 
     storage_options = {"User-Agent": "Mozilla/5.0"}
-    url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
     try:
         vehicles_gho = read_csv_nafix(
-            url, storage_options=storage_options, encoding="utf8"
+            fn_who, storage_options=storage_options, encoding="utf8"
         )
         print("File read successfully.")
     except Exception as e:
@@ -80,10 +79,9 @@ def download_number_of_vehicles():
 
     vehicles_gho = _clean_data(vehicles_gho)
 
-    url = "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita"
     try:
         vehicles_wiki = pd.read_html(
-            url, storage_options=storage_options, encoding="utf8"
+            fn_wiki, storage_options=storage_options, encoding="utf8"
         )[0]
         print("File read successfully.")
     except Exception as e:
@@ -112,7 +110,7 @@ def download_number_of_vehicles():
     return nbr_vehicles
 
 
-def download_CO2_emissions():
+def download_CO2_emissions(fn):
     """
     Downloads the CO2 emissions from transport in % of total fuel combustion.
     The data is used to estimate the average fuel consumption of land transport.
@@ -122,11 +120,9 @@ def download_CO2_emissions():
     The live API of the World Bank has stopped providing the dataset since October 2024.
     So this link is used: https://web.archive.org/web/20240527231108/https://data.worldbank.org/indicator/EN.CO2.TRAN.ZS?view=map
     """
-    url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
-
     # Read the 'Data' sheet directly from the Excel file at the provided URL
     try:
-        CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
+        CO2_emissions = pd.read_excel(fn, sheet_name="Data", skiprows=[0, 1, 2])
         print("File read successfully.")
     except Exception as e:
         logger.warning("Failed to read the file. Falling back on hard-coded data:", e)
@@ -159,9 +155,14 @@ if __name__ == "__main__":
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    nbr_vehicles = download_number_of_vehicles().copy()
+    nbr_vehicles = download_number_of_vehicles(
+        "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv",
+        "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita",
+    ).copy()
 
-    CO2_emissions = download_CO2_emissions().copy()
+    CO2_emissions = download_CO2_emissions(
+        "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
+    ).copy()
 
     if nbr_vehicles.empty or CO2_emissions.empty:
         # In case one of the urls is not working, we can use the hard-coded data
