@@ -18,7 +18,7 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_ports():
+def download_ports(fn):
     """
     Downloads the world ports index csv File and NOT as shape or other because
     it is updated on a monthly basis.
@@ -27,7 +27,6 @@ def download_ports():
     https://msi.nga.mil/Publications/WPI
     as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
     """
-    fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
     wpi_csv = read_csv_nafix(fn, index_col=0)
 
     return wpi_csv
@@ -77,7 +76,9 @@ if __name__ == "__main__":
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    df = download_ports().copy()
+    df = download_ports(
+        "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
+    ).copy()
 
     # Add ISO2 country code for each country
     df = df.rename(
