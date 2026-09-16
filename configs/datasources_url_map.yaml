@@ -6,7 +6,7 @@
 # The TOML file remains the source of truth consumed by get_datasource_url().
 
 source:
-- name: osm_power_geofabrik
+- name: osm_geofabrik
   long_name: OpenStreetMap
   output: resources/osm/raw/all_raw_cables.geojson, resources/osm/raw/all_raw_generators.geojson, resources/osm/raw/all_raw_generators.csv, resources/osm/raw/all_raw_lines.geojson, resources/osm/raw/all_raw_substations.geojson
   description: 'OpenStreetMap database used as a primary source of power-infrastructure data on substations, lines, cables, generators. OSM data are fetched for requested countries via the earth-osm package (github.com/pypsa-meets-earth/earth-osm) which downloads regional .osm.pbf extracts from Geofabrik and filters them to power-tagged features. For each country, url are resolved dynamically from Geofabrik''s index. Cite: © OpenStreetMap contributors, data extracted via Geofabrik (https://download.geofabrik.de/).'
