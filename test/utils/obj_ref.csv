@@ -4,13 +4,13 @@
 # SPDX-License-Identifier: CC-BY-4.0
 folder,file,objective
 landlock,elec_s_6_ec_lcopt_Co2L-4H_python.log,1089415189.00
-test,elec_s_4_ec_lc1_Co2L-24h_144h_2030_0.071_python.log,26705980660.00
-test,elec_s_4_ec_lc1_Co2L-24h_144h_2050_0.071_python.log,35287667800.00
-test,elec_s_4_ec_lcopt_CCL-Co2L-24h_144h_2030_0.071_python.log,43171769040.00
-test,elec_s_5_ec_lcopt_Co2L-4H_python.log,1116341747.00
-test,elec_s_6_ec_lcopt_Co2L-4H_m0_python.log,9617494897.00
-test,elec_s_6_ec_lcopt_Co2L-4H_m1_python.log,4887887955.00
-test,elec_s_6_ec_lcopt_Co2L-4H_m2_python.log,3690572766.00
-test,elec_s_6_ec_lcopt_Co2L-4H_m3_python.log,508621330.10
-test,elec_s_6_ec_lcopt_Co2L-4H_m4_python.log,545822048.00
-test,elec_s_6_ec_lcopt_Co2L-4H_python.log,2665823464.00
+test,elec_s_4_ec_lc1_Co2L-24h_144h_2030_0.071_python.log,26705498350.00
+test,elec_s_4_ec_lc1_Co2L-24h_144h_2050_0.071_python.log,35288735590.00
+test,elec_s_4_ec_lcopt_CCL-Co2L-24h_144h_2030_0.071_python.log,43171366240.00
+test,elec_s_5_ec_lcopt_Co2L-4H_python.log,1116343427.00
+test,elec_s_6_ec_lcopt_Co2L-4H_m0_python.log,9617512869.00
+test,elec_s_6_ec_lcopt_Co2L-4H_m1_python.log,4887909442.00
+test,elec_s_6_ec_lcopt_Co2L-4H_m2_python.log,3690582106.00
+test,elec_s_6_ec_lcopt_Co2L-4H_m3_python.log,508631659.90
+test,elec_s_6_ec_lcopt_Co2L-4H_m4_python.log,545849224.70
+test,elec_s_6_ec_lcopt_Co2L-4H_python.log,2665847760.00
