@@ -2,6 +2,51 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+Prepares port location and size data used for the shipping and hydrogen
+export sectors.
+
+Relevant Settings
+-----------------
+
+```yaml
+custom_data:
+    export_ports:
+```
+
+Outputs
+-------
+
+- ``resources/ports.csv``: world ports per country. The ``fraction`` column gives
+  each port's share of its country's total harbor size weighting.
+- ``resources/export_ports.csv``: the ports of each country's largest available
+  harbor size class, used as candidate hydrogen/derivative export locations; or the
+  user-provided ``data/custom/export_ports.csv`` if ``custom_data.export_ports`` is
+  enabled.
+
+Description
+-----------
+
+Downloads the World Port Index, drops entries that could not be matched to
+an ISO2 country code (e.g. small islands), and weights each port by harbor
+size as 3 (large), 2 (medium) or 1 (small). The ``fraction`` column is that
+weight divided by the sum of the weights of all ports in the same country, so
+the fractions within a country sum to one. Candidate export ports are then
+selected per country by taking all ports of the largest harbor size present in
+that country: all large ports if any exist, otherwise all medium ports,
+otherwise all small ones.
+
+References
+----------
+
+- World Port Index (Publication 150), U.S. National Geospatial-Intelligence
+  Agency, Maritime Safety Office, updated monthly
+  (https://msi.nga.mil/Publications/WPI). NGA states that information it
+  presents is public information and may be distributed or copied unless
+  otherwise specified, with appropriate credit requested
+  (https://www.nga.mil/resources/Privacy_Policy.html).
+"""
+
 import logging
 import os
 import shutil
@@ -18,14 +63,19 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_ports():
+def download_ports() -> pd.DataFrame:
     """
-    Downloads the world ports index csv File and NOT as shape or other because
-    it is updated on a monthly basis.
+    Download the World Port Index as a csv file.
 
-    The following csv file was downloaded from the webpage
-    https://msi.nga.mil/Publications/WPI
-    as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
+    The csv format is used rather than a shapefile or other format because the
+    publication is updated monthly. The table is fetched live, so the number of
+    ports it contains changes as the upstream publication is updated. See the
+    module-level References section for the data source.
+
+    Returns
+    -------
+    pd.DataFrame
+        World Port Index, one row per port.
     """
     fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
     wpi_csv = read_csv_nafix(fn, index_col=0)
@@ -33,10 +83,27 @@ def download_ports():
     return wpi_csv
 
 
-def filter_ports(dataframe):
+def filter_ports(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
-    Filters ports based on their harbor size and returns a DataFrame containing
-    only the largest port for each country.
+    Select, for each country, the ports of the largest harbor size present in
+    that country.
+
+    Countries with at least one large port contribute all of their large ports;
+    countries without any large port contribute all of their medium ports, and
+    countries with neither contribute all of their small ports. A country may
+    therefore appear several times in the result.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        Ports data with a 'Harbor Size' column ('Large', 'Medium' or 'Small')
+        and a 'country' column.
+
+    Returns
+    -------
+    pd.DataFrame
+        All ports of each country's largest available harbor size class, with
+        one row per port.
     """
     # Filter large sized ports
     large_ports = dataframe[dataframe["Harbor Size"] == "Large"]

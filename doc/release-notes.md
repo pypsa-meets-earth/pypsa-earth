@@ -72,6 +72,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add module level docstrings and typehints to transport scripts [PR #1981](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1981)
+
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
 
 * Fix invalid biomass transport and CO2 pipeline connections [PR #1987](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1987)
