@@ -12,7 +12,7 @@ import logging
 import country_converter as coco
 import numpy as np
 import pandas as pd
-from _helpers import read_csv_nafix
+from _helpers import read_csv_nafix, to_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -152,9 +152,9 @@ if __name__ == "__main__":
         snakemake.params.url_n_vehicles_who,
         snakemake.params.url_vehicles_per_capita_wiki,
     )
-    nbr_vehicles.to_csv(snakemake.output.n_vehicles_raw, index=False)
+    to_csv_nafix(nbr_vehicles, snakemake.output.n_vehicles_raw, index=False)
 
     CO2_emissions = download_CO2_emissions(
         snakemake.params.url_transport_emission_worldbank
     )
-    CO2_emissions.to_csv(snakemake.output.transport_emissions_raw, index=False)
+    to_csv_nafix(CO2_emissions, snakemake.output.transport_emissions_raw, index=False)
