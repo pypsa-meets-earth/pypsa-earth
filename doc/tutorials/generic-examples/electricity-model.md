@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC-BY-4.0
 # Tutorial: Building and Running the Electricity Model
 
 !!! note
-    This tutorial assumes that you have already installed PyPSA-Earth and have a working environment. If you have not yet installed PyPSA-Earth, please refer to the [installation](../home/installation.md) section.
+    This tutorial assumes that you have already installed PyPSA-Earth and have a working environment. If you have not yet installed PyPSA-Earth, please refer to the [installation](../../home/installation.md) section.
 
 To properly model any region of the Earth, it is first crucial to get familiar with a tutorial
 where a simpler model is considered. This section explains how to run and analyze the tutorial model.
@@ -53,7 +53,7 @@ end: "2013-03-7"
 ```
 
 !!! note
-    For more information on the configuration file, please refer to the [config](../user-guide/configuration.md) section.
+    For more information on the configuration file, please refer to the [config](../../user-guide/configuration.md) section.
 
 ## Run the model
 
@@ -181,4 +181,4 @@ It is also possible to make manual clean-up removing folders `resources`, `netwo
     This tutorial only covers Nigeria and Benin. To make the workflow run on other regions you need to use the `config.default.yaml` as `config.yaml``.
     To use the model in and outside Africa, you should also read [How to create a model for you region of interest with PyPSA-Earth?](https://github.com/pypsa-meets-earth/pypsa-earth/discussions/505)
 
-[Model Customization](../user-guide/model-customization.md) section elaborates on building and running a full PyPSA-Earth model.
+[Model Customization](../../user-guide/model-customization.md) section elaborates on building and running a full PyPSA-Earth model.

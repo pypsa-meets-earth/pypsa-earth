@@ -43,7 +43,7 @@ Inputs
 ------
 - ``resources/{RDIR}/bus_regions/busmap_elec_s{simpl}.csv``: Busmap after simplifying the network
 - ``resources/{RDIR}/bus_regions/busmap_elec_s{simpl}_{clusters}.csv``: Busmap after clustering the network
-- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc``: prenetwork file obtained prior to solving
+- ``{RESDIR}/prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc``: prenetwork file obtained prior to solving
 - ``solved_previous_horizon``: Network solved at previous time step
 - ``resources/{RDIR}/costs_{planning_horizons}_sec.csv``: Technology costs data
 - ``resources/{SECDIR}/cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc``: Ground/soil source heat pump COP time series aligned to the network snapshots
@@ -51,7 +51,7 @@ Inputs
 
 Output
 ------
-- ``{RESDIR}/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_{demand}_{h2export}export.nc``: Brownfield prenetwork file
+- ``{RESDIR}/prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc``: Brownfield prenetwork file
 
 Description
 -----------
@@ -308,8 +308,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
-            h2export="120",
         )
 
     logger.info(f"Preparing brownfield from the file {snakemake.input.network_p}")

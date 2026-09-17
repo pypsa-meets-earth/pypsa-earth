@@ -5,7 +5,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Alternative Clustering
 
-Alternative clustering is not a standalone Snakemake rule but a configuration option within the `cluster_options` section that changes the behavior of several rules, including `cluster_network`, `build_renewable_profiles`, `build_powerplants`, and `add_electricity`.
+Alternative clustering is not a standalone Snakemake rule but a configuration option within the `clustering` section that changes the behavior of several rules, including `cluster_network`, `build_renewable_profiles`, `build_powerplants`, and `add_electricity`.
 
 ## What does it do?
 
@@ -18,7 +18,7 @@ When `alternative_clustering` is enabled, the model uses administrative boundari
 ## Configuration
 
 ```yaml
-cluster_options:
+clustering:
   alternative_clustering: false  # Set to true to enable GADM-based clustering
 ```
 

@@ -55,8 +55,8 @@ Once complete, you can find:
 
 Now that you've run your first model, explore:
 
-- **[Electricity Tutorial](../tutorials/electricity-model.md)** - Learn to customize electricity models
-- **[Sector-Coupled Tutorial](../tutorials/sector-coupled-model.md)** - Build multi-sector models
+- **[Electricity Tutorial](../tutorials/generic-examples/electricity-model.md)** - Learn to customize electricity models
+- **[Sector-Coupled Tutorial](../tutorials/generic-examples/sector-coupled-model.md)** - Build multi-sector models
 - **[Configuration Guide](../user-guide/configuration.md)** - Understand all configuration options
 - **[Model Customization](../user-guide/model-customization.md)** - Adapt the model to your needs
 

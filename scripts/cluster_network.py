@@ -27,7 +27,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
+    :ref:`meta_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
 
 Inputs
 ------
@@ -704,16 +704,16 @@ if __name__ == "__main__":
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
 
     n = pypsa.Network(inputs.network)
+    source_line_types = n.line_types.copy()
 
     # Add year suffix to carrier names for clustering
     add_year_suffix_to_carriers(n)
 
-    alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
-    distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+    alternative_clustering = snakemake.params.clustering["alternative_clustering"]
+    distribution_cluster = snakemake.params.clustering["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     focus_weights = (
-        snakemake.params.focus_weights
-        or snakemake.params.cluster_options["focus_weights"]
+        snakemake.params.focus_weights or snakemake.params.clustering["focus_weights"]
     )
     country_list = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
@@ -726,7 +726,7 @@ if __name__ == "__main__":
         ]
     )
 
-    exclude_carriers = snakemake.params.cluster_options["cluster_network"].get(
+    exclude_carriers = snakemake.params.clustering["cluster_network"].get(
         "exclude_carriers", []
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
@@ -803,7 +803,7 @@ if __name__ == "__main__":
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
             custom_busmap = busmap
 
-        cluster_config = snakemake.config.get("cluster_options", {}).get(
+        cluster_config = snakemake.config.get("clustering", {}).get(
             "cluster_network", {}
         )
         clustering = clustering_for_n_clusters(
@@ -843,6 +843,40 @@ if __name__ == "__main__":
     # Groupby carrier and bus for overnight simulation
     if config["foresight"] == "overnight":
         groupby_bus_carrier(clustering.network, aggregation_strategies)
+
+    # Restore line types lost when clustering creates a new network.
+    used_line_types = pd.Index(
+        clustering.network.lines["type"]
+        .dropna()
+        .loc[lambda values: values != ""]
+        .unique()
+    )
+    missing_line_types = used_line_types.difference(clustering.network.line_types.index)
+
+    unavailable_line_types = missing_line_types.difference(source_line_types.index)
+    if not unavailable_line_types.empty:
+        raise ValueError(
+            "The following line types are used by clustered lines but are "
+            "unavailable in the source network: "
+            f"{unavailable_line_types.tolist()}"
+        )
+
+    valid_attributes = n.component_attrs["LineType"].index
+
+    for line_type in missing_line_types:
+        attributes = (
+            source_line_types.loc[line_type]
+            .reindex(valid_attributes)
+            .dropna()
+            .to_dict()
+        )
+        clustering.network.add("LineType", line_type, **attributes)
+
+    if not missing_line_types.empty:
+        logger.info(
+            "Restored line types removed during network clustering: %s",
+            missing_line_types.tolist(),
+        )
 
     clustering.network.meta = dict(
         snakemake.config, **dict(wildcards=dict(snakemake.wildcards))

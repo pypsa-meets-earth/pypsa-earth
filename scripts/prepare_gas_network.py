@@ -18,7 +18,7 @@ Relevant Settings
             network_data:
             network_data_GGIT_status:
 
-    cluster_options:
+    clustering:
         alternative_clustering:
 
     custom_data:

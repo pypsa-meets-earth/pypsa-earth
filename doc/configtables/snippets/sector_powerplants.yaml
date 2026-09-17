@@ -1,5 +1,4 @@
-  # ------------------- POWERPLANTS OPTIONS -------------------
-
+  # ------------------- Powerplants options -------------------
   conventional_generation: # generator : carrier
     OCGT: gas
     CCGT: gas

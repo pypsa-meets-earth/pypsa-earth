@@ -52,14 +52,13 @@ if __name__ == "__main__":
             "prepare_energy_totals",
             simpl="",
             clusters="4",
-            demand="AB",
             planning_horizons=2030,
         )
 
     countries = snakemake.params.countries
     # countries = ["NG", "BJ"]
     investment_year = int(snakemake.wildcards.planning_horizons)
-    demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
+    demand_sc = snakemake.params.demand_scenario
 
     base_energy_totals = read_csv_nafix(snakemake.input.unsd_paths, index_col=0)
     growth_factors_cagr = read_csv_nafix(

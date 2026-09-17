@@ -1,0 +1,7 @@
+Parameter,Unit,Values,Description
+version,--,0.x.x,Version of PyPSA-Earth.
+tutorial,bool,"{true, false}",Use the tutorial dataset instead of the full dataset.
+logging,,,
+-- level,--,"{INFO, WARNING, ERROR}",Console log level.
+-- format,--,,Log message format; see Python ``LogRecord`` attributes.
+custom_rules,list,"[] or [""path/to/rules.smk""]",Additional Snakemake rule files to include in the workflow.
