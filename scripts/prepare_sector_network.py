@@ -598,34 +598,47 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
         },
     }
 
-    if options["hydrogen"].get("hydrogen_colors", False):
-        color_techs = {
-            "grid H2": [
-                "H2 Electrolysis",
-                "Alkaline electrolyzer large",
-                "Alkaline electrolyzer medium",
-                "Alkaline electrolyzer small",
-                "PEM electrolyzer",
-                "SOEC",
-            ],
-            "green H2": [
-                "Solid biomass steam reforming",
-                "Biomass gasification",
-                "Biomass gasification CC",
-            ],
-            "grey H2": [
-                "SMR",
-                "Natural gas steam reforming",
-                "Coal gasification",
-                "Heavy oil partial oxidation",
-            ],
-            "blue H2": [
-                "SMR CC",
-                "Natural gas steam reforming CC",
-                "Coal gasification CC",
-            ],
-        }
+    color_techs = {
+        "grid H2": [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC",
+        ],
+        "green H2": [
+            "Solid biomass steam reforming",
+            "Biomass gasification",
+            "Biomass gasification CC",
+        ],
+        "grey H2": [
+            "SMR",
+            "Natural gas steam reforming",
+            "Coal gasification",
+            "Heavy oil partial oxidation",
+        ],
+        "blue H2": [
+            "SMR CC",
+            "Natural gas steam reforming CC",
+            "Coal gasification CC",
+        ],
+    }
 
+    h2_subsectors = {
+        tech: color.lower().replace(" ", "_")
+        for color, techs in color_techs.items()
+        for tech in techs
+    }
+
+    missing_h2_subsectors = set(h2_techs) - set(h2_subsectors)
+    if missing_h2_subsectors:
+        raise ValueError(
+            "Missing hydrogen subsector mapping for: "
+            + ", ".join(sorted(missing_h2_subsectors))
+        )
+
+    if options["hydrogen"].get("hydrogen_colors", False):
         for color, techs in color_techs.items():
             if set(h2_techs) & set(techs):
                 n.madd(
@@ -663,6 +676,8 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             "bus1": bus1,
             "p_nom_extendable": True,
             "carrier": h2_tech,
+            "sector": "hydrogen",
+            "subsector": h2_subsectors[h2_tech],
             "efficiency": params["efficiency"],
             "capital_cost": costs.at[params["cost_name"], "fixed"],
             "lifetime": costs.at[params["cost_name"], "lifetime"],
@@ -1339,6 +1354,8 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
                 efficiency4=costs.at["solid biomass", "CO2 intensity"]
                 * costs.at["biomass CHP capture", "capture_rate"],
                 lifetime=costs.at[key, "lifetime"],
+                sector="power_and_heat_generation",
+                subsector="chp",
             )
 
 
@@ -1479,6 +1496,109 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
         )
 
 
+def _country_for_nodes(n, nodes):
+    """Return the country associated with network nodes."""
+    nodes = pd.Index(nodes)
+
+    countries = n.buses.loc[nodes, "country"].fillna("").astype(str).str.strip()
+
+    if countries.eq("").any():
+        missing = countries.index[countries.eq("")]
+        raise ValueError(
+            "Missing country information for buses: " + ", ".join(missing.astype(str))
+        )
+
+    return countries
+
+
+def _add_country_emission_loads(
+    n,
+    emissions_by_node,
+    name,
+    carrier,
+    sector,
+    subsector="",
+):
+    """Add static or time-dependent atmospheric CO2 Loads aggregated by country."""
+    if isinstance(emissions_by_node, pd.DataFrame):
+        countries = _country_for_nodes(n, emissions_by_node.columns)
+        emissions_by_country = emissions_by_node.T.groupby(countries).sum().T
+        country_emissions = (
+            (country, emissions_by_country[country])
+            for country in emissions_by_country.columns
+        )
+    else:
+        emissions_by_node = pd.Series(emissions_by_node, dtype=float)
+        countries = _country_for_nodes(n, emissions_by_node.index)
+        emissions_by_country = emissions_by_node.groupby(countries).sum()
+        country_emissions = emissions_by_country.items()
+
+    for country, emissions in country_emissions:
+        load_name = f"{country} {name}"
+
+        n.add(
+            "Load",
+            load_name,
+            bus="co2 atmosphere",
+            carrier=carrier,
+            p_set=-emissions,
+        )
+        n.loads.loc[load_name, "country"] = country
+        n.loads.loc[load_name, "sector"] = sector
+        n.loads.loc[load_name, "subsector"] = subsector
+
+
+def _assign_sector_link_countries(n):
+    """Assign country metadata to sector-tagged Links."""
+    sector = (
+        n.links.get(
+            "sector",
+            pd.Series("", index=n.links.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    bus_cols = sorted(
+        (col for col in n.links.columns if col.startswith("bus") and col[3:].isdigit()),
+        key=lambda col: int(col[3:]),
+    )
+
+    for link in n.links.index[sector.ne("")]:
+        countries = set()
+
+        for bus_col in bus_cols:
+            bus = n.links.at[link, bus_col]
+
+            if pd.isna(bus) or bus == "" or bus == "co2 atmosphere":
+                continue
+
+            if bus not in n.buses.index:
+                continue
+
+            country = n.buses.at[bus, "country"]
+            country = "" if pd.isna(country) else str(country).strip()
+
+            if not country:
+                location = n.buses.at[bus, "location"]
+
+                if not pd.isna(location) and location in n.buses.index:
+                    country = n.buses.at[location, "country"]
+                    country = "" if pd.isna(country) else str(country).strip()
+
+            if country:
+                countries.add(country)
+
+        if len(countries) != 1:
+            raise ValueError(
+                f"Could not uniquely determine country for sector Link "
+                f"'{link}': {sorted(countries)}"
+            )
+
+        n.links.loc[link, "country"] = countries.pop()
+
+
 def add_aviation(
     n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, airports_fn: str
 ) -> None:
@@ -1542,26 +1662,28 @@ def add_aviation(
         p_set=airports["p_set"],
     )
 
+    airport_country = _country_for_nodes(n, airports.index)
+
     if snakemake.params.sector_options["international_bunkers"]:
-        co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
+        co2_by_node = airports["p_set"] * costs.at["oil", "CO2 intensity"]
     else:
         domestic_to_total = energy_totals["total domestic aviation"] / (
             energy_totals["total international aviation"]
             + energy_totals["total domestic aviation"]
         )
-
-        co2 = (
-            airports["p_set"].sum()
-            * domestic_to_total
+        co2_by_node = (
+            airports["p_set"]
+            * airport_country.map(domestic_to_total)
             * costs.at["oil", "CO2 intensity"]
-        ).sum()
+        )
 
-    n.add(
-        "Load",
-        "aviation oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="aviation oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="transport",
+        subsector="non_road_aviation",
     )
 
 
@@ -1741,26 +1863,28 @@ def add_shipping(
             p_set=ports["p_set"],
         )
 
+        port_country = _country_for_nodes(n, ports.index)
+
         if snakemake.params.sector_options["international_bunkers"]:
-            co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
+            co2_by_node = ports["p_set"] * costs.at["oil", "CO2 intensity"]
         else:
             domestic_to_total = energy_totals["total domestic navigation"] / (
                 energy_totals["total domestic navigation"]
                 + energy_totals["total international navigation"]
             )
-
-            co2 = (
-                ports["p_set"].sum()
-                * domestic_to_total
+            co2_by_node = (
+                ports["p_set"]
+                * port_country.map(domestic_to_total)
                 * costs.at["oil", "CO2 intensity"]
-            ).sum()
+            )
 
-        n.add(
-            "Load",
-            "shipping oil emissions",
-            bus="co2 atmosphere",
+        _add_country_emission_loads(
+            n,
+            co2_by_node,
+            name="shipping oil emissions",
             carrier="shipping oil emissions",
-            p_set=-co2,
+            sector="transport",
+            subsector="non_road_shipping",
         )
 
     if "oil" not in n.buses.carrier.unique():
@@ -1869,6 +1993,7 @@ def add_industry(
             efficiency3=costs.at["solid biomass", "CO2 intensity"]
             * costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
+            sector="industry",
         )
 
     # CARRIER = FOSSIL GAS
@@ -1913,6 +2038,7 @@ def add_industry(
         p_nom_extendable=True,
         efficiency=1.0,
         efficiency2=costs.at["gas", "CO2 intensity"],
+        sector="industry",
     )
     if snakemake.params.sector_options["cc"]:
         n.madd(
@@ -1932,6 +2058,7 @@ def add_industry(
             efficiency3=costs.at["gas", "CO2 intensity"]
             * costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
+            sector="industry",
         )
 
     #################################################### CARRIER = HYDROGEN
@@ -1966,32 +2093,35 @@ def add_industry(
     co2_release = [" naphtha for industry"]
     # check land transport
 
-    co2 = (
-        n.loads.loc[spatial.nodes + co2_release, "p_set"].sum()
+    oil_loads = spatial.nodes + co2_release
+    co2_by_node = (
+        pd.Series(
+            n.loads.loc[oil_loads, "p_set"].to_numpy(),
+            index=spatial.nodes,
+        )
         * costs.at["oil", "CO2 intensity"]
-    )  # No division by 8760 because p_set is already in MW
-
-    n.add(
-        "Load",
-        "industry oil emissions",
-        bus="co2 atmosphere",
-        carrier="industry oil emissions",
-        p_set=-co2,
     )
 
-    co2 = (
-        industrial_demand["coal"].sum()
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="industry oil emissions",
+        carrier="industry oil emissions",
+        sector="industry",
+    )
+
+    co2_by_node = (
+        industrial_demand.loc[spatial.nodes, "coal"]
         * costs.at["coal", "CO2 intensity"]
-        # - industrial_demand["process emission from feedstock"].sum()
         / 8760
     )
 
-    n.add(
-        "Load",
-        "industry coal emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="industry coal emissions",
         carrier="industry coal emissions",
-        p_set=-co2,
+        sector="industry",
     )
 
     ########################################################### CARRIER = HEAT
@@ -2035,40 +2165,54 @@ def add_industry(
         p_set=industrial_elec,
     )
 
-    n.add("Bus", "process emissions", location="Earth", carrier="process emissions")
-
-    # this should be process emissions fossil+feedstock
-    # then need load on atmosphere for feedstock emissions that are currently going to atmosphere via Link Fischer-Tropsch demand
-    n.madd(
-        "Load",
-        spatial.nodes,
-        suffix=" process emissions",
-        bus="process emissions",
-        carrier="process emissions",
-        p_set=-(
-            #    industrial_demand["process emission from feedstock"]+
-            industrial_demand["process emissions"]
-        )
-        / 8760,
+    process_node_country = _country_for_nodes(n, spatial.nodes)
+    process_emissions_by_country = (
+        industrial_demand.loc[spatial.nodes, "process emissions"]
+        .groupby(process_node_country)
+        .sum()
+        / 8760
     )
 
-    n.add(
+    process_countries = pd.Index(process_emissions_by_country.index)
+    process_buses = process_countries + " process emissions"
+
+    n.madd(
+        "Bus",
+        process_buses,
+        location=process_countries,
+        carrier="process emissions",
+    )
+    n.buses.loc[process_buses, "country"] = process_countries.to_numpy()
+
+    n.madd(
+        "Load",
+        process_buses,
+        bus=process_buses,
+        carrier="process emissions",
+        p_set=-process_emissions_by_country.to_numpy(),
+    )
+
+    n.madd(
         "Link",
-        "process emissions",
-        bus0="process emissions",
+        process_buses,
+        bus0=process_buses,
         bus1="co2 atmosphere",
         carrier="process emissions",
         p_nom_extendable=True,
         efficiency=1.0,
+        sector="industry_process_emissions",
+        subsector="",
     )
 
     # assume enough local waste heat for CC
     if snakemake.params.sector_options["cc"]:
+        co2_location_country = _country_for_nodes(n, spatial.co2.locations)
+
         n.madd(
             "Link",
             spatial.co2.locations,
             suffix=" process emissions CC",
-            bus0="process emissions",
+            bus0=(co2_location_country + " process emissions").to_numpy(),
             bus1="co2 atmosphere",
             bus2=spatial.co2.nodes,
             carrier="process emissions CC",
@@ -2077,6 +2221,8 @@ def add_industry(
             efficiency=1 - costs.at["cement capture", "capture_rate"],
             efficiency2=costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
+            sector="industry_process_emissions",
+            subsector="",
         )
 
 
@@ -2470,19 +2616,20 @@ def add_land_transport(
             p_set=ice_share / ice_efficiency * transport[spatial.nodes],
         )
 
-        co2 = (
+        co2_by_node = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].mean().sum()
+            * transport[spatial.nodes]
             * costs.at["oil", "CO2 intensity"]
         )
 
-        n.add(
-            "Load",
-            "land transport oil emissions",
-            bus="co2 atmosphere",
+        _add_country_emission_loads(
+            n,
+            co2_by_node,
+            name="land transport oil emissions",
             carrier="land transport oil emissions",
-            p_set=-co2,
+            sector="transport",
+            subsector="road_transport",
         )
 
 
@@ -2777,6 +2924,18 @@ def add_heat(
 
             key = f"{name_type} gas boiler"
 
+            if name == "urban central":
+                emission_sector = "power_and_heat_generation"
+                emission_subsector = "heat"
+            elif name.startswith("residential"):
+                emission_sector = "residential"
+                emission_subsector = ""
+            elif name.startswith("services"):
+                emission_sector = "services"
+                emission_subsector = ""
+            else:
+                raise ValueError(f"Unknown heat system: {name}")
+
             n.madd(
                 "Link",
                 h_nodes[name] + f" {name} gas boiler",
@@ -2789,6 +2948,8 @@ def add_heat(
                 efficiency2=costs.at["gas", "CO2 intensity"],
                 capital_cost=costs.at[key, "efficiency"] * costs.at[key, "fixed"],
                 lifetime=costs.at[key, "lifetime"],
+                sector=emission_sector,
+                subsector=emission_subsector,
             )
 
         if options["solar_thermal_collector"]["enable"]:
@@ -2825,6 +2986,8 @@ def add_heat(
                 / costs.at["central gas CHP", "c_b"],
                 efficiency3=costs.at["gas", "CO2 intensity"],
                 lifetime=costs.at["central gas CHP", "lifetime"],
+                sector="power_and_heat_generation",
+                subsector="chp",
             )
             if snakemake.params.sector_options["cc"]:
                 n.madd(
@@ -2864,9 +3027,18 @@ def add_heat(
                     efficiency4=costs.at["gas", "CO2 intensity"]
                     * costs.at["biomass CHP capture", "capture_rate"],
                     lifetime=costs.at["central gas CHP", "lifetime"],
+                    sector="power_and_heat_generation",
+                    subsector="chp",
                 )
 
         if options["chp"] and options["micro_chp"] and name != "urban central":
+            if name.startswith("residential"):
+                micro_chp_sector = "residential"
+            elif name.startswith("services"):
+                micro_chp_sector = "services"
+            else:
+                raise ValueError(f"Unknown heat system: {name}")
+
             n.madd(
                 "Link",
                 h_nodes[name] + f" {name} micro gas CHP",
@@ -2882,6 +3054,8 @@ def add_heat(
                 efficiency3=costs.at["gas", "CO2 intensity"],
                 capital_cost=costs.at["micro CHP", "fixed"],
                 lifetime=costs.at["micro CHP", "lifetime"],
+                sector=micro_chp_sector,
+                subsector="",
             )
 
 
@@ -3042,15 +3216,14 @@ def add_services(
         p_set=p_set_oil,
     )
 
-    # TODO check with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
+    co2_by_node = p_set_oil * costs.at["oil", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "services oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="services oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="services",
     )
 
     p_set_gas = p_set_from_scaling(
@@ -3066,15 +3239,14 @@ def add_services(
         p_set=p_set_gas,
     )
 
-    # TODO check with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
+    co2_by_node = p_set_gas * costs.at["gas", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "services gas emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="services gas emissions",
         carrier="gas emissions",
-        p_set=-co2,
+        sector="services",
     )
 
 
@@ -3123,19 +3295,19 @@ def add_agriculture(
         carrier="agriculture oil",
         p_set=nodal_energy_totals.loc[spatial.nodes, "agriculture oil"] * 1e6 / 8760,
     )
-    co2 = (
+    co2_by_node = (
         nodal_energy_totals.loc[spatial.nodes, "agriculture oil"]
         * 1e6
         / 8760
         * costs.at["oil", "CO2 intensity"]
-    ).sum()
+    )
 
-    n.add(
-        "Load",
-        "agriculture oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="agriculture oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="agriculture",
     )
 
 
@@ -3282,14 +3454,14 @@ def add_residential(
         p_set=p_set_oil,
     )
 
-    co2 = p_set_oil.mean().sum() * costs.at["oil", "CO2 intensity"]
+    co2_by_node = p_set_oil * costs.at["oil", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "residential oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="residential oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="residential",
     )
     n.madd(
         "Load",
@@ -3309,14 +3481,14 @@ def add_residential(
         p_set=p_set_gas,
     )
 
-    co2 = p_set_gas.mean().sum() * costs.at["gas", "CO2 intensity"]
+    co2_by_node = p_set_gas * costs.at["gas", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "residential gas emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="residential gas emissions",
         carrier="gas emissions",
-        p_set=-co2,
+        sector="residential",
     )
 
     for country in countries:
@@ -3678,6 +3850,17 @@ def add_rail_transport(
         p_set=p_set_elec * 1e6 / 8760,
     )
 
+    co2_by_node = p_set_oil * 1e6 / 8760 * costs.at["oil", "CO2 intensity"]
+
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="rail transport oil emissions",
+        carrier="rail transport oil emissions",
+        sector="transport",
+        subsector="non_road_rail",
+    )
+
 
 def convert_conventional_generators_to_links(
     n: pypsa.Network, costs: pd.DataFrame
@@ -3753,6 +3936,8 @@ def convert_conventional_generators_to_links(
             bus1=carrier_gens["bus"],
             bus2="co2 atmosphere",
             carrier=carrier,
+            sector="power_and_heat_generation",
+            subsector="power",
             p_nom=carrier_gens["p_nom"] / carrier_gens["efficiency"],
             p_nom_extendable=carrier_gens["p_nom_extendable"],
             efficiency=carrier_gens["efficiency"],
@@ -3986,6 +4171,7 @@ if __name__ == "__main__":
 
     sanitize_carriers(n, snakemake.config)
     sanitize_locations(n)
+    _assign_sector_link_countries(n)
 
     n.export_to_netcdf(snakemake.output[0])
 

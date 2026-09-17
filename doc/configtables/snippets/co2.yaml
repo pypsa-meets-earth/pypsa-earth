@@ -17,3 +17,5 @@ co2:
       2040: 0.40
       2045: 0.25
       2050: 0.1
+  sector_policy:
+    policy_file: "configs/policy/co2_sector_limits.csv"

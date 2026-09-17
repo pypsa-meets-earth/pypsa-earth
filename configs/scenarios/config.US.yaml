@@ -1,0 +1,384 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["US"]
+# Can be replaced by country ["NG", "BJ"], continent ["Africa"] or user-specific region, see more at https://pypsa-earth.readthedocs.io/en/latest/user-guide/configuration/#top-level-configuration
+
+run:
+  name: "US" # use this to keep track of runs with different settings
+  sector_name: "US" # use this to keep track of sector scenario runs
+  shared_cutouts: true # set to true to share the default cutout(s) across runs
+  # Note: value false requires build_cutout to be enabled
+  allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scenario fails
+
+scenario:
+  simpl: [""]
+  ll: ["v1"]
+  clusters: [100]
+  opts: [Co2L-3h]
+  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  - 2023
+  sopts:
+  - "3h"
+
+snapshots:
+  start: "2023-01-01"
+  end: "2024-01-01"
+  inclusive: "left" # end is not inclusive
+
+# =================== DATA RETRIEVAL ===================
+enable:
+  retrieve_databundle: true # Recommended 'true' for the first run. Otherwise data might be missing.
+  download_osm_data: true # If true, OpenStreetMap data will be downloaded for the countries above.
+  retrieve_cutout: false # The bundled cutout is only available for weather year 2013.
+  retrieve_cost_data: true # False uses the existing cost data in data/costs.csv.
+  retrieve_databundle_sector: false
+  download_global_buildings: false
+  build_cutout: true # Enable to build the cutout for weather year 2023.
+  build_natura_raster: true
+  progress_bar: true
+  custom_busmap: false
+
+# =================== NETWORK & RESOURCES ===================
+# DemandCast covers 2000-2024; GEGIS provides data for 2011, 2013, and 2018.
+load_options:
+  source: "demcast"
+  weather_year: 2023
+  prediction_year: 2030 # Valid only when GEGIS is used.
+  scale: 1
+
+electricity:
+  extendable_carriers:
+    # Note: For landlocked countries (e.g., Jordan, Austria, Switzerland), remove 'offwind-ac' and 'offwind-dc'
+    # from the Generator list below, as these offshore wind technologies require coastline access.
+    Generator: []
+    StorageUnit: [] # battery, H2
+    Store: []
+    Link: [] # H2 pipeline
+
+  powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
+  custom_powerplants:
+    filepaths:
+    - data/custom_powerplants_US.csv
+    method: replace # false: use only powerplantmatching data; merge: combine both sources; replace: use only custom data
+
+# Costs Configuration
+costs:
+  year: 2020 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
+  technology_data_version: v0.15.0
+  discountrate: [0.071] #, 0.086, 0.111]
+  country_specific_data: "US" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
+  # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
+  cost_scenario: "moderate" # only used if `country_specific_data: "US"`; can be "moderate", "advanced" or "conservative"
+  financial_case: "market" # only used if `country_specific_data: "US"`; can be "market" or "r&d"
+  # Management of output currencies and exchange rates
+  output_currency: "USD" # full list of supported currencies at https://github.com/alexprengere/currencyconverter/blob/master/currency_converter/eurofxref.csv
+  default_exchange_rate: 0.7532 # previously USD2013_to_EUR2013; should be sufficient as current data from 'technology-data` are either in EUR or USD; [EUR/USD] ECB: https://www.ecb.europa.eu/stats/exchange/eurofxref/html/eurofxref-graph-usd.en.html
+  future_exchange_rate_strategy: "reference" # reference uses the exchange rate from `reference_year` for all conversions, ensuring all costs are expressed in the same currency and year; "latest" uses the yearly average of the latest available exchange rates for the selected `output_currency`; "custom" allows to specify a `custom_future_exchange_rate` below
+  custom_future_exchange_rate: None # if `future_exchange_rate_strategy: "custom"`, please insert here the desired output_currency-to-EUR exchange rate
+  rooftop_share: 0.14 # based on the potentials, assuming (0.1 kW/m2 and 10 m2/person)
+  fill_values:
+    FOM: 0
+    VOM: 0
+    efficiency: 1
+    fuel: 0
+    investment: 0
+    lifetime: 25
+    CO2 intensity: 0
+    discount rate: 0.07
+  marginal_cost: # USD/MWh
+    solar: 0.01
+    onwind: 0.015
+    offwind: 0.015
+    hydro: 0.
+    H2: 0.
+    electrolysis: 0.
+    fuel cell: 0.
+    battery: 0.
+    battery inverter: 0.
+  lifetime:
+    CCGT: 45
+    OCGT: 45
+  efficiency:
+    coal: 0.3195 # EIA https://www.eia.gov/electricity/annual/html/epa_08_01.html
+    oil: 0.3005 # EIA https://www.eia.gov/electricity/annual/html/epa_08_01.html
+    CCGT: 0.4429 # EIA https://www.eia.gov/electricity/annual/html/epa_08_01.html
+    nuclear: 0.3254 # EIA https://www.eia.gov/electricity/annual/html/epa_08_01.html
+    biomass: 0.30 # EIA https://www.eia.gov/electricity/annual/html/epa_08_01.html
+
+co2:
+  limit: 4.413e+9    # annual cap [tCO2/year]
+  base: 1.490e+9     # power sector emissions US 2023 https://www.iea.org/countries/united-states/electricity
+  emission_price: 0. # [currency/tCO2]; active via Ep wildcard
+  automatic_emission: # derive co2.limit from historical emission data instead of the value above
+    enable: false
+    base_year: 1990  # any year from 1970 to 2018
+  budget:            # year-by-year reduction trajectory; used in all sector-coupled runs
+    enable: false
+    override_co2opt: true
+    base_value: limit # which co2 scalar to scale by year factors: "limit", "base", "absolute", or a float [tCO2/a]
+    year:
+      2020: 1.0
+      2025: 0.85
+      2030: 0.70
+      2035: 0.55
+      2040: 0.40
+      2045: 0.25
+      2050: 0.1
+
+# =================== SECTOR OPTIONS ===================
+demand_data:
+  scenario: "AB"
+
+existing_capacities:
+  grouping_years_power: [1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2023, 2025, 2030]
+
+sector:
+  enable:
+    heat: true
+    biomass: true
+    industry: true
+    shipping: true
+    aviation: true
+    land_transport: true
+    rail_transport: true
+    agriculture: true
+    residential: true
+    services: true
+
+  gas:
+    spatial_gas: true # ALWAYS TRUE
+    network: false # ALWAYS FALSE for now (NOT USED)
+    network_data: GGIT # Global dataset -> 'GGIT' , European dataset -> 'IGGIELGN'
+    network_data_GGIT_status: ["Construction", "Operating", "Idle", "Shelved", "Mothballed", "Proposed"]
+
+  hydrogen:
+    network: false
+    H2_retrofit_capacity_per_CH4: 0.6
+    network_limit: 2000 #GWkm
+    network_routes: gas # "gas or "greenfield". If "gas"  ->  the network data are fetched from ["sector"]["gas"]["network_data"]. If "greenfield"  -> the network follows the topology of electrical transmission lines
+    gas_network_repurposing: false # If true -> ["sector"]["gas"]["network"] is automatically false
+    h2_turbine: false
+    underground_storage:
+      enabled: false
+      # calculations based on https://doi.org/10.1016/j.energy.2026.141729
+      min_area_km2: 13 # minimum area for kaverns in km2
+      method: "surface" # surface or physics
+      technical_realization_factor: 3.5e-5
+      energy_density_MWh_per_m3: 0.336 # energy density varies in europe between 0.214 and 0.0458 MWh/m3
+      cavern_height_bedded_m: 120
+      cavern_diameter_bedded_m: 84
+      cavern_height_dome_m: 300
+      cavern_diameter_dome_m: 58
+      salt_buffer_m_bedded: 2000
+      salt_buffer_m_dome: 500
+      copernicus:
+        # CLC grid codes:
+        # 11X/12X - Various forest types
+        # 20  - Shrubs
+        # 30  - Herbaceus vegetation
+        # 40  - Cropland
+        # 50  - Urban
+        # 60  - Bare / Sparse vegetation
+        # 80  - Permanent water bodies
+        # 100 - Moss and lichen
+        # 200 - Open sea
+        grid_codes: [50, 80, 100]
+        distance_buffer_by_code:
+          50: 2500 # urban
+          80: 200 # protected areas / water bodies
+          100: 200 # natural protected areas
+      rho_min: 5.0         # Minimum hydrogen density in kg/m³ (at low pressure, e.g. ~30 bar)
+      rho_max: 42.0        # Maximum hydrogen density in kg/m³ (at high pressure, e.g. ~200–250 bar)
+      theta_safety: 0.8    # Usable working gas fraction (portion of H₂ that can actually be withdrawn)
+      lhv_h2: 120          # Lower Heating Value (LHV) of hydrogen in MJ/kg (energy content per kg H₂)
+      locations:
+      - onshore
+      - offshore
+    hydrogen_colors: false
+    set_color_shares: false
+    blue_share: 0.40
+    pink_share: 0.05
+    production_technologies: ["H2 Electrolysis", "SMR", "SMR CC"]   # ["Alkaline electrolyzer large", "Alkaline electrolyzer medium", "Alkaline electrolyzer small", "PEM electrolyzer", "SOEC", "Solid biomass steam reforming", "Biomass gasification", "Biomass gasification CC", "Natural gas steam reforming", "Natural gas steam reforming CC", "Coal gasification", "Coal gasification CC", "Heavy oil partial oxidation"] a list of H2 production technologies that can be added
+
+  coal:
+    spatial_coal: true
+    shift_to_elec: true # If true, residential and services demand of coal is shifted to electricity. If false, the final energy demand of coal is disregarded
+
+  lignite:
+    spatial_lignite: false
+
+  oil:
+    spatial_oil: true
+
+  ammonia:
+    enable: false
+    spatial_ammonia: false
+    production_year: 2023 # 2019 - 2023 are available
+    gas_MWh_per_tNH3: 7.81   # MWh natural gas per tNH3 (SMR eff.=0.76, HB H2-input=1.1484 MWh_H2/MWh_NH3, NH3 LHV=5.167 MWh/t)
+    elec_MWh_per_tNH3: 1.278  # MWh electricity per tNH3 (HB elec-input=0.2473 MWh_el/MWh_NH3, NH3 LHV=5.167 MWh/t)
+    co2_t_per_tNH3: 1.547    # tCO2 per tNH3 (gas CO2 intensity=0.198 tCO2/MWh_gas x 7.81 MWh_gas/tNH3)
+
+  # ------------------- HEAT SECTOR -------------------
+
+  district_heating:
+    potential: 0.3 #maximum fraction of urban demand which can be supplied by district heating
+    #increase of today's district heating demand to potential maximum district heating share
+    #progress = 0 means today's district heating share, progress=-1 means maximum fraction of urban demand is supplied by district heating
+    progress: 1
+    # 2020: 0.0
+    # 2030: 0.3
+    # 2040: 0.6
+    # 2050: 1.0
+    district_heating_loss: 0.15
+  reduce_space_heat_exogenously: false # reduces space heat demand by a given factor (applied before losses in DH)
+  # this can represent e.g. building renovation, building demolition, or if
+  # the factor is negative: increasing floor area, increased thermal comfort, population growth
+  # NB The value of space heat reduction are Europe-specific
+  # if they usage is enabled (reduce_space_heat_exogenously) a regional adjustment is needed
+  reduce_space_heat_exogenously_factor: 0.29 # per unit reduction in space heat demand
+  # the default factors are determined by the LTS scenario from http://tool.european-calculator.eu/app/buildings/building-types-area/?levers=1ddd4444421213bdbbbddd44444ffffff11f411111221111211l212221
+  # 2020: 0.10  # this results in a space heat demand reduction of 10%
+  # 2025: 0.09  # first heat demand increases compared to 2020 because of larger floor area per capita
+  # 2030: 0.09
+  # 2035: 0.11
+  # 2040: 0.16
+  # 2045: 0.21
+  # 2050: 0.29
+  space_heat_share: 0.6 # the share of space heating from all heating. Remainder goes to water heating.
+
+  tes: true
+  tes_tau: # 180 day time constant for centralised, 3 day for decentralised
+    decentral: 3
+    central: 180
+  boilers: true
+  oil_boilers: false
+  chp: false
+  micro_chp: false
+
+  solar_thermal_collector:
+    enable: true
+    cf_correction: 0.788457 # correction factor applied to atlite's raw output; = 1/1.2683
+    clearsky_model: simple
+    orientation:
+      slope: 45.
+      azimuth: 180.
+
+  heat_pump_sink_T: 55 #Celsius, based on DTU / large area radiators; used un build_cop_profiles.py
+  time_dep_hp_cop: true #time dependent heat pump coefficient of performance
+
+  # ------------------- LAND TRANSPORT SECTOR -------------------
+
+  bev_plug_to_wheel_efficiency: 0.2 #kWh/km from EPA https://www.fueleconomy.gov/feg/ for Tesla Model S
+  bev_charge_efficiency: 0.9 #BEV (dis-)charging efficiency
+  transport_heating_deadband_upper: 20.
+  transport_heating_deadband_lower: 15.
+  ICE_lower_degree_factor: 0.375 #in per cent increase in fuel consumption per degree above deadband
+  ICE_upper_degree_factor: 1.6
+  EV_lower_degree_factor: 0.98
+  EV_upper_degree_factor: 0.63
+  bev_avail_max: 0.95
+  bev_avail_mean: 0.8
+  bev_dsm_restriction_value: 0.75 #Set to 0 for no restriction on BEV DSM
+  bev_dsm_restriction_time: 7 #Time at which SOC of BEV has to be dsm_restriction_value
+  v2g: true #allows feed-in to grid from EV battery
+  bev_dsm: true #turns on EV battery
+  bev_energy: 0.05 #average battery size in MWh
+  bev_availability: 0.5 #How many cars do smart charging
+  transport_fuel_cell_efficiency: 0.5
+  transport_internal_combustion_efficiency: 0.3
+
+  land_transport_fuel_cell_share: # 1 means all FCEVs HERE
+    AB_2020: 0.00
+  land_transport_electric_share: # 1 means all EVs  # This leads to problems when non-zero HERE
+    AB_2020: 0.00
+
+  # ------------------- BIOMASS SECTOR -------------------
+
+  biomass_transport: true # biomass transport between nodes
+  biomass_transport_default_cost: 0.1 #EUR/km/MWh
+  solid_biomass_potential: 40 # TWh/a, Potential of whole modelled area
+  biogas_potential: 0.5 # TWh/a, Potential of whole modelled area
+
+  # ------------------- ELECTRICITY DISTRIBUTION GRID -------------------
+
+  electricity_distribution_grid: true # adds low voltage buses and shifts AC loads, BEVs, heat pumps, and resistive heaters, micro CHPs to low voltage buses if technologies are present
+  enable_electricity_connection_cost: false # adds electricity grid connection costs to fixed capital costs for solar and onwind generators in prepare_sector_network.
+  solar_rooftop: # adds distribution side customer rooftop PV (only work if electricity_distribution_grid: true)
+    enable: false
+    kW_per_m2: 0.1
+    m2_per_person: 20
+    use_building_size: false
+    # proportion of rooftop suitable for PV installation
+    install_ratio:
+      0: 0
+      10: 0.3
+      100: 0.36
+      200: 0.41
+      450: 0.49
+      2300: 0.66
+      # maximum distance [km] to allocate a building within the nearest bus shapes
+    tolerance: 100
+
+  home_battery: false # adds home batteries to low voltage buses ((only work if electricity_distribution_grid: true)
+  transmission_efficiency:
+    electricity distribution grid:
+      efficiency_static: 0.97 # efficiency of distribution grid (i.e. 3% loses)
+    H2 pipeline:
+      efficiency_per_1000km: 1
+      compression_per_1000km: 0.017 # DEA technology data. Mean of  Energy losses, lines 5000-20000 MW and lines >20000 MW for 2020, 2030 and 2050, [%/1000 km]
+
+  # ------------------- SHIPPING & AVIATION SECTOR -------------------
+
+  shipping_hydrogen_liquefaction: false
+  shipping_average_efficiency: 0.4 #For conversion of fuel oil to propulsion in 2011
+  shipping_hydrogen_share: #1.0
+    AB_2020: 0.00
+  airport_sizing_factor: 3
+  international_bunkers: false #Whether or not to count the emissions of international aviation and navigation
+
+  # ------------------- CCUS & CONVERSION OPTIONS -------------------
+
+  co2_network: true
+  co2_sequestration_potential: 200 #MtCO2/a sequestration potential for Europe
+  co2_sequestration_cost: 10 #EUR/tCO2 for sequestration of CO2
+
+  methanation: false
+  helmeth: false
+  dac: false
+  cc_fraction: 0.9
+  cc: false
+  fischer_tropsch: false
+  min_part_load_fischer_tropsch: 0.9
+
+  # ------------------- INDUSTRY OPTIONS -------------------
+
+  industry_util_factor: 0.7
+
+  efficiency_heat_oil_to_elec: 0.9
+  efficiency_heat_biomass_to_elec: 0.9
+  efficiency_heat_gas_to_elec: 0.9
+
+  # ------------------- POWERPLANTS OPTIONS -------------------
+
+  conventional_generation: # generator : carrier
+    OCGT: gas
+    CCGT: gas
+    oil: oil
+    coal: coal
+    lignite: lignite
+    biomass: biomass
+  keep_existing_capacities: true
+
+  marginal_cost_storage: 0
+
+
+# =================== SOLVING ===================
+# Optimization options, memory limit, and named solver presets live in
+# configs/solving.default.yaml (merged via Snakefile configfile:).
+solving:
+  # ------------------- Solver -------------------
+  solver:
+    name: gurobi
+    options: gurobi-default
