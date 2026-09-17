@@ -12,6 +12,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Integrate `planning_horizon` wildcard into electricity-only networks [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
+
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 **Minor Changes and bug-fixing**
