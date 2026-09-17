@@ -16,6 +16,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update `technology-data` version to the latest release (0.15.0) with significant inputs on objective function values `PR #1729 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1729>`__
+
 * Fix fallback to closest available CO2 emission year [PR #2018](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2018)
 
 # PyPSA-Earth 0.9.0
