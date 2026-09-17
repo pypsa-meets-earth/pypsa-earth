@@ -705,6 +705,7 @@ if __name__ == "__main__":
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
 
     n = pypsa.Network(inputs.network)
+    source_line_types = n.line_types.copy()
 
     # Add year suffix to carrier names for clustering
     add_year_suffix_to_carriers(n)
@@ -843,8 +844,40 @@ if __name__ == "__main__":
     if config["foresight"] == "overnight":
         groupby_bus_carrier(nc, aggregation_strategies)
 
+    # Restore line types lost when clustering creates a new network.
+    used_line_types = pd.Index(
+        nc.lines["type"].dropna().loc[lambda values: values != ""].unique()
+    )
+    missing_line_types = used_line_types.difference(nc.line_types.index)
+
+    unavailable_line_types = missing_line_types.difference(source_line_types.index)
+    if not unavailable_line_types.empty:
+        raise ValueError(
+            "The following line types are used by clustered lines but are "
+            "unavailable in the source network: "
+            f"{unavailable_line_types.tolist()}"
+        )
+
+    valid_attributes = n.component_attrs["LineType"].index
+
+    for line_type in missing_line_types:
+        attributes = (
+            source_line_types.loc[line_type]
+            .reindex(valid_attributes)
+            .dropna()
+            .to_dict()
+        )
+        nc.add("LineType", line_type, **attributes)
+
+    if not missing_line_types.empty:
+        logger.info(
+            "Restored line types removed during network clustering: %s",
+            missing_line_types.tolist(),
+        )
+
     nc.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     nc.export_to_netcdf(outputs.network)
+
     for attr in (
         "busmap",
         "linemap",
