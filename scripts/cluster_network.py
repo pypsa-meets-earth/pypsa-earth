@@ -846,10 +846,7 @@ if __name__ == "__main__":
 
     # Restore line types lost when clustering creates a new network.
     used_line_types = pd.Index(
-        nc.lines["type"]
-        .dropna()
-        .loc[lambda values: values != ""]
-        .unique()
+        nc.lines["type"].dropna().loc[lambda values: values != ""].unique()
     )
     missing_line_types = used_line_types.difference(nc.line_types.index)
 
@@ -880,7 +877,7 @@ if __name__ == "__main__":
 
     nc.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     nc.export_to_netcdf(outputs.network)
- 
+
     for attr in (
         "busmap",
         "linemap",
