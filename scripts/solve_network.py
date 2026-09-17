@@ -99,40 +99,25 @@ pypsa.pf.logger.setLevel(logging.WARNING)
 def get_load_shedding_capacity(n, safety_margin=1.2):
     """
     Calculate required load shedding p_nom per bus based on the
-    maximum aggregated load observed in any snapshot.
+    maximum positive aggregated load observed in any snapshot.
 
     Parameters
     ----------
     n : pypsa.Network
-        The PyPSA network
+        The PyPSA network.
     safety_margin : float, default 1.2
-        Safety factor to apply to the maximum load
+        Safety factor applied to the maximum positive load.
 
     Returns
     -------
     pd.Series
-        Required p_nom per bus for load shedding.
+        Required load shedding capacity per bus.
     """
+    loads = get_as_dense(n, "Load", "p_set")
+    loads_by_bus = loads.T.groupby(n.loads.bus).sum().T
+    max_load = loads_by_bus.max(axis=0).clip(lower=0.0)
 
-    load_shedding_p_nom = pd.Series(0.0, index=n.buses.index)
-
-    for bus_name, bus_loads in n.loads.groupby("bus"):
-
-        if not n.loads_t.p_set.empty:
-            bus_load_timeseries = n.loads_t.p_set[
-                bus_loads.index.intersection(n.loads_t.p_set.columns)
-            ]
-            # Sum loads across all components at this bus for each snapshot
-            total_load_per_snapshot = bus_load_timeseries.sum(axis=1)
-            max_total_load = total_load_per_snapshot.max()
-        else:
-            max_total_load = bus_loads["p_set"].sum()
-
-        required_p_nom = max_total_load * safety_margin
-
-        load_shedding_p_nom[bus_name] = required_p_nom
-
-    return load_shedding_p_nom
+    return max_load.reindex(n.buses.index, fill_value=0.0) * safety_margin
 
 
 def prepare_network(n, solve_opts, config):
