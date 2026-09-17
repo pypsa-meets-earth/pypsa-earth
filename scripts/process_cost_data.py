@@ -656,4 +656,4 @@ if __name__ == "__main__":
             snakemake.params.storage_techs,
         )
 
-    costs.to_csv(snakemake.output[0])
+    costs.to_csv(snakemake.output.costs)

@@ -342,7 +342,7 @@ if __name__ == "__main__":
 
     opts = snakemake.wildcards.opts.split("-")
 
-    n = pypsa.Network(snakemake.input[0])
+    n = pypsa.Network(snakemake.input.network)
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
     s_max_pu = snakemake.params.lines["s_max_pu"]
@@ -440,4 +440,4 @@ if __name__ == "__main__":
     sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
-    n.export_to_netcdf(snakemake.output[0])
+    n.export_to_netcdf(snakemake.output.network)

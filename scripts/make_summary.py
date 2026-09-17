@@ -571,4 +571,4 @@ if __name__ == "__main__":
         country=snakemake.wildcards.country,
     )
 
-    to_csv(dfs, snakemake.output[0])
+    to_csv(dfs, snakemake.output.summary)

@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     if snakemake.params.airport_custom_data:
         custom_airports = Path(BASE_DIR).joinpath("data", "custom", "airports.csv")
-        shutil.copy(custom_airports, snakemake.output[0])
+        shutil.copy(custom_airports, snakemake.output.airports)
     else:
         # Prepare downloaded data
         download_data = download_airports()
@@ -142,4 +142,6 @@ if __name__ == "__main__":
         airports = preprocess_airports(df)
 
         # Save
-        airports.to_csv(snakemake.output[0], sep=",", encoding="utf-8", header="true")
+        airports.to_csv(
+            snakemake.output.airports, sep=",", encoding="utf-8", header="true"
+        )

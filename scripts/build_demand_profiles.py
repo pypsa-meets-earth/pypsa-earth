@@ -440,7 +440,7 @@ if __name__ == "__main__":
     scale = snakemake.params.load_options.get("scale", 1.0)
     start_date = snakemake.params.snapshots["start"]
     end_date = snakemake.params.snapshots["end"]
-    out_path = snakemake.output[0]
+    out_path = snakemake.output.demand_profiles
 
     load_source = snakemake.params.load_options.get("source", "gegis")
     weather_year = snakemake.params.load_options["weather_year"]

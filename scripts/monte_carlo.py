@@ -417,7 +417,7 @@ if __name__ == "__main__":
 
     # MONTE-CARLO MODIFICATIONS
     ###
-    n = pypsa.Network(snakemake.input[0])
+    n = pypsa.Network(snakemake.input.network)
     unc_wildcards = snakemake.wildcards[-1]
     i = int(unc_wildcards[1:])
     j = 0
@@ -437,4 +437,4 @@ if __name__ == "__main__":
         pd.DataFrame(lh).rename_axis("Nruns").add_suffix("_feature")
     ).to_dict()
     n.meta.update(latin_hypercube_dict)
-    n.export_to_netcdf(snakemake.output[0])
+    n.export_to_netcdf(snakemake.output.network)

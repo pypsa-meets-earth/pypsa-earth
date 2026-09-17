@@ -231,6 +231,6 @@ if __name__ == "__main__":
     # add export value and components to network
     add_export(n, hydrogen_buses_ports, export_profile)
 
-    n.export_to_netcdf(snakemake.output[0])
+    n.export_to_netcdf(snakemake.output.network)
 
     logger.info("Network successfully exported")

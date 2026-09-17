@@ -1340,4 +1340,4 @@ if __name__ == "__main__":
     else:
         logger.info("No generators or storage units found.")
 
-    n.export_to_netcdf(snakemake.output[0])
+    n.export_to_netcdf(snakemake.output.network)

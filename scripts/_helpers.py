@@ -2475,3 +2475,24 @@ def get_linetype_by_voltage_and_country(
         key=lambda candidate: abs(float(candidate) - float(v_nom)),
     )
     return mapping[voltage]
+
+
+def script_path_provider(project_dir: Path) -> Callable[[str], Path]:
+    """
+    Returns a function that provides the full path to a script given its name.
+
+    Parameters
+    ----------
+    project_dir : Path
+        The root directory of the project (where the script directory is located).
+
+    Returns
+    -------
+    Callable[[str], Path]
+        A function that takes a script name as input and returns the full path to the script.
+    """
+
+    def _get_script_path(script: str) -> Path:
+        return project_dir / "scripts" / script
+
+    return _get_script_path
