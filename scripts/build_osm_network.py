@@ -519,6 +519,11 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     logger.info("Stage 4c/5: Specify the bus ids of the line endings")
 
+    # Normalize DataFrame indices before assigning line endpoints.
+    lines = lines.reset_index(drop=True)
+    buses = buses.reset_index(drop=True)
+    buses["bus_id"] = buses.index
+
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses, distance_crs)
 
