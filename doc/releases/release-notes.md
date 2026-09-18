@@ -4,19 +4,29 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-Release Notes
-
 # Upcoming release
 
 This part of documentation collects descriptive release notes to capture the main improvements introduced by developing the model before the next release.
 
 **New Features and Major Changes**
 
-* Inntegrate additional tutorials for use-case documentation [PR #1930](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1930)
+* Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
+
+**Minor Changes and bug-fixing**
+
+* Fix fallback to closest available CO2 emission year [PR #2018](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2018)
+
+* Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
+
+# PyPSA-Earth 0.9.0
+
+**New Features and Major Changes**
+
+* Integrate additional tutorials for use-case documentation [PR #1930](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1930)
 
 * Move ``plotting`` defaults to ``configs/plotting.default.yaml`` and solving defaults (``solving.options``, ``solving.mem``, ``solving.solver_options``) to ``configs/solving.default.yaml``; both still merge via Snakemake ``configfile:`` and remain overridable from ``config.yaml``. ``config.default.yaml`` keeps only ``solving.solver`` (name and preset choice) [PR #1957](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1957)
 
-* Update databundle links to point to the new zenodo release [PR #1984](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1984)
+* Update databundle links to point to the new Zenodo release [PR #1984](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1984)
 
 * Include new storage technologies such as li-ion, vanadium, lfp, lair, pair and iron-air. These technologies can now be configured as either store-link combinations or standalone storage units. Implemented in both ``add_electricity.py`` and ``prepare_sector_network.py`` [PR #1731](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1731)
 
@@ -26,7 +36,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Support multiple custom powerplant datasets with configurable merge and replace methods [PR #1945](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1945)
 
-* Add gis based underground hydrogen storage (salt carverns) and h2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
+* Add GIS-based underground hydrogen storage (salt caverns) and H2 turbine [PR #1474](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1474)
 
 * Add docstrings and type hints for core sector model scripts [PR #1880](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1880)
 
@@ -38,15 +48,15 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add ammonia industry explicitly [PR #1783](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1783)
 
-* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population `PR #1622 <https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622>`__
+* Attach wind and solar generators using real positions from `powerplants.csv` instead of using redistribution according to the population [PR #1622](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1622)
 
 * Revise implementation of myopic optimization [PR #1722](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1722)
 
 * Migrate all cost data processing to ``process_cost_data.py`` [PR #1719](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1719)
 
-* Add the rule `retrieve_cutout` using the same script from `retrieve_databundle_light`. The `bundle_to_download` excludes cutouts while `cutout_to_download` include only cutouts. The retrieved cutouts are then verified to ensure their total bounds match the outputs from `build_shapes`. The config `enable: retrieve_cutout` allows users to switch off this rule after retrieval. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+* Add the rule `retrieve_cutout` using the same script from `retrieve_databundle_light`. The `bundle_to_download` excludes cutouts while `cutout_to_download` includes only cutouts. The retrieved cutouts are then verified to ensure their total bounds match the outputs from `build_shapes`. The config `enable: retrieve_cutout` allows users to switch off this rule after retrieval. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
-* Use IRENA statistics for 2023 to normalize countries hydropower generation data [PR #1681](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681)
+* Use IRENA statistics for 2023 to normalize countries' hydropower generation data [PR #1681](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1681)
 
 * Drop use of override_components that is no longer needed in newer PyPSA versions [PR #1699](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1699)
 
@@ -58,7 +68,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Integrate DemandCast dataset for electricity demand [PR #1725](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1725)
 
-* Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be depreciated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
+* Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be deprecated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
 
@@ -136,9 +146,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add options to use custom shapes for offshore subregions [PR #1769](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1769)
 
-* In `cluster_network`, replace custom voronoi polygon calculation function with Geopandas `gdf.voronoi_polygons` method [PR #1771](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1771)
+* In `cluster_network`, replace custom Voronoi polygon calculation function with GeoPandas `gdf.voronoi_polygons` method [PR #1771](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1771)
 
-* Add `auto` as an option in renewable cutout selection, which directs to the cutout defined in `atlite: default`. This is executed using the function `update_cutout_config(config)`. Furthermore, improve `terminate_if_cutout_exist(w)` to be based purely on wildcards of the cutouts name that are to be downloaded. This is applied to both `build_cutout` and `retrieve_cutout`. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
+* Add `auto` as an option in renewable cutout selection, which directs to the cutout defined in `atlite: default`. This is executed using the function `update_cutout_config(config)`. Furthermore, improve `terminate_if_cutout_exist(w)` to be based purely on wildcards of the cutout names that are to be downloaded. This is applied to both `build_cutout` and `retrieve_cutout`. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
 * Send information from `retrieve_databundle_light.py` to `databundle_cli.py` using a temporary yaml file to make missing files consistent. [PR #1767](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1767)
 
@@ -158,7 +168,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix missing bus warning for hydrogen due to pypsa version change [PR #1723](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1723)
 
-* Fix warning in of H2 pipeline extension in solve_network [PR #1732](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732)
+* Fix warning in H2 pipeline extension in solve_network [PR #1732](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1732)
 
 * Fix stochastic bundle names causing rerun of workflow every time [PR #1746](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1746)
 
@@ -184,7 +194,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix result network path in the snakemake command on quick start page [PR #1928](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1928)
 
-* Polishing time-dependent quantities in prepare sector network [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
+* Polish time-dependent quantities in `prepare_sector_network` [PR #1809](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1809)
 
 # PyPSA-Earth 0.8.0
 
@@ -900,27 +910,3 @@ This is the first release of PyPSA-Africa which heavily builds on [PyPSA-Eur](ht
 * Community moved to [Discord](https://discord.gg/AnuJBk23FU).
 
 * Most meeting and agenda's are [open](https://github.com/pypsa-meets-earth/pypsa-earth#get-involved).
-
-# Release Process
-
-* Checkout a new release branch [`git checkout -b release-v0.x.x`.
-
-* Finalise release notes at `doc/release_notes.rst`.
-
-* Make sure thah pinned versions of the environments `*-pinned.yaml` in `envs` folder are up-to-date.
-
-* Update version number in `doc/conf.py`, `default.config.yaml`, `tutorial.config.yaml` and `test/config.*.yaml`.
-
-* Open, review and merge pull request for branch `release-v0.x.x`.
-  Make sure to close issues and PRs or the release milestone with it (e.g. closes #X).
-  Run `pre-commit run --all`` locally and fix any issues.
-
-* Update and checkout your local `main` and tag a release with `git tag v0.x.x`, `git push`, `git push --tags`. Include release notes in the tag message using Github UI.
-
-* Upload code to `zenodo code repository](<https://doi.org>) with [GPLv3 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
-
-* Create pre-built networks for [`config.default.yaml` by running `snakemake -j 1 extra_components_all_networks``.
-
-* Upload pre-built networks to `zenodo data repository](<https://doi.org/10.5281/zenodo.3601881>) with [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license.
-
-* Send announcement on the [PyPSA-Earth Discord channel](https://discord.gg/AnuJBk23FU).
