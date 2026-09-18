@@ -59,6 +59,8 @@ import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
 
+PYPSA_V1 = bool(re.match(r"^1\.\d", pypsa.__version__))
+
 logger = logging.getLogger(__name__)
 
 currency_converter = CurrencyConverter(
