@@ -72,6 +72,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Include cutout and requested-region bounds in spatial mismatch messages [PR #2010](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2010)
+
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
 
 * Fix invalid biomass transport and CO2 pipeline connections [PR #1987](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1987)
