@@ -1,4 +1,6 @@
   hydro:
+    source: custom # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
+    path: ""
     cutout: auto
     hydrobasins_level: 6
     resource:
