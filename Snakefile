@@ -2147,6 +2147,9 @@ rule build_industry_demand:  #default data
         industrial_energy_demand_per_node="resources/"
         + SECDIR
         + "demand/industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
+        industrial_energy_demand_per_node_by_subsector="resources/"
+        + SECDIR
+        + "demand/industrial_energy_demand_per_node_by_subsector_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
     threads: 1
     resources:
         mem_mb=1000,
