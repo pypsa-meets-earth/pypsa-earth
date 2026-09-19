@@ -134,6 +134,10 @@ def create_paper_df(fn):
         lambda x: x if type(x) == int or type(x) == int == float else np.nan
     )
 
+    # Keep only operating steel plants
+    # df_paper = df_paper.loc[df_paper["status"] == "Operating"]
+
+    # Create a column with iso2 country code
     cc = coco.CountryConverter()
     iso3 = pd.Series(df_paper["iso3"])
     df_paper["country"] = cc.pandas_convert(series=iso3, to="ISO2")
