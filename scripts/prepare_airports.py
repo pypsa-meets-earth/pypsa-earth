@@ -16,30 +16,6 @@ from _helpers import BASE_DIR, read_csv_nafix
 # logger = logging.getLogger(__name__)
 
 
-def download_airports():
-    """
-    Downloads the world airports as .csv File in addition to runnways
-    information.
-
-    The following csv file was downloaded from the webpage
-    https://ourairports.com/data/
-    as a .csv file. The dataset contains 74844 airports.
-    """
-    fn = "https://davidmegginson.github.io/ourairports-data/airports.csv"
-    storage_options = {"User-Agent": "Mozilla/5.0"}
-    airports_csv = read_csv_nafix(
-        fn, index_col=0, storage_options=storage_options, encoding="utf8"
-    )
-
-    fn = "https://davidmegginson.github.io/ourairports-data/runways.csv"
-    storage_options = {"User-Agent": "Mozilla/5.0"}
-    runways_csv = read_csv_nafix(
-        fn, index_col=0, storage_options=storage_options, encoding="utf8"
-    )
-
-    return (airports_csv, runways_csv)
-
-
 def preprocess_airports(df):
     """
     Preprocess the airports data
@@ -99,9 +75,10 @@ if __name__ == "__main__":
         shutil.copy(custom_airports, snakemake.output[0])
     else:
         # Prepare downloaded data
-        download_data = download_airports()
+        airports_csv = read_csv_nafix(snakemake.input.airports_raw, index_col=0)
+        runways_csv = read_csv_nafix(snakemake.input.runways_raw, index_col=0)
 
-        airports_csv = download_data[0].copy()
+        airports_csv = airports_csv.copy()
         airports_csv = airports_csv[
             [
                 "ident",
@@ -122,7 +99,7 @@ if __name__ == "__main__":
         airports_csv = airports_csv.rename(columns={"latitude_deg": "y"})
         airports_csv = airports_csv.rename(columns={"longitude_deg": "x"})
 
-        runways_csv = download_data[1].copy()
+        runways_csv = runways_csv.copy()
         runways_csv = runways_csv[
             ["airport_ident", "length_ft", "width_ft", "surface", "lighted", "closed"]
         ]
