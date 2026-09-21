@@ -73,6 +73,7 @@ There are multiple ways to get involved and learn more about our work:
 
 - [Structure](user-guide/structure.md) - Project structure and workflow
 - [Data Workflow](user-guide/data-workflow.md) - Data processing pipeline
+- [Data API](user-guide/data_api.md) - Detailed descriptions of datasets used by the workflow
 - [Configuration](user-guide/configuration.md) - Configure your model settings
 - [Wildcards](user-guide/wildcards.md) - Understand wildcard patterns
 - [Costs](user-guide/costs.md) - Technology cost assumptions

@@ -1,0 +1,195 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[[cutout]]
+name = "cutout_tutorial_ngbj"
+description = "ERA5-derived weather cutout (2013), tutorial-scoped for Nigeria/Benin"
+tutorial = true
+countries = "NG, BJ"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_NGBJ.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:3ab8a995f3e0066384171f4191b100e5"
+code_line = "[bundle_config.yaml:bundle_cutouts_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L107)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
+
+[[cutout]]
+name = "cutout_tutorial_bw"
+description = "ERA5-derived weather cutout (2013), tutorial-scoped for Botswana"
+tutorial = true
+countries = "BW"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_BW.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:df3946fc32010043ecdc5e437f217916"
+code_line = "[bundle_config.yaml:bundle_cutouts_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L120)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
+
+[[cutout]]
+name = "cutout_tutorial_ma"
+description = "ERA5-derived weather cutout (2013), tutorial-scoped for Morocco"
+tutorial = true
+countries = "MA"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_MA.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:6c4f7264cb9489a2e9586c9d6d69a46b"
+code_line = "[bundle_config.yaml:bundle_cutouts_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L133)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
+
+[[cutout]]
+name = "cutout_tutorial_kz"
+description = "ERA5-derived weather cutout (2013), tutorial-scoped for Kazakhstan; used for CI testing of the pypsa-kz-data repo, only ~5 MB"
+tutorial = true
+countries = "KZ"
+url = "https://zenodo.org/records/18032587/files/bundle_tutorial_cutouts_KZ.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:2dac8f0fef8089f7b3788a7296c7243c"
+code_line = "[bundle_config.yaml:bundle_cutouts_test_KZ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L146)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032587"
+
+[[cutout]]
+name = "cutout_mainland_africa"
+description = "ERA5-derived weather cutout (2013) for mainland Africa; some offshore countries (e.g. CV, SC) not covered"
+tutorial = false
+countries = "Africa"
+url = "https://zenodo.org/records/18032151/files/bundle_cutouts_africa.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:582764a0925c70f16b56a8cc22438393"
+code_line = "[bundle_config.yaml:bundle_cutouts_mainland_africa](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L305)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18032151"
+
+[[cutout]]
+name = "cutout_northamerica"
+description = "ERA5-derived weather cutout (2013) for North America"
+tutorial = false
+countries = "NorthAmerica"
+url = "https://zenodo.org/records/18186603/files/bundle_cutouts_northamerica.zip?download=1"
+version = "2026-01-08"
+checksum = "md5:45fb77260330992fa75f6fb89d1c443b"
+code_line = "[bundle_config.yaml:bundle_cutouts_northamerica](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L331)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18186603"
+
+[[cutout]]
+name = "cutout_europe"
+description = "ERA5-derived weather cutout (2013) for Europe"
+tutorial = false
+countries = "Europe"
+url = "https://zenodo.org/records/18034282/files/bundle_cutouts_europe.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:089152c7bb63419c1a286f11781e8d89"
+code_line = "[bundle_config.yaml:bundle_cutouts_europe](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L344)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18034282"
+
+[[cutout]]
+name = "cutout_oceania"
+description = "ERA5-derived weather cutout (2013) for Oceania"
+tutorial = false
+countries = "Oceania"
+url = "https://zenodo.org/records/18038936/files/bundle_cutouts_oceania.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:0c161d19a901febce5885c3cab09e372"
+code_line = "[bundle_config.yaml:bundle_cutouts_oceania](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L357)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18038936"
+
+[[cutout]]
+name = "cutout_asia"
+description = "ERA5-derived weather cutout (2013) for the Asian continent except its northern part"
+tutorial = false
+countries = "KVR, WAS, FEAR, SEAR, CASR, SASR, ASEAN, MEAR"
+url = "https://zenodo.org/records/18039581/files/bundle_cutouts_asia.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:f37ea8b327b71ef237a10e1081b96cdb"
+code_line = "[bundle_config.yaml:bundle_cutouts_asia](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L382)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18039581"
+
+[[cutout]]
+name = "cutout_southamerica"
+description = "ERA5-derived weather cutout (2013) for South America"
+tutorial = false
+countries = "SouthAmerica"
+url = "https://zenodo.org/records/19661490/files/bundle_cutouts_southamerica.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:dda74ead6c679de93e1acc7430bc9768"
+code_line = "[bundle_config.yaml:bundle_cutouts_southamerica](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L408)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/19661490"
+
+[[cutout]]
+name = "cutout_westernasia"
+description = "ERA5-derived weather cutout (2013) for Western Asia"
+tutorial = false
+countries = "WAS"
+url = "https://zenodo.org/records/18033563/files/bundle_cutouts_westasia.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:b26b35f9415809444bd6e4be7dfd7040"
+code_line = "[bundle_config.yaml:bundle_cutouts_westernasia](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L421)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18033563"
+
+[[cutout]]
+name = "cutout_asean"
+description = "ERA5-derived weather cutout (2013) for the ASEAN region"
+tutorial = false
+countries = "ASEAN"
+url = "https://zenodo.org/records/20325289/files/bundle_cutouts_asean.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:78a3525403077ef69d6078552722ca75"
+code_line = "[bundle_config.yaml:bundle_cutouts_asean](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L434)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/20325289"
+
+[[cutout]]
+name = "cutout_northeurasia"
+description = "ERA5-derived weather cutout (2013) for North Eurasia"
+tutorial = false
+countries = "LT, LV, EE, BY, RU, KZ, MN, GE"
+url = "https://zenodo.org/records/18920577/files/bundle_cutouts_northeurasia.zip?download=1"
+version = "2026-08-11"
+checksum = "md5:c3f3a7706676284d75c8ea364d01110e"
+code_line = "[bundle_config.yaml:bundle_cutouts_northeurasia](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L447)"
+license = "CC BY 4.0"
+license_link = "https://zenodo.org/records/18920577"
+
+[[cutout]]
+name = "cutout_zambia"
+description = "ERA5-derived weather cutout (2013) for Zambia; national-level cutout, ~0.5 GB"
+tutorial = false
+countries = "ZM"
+url = "https://sandbox.zenodo.org/records/470328/files/bundle_cutouts_zm_2013.zip?download=1"
+version = "2026-03-13"
+checksum = "md5:0599784f855cd28e736f78ef8a2956cc"
+code_line = "[bundle_config.yaml:bundle_cutouts_africa_zm](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L460)"
+license = "CC BY 4.0"
+license_link = "https://sandbox.zenodo.org/records/470328"
+
+[[cutout]]
+name = "cutout_bolivia"
+description = "ERA5-derived weather cutout (2013) for Bolivia; national-level cutout, ~0.7 GB"
+tutorial = false
+countries = "BO"
+url = "https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_bo.zip?download=1"
+version = "2026-03-13"
+checksum = "md5:e5a509cc75b7617f6128948c142a8c3d"
+code_line = "[bundle_config.yaml:bundle_cutouts_bo](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L473)"
+license = "CC BY 4.0"
+license_link = "https://sandbox.zenodo.org/records/470372"
+
+[[cutout]]
+name = "cutout_colombia"
+description = "ERA5-derived weather cutout (2013) for Colombia; national-level cutout, ~1.3 GB"
+tutorial = false
+countries = "CO"
+url = "https://sandbox.zenodo.org/records/470372/files/bundle_cutouts_co.zip?download=1"
+version = "2026-03-13"
+checksum = "md5:01073bebce9af12931acecb785988dd2"
+code_line = "[bundle_config.yaml:bundle_cutouts_co](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L484)"
+license = "CC BY 4.0"
+license_link = "https://sandbox.zenodo.org/records/470372"
