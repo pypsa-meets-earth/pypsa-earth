@@ -16,6 +16,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Represent fixed sector emissions as time-dependent loads [PR #2027](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2027)
 
+* Normalize OSM network indices before assigning line endpoints [PR #2038](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2038)
+
 * Fix fallback to closest available CO2 emission year [PR #2018](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2018)
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
@@ -73,6 +75,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be deprecated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+
+* Fix country lookup for country-specific line type mappings [PR #2037](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2037)
 
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
 
