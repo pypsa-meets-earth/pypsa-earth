@@ -1435,14 +1435,15 @@ def extra_functionality(n, snapshots):
     co2_limit_active = any(option.startswith("Co2L") for option in opts)
     sector_policy = config.get("co2", {}).get("sector_policy") or {}
     policy_file = sector_policy.get("policy_file")
+    planning_horizon = getattr(snakemake.wildcards, "planning_horizons", None)
 
-    if co2_limit_active and policy_file:
+    if co2_limit_active and policy_file and planning_horizon is not None:
         logger.info("setting country and sector specific CO2 limits")
         add_co2_sector_limits(
             n,
             policy_file,
             snapshots,
-            snakemake.wildcards["planning_horizons"],
+            planning_horizon,
         )
 
     add_co2_sequestration_limit(n, snapshots)
