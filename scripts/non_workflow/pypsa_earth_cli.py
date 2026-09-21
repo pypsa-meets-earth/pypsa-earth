@@ -579,9 +579,9 @@ def quiz_zone() -> None:
             "desc": "Integrate national demand",
         },
         {"num": "4", "name": "Generation", "desc": "Integrate national generation"},
-        {"num": "5", "name": "Transmission", "desc": "Improve transmission network"},
-        {"num": "6", "name": "CO2 limits", "desc": "Define CO2 emission limits"},
-        {"num": "7", "name": "Costs", "desc": "Customize regional costs"},
+        {"num": "5", "name": "Costs", "desc": "Customize regional costs"},
+        {"num": "6", "name": "Transmission", "desc": "Improve transmission network"},
+        {"num": "7", "name": "CO2 limits", "desc": "Define CO2 emission limits"},
         {"num": "8", "name": "Return", "desc": "Return to main menu"},
     ]
 
