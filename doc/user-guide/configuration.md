@@ -18,7 +18,7 @@ confer installation instructions at [installation](../home/installation.md).
 
 PyPSA-Earth loads ``config.default.yaml`` first and then merges your ``config.yaml`` on top (see the ``configfile`` entries in the Snakefile). You therefore only need to list settings in ``config.yaml`` that differ from the defaults—a small override file is enough for most studies.
 
-When you upgrade to a new version, open the updated ``config.default.yaml`` and check what changed: new keys, renamed paths, or reorganised sections. Compare it with your ``config.yaml`` and copy across any new defaults you want to use, or move keys you still override to their new locations. The [release notes](../release-notes.md) summarise breaking config changes per release.
+When you upgrade to a new version, open the updated ``config.default.yaml`` and check what changed: new keys, renamed paths, or reorganised sections. Compare it with your ``config.yaml`` and copy across any new defaults you want to use, or move keys you still override to their new locations. The [release notes](../releases/release-notes.md) summarise breaking config changes per release.
 
 Some deprecated key names are migrated automatically when the workflow starts; if Snakemake prints a ``FutureWarning`` about an old path, update your ``config.yaml`` to the new key and remove the obsolete one. See [Renamed keys](#renamed-keys) for the full mapping. For study-specific settings you can also pass extra files with ``snakemake --configfile my_study.yaml`` instead of growing a single ``config.yaml``.
 
@@ -44,11 +44,10 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `clean_osm_data_options` | `osm.clean_osm_data` |
 | `build_osm_network` | `osm.build_osm_network` |
 | `cluster_options` | `clustering` |
-| `fossil_reserves.{carrier}` | `sector.{carrier}.reserves` |
 | `scenario.demand` *(list/string wildcard)* | `demand_data.scenario` *(single string; lists with more than one value error)* |
 | `export.h2export` *(list)* | `export.h2export` *(single scalar TWh/year; multi-value lists error)* |
 
-`{carrier}` is the fuel name (e.g. `oil`, `coal`, `gas`, `lignite`, `biomass`). Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../release-notes.md) when upgrading.
+Migrations run automatically via ``migrate_config`` in ``scripts/_helpers.py``; see also the [release notes](../releases/release-notes.md) when upgrading.
 
 ## Top-level configuration
 
@@ -527,7 +526,7 @@ Specifies the options for sector coupling, i.e. the integration of the electrici
 
 #### top-level
 
-Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia. Fossil fuel reserves are set per carrier as `sector.{carrier}.reserves` [TWh/bus] (e.g. `sector.oil.reserves`, `sector.coal.reserves`). The value sets initial Store energy in `add_carrier_buses` for fuel carriers used in `sector.conventional_generation` (`gas`, `oil`, `coal`, `lignite`, `biomass`); it defaults to 0 if omitted. The former top-level ``fossil_reserves`` block is deprecated — see [Renamed keys](#renamed-keys).
+Carrier toggles, fossil-fuel supply settings (`gas`, `coal`, `lignite`, `oil`), hydrogen, and ammonia.
 
 ```yaml
 --8<-- "configtables/snippets/sector_toplevel.yaml"

@@ -80,7 +80,6 @@ according to the following rules:
 import datetime as dt
 import os
 import re
-import time
 from zipfile import ZipFile
 
 import geopandas as gpd
@@ -132,11 +131,15 @@ def load_databundle_config(config: dict | str) -> dict:
 
 
 def download_and_unzip_zenodo(
-    config: dict, rootpath: str, hot_run: bool = True, disable_progress: bool = False
+    config: dict,
+    rootpath: str,
+    hot_run: bool = True,
+    disable_progress: bool = False,
 ) -> bool:
     """
-    download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True,
-    disable_progress=False)
+    download_and_unzip_zenodo(
+        config, rootpath, dest_path, hot_run=True, disable_progress=False
+    )
 
     Function to download and unzip the data from zenodo
 
@@ -163,16 +166,32 @@ def download_and_unzip_zenodo(
 
     if hot_run:
         try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
             logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
-            logger.info(f"Extracting resources")
+            progress_retrieve(
+                url,
+                file_path,
+                disable_progress=disable_progress,
+            )
+            logger.info("Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=destination)
+
             os.remove(file_path)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            return True
+
+        except Exception as exc:
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}': {exc}"
+            )
+
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
             return False
 
     return True
@@ -949,6 +968,7 @@ def retrieve_databundle(
     hydrobasins_level: int,
     rootpath: str = ".",
     disable_progress: bool = False,
+    output_path: str | None = None,
 ) -> None:
     """
     Retrieve the specified databundles and unzip them.
@@ -966,6 +986,9 @@ def retrieve_databundle(
         The root path for the downloaded files.
     disable_progress : bool
         Whether to disable the progress bar.
+    output_path : str, optional
+        Snakemake rule output path. When set, cutout bundles unpack to its
+        parent directory (supports ``shared_cutouts: false``).
 
     Returns
     -------
@@ -983,6 +1006,11 @@ def retrieve_databundle(
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
+    if output_path:
+        for b_name in bundles_to_download:
+            if config_bundles[b_name]["category"] == "cutouts":
+                config_bundles[b_name]["destination"] = os.path.dirname(output_path)
+
     hydrobasin_bundles = [
         b_name for b_name in bundles_to_download if "hydrobasins" in b_name
     ]
@@ -992,6 +1020,7 @@ def retrieve_databundle(
 
     # initialize downloaded and missing bundles
     downloaded_bundles = []
+    max_attempts = 3
 
     # download the selected bundles
     for b_name in bundles_to_download:
@@ -1005,12 +1034,33 @@ def retrieve_databundle(
 
             try:
                 download_and_unzip = globals()[f"download_and_unzip_{host}"]
-                if download_and_unzip(
-                    config_bundles[b_name], rootpath, disable_progress=disable_progress
-                ):
-                    downloaded_bundle = True
-            except Exception:
-                logger.warning(f"Error in downloading bundle {b_name} - host {host}")
+            except KeyError:
+                logger.warning(f"No download function available for host {host}")
+                continue
+
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    downloaded_bundle = download_and_unzip(
+                        config_bundles[b_name],
+                        rootpath,
+                        disable_progress=disable_progress,
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        f"Error in downloading bundle {b_name} - host {host} "
+                        f"(attempt {attempt}/{max_attempts}): {exc}"
+                    )
+                    downloaded_bundle = False
+
+                if downloaded_bundle:
+                    break
+
+                if attempt < max_attempts:
+                    logger.info(
+                        f"Retrying bundle {b_name} - host {host} "
+                        f"(attempt {attempt + 1}/{max_attempts})"
+                    )
+                    time.sleep(10 * attempt)
 
             if downloaded_bundle:
                 downloaded_bundles.append(b_name)
@@ -1132,6 +1182,7 @@ if __name__ == "__main__":
         hydrobasins_level,
         rootpath=rootpath,
         disable_progress=disable_progress,
+        output_path=snakemake.output[0],
     )
 
     if snakemake.input:
