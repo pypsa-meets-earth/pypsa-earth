@@ -594,9 +594,9 @@ def quiz_zone() -> None:
     console.rule("[bold magenta]📊 QUIZ ZONE [/bold magenta]")
     console.print(Columns(panels, padding=(1, 2)))
 
-    choice = ask("Select option 1-8 to proceed further")
+    choice = ask("Enter option 1-8 to proceed further")
 
-    if int(choice) <= 4:
+    if int(choice) <= 5:
         show_questionnaire(choice)
         quiz_zone()
     elif int(choice) <= 7:
@@ -608,6 +608,11 @@ def quiz_zone() -> None:
     elif choice == "8":
         console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
         display_main_menu()
+    else:
+        console.print(
+            "[bold red] Invalid choice. Please enter option again [/bold red]"
+        )
+        quiz_zone()
 
 
 @app.command("run-model")
