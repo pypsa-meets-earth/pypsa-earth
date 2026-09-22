@@ -78,6 +78,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
+
 * Fix country lookup for country-specific line type mappings [PR #2037](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2037)
 
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)

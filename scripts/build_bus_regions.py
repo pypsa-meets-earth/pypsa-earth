@@ -42,7 +42,6 @@ Outputs
 Description
 -----------
 """
-import os
 import warnings
 
 import geopandas as gpd
