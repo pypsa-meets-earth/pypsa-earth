@@ -250,7 +250,6 @@ import pandas as pd
 import pypsa
 from _helpers import (
     BASE_DIR,
-    create_dummy_data,
     create_network_topology,
     cycling_shift,
     locate_bus,
