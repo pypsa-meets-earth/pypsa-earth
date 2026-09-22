@@ -35,6 +35,7 @@ grouped roughly as follows:
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
