@@ -14,6 +14,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
+* Enable support of Snakemake 8+ and improve environment [PR # 1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
+
 **Minor Changes and bug-fixing**
 
 * Represent fixed sector emissions as time-dependent loads [PR #2027](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2027)
