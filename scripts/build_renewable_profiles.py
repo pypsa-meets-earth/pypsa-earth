@@ -211,7 +211,7 @@ from _helpers import (
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point, box
+from shapely.geometry import LineString, box
 
 cc = coco.CountryConverter()
 
