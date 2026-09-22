@@ -17,7 +17,6 @@ Description
 -----------
 """
 
-import os
 
 import cartopy.crs as ccrs
 import geopandas as gpd
@@ -1005,7 +1004,6 @@ nice_names_n = {
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        import os
 
         from _helpers import mock_snakemake
 

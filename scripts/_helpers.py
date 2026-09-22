@@ -32,7 +32,6 @@ grouped roughly as follows:
   ``rename_techs``, ``safe_divide``.
 """
 
-import calendar
 import io
 import logging
 import os
@@ -44,7 +43,6 @@ import time
 import warnings
 import zipfile
 from collections.abc import Callable, Iterable, Sequence
-from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Any
@@ -1130,16 +1128,8 @@ def convert_country_codes(
         ("SN-GM", "ISO3"): "SEN-GMB",
     }
 
-    unique_codes = (
-        set(country_codes)
-        if isinstance(country_codes, list)
-        else set(country_codes.unique())
-    )
-
-    if isinstance(country_codes, pd.Series):
-        unique_codes = list(set(country_codes))
-    elif isinstance(country_codes, list):
-        unique_codes = list(set(country_codes))
+    if isinstance(country_codes, (pd.Series, list)):
+        unique_codes = set(country_codes)
     else:
         raise ValueError(
             "Input must be a pandas Series or list containing country codes."

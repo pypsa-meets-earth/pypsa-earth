@@ -29,8 +29,9 @@ memory_profiler = "*"
 "ruamel.yaml" = ">=0.17"
 pytables = "*"
 pyscipopt = "*"
+scip = "<=10.0.2"  # experienced issues with 10.0.3 and 10.1. ImportError: libscip.so.10.0: cannot open shared object file
 lxml = "*"
-numpy = "<2"
+numpy = ">=1.26.4"
 pandas = "<3"
 geopandas = ">=1"
 fiona = ">=1.10"
@@ -55,7 +56,6 @@ tqdm = "*"
 pytz = "*"
 currencyconverter = "*"
 googledrivedownloader = ">=1.1"
-scip = "!=10.0.3"
 
 # Jupyter notebook requirements
 ipykernel = "*"
@@ -83,6 +83,14 @@ rich = "*"
 
 [environments]
 pypsa-earth = ["default"]
+pypsa-earth-cli = ["pypsa-earth-cli"]
 
 [tasks]
 install-kernel = "ipython kernel install --user --name=pypsa-earth"
+
+[feature.pypsa-earth-cli.dependencies]
+inquirerpy = "*"
+typer = "*"
+
+[feature.pypsa-earth-cli.tasks]
+pypsa-earth-cli = "python scripts/non_workflow/pypsa_earth_cli.py"
