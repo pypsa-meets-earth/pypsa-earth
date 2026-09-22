@@ -90,6 +90,7 @@ nav:
 
 - Features:
   - Monte Carlo: utilities/monte-carlo.md
+  - PyPSA-Earth CLI: utilities/pypsa-earth-cli.md
 
 - Community & Resources:
   - Contributing: community/contributing.md
