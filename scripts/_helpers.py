@@ -518,7 +518,7 @@ def validate_cutout_configuration(config: dict) -> dict:
     Validate how the resolved weather cutout is obtained.
 
     The function prevents conflicting build and retrieve options, checks
-    whether a requested pre-built cutout is available, and warns when the user
+    whether a requested pre-built cutout is available, and logs an informational message when the user
     chooses to build a cutout that can already be retrieved.
 
     Parameters
@@ -550,10 +550,8 @@ def validate_cutout_configuration(config: dict) -> dict:
         )
 
     if build_cutout and cutout_name in PREBUILT_CUTOUTS:
-        warnings.warn(
+        logger.info(
             f"The requested cutout `{cutout_name}` is available as a pre-built cutout. It will still be built because `build_cutout` is enabled.",
-            UserWarning,
-            stacklevel=2,
         )
 
     return config
