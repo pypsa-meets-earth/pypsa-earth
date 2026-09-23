@@ -79,11 +79,6 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
-# Cutouts currently available for `retrieve_cutout`. Additional entries can be added here as new pre-built cutouts become available.
-PREBUILT_CUTOUTS = {
-    "cutout-2013-era5",
-}
-
 
 def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
     """
@@ -543,13 +538,21 @@ def validate_cutout_configuration(config: dict) -> dict:
             "`build_cutout` and `retrieve_cutout` cannot both be enabled. Choose one method for obtaining the weather cutout."
         )
 
-    if retrieve_cutout and cutout_name not in PREBUILT_CUTOUTS:
-        available_cutouts = ", ".join(sorted(PREBUILT_CUTOUTS))
+    prebuilt_cutouts = {
+        Path(output).stem
+        for bundle in config["databundles"].values()
+        if bundle.get("category") == "cutouts" and not bundle.get("tutorial", False)
+        for output in bundle.get("output", [])
+        if Path(output).suffix == ".nc"
+    }
+
+    if retrieve_cutout and cutout_name not in prebuilt_cutouts:
+        available_cutouts = ", ".join(sorted(prebuilt_cutouts))
         raise ValueError(
             f"`retrieve_cutout` is enabled, but the requested cutout `{cutout_name}` is not available as a pre-built cutout. Available pre-built cutouts: {available_cutouts}. Disable `retrieve_cutout` and enable `build_cutout`."
         )
 
-    if build_cutout and cutout_name in PREBUILT_CUTOUTS:
+    if build_cutout and cutout_name in prebuilt_cutouts:
         logger.info(
             f"The requested cutout `{cutout_name}` is available as a pre-built cutout. It will still be built because `build_cutout` is enabled.",
         )
