@@ -27,7 +27,7 @@ dependencies:
 - ruamel.yaml>=0.18
 - pytables
 - pyscipopt
-- scip<=10.0.2
+- scip<=10.0.2  # experienced issues with 10.0.3 and 10.1. ImportError: libscip.so.10.0: cannot open shared object file
 - lxml
 - numpy>=1.26.4
 - pandas<3
