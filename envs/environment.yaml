@@ -27,6 +27,7 @@ dependencies:
 - ruamel.yaml>=0.18
 - pytables
 - pyscipopt
+- scip<=12.0.2
 - lxml
 - numpy>=1.26.4
 - pandas<3
