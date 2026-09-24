@@ -12,10 +12,11 @@ dependencies:
 - pip
 
 - pypsa>=0.25.1, <=0.30.3
+- linopy<0.6 # keep in sync with pixi.toml; 0.6 onwards rejects the constant constraint built by `define_transmission_expansion_cost_limit` and 0.8 onwards the unnamed MultiIndex coords in `cluster_network`, both fixed by https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676
 - atlite=0.4.1 # in versions >0.4.1 the computation of availability matrix in `build_renewable_profiles` fails due to https://github.com/PyPSA/atlite/issues/301 https://github.com/PyPSA/atlite/issues/514 for countries whose cutouts span over geometries crossing the antimeridian
 - dask
 - powerplantmatching>=0.8
-- earth-osm>=2.3.post1
+- earth-osm>=3.0.2
 
 # Dependencies of the workflow itself
 - xlrd
