@@ -1124,8 +1124,7 @@ def retrieve_databundle(
             "Databundle retrieval was incomplete. The following bundles could not be downloaded:\n\t"
             + "\n\t".join(list(missing_bundles))
             + "\n"
-            "Retry or run `python scripts/non_workflow/databundle_cli.py "
-            "--diagnostic logs/databundle_cli.yaml` for inspection."
+            "Retry or run `python scripts/non_workflow/databundle_cli.py` for inspection."
         )
 
 
