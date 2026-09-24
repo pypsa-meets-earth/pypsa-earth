@@ -11,7 +11,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from _helpers import (
-    BASE_DIR,
     configure_logging,
     create_logger,
 )

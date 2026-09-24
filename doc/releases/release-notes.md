@@ -10,9 +10,15 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
+
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 **Minor Changes and bug-fixing**
+
+* Remove duplicate configuration files for PyPSA-Earth-CLI [PR #2044](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2044)
+
+* Represent fixed sector emissions as time-dependent loads [PR #2027](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2027)
 
 * Normalize OSM network indices before assigning line endpoints [PR #2038](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2038)
 
@@ -76,6 +82,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 * Update Data workflow section to update databundles, include cutouts details and script to collect cutout info [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
+
+* Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
 
 * Fix country lookup for country-specific line type mappings [PR #2037](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2037)
 
