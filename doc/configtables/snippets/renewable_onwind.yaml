@@ -1,4 +1,5 @@
   onwind:
+    source: era5 # use "era5" for a regular cutout workflow and "custom" for custom renewable profiles
     cutout: auto
     resource:
       method: wind
