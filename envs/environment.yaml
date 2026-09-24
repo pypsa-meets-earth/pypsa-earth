@@ -5,6 +5,7 @@
 name: pypsa-earth
 channels:
 - conda-forge
+- nodefaults
 - bioconda
 - gurobi
 dependencies:
@@ -31,6 +32,10 @@ dependencies:
 - pandas<3
 - geopandas>=1
 - fiona>=1.10
+- libgdal
+- sqlite
+- pyogrio
+- backports.zstd
 - xarray>=2023.11.0, <=2025.01.2
 - netcdf4
 - libgdal-netcdf
