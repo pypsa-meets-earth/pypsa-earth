@@ -26,6 +26,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 
+* Add plot of available cutout databundles to the documentation [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
+
 # PyPSA-Earth 0.9.0
 
 **New Features and Major Changes**
@@ -79,6 +81,7 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be deprecated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+* Update Data workflow section to update databundles, include cutouts details and script to collect cutout info [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
 
 * Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
 

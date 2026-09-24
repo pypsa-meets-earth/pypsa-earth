@@ -18,6 +18,7 @@ watch:
 
 hooks:
 - doc/assets/hooks/cleanup.py
+- doc/assets/hooks/generate_cutout_bundle_plots.py
 
 # Navigation
 nav:
