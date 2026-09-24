@@ -2,34 +2,22 @@ from pathlib import Path
 
 import pandas as pd
 import pypsa
-
 from thesis_flexible_consumers import summary
 
-
 SCENARIOS = {
-    "S0": (
-        "results/scenarios/final_S0_S6_Link_20260922/"
-        "S0_KZ_2045_Reference.nc"
-    ),
+    "S0": ("results/scenarios/final_S0_S6_Link_20260922/" "S0_KZ_2045_Reference.nc"),
     "S1": (
-        "results/scenarios/final_S0_S6_Link_20260922/"
-        "S1_KZ_2045_ZeroDirectCO2.nc"
+        "results/scenarios/final_S0_S6_Link_20260922/" "S1_KZ_2045_ZeroDirectCO2.nc"
     ),
     "S2": (
-        "results/scenarios/final_S0_S6_Link_20260922/"
-        "S2_KZ_2045_Reference_BTC.nc"
+        "results/scenarios/final_S0_S6_Link_20260922/" "S2_KZ_2045_Reference_BTC.nc"
     ),
-    "S3": (
-        "results/scenarios/final_S0_S6_Link_20260922/"
-        "S3_KZ_2045_Reference_H2.nc"
-    ),
+    "S3": ("results/scenarios/final_S0_S6_Link_20260922/" "S3_KZ_2045_Reference_H2.nc"),
     "S4": (
-        "results/scenarios/final_S0_S6_Link_20260922/"
-        "S4_KZ_2045_ZeroDirectCO2_BTC.nc"
+        "results/scenarios/final_S0_S6_Link_20260922/" "S4_KZ_2045_ZeroDirectCO2_BTC.nc"
     ),
     "S5": (
-        "results/scenarios/final_S0_S6_Link_20260922/"
-        "S5_KZ_2045_ZeroDirectCO2_H2.nc"
+        "results/scenarios/final_S0_S6_Link_20260922/" "S5_KZ_2045_ZeroDirectCO2_H2.nc"
     ),
     "S6": (
         "results/scenarios/final_S0_S6_Link_20260922/"
@@ -45,14 +33,9 @@ for scenario, path_string in SCENARIOS.items():
     path = Path(path_string)
 
     if not path.exists():
-        raise FileNotFoundError(
-            f"{scenario}: {path}"
-        )
+        raise FileNotFoundError(f"{scenario}: {path}")
 
-    print(
-        f"Loading {scenario}: "
-        f"{path}"
-    )
+    print(f"Loading {scenario}: " f"{path}")
 
     n = pypsa.Network(path)
 
@@ -61,9 +44,7 @@ for scenario, path_string in SCENARIOS.items():
         "network": str(path),
     }
 
-    row.update(
-        summary(n)
-    )
+    row.update(summary(n))
 
     rows.append(row)
 
@@ -90,18 +71,11 @@ columns = [
 df = df[columns]
 
 
-print(
-    "\n"
-    "============================================================"
-)
+print("\n" "============================================================")
 
-print(
-    "FINAL FLEXIBLE-CONSUMER EXTRACTION CHECK"
-)
+print("FINAL FLEXIBLE-CONSUMER EXTRACTION CHECK")
 
-print(
-    "============================================================"
-)
+print("============================================================")
 
 print(
     df.to_string(
@@ -111,10 +85,7 @@ print(
 )
 
 
-output = Path(
-    "results/scenarios/"
-    "final_flexible_consumer_extraction_check.csv"
-)
+output = Path("results/scenarios/" "final_flexible_consumer_extraction_check.csv")
 
 output.parent.mkdir(
     parents=True,
@@ -131,9 +102,7 @@ df.to_csv(
 # Thesis invariants
 # =============================================================================
 
-by_scenario = (
-    df.set_index("scenario")
-)
+by_scenario = df.set_index("scenario")
 
 
 # BTC presence
@@ -193,34 +162,19 @@ for scenario in [
         ]
     )
 
-    if abs(
-        h2_kt
-        - 100.0
-    ) > 1e-6:
+    if abs(h2_kt - 100.0) > 1e-6:
 
         raise AssertionError(
-            f"{scenario}: "
-            f"H2 target is {h2_kt} kt/a, "
-            "expected 100 kt/a."
+            f"{scenario}: " f"H2 target is {h2_kt} kt/a, " "expected 100 kt/a."
         )
 
 
-print(
-    "\n"
-    "============================================================"
-)
+print("\n" "============================================================")
 
-print(
-    "ALL FLEXIBLE-CONSUMER EXTRACTION "
-    "INVARIANTS PASSED"
-)
+print("ALL FLEXIBLE-CONSUMER EXTRACTION " "INVARIANTS PASSED")
 
-print(
-    "============================================================"
-)
+print("============================================================")
 
-print(
-    "\nSaved:"
-)
+print("\nSaved:")
 
 print(output)

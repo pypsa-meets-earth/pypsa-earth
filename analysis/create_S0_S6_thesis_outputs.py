@@ -1,9 +1,8 @@
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
 
 # ============================================================
 # Paths
@@ -66,16 +65,18 @@ LABELS = {
 # Plot style
 # ============================================================
 
-plt.rcParams.update({
-    "font.family": "serif",
-    "font.size": 10,
-    "axes.labelsize": 10,
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 9,
-    "legend.fontsize": 9,
-    "figure.dpi": 120,
-    "savefig.dpi": 350,
-})
+plt.rcParams.update(
+    {
+        "font.family": "serif",
+        "font.size": 10,
+        "axes.labelsize": 10,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "legend.fontsize": 9,
+        "figure.dpi": 120,
+        "savefig.dpi": 350,
+    }
+)
 
 
 def clean_axis(ax):
@@ -128,8 +129,7 @@ def annotate_bars(
         ax.annotate(
             fmt.format(height),
             xy=(
-                bar.get_x()
-                + bar.get_width() / 2,
+                bar.get_x() + bar.get_width() / 2,
                 height,
             ),
             xytext=(0, 4),
@@ -148,7 +148,6 @@ def annotate_bars(
 scenario_matrix = pd.DataFrame(
     {
         "Scenario": SCENARIOS,
-
         "Electricity system": [
             "2045 Reference",
             "2045 zero-direct-CO2",
@@ -158,7 +157,6 @@ scenario_matrix = pd.DataFrame(
             "2045 zero-direct-CO2",
             "2045 zero-direct-CO2",
         ],
-
         "Bitcoin mining": [
             "None",
             "None",
@@ -168,7 +166,6 @@ scenario_matrix = pd.DataFrame(
             "None",
             "1 GW flexible BTC",
         ],
-
         "Hydrogen production": [
             "None",
             "None",
@@ -190,9 +187,7 @@ scenario_matrix.to_latex(
     TABLE_DIR / "table_00_scenario_matrix.tex",
     index=False,
     escape=True,
-    caption=(
-        "Definition of the principal PyPSA-Earth scenarios."
-    ),
+    caption=("Definition of the principal PyPSA-Earth scenarios."),
     label="tab:scenario_matrix",
     position="htbp",
 )
@@ -243,18 +238,13 @@ headline.columns = [
 
 headline.index.name = "Scenario"
 
-headline.round(3).to_csv(
-    TABLE_DIR / "table_01_headline_kpis.csv"
-)
+headline.round(3).to_csv(TABLE_DIR / "table_01_headline_kpis.csv")
 
 headline.round(3).to_latex(
     TABLE_DIR / "table_01_headline_kpis.tex",
     escape=True,
     na_rep="--",
-    caption=(
-        "Headline results of the principal "
-        "PyPSA-Earth scenarios."
-    ),
+    caption=("Headline results of the principal " "PyPSA-Earth scenarios."),
     label="tab:headline_kpis",
     position="htbp",
 )
@@ -276,84 +266,34 @@ effect_rows = []
 
 for scenario, baseline in BASELINES.items():
 
-    flex = df.loc[
-        scenario,
-        "Flexible consumption [TWh]"
-    ]
+    flex = df.loc[scenario, "Flexible consumption [TWh]"]
 
     cost_delta = (
-        df.loc[
-            scenario,
-            "Power-system cost proxy [EUR bn]"
-        ]
-        -
-        df.loc[
-            baseline,
-            "Power-system cost proxy [EUR bn]"
-        ]
+        df.loc[scenario, "Power-system cost proxy [EUR bn]"]
+        - df.loc[baseline, "Power-system cost proxy [EUR bn]"]
     )
 
     co2_delta = (
-        df.loc[
-            scenario,
-            "CO2 emissions [MtCO2/a]"
-        ]
-        -
-        df.loc[
-            baseline,
-            "CO2 emissions [MtCO2/a]"
-        ]
+        df.loc[scenario, "CO2 emissions [MtCO2/a]"]
+        - df.loc[baseline, "CO2 emissions [MtCO2/a]"]
     )
 
     solar_curt_delta = (
-        df.loc[
-            scenario,
-            "Solar curtailment [TWh]"
-        ]
-        -
-        df.loc[
-            baseline,
-            "Solar curtailment [TWh]"
-        ]
+        df.loc[scenario, "Solar curtailment [TWh]"]
+        - df.loc[baseline, "Solar curtailment [TWh]"]
     )
 
     wind_curt_delta = (
-        df.loc[
-            scenario,
-            "Wind curtailment [TWh]"
-        ]
-        -
-        df.loc[
-            baseline,
-            "Wind curtailment [TWh]"
-        ]
+        df.loc[scenario, "Wind curtailment [TWh]"]
+        - df.loc[baseline, "Wind curtailment [TWh]"]
     )
 
-    total_curt_delta = (
-        solar_curt_delta
-        + wind_curt_delta
-    )
+    total_curt_delta = solar_curt_delta + wind_curt_delta
 
     if flex > 0:
-        cost_per_flex_mwh = (
-            cost_delta
-            * 1e9
-            /
-            (
-                flex
-                * 1e6
-            )
-        )
+        cost_per_flex_mwh = cost_delta * 1e9 / (flex * 1e6)
 
-        co2_per_flex_mwh = (
-            co2_delta
-            * 1e6
-            /
-            (
-                flex
-                * 1e6
-            )
-        )
+        co2_per_flex_mwh = co2_delta * 1e6 / (flex * 1e6)
 
     else:
         cost_per_flex_mwh = np.nan
@@ -363,74 +303,31 @@ for scenario, baseline in BASELINES.items():
         {
             "Scenario": scenario,
             "Baseline": baseline,
-
-            "Flexible electricity [TWh]":
-                flex,
-
-            "Incremental upstream cost [EUR million]":
-                cost_delta * 1000,
-
-            "Incremental cost [EUR/MWh_flex]":
-                cost_per_flex_mwh,
-
-            "Incremental CO2 [Mt/a]":
-                co2_delta,
-
-            "Incremental CO2 [t/MWh_flex]":
-                co2_per_flex_mwh,
-
-            "Change in solar+wind curtailment [TWh]":
-                total_curt_delta,
-
-            "Change in solar capacity [GW]":
-                (
-                    df.loc[
-                        scenario,
-                        "Solar capacity [GW]"
-                    ]
-                    -
-                    df.loc[
-                        baseline,
-                        "Solar capacity [GW]"
-                    ]
-                ),
-
-            "Change in wind capacity [GW]":
-                (
-                    df.loc[
-                        scenario,
-                        "Wind capacity [GW]"
-                    ]
-                    -
-                    df.loc[
-                        baseline,
-                        "Wind capacity [GW]"
-                    ]
-                ),
-
-            "Change in battery energy [GWh]":
-                (
-                    df.loc[
-                        scenario,
-                        "Battery energy capacity [GWh]"
-                    ]
-                    -
-                    df.loc[
-                        baseline,
-                        "Battery energy capacity [GWh]"
-                    ]
-                ),
+            "Flexible electricity [TWh]": flex,
+            "Incremental upstream cost [EUR million]": cost_delta * 1000,
+            "Incremental cost [EUR/MWh_flex]": cost_per_flex_mwh,
+            "Incremental CO2 [Mt/a]": co2_delta,
+            "Incremental CO2 [t/MWh_flex]": co2_per_flex_mwh,
+            "Change in solar+wind curtailment [TWh]": total_curt_delta,
+            "Change in solar capacity [GW]": (
+                df.loc[scenario, "Solar capacity [GW]"]
+                - df.loc[baseline, "Solar capacity [GW]"]
+            ),
+            "Change in wind capacity [GW]": (
+                df.loc[scenario, "Wind capacity [GW]"]
+                - df.loc[baseline, "Wind capacity [GW]"]
+            ),
+            "Change in battery energy [GWh]": (
+                df.loc[scenario, "Battery energy capacity [GWh]"]
+                - df.loc[baseline, "Battery energy capacity [GWh]"]
+            ),
         }
     )
 
 
-effects = pd.DataFrame(
-    effect_rows
-).set_index("Scenario")
+effects = pd.DataFrame(effect_rows).set_index("Scenario")
 
-effects.round(4).to_csv(
-    TABLE_DIR / "table_02_baseline_relative_effects.csv"
-)
+effects.round(4).to_csv(TABLE_DIR / "table_02_baseline_relative_effects.csv")
 
 effects.round(4).to_latex(
     TABLE_DIR / "table_02_baseline_relative_effects.tex",
@@ -450,9 +347,7 @@ effects.round(4).to_latex(
 # TABLE 03 — Synergy / conflict summary
 # ============================================================
 
-interaction_col = (
-    "Interaction S6-(S4+S5-S1)"
-)
+interaction_col = "Interaction S6-(S4+S5-S1)"
 
 cost_interaction_bn = float(
     interaction.loc[
@@ -483,123 +378,61 @@ ror_curt_interaction = float(
 )
 
 total_curt_interaction = (
-    solar_curt_interaction
-    + wind_curt_interaction
-    + ror_curt_interaction
+    solar_curt_interaction + wind_curt_interaction + ror_curt_interaction
 )
 
 
 def competition_value(metric):
-    row = competition.loc[
-        competition["Metric"] == metric
-    ]
+    row = competition.loc[competition["Metric"] == metric]
 
     if row.empty:
         return np.nan
 
-    return float(
-        row.iloc[0]["Value"]
-    )
+    return float(row.iloc[0]["Value"])
 
 
-btc_consumption_change = competition_value(
-    "BTC consumption change S6-S4 [TWh]"
-)
+btc_consumption_change = competition_value("BTC consumption change S6-S4 [TWh]")
 
-btc_cf_change = competition_value(
-    "BTC CF change S6-S4 [percentage points]"
-)
+btc_cf_change = competition_value("BTC CF change S6-S4 [percentage points]")
 
-pem_price_change = competition_value(
-    "PEM weighted price change S6-S5 [EUR/MWh]"
-)
+pem_price_change = competition_value("PEM weighted price change S6-S5 [EUR/MWh]")
 
 
 synergy = pd.DataFrame(
     [
         {
-            "Indicator":
-                "Combined cost non-additivity",
-
-            "Value":
-                cost_interaction_bn
-                * 1e6,
-
-            "Unit":
-                "EUR thousand/a",
-
-            "Interpretation":
-                (
-                    "Effectively neutral; very small "
-                    "positive interaction."
-                ),
+            "Indicator": "Combined cost non-additivity",
+            "Value": cost_interaction_bn * 1e6,
+            "Unit": "EUR thousand/a",
+            "Interpretation": (
+                "Effectively neutral; very small " "positive interaction."
+            ),
         },
-
         {
-            "Indicator":
-                "Combined renewable-curtailment non-additivity",
-
-            "Value":
-                total_curt_interaction,
-
-            "Unit":
-                "TWh/a",
-
-            "Interpretation":
-                (
-                    "Effectively neutral; small additional "
-                    "curtailment reduction."
-                ),
+            "Indicator": "Combined renewable-curtailment non-additivity",
+            "Value": total_curt_interaction,
+            "Unit": "TWh/a",
+            "Interpretation": (
+                "Effectively neutral; small additional " "curtailment reduction."
+            ),
         },
-
         {
-            "Indicator":
-                "BTC electricity change when H2 is added",
-
-            "Value":
-                btc_consumption_change,
-
-            "Unit":
-                "TWh/a",
-
-            "Interpretation":
-                (
-                    "Negligible direct competition for "
-                    "electricity."
-                ),
+            "Indicator": "BTC electricity change when H2 is added",
+            "Value": btc_consumption_change,
+            "Unit": "TWh/a",
+            "Interpretation": ("Negligible direct competition for " "electricity."),
         },
-
         {
-            "Indicator":
-                "BTC capacity-factor change when H2 is added",
-
-            "Value":
-                btc_cf_change,
-
-            "Unit":
-                "percentage points",
-
-            "Interpretation":
-                (
-                    "Negligible operational competition."
-                ),
+            "Indicator": "BTC capacity-factor change when H2 is added",
+            "Value": btc_cf_change,
+            "Unit": "percentage points",
+            "Interpretation": ("Negligible operational competition."),
         },
-
         {
-            "Indicator":
-                "PEM weighted-price change when BTC is added",
-
-            "Value":
-                pem_price_change,
-
-            "Unit":
-                "EUR/MWh",
-
-            "Interpretation":
-                (
-                    "Negligible increase in marginal "
-                    "electricity value."
-                ),
+            "Indicator": "PEM weighted-price change when BTC is added",
+            "Value": pem_price_change,
+            "Unit": "EUR/MWh",
+            "Interpretation": ("Negligible increase in marginal " "electricity value."),
         },
     ]
 )
@@ -627,34 +460,20 @@ synergy.round(6).to_latex(
 # FIGURE 01 — Total upstream power-system cost
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.0, 4.7)
-)
+fig, ax = plt.subplots(figsize=(8.0, 4.7))
 
-values = df.loc[
-    SCENARIOS,
-    "Power-system cost proxy [EUR bn]"
-]
+values = df.loc[SCENARIOS, "Power-system cost proxy [EUR bn]"]
 
 bars = ax.bar(
     range(len(SCENARIOS)),
     values,
 )
 
-ax.set_xticks(
-    range(len(SCENARIOS))
-)
+ax.set_xticks(range(len(SCENARIOS)))
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Upstream power-system cost [EUR bn/a]"
-)
+ax.set_ylabel("Upstream power-system cost [EUR bn/a]")
 
 clean_axis(ax)
 
@@ -682,13 +501,10 @@ flex_scenarios = [
     "S6",
 ]
 
-fig, ax = plt.subplots(
-    figsize=(7.5, 4.7)
-)
+fig, ax = plt.subplots(figsize=(7.5, 4.7))
 
 values = df.loc[
-    flex_scenarios,
-    "Incremental power-system cost per flexible MWh [EUR/MWh]"
+    flex_scenarios, "Incremental power-system cost per flexible MWh [EUR/MWh]"
 ]
 
 bars = ax.bar(
@@ -696,20 +512,11 @@ bars = ax.bar(
     values,
 )
 
-ax.set_xticks(
-    range(len(flex_scenarios))
-)
+ax.set_xticks(range(len(flex_scenarios)))
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in flex_scenarios
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in flex_scenarios])
 
-ax.set_ylabel(
-    "Incremental upstream cost [EUR/MWh$_{flex}$]"
-)
+ax.set_ylabel("Incremental upstream cost [EUR/MWh$_{flex}$]")
 
 clean_axis(ax)
 
@@ -729,34 +536,20 @@ save_figure(
 # FIGURE 03 — CO2 emissions
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.0, 4.7)
-)
+fig, ax = plt.subplots(figsize=(8.0, 4.7))
 
-values = df.loc[
-    SCENARIOS,
-    "CO2 emissions [MtCO2/a]"
-]
+values = df.loc[SCENARIOS, "CO2 emissions [MtCO2/a]"]
 
 bars = ax.bar(
     range(len(SCENARIOS)),
     values,
 )
 
-ax.set_xticks(
-    range(len(SCENARIOS))
-)
+ax.set_xticks(range(len(SCENARIOS)))
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Direct fossil CO$_2$ emissions [MtCO$_2$/a]"
-)
+ax.set_ylabel("Direct fossil CO$_2$ emissions [MtCO$_2$/a]")
 
 clean_axis(ax)
 
@@ -776,23 +569,13 @@ save_figure(
 # FIGURE 04 — Renewable curtailment
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.0, 4.8)
-)
+fig, ax = plt.subplots(figsize=(8.0, 4.8))
 
-x = np.arange(
-    len(SCENARIOS)
-)
+x = np.arange(len(SCENARIOS))
 
-solar = df.loc[
-    SCENARIOS,
-    "Solar curtailment [TWh]"
-].to_numpy()
+solar = df.loc[SCENARIOS, "Solar curtailment [TWh]"].to_numpy()
 
-wind = df.loc[
-    SCENARIOS,
-    "Wind curtailment [TWh]"
-].to_numpy()
+wind = df.loc[SCENARIOS, "Wind curtailment [TWh]"].to_numpy()
 
 ax.bar(
     x,
@@ -809,20 +592,11 @@ ax.bar(
 
 ax.set_xticks(x)
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Renewable curtailment [TWh/a]"
-)
+ax.set_ylabel("Renewable curtailment [TWh/a]")
 
-ax.legend(
-    frameon=False
-)
+ax.legend(frameon=False)
 
 clean_axis(ax)
 
@@ -836,25 +610,15 @@ save_figure(
 # FIGURE 05 — Solar and wind capacity
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.2, 4.8)
-)
+fig, ax = plt.subplots(figsize=(8.2, 4.8))
 
-x = np.arange(
-    len(SCENARIOS)
-)
+x = np.arange(len(SCENARIOS))
 
 width = 0.38
 
-solar = df.loc[
-    SCENARIOS,
-    "Solar capacity [GW]"
-].to_numpy()
+solar = df.loc[SCENARIOS, "Solar capacity [GW]"].to_numpy()
 
-wind = df.loc[
-    SCENARIOS,
-    "Wind capacity [GW]"
-].to_numpy()
+wind = df.loc[SCENARIOS, "Wind capacity [GW]"].to_numpy()
 
 ax.bar(
     x - width / 2,
@@ -872,20 +636,11 @@ ax.bar(
 
 ax.set_xticks(x)
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Installed generation capacity [GW]"
-)
+ax.set_ylabel("Installed generation capacity [GW]")
 
-ax.legend(
-    frameon=False
-)
+ax.legend(frameon=False)
 
 clean_axis(ax)
 
@@ -899,34 +654,20 @@ save_figure(
 # FIGURE 06 — Battery energy capacity
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.0, 4.7)
-)
+fig, ax = plt.subplots(figsize=(8.0, 4.7))
 
-values = df.loc[
-    SCENARIOS,
-    "Battery energy capacity [GWh]"
-]
+values = df.loc[SCENARIOS, "Battery energy capacity [GWh]"]
 
 bars = ax.bar(
     range(len(SCENARIOS)),
     values,
 )
 
-ax.set_xticks(
-    range(len(SCENARIOS))
-)
+ax.set_xticks(range(len(SCENARIOS)))
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Battery energy capacity [GWh]"
-)
+ax.set_ylabel("Battery energy capacity [GWh]")
 
 clean_axis(ax)
 
@@ -946,25 +687,15 @@ save_figure(
 # FIGURE 07 — Flexible-consumer utilization
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.0, 4.8)
-)
+fig, ax = plt.subplots(figsize=(8.0, 4.8))
 
-x = np.arange(
-    len(SCENARIOS)
-)
+x = np.arange(len(SCENARIOS))
 
 width = 0.38
 
-btc_cf = df.loc[
-    SCENARIOS,
-    "BTC capacity factor [%]"
-].to_numpy()
+btc_cf = df.loc[SCENARIOS, "BTC capacity factor [%]"].to_numpy()
 
-pem_cf = df.loc[
-    SCENARIOS,
-    "PEM capacity factor [%]"
-].to_numpy()
+pem_cf = df.loc[SCENARIOS, "PEM capacity factor [%]"].to_numpy()
 
 ax.bar(
     x - width / 2,
@@ -982,25 +713,16 @@ ax.bar(
 
 ax.set_xticks(x)
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Capacity factor [%]"
-)
+ax.set_ylabel("Capacity factor [%]")
 
 ax.set_ylim(
     0,
     105,
 )
 
-ax.legend(
-    frameon=False
-)
+ax.legend(frameon=False)
 
 clean_axis(ax)
 
@@ -1014,19 +736,11 @@ save_figure(
 # FIGURE 08 — Flexible electricity consumption
 # ============================================================
 
-fig, ax = plt.subplots(
-    figsize=(8.0, 4.8)
-)
+fig, ax = plt.subplots(figsize=(8.0, 4.8))
 
-btc_e = df.loc[
-    SCENARIOS,
-    "BTC consumption [TWh]"
-].to_numpy()
+btc_e = df.loc[SCENARIOS, "BTC consumption [TWh]"].to_numpy()
 
-pem_e = df.loc[
-    SCENARIOS,
-    "PEM electricity [TWh]"
-].to_numpy()
+pem_e = df.loc[SCENARIOS, "PEM electricity [TWh]"].to_numpy()
 
 ax.bar(
     x,
@@ -1043,20 +757,11 @@ ax.bar(
 
 ax.set_xticks(x)
 
-ax.set_xticklabels(
-    [
-        LABELS[s]
-        for s in SCENARIOS
-    ]
-)
+ax.set_xticklabels([LABELS[s] for s in SCENARIOS])
 
-ax.set_ylabel(
-    "Flexible electricity consumption [TWh/a]"
-)
+ax.set_ylabel("Flexible electricity consumption [TWh/a]")
 
-ax.legend(
-    frameon=False
-)
+ax.legend(frameon=False)
 
 clean_axis(ax)
 
@@ -1081,24 +786,12 @@ print(f"Tables : {TABLE_DIR}")
 
 print()
 print("Recommended core figures for Chapter 4:")
-print(
-    "  figure_02_incremental_cost_per_flexible_MWh"
-)
-print(
-    "  figure_03_CO2_emissions"
-)
-print(
-    "  figure_04_solar_wind_curtailment"
-)
-print(
-    "  figure_05_solar_wind_capacity"
-)
-print(
-    "  figure_06_battery_energy_capacity"
-)
-print(
-    "  figure_07_flexible_consumer_capacity_factor"
-)
+print("  figure_02_incremental_cost_per_flexible_MWh")
+print("  figure_03_CO2_emissions")
+print("  figure_04_solar_wind_curtailment")
+print("  figure_05_solar_wind_capacity")
+print("  figure_06_battery_energy_capacity")
+print("  figure_07_flexible_consumer_capacity_factor")
 
 print()
 print("Recommended core tables:")

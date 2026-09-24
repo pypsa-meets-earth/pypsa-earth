@@ -39,7 +39,6 @@ from __future__ import annotations
 
 import pandas as pd
 
-
 # =============================================================================
 # Component names
 # =============================================================================
@@ -57,6 +56,7 @@ H2_PRODUCT_STORE_NAME = "THESIS H2 annual product accumulator"
 # Snapshot weighting
 # =============================================================================
 
+
 def snapshot_weights(n, column: str = "generators") -> pd.Series:
     """
     Return snapshot weights aligned to the network snapshots.
@@ -69,11 +69,7 @@ def snapshot_weights(n, column: str = "generators") -> pd.Series:
             f"{list(n.snapshot_weightings.columns)}"
         )
 
-    return (
-        n.snapshot_weightings[column]
-        .reindex(n.snapshots)
-        .astype(float)
-    )
+    return n.snapshot_weightings[column].reindex(n.snapshots).astype(float)
 
 
 def weighted_sum(
@@ -87,20 +83,15 @@ def weighted_sum(
 
     w = snapshot_weights(n, column)
 
-    s = (
-        series
-        .reindex(n.snapshots)
-        .astype(float)
-    )
+    s = series.reindex(n.snapshots).astype(float)
 
-    return float(
-        s.mul(w).sum()
-    )
+    return float(s.mul(w).sum())
 
 
 # =============================================================================
 # BTC representation
 # =============================================================================
+
 
 def btc_representation(n) -> str:
     """
@@ -118,15 +109,9 @@ def btc_representation(n) -> str:
         No BTC component present.
     """
 
-    has_link = (
-        BTC_LINK_NAME
-        in n.links.index
-    )
+    has_link = BTC_LINK_NAME in n.links.index
 
-    has_legacy_generator = (
-        LEGACY_BTC_GENERATOR_NAME
-        in n.generators.index
-    )
+    has_legacy_generator = LEGACY_BTC_GENERATOR_NAME in n.generators.index
 
     if has_link and has_legacy_generator:
         raise RuntimeError(
@@ -153,19 +138,13 @@ def btc_consumption_series_mw(n) -> pd.Series:
 
     if representation == "link":
 
-        return (
-            n.links_t.p0[BTC_LINK_NAME]
-            .astype(float)
-            .clip(lower=0.0)
-        )
+        return n.links_t.p0[BTC_LINK_NAME].astype(float).clip(lower=0.0)
 
     if representation == "legacy_generator":
 
         return (
-            -n.generators_t.p[
-                LEGACY_BTC_GENERATOR_NAME
-            ]
-        ).astype(float).clip(lower=0.0)
+            (-n.generators_t.p[LEGACY_BTC_GENERATOR_NAME]).astype(float).clip(lower=0.0)
+        )
 
     return pd.Series(
         0.0,
@@ -191,10 +170,7 @@ def btc_consumption_twh(n) -> float:
     Annual BTC electricity consumption [TWh/a].
     """
 
-    return (
-        btc_consumption_mwh(n)
-        / 1e6
-    )
+    return btc_consumption_mwh(n) / 1e6
 
 
 def btc_capacity_mw(n) -> float:
@@ -242,19 +218,13 @@ def btc_capacity_factor_pct(n) -> float:
         ).sum()
     )
 
-    return (
-        100.0
-        * btc_consumption_mwh(n)
-        / (
-            capacity_mw
-            * hours
-        )
-    )
+    return 100.0 * btc_consumption_mwh(n) / (capacity_mw * hours)
 
 
 # =============================================================================
 # BTC objective accounting
 # =============================================================================
+
 
 def btc_objective_contribution_eur(n) -> float:
     """
@@ -281,13 +251,7 @@ def btc_objective_contribution_eur(n) -> float:
 
     if representation == "link":
 
-        dispatch = (
-            n.links_t.p0[
-                BTC_LINK_NAME
-            ]
-            .reindex(n.snapshots)
-            .astype(float)
-        )
+        dispatch = n.links_t.p0[BTC_LINK_NAME].reindex(n.snapshots).astype(float)
 
         marginal_cost = float(
             n.links.at[
@@ -299,9 +263,7 @@ def btc_objective_contribution_eur(n) -> float:
     else:
 
         dispatch = (
-            n.generators_t.p[
-                LEGACY_BTC_GENERATOR_NAME
-            ]
+            n.generators_t.p[LEGACY_BTC_GENERATOR_NAME]
             .reindex(n.snapshots)
             .astype(float)
         )
@@ -313,10 +275,7 @@ def btc_objective_contribution_eur(n) -> float:
             ]
         )
 
-    return float(
-        dispatch.mul(w).sum()
-        * marginal_cost
-    )
+    return float(dispatch.mul(w).sum() * marginal_cost)
 
 
 def upstream_power_system_cost_eur(n) -> float:
@@ -336,25 +295,20 @@ def upstream_power_system_cost_eur(n) -> float:
     electricity-system expenditure proxy.
     """
 
-    return (
-        float(n.objective)
-        - btc_objective_contribution_eur(n)
-    )
+    return float(n.objective) - btc_objective_contribution_eur(n)
 
 
 # =============================================================================
 # PEM / hydrogen
 # =============================================================================
 
+
 def has_pem(n) -> bool:
     """
     Return True when the thesis PEM Link is present.
     """
 
-    return (
-        PEM_LINK_NAME
-        in n.links.index
-    )
+    return PEM_LINK_NAME in n.links.index
 
 
 def pem_electricity_series_mw(n) -> pd.Series:
@@ -370,13 +324,7 @@ def pem_electricity_series_mw(n) -> pd.Series:
             dtype=float,
         )
 
-    return (
-        n.links_t.p0[
-            PEM_LINK_NAME
-        ]
-        .astype(float)
-        .clip(lower=0.0)
-    )
+    return n.links_t.p0[PEM_LINK_NAME].astype(float).clip(lower=0.0)
 
 
 def pem_electricity_mwh(n) -> float:
@@ -396,10 +344,7 @@ def pem_electricity_twh(n) -> float:
     Annual PEM electricity consumption [TWh_el/a].
     """
 
-    return (
-        pem_electricity_mwh(n)
-        / 1e6
-    )
+    return pem_electricity_mwh(n) / 1e6
 
 
 def h2_product_series_mw_lhv(n) -> pd.Series:
@@ -418,11 +363,7 @@ def h2_product_series_mw_lhv(n) -> pd.Series:
             dtype=float,
         )
 
-    return (
-        -n.links_t.p1[
-            PEM_LINK_NAME
-        ]
-    ).astype(float).clip(lower=0.0)
+    return (-n.links_t.p1[PEM_LINK_NAME]).astype(float).clip(lower=0.0)
 
 
 def h2_product_mwh_lhv(n) -> float:
@@ -442,10 +383,7 @@ def h2_product_twh_lhv(n) -> float:
     Annual hydrogen product [TWh_H2,LHV/a].
     """
 
-    return (
-        h2_product_mwh_lhv(n)
-        / 1e6
-    )
+    return h2_product_mwh_lhv(n) / 1e6
 
 
 def h2_product_kt(n) -> float:
@@ -456,25 +394,20 @@ def h2_product_kt(n) -> float:
         1 kt H2 = 33,330 MWh_H2,LHV
     """
 
-    return (
-        h2_product_mwh_lhv(n)
-        / 33330.0
-    )
+    return h2_product_mwh_lhv(n) / 33330.0
 
 
 # =============================================================================
 # Combined flexible-consumer reporting
 # =============================================================================
 
+
 def flexible_electricity_twh(n) -> float:
     """
     Total electricity consumed by BTC + PEM [TWh/a].
     """
 
-    return (
-        btc_consumption_twh(n)
-        + pem_electricity_twh(n)
-    )
+    return btc_consumption_twh(n) + pem_electricity_twh(n)
 
 
 def summary(n) -> dict:
@@ -483,39 +416,16 @@ def summary(n) -> dict:
     """
 
     return {
-        "btc_representation":
-            btc_representation(n),
-
-        "btc_capacity_mw":
-            btc_capacity_mw(n),
-
-        "btc_electricity_twh":
-            btc_consumption_twh(n),
-
-        "btc_capacity_factor_pct":
-            btc_capacity_factor_pct(n),
-
-        "btc_objective_contribution_eur":
-            btc_objective_contribution_eur(n),
-
-        "pem_present":
-            has_pem(n),
-
-        "pem_electricity_twh":
-            pem_electricity_twh(n),
-
-        "h2_product_twh_lhv":
-            h2_product_twh_lhv(n),
-
-        "h2_product_kt":
-            h2_product_kt(n),
-
-        "flexible_electricity_twh":
-            flexible_electricity_twh(n),
-
-        "raw_objective_eur":
-            float(n.objective),
-
-        "upstream_power_system_cost_eur":
-            upstream_power_system_cost_eur(n),
+        "btc_representation": btc_representation(n),
+        "btc_capacity_mw": btc_capacity_mw(n),
+        "btc_electricity_twh": btc_consumption_twh(n),
+        "btc_capacity_factor_pct": btc_capacity_factor_pct(n),
+        "btc_objective_contribution_eur": btc_objective_contribution_eur(n),
+        "pem_present": has_pem(n),
+        "pem_electricity_twh": pem_electricity_twh(n),
+        "h2_product_twh_lhv": h2_product_twh_lhv(n),
+        "h2_product_kt": h2_product_kt(n),
+        "flexible_electricity_twh": flexible_electricity_twh(n),
+        "raw_objective_eur": float(n.objective),
+        "upstream_power_system_cost_eur": upstream_power_system_cost_eur(n),
     }

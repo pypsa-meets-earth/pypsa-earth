@@ -1,15 +1,14 @@
-from pathlib import Path
 import hashlib
+from pathlib import Path
 
 import pandas as pd
 import pypsa
-
 from thesis_flexible_consumers import (
-    btc_representation,
     btc_capacity_mw,
     btc_consumption_twh,
-    pem_electricity_twh,
+    btc_representation,
     h2_product_kt,
+    pem_electricity_twh,
 )
 
 ROOT = Path("results/scenarios/final_S0_S6_Link_20260922")
@@ -41,13 +40,7 @@ def weights(n):
 
 def annual_base_demand_twh(n):
     w = weights(n)
-    return float(
-        n.loads_t.p_set
-        .sum(axis=1)
-        .mul(w)
-        .sum()
-        / 1e6
-    )
+    return float(n.loads_t.p_set.sum(axis=1).mul(w).sum() / 1e6)
 
 
 def direct_co2_mt(n):
@@ -63,27 +56,16 @@ def direct_co2_mt(n):
         if "co2_emissions" not in n.carriers.columns:
             continue
 
-        intensity = float(
-            n.carriers.at[carrier, "co2_emissions"]
-        )
+        intensity = float(n.carriers.at[carrier, "co2_emissions"])
 
         efficiency = float(row.efficiency)
 
         if intensity == 0 or efficiency <= 0:
             continue
 
-        generation_mwh = float(
-            n.generators_t.p[name]
-            .clip(lower=0)
-            .mul(w)
-            .sum()
-        )
+        generation_mwh = float(n.generators_t.p[name].clip(lower=0).mul(w).sum())
 
-        total_t += (
-            generation_mwh
-            / efficiency
-            * intensity
-        )
+        total_t += generation_mwh / efficiency * intensity
 
     return total_t / 1e6
 
@@ -106,24 +88,26 @@ for scenario, (
 
     n = pypsa.Network(path)
 
-    rows.append({
-        "scenario": scenario,
-        "system_regime": regime,
-        "network_file": str(path),
-        "sha256": sha256(path),
-        "snapshots": len(n.snapshots),
-        "weighted_hours": float(weights(n).sum()),
-        "annual_base_demand_twh": annual_base_demand_twh(n),
-        "direct_co2_mt_per_a": direct_co2_mt(n),
-        "btc_expected": btc_expected,
-        "btc_representation": btc_representation(n),
-        "btc_capacity_mw": btc_capacity_mw(n),
-        "btc_electricity_twh": btc_consumption_twh(n),
-        "pem_expected": pem_expected,
-        "pem_electricity_twh": pem_electricity_twh(n),
-        "h2_production_kt_per_a": h2_product_kt(n),
-        "raw_objective_eur": float(n.objective),
-    })
+    rows.append(
+        {
+            "scenario": scenario,
+            "system_regime": regime,
+            "network_file": str(path),
+            "sha256": sha256(path),
+            "snapshots": len(n.snapshots),
+            "weighted_hours": float(weights(n).sum()),
+            "annual_base_demand_twh": annual_base_demand_twh(n),
+            "direct_co2_mt_per_a": direct_co2_mt(n),
+            "btc_expected": btc_expected,
+            "btc_representation": btc_representation(n),
+            "btc_capacity_mw": btc_capacity_mw(n),
+            "btc_electricity_twh": btc_consumption_twh(n),
+            "pem_expected": pem_expected,
+            "pem_electricity_twh": pem_electricity_twh(n),
+            "h2_production_kt_per_a": h2_product_kt(n),
+            "raw_objective_eur": float(n.objective),
+        }
+    )
 
 
 df = pd.DataFrame(rows).set_index("scenario")
@@ -136,25 +120,13 @@ df = pd.DataFrame(rows).set_index("scenario")
 for scenario in df.index:
 
     if int(df.loc[scenario, "snapshots"]) != 8760:
-        raise AssertionError(
-            f"{scenario}: snapshots != 8760"
-        )
+        raise AssertionError(f"{scenario}: snapshots != 8760")
 
-    if abs(
-        float(df.loc[scenario, "weighted_hours"])
-        - 8760.0
-    ) > 1e-6:
-        raise AssertionError(
-            f"{scenario}: weighted hours != 8760"
-        )
+    if abs(float(df.loc[scenario, "weighted_hours"]) - 8760.0) > 1e-6:
+        raise AssertionError(f"{scenario}: weighted hours != 8760")
 
-    if abs(
-        float(df.loc[scenario, "annual_base_demand_twh"])
-        - 187.0
-    ) > 1e-6:
-        raise AssertionError(
-            f"{scenario}: base demand != 187 TWh/a"
-        )
+    if abs(float(df.loc[scenario, "annual_base_demand_twh"]) - 187.0) > 1e-6:
+        raise AssertionError(f"{scenario}: base demand != 187 TWh/a")
 
 
 # ------------------------------------------------------------------
@@ -164,25 +136,16 @@ for scenario in df.index:
 for scenario in ["S2", "S4", "S6"]:
 
     if df.loc[scenario, "btc_representation"] != "link":
-        raise AssertionError(
-            f"{scenario}: BTC is not represented by Link"
-        )
+        raise AssertionError(f"{scenario}: BTC is not represented by Link")
 
-    if abs(
-        float(df.loc[scenario, "btc_capacity_mw"])
-        - 1000.0
-    ) > 1e-9:
-        raise AssertionError(
-            f"{scenario}: BTC capacity != 1000 MW"
-        )
+    if abs(float(df.loc[scenario, "btc_capacity_mw"]) - 1000.0) > 1e-9:
+        raise AssertionError(f"{scenario}: BTC capacity != 1000 MW")
 
 
 for scenario in ["S0", "S1", "S3", "S5"]:
 
     if df.loc[scenario, "btc_representation"] != "none":
-        raise AssertionError(
-            f"{scenario}: unexpected BTC component"
-        )
+        raise AssertionError(f"{scenario}: unexpected BTC component")
 
 
 # ------------------------------------------------------------------
@@ -191,13 +154,8 @@ for scenario in ["S0", "S1", "S3", "S5"]:
 
 for scenario in ["S3", "S5", "S6"]:
 
-    if abs(
-        float(df.loc[scenario, "h2_production_kt_per_a"])
-        - 100.0
-    ) > 1e-6:
-        raise AssertionError(
-            f"{scenario}: H2 production != 100 kt/a"
-        )
+    if abs(float(df.loc[scenario, "h2_production_kt_per_a"]) - 100.0) > 1e-6:
+        raise AssertionError(f"{scenario}: H2 production != 100 kt/a")
 
 
 # ------------------------------------------------------------------
@@ -206,12 +164,8 @@ for scenario in ["S3", "S5", "S6"]:
 
 for scenario in ["S1", "S4", "S5", "S6"]:
 
-    if abs(
-        float(df.loc[scenario, "direct_co2_mt_per_a"])
-    ) > 1e-8:
-        raise AssertionError(
-            f"{scenario}: direct CO2 is not zero"
-        )
+    if abs(float(df.loc[scenario, "direct_co2_mt_per_a"])) > 1e-8:
+        raise AssertionError(f"{scenario}: direct CO2 is not zero")
 
 
 output = ROOT / "final_scenario_manifest.csv"
@@ -240,9 +194,7 @@ print(
             "pem_electricity_twh",
             "h2_production_kt_per_a",
         ]
-    ].to_string(
-        float_format=lambda x: f"{x:.9f}"
-    )
+    ].to_string(float_format=lambda x: f"{x:.9f}")
 )
 
 print()

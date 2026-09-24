@@ -4,31 +4,15 @@ import numpy as np
 import pandas as pd
 import pypsa
 
+OLD_SOLVED = Path("results/networks/" "elec_s_10_ec_lcopt_1h-S2BTC.nc")
 
-OLD_SOLVED = Path(
-    "results/networks/"
-    "elec_s_10_ec_lcopt_1h-S2BTC.nc"
-)
+NEW_SOLVED = Path("results/networks/" "elec_s_10_ec_lcopt_1h-S2BTCLINKV2.nc")
 
-NEW_SOLVED = Path(
-    "results/networks/"
-    "elec_s_10_ec_lcopt_1h-S2BTCLINKV2.nc"
-)
+OLD_INPUT = Path("networks/" "elec_s_10_ec_lcopt_1h-S2BTC.nc")
 
-OLD_INPUT = Path(
-    "networks/"
-    "elec_s_10_ec_lcopt_1h-S2BTC.nc"
-)
+NEW_INPUT = Path("networks/" "elec_s_10_ec_lcopt_1h-S2BTCLINKV2.nc")
 
-NEW_INPUT = Path(
-    "networks/"
-    "elec_s_10_ec_lcopt_1h-S2BTCLINKV2.nc"
-)
-
-OUTPUT = Path(
-    "results/scenarios/"
-    "btc_link_regression_S2.csv"
-)
+OUTPUT = Path("results/scenarios/" "btc_link_regression_S2.csv")
 
 OLD_BTC = "THESIS BTC flexible mining"
 NEW_BTC = "THESIS BTC mining link"
@@ -36,39 +20,25 @@ BTC_STORE = "THESIS BTC service accumulator"
 
 
 def weights(n, column):
-    return (
-        n.snapshot_weightings[column]
-        .reindex(n.snapshots)
-        .astype(float)
-    )
+    return n.snapshot_weightings[column].reindex(n.snapshots).astype(float)
 
 
 def annual_sum(series, n, column="generators"):
     w = weights(n, column)
 
-    return float(
-        series.reindex(n.snapshots)
-        .mul(w)
-        .sum()
-    )
+    return float(series.reindex(n.snapshots).mul(w).sum())
 
 
 def effective_generator_capacity(n):
     capacity = n.generators["p_nom"].astype(float).copy()
 
     if "p_nom_opt" in n.generators.columns:
-        extendable = (
-            n.generators["p_nom_extendable"]
-            .fillna(False)
-            .astype(bool)
-        )
+        extendable = n.generators["p_nom_extendable"].fillna(False).astype(bool)
 
-        capacity.loc[extendable] = (
-            n.generators.loc[
-                extendable,
-                "p_nom_opt",
-            ].astype(float)
-        )
+        capacity.loc[extendable] = n.generators.loc[
+            extendable,
+            "p_nom_opt",
+        ].astype(float)
 
     return capacity
 
@@ -77,18 +47,12 @@ def effective_store_capacity(n):
     capacity = n.stores["e_nom"].astype(float).copy()
 
     if "e_nom_opt" in n.stores.columns:
-        extendable = (
-            n.stores["e_nom_extendable"]
-            .fillna(False)
-            .astype(bool)
-        )
+        extendable = n.stores["e_nom_extendable"].fillna(False).astype(bool)
 
-        capacity.loc[extendable] = (
-            n.stores.loc[
-                extendable,
-                "e_nom_opt",
-            ].astype(float)
-        )
+        capacity.loc[extendable] = n.stores.loc[
+            extendable,
+            "e_nom_opt",
+        ].astype(float)
 
     return capacity
 
@@ -97,18 +61,12 @@ def effective_line_capacity(n):
     capacity = n.lines["s_nom"].astype(float).copy()
 
     if "s_nom_opt" in n.lines.columns:
-        extendable = (
-            n.lines["s_nom_extendable"]
-            .fillna(False)
-            .astype(bool)
-        )
+        extendable = n.lines["s_nom_extendable"].fillna(False).astype(bool)
 
-        capacity.loc[extendable] = (
-            n.lines.loc[
-                extendable,
-                "s_nom_opt",
-            ].astype(float)
-        )
+        capacity.loc[extendable] = n.lines.loc[
+            extendable,
+            "s_nom_opt",
+        ].astype(float)
 
     return capacity
 
@@ -116,9 +74,7 @@ def effective_line_capacity(n):
 def dense_generator_attribute(n, attribute):
     static = pd.DataFrame(
         np.tile(
-            n.generators[attribute]
-            .astype(float)
-            .to_numpy(),
+            n.generators[attribute].astype(float).to_numpy(),
             (len(n.snapshots), 1),
         ),
         index=n.snapshots,
@@ -131,16 +87,12 @@ def dense_generator_attribute(n, attribute):
     )
 
     if not dynamic.empty:
-        cols = dynamic.columns.intersection(
-            n.generators.index
-        )
+        cols = dynamic.columns.intersection(n.generators.index)
 
-        static.loc[:, cols] = (
-            dynamic.loc[
-                n.snapshots,
-                cols,
-            ]
-        )
+        static.loc[:, cols] = dynamic.loc[
+            n.snapshots,
+            cols,
+        ]
 
     return static
 
@@ -148,9 +100,7 @@ def dense_generator_attribute(n, attribute):
 def dense_load_p_set(n):
     static = pd.DataFrame(
         np.tile(
-            n.loads["p_set"]
-            .astype(float)
-            .to_numpy(),
+            n.loads["p_set"].astype(float).to_numpy(),
             (len(n.snapshots), 1),
         ),
         index=n.snapshots,
@@ -160,16 +110,12 @@ def dense_load_p_set(n):
     dynamic = n.loads_t.p_set
 
     if not dynamic.empty:
-        cols = dynamic.columns.intersection(
-            n.loads.index
-        )
+        cols = dynamic.columns.intersection(n.loads.index)
 
-        static.loc[:, cols] = (
-            dynamic.loc[
-                n.snapshots,
-                cols,
-            ]
-        )
+        static.loc[:, cols] = dynamic.loc[
+            n.snapshots,
+            cols,
+        ]
 
     return static
 
@@ -179,10 +125,7 @@ def generator_capacity_gw(n, carrier):
 
     mask = n.generators.carrier.eq(carrier)
 
-    return float(
-        cap.loc[mask].sum()
-        / 1000.0
-    )
+    return float(cap.loc[mask].sum() / 1000.0)
 
 
 def store_capacity_gwh(n, carrier):
@@ -190,35 +133,22 @@ def store_capacity_gwh(n, carrier):
 
     mask = n.stores.carrier.eq(carrier)
 
-    return float(
-        cap.loc[mask].sum()
-        / 1000.0
-    )
+    return float(cap.loc[mask].sum() / 1000.0)
 
 
 def generation_twh(n, carrier):
-    names = n.generators.index[
-        n.generators.carrier.eq(carrier)
-    ]
+    names = n.generators.index[n.generators.carrier.eq(carrier)]
 
     if len(names) == 0:
         return 0.0
 
-    dispatch = (
-        n.generators_t.p[names]
-        .sum(axis=1)
-    )
+    dispatch = n.generators_t.p[names].sum(axis=1)
 
-    return (
-        annual_sum(dispatch, n)
-        / 1e6
-    )
+    return annual_sum(dispatch, n) / 1e6
 
 
 def curtailment_twh(n, carrier):
-    names = n.generators.index[
-        n.generators.carrier.eq(carrier)
-    ]
+    names = n.generators.index[n.generators.carrier.eq(carrier)]
 
     if len(names) == 0:
         return 0.0
@@ -230,75 +160,40 @@ def curtailment_twh(n, carrier):
         "p_max_pu",
     )
 
-    potential = (
-        p_max_pu[names]
-        .mul(
-            cap.loc[names],
-            axis=1,
-        )
+    potential = p_max_pu[names].mul(
+        cap.loc[names],
+        axis=1,
     )
 
     actual = n.generators_t.p[names]
 
-    curtailed = (
-        potential
-        - actual
-    ).clip(lower=0.0)
+    curtailed = (potential - actual).clip(lower=0.0)
 
     hourly_total = curtailed.sum(axis=1)
 
-    return (
-        annual_sum(hourly_total, n)
-        / 1e6
-    )
+    return annual_sum(hourly_total, n) / 1e6
 
 
 def direct_co2_mt(n):
     if "co2_emissions" not in n.carriers.columns:
         return float("nan")
 
-    carrier_co2 = (
-        n.carriers["co2_emissions"]
-        .astype(float)
-    )
+    carrier_co2 = n.carriers["co2_emissions"].astype(float)
 
-    co2_intensity = (
-        n.generators["carrier"]
-        .map(carrier_co2)
-        .fillna(0.0)
-    )
+    co2_intensity = n.generators["carrier"].map(carrier_co2).fillna(0.0)
 
-    efficiency = (
-        n.generators["efficiency"]
-        .astype(float)
-        .replace(0.0, np.nan)
-    )
+    efficiency = n.generators["efficiency"].astype(float).replace(0.0, np.nan)
 
-    co2_per_mwh_el = (
-        co2_intensity
-        / efficiency
-    ).fillna(0.0)
+    co2_per_mwh_el = (co2_intensity / efficiency).fillna(0.0)
 
-    dispatch = (
-        n.generators_t.p[
-            n.generators.index
-        ]
-        .clip(lower=0.0)
-    )
+    dispatch = n.generators_t.p[n.generators.index].clip(lower=0.0)
 
-    hourly = (
-        dispatch
-        .mul(
-            co2_per_mwh_el,
-            axis=1,
-        )
-        .sum(axis=1)
-    )
+    hourly = dispatch.mul(
+        co2_per_mwh_el,
+        axis=1,
+    ).sum(axis=1)
 
-    return (
-        annual_sum(hourly, n)
-        / 1e6
-    )
+    return annual_sum(hourly, n) / 1e6
 
 
 def load_weighted_price(n):
@@ -316,71 +211,36 @@ def load_weighted_price(n):
         if bus not in bus_load.columns:
             continue
 
-        bus_load[bus] = (
-            load[list(load_names)]
-            .sum(axis=1)
-        )
+        bus_load[bus] = load[list(load_names)].sum(axis=1)
 
-    prices = (
-        n.buses_t.marginal_price
-        .reindex(
-            index=n.snapshots,
-            columns=n.buses.index,
-        )
+    prices = n.buses_t.marginal_price.reindex(
+        index=n.snapshots,
+        columns=n.buses.index,
     )
 
     w = weights(n, "generators")
 
-    numerator = (
-        (
-            prices
-            * bus_load
-        )
-        .sum(axis=1)
-        .mul(w)
-        .sum()
-    )
+    numerator = (prices * bus_load).sum(axis=1).mul(w).sum()
 
-    denominator = (
-        bus_load
-        .sum(axis=1)
-        .mul(w)
-        .sum()
-    )
+    denominator = bus_load.sum(axis=1).mul(w).sum()
 
-    return float(
-        numerator
-        / denominator
-    )
+    return float(numerator / denominator)
 
 
 def line_volume_million_mwkm(n):
     cap = effective_line_capacity(n)
 
-    volume = (
-        cap
-        * n.lines["length"].astype(float)
-    ).sum()
+    volume = (cap * n.lines["length"].astype(float)).sum()
 
-    return float(
-        volume
-        / 1e6
-    )
+    return float(volume / 1e6)
 
 
 def btc_metrics(old, new):
-    old_dispatch_signed = (
-        old.generators_t.p[OLD_BTC]
-    )
+    old_dispatch_signed = old.generators_t.p[OLD_BTC]
 
-    old_consumption = (
-        -old_dispatch_signed
-    )
+    old_consumption = -old_dispatch_signed
 
-    new_consumption = (
-        new.links_t.p0[NEW_BTC]
-        .clip(lower=0.0)
-    )
+    new_consumption = new.links_t.p0[NEW_BTC].clip(lower=0.0)
 
     old_energy = annual_sum(
         old_consumption,
@@ -450,10 +310,7 @@ def btc_objective_contribution_old(n):
 
     w = weights(n, "objective")
 
-    return float(
-        p.mul(w).sum()
-        * mc
-    )
+    return float(p.mul(w).sum() * mc)
 
 
 def btc_objective_contribution_new(n):
@@ -468,10 +325,7 @@ def btc_objective_contribution_new(n):
 
     w = weights(n, "objective")
 
-    return float(
-        p0.mul(w).sum()
-        * mc
-    )
+    return float(p0.mul(w).sum() * mc)
 
 
 for path in [
@@ -504,24 +358,14 @@ new_input = pypsa.Network(NEW_INPUT)
 )
 
 
-old_btc_obj = (
-    btc_objective_contribution_old(old)
-)
+old_btc_obj = btc_objective_contribution_old(old)
 
-new_btc_obj = (
-    btc_objective_contribution_new(new)
-)
+new_btc_obj = btc_objective_contribution_new(new)
 
 
-old_system_cost = (
-    float(old.objective)
-    - old_btc_obj
-)
+old_system_cost = float(old.objective) - old_btc_obj
 
-new_system_cost = (
-    float(new.objective)
-    - new_btc_obj
-)
+new_system_cost = float(new.objective) - new_btc_obj
 
 
 metrics = {
@@ -529,12 +373,10 @@ metrics = {
         old_btc_energy / 1e6,
         new_btc_energy / 1e6,
     ),
-
     "BTC capacity factor [%]": (
         old_btc_cf,
         new_btc_cf,
     ),
-
     "Solar capacity [GW]": (
         generator_capacity_gw(
             old,
@@ -545,7 +387,6 @@ metrics = {
             "solar",
         ),
     ),
-
     "Wind capacity [GW]": (
         generator_capacity_gw(
             old,
@@ -556,7 +397,6 @@ metrics = {
             "onwind",
         ),
     ),
-
     "Battery energy [GWh]": (
         store_capacity_gwh(
             old,
@@ -567,7 +407,6 @@ metrics = {
             "battery",
         ),
     ),
-
     "Solar generation [TWh/a]": (
         generation_twh(
             old,
@@ -578,7 +417,6 @@ metrics = {
             "solar",
         ),
     ),
-
     "Wind generation [TWh/a]": (
         generation_twh(
             old,
@@ -589,7 +427,6 @@ metrics = {
             "onwind",
         ),
     ),
-
     "Coal generation [TWh/a]": (
         generation_twh(
             old,
@@ -600,7 +437,6 @@ metrics = {
             "coal",
         ),
     ),
-
     "CCGT generation [TWh/a]": (
         generation_twh(
             old,
@@ -611,7 +447,6 @@ metrics = {
             "CCGT",
         ),
     ),
-
     "OCGT generation [TWh/a]": (
         generation_twh(
             old,
@@ -622,7 +457,6 @@ metrics = {
             "OCGT",
         ),
     ),
-
     "Solar curtailment [TWh/a]": (
         curtailment_twh(
             old,
@@ -633,7 +467,6 @@ metrics = {
             "solar",
         ),
     ),
-
     "Wind curtailment [TWh/a]": (
         curtailment_twh(
             old,
@@ -644,27 +477,22 @@ metrics = {
             "onwind",
         ),
     ),
-
     "Direct CO2 [Mt/a]": (
         direct_co2_mt(old),
         direct_co2_mt(new),
     ),
-
     "Load-weighted price [EUR/MWh]": (
         load_weighted_price(old),
         load_weighted_price(new),
     ),
-
     "AC line volume [million MWkm]": (
         line_volume_million_mwkm(old),
         line_volume_million_mwkm(new),
     ),
-
     "Raw objective [EUR bn/a]": (
         float(old.objective) / 1e9,
         float(new.objective) / 1e9,
     ),
-
     "Upstream system-cost proxy [EUR bn/a]": (
         old_system_cost / 1e9,
         new_system_cost / 1e9,
@@ -678,11 +506,7 @@ for metric, (old_value, new_value) in metrics.items():
     delta = new_value - old_value
 
     if abs(old_value) > 1e-12:
-        relative = (
-            100.0
-            * delta
-            / abs(old_value)
-        )
+        relative = 100.0 * delta / abs(old_value)
     else:
         relative = np.nan
 
@@ -710,18 +534,11 @@ df.to_csv(
 )
 
 
-print(
-    "\n"
-    "============================================================"
-)
+print("\n" "============================================================")
 
-print(
-    "S2 BTC GENERATOR -> LINK FULL REGRESSION"
-)
+print("S2 BTC GENERATOR -> LINK FULL REGRESSION")
 
-print(
-    "============================================================"
-)
+print("============================================================")
 
 print(
     df.to_string(
@@ -731,18 +548,11 @@ print(
 )
 
 
-print(
-    "\n"
-    "============================================================"
-)
+print("\n" "============================================================")
 
-print(
-    "ECONOMIC INPUT CHECK"
-)
+print("ECONOMIC INPUT CHECK")
 
-print(
-    "============================================================"
-)
+print("============================================================")
 
 print(
     "Old unsolved Generator marginal cost:",
@@ -777,26 +587,15 @@ print(
 )
 
 
-print(
-    "\n"
-    "============================================================"
-)
+print("\n" "============================================================")
 
-print(
-    "BTC BOOKKEEPING STORE CHECK"
-)
+print("BTC BOOKKEEPING STORE CHECK")
 
-print(
-    "============================================================"
-)
+print("============================================================")
 
-store_p = (
-    new.stores_t.p[BTC_STORE]
-)
+store_p = new.stores_t.p[BTC_STORE]
 
-link_p0 = (
-    new.links_t.p0[NEW_BTC]
-)
+link_p0 = new.links_t.p0[NEW_BTC]
 
 eff = float(
     new.links.at[
@@ -805,14 +604,9 @@ eff = float(
     ]
 )
 
-service_balance_error = (
-    (-store_p)
-    - link_p0 * eff
-).abs().max()
+service_balance_error = ((-store_p) - link_p0 * eff).abs().max()
 
-store_e = (
-    new.stores_t.e[BTC_STORE]
-)
+store_e = new.stores_t.e[BTC_STORE]
 
 print(
     "Maximum Store discharge [MW]:",
@@ -844,8 +638,6 @@ print(
     ),
 )
 
-print(
-    "\nSaved regression table:"
-)
+print("\nSaved regression table:")
 
 print(OUTPUT)

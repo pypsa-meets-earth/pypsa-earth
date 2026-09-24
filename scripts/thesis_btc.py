@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 # =============================================================================
 # Thesis BTC component names
 # =============================================================================
@@ -37,12 +36,11 @@ DEFAULT_NON_ELECTRIC_OPEX_EUR2020_PER_MWH = 0.0
 # Economic conversion
 # =============================================================================
 
+
 def btc_hashprice_eur2020_per_th_day(
-    hashprice_usd_per_ph_day: float
-    = DEFAULT_HASHPRICE_USD2026_PER_PH_DAY,
+    hashprice_usd_per_ph_day: float = DEFAULT_HASHPRICE_USD2026_PER_PH_DAY,
     usd_per_eur: float = DEFAULT_USD_PER_EUR,
-    eur2026_to_eur2020_factor: float
-    = DEFAULT_EUR2026_TO_EUR2020_FACTOR,
+    eur2026_to_eur2020_factor: float = DEFAULT_EUR2026_TO_EUR2020_FACTOR,
 ) -> float:
     """
     Convert BTC hashprice from
@@ -65,37 +63,23 @@ def btc_hashprice_eur2020_per_th_day(
     """
 
     if hashprice_usd_per_ph_day <= 0:
-        raise ValueError(
-            "BTC hashprice must be positive."
-        )
+        raise ValueError("BTC hashprice must be positive.")
 
     if usd_per_eur <= 0:
-        raise ValueError(
-            "USD per EUR exchange rate must be positive."
-        )
+        raise ValueError("USD per EUR exchange rate must be positive.")
 
     if eur2026_to_eur2020_factor <= 0:
-        raise ValueError(
-            "EUR2026-to-EUR2020 factor must be positive."
-        )
+        raise ValueError("EUR2026-to-EUR2020 factor must be positive.")
 
-    return (
-        hashprice_usd_per_ph_day
-        / 1000.0
-        / usd_per_eur
-        / eur2026_to_eur2020_factor
-    )
+    return hashprice_usd_per_ph_day / 1000.0 / usd_per_eur / eur2026_to_eur2020_factor
 
 
 def btc_electricity_value_eur2020_per_mwh(
-    hashprice_usd_per_ph_day: float
-    = DEFAULT_HASHPRICE_USD2026_PER_PH_DAY,
-    asic_efficiency_j_per_th: float
-    = DEFAULT_ASIC_EFFICIENCY_J_PER_TH,
+    hashprice_usd_per_ph_day: float = DEFAULT_HASHPRICE_USD2026_PER_PH_DAY,
+    asic_efficiency_j_per_th: float = DEFAULT_ASIC_EFFICIENCY_J_PER_TH,
     pue: float = DEFAULT_PUE,
     usd_per_eur: float = DEFAULT_USD_PER_EUR,
-    eur2026_to_eur2020_factor: float
-    = DEFAULT_EUR2026_TO_EUR2020_FACTOR,
+    eur2026_to_eur2020_factor: float = DEFAULT_EUR2026_TO_EUR2020_FACTOR,
 ) -> float:
     """
     Calculate gross BTC mining revenue per MWh of
@@ -119,23 +103,15 @@ def btc_electricity_value_eur2020_per_mwh(
     """
 
     if asic_efficiency_j_per_th <= 0:
-        raise ValueError(
-            "ASIC efficiency must be positive."
-        )
+        raise ValueError("ASIC efficiency must be positive.")
 
     if pue < 1.0:
-        raise ValueError(
-            "PUE must be greater than or equal to 1."
-        )
+        raise ValueError("PUE must be greater than or equal to 1.")
 
-    hashprice_eur2020_per_th_day = (
-        btc_hashprice_eur2020_per_th_day(
-            hashprice_usd_per_ph_day=
-                hashprice_usd_per_ph_day,
-            usd_per_eur=usd_per_eur,
-            eur2026_to_eur2020_factor=
-                eur2026_to_eur2020_factor,
-        )
+    hashprice_eur2020_per_th_day = btc_hashprice_eur2020_per_th_day(
+        hashprice_usd_per_ph_day=hashprice_usd_per_ph_day,
+        usd_per_eur=usd_per_eur,
+        eur2026_to_eur2020_factor=eur2026_to_eur2020_factor,
     )
 
     # 1 MW = 1,000,000 J/s.
@@ -145,21 +121,13 @@ def btc_electricity_value_eur2020_per_mwh(
     #
     # Including PUE gives the hashrate supported
     # by 1 MW of total facility electricity.
-    hashrate_th_per_s_per_mw = (
-        1e6
-        / (
-            asic_efficiency_j_per_th
-            * pue
-        )
-    )
+    hashrate_th_per_s_per_mw = 1e6 / (asic_efficiency_j_per_th * pue)
 
     # Hashprice is daily revenue per TH/s.
     # Divide by 24 to obtain revenue per MWh
     # for a continuously operating 1 MW facility.
     value_eur2020_per_mwh = (
-        hashrate_th_per_s_per_mw
-        * hashprice_eur2020_per_th_day
-        / 24.0
+        hashrate_th_per_s_per_mw * hashprice_eur2020_per_th_day / 24.0
     )
 
     return value_eur2020_per_mwh
@@ -169,20 +137,17 @@ def btc_electricity_value_eur2020_per_mwh(
 # PyPSA component
 # =============================================================================
 
+
 def add_btc_mining_link(
     n,
     electricity_bus: str = "KZ0 0",
     p_nom_mw: float = 1000.0,
-    hashprice_usd_per_ph_day: float
-    = DEFAULT_HASHPRICE_USD2026_PER_PH_DAY,
-    asic_efficiency_j_per_th: float
-    = DEFAULT_ASIC_EFFICIENCY_J_PER_TH,
+    hashprice_usd_per_ph_day: float = DEFAULT_HASHPRICE_USD2026_PER_PH_DAY,
+    asic_efficiency_j_per_th: float = DEFAULT_ASIC_EFFICIENCY_J_PER_TH,
     pue: float = DEFAULT_PUE,
     usd_per_eur: float = DEFAULT_USD_PER_EUR,
-    eur2026_to_eur2020_factor: float
-    = DEFAULT_EUR2026_TO_EUR2020_FACTOR,
-    non_electric_opex_eur2020_per_mwh: float
-    = DEFAULT_NON_ELECTRIC_OPEX_EUR2020_PER_MWH,
+    eur2026_to_eur2020_factor: float = DEFAULT_EUR2026_TO_EUR2020_FACTOR,
+    non_electric_opex_eur2020_per_mwh: float = DEFAULT_NON_ELECTRIC_OPEX_EUR2020_PER_MWH,
 ):
     """
     Add flexible Bitcoin mining as a PyPSA Link.
@@ -218,20 +183,14 @@ def add_btc_mining_link(
 
     if electricity_bus not in n.buses.index:
         raise KeyError(
-            f"BTC connection bus '{electricity_bus}' "
-            "does not exist in the network."
+            f"BTC connection bus '{electricity_bus}' " "does not exist in the network."
         )
 
     if p_nom_mw <= 0:
-        raise ValueError(
-            "BTC electrical capacity must be positive."
-        )
+        raise ValueError("BTC electrical capacity must be positive.")
 
     if non_electric_opex_eur2020_per_mwh < 0:
-        raise ValueError(
-            "BTC non-electric marginal OPEX cannot "
-            "be negative."
-        )
+        raise ValueError("BTC non-electric marginal OPEX cannot " "be negative.")
 
     # -------------------------------------------------------------------------
     # Remove legacy BTC representation if present
@@ -260,33 +219,21 @@ def add_btc_mining_link(
     # Economic calculation
     # -------------------------------------------------------------------------
 
-    hashprice_eur2020_per_th_day = (
-        btc_hashprice_eur2020_per_th_day(
-            hashprice_usd_per_ph_day=
-                hashprice_usd_per_ph_day,
-            usd_per_eur=usd_per_eur,
-            eur2026_to_eur2020_factor=
-                eur2026_to_eur2020_factor,
-        )
+    hashprice_eur2020_per_th_day = btc_hashprice_eur2020_per_th_day(
+        hashprice_usd_per_ph_day=hashprice_usd_per_ph_day,
+        usd_per_eur=usd_per_eur,
+        eur2026_to_eur2020_factor=eur2026_to_eur2020_factor,
     )
 
-    gross_value = (
-        btc_electricity_value_eur2020_per_mwh(
-            hashprice_usd_per_ph_day=
-                hashprice_usd_per_ph_day,
-            asic_efficiency_j_per_th=
-                asic_efficiency_j_per_th,
-            pue=pue,
-            usd_per_eur=usd_per_eur,
-            eur2026_to_eur2020_factor=
-                eur2026_to_eur2020_factor,
-        )
+    gross_value = btc_electricity_value_eur2020_per_mwh(
+        hashprice_usd_per_ph_day=hashprice_usd_per_ph_day,
+        asic_efficiency_j_per_th=asic_efficiency_j_per_th,
+        pue=pue,
+        usd_per_eur=usd_per_eur,
+        eur2026_to_eur2020_factor=eur2026_to_eur2020_factor,
     )
 
-    net_value = (
-        gross_value
-        - non_electric_opex_eur2020_per_mwh
-    )
+    net_value = gross_value - non_electric_opex_eur2020_per_mwh
 
     if net_value <= 0:
         raise ValueError(
@@ -329,25 +276,19 @@ def add_btc_mining_link(
     n.add(
         "Link",
         BTC_LINK_NAME,
-
         bus0=electricity_bus,
         bus1=BTC_BUS_NAME,
-
         carrier="bitcoin_mining",
-
         # Fixed facility-meter electrical capacity
         p_nom=p_nom_mw,
         p_nom_extendable=False,
-
         # Fully flexible load
         p_min_pu=0.0,
         p_max_pu=1.0,
-
         # Bookkeeping conversion only:
         # 1 MWh electricity ->
         # 1 MWh-equivalent BTC service
         efficiency=1.0,
-
         # Link p0 is positive electricity consumption.
         # Negative cost represents marginal BTC value.
         marginal_cost=-net_value,
@@ -366,34 +307,23 @@ def add_btc_mining_link(
     # BTC service production over the modeled period.
     # -------------------------------------------------------------------------
 
-    snapshot_hours = float(
-        n.snapshot_weightings.stores.sum()
-    )
+    snapshot_hours = float(n.snapshot_weightings.stores.sum())
 
-    max_service_mwh = (
-        p_nom_mw
-        * snapshot_hours
-    )
+    max_service_mwh = p_nom_mw * snapshot_hours
 
     n.add(
         "Store",
         BTC_STORE_NAME,
-
         bus=BTC_BUS_NAME,
         carrier="bitcoin_service",
-
         e_nom=max_service_mwh,
         e_nom_extendable=False,
-
         e_min_pu=0.0,
         e_max_pu=1.0,
-
         e_initial=0.0,
         e_cyclic=False,
         e_cyclic_per_period=False,
-
         standing_loss=0.0,
-
         marginal_cost=0.0,
         capital_cost=0.0,
     )
@@ -402,13 +332,7 @@ def add_btc_mining_link(
     # Reporting
     # -------------------------------------------------------------------------
 
-    hashrate_th_per_s_per_mw = (
-        1e6
-        / (
-            asic_efficiency_j_per_th
-            * pue
-        )
-    )
+    hashrate_th_per_s_per_mw = 1e6 / (asic_efficiency_j_per_th * pue)
 
     print(
         "\nBTC mining Link added"
@@ -437,26 +361,15 @@ def add_btc_mining_link(
     )
 
     return {
-        "hashprice_usd2026_per_ph_day":
-            hashprice_usd_per_ph_day,
-        "hashprice_eur2020_per_th_day":
-            hashprice_eur2020_per_th_day,
-        "asic_efficiency_j_per_th":
-            asic_efficiency_j_per_th,
-        "pue":
-            pue,
-        "usd_per_eur":
-            usd_per_eur,
-        "eur2026_to_eur2020_factor":
-            eur2026_to_eur2020_factor,
-        "gross_value_eur2020_per_mwh":
-            gross_value,
-        "non_electric_opex_eur2020_per_mwh":
-            non_electric_opex_eur2020_per_mwh,
-        "net_value_eur2020_per_mwh":
-            net_value,
-        "hashrate_th_per_s_per_mw":
-            hashrate_th_per_s_per_mw,
-        "max_service_mwh":
-            max_service_mwh,
+        "hashprice_usd2026_per_ph_day": hashprice_usd_per_ph_day,
+        "hashprice_eur2020_per_th_day": hashprice_eur2020_per_th_day,
+        "asic_efficiency_j_per_th": asic_efficiency_j_per_th,
+        "pue": pue,
+        "usd_per_eur": usd_per_eur,
+        "eur2026_to_eur2020_factor": eur2026_to_eur2020_factor,
+        "gross_value_eur2020_per_mwh": gross_value,
+        "non_electric_opex_eur2020_per_mwh": non_electric_opex_eur2020_per_mwh,
+        "net_value_eur2020_per_mwh": net_value,
+        "hashrate_th_per_s_per_mw": hashrate_th_per_s_per_mw,
+        "max_service_mwh": max_service_mwh,
     }

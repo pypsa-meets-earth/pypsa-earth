@@ -4,23 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-
 # ============================================================
 # Paths
 # ============================================================
 
-INPUT = Path(
-    "results/scenarios/final_scenario_kpis.csv"
-)
+INPUT = Path("results/scenarios/final_scenario_kpis.csv")
 
-OUTPUT_DIR = Path(
-    "results/scenarios/figures"
-)
+OUTPUT_DIR = Path("results/scenarios/figures")
 
-OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ============================================================
@@ -44,16 +36,13 @@ labels = [scenario_names[s] for s in scenarios]
 # Helper
 # ============================================================
 
+
 def save_figure(filename):
     path = OUTPUT_DIR / filename
 
     plt.tight_layout()
 
-    plt.savefig(
-        path,
-        dpi=300,
-        bbox_inches="tight"
-    )
+    plt.savefig(path, dpi=300, bbox_inches="tight")
 
     plt.close()
 
@@ -71,10 +60,8 @@ capacity_kpis = {
     "Coal": "Coal capacity [GW]",
     "CCGT": "CCGT capacity [GW]",
     "OCGT": "OCGT capacity [GW]",
-    "Reservoir hydro":
-        "Reservoir hydro capacity [GW]",
-    "Run-of-river":
-        "RoR capacity [GW]",
+    "Reservoir hydro": "Reservoir hydro capacity [GW]",
+    "Run-of-river": "RoR capacity [GW]",
 }
 
 x = np.arange(len(scenarios))
@@ -82,19 +69,10 @@ width = 0.11
 
 plt.figure(figsize=(11, 6))
 
-offsets = (
-    np.arange(len(capacity_kpis))
-    - (len(capacity_kpis) - 1) / 2
-) * width
+offsets = (np.arange(len(capacity_kpis)) - (len(capacity_kpis) - 1) / 2) * width
 
-for offset, (technology, column) in zip(
-    offsets,
-    capacity_kpis.items()
-):
-    values = [
-        df.loc[s, column]
-        for s in scenarios
-    ]
+for offset, (technology, column) in zip(offsets, capacity_kpis.items()):
+    values = [df.loc[s, column] for s in scenarios]
 
     plt.bar(
         x + offset,
@@ -103,31 +81,17 @@ for offset, (technology, column) in zip(
         label=technology,
     )
 
-plt.xticks(
-    x,
-    labels
-)
+plt.xticks(x, labels)
 
-plt.ylabel(
-    "Installed capacity [GW]"
-)
+plt.ylabel("Installed capacity [GW]")
 
-plt.title(
-    "Installed Generation Capacity – Kazakhstan 2045"
-)
+plt.title("Installed Generation Capacity – Kazakhstan 2045")
 
-plt.legend(
-    ncol=2
-)
+plt.legend(ncol=2)
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "01_installed_generation_capacity.png"
-)
+save_figure("01_installed_generation_capacity.png")
 
 
 # ============================================================
@@ -138,10 +102,8 @@ save_figure(
 generation_kpis = {
     "Solar": "Solar generation [TWh]",
     "Wind": "Wind generation [TWh]",
-    "Reservoir hydro":
-        "Reservoir hydro generation [TWh]",
-    "Run-of-river":
-        "RoR generation [TWh]",
+    "Reservoir hydro": "Reservoir hydro generation [TWh]",
+    "Run-of-river": "RoR generation [TWh]",
     "Coal": "Coal generation [TWh]",
     "CCGT": "CCGT generation [TWh]",
     "OCGT": "OCGT generation [TWh]",
@@ -149,16 +111,11 @@ generation_kpis = {
 
 plt.figure(figsize=(9, 6))
 
-bottom = np.zeros(
-    len(scenarios)
-)
+bottom = np.zeros(len(scenarios))
 
 for technology, column in generation_kpis.items():
 
-    values = np.array([
-        df.loc[s, column]
-        for s in scenarios
-    ])
+    values = np.array([df.loc[s, column] for s in scenarios])
 
     plt.bar(
         labels,
@@ -170,36 +127,21 @@ for technology, column in generation_kpis.items():
     bottom += values
 
 plt.axhline(
-    df.loc[
-        "S0_2045_Reference",
-        "Annual demand [TWh]"
-    ],
+    df.loc["S0_2045_Reference", "Annual demand [TWh]"],
     linestyle="--",
     linewidth=1.3,
     label="Annual demand",
 )
 
-plt.ylabel(
-    "Electricity generation [TWh]"
-)
+plt.ylabel("Electricity generation [TWh]")
 
-plt.title(
-    "Electricity Generation Mix – Kazakhstan 2045"
-)
+plt.title("Electricity Generation Mix – Kazakhstan 2045")
 
-plt.legend(
-    bbox_to_anchor=(1.02, 1),
-    loc="upper left"
-)
+plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left")
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "02_generation_mix.png"
-)
+save_figure("02_generation_mix.png")
 
 
 # ============================================================
@@ -208,40 +150,24 @@ save_figure(
 # ============================================================
 
 battery_kpis = {
-    "Battery energy [GWh]":
-        "Battery energy [GWh]",
-    "Battery charger [GW]":
-        "Battery charger [GW]",
-    "Battery discharger [GW]":
-        "Battery discharger [GW]",
+    "Battery energy [GWh]": "Battery energy [GWh]",
+    "Battery charger [GW]": "Battery charger [GW]",
+    "Battery discharger [GW]": "Battery discharger [GW]",
 }
 
 for title, column in battery_kpis.items():
 
-    plt.figure(
-        figsize=(7, 5)
-    )
+    plt.figure(figsize=(7, 5))
 
-    values = [
-        df.loc[s, column]
-        for s in scenarios
-    ]
+    values = [df.loc[s, column] for s in scenarios]
 
-    plt.bar(
-        labels,
-        values
-    )
+    plt.bar(labels, values)
 
     plt.ylabel(title)
 
-    plt.title(
-        f"{title} – Kazakhstan 2045"
-    )
+    plt.title(f"{title} – Kazakhstan 2045")
 
-    plt.grid(
-        axis="y",
-        alpha=0.3
-    )
+    plt.grid(axis="y", alpha=0.3)
 
     filename = (
         title.lower()
@@ -261,32 +187,20 @@ for title, column in battery_kpis.items():
 # ============================================================
 
 curtailment = {
-    "Solar":
-        "Solar curtailment [%]",
-    "Wind":
-        "Wind curtailment [%]",
-    "Run-of-river":
-        "RoR curtailment [%]",
+    "Solar": "Solar curtailment [%]",
+    "Wind": "Wind curtailment [%]",
+    "Run-of-river": "RoR curtailment [%]",
 }
 
-x = np.arange(
-    len(scenarios)
-)
+x = np.arange(len(scenarios))
 
 width = 0.24
 
-plt.figure(
-    figsize=(9, 5.5)
-)
+plt.figure(figsize=(9, 5.5))
 
-for i, (technology, column) in enumerate(
-    curtailment.items()
-):
+for i, (technology, column) in enumerate(curtailment.items()):
 
-    values = [
-        df.loc[s, column]
-        for s in scenarios
-    ]
+    values = [df.loc[s, column] for s in scenarios]
 
     plt.bar(
         x + (i - 1) * width,
@@ -295,29 +209,17 @@ for i, (technology, column) in enumerate(
         label=technology,
     )
 
-plt.xticks(
-    x,
-    labels
-)
+plt.xticks(x, labels)
 
-plt.ylabel(
-    "Curtailment [%]"
-)
+plt.ylabel("Curtailment [%]")
 
-plt.title(
-    "Renewable Curtailment – Kazakhstan 2045"
-)
+plt.title("Renewable Curtailment – Kazakhstan 2045")
 
 plt.legend()
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "04_renewable_curtailment.png"
-)
+save_figure("04_renewable_curtailment.png")
 
 
 # ============================================================
@@ -325,39 +227,19 @@ save_figure(
 # CO2 emissions
 # ============================================================
 
-plt.figure(
-    figsize=(7, 5)
-)
+plt.figure(figsize=(7, 5))
 
-values = [
-    df.loc[
-        s,
-        "CO2 emissions [MtCO2/a]"
-    ]
-    for s in scenarios
-]
+values = [df.loc[s, "CO2 emissions [MtCO2/a]"] for s in scenarios]
 
-plt.bar(
-    labels,
-    values
-)
+plt.bar(labels, values)
 
-plt.ylabel(
-    "CO$_2$ emissions [MtCO$_2$/a]"
-)
+plt.ylabel("CO$_2$ emissions [MtCO$_2$/a]")
 
-plt.title(
-    "Electricity-Sector CO$_2$ Emissions – Kazakhstan 2045"
-)
+plt.title("Electricity-Sector CO$_2$ Emissions – Kazakhstan 2045")
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "05_co2_emissions.png"
-)
+save_figure("05_co2_emissions.png")
 
 
 # ============================================================
@@ -366,34 +248,21 @@ save_figure(
 # ============================================================
 
 price_kpis = {
-    "Load-weighted":
-        "Load-weighted marginal price [EUR/MWh]",
-    "Unweighted":
-        "Unweighted mean marginal price [EUR/MWh]",
+    "Load-weighted": "Load-weighted marginal price [EUR/MWh]",
+    "Unweighted": "Unweighted mean marginal price [EUR/MWh]",
 }
 
-x = np.arange(
-    len(scenarios)
-)
+x = np.arange(len(scenarios))
 
 width = 0.32
 
-plt.figure(
-    figsize=(8, 5)
-)
+plt.figure(figsize=(8, 5))
 
-for i, (name, column) in enumerate(
-    price_kpis.items()
-):
+for i, (name, column) in enumerate(price_kpis.items()):
 
-    values = [
-        df.loc[s, column]
-        for s in scenarios
-    ]
+    values = [df.loc[s, column] for s in scenarios]
 
-    offset = (
-        i - 0.5
-    ) * width
+    offset = (i - 0.5) * width
 
     plt.bar(
         x + offset,
@@ -402,29 +271,17 @@ for i, (name, column) in enumerate(
         label=name,
     )
 
-plt.xticks(
-    x,
-    labels
-)
+plt.xticks(x, labels)
 
-plt.ylabel(
-    "Marginal electricity price [EUR/MWh]"
-)
+plt.ylabel("Marginal electricity price [EUR/MWh]")
 
-plt.title(
-    "Mean Marginal Electricity Prices – Kazakhstan 2045"
-)
+plt.title("Mean Marginal Electricity Prices – Kazakhstan 2045")
 
 plt.legend()
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "06_marginal_prices.png"
-)
+save_figure("06_marginal_prices.png")
 
 
 # ============================================================
@@ -432,39 +289,19 @@ save_figure(
 # Objective
 # ============================================================
 
-plt.figure(
-    figsize=(7, 5)
-)
+plt.figure(figsize=(7, 5))
 
-values = [
-    df.loc[
-        s,
-        "Objective [EUR bn]"
-    ]
-    for s in scenarios
-]
+values = [df.loc[s, "Objective [EUR bn]"] for s in scenarios]
 
-plt.bar(
-    labels,
-    values
-)
+plt.bar(labels, values)
 
-plt.ylabel(
-    "Objective [EUR billion]"
-)
+plt.ylabel("Objective [EUR billion]")
 
-plt.title(
-    "Optimized System Objective – Kazakhstan 2045"
-)
+plt.title("Optimized System Objective – Kazakhstan 2045")
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "07_system_objective.png"
-)
+save_figure("07_system_objective.png")
 
 
 # ============================================================
@@ -472,39 +309,19 @@ save_figure(
 # AC transmission line volume
 # ============================================================
 
-plt.figure(
-    figsize=(7, 5)
-)
+plt.figure(figsize=(7, 5))
 
-values = [
-    df.loc[
-        s,
-        "AC line volume [million MWkm]"
-    ]
-    for s in scenarios
-]
+values = [df.loc[s, "AC line volume [million MWkm]"] for s in scenarios]
 
-plt.bar(
-    labels,
-    values
-)
+plt.bar(labels, values)
 
-plt.ylabel(
-    "AC line volume [million MWkm]"
-)
+plt.ylabel("AC line volume [million MWkm]")
 
-plt.title(
-    "AC Transmission Line Volume – Kazakhstan 2045"
-)
+plt.title("AC Transmission Line Volume – Kazakhstan 2045")
 
-plt.grid(
-    axis="y",
-    alpha=0.3
-)
+plt.grid(axis="y", alpha=0.3)
 
-save_figure(
-    "08_ac_line_volume.png"
-)
+save_figure("08_ac_line_volume.png")
 
 
 print()
