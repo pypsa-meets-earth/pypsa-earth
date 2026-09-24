@@ -663,8 +663,10 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     # return to original crs
     df_l = df_l.to_crs(lines.crs)
 
-    # remove lines that are rings (included for completion), TODO: this should be a separate function
-    df_l = df_l[~df_l.geometry.is_ring].reset_index(drop=True)
+    # remove lines that are rings (included for completion) or degenerate (e.g. single points), TODO: this should be a separate function
+    df_l = df_l[
+        ~(df_l.geometry.is_ring | df_l.geometry.boundary.is_empty | (df_l.geometry.geom_type != "LineString"))
+    ].reset_index(drop=True)
 
     # buses should not be returned as they are not changed, but included for completion
     return df_l, buses
