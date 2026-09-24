@@ -10,6 +10,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
+
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 **Minor Changes and bug-fixing**
