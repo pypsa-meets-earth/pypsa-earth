@@ -13,7 +13,6 @@ from shutil import copyfile, move, unpack_archive
 
 from _helpers import (
     BASE_DIR,
-    branch,
     check_config_version,
     content_retrieve,
     copy_default_files,
