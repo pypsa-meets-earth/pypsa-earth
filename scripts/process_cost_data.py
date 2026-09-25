@@ -88,7 +88,7 @@ def annuity(n: float | pd.Series, r: float | pd.Series) -> float | pd.Series:
 
 # Single source for the currency reference year (aligned with `technology-data` output files / PyPSA-Earth input cost files).
 # Change this value to update the reference year everywhere.
-TECH_DATA_REFERENCE_YEAR = 2020
+TECH_DATA_REFERENCE_YEAR = 2025
 
 # Simple cache to avoid repeated computations and logging for same (currency, output_currency, year)
 _currency_conversion_cache = {}
@@ -250,7 +250,7 @@ def apply_currency_conversion(
     """
     Applies exchange rates from the cache to convert all cost values and units.
 
-    All rows are assumed to be in `*_reference_year` already (e.g. EUR_2020).
+    All rows are assumed to be in `*_reference_year` already (e.g. EUR_2025).
 
     Parameters
     ----------
