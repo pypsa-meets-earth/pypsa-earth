@@ -288,7 +288,9 @@ Specifies the options to estimate future electricity demand (load). Different ye
 
 {{ read_csv('configtables/load_options.csv') }}
 
-The snapshots date range (`snapshots\start` - `snapshots\end`) must be in the `weather_year`.
+`load_options.weather_year` accepts an integer or `derive_from_snapshots`. The latter infers the demand year from `snapshots.start`; an integer selects it independently. Neither option changes the configured snapshots. Demand is aligned by month, day, and hour, without preserving weekdays across years. February 29 uses February 28 when absent from the demand year. The selected demand year must be supported by the load source.
+
+`atlite.default: derive_from_snapshots` independently enables automatic cutout naming using the snapshot year and the definition under `atlite.cutouts.derive_from_snapshots`. An explicit name preserves the selected cutout and its configuration. Deriving a year requires snapshots within one calendar year, allowing January 1 of the following year as an exclusive end boundary. See [basic setup](customization/basic-setup.md) for examples.
 
 ### electricity
 
