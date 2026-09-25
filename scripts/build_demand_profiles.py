@@ -286,6 +286,66 @@ def read_demcast_load(
     return demcast_load
 
 
+def align_demand_to_snapshots(
+    demand_profiles: pd.DataFrame,
+    weather_year: int,
+    start_date,
+    end_date,
+) -> pd.DataFrame:
+    """
+    Align hourly demand to snapshots by calendar month, day, and hour.
+
+    The end boundary is exclusive. February 29 uses February 28 when
+    the source year is not a leap year. Weekdays are not preserved
+    when mapping between different years.
+    """
+    snapshots = pd.date_range(
+        start=start_date, end=end_date, freq="h", inclusive="left"
+    )
+    if snapshots.empty:
+        raise ValueError("The configured demand snapshot range is empty.")
+
+    profiles = demand_profiles.copy()
+    profiles.index = pd.DatetimeIndex(pd.to_datetime(profiles.index))
+    if profiles.index.hasnans or not profiles.index.is_unique:
+        raise ValueError("Demand timestamps must be valid and unique.")
+
+    source_times = []
+    leap_day_fallback = False
+    source_is_leap = pd.Timestamp(year=weather_year, month=1, day=1).is_leap_year
+
+    for timestamp in snapshots:
+        if timestamp.month == 2 and timestamp.day == 29 and not source_is_leap:
+            source_times.append(timestamp.replace(year=weather_year, day=28))
+            leap_day_fallback = True
+        else:
+            source_times.append(timestamp.replace(year=weather_year))
+
+    source_times = pd.DatetimeIndex(source_times)
+    missing = source_times.difference(profiles.index)
+    if not missing.empty:
+        raise ValueError(
+            f"Demand data for weather year {weather_year} do not cover "
+            f"{len(missing)} required timestamps; first missing: {missing[0]}."
+        )
+
+    aligned = profiles.reindex(source_times)
+    aligned.index = snapshots.rename(profiles.index.name)
+    if aligned.isna().any().any():
+        raise ValueError(
+            "Demand data contain missing values for the requested snapshots."
+        )
+
+    if leap_day_fallback:
+        logger.info(
+            "Demand year %s has no February 29; using February 28 demand "
+            "for February 29 snapshots.",
+            weather_year,
+        )
+
+    return aligned
+
+
 def build_demand_profiles(
     n,
     load_source,
@@ -413,9 +473,9 @@ def build_demand_profiles(
         axis=1,
     )
 
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date) - pd.Timedelta(hours=1)
-    demand_profiles = demand_profiles.loc[start_date:end_date]
+    demand_profiles = align_demand_to_snapshots(
+        demand_profiles, weather_year, start_date, end_date
+    )
     demand_profiles.to_csv(out_path, header=True)
 
     logger.info(f"Demand_profiles csv file created for the corresponding snapshots.")

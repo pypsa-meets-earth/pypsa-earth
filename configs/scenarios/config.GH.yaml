@@ -175,7 +175,7 @@ base_network:
 
 load_options:
   source: "gegis" # "demcast" or "gegis"
-  weather_year: 2013 # Integer or "derive_from_snapshots"
+  weather_year: derive_from_snapshots # Integer to select a different demand weather year
   prediction_year: 2030 # Valid only if "gegis" is used as source
   scale: 1 # scales all load time series, i.e. 2 doubles load
 
@@ -259,14 +259,16 @@ transformers:
 
 atlite:
   nprocesses: 4
-  cutout:
-    module: era5
-    dx: 0.3 # cutout resolution
-    dy: 0.3 # cutout resolution
-    # The cutout time is automatically derived from `snapshots`. See `snapshots:` above and `build_cutout.py`.
-    # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
-    # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
-    # y: [33., 72]    # manual set cutout range
+  default: derive_from_snapshots # Or an explicit cutout name
+  cutouts:
+    derive_from_snapshots:
+      module: era5
+      dx: 0.3 # cutout resolution
+      dy: 0.3 # cutout resolution
+      # The cutout time is automatically derived from `snapshots`. See `snapshots:` above and `build_cutout.py`.
+      # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
+      # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
+      # y: [33., 72]    # manual set cutout range
 
 renewable:
   onwind:

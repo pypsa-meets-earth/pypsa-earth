@@ -300,35 +300,6 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
-def _migrate_atlite_cutout(
-    config: dict[str, Any], warn: Callable[[str, str], None]
-) -> None:
-    """Migrate the legacy named cutout configuration to the single-cutout format."""
-    atlite_config = config.get("atlite", {})
-    legacy_cutouts = atlite_config.get("cutouts")
-
-    if not isinstance(legacy_cutouts, dict) or not legacy_cutouts:
-        return
-
-    legacy_default = atlite_config.get("default")
-
-    if legacy_default in legacy_cutouts:
-        cutout_config = legacy_cutouts[legacy_default]
-    elif len(legacy_cutouts) == 1:
-        cutout_config = next(iter(legacy_cutouts.values()))
-    else:
-        raise ValueError(
-            "Multiple legacy atlite cutouts are configured. "
-            "Move the selected cutout configuration manually to `atlite.cutout`."
-        )
-
-    atlite_config["cutout"] = cutout_config.copy()
-    atlite_config.pop("cutouts", None)
-    atlite_config.pop("default", None)
-
-    warn("atlite.cutouts/atlite.default", "atlite.cutout")
-
-
 def _migrate_line_type_mappings(
     config: dict[str, Any],
     warn: Callable[[str, str], None],
@@ -378,8 +349,8 @@ def migrate_config(
     (renames values, not just paths), ``sector.solar_thermal`` when it is still
     a legacy bool flag and the former ``{demand}`` / ``{h2export}`` wildcards
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
-    scalar), legacy ``atlite.cutouts`` and ``atlite.default`` settings, and
-    legacy ``lines.ac_types`` and ``lines.dc_types`` voltage mappings, which
+    scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
+    mappings, which
     are moved under their respective ``default`` keys.
 
     Parameters
@@ -405,7 +376,6 @@ def migrate_config(
     _migrate_line_type_mappings(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
-    _migrate_atlite_cutout(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
 
@@ -414,12 +384,11 @@ def migrate_config(
 
 def resolve_weather_configuration(config: dict) -> dict:
     """
-    Resolve and validate weather-dependent workflow settings.
+    Resolve demand weather year and optional automatic cutout naming.
 
-    ``load_options.weather_year`` may be either an explicit integer or
-    ``"derive_from_snapshots"``. With an explicit year, the workflow derives
-    an annual snapshot range. With ``"derive_from_snapshots"``, it preserves
-    the configured snapshots and infers the weather year from their start.
+    Snapshot dates are preserved. The demand weather year and default
+    cutout can independently be derived from snapshots. Explicit cutout
+    names and definitions are preserved.
 
     Parameters
     ----------
@@ -431,50 +400,53 @@ def resolve_weather_configuration(config: dict) -> dict:
     dict
         Updated configuration dictionary.
     """
-    configured_weather_year = config["load_options"]["weather_year"]
-    derive_from_snapshots = configured_weather_year == "derive_from_snapshots"
+    automatic = "derive_from_snapshots"
+    load_options = config["load_options"]
+    atlite_config = config["atlite"]
+    configured_year = load_options["weather_year"]
+    derive_load_year = configured_year == automatic
+    derive_cutout = atlite_config["default"] == automatic
 
-    if derive_from_snapshots:
-        snapshots = config["snapshots"]
-
+    if derive_load_year or derive_cutout:
         try:
-            snapshot_start = pd.Timestamp(snapshots["start"])
-            snapshot_end = pd.Timestamp(snapshots["end"])
+            start = pd.Timestamp(config["snapshots"]["start"])
+            end = pd.Timestamp(config["snapshots"]["end"])
         except (KeyError, TypeError, ValueError) as exc:
             raise ValueError(
-                "`weather_year: derive_from_snapshots` requires valid "
+                "`derive_from_snapshots` requires valid "
                 "`snapshots.start` and `snapshots.end` values."
             ) from exc
 
-        if snapshot_end <= snapshot_start:
+        if pd.isna(start) or pd.isna(end):
+            raise ValueError("Snapshot dates must not be missing.")
+        if end <= start:
             raise ValueError("`snapshots.end` must be later than `snapshots.start`.")
 
-        weather_year = snapshot_start.year
-        latest_valid_end = pd.Timestamp(f"{weather_year + 1}-01-01")
-
-        if snapshot_end > latest_valid_end:
+        snapshot_year = start.year
+        next_year = pd.Timestamp(year=snapshot_year + 1, month=1, day=1, tz=start.tz)
+        if end > next_year or (
+            end == next_year
+            and config["snapshots"].get("inclusive", "left") in ("both", "right")
+        ):
             raise ValueError(
-                "`weather_year: derive_from_snapshots` requires snapshots "
-                "within a single calendar year."
+                "`derive_from_snapshots` requires snapshots within a single "
+                "calendar year. January 1 of the following year is allowed "
+                "only as an exclusive end boundary."
             )
 
-        config["load_options"]["weather_year"] = weather_year
-    elif isinstance(configured_weather_year, int) and not isinstance(
-        configured_weather_year, bool
-    ):
-        weather_year = configured_weather_year
+    if derive_load_year:
+        weather_year = snapshot_year
+    elif isinstance(configured_year, int) and not isinstance(configured_year, bool):
+        weather_year = configured_year
     else:
         raise TypeError(
             "`load_options.weather_year` must be an integer or "
-            "'derive_from_snapshots', received "
-            f"{configured_weather_year!r}."
+            f"'derive_from_snapshots', received {configured_year!r}."
         )
 
-    load_source = config["load_options"]["source"]
-
+    load_source = load_options["source"]
     if load_source == "gegis":
-        supported_years = {2011, 2013, 2018}
-        if weather_year not in supported_years:
+        if weather_year not in {2011, 2013, 2018}:
             raise ValueError(
                 f"Weather year {weather_year} is not available for the GEGIS "
                 "load source. Supported years are 2011, 2013, and 2018."
@@ -490,20 +462,26 @@ def resolve_weather_configuration(config: dict) -> dict:
             f"Unknown load source {load_source!r}. Expected `gegis` or `demcast`."
         )
 
-    if not derive_from_snapshots and not config.get("tutorial", False):
-        config["snapshots"]["start"] = f"{weather_year}-01-01"
-        config["snapshots"]["end"] = f"{weather_year + 1}-01-01"
+    load_options["weather_year"] = weather_year
 
-    cutout_config = config["atlite"]["cutout"].copy()
-    module = cutout_config["module"]
+    if derive_cutout:
+        cutouts = atlite_config["cutouts"]
+        if automatic not in cutouts:
+            raise ValueError(
+                "`atlite.default: derive_from_snapshots` requires a cutout "
+                "definition under `atlite.cutouts.derive_from_snapshots`."
+            )
 
-    if config.get("tutorial", False):
-        cutout_name = f"cutout-{weather_year}-{module}-tutorial"
-    else:
-        cutout_name = f"cutout-{weather_year}-{module}"
+        cutout_config = cutouts[automatic].copy()
+        module = cutout_config["module"]
+        cutout_name = f"cutout-{snapshot_year}-{module}"
+        if config.get("tutorial", False):
+            cutout_name += "-tutorial"
 
-    config["atlite"]["default"] = cutout_name
-    config["atlite"]["cutouts"] = {cutout_name: cutout_config}
+        # Preserve an explicitly configured definition with the resolved name.
+        cutouts.setdefault(cutout_name, cutout_config)
+        del cutouts[automatic]
+        atlite_config["default"] = cutout_name
 
     return config
 

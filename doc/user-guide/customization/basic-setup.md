@@ -76,57 +76,69 @@ Ensure that the selected date range aligns with the dates available in the cutou
 
 ## Specify the demand year
 
-Year-related parameters are also being used when specifying `load_options`:
+By default, the demand weather year is inferred from `snapshots.start`:
 
 ```yaml
 load_options:
   source: "gegis"
-  weather_year: 2013
+  weather_year: derive_from_snapshots
   prediction_year: 2030
   scale: 1
 ```
 
-The `weather_year` value corresponds to the weather data which was used to generate the electricity demand profiles for a selected area while `prediction_year` corresponds to the point of a [Shared Socioeconomic Pathways (SSP)](https://en.wikipedia.org/wiki/Shared_Socioeconomic_Pathways) trajectory. PyPSA-Earth uses SSP2-2.6 scenario within the Shared Socioeconomic Pathways framework, which is characterized by medium challenges to mitigation and adaptation efforts resulting in a global warming of approximately 2.6°C by the end of the 21st century.
-The available values for `weather_year` and `prediction_year` can be checked by looking into `pypsa-earth/data/ssp2-2.6` folder. Currently, there are pre-calculated demand data for 2011, 2013, 2018 weather years and for 2030, 2040, 2050, and 2100 scenario prediction years.
+For GEGIS, `weather_year` selects the weather conditions used to generate the demand profile, while `prediction_year` selects the socioeconomic scenario year. Supported weather years are 2011, 2013, and 2018. DemandCast provides demand years from 2000 to 2024 and does not use `prediction_year`.
 
-Alternatively, set `weather_year: derive_from_snapshots` to preserve the configured snapshot range and infer the demand weather year from `snapshots.start`. The snapshot range must belong to a single calendar year, allowing January 1 of the following year as an exclusive end boundary.
+An explicit integer, such as `weather_year: 2013`, selects the demand year independently of snapshots and cutout selection. The configured snapshot range is never changed.
 
-## Use custom demand data
+Demand is aligned to snapshots by month, day, and hour. Weekdays are not preserved when the years differ. If the demand year has no February 29, its February 28 profile is reused for February 29. Missing required timestamps or demand values raise an error.
 
-It is possible to implement custom demand profiles. It can be done by creating a dedicated custom demand sub-folder in a scenario folder `pypsa-earth/data/ssp2-2.6` and placing there a custom demand file. The name of a custom demand sub-folder should correspond to `weather_year` argument which stands in this case for general identification of a demand input. The name of a demand input file should be a continent name to which belongs a country of initerest. Both csv and nc formats can be used for demand files.
-
-For example, to  `pypsa-earth/data/ssp2-2.6/2013_custom/`
-
-For example, to provide custom inputs for Nigeria, you can put the time-series into `Africa.csv` file and place the file into `pypsa-earth/data/ssp2-2.6/2013_custom/` folder. To make it fetched, you'll need to specify `weather_year: 2013_custom` under `load_options`.
-
-A format of the custom csv demand file should correspond to the csv files supplied with the model: there are `region_code`, `time`, `region_name` and `Electricity demand` columns, while a semicolon is used as a separator.
+When deriving a year from snapshots, the range must remain within one calendar year. January 1 of the following year is accepted as an exclusive end boundary.
 
 ## Configure `atlite` section
 
-To accurately model the temporal and spatial availability of renewable energy sources, PyPSA-Earth processes historical weather data using [atlite](https://atlite.readthedocs.io/en/latest/).
+PyPSA-Earth processes historical weather data using [atlite](https://atlite.readthedocs.io/en/latest/). The selected cutout must cover the snapshot dates.
 
-The workflow derives the annual snapshot range and weather cutout automatically from the configured `weather_year`. For example, `weather_year: 2018` automatically selects the `cutout-2018-era5` weather cutout and snapshots from `2018-01-01` to `2019-01-01`.
-
-The technical cutout parameters are configured under `atlite.cutout`:
+Set `atlite.default: derive_from_snapshots` to generate the cutout name from the snapshot year and the module configured under `atlite.cutouts.derive_from_snapshots`:
 
 ```yaml
+snapshots:
+  start: "2018-01-01"
+  end: "2019-01-01"
+  inclusive: "left"
+
 load_options:
-  weather_year: 2018
+  weather_year: derive_from_snapshots
 
 atlite:
   nprocesses: 4
-  cutout:
-    module: era5
-    dx: 0.3 # cutout resolution
-    dy: 0.3 # cutout resolution
+  default: derive_from_snapshots
+  cutouts:
+    derive_from_snapshots:
+      module: era5
+      dx: 0.3
+      dy: 0.3
 ```
 
-Pre-built cutouts are currently available for weather year 2013 and can be downloaded by enabling `retrieve_cutout`. Building the 2013 cutout locally is also supported, although the workflow will warn that a pre-built version is available.
+This selects `cutout-2018-era5`. Tutorial runs append `-tutorial`. Automatic cutout naming uses the snapshot year independently of an explicitly selected demand year. The planning horizon remains unchanged.
 
-For other supported weather years, disable `retrieve_cutout` and enable `build_cutout`. The resulting cutout is created using the same weather year as the snapshots and weather-dependent demand profiles.
+For a custom cutout, specify its name and definition explicitly:
 
-Renewable technologies configured with `cutout: auto` automatically use the cutout derived from the resolved `load_options.weather_year`; no manual replacement of cutout names is required.
+```yaml
+atlite:
+  default: my_fancy_cutout
+  cutouts:
+    my_fancy_cutout:
+      module: era5
+      dx: 0.1
+      dy: 0.1
+      x: [130, 145]
+      y: [30, 45]
+```
 
-The supported weather years depend on the selected demand source. GEGIS supports 2011, 2013, and 2018, while DemandCast supports weather years from 2000 to 2024.
+Explicit names and definitions are preserved, including additional named cutouts. Renewable technologies with `cutout: auto` use the resolved `atlite.default`; explicit technology-specific cutout names remain unchanged.
+
+Enable `retrieve_cutout` to download an available pre-built cutout. Available names are read from the configured non-tutorial databundles in the `cutouts` category. To build locally, disable `retrieve_cutout` and enable `build_cutout`. Choosing to build a cutout that is also available for retrieval produces an informational log message. For an existing local cutout, both options can be disabled.
+
+Demand-source year restrictions apply to demand profiles. The weather dataset used for the cutout must independently cover the configured snapshot dates.
 
 To explore additional settings, refer to the [configuration](../configuration.md) page.
