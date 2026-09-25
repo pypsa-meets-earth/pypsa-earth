@@ -67,6 +67,10 @@ COLUMNS = [
 REFERENCE_TYPES = [
     (66, 0.120, 0.400, 3.20e-6, 0.6),
     (77, 0.100, 0.395, 3.30e-6, 0.7),
+    # HEPCO operates both 100 and 110 kV systems. Until a dedicated
+    # representative 100 kV parameter set is available, use the 110 kV
+    # electrical parameters as a conservative proxy.
+    (100, 0.055, 0.385, 3.45e-6, 0.9),
     (110, 0.055, 0.385, 3.45e-6, 0.9),
     (132, 0.045, 0.370, 3.55e-6, 1.2),
     (154, 0.050, 0.380, 3.50e-6, 1.0),
