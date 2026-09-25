@@ -16,6 +16,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add representative Zambia-specific transmission line types and mappings [PR #2048](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2048).
+
 * Remove duplicate configuration files for PyPSA-Earth-CLI [PR #2044](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2044)
 
 * Represent fixed sector emissions as time-dependent loads [PR #2027](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2027)
