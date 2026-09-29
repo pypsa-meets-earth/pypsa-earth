@@ -5,7 +5,6 @@
 """
 Build temperature profiles.
 """
-import os
 
 import atlite
 import geopandas as gpd
