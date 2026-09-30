@@ -16,7 +16,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
 
 * Remove duplicate configuration files for PyPSA-Earth-CLI [PR #2044](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2044)
 
