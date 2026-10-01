@@ -134,6 +134,7 @@ from _helpers import (
     add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
+    get_base_carrier,
     locate_bus,
     nearest_shape,
     read_csv_nafix,
@@ -158,6 +159,22 @@ logger = create_logger(__name__)
 
 def normed(x):
     return (x / x.sum()).fillna(0.0)
+
+
+def get_aggregate_carriers(network, exclude_carriers):
+    """
+    Return carrier variants that should be aggregated.
+
+    Exclusions are matched against the base carrier so that, for example,
+    excluding ``coal`` also excludes internally year-tagged carriers such as
+    ``coal-2020``.
+    """
+    exclude_carriers = set(exclude_carriers)
+    return {
+        carrier
+        for carrier in network.generators.carrier.unique()
+        if get_base_carrier(carrier) not in exclude_carriers
+    }
 
 
 def weighting_for_country(n, x):
@@ -724,10 +741,10 @@ if __name__ == "__main__":
         ]
     )
 
-    exclude_carriers = snakemake.params.clustering["cluster_network"].get(
-        "exclude_carriers", []
+    exclude_carriers = set(
+        snakemake.params.clustering["cluster_network"].get("exclude_carriers", [])
     )
-    aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
+    aggregate_carriers = get_aggregate_carriers(n, exclude_carriers)
 
     # Option for subregion
     subregion_shapes = snakemake.input.get("subregion_shapes")
@@ -739,7 +756,14 @@ if __name__ == "__main__":
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
-        aggregate_carriers = snakemake.params.electricity.get("conventional_carriers")
+        conventional_carriers = set(
+            snakemake.params.electricity.get("conventional_carriers", [])
+        )
+        aggregate_carriers = {
+            carrier
+            for carrier in aggregate_carriers
+            if get_base_carrier(carrier) in conventional_carriers
+        }
     elif snakemake.wildcards.clusters.endswith("flex"):
         n_clusters = min(len(n.buses), int(snakemake.wildcards.clusters[:-4]))
     elif snakemake.wildcards.clusters == "all":
@@ -748,7 +772,6 @@ if __name__ == "__main__":
         n_clusters = n.buses.groupby(["country", "sub_network"]).ngroups
     else:
         n_clusters = int(snakemake.wildcards.clusters)
-        aggregate_carriers = None
 
     aggregation_strategies = snakemake.params.aggregation_strategies
 
@@ -840,7 +863,11 @@ if __name__ == "__main__":
 
     # Groupby carrier and bus for overnight simulation
     if config["foresight"] == "overnight":
-        groupby_bus_carrier(clustering.network, aggregation_strategies)
+        groupby_bus_carrier(
+            clustering.network,
+            aggregation_strategies,
+            exclude_carriers=exclude_carriers,
+        )
 
     # Restore line types lost when clustering creates a new network.
     used_line_types = pd.Index(

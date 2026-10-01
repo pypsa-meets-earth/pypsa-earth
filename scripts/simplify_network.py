@@ -97,7 +97,11 @@ from _helpers import (
     update_config_dictionary,
     update_p_nom_max,
 )
-from cluster_network import cluster_regions, clustering_for_n_clusters
+from cluster_network import (
+    cluster_regions,
+    clustering_for_n_clusters,
+    get_aggregate_carriers,
+)
 from pypsa.clustering.spatial import (
     aggregateoneport,
     busmap_by_stubs,
@@ -360,7 +364,7 @@ def _aggregate_and_move_components(
     generator_strategies = aggregation_strategies["generators"]
     one_port_strategies = aggregation_strategies["one_ports"]
 
-    carriers = set(n.generators.carrier) - set(exclude_carriers)
+    carriers = get_aggregate_carriers(n, exclude_carriers)
     generators, generators_pnl = aggregateoneport(
         n,
         busmap,
