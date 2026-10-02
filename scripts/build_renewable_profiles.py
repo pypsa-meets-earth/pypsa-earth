@@ -223,6 +223,38 @@ GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
+def inset_dateline(regions, tolerance=0.001):
+    """Trim the dateline strip to avoid nonfinite Mollweide round trips.
+
+    Tolerance is in degrees. This does not fix nearly global bounding boxes.
+    """
+    if regions.empty:
+        return regions
+
+    gdf_geo = regions.to_crs("EPSG:4326")
+    limit = 180 - tolerance
+    bounds = gdf_geo.bounds
+    affected = (bounds.minx < -limit) | (bounds.maxx > limit)
+    country_counts = gdf_geo.loc[affected, "country"].fillna("unknown").value_counts()
+    logger.info(
+        "The shapes crossing antimeridian are %s; countries: %s",
+        int(affected.sum()),
+        ", ".join(f"{country}: {count}" for country, count in country_counts.items())
+    )
+    corrected = gdf_geo.loc[affected].geometry.intersection(
+        box(-limit, -90, limit, 90)
+    )
+    invalid = corrected.is_empty | ~corrected.is_valid | ~corrected.geom_type.isin(
+        ["Polygon", "MultiPolygon"]
+    )
+    if invalid.any():
+        names = gdf_geo.loc[corrected.index[invalid], "name"].tolist()
+        raise ValueError(f"Dateline inset produced empty or invalid regions: {names}")
+
+    regions.loc[affected, "geometry"] = corrected.to_crs(regions.crs)
+    return regions
+
+
 def check_cutout_match(cutout, regions):
     cutout_box = box(*cutout.bounds)
     region_box = box(*regions.total_bounds)
@@ -563,7 +595,8 @@ if __name__ == "__main__":
 
     if correction_factor != 1.0:
         logger.info(f"correction_factor is set as {correction_factor}")
-    regions = gpd.read_file(paths.regions)  # .set_index("name").rename_axis("bus")
+    regions = gpd.read_file(paths.regions)
+    regions = inset_dateline(regions, tolerance=0.001)
 
     assert not regions.empty, (
         f"List of regions in {snakemake.input.regions} is empty, please "
