@@ -111,6 +111,13 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     n.import_components_from_dataframe(emissions, "Carrier")
 
 
+def _fill_missing_efficiencies(ppl, fallback):
+    ppl["efficiency"] = ppl.get(
+        "efficiency", pd.Series(index=ppl.index, dtype=float)
+    ).fillna(fallback)
+    return ppl
+
+
 def load_powerplants(
     ppl_fn: str,
     costs: pd.DataFrame = None,
@@ -147,7 +154,6 @@ def load_powerplants(
         .powerplant.to_pypsa_names()
         .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
-        .drop(columns=["efficiency"])
         .replace({"carrier": carrier_dict})
     )
     # drop powerplants with null capacity
@@ -547,6 +553,7 @@ def attach_wind_and_solar(
                 continue
 
             supcarrier = carrier.split("-", 2)[0]
+            default_efficiency = costs.at[supcarrier, "efficiency"]
 
             if supcarrier == "offwind":
                 underwater_fraction = ds["underwater_fraction"].to_pandas()
@@ -606,6 +613,16 @@ def attach_wind_and_solar(
                             f"{carrier}: reassigned {reassigned} plants without valid bus."
                         )
 
+                valid = _fill_missing_efficiencies(valid, default_efficiency)
+                efficiency_by_bus = (
+                    (valid["efficiency"] * valid["p_nom"]).groupby(valid["bus"]).sum()
+                    / valid.groupby("bus")["p_nom"].sum()
+                )
+                efficiency = (
+                    efficiency_by_bus.reindex(ds.indexes["bus"])
+                    .fillna(default_efficiency)
+                )
+
                 caps_existing = (
                     valid.groupby("bus")["p_nom"]
                     .sum()
@@ -613,6 +630,7 @@ def attach_wind_and_solar(
                 )
             else:
                 caps_existing = pd.Series(0.0, index=ds.indexes["bus"])
+                efficiency = pd.Series(default_efficiency, index=ds.indexes["bus"])
 
             p_max_pu = ds["profile"].transpose("time", "bus").to_pandas()
             p_nom_max = ds["p_nom_max"].to_pandas()
@@ -684,7 +702,7 @@ def attach_wind_and_solar(
                 weight=weight,
                 marginal_cost=costs.at[supcarrier, "marginal_cost"],
                 capital_cost=capital_cost,
-                efficiency=costs.at[supcarrier, "efficiency"],
+                efficiency=efficiency,
                 lifetime=renewable_lifetime,
             )
 
@@ -735,7 +753,9 @@ def attach_conventional_generators(
         .join(costs, on="carrier", rsuffix="_r")
         .rename(index=lambda s: "C" + str(s))
     )
-    ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
+    ppl = _fill_missing_efficiencies(
+        ppl, ppl.get("efficiency_r", ppl.get("efficiency"))
+    )
 
     # Aggregate power plants by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -895,6 +915,9 @@ def attach_hydro(
         "Reservoir": "hydro",
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
+    ppl = _fill_missing_efficiencies(
+        ppl, ppl["carrier"].map(costs["efficiency"])
+    )
 
     # Aggregate by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -953,6 +976,9 @@ def attach_hydro(
         # Aggregate to_be_ror and to_be_hydro by (bus, carrier, grouping_year)
         to_be_hydro.loc[:, "carrier"] = "hydro"
         to_be_ror.loc[:, "carrier"] = "ror"
+        to_be_ror = _fill_missing_efficiencies(
+            to_be_ror, costs.at["ror", "efficiency"]
+        )
         to_be_ror_grouped = aggregate_ppl_by_bus_carrier_year(to_be_ror)
         to_be_hydro_grouped = aggregate_ppl_by_bus_carrier_year(to_be_hydro)
         inflow_agg_ror = aggregate_inflow_by_group(
@@ -1004,7 +1030,7 @@ def attach_hydro(
             bus=ror["bus"],
             p_nom=ror["p_nom"],
             p_nom_extendable=False,
-            efficiency=costs.at["ror", "efficiency"],
+            efficiency=ror["efficiency"],
             capital_cost=costs.at["ror", "capital_cost"],
             weight=ror["p_nom"],
             p_max_pu=(
