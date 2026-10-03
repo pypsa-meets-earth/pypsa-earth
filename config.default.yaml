@@ -284,6 +284,12 @@ lines:
       345.: "US_345kV"
       500.: "US_500kV"
       765.: "US_765kV"
+    ZM:
+      66.: "ZM_66kV_wolf"
+      88.: "ZM_88kV_wolf"
+      132.: "ZM_132kV_wolf"
+      220.: "ZM_220kV_bison"
+      330.: "ZM_330kV_bison_2bundle"
   dc_types:
     default:
       500.: "HVDC XLPE 1000"
