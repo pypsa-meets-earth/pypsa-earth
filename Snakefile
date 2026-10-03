@@ -151,10 +151,11 @@ rule plot_all_summaries:
 
 if config["enable"].get("retrieve_databundle", True):
 
+    # Collect all databundle categories, except cutouts that are treated separately
     databundle_categories = get_databundle_categories(
         config["databundles"], exclude_categories=["cutouts"]
     )
-
+    # get the best bundles for each category
     bundle_dict = {
         category: get_best_bundles_in_snakemake(config, include_categories=[category])
         for category in databundle_categories
