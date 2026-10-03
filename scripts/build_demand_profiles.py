@@ -56,7 +56,6 @@ from _helpers import (
     add_transform_iso3,
     configure_logging,
     create_logger,
-    progress_retrieve,
     read_csv_nafix,
     read_osm_config,
 )

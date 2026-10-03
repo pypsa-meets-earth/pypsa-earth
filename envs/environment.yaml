@@ -12,7 +12,7 @@ dependencies:
 - pip
 
 - pypsa>=0.33
-- atlite=0.4.1
+- atlite=0.4.1 # in versions >0.4.1 the computation of availability matrix in `build_renewable_profiles` fails due to https://github.com/PyPSA/atlite/issues/301 https://github.com/PyPSA/atlite/issues/514 for countries whose cutouts span over geometries crossing the antimeridian
 - dask
 - powerplantmatching>=0.8
 - earth-osm>=3.0.2
@@ -28,6 +28,7 @@ dependencies:
 - ruamel.yaml>=0.18
 - pytables
 - pyscipopt
+- scip<=10.0.2  # experienced issues with 10.0.3 and 10.1. ImportError: libscip.so.10.0: cannot open shared object file
 - lxml
 - numpy>=1.26.4
 - pandas>=3
@@ -81,6 +82,3 @@ dependencies:
 
 # Command Line Interface
 - rich
-
-# Avoid cuda versions of pyarrow
-- pyarrow-core=*=*cpu*

@@ -11,9 +11,9 @@ sys.path.append("./scripts")
 from pathlib import Path
 from shutil import copyfile, move, unpack_archive
 
-from _helpers import branch  # Remove if Snakemake >= 8.3.0
 from _helpers import (
     BASE_DIR,
+    branch,
     check_config_version,
     content_retrieve,
     copy_default_files,
@@ -86,6 +86,8 @@ wildcard_constraints:
     sopts=r"[-+a-zA-Z0-9\.\s]*",
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     planning_horizons="20[2-9][0-9]|2100",
+    demand=r"[-+a-zA-Z0-9\.\s]*",
+    h2export="[0-9]+m?|all",
 
 
 if config["custom_rules"] is not []:
@@ -149,10 +151,11 @@ rule plot_all_summaries:
 
 if config["enable"].get("retrieve_databundle", True):
 
+    # Collect all databundle categories, except cutouts that are treated separately
     databundle_categories = get_databundle_categories(
         config["databundles"], exclude_categories=["cutouts"]
     )
-
+    # get the best bundles for each category
     bundle_dict = {
         category: get_best_bundles_in_snakemake(config, include_categories=[category])
         for category in databundle_categories
@@ -162,10 +165,8 @@ if config["enable"].get("retrieve_databundle", True):
     print("\n====================================================")
     print("Selected bundles for each category:")
     for category, bundles in bundle_dict.items():
-        print(f"\t{category}: {bundles}")
-        # output files for each category
-        output_files = datafiles_retrivedatabundle(config, bundles)
-        print(f"\t\tOutput files: {output_files}")
+        if len(bundles) >= 1:
+            print(f"\t{category}: {bundles}")
     print("====================================================\n")
 
     for category, bundles in bundle_dict.items():
@@ -370,6 +371,7 @@ rule base_network:
         + "base_network/all_transformers_build_network.csv",
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
         offshore_shapes="resources/" + RDIR + "shapes/offshore_shapes.geojson",
+        custom_line_types="data/custom_line_types.csv",
     output:
         "networks/" + RDIR + "base.nc",
     log:

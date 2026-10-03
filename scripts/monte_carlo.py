@@ -67,20 +67,17 @@ networks. Thereby, this script creates samples x amount of networks. The iterato
 wildcard {unc}, which is described in the config.yaml and created in the Snakefile as a range from
 0 to (total number of) SAMPLES.
 """
-import os
 
 import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
-import seaborn as sns
 from _helpers import configure_logging, create_logger
-from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
+from scipy.stats import qmc
 from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
 logger = create_logger(__name__)
-sns.set(style="whitegrid")
 
 
 def monte_carlo_sampling_chaospy(
@@ -96,8 +93,6 @@ def monte_carlo_sampling_chaospy(
     Documentation on Chaospy: https://chaospy.readthedocs.io/en/master/ (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
     """
-    import chaospy
-    from scipy.stats import qmc
 
     # generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
     N_FEATURES = "chaospy.Uniform(0, 1), " * N_FEATURES
@@ -201,8 +196,8 @@ def rescale_distribution(
     - The function supports rescaling for uniform, normal, lognormal, triangle, beta, and gamma distributions.
     - The rescaled samples will have values in the range [0, 1].
     """
-    from scipy.stats import beta, gamma, lognorm, norm, qmc, triang
-    from sklearn.preprocessing import MinMaxScaler, minmax_scale
+    from scipy.stats import beta, gamma, lognorm, norm, triang
+    from sklearn.preprocessing import minmax_scale
 
     for idx, value in enumerate(uncertainties_values):
         dist = value.get("type")
@@ -365,6 +360,8 @@ if __name__ == "__main__":
         )
 
     # create plot for the rescaled distributions (for development usage, commented by default)
+    # import seaborn as sns
+    # sns.set(style="whitegrid")
     # for idx in range(N_FEATURES):
     #     sns.displot(lh[:, idx], kde=True).set(
     #         title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"
