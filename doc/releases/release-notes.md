@@ -16,6 +16,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix NaN shipping oil demand for nodes with several ports or no port [PR #2052](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2052)
+
 * Fix missing time import in databundle retries [PR #2054](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2054)
 
 * Remove duplicate configuration files for PyPSA-Earth-CLI [PR #2044](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2044)
