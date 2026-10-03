@@ -223,10 +223,10 @@ GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
-def inset_dateline(regions, tolerance=0.001):
-    """Trim the dateline strip to avoid nonfinite Mollweide round trips.
-
-    Tolerance is in degrees. This does not fix nearly global bounding boxes.
+def fix_shapes_antimeridian(regions, tolerance=0.001):
+    """
+    Avoid shapes to reach the antimeridian by cutting them at 180 degrees longitude.
+    The shapes are trimmed to the range [-180+tolerance, 180-tolerance] degrees longitude.
     """
     if regions.empty:
         return regions
@@ -239,13 +239,13 @@ def inset_dateline(regions, tolerance=0.001):
     logger.info(
         "The shapes crossing antimeridian are %s; countries: %s",
         int(affected.sum()),
-        ", ".join(f"{country}: {count}" for country, count in country_counts.items())
+        ", ".join(f"{country}: {count}" for country, count in country_counts.items()),
     )
-    corrected = gdf_geo.loc[affected].geometry.intersection(
-        box(-limit, -90, limit, 90)
-    )
-    invalid = corrected.is_empty | ~corrected.is_valid | ~corrected.geom_type.isin(
-        ["Polygon", "MultiPolygon"]
+    corrected = gdf_geo.loc[affected].geometry.intersection(box(-limit, -90, limit, 90))
+    invalid = (
+        corrected.is_empty
+        | ~corrected.is_valid
+        | ~corrected.geom_type.isin(["Polygon", "MultiPolygon"])
     )
     if invalid.any():
         names = gdf_geo.loc[corrected.index[invalid], "name"].tolist()
