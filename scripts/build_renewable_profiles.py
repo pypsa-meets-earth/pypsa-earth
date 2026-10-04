@@ -596,7 +596,7 @@ if __name__ == "__main__":
     if correction_factor != 1.0:
         logger.info(f"correction_factor is set as {correction_factor}")
     regions = gpd.read_file(paths.regions)
-    regions = inset_dateline(regions, tolerance=0.001)
+    regions = fix_shapes_antimeridian(regions, tolerance=0.001)
 
     assert not regions.empty, (
         f"List of regions in {snakemake.input.regions} is empty, please "
