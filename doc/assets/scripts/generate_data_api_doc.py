@@ -15,9 +15,8 @@ from pathlib import Path
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SOURCE_YAML = REPO_ROOT / "configs" / "datasources_url_map.yaml"
-OUTPUT_MD = REPO_ROOT / "doc" / "user-guide" / "data_api.md"
+SOURCE_YAML = Path("configs/datasources_url_map.yaml")
+OUTPUT_MD = Path("doc/user-guide/data_api.md")
 
 # Tutorial-scoped datasets (entries with tutorial: true in the yaml) are
 # always skipped -- they're bundle-specific copies of the entries below.
