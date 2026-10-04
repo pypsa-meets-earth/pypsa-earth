@@ -71,27 +71,23 @@ SPDX-License-Identifier: CC-BY-4.0
 """
 
 
-def render_entry(entry):
-    lines = [f"## {entry['long_name']}", ""]
+TABLE_HEADER = "| Dataset | Output | Description |\n|---|---|---|\n"
 
+
+def render_cell(value):
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
+def render_row(entry):
     output = entry.get("output")
-    if output:
-        lines.append(f"**Output:** `{output}`")
-        lines.append("")
-
-    description = entry.get("description")
-    if description:
-        lines.append(description)
-        lines.append("")
-
-    return "\n".join(lines)
+    output = f"`{render_cell(output)}`" if output else ""
+    description = render_cell(entry.get("description", ""))
+    return f"| {render_cell(entry['long_name'])} | {output} | {description} |"
 
 
 def order_entries(entries):
     by_name = {entry["name"]: entry for entry in entries}
     ordered = [by_name.pop(name) for name in DATASET_ORDER if name in by_name]
-    # anything not listed in DATASET_ORDER is appended, in its original order,
-    # instead of being silently dropped
     ordered.extend(by_name.values())
     return ordered
 
@@ -102,14 +98,15 @@ def main():
 
     entries = [entry for entry in data["source"] if not entry.get("tutorial")]
     entries = order_entries(entries)
-    sections = [render_entry(entry) for entry in entries]
+    rows = [render_row(entry) for entry in entries]
 
     OUTPUT_MD.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_MD, "w") as f:
         f.write(MD_HEADER)
-        f.write("\n".join(sections))
+        f.write(TABLE_HEADER)
+        f.write("\n".join(rows) + "\n")
 
-    print(f"Wrote {len(sections)} dataset sections to {OUTPUT_MD}")
+    print(f"Wrote {len(rows)} dataset rows to {OUTPUT_MD}")
 
 
 if __name__ == "__main__":
