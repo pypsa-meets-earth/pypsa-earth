@@ -88,9 +88,9 @@ def render_row(entry):
     return f"| {render_cell(entry['long_name'])} | {output} | {description} |"
 
 
-def order_entries(entries):
+def order_entries(entries, order=DATASET_ORDER):
     by_name = {entry["name"]: entry for entry in entries}
-    ordered = [by_name.pop(name) for name in DATASET_ORDER if name in by_name]
+    ordered = [by_name.pop(name) for name in order if name in by_name]
     ordered.extend(by_name.values())
     return ordered
 
