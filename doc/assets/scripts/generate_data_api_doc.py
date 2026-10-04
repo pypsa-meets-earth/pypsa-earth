@@ -3,15 +3,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Render configs/datasources_url_map.yaml into a human-readable markdown page.
-
-Writes doc/user-guide/data_api.md, with one second-level section per
-dataset (titled with its "long_name"), starting with the local "output"
-path and followed by the "description".
+Render configs/datasources_url_map.yaml into a description of the datasets
+in the documentation.
 
 Usage
 -----
-python scripts/non_workflow/generate_data_api_doc.py
+python doc/assets/scripts/generate_data_api_doc.py
 """
 
 from pathlib import Path
