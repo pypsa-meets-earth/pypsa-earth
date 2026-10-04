@@ -11,7 +11,7 @@ import country_converter as coco
 import pandas as pd
 import pycountry
 import requests
-from _helpers import content_retrieve, create_logger
+from _helpers import content_retrieve, create_logger, to_csv_nafix
 from geopy.geocoders import Nominatim
 
 logger = create_logger(__name__)
@@ -289,9 +289,11 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("retrieve_industrial_database")
 
     industrial_database_steel = create_steel_db(snakemake.params.url_steel)
-    industrial_database_steel.to_csv(snakemake.output.steel_raw, index=False)
+    to_csv_nafix(industrial_database_steel, snakemake.output.steel_raw, index=False)
 
     industrial_database_refineries = create_refineries_df(
         snakemake.params.url_refineries
     )
-    industrial_database_refineries.to_csv(snakemake.output.refineries_raw, index=False)
+    to_csv_nafix(
+        industrial_database_refineries, snakemake.output.refineries_raw, index=False
+    )

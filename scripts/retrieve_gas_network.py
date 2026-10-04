@@ -12,7 +12,13 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
-from _helpers import BASE_DIR, content_retrieve, create_logger, progress_retrieve
+from _helpers import (
+    BASE_DIR,
+    content_retrieve,
+    create_logger,
+    progress_retrieve,
+    to_csv_nafix,
+)
 
 logger = create_logger(__name__)
 
@@ -63,6 +69,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("retrieve_gas_network")
 
     GGIT_gas_pipeline = download_GGIT_gas_network(snakemake.params.url_ggit)
-    GGIT_gas_pipeline.to_csv(snakemake.output.ggit_raw)
+    to_csv_nafix(GGIT_gas_pipeline, snakemake.output.ggit_raw)
 
     download_IGGIELGN_gas_network(snakemake.params.url_iggielgn)

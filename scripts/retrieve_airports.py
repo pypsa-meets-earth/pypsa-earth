@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-from _helpers import read_csv_nafix
+from _helpers import read_csv_nafix, to_csv_nafix
 
 
 def download_airports(fn_airports, fn_runways):
@@ -36,5 +36,5 @@ if __name__ == "__main__":
         snakemake.params.url_airports,
         snakemake.params.url_runways,
     )
-    airports_csv.to_csv(snakemake.output.airports_raw)
-    runways_csv.to_csv(snakemake.output.runways_raw)
+    to_csv_nafix(airports_csv, snakemake.output.airports_raw)
+    to_csv_nafix(runways_csv, snakemake.output.runways_raw)

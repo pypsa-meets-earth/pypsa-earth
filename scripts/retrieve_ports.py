@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-from _helpers import read_csv_nafix
+from _helpers import read_csv_nafix, to_csv_nafix
 
 
 def download_ports(fn):
@@ -25,4 +25,4 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("retrieve_ports")
 
     wpi_csv = download_ports(snakemake.params.url_ports)
-    wpi_csv.to_csv(snakemake.output.ports_raw)
+    to_csv_nafix(wpi_csv, snakemake.output.ports_raw)

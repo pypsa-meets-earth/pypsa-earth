@@ -8,7 +8,7 @@ import os
 
 import py7zr
 import requests
-from _helpers import read_csv_nafix
+from _helpers import read_csv_nafix, to_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -72,4 +72,4 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("retrieve_urban_percent")
 
     df = download_urban_percent(snakemake.params.url_urban_percent)
-    df.to_csv(snakemake.output.urban_percent_raw)
+    to_csv_nafix(df, snakemake.output.urban_percent_raw)

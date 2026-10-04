@@ -55,6 +55,7 @@ from _helpers import (
     BASE_DIR,
     content_retrieve,
     progress_retrieve,
+    read_csv_nafix,
 )
 from pyproj import CRS
 from pypsa.geo import haversine_pts
@@ -803,7 +804,7 @@ def cluster_gas_network(
 
 if not snakemake.params.custom_gas_network:
     if snakemake.params.gas_config["network_data"] == "GGIT":
-        pipelines = pd.read_csv(snakemake.input.ggit_raw, index_col=0)
+        pipelines = read_csv_nafix(snakemake.input.ggit_raw, index_col=0)
         pipelines = prepare_GGIT_data(pipelines)
 
     elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
