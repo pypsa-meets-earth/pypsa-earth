@@ -11,9 +11,12 @@ Usage
 python doc/assets/scripts/generate_data_api_doc.py
 """
 
+import logging
 from pathlib import Path
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 SOURCE_YAML = Path("configs/datasources_url_map.yaml")
 OUTPUT_MD = Path("doc/user-guide/data_api.md")
@@ -106,8 +109,9 @@ def main():
         f.write(TABLE_HEADER)
         f.write("\n".join(rows) + "\n")
 
-    print(f"Wrote {len(rows)} dataset rows to {OUTPUT_MD}")
+    logger.info(f"Wrote {len(rows)} dataset rows to {OUTPUT_MD}")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()
