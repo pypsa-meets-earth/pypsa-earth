@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-#
-# YAML mirror of datasources_url_map.toml, generated for readability.
-# The TOML file remains the source of truth consumed by get_datasource_url().
 
 source:
 - name: osm_geofabrik

@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Render configs/datasources_url_map.toml into a human-readable markdown page.
+Render configs/datasources_url_map.yaml into a human-readable markdown page.
 
 Writes doc/user-guide/data_api.md, with one second-level section per
 dataset (titled with its "long_name"), starting with the local "output"
@@ -14,19 +14,20 @@ Usage
 python scripts/non_workflow/generate_data_api_doc.py
 """
 
-import tomllib
 from pathlib import Path
 
+import yaml
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SOURCE_TOML = REPO_ROOT / "configs" / "datasources_url_map.toml"
+SOURCE_YAML = REPO_ROOT / "configs" / "datasources_url_map.yaml"
 OUTPUT_MD = REPO_ROOT / "doc" / "user-guide" / "data_api.md"
 
-# Tutorial-scoped datasets (entries with tutorial = true in the toml) are
+# Tutorial-scoped datasets (entries with tutorial: true in the yaml) are
 # always skipped -- they're bundle-specific copies of the entries below.
 
 # Order in which datasets are rendered. Edit this list by hand to reorder
-# the doc; any dataset name present in the toml but missing here is
-# appended at the end (in its original toml order) rather than dropped.
+# the doc; any dataset name present in the yaml but missing here is
+# appended at the end (in its original yaml order) rather than dropped.
 DATASET_ORDER = [
     "osm_geofabrik",
     "era5",
@@ -100,8 +101,8 @@ def order_entries(entries):
 
 
 def main():
-    with open(SOURCE_TOML, "rb") as f:
-        data = tomllib.load(f)
+    with open(SOURCE_YAML) as f:
+        data = yaml.safe_load(f)
 
     entries = [entry for entry in data["source"] if not entry.get("tutorial")]
     entries = order_entries(entries)
