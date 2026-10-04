@@ -2,22 +2,9 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import glob
 import logging
-import os
-import sys
-from io import BytesIO
-from pathlib import Path
-from urllib.request import urlopen
-from zipfile import ZipFile
 
-import country_converter as coco
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import py7zr
-import requests
-from _helpers import BASE_DIR, read_csv_nafix, three_2_two_digits_country
+from _helpers import read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 

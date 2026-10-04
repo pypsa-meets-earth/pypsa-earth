@@ -250,7 +250,6 @@ import pandas as pd
 import pypsa
 from _helpers import (
     BASE_DIR,
-    create_dummy_data,
     create_network_topology,
     cycling_shift,
     locate_bus,
@@ -1677,6 +1676,12 @@ def add_shipping(
         # TODO double check the use of efficiency
     )  # TODO use real data here
 
+    # map the country demand per port before aggregating to nodes, since
+    # summing the "country" column joins the codes (e.g. "EGEG")
+    ports["navigation_p_set"] = (
+        ports["fraction"] * ports["country"].map(navigation_demand) * 1e6 / 8760
+    )
+
     ports = pd.concat([ports, ind]).drop("Bus", axis=1)
 
     # ports = ports.fillna(0.0)
@@ -1724,13 +1729,7 @@ def add_shipping(
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
 
-        ports["p_set"] = (
-            shipping_oil_share
-            * ports["fraction"]
-            * ports["country"].map(navigation_demand)
-            * 1e6
-            / 8760
-        )
+        ports["p_set"] = shipping_oil_share * ports["navigation_p_set"]
 
         n.madd(
             "Load",
@@ -2473,7 +2472,7 @@ def add_land_transport(
         co2 = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].mean().sum()
+            * transport[spatial.nodes].sum(axis=1)
             * costs.at["oil", "CO2 intensity"]
         )
 
@@ -3042,8 +3041,7 @@ def add_services(
         p_set=p_set_oil,
     )
 
-    # TODO check with different snapshot settings
-    co2 = p_set_oil.sum(axis=1).mean() * costs.at["oil", "CO2 intensity"]
+    co2 = p_set_oil.sum(axis=1) * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3066,8 +3064,7 @@ def add_services(
         p_set=p_set_gas,
     )
 
-    # TODO check with different snapshot settings
-    co2 = p_set_gas.sum(axis=1).mean() * costs.at["gas", "CO2 intensity"]
+    co2 = p_set_gas.sum(axis=1) * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3282,7 +3279,7 @@ def add_residential(
         p_set=p_set_oil,
     )
 
-    co2 = p_set_oil.mean().sum() * costs.at["oil", "CO2 intensity"]
+    co2 = p_set_oil.sum(axis=1) * costs.at["oil", "CO2 intensity"]
 
     n.add(
         "Load",
@@ -3309,7 +3306,7 @@ def add_residential(
         p_set=p_set_gas,
     )
 
-    co2 = p_set_gas.mean().sum() * costs.at["gas", "CO2 intensity"]
+    co2 = p_set_gas.sum(axis=1) * costs.at["gas", "CO2 intensity"]
 
     n.add(
         "Load",
