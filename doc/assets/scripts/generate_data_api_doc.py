@@ -124,6 +124,8 @@ def order_entries(entries, order=DATASET_ORDER):
     ----------
     entries : list of dict
         Content of the data inventory.
+    order : list of str
+        Custom order for the order in which datasets should appear.
 
     Returns
     -------
