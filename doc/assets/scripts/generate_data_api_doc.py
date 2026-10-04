@@ -78,10 +78,38 @@ TABLE_HEADER = "| Dataset | Output | Description |\n|---|---|---|\n"
 
 
 def render_cell(value):
+    """
+    Clean content to make it safe for placing in a markdown table
+    cell.
+
+    Parameters
+    ----------
+    value : Any
+        A value to render into a string content.
+
+    Returns
+    -------
+    str
+        The cleaned value.
+    """
     return str(value).replace("|", "\\|").replace("\n", " ")
 
 
 def render_row(entry):
+    """
+    Translate a dataset entry into a properly formatted markdown table row.
+
+    Parameters
+    ----------
+    entry : dict
+        Dataset entry from the inventory containing "long_name",
+        "output" and "description" keys.
+
+    Returns
+    -------
+    str
+        A table row for the automated data documenting table.
+    """
     output = entry.get("output")
     output = f"`{render_cell(output)}`" if output else ""
     description = render_cell(entry.get("description", ""))
@@ -89,6 +117,20 @@ def render_row(entry):
 
 
 def order_entries(entries, order=DATASET_ORDER):
+    """
+    Sort dataset entries according to the custom order.
+
+    Parameters
+    ----------
+    entries : list of dict
+        Content of the data inventory.
+
+    Returns
+    -------
+    list of dict
+        Entries listed in order first, in that order, followed by
+        the remaining entries in their original order.
+    """
     by_name = {entry["name"]: entry for entry in entries}
     ordered = [by_name.pop(name) for name in order if name in by_name]
     ordered.extend(by_name.values())
@@ -96,6 +138,9 @@ def order_entries(entries, order=DATASET_ORDER):
 
 
 def main():
+    """
+    Write the table of non-tutorial datasets from SOURCE_YAML to OUTPUT_MD.
+    """
     with open(SOURCE_YAML) as f:
         data = yaml.safe_load(f)
 
