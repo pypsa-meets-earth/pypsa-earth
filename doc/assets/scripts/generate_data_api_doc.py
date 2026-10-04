@@ -66,7 +66,7 @@ SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
-# Description of datasets used by workflow
+# Description of datasets used by PyPSA-Earth workflow
 
 """
 
