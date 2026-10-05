@@ -6,6 +6,7 @@
 """
 This script processes global building data to calculate solar rooftop area.
 """
+
 import country_converter as coco
 import geopandas as gpd
 import numpy as np

@@ -13,6 +13,7 @@ The CLI has the following modules:
 4. Run snakemake - Feature to run a snakemake workflow
 
 """
+
 import ast
 import os
 import random

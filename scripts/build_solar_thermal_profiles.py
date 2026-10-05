@@ -6,7 +6,6 @@
 Build solar thermal collector time series.
 """
 
-
 import atlite
 import geopandas as gpd
 import numpy as np

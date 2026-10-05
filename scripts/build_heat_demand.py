@@ -6,7 +6,6 @@
 Build heat demand time series.
 """
 
-
 import atlite
 import geopandas as gpd
 import numpy as np
