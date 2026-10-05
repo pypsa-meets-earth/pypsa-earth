@@ -614,13 +614,11 @@ def attach_wind_and_solar(
                         )
 
                 valid = _fill_missing_efficiencies(valid, default_efficiency)
-                efficiency_by_bus = (
-                    (valid["efficiency"] * valid["p_nom"]).groupby(valid["bus"]).sum()
-                    / valid.groupby("bus")["p_nom"].sum()
-                )
-                efficiency = (
-                    efficiency_by_bus.reindex(ds.indexes["bus"])
-                    .fillna(default_efficiency)
+                efficiency_by_bus = (valid["efficiency"] * valid["p_nom"]).groupby(
+                    valid["bus"]
+                ).sum() / valid.groupby("bus")["p_nom"].sum()
+                efficiency = efficiency_by_bus.reindex(ds.indexes["bus"]).fillna(
+                    default_efficiency
                 )
 
                 caps_existing = (
@@ -915,9 +913,7 @@ def attach_hydro(
         "Reservoir": "hydro",
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
-    ppl = _fill_missing_efficiencies(
-        ppl, ppl["carrier"].map(costs["efficiency"])
-    )
+    ppl = _fill_missing_efficiencies(ppl, ppl["carrier"].map(costs["efficiency"]))
 
     # Aggregate by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -976,9 +972,7 @@ def attach_hydro(
         # Aggregate to_be_ror and to_be_hydro by (bus, carrier, grouping_year)
         to_be_hydro.loc[:, "carrier"] = "hydro"
         to_be_ror.loc[:, "carrier"] = "ror"
-        to_be_ror = _fill_missing_efficiencies(
-            to_be_ror, costs.at["ror", "efficiency"]
-        )
+        to_be_ror = _fill_missing_efficiencies(to_be_ror, costs.at["ror", "efficiency"])
         to_be_ror_grouped = aggregate_ppl_by_bus_carrier_year(to_be_ror)
         to_be_hydro_grouped = aggregate_ppl_by_bus_carrier_year(to_be_hydro)
         inflow_agg_ror = aggregate_inflow_by_group(
