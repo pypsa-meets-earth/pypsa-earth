@@ -20,6 +20,7 @@ from _helpers import (
     content_retrieve,
     copy_default_files,
     create_country_list,
+    get_datasource_url,
     get_last_commit_message,
     migrate_config,
     update_cutout_config,
@@ -1178,6 +1179,8 @@ rule solve_sector_networks:
 rule prepare_ports:
     params:
         custom_export=config["custom_data"]["export_ports"],
+    input:
+        ports_raw="data/ports_raw.csv",
     output:
         ports="resources/" + SECDIR + "ports.csv",
         export_ports="resources/" + SECDIR + "export_ports.csv",
@@ -1189,6 +1192,9 @@ rule prepare_airports:
     params:
         airport_sizing_factor=config["sector"]["airport_sizing_factor"],
         airport_custom_data=config["custom_data"]["airports"],
+    input:
+        airports_raw="data/airports_raw.csv",
+        runways_raw="data/runways_raw.csv",
     output:
         ports="resources/" + SECDIR + "airports.csv",
     script:
@@ -1196,6 +1202,8 @@ rule prepare_airports:
 
 
 rule prepare_urban_percent:
+    input:
+        urban_percent_raw="data/urban_percent_raw.csv",
     output:
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:
@@ -1203,6 +1211,9 @@ rule prepare_urban_percent:
 
 
 rule prepare_transport_data_input:
+    input:
+        n_vehicles_raw="data/n_vehicles_raw.csv",
+        transport_emissions_raw="data/transport_emissions_raw.csv",
     output:
         transport_data_input="resources/" + SECDIR + "transport_data.csv",
     script:
@@ -1253,6 +1264,16 @@ if (
 
 if not config["custom_data"]["gas_network"]:
 
+    rule retrieve_gas_network:
+        params:
+            url_ggit=get_datasource_url("pipelines_gem"),
+            url_iggielgn=get_datasource_url("gas_network_iggielgn"),
+        output:
+            ggit_raw="data/gas_network/ggit_pipelines_raw.csv",
+            iggielgn_dir=directory("data/gas_network/scigrid-gas"),
+        script:
+            "scripts/retrieve_gas_network.py"
+
     rule prepare_gas_network:
         params:
             gas_config=config["sector"]["gas"],
@@ -1262,6 +1283,8 @@ if not config["custom_data"]["gas_network"]:
             regions_onshore="resources/"
             + RDIR
             + "bus_regions/regions_onshore_elec_s{simpl}_{clusters}.geojson",
+            ggit_raw="data/gas_network/ggit_pipelines_raw.csv",
+            iggielgn_dir="data/gas_network/scigrid-gas",
         output:
             clustered_gas_network="resources/"
             + SECDIR
@@ -2029,6 +2052,10 @@ rule plot_sector_summary:
 rule build_industrial_database:
     input:
         ammonia_plants="resources/ammonia_plants.csv",
+        steel_raw="data/industry/steel_raw.csv",
+        refineries_raw="data/industry/refineries_raw.csv",
+        cement_raw="data/industry/SFI-Global-Cement-Database-July-2021.xlsx",
+        paper_raw="data/industry/SFI_ALD_Pulp_Paper_Sample_LatAm_Jan_2023.xlsx",
     output:
         industrial_database="resources/industrial_database.csv",
     script:
@@ -2168,10 +2195,67 @@ rule retrieve_us_cities_dataset:
 
 
 rule retrieve_ammonia_dataset:
+    params:
+        url_primary=get_datasource_url("ammonia_production_usgs"),
+        url_archive=get_datasource_url("ammonia_production_usgs_archive"),
     output:
         usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
     script:
         "scripts/retrieve_ammonia_dataset.py"
+
+
+rule retrieve_urban_percent:
+    params:
+        url_urban_percent=get_datasource_url("pop_total_un"),
+    output:
+        urban_percent_raw="data/urban_percent_raw.csv",
+    script:
+        "scripts/retrieve_urban_percent.py"
+
+
+rule retrieve_ports:
+    params:
+        url_ports=get_datasource_url("sea_ports_nga"),
+    output:
+        ports_raw="data/ports_raw.csv",
+    script:
+        "scripts/retrieve_ports.py"
+
+
+rule retrieve_airports:
+    params:
+        url_airports=get_datasource_url("airports"),
+        url_runways=get_datasource_url("air_runways"),
+    output:
+        airports_raw="data/airports_raw.csv",
+        runways_raw="data/runways_raw.csv",
+    script:
+        "scripts/retrieve_airports.py"
+
+
+rule retrieve_transport_data_input:
+    params:
+        url_n_vehicles_who=get_datasource_url("n_vehicles_who"),
+        url_vehicles_per_capita_wiki=get_datasource_url("vehicles_per_capita_wiki"),
+        url_transport_emission_worldbank=get_datasource_url(
+            "transport_emission_worldbank"
+        ),
+    output:
+        n_vehicles_raw="data/n_vehicles_raw.csv",
+        transport_emissions_raw="data/transport_emissions_raw.csv",
+    script:
+        "scripts/retrieve_transport_data_input.py"
+
+
+rule retrieve_industrial_database:
+    params:
+        url_steel=get_datasource_url("steel_gem"),
+        url_refineries=get_datasource_url("refineries"),
+    output:
+        steel_raw="data/industry/steel_raw.csv",
+        refineries_raw="data/industry/refineries_raw.csv",
+    script:
+        "scripts/retrieve_industrial_database.py"
 
 
 rule build_ammonia_production:

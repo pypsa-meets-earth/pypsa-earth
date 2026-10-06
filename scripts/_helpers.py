@@ -77,6 +77,34 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
 
+# absolute path to configs/datasources_url_map.yaml
+YAML_INVENTORY_PATH = os.path.join(BASE_DIR, "configs", "datasources_url_map.yaml")
+
+
+def get_datasource_url(dataset_name: str, yaml_path: str = YAML_INVENTORY_PATH) -> str:
+    """
+    Map a dataset dataset_name into a corersponding URL.
+
+    Parameters
+    ----------
+    dataset_name : str
+        The dataset's "name" key in the yaml inventory.
+    yaml_path : str
+        Path to the yaml inventory.
+
+    Returns
+    -------
+    str
+        A url string for a requested dataset.
+    """
+    with open(yaml_path) as f:
+        dataset_url = {s["name"]: s["url"] for s in yaml.safe_load(f)["source"]}
+
+    if dataset_name not in dataset_url:
+        raise KeyError(f"No entry named '{dataset_name}' found in {yaml_path}")
+
+    return dataset_url[dataset_name]
+
 
 def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
     """
