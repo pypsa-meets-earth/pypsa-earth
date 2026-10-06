@@ -6,55 +6,55 @@ source:
 - name: osm_geofabrik
   long_name: OpenStreetMap
   output: resources/osm/raw/all_raw_cables.geojson, resources/osm/raw/all_raw_generators.geojson, resources/osm/raw/all_raw_generators.csv, resources/osm/raw/all_raw_lines.geojson, resources/osm/raw/all_raw_substations.geojson
-  description: 'OpenStreetMap database used as a primary source of power-infrastructure data on substations, lines, cables, generators. OSM data are fetched for requested countries via the earth-osm package (github.com/pypsa-meets-earth/earth-osm) which downloads regional .osm.pbf extracts from Geofabrik and filters them to power-tagged features. For each country, url are resolved dynamically from Geofabrik''s index. Cite: © OpenStreetMap contributors, data extracted via Geofabrik (https://download.geofabrik.de/).'
+  description: "OpenStreetMap database used as a primary source of power-infrastructure data on substations, lines, cables, generators. OSM data are fetched for requested countries via the earth-osm package (github.com/pypsa-meets-earth/earth-osm) which downloads regional .osm.pbf extracts from Geofabrik and filters them to power-tagged features. For each country, url are resolved dynamically from Geofabrik's index. Cite: © OpenStreetMap contributors, data extracted via Geofabrik (https://download.geofabrik.de/)."
   tutorial: false
   countries: Earth
   url: https://download.geofabrik.de/index-v1.json
   origin_url: https://download.geofabrik.de/
-  version: ''
-  checksum: ''
-  code_line: '[download_osm_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_osm_data.py#L108)'
+  version: ""
+  checksum: ""
+  code_line: "[download_osm_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_osm_data.py#L108)"
   license: ODbL 1.0
   license_link: https://www.openstreetmap.org/copyright, https://osmfoundation.org/wiki/Terms_of_Use
 
 - name: era5
   long_name: ERA5 hourly reanalysis on single levels from 1940 to present, Copernicus/ECMWF
   output: cutouts/{cutout}.nc
-  description: 'ERA5 hourly data on single levels from 1940 to present. Atmospheric reanalysis produced by European Centre for Medium-Range Weather Forecasts (ECMWF). Retrieved from Copernicus Climate Change Service (C3S) using atlite package to build weather cutouts for the wind, influx, temperature and runoff features. Cite: Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horanyi, A., Munoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thepaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). DOI: https://doi.org/10.24381/cds.adbb2d47'
+  description: "ERA5 hourly data on single levels from 1940 to present. Atmospheric reanalysis produced by European Centre for Medium-Range Weather Forecasts (ECMWF). Retrieved from Copernicus Climate Change Service (C3S) using atlite package to build weather cutouts for the wind, influx, temperature and runoff features. Cite: Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horanyi, A., Munoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thepaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). DOI: https://doi.org/10.24381/cds.adbb2d47"
   tutorial: false
   countries: Earth
   url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
   origin_url: https://doi.org/10.24381/cds.adbb2d47
   version: reanalysis-era5-single-levels
-  checksum: ''
-  code_line: '[atlite:era5.retrieve_data](https://github.com/PyPSA/atlite/blob/master/atlite/datasets/era5.py#L465) -- fetched by build_cutout.py via atlite.Cutout.prepare(), not a pypsa-earth script'
+  checksum: ""
+  code_line: "[atlite:era5.retrieve_data](https://github.com/PyPSA/atlite/blob/master/atlite/datasets/era5.py#L465) -- fetched by build_cutout.py via atlite.Cutout.prepare(), not a pypsa-earth script"
   license: Licence to use Copernicus Products (CC-BY-compatible; attribution to the Copernicus Climate Change Service and ECMWF required)
   license_link: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
 
 - name: sarah3
   long_name: Surface Radiation Data Set - Heliosat (SARAH), Edition 3, EUMETSAT CM SAF
   output: cutouts/{cutout}.nc
-  description: 'SARAH-3 (Surface Radiation Data Set - Heliosat, Edition 3): satellite-based climate data record of surface solar irradiance (SIS/SID) at 0.05 deg x 0.05 deg resolution, with 30-minute/daily/monthly time steps, covering Europe, Africa, parts of South America and adjacent oceans from 1983 to near-present. Produced by EUMETSAT''s Satellite Application Facility on Climate Monitoring (CM SAF). The raw files must be obtained manually via the CM SAF Web User Interface or the EUMETSAT Data Store, atlite is used to build a cutout. Cite: Pfeifroth, U., Kothe, S., Drucke, J., Trentmann, J., Schroder, M., Selbach, N., Hollmann, R. (2023): Surface Radiation Data Set - Heliosat (SARAH) - Edition 3. Satellite Application Facility on Climate Monitoring (CM SAF). DOI: https://doi.org/10.5676/EUM_SAF_CM/SARAH/V003'
+  description: "SARAH-3 (Surface Radiation Data Set - Heliosat, Edition 3): satellite-based climate data record of surface solar irradiance (SIS/SID) at 0.05 deg x 0.05 deg resolution, with 30-minute/daily/monthly time steps, covering Europe, Africa, parts of South America and adjacent oceans from 1983 to near-present. Produced by EUMETSAT's Satellite Application Facility on Climate Monitoring (CM SAF). The raw files must be obtained manually via the CM SAF Web User Interface or the EUMETSAT Data Store, atlite is used to build a cutout. Cite: Pfeifroth, U., Kothe, S., Drucke, J., Trentmann, J., Schroder, M., Selbach, N., Hollmann, R. (2023): Surface Radiation Data Set - Heliosat (SARAH) - Edition 3. Satellite Application Facility on Climate Monitoring (CM SAF). DOI: https://doi.org/10.5676/EUM_SAF_CM/SARAH/V003"
   tutorial: false
   countries: Europe, Africa, parts of South America and adjacent oceans
   url: https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003
   origin_url: https://doi.org/10.5676/EUM_SAF_CM/SARAH/V003
   version: Edition 3 (V003)
-  checksum: ''
-  code_line: '[atlite:sarah.get_filenames](https://github.com/PyPSA/atlite/blob/master/atlite/datasets/sarah.py#L44) -- reads pre-downloaded local NetCDF files; retrieval is manual, see [build_cutout.py#L86](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_cutout.py#L86) (NOTE: pypsa-earth''s own build_cutout.py docstring still refers to this as ''SARAH-2''; the current CM SAF product is Edition 3 / SARAH-3)'
+  checksum: ""
+  code_line: "[atlite:sarah.get_filenames](https://github.com/PyPSA/atlite/blob/master/atlite/datasets/sarah.py#L44) -- reads pre-downloaded local NetCDF files; retrieval is manual, see [build_cutout.py#L86](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_cutout.py#L86) (NOTE: pypsa-earth own build_cutout.py docstring still refers to this as SARAH-2; the current CM SAF product is Edition 3 / SARAH-3)"
   license: CC BY 4.0
   license_link: https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003
 
 - name: demandcast_forecasts
   long_name: Global Dataset of Forecasted Hourly Electricity Demand from 2000 to 2024 Using DemandCast. E. Antonini, P. Goli, K. Steijn
   output: data/demand/forecasts_on_historical_period.parquet
-  description: 'DemandCast: machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, combining historical demand data, weather variables and socioeconomic indicators. E. Antonini, P. Goli and K. Steijn.'
+  description: "DemandCast: machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, combining historical demand data, weather variables and socioeconomic indicators. E. Antonini, P. Goli and K. Steijn."
   tutorial: false
   countries: Earth
   url: https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet
   version: 1.0.0 (2026-01-26)
   checksum: md5:be6b47c118d547fccf22245ec7cd8323
-  code_line: '[bundle_config.yaml:demandcast_full](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L192)'
+  code_line: "[bundle_config.yaml:demandcast_full](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L192)"
   license: CC BY 4.0
   license_link: https://zenodo.org/records/18374352
 
@@ -65,9 +65,9 @@ source:
   tutorial: true
   countries: Earth
   url: https://sandbox.zenodo.org/records/493116/files/forecasts_on_historical_period.parquet
-  version: '2026-04-24'
+  version: "2026-04-24"
   checksum: md5:68073bf2d11fae0655be93fcf54c139f
-  code_line: '[bundle_config.yaml:demandcast_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L203)'
+  code_line: "[bundle_config.yaml:demandcast_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L203)"
   license: CC BY 4.0
   license_link: https://zenodo.org/records/18374352
 
@@ -81,7 +81,7 @@ source:
   origin_url: https://github.com/niclasmattsson/GlobalEnergyGIS
   version: SSP2-2.6, 2030, era5_2013 (2026-08-11)
   checksum: md5:c1feeea9c2601bb8ba5c52773bd1523c
-  code_line: '[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)'
+  code_line: "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)"
   license: MIT
   license_link: https://github.com/niclasmattsson/GlobalEnergyGIS/blob/master/README.md
 
@@ -95,21 +95,21 @@ source:
   origin_url: https://github.com/niclasmattsson/GlobalEnergyGIS
   version: SSP2-2.6, 2030, era5_2013 (2026-08-11)
   checksum: md5:2b64b882209750ac2010410c1fe7e414
-  code_line: '[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
   license: MIT
   license_link: https://github.com/niclasmattsson/GlobalEnergyGIS/blob/master/README.md
 
 - name: copernicus_landcover
   long_name: Copernicus Global Land Service 100m land cover (PROBA-V)
   output: data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-  description: 'Copernicus Global Land Service 100m land cover (Collection 3, PROBA-V, epoch 2019): global annual land cover classification.'
+  description: "Copernicus Global Land Service 100m land cover (Collection 3, PROBA-V, epoch 2019): global annual land cover classification."
   tutorial: false
   countries: Earth
   url: https://zenodo.org/records/18033571/files/bundle_data_earth.zip?download=1
   origin_url: https://land.copernicus.eu/en/products/global-dynamic-land-cover
   version: Collection 3 epoch 2019 (2026-08-11)
   checksum: md5:c1feeea9c2601bb8ba5c52773bd1523c
-  code_line: '[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)'
+  code_line: "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)"
   license: Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)
   license_link: https://land.copernicus.eu/en/data-policy
 
@@ -123,7 +123,7 @@ source:
   origin_url: https://land.copernicus.eu/en/products/global-dynamic-land-cover
   version: Collection 3 epoch 2019 (2026-08-11)
   checksum: md5:6cdf44d6c5d22b1c109c5c5bf82721cb
-  code_line: '[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
   license: Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)
   license_link: https://land.copernicus.eu/en/data-policy
 
@@ -137,7 +137,7 @@ source:
   origin_url: https://land.copernicus.eu/en/products/global-dynamic-land-cover
   version: Collection 3 epoch 2019 (2026-08-11)
   checksum: md5:cbfab5ec418ea2195229fde98ebdc344
-  code_line: '[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
   license: Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)
   license_link: https://land.copernicus.eu/en/data-policy
 
@@ -151,7 +151,7 @@ source:
   origin_url: https://land.copernicus.eu/en/products/global-dynamic-land-cover
   version: Collection 3 epoch 2019 (2026-08-11)
   checksum: md5:23a8cf8cfc5765dae77f740d8fb6f43c
-  code_line: '[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
   license: Custom (Copernicus free and open data policy; all uses including commercial, attribution requested)
   license_link: https://land.copernicus.eu/en/data-policy
 
@@ -162,22 +162,22 @@ source:
   tutorial: false
   countries: Earth
   url: https://zenodo.org/records/18033571/files/bundle_natura.zip?download=1
-  version: '2026-08-11'
+  version: "2026-08-11"
   checksum: md5:65bd6c2e8ff869dbd21fed6a4004b38c
-  code_line: '[bundle_config.yaml:bundle_natura_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L259)'
-  license: ''
-  license_link: ''
+  code_line: "[bundle_config.yaml:bundle_natura_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L259)"
+  license: ""
+  license_link: ""
 
 - name: wdpa_protectedplanet
   long_name: World Database on Protected Areas (WDPA), UNEP-WCMC/IUCN
   output: data/landcover/world_protected_areas/*
-  description: 'World Database on Protected Areas (WDPA): boundaries of protected areas worldwide, maintained by UNEP-WCMC/IUCN and distributed via Protected Planet''s monthly-release.'
+  description: "World Database on Protected Areas (WDPA): boundaries of protected areas worldwide, maintained by UNEP-WCMC/IUCN and distributed via Protected Planet's monthly-release."
   tutorial: false
   countries: Earth
   url: https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_{month:s}{year:d}_Public_shp.zip
-  version: ''
-  checksum: ''
-  code_line: '[bundle_config.yaml:bundle_landcover_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L496)'
+  version: ""
+  checksum: ""
+  code_line: "[bundle_config.yaml:bundle_landcover_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L496)"
   license: Custom (UNEP-WCMC WDPA Data License, non-commercial use only; commercial use and redistribution require permission)
   license_link: https://www.unep-wcmc.org/en/wdpa-data-license
 
@@ -188,50 +188,50 @@ source:
   tutorial: true
   countries: Africa
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_general.zip?download=1
-  version: '2026-08-11'
+  version: "2026-08-11"
   checksum: md5:2b64b882209750ac2010410c1fe7e414
-  code_line: '[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
   license: Custom (UNEP-WCMC WDPA Data License, non-commercial use only; commercial use and redistribution require permission)
   license_link: https://www.unep-wcmc.org/en/wdpa-data-license
 
 - name: hydrobasins
   long_name: HydroBASINS global watershed boundaries (HydroSHEDS)
   output: data/hydrobasins/hybas_world.shp
-  description: 'HydroBASINS (HydroSHEDS project): global watershed boundaries and sub-basin delineations at a standard level, fetched per continental-region suffix from data.hydrosheds.org.'
+  description: "HydroBASINS (HydroSHEDS project): global watershed boundaries and sub-basin delineations at a standard level, fetched per continental-region suffix from data.hydrosheds.org."
   tutorial: false
   countries: Earth
   url: https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_{region}_lev{level}_v1c.zip
   version: v1c
-  checksum: ''
-  code_line: '[bundle_config.yaml:bundle_hydrobasins](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L178)'
+  checksum: ""
+  code_line: "[bundle_config.yaml:bundle_hydrobasins](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L178)"
   license: Custom (HydroSHEDS License Agreement, free for scientific/educational/commercial use with required attribution)
   license_link: https://www.hydrosheds.org/terms-of-use
 
 - name: hydrobasins_tutorial_africa_geoglows
-  long_name: 'Derived Hydrography of Africa (rivers, watersheds, basin area) via terrain analysis, supporting GEOGLoWS/ECMWF/RAPID river forecasting. Brigham Young University: Ashby, Nelson, Ames'
+  long_name: "Derived Hydrography of Africa (rivers, watersheds, basin area) via terrain analysis, supporting GEOGLoWS/ECMWF/RAPID river forecasting. Brigham Young University: Ashby, Nelson, Ames"
   output: data/hydrobasins_hydroshare/africa-geoglows-atlite.shp
-  description: '''Derived Hydrography of Africa'': rivers, watersheds and basin-area polygons for Africa, produced via terrain analysis by Brigham Young University (Ashby, Nelson, Ames) to support GEOGLoWS ECMWF-driven streamflow forecasting with the RAPID river routing model. Published on HydroShare and mirrored into the pypsa-earth tutorial databundle.'
+  description: "Derived Hydrography of Africa: rivers, watersheds and basin-area polygons for Africa, produced via terrain analysis by Brigham Young University (Ashby, Nelson, Ames) to support GEOGLoWS ECMWF-driven streamflow forecasting with the RAPID river routing model. Published on HydroShare and mirrored into the pypsa-earth tutorial databundle."
   tutorial: true
   countries: Africa
   url: https://zenodo.org/records/18032587/files/africa-geoglows-catchment.zip?download=1
   origin_url: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b
-  version: '2020-06-29'
+  version: "2020-06-29"
   checksum: md5:58cecb9e366fe7a02b3e26dec338b359
-  code_line: '[bundle_config.yaml:bundle_tutorial_hydrobasins](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L95)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_hydrobasins](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L95)"
   license: CC BY 4.0
   license_link: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b
 
 - name: eez_marineregions
   long_name: World EEZ v11 maritime boundaries worldwide (Flanders Marine Institute / VLIZ)
   output: data/eez/eez_v11.gpkg
-  description: 'World EEZ v11: global maritime boundary (Exclusive Economic Zone) polygons, published by the Flanders Marine Institute (VLIZ) via marineregions.org.'
+  description: "World EEZ v11: global maritime boundary (Exclusive Economic Zone) polygons, published by the Flanders Marine Institute (VLIZ) via marineregions.org."
   tutorial: false
   countries: Earth
   url: https://zenodo.org/records/18033571/files/bundle_data_earth.zip?download=1
   origin_url: https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip
   version: v11 (2019-11-18)
   checksum: md5:c1feeea9c2601bb8ba5c52773bd1523c
-  code_line: '[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)'
+  code_line: "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)"
   license: CC BY 4.0
   license_link: https://www.marineregions.org/disclaimer.php
 
@@ -245,21 +245,21 @@ source:
   origin_url: https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip
   version: v11 (2019-11-18)
   checksum: md5:2b64b882209750ac2010410c1fe7e414
-  code_line: '[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_data_common](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L159)"
   license: CC BY 4.0
   license_link: https://www.marineregions.org/disclaimer.php
 
 - name: gebco_bathymetry
   long_name: GEBCO gridded global bathymetry (2025 grid)
   output: data/gebco/GEBCO_2025_sub_ice.nc
-  description: 'GEBCO_2025 global gridded bathymetry: seafloor depth data compiled from many trackline sources, largely representative of deep-ocean bathymetry rather than detailed shallow-shelf depths.'
+  description: "GEBCO_2025 global gridded bathymetry: seafloor depth data compiled from many trackline sources, largely representative of deep-ocean bathymetry rather than detailed shallow-shelf depths."
   tutorial: false
   countries: Earth
   url: https://zenodo.org/records/18033571/files/bundle_data_earth.zip?download=1
   origin_url: https://www.gebco.net/data-products/gridded-bathymetry-data
   version: GEBCO_2025 (2026-08-11)
   checksum: md5:c1feeea9c2601bb8ba5c52773bd1523c
-  code_line: '[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)'
+  code_line: "[bundle_config.yaml:bundle_data_earth](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L240)"
   license: Public Domain
   license_link: https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use
 
@@ -273,7 +273,7 @@ source:
   origin_url: https://www.gebco.net/data-products/gridded-bathymetry-data
   version: GEBCO_2025 (2026-08-11)
   checksum: md5:6cdf44d6c5d22b1c109c5c5bf82721cb
-  code_line: '[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
   license: Public Domain
   license_link: https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use
 
@@ -287,7 +287,7 @@ source:
   origin_url: https://www.gebco.net/data-products/gridded-bathymetry-data
   version: GEBCO_2025 (2026-08-11)
   checksum: md5:cbfab5ec418ea2195229fde98ebdc344
-  code_line: '[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
   license: Public Domain
   license_link: https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use
 
@@ -301,7 +301,7 @@ source:
   origin_url: https://www.gebco.net/data-products/gridded-bathymetry-data
   version: GEBCO_2025 (2026-08-11)
   checksum: md5:23a8cf8cfc5765dae77f740d8fb6f43c
-  code_line: '[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
   license: Public Domain
   license_link: https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use
 
@@ -314,7 +314,7 @@ source:
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_NGBJ.zip?download=1
   version: v4.1 (2026-08-11)
   checksum: md5:6cdf44d6c5d22b1c109c5c5bf82721cb
-  code_line: '[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -327,7 +327,7 @@ source:
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_BW.zip?download=1
   version: v4.1 (2026-08-11)
   checksum: md5:cbfab5ec418ea2195229fde98ebdc344
-  code_line: '[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -340,7 +340,7 @@ source:
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_MA.zip?download=1
   version: v4.1 (2026-08-11)
   checksum: md5:23a8cf8cfc5765dae77f740d8fb6f43c
-  code_line: '[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -353,7 +353,7 @@ source:
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_NGBJ.zip?download=1
   version: v3.6 (2026-08-11)
   checksum: md5:6cdf44d6c5d22b1c109c5c5bf82721cb
-  code_line: '[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_NGBJ](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L33)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -366,7 +366,7 @@ source:
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_BW.zip?download=1
   version: v3.6 (2026-08-11)
   checksum: md5:cbfab5ec418ea2195229fde98ebdc344
-  code_line: '[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_BW](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L63)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -379,34 +379,34 @@ source:
   url: https://zenodo.org/records/18032587/files/bundle_tutorial_data_MA.zip?download=1
   version: v3.6 (2026-08-11)
   checksum: md5:23a8cf8cfc5765dae77f740d8fb6f43c
-  code_line: '[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_MA](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L78)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
 - name: global_buildings_microsoft_tutorial_ngbj
   long_name: Global building footprints derived from satellite/aerial imagery via ML (Microsoft). Tutorial-scoped copy (Nigeria, Benin)
   output: data/global_buildings/NG_global_buildings_raw.parquet, data/global_buildings/BJ_global_buildings_raw.parquet
-  description: Tutorial-scoped copy of Microsoft's Global ML Building Footprints, pre-extracted as raw per-country parquet files for Nigeria and Benin.
+  description: Tutorial-scoped copy of Microsoft"s Global ML Building Footprints, pre-extracted as raw per-country parquet files for Nigeria and Benin.
   tutorial: true
   countries: NG, BJ
   url: https://zenodo.org/records/18032587/files/global_buildings.zip?download=1
-  version: '2026-08-11'
+  version: "2026-08-11"
   checksum: md5:9eb8d147d6a50fdbb047db9609230aca
-  code_line: '[bundle_config.yaml:bundle_tutorial_NGBJ_global_buildings](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L50)'
+  code_line: "[bundle_config.yaml:bundle_tutorial_NGBJ_global_buildings](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L50)"
   license: Open Data Commons Open Database License (ODbL)
   license_link: https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license
 
 - name: irena_statistics
   long_name: IRENA renewable energy statistics
   output: data/IRENA_Statistics_Extract_2025H2.xlsx
-  description: 'IRENA Renewable Energy Statistics: installed capacity, generation, heat production and related indicators, collected via IRENA''s annual member questionnaire and desk research; used in build_renewable_profiles.py to derive hydropower generation potentials.'
+  description: "IRENA Renewable Energy Statistics: installed capacity, generation, heat production and related indicators, collected via IRENA annual member questionnaire and desk research; used in build_renewable_profiles.py to derive hydropower generation potentials."
   tutorial: false
   countries: Earth
   url: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
   origin_url: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
   version: 2025H2
-  checksum: ''
-  code_line: '[bundle_config.yaml:bundle_irena_statistics](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L218)'
+  checksum: ""
+  code_line: "[bundle_config.yaml:bundle_irena_statistics](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L218)"
   license: Custom (reuse permitted with attribution to IRENA as source/copyright holder)
   license_link: https://www.irena.org/terms-and-conditions
 
@@ -419,34 +419,34 @@ source:
   url: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
   origin_url: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
   version: 2025H2
-  checksum: ''
-  code_line: '[bundle_config.yaml:bundle_irena_statistics_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L229)'
+  checksum: ""
+  code_line: "[bundle_config.yaml:bundle_irena_statistics_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L229)"
   license: Custom (reuse permitted with attribution to IRENA as source/copyright holder)
   license_link: https://www.irena.org/terms-and-conditions
 
 - name: global_buildings_microsoft
   long_name: Global building footprints, Microsoft
   output: data/global_buildings/{country}_global_buildings_raw.parquet
-  description: 'Microsoft''s Global ML Building Footprints: worldwide building footprint polygons derived from satellite/aerial imagery via machine learning.'
+  description: "Microsoft's Global ML Building Footprints: worldwide building footprint polygons derived from satellite/aerial imagery via machine learning."
   tutorial: false
   countries: Earth
   url: https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv
-  version: ''
-  checksum: ''
-  code_line: '[download_global_buildings:download_global_buildings](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_global_buildings.py#L121)'
+  version: ""
+  checksum: ""
+  code_line: "[download_global_buildings:download_global_buildings](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_global_buildings.py#L121)"
   license: Open Data Commons Open Database License (ODbL)
   license_link: https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license
 
 - name: global_buildings_microsoft_quadrants
   long_name: Per-quadkey-partitioned building footprint, Microsoft
   output: data/global_buildings/{country}_global_buildings_raw.parquet
-  description: Per-quadkey-partitioned GeoJSONL building footprint files from Microsoft's Global ML Building Footprints dataset.
+  description: Per-quadkey-partitioned GeoJSONL building footprint files from Microsoft"s Global ML Building Footprints dataset.
   tutorial: false
   countries: Earth
-  url: ''
-  version: ''
-  checksum: ''
-  code_line: '[download_global_buildings:get_building_area_center](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_global_buildings.py#L105)'
+  url: ""
+  version: ""
+  checksum: ""
+  code_line: "[download_global_buildings:get_building_area_center](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/download_global_buildings.py#L105)"
   license: Open Data Commons Open Database License (ODbL)
   license_link: https://github.com/microsoft/GlobalMLBuildingFootprints?tab=readme-ov-file#license
 
@@ -458,8 +458,8 @@ source:
   countries: Earth
   url: https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{GADM_filename}.gpkg
   version: v4.1
-  checksum: ''
-  code_line: '[build_shapes:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L83)'
+  checksum: ""
+  code_line: "[build_shapes:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L83)"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -471,8 +471,8 @@ source:
   countries: Earth
   url: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/{GADM_filename}_gpkg.zip
   version: v3.6
-  checksum: ''
-  code_line: '[_helpers:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/_helpers.py#L1646) TODO clean-up may be needed this function is not called anywhere in the codebase'
+  checksum: ""
+  code_line: "[_helpers:download_GADM](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/_helpers.py#L1646) TODO clean-up may be needed this function is not called anywhere in the codebase"
   license: Custom (non-commercial/academic use only; redistribution or commercial use requires prior permission)
   license_link: https://gadm.org/license.html
 
@@ -484,8 +484,8 @@ source:
   countries: Earth
   url: https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}
   version: 2020 (maxar_v1)
-  checksum: ''
-  code_line: '[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L620)'
+  checksum: ""
+  code_line: "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L620)"
   license: CC BY 4.0
   license_link: https://www.worldpop.org/faq/
 
@@ -497,8 +497,8 @@ source:
   countries: Earth
   url: https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/2020/BSGM/{two_2_three_digits_country(country_code).upper()}/{WorldPop_filename}
   version: 2020 (BSGM)
-  checksum: ''
-  code_line: '[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L620)'
+  checksum: ""
+  code_line: "[build_shapes:download_WorldPop_standard](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L620)"
   license: CC BY 4.0
   license_link: https://www.worldpop.org/faq/
 
@@ -509,9 +509,9 @@ source:
   tutorial: false
   countries: Earth
   url: https://www.worldpop.org/rest/data/pop/wpgp?iso3={two_2_three_digits_country(country_code)}
-  version: ''
-  checksum: ''
-  code_line: '[build_shapes:download_WorldPop_API](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L691)'
+  version: ""
+  checksum: ""
+  code_line: "[build_shapes:download_WorldPop_API](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_shapes.py#L691)"
   license: CC BY 4.0
   license_link: https://www.worldpop.org/faq/
 
@@ -523,8 +523,8 @@ source:
   countries: Earth
   url: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip
   version: v6.0
-  checksum: ''
-  code_line: '[Snakefile:retrieve_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile#L912)'
+  checksum: ""
+  code_line: "[Snakefile:retrieve_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/Snakefile#L912)"
   license: CC BY 4.0
   license_link: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/copyright.txt
 
@@ -534,36 +534,36 @@ source:
   description: UN Statistics Division per-country energy balance zip files (production, trade, transformation and consumption, in TJ).
   tutorial: false
   countries: Earth
-  url: ''
-  version: ''
-  checksum: ''
-  code_line: '[build_base_energy_totals](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_base_energy_totals.py#L389)'
+  url: ""
+  version: ""
+  checksum: ""
+  code_line: "[build_base_energy_totals](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_base_energy_totals.py#L389)"
   license: Custom (UNSD attribution, non-commercial)
   license_link: https://data.un.org/Host.aspx?Content=UNdataUse
 
 - name: pop_total_un
   long_name: Urban population as a percentage, UNCTAD
   output: resources/urban_percent.csv
-  description: UNCTADstat 'Urban population as percentage of total population' indicator, by country. The dataset is downloaded as a .7z file and contains urban percent for most countries from 1950 and predictions until 2050.
+  description: UNCTADstat "Urban population as percentage of total population" indicator, by country. The dataset is downloaded as a .7z file and contains urban percent for most countries from 1950 and predictions until 2050.
   tutorial: false
   countries: Earth
   url: https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_urban_percent:download_urban_percent](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_urban_percent.py#L13)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_urban_percent:download_urban_percent](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_urban_percent.py#L13)"
   license: CC BY 3.0 IGO
   license_link: https://unctadstat.unctad.org/EN/About.html
 
 - name: sea_ports_nga
   long_name: Sea port worldwide, NGA World Port Index
   output: resources/ports.csv
-  description: 'NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency. The dataset is updated monthly and contains 3711 ports.'
+  description: "NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency. The dataset is updated monthly and contains 3711 ports."
   tutorial: false
   countries: Earth
   url: https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_ports:download_ports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ports.py#L9)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_ports:download_ports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ports.py#L9)"
   license: Public Domain
   license_link: https://www.nga.mil/resources/Public_Release.html
 
@@ -574,128 +574,128 @@ source:
   tutorial: false
   countries: Earth
   url: https://davidmegginson.github.io/ourairports-data/airports.csv
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_airports.py#L9)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_airports.py#L9)"
   license: Public Domain (Unlicense)
   license_link: https://ourairports.com/data/
 
 - name: air_runways
   long_name: Location and length of airport runways worldwide
   output: resources/airports.csv
-  description: 'Runway-level detail from the OurAirports open dataset: length, latitude/longitude and heading for each end of every landing surface at the airports listed in the airports dataset.'
+  description: "Runway-level detail from the OurAirports open dataset: length, latitude/longitude and heading for each end of every landing surface at the airports listed in the airports dataset."
   tutorial: false
   countries: Earth
   url: https://davidmegginson.github.io/ourairports-data/runways.csv
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_airports.py#L9)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_airports:download_airports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_airports.py#L9)"
   license: Public Domain (Unlicense)
   license_link: https://ourairports.com/data/
 
 - name: steel_gem
   long_name: Location and technology data of iron and steel plants worldwide, GEM Global Steel Plant Tracker
   output: resources/industrial_database.csv
-  description: 'Global Energy Monitor''s Global Steel Plant Tracker (GSPT): location, operating status (operating/proposed/retired), capacity, and production process (blast furnace, EAF, DRI, etc.) of iron and steel plants worldwide with capacity of 0.5 Mtpa or more.'
+  description: "Global Energy Monitor's Global Steel Plant Tracker (GSPT): location, operating status (operating/proposed/retired), capacity, and production process (blast furnace, EAF, DRI, etc.) of iron and steel plants worldwide with capacity of 0.5 Mtpa or more."
   tutorial: false
   countries: Earth
   url: https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx
   origin_url: https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx
   version: April 2024 (Standard)
-  checksum: ''
-  code_line: '[retrieve_industrial_database:create_steel_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_industrial_database.py#L68)'
+  checksum: ""
+  code_line: "[retrieve_industrial_database:create_steel_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_industrial_database.py#L68)"
   license: Creative Commons Attribution 4.0 International Public License
   license_link: https://globalenergymonitor.org/creative-commons-public-license/
 
 - name: pipelines_gem
   long_name: Location and technology data of gas pipelines worldwide, GEM Global Gas Infrastructure Tracker
   output: resources/gas_networks/gas_network_elec_s{simpl}_{clusters}.csv
-  description: 'Global Energy Monitor''s Global Gas Infrastructure Tracker (GGIT) gas pipelines dataset: location, length, diameter, capacity, and status of gas transmission pipelines and pipeline projects worldwide. The dataset contains 3144 pipelines.'
+  description: "Global Energy Monitor Global Gas Infrastructure Tracker (GGIT) gas pipelines dataset: location, length, diameter, capacity, and status of gas transmission pipelines and pipeline projects worldwide. The dataset contains 3144 pipelines."
   tutorial: false
   countries: Earth
   url: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/GEM-GGIT-Gas-Pipelines-December-2022.xlsx
   origin_url: https://globalenergymonitor.org/wp-content/uploads/2022/12/GEM-GGIT-Gas-Pipelines-December-2022.xlsx
   version: December 2022
-  checksum: ''
-  code_line: '[retrieve_gas_network:download_GGIT_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_gas_network.py#L44)'
+  checksum: ""
+  code_line: "[retrieve_gas_network:download_GGIT_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_gas_network.py#L44)"
   license: Creative Commons Attribution 4.0 International Public License
   license_link: https://globalenergymonitor.org/creative-commons-public-license/
 
 - name: gas_network_iggielgn
-  long_name: 'SciGRID-gas IGGIELGN dataset: European gas transmission network model'
+  long_name: "SciGRID-gas IGGIELGN dataset: European gas transmission network model"
   output: data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson
-  description: 'SciGRID-gas IGGIELGN dataset: a European gas transmission network model combining pipelines, storages, production sites, LNG terminals and interconnection points with capacity, pressure, and diameter attributes. Published on Zenodo by the SciGRID-gas project.'
+  description: "SciGRID-gas IGGIELGN dataset: a European gas transmission network model combining pipelines, storages, production sites, LNG terminals and interconnection points with capacity, pressure, and diameter attributes. Published on Zenodo by the SciGRID-gas project."
   tutorial: false
   countries: Earth
   url: https://zenodo.org/record/4767098/files/IGGIELGN.zip
   version: 1.1.2 (2021-05-17)
   checksum: md5:262aba03a2585183a79f37e84e96a736
-  code_line: '[retrieve_gas_network:download_IGGIELGN_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_gas_network.py#L20)'
+  code_line: "[retrieve_gas_network:download_IGGIELGN_gas_network](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_gas_network.py#L20)"
   license: CC BY 4.0
   license_link: https://zenodo.org/records/4767098
 
 - name: refineries
   long_name: Location and daily throughput capacity of oil refineries worldwide
   output: resources/industrial_database.csv
-  description: 'Global Oil Refinery Complex and Daily Capacity: an Esri ArcGIS-hosted point layer with the location and daily throughput capacity of oil refineries worldwide. The dataset contains 536 global Oil refineries.'
+  description: "Global Oil Refinery Complex and Daily Capacity: an Esri ArcGIS-hosted point layer with the location and daily throughput capacity of oil refineries worldwide. The dataset contains 536 global Oil refineries."
   tutorial: false
   countries: Earth
   url: https://services.arcgis.com/jDGuO8tYggdCCnUJ/arcgis/rest/services/Global_Oil_Refinery_Complex_and_Daily_Capacity/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=FID%20ASC&resultOffset=0&resultRecordCount=537&cacheHint=true&quantizationParameters=%7B%22mode%22%3A%22edit%22%7D
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_industrial_database:create_refineries_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_industrial_database.py#L209)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_industrial_database:create_refineries_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_industrial_database.py#L209)"
   license: Custom (FracTracker Alliance, non-commercial with attribution)
   license_link: https://hub.arcgis.com/maps/a6979b6bccbf4e719de3f703ea799259_0/about
 
 - name: osm_nominatim_geocoding
-  long_name: Reverse geocoding of refinery coordinates to country codes via OpenStreetMap's Nominatim API
+  long_name: Reverse geocoding of refinery coordinates to country codes via OpenStreetMap"s Nominatim API
   output: resources/industrial_database.csv
-  description: Reverse geocoding of refinery point coordinates that are missing a country code, resolved to ISO country codes via OpenStreetMap's Nominatim service. Retriven using the default endpoint of the geopy Nominatim client.
+  description: Reverse geocoding of refinery point coordinates that are missing a country code, resolved to ISO country codes via OpenStreetMap"s Nominatim service. Retriven using the default endpoint of the geopy Nominatim client.
   tutorial: false
   countries: Earth
   url: https://nominatim.openstreetmap.org
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_industrial_database:get_cocode_from_coords](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_industrial_database.py#L28)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_industrial_database:get_cocode_from_coords](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_industrial_database.py#L28)"
   license: ODbL 1.0
   license_link: https://www.openstreetmap.org/copyright, https://osmfoundation.org/wiki/Terms_of_Use
 
 - name: n_vehicles_who
   long_name: Number of registered motor vehicles, WHO
   output: resources/transport_data.csv
-  description: 'WHO Global Health Observatory (GHO) ''Registered vehicles'' indicator (RS_194, Road Safety theme): number of registered motor vehicles by country. Fetched via the GHO OData API. A few countries are missing from this list (e.g. South Africa, Algeria).'
+  description: "WHO Global Health Observatory (GHO) 'Registered vehicles' indicator (RS_194, Road Safety theme): number of registered motor vehicles by country. Fetched via the GHO OData API. A few countries are missing from this list (e.g. South Africa, Algeria)."
   tutorial: false
   countries: Earth
   url: https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L39)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L39)"
   license: CC BY-NC-SA 3.0 IGO + Permission is required for commercial uses and licensing of WHO materials
   license_link: https://www.who.int/about/policies/publishing/copyright
 
 - name: vehicles_per_capita_wiki
   long_name: Number of road motor vehicles per capita
   output: resources/transport_data.csv
-  description: 'Wikipedia''s ''List of countries and territories by motor vehicles per capita'': road motor vehicles per 1,000 inhabitants by country/territory, used as a fallback/completion source for countries missing from the WHO vehicles dataset.'
+  description: "Wikipedia 'List of countries and territories by motor vehicles per capita': road motor vehicles per 1,000 inhabitants by country/territory, used as a fallback/completion source for countries missing from the WHO vehicles dataset."
   tutorial: false
   countries: Earth
   url: https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita
-  version: ''
-  checksum: ''
-  code_line: '[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L39)'
+  version: ""
+  checksum: ""
+  code_line: "[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L39)"
   license: Creative Commons Attribution-ShareAlike 4.0 License and GNU FDL
   license_link: https://en.wikipedia.org/wiki/Wikipedia:Copyrights
 
 - name: transport_emission_worldbank
   long_name: CO2 emissions from transport, World Bank
   output: resources/transport_data.csv
-  description: World Bank indicator EN.CO2.TRAN.ZS ('CO2 emissions from transport, % of total fuel combustion'), used to estimate average land-transport fuel efficiency; the live World Bank API was discontinued in October 2024, so the code fetches an archived Wayback Machine snapshot from 2024-05-21 instead.
+  description: World Bank indicator EN.CO2.TRAN.ZS ("CO2 emissions from transport, % of total fuel combustion"), used to estimate average land-transport fuel efficiency; the live World Bank API was discontinued in October 2024, so the code fetches an archived Wayback Machine snapshot from 2024-05-21 instead.
   tutorial: false
   countries: Earth
   url: https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel
   version: Wayback Machine snapshot 2024-05-21
-  checksum: ''
-  code_line: '[retrieve_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L115)'
+  checksum: ""
+  code_line: "[retrieve_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L115)"
   license: CC BY 4.0
   license_link: https://datacatalog.worldbank.org/public-licenses
 
@@ -706,36 +706,36 @@ source:
   tutorial: false
   countries: Latin America
   url: https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/
-  version: ''
-  checksum: ''
-  code_line: '[build_industrial_database:create_paper_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L96)'
+  version: ""
+  checksum: ""
+  code_line: "[build_industrial_database:create_paper_df](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L96)"
   license: CC BY 4.0
   license_link: https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/pulp-and-paper-mill-database-for-latin-america/
 
 - name: cgfi_cement_db
   long_name: Global Database of Cement Production Assets, CGFI Spatial Finance Initiative
   output: data/industry/SFI-Global-Cement-Database-July-2021.xlsx
-  description: 'The Spatial Finance Initiative Global Database of Cement Production Assets provides information on cement production facilities worldwide. The database contains 3,117 cement plants with exact geolocation, covering both integrated clinker-producing plants and independent grinding facilities, with ownership, production type, capacity and startup year where available. Cite: McCarten, M., Bayaraa, M., Caldecott, B., Christiaen, C., Foster, P., Hickey, C., Kampmann, D., Layman, C., Rossi, C., Scott, K., Tang, K., Tkachenko, N., and Yoken, D. 2021. Global Database of Cement Production Assets.'
+  description: "The Spatial Finance Initiative Global Database of Cement Production Assets provides information on cement production facilities worldwide. The database contains 3,117 cement plants with exact geolocation, covering both integrated clinker-producing plants and independent grinding facilities, with ownership, production type, capacity and startup year where available. Cite: McCarten, M., Bayaraa, M., Caldecott, B., Christiaen, C., Foster, P., Hickey, C., Kampmann, D., Layman, C., Rossi, C., Scott, K., Tang, K., Tkachenko, N., and Yoken, D. 2021. Global Database of Cement Production Assets."
   tutorial: false
   countries: Earth
   url: https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/
-  version: ''
-  checksum: ''
-  code_line: '[build_industrial_database:create_cement_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L14)'
+  version: ""
+  checksum: ""
+  code_line: "[build_industrial_database:create_cement_db](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/build_industrial_database.py#L14)"
   license: CC BY 4.0
   license_link: https://www.cgfi.ac.uk/spatial-finance-initiative/geoasset-project/cement/
 
 - name: ammonia_production_usgs
   long_name: Historical annual ammonia (nitrogen) production statistics, USGS Minerals Yearbook
   output: data/industry/USGS_ammonia_dataset.xlsx
-  description: 'US Geological Survey (USGS) National Minerals Information Center ''Nitrogen Statistics and Information'' Minerals Yearbook: historical annual ammonia production by country/plant, used to derive per-country ammonia production. See also the "ammonia_production_usgs_archive" entry for the pypsa.org-hosted fallback mirror used if this primary USGS source is unavailable.'
+  description: "US Geological Survey (USGS) National Minerals Information Center Nitrogen Statistics and Information Minerals Yearbook: historical annual ammonia production by country/plant, used to derive per-country ammonia production. See also the `ammonia_production_usgs_archive` entry for the pypsa.org-hosted fallback mirror used if this primary USGS source is unavailable."
   tutorial: false
   countries: Earth
   url: https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/myb1-2023-nitro-ERT.xlsx
   origin_url: https://www.usgs.gov/centers/national-minerals-information-center/nitrogen-statistics-and-information
   version: Minerals Yearbook 2023 (nitrogen)
-  checksum: ''
-  code_line: '[retrieve_ammonia_dataset:download_ammonia_production_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ammonia_dataset.py#L15)'
+  checksum: ""
+  code_line: "[retrieve_ammonia_dataset:download_ammonia_production_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ammonia_dataset.py#L15)"
   license: Public Domain (U.S. Government Work)
   license_link: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
 
@@ -748,7 +748,7 @@ source:
   url: https://data.pypsa.org/workflows/eur/nitrogen_statistics/2023/myb1-2023-nitro-ERT.xlsx
   origin_url: https://www.usgs.gov/centers/national-minerals-information-center/nitrogen-statistics-and-information
   version: Minerals Yearbook 2023 (nitrogen)
-  checksum: ''
-  code_line: '[retrieve_ammonia_dataset:download_ammonia_production_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ammonia_dataset.py#L15)'
+  checksum: ""
+  code_line: "[retrieve_ammonia_dataset:download_ammonia_production_data](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ammonia_dataset.py#L15)"
   license: Public Domain (U.S. Government Work)
   license_link: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
