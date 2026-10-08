@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake("prepare_urban_percent")
 
-        df = read_csv_nafix(snakemake.input.urban_percent_raw).copy()
+    df = read_csv_nafix(snakemake.input.urban_percent_raw).copy()
 
     # Select the columns that we need to keep
     df = df[
