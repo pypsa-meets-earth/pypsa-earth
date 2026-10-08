@@ -479,9 +479,10 @@ outputs = [
 ]
 
 
-def make_summaries(networks_dict, inputs, country="all"):
+def make_summaries(networks_dict, costs_files, country="all"):
     columns = pd.MultiIndex.from_tuples(
-        networks_dict.keys(), names=["simpl", "clusters", "ll", "opts"]
+        networks_dict.keys(),
+        names=["simpl", "clusters", "ll", "opts", "planning_horizons"],
     )
 
     dfs = {}
@@ -504,7 +505,8 @@ def make_summaries(networks_dict, inputs, country="all"):
         if country != "all":
             n = n[n.buses.country == country]
 
-        costs = pd.read_csv(inputs.tech_costs, index_col=0)
+        planning_horizon = label[-1]
+        costs = pd.read_csv(costs_files[planning_horizon], index_col=0)
         update_transmission_costs(n, costs, simple_hvdc_costs=False)
 
         assign_carriers(n)
@@ -556,19 +558,24 @@ if __name__ == "__main__":
     else:
         ll = [snakemake.wildcards.ll]
 
+    planning_horizons = snakemake.params.scenario["planning_horizons"]
+
     networks_dict = {
-        (simpl, clusters, l, opts): os.path.join(
-            network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}.nc"
+        (simpl, clusters, l, opts, ph): os.path.join(
+            network_dir, f"elec_s{simpl}_" f"{clusters}_ec_l{l}_{opts}_{ph}.nc"
         )
         for simpl in expand_from_wildcard("simpl")
         for clusters in expand_from_wildcard("clusters")
         for l in ll
         for opts in expand_from_wildcard("opts")
+        for ph in planning_horizons
     }
+
+    costs_files = dict(zip(planning_horizons, snakemake.input.tech_costs))
 
     dfs = make_summaries(
         networks_dict,
-        snakemake.input,
+        costs_files,
         country=snakemake.wildcards.country,
     )
 

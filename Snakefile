@@ -700,7 +700,9 @@ rule add_electricity:
             if str(fn).startswith("data/")
         },
         base_network="networks/" + RDIR + "base.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
@@ -793,7 +795,9 @@ rule cluster_network:
             if config["enable"].get("custom_busmap", False)
             else []
         ),
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
     output:
         network=branch(
             config["augmented_line_connection"].get("add_to_snakefile", False) == True,
@@ -863,7 +867,9 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
             hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
             electricity=config["electricity"],
         input:
-            tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+            tech_costs="resources/"
+            + RDIR
+            + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
             regions_onshore="resources/"
             + RDIR
@@ -892,7 +898,9 @@ rule add_extra_components:
         csp_model=config["renewable"]["csp"]["csp_model"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
@@ -1159,14 +1167,13 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
 
 
 def input_make_summary(w):
-    # It's mildly hacky to include the separate costs input as first entry
     if w.ll.endswith("all"):
         ll = config["scenario"]["ll"]
         if len(w.ll) == 4:
             ll = [l for l in ll if l[0] == w.ll[0]]
     else:
         ll = w.ll
-    return ["resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv"] + expand(
+    return expand(
         "results/"
         + RDIR
         + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
@@ -1185,7 +1192,10 @@ rule make_summary:
         scenario=config["scenario"],
     input:
         input_make_summary,
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs=expand(
+            "resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
+            planning_horizons=config["scenario"]["planning_horizons"],
+        ),
     output:
         directory(
             "results/"
@@ -2006,7 +2016,7 @@ rule plot_network:
         extended_country_shape="resources/"
         + RDIR
         + "shapes/extended_country_shape.geojson",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
     output:
         only_map="results/"
         + RDIR
