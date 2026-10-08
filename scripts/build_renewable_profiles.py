@@ -223,12 +223,38 @@ GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
+def _describe_bounds_mismatch(cutout_box, region_box):
+    """Human-readable comparison of cutout vs requested region bounds.
+
+    Bounds are (minx, miny, maxx, maxy), i.e. (lon_min, lat_min, lon_max, lat_max).
+    """
+    c = cutout_box.bounds
+    r = region_box.bounds
+    lines = [
+        f"Cutout bounds (lon_min, lat_min, lon_max, lat_max): {tuple(round(v, 3) for v in c)}",
+        f"Requested region bounds (lon_min, lat_min, lon_max, lat_max): {tuple(round(v, 3) for v in r)}",
+    ]
+    overhangs = []
+    if r[0] < c[0]:
+        overhangs.append(f"region extends {c[0] - r[0]:.3f}° further west")
+    if r[1] < c[1]:
+        overhangs.append(f"region extends {c[1] - r[1]:.3f}° further south")
+    if r[2] > c[2]:
+        overhangs.append(f"region extends {r[2] - c[2]:.3f}° further east")
+    if r[3] > c[3]:
+        overhangs.append(f"region extends {r[3] - c[3]:.3f}° further north")
+    if overhangs:
+        lines.append("Mismatch: " + "; ".join(overhangs) + ".")
+    return "\n".join(lines)
+
+
 def check_cutout_match(cutout, regions):
     cutout_box = box(*cutout.bounds)
     region_box = box(*regions.total_bounds)
 
     assert not region_box.intersection(cutout_box).is_empty, (
         "The requested region is completely out of the cutout area.\n\r"
+        f"{_describe_bounds_mismatch(cutout_box, region_box)}\n\r"
         "Check please the provided cutout.\n\r"
         "More details on cutout generation are available in docs:\n\r"
         "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
@@ -237,6 +263,7 @@ def check_cutout_match(cutout, regions):
     if not region_box.covered_by(cutout_box):
         logger.warning(
             "Weather data does not fully cover the requester region.\n\r"
+            f"{_describe_bounds_mismatch(cutout_box, region_box)}\n\r"
             "It's recommended to check the provided cutout.\n\r"
             "More details on cutout generation are available in docs:\n\r"
             "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
