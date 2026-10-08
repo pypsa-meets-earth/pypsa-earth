@@ -1196,8 +1196,8 @@ rule prepare_airports:
 
 
 rule prepare_urban_percent:
-    params:
-        url_urban_percent="https://unctadstat-api.unctad.org/bulkdownload/US.PopTotal/US_PopTotal",
+    input:
+        urban_percent_raw="data/urban_percent_raw.csv",
     output:
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:
@@ -2175,6 +2175,13 @@ rule retrieve_ammonia_dataset:
     script:
         "scripts/retrieve_ammonia_dataset.py"
 
+rule retrieve_urban_percent:
+    params:
+        url_urban_percent="https://zenodo.org/records/23242372/files/US_PopTotal.csv.7z?download=1",
+    output:
+        urban_percent_raw="data/urban_percent_raw.csv",
+    script:
+        "scripts/retrieve_urban_percent.py"        
 
 rule build_ammonia_production:
     input:
