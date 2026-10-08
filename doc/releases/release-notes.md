@@ -32,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 
+* Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
+
 # PyPSA-Earth 0.9.0
 
 **New Features and Major Changes**
