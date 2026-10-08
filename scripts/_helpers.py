@@ -337,11 +337,9 @@ def _migrate_custom_powerplants_method(
 ) -> None:
     """Move a legacy scalar ``electricity.custom_powerplants`` under ``method``.
 
-    Before the ``filepaths`` / ``method`` layout, ``custom_powerplants`` held the
-    method itself (``false``, ``merge`` or ``replace``) and always read
-    ``data/custom_powerplants.csv``. A scalar in a user config replaces the whole
-    default dict during Snakemake config merging, so it is expanded back into
-    that layout with the former file.
+    The option used to be a single value (``false``, ``merge`` or ``replace``).
+    It is now a dict with ``filepaths`` and ``method``, so the old value is moved
+    to ``method`` and ``filepaths`` is set to ``data/custom_powerplants.csv``.
     """
     electricity = config.get("electricity")
     if not isinstance(electricity, dict):
@@ -357,7 +355,7 @@ def _migrate_custom_powerplants_method(
     }
     warn(
         "electricity.custom_powerplants: " + str(method),
-        "electricity.custom_powerplants.method",
+        "electricity.custom_powerplants.method: " + str(method),
     )
 
 
