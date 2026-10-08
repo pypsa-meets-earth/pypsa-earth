@@ -87,6 +87,7 @@ There are multiple ways to get involved and learn more about our work:
 ### Features
 
 - [Monte Carlo](utilities/monte-carlo.md) - Uncertainty quantification and sensitivity analysis
+- [PyPSA-Earth-CLI](utilities/pypsa-earth-cli.md) - CLI for beginners to PyPSA-Earth
 
 ### Community & Resources
 
@@ -97,6 +98,11 @@ There are multiple ways to get involved and learn more about our work:
 - [Learning Materials](community/learning-materials.md) with additional resources
 - [Software Hints](community/software-hints.md) providing tips and troubleshooting
 - [FAQ](community/faq.md) listing common run errors and fixes
+
+### Releases
+
+- [Release Notes](releases/release-notes.md) - List of new features and changes for each release of PyPSA-Earth model
+- [Maintenance](releases/maintenance-notes.md) - Technical notes of code and data maintenance
 
 ### API Reference
 
