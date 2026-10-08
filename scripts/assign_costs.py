@@ -297,11 +297,82 @@ def calculate_renewable_capital_cost(
     return capital_cost, capital_cost_tech
 
 
+def _update_offwind_capital_cost(
+    n: pypsa.Network,
+    sub: pd.Index,
+    carrier: str,
+    costs: pd.DataFrame,
+    output_currency: str = "EUR",
+) -> pd.Series | None:
+    """
+    Recompute capital_cost of extendable offshore wind generators in-place.
+
+    The capital cost is rebuilt as::
+
+        offwind turbine + station + connection
+
+    where the connection cost is ``connection_submarine_length`` and
+    ``connection_underground_length`` (set in ``add_electricity``, extended by
+    ``simplify_network`` for displaced generators) times the submarine and
+    underground unit costs. The lengths already include the length factor.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+    sub : pd.Index
+        Extendable generators of the offshore carrier.
+    carrier : str
+        Offshore carrier name, e.g. ``"offwind-ac"`` or ``"offwind-dc"``.
+    costs : pd.DataFrame
+        Horizon-specific cost table indexed by technology.
+    output_currency : str
+        Currency label used only for logging.
+
+    Returns
+    -------
+    pd.Series or None
+        Connection cost [currency/MW/a] indexed by generator, or None if the
+        connection lengths are not stored (capital_cost is left unchanged).
+    """
+    gens = n.generators
+    has_lengths = (
+        "connection_submarine_length" in gens.columns
+        and "connection_underground_length" in gens.columns
+        and gens.loc[sub, "connection_submarine_length"].notna().all()
+    )
+    if not has_lengths:
+        logger.warning(
+            f"No stored connection lengths for offshore carrier '{carrier}'; "
+            "capital_cost left unchanged during re-costing."
+        )
+        return None
+
+    connection_cost = (
+        gens.loc[sub, "connection_submarine_length"]
+        * costs.at[carrier + "-connection-submarine", "capital_cost"]
+        + gens.loc[sub, "connection_underground_length"].fillna(0.0)
+        * costs.at[carrier + "-connection-underground", "capital_cost"]
+    )
+    logger.info(
+        "Added connection cost of {:.0f}-{:.0f} {}/MW/a to {}".format(
+            connection_cost.min(),
+            connection_cost.max(),
+            output_currency,
+            carrier,
+        )
+    )
+    gens.loc[sub, "capital_cost"] = (
+        costs.at["offwind", "capital_cost"]
+        + costs.at[carrier + "-station", "capital_cost"]
+        + connection_cost
+    )
+    return connection_cost
+
+
 def update_generator_costs(
     n: pypsa.Network,
     costs: pd.DataFrame,
     renewable_carriers: set,
-    length_factor: float,
     output_currency: str = "EUR",
 ) -> pd.DataFrame:
     """
@@ -315,15 +386,8 @@ def update_generator_costs(
       build-time efficiency and lifetime; their capital_cost is irrelevant to
       the optimisation.
 
-    For offshore wind, extendable ``capital_cost`` is rebuilt as::
-
-        offwind turbine + station + connection
-
-    where the connection cost is ``connection_submarine_length`` and
-    ``connection_underground_length`` (set in ``add_electricity``, extended by
-    ``simplify_network`` for displaced generators) times the submarine and
-    underground unit costs. If these lengths are missing, capital_cost is
-    left unchanged and a warning is logged.
+    For offshore wind, extendable ``capital_cost`` is rebuilt from the stored
+    connection lengths by :func:`_update_offwind_capital_cost`.
 
     Carriers absent from the cost table are skipped.
 
@@ -334,8 +398,6 @@ def update_generator_costs(
         Horizon-specific cost table indexed by technology.
     renewable_carriers : set of str
         Renewable generator carriers (routes offshore vs standard re-costing).
-    length_factor : float
-        Scalar applied to offshore farm connection distances.
     output_currency : str
         Currency label used only for logging.
 
@@ -376,40 +438,16 @@ def update_generator_costs(
                 lifetime=costs.at[cost_key, "lifetime"],
             )
 
-            sub = n.generators.index[is_ext]
-            has_geometry = (
-                "connection_submarine_length" in n.generators.columns
-                and "connection_underground_length" in n.generators.columns
-                and n.generators.loc[sub, "connection_submarine_length"].notna().all()
-            )
-
-            if supcarrier == "offwind" and has_geometry:
-                # lengths already include length_factor (farm and displacement)
-                connection_cost = (
-                    n.generators.loc[sub, "connection_submarine_length"]
-                    * costs.at[carrier + "-connection-submarine", "capital_cost"]
-                    + n.generators.loc[sub, "connection_underground_length"].fillna(0.0)
-                    * costs.at[carrier + "-connection-underground", "capital_cost"]
+            if supcarrier == "offwind":
+                connection_cost = _update_offwind_capital_cost(
+                    n,
+                    n.generators.index[is_ext],
+                    carrier,
+                    costs,
+                    output_currency=output_currency,
                 )
-                connection_costs[carrier] = connection_cost
-                logger.info(
-                    "Added connection cost of {:.0f}-{:.0f} {}/MW/a to {}".format(
-                        connection_cost.min(),
-                        connection_cost.max(),
-                        output_currency,
-                        carrier,
-                    )
-                )
-                n.generators.loc[sub, "capital_cost"] = (
-                    costs.at["offwind", "capital_cost"]
-                    + costs.at[carrier + "-station", "capital_cost"]
-                    + connection_cost
-                )
-            elif supcarrier == "offwind":
-                logger.warning(
-                    f"No stored geometry for offshore carrier '{carrier}'; "
-                    "capital_cost left unchanged during re-costing."
-                )
+                if connection_cost is not None:
+                    connection_costs[carrier] = connection_cost
             else:
                 _assign_component_attrs(
                     n.generators,
@@ -813,7 +851,7 @@ def update_electricity_costs(
     renewable_carriers : iterable of str
         Renewable generator carriers (used to route generator re-costing).
     length_factor : float
-        Transmission/offshore connection length factor.
+        Transmission line length factor.
     hydro_capital_cost : bool
         Whether hydro reservoirs carry a capital cost.
     output_currency : str
@@ -837,7 +875,6 @@ def update_electricity_costs(
         n,
         costs,
         renewable_carriers,
-        length_factor,
         output_currency=output_currency,
     )
 
