@@ -69,7 +69,7 @@ The rule :mod:`simplify_network` does up to four things:
 
 1. Create an equivalent transmission network in which all voltage levels are mapped to the configured base-voltage layer by ``simplify_network_to_base_voltage(...)``. Country-specific line-type mappings are used only when enabled and when mappings are available for every configured country. Otherwise, the complete default mapping is used. AC and DC mappings are evaluated separately.
 
-2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. Displacement connection length for offshore wind is stored on generators so that ``assign_costs`` can apply horizon-specific connection capital costs later.
+2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The submarine and underground lengths of the path an offshore wind generator is moved along are added to its ``connection_submarine_length`` and ``connection_underground_length``, which ``assign_costs`` converts into connection costs.
 
 3. Stub lines and links, i.e. dead ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
 
@@ -213,10 +213,7 @@ def _prepare_connection_lengths_per_link(
     lines_length_factor: float,
 ) -> dict:
     """
-    Return per-link connection *lengths* (km) for offshore techs.
-
-    Same structure as the former cost-weighted helper, but without unit costs so
-    that ``assign_costs`` can monetise the path with horizon-specific prices.
+    Return per-link submarine and underground lengths for offshore connections.
 
     Parameters
     ----------
@@ -232,25 +229,31 @@ def _prepare_connection_lengths_per_link(
     Returns
     -------
     dict
-        Dictionary of per-link connection lengths for offshore techs.
+        Per-link submarine and underground lengths [km], keyed by the generator
+        attributes ``connection_submarine_length`` and
+        ``connection_underground_length``. Empty if there are no links or no
+        offshore wind carriers.
     """
-    if n.links.empty:
+    if n.links.empty or not any(t.startswith("offwind") for t in renewable_config):
         return {}
 
-    connection_lengths_per_link = {}
-
-    # initialize dc_lengths by the hvdc_as_lines option
+    # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
     if hvdc_as_lines:
         dc_lengths = n.lines.length
+        unterwater_fractions = n.lines.underwater_fraction
     else:
         dc_lengths = n.links.length
+        unterwater_fractions = n.links.underwater_fraction
 
-    for tech in renewable_config:
-        if tech.startswith("offwind"):
-            # length only — underwater share uses generator underwater_fraction later
-            connection_lengths_per_link[tech] = dc_lengths * lines_length_factor
-
-    return connection_lengths_per_link
+    # keys are the generator attributes the displacement lengths are added to
+    return {
+        "connection_submarine_length": dc_lengths
+        * lines_length_factor
+        * unterwater_fractions,
+        "connection_underground_length": dc_lengths
+        * lines_length_factor
+        * (1.0 - unterwater_fractions),
+    }
 
 
 def _compute_connection_lengths_to_bus(
@@ -278,15 +281,17 @@ def _compute_connection_lengths_to_bus(
     lines_length_factor : float
         Factor to scale line lengths by.
     connection_lengths_per_link : dict
-        Dictionary of per-link connection lengths for offshore techs.
+        Per-link submarine and underground lengths, see
+        :func:`_prepare_connection_lengths_per_link`.
     buses : pd.Index
         Indices of buses to compute connection lengths to.
 
     Returns
     -------
     pd.DataFrame
-        Connection lengths to buses for offshore techs.
-        Index is the indices of the buses, columns are the offshore techs.
+        Submarine and underground connection lengths to buses [km].
+        Index is the indices of the buses, columns are
+        ``connection_submarine_length`` and ``connection_underground_length``.
     """
     if connection_lengths_per_link is None:
         connection_lengths_per_link = _prepare_connection_lengths_per_link(
@@ -298,11 +303,11 @@ def _compute_connection_lengths_to_bus(
 
     connection_lengths_to_bus = pd.DataFrame(index=buses)
 
-    for tech in connection_lengths_per_link:
+    for attr in connection_lengths_per_link:
         adj = n.adjacency_matrix(
             weights=pd.concat(
                 dict(
-                    Link=connection_lengths_per_link[tech]
+                    Link=connection_lengths_per_link[attr]
                     .reindex(n.links.index)
                     .astype(float),
                     Line=pd.Series(0.0, n.lines.index),
@@ -312,51 +317,45 @@ def _compute_connection_lengths_to_bus(
         lengths_between_buses = dijkstra(
             adj, directed=False, indices=n.buses.index.get_indexer(buses)
         )
-        connection_lengths_to_bus[tech] = lengths_between_buses[
+        connection_lengths_to_bus[attr] = lengths_between_buses[
             np.arange(len(buses)), n.buses.index.get_indexer(busmap.loc[buses])
         ]
     return connection_lengths_to_bus
 
 
-def _adjust_capital_costs_using_connection_lengths(
+def _add_displacement_connection_lengths(
     n: pypsa.Network,
     connection_lengths_to_bus: pd.DataFrame,
 ) -> None:
     """
-    Store displacement connection length on generators (no monetisation).
-
-    Formerly added CAPEX into ``capital_cost`` and wrote ``connection_costs`` CSV.
-    Monetisation is deferred to ``assign_costs`` for per-horizon consistency.
+    Add displacement connection lengths to offshore wind generators in-place.
 
     Parameters
     ----------
     n : pypsa.Network
         The network to modify.
     connection_lengths_to_bus : pd.DataFrame
-        Displacement connection length per bus (from Dijkstra on DC links).
+        Submarine and underground connection lengths per bus, see
+        :func:`_compute_connection_lengths_to_bus`.
 
     Returns
     -------
     None
     """
-    if "displacement_length" not in n.generators.columns:
-        n.generators["displacement_length"] = 0.0
-
-    for tech in connection_lengths_to_bus:
-        tech_b = n.generators.carrier == tech
+    offwind_b = n.generators.carrier.str.startswith("offwind")
+    for attr in connection_lengths_to_bus:
         lengths = (
-            n.generators.loc[tech_b, "bus"]
-            .map(connection_lengths_to_bus[tech])
+            n.generators.loc[offwind_b, "bus"]
+            .map(connection_lengths_to_bus[attr])
             .loc[lambda s: s > 0]
         )
         if not lengths.empty:
-            n.generators.loc[lengths.index, "displacement_length"] = (
-                n.generators.loc[lengths.index, "displacement_length"].fillna(0.0)
-                + lengths
+            n.generators.loc[lengths.index, attr] = (
+                n.generators.loc[lengths.index, attr].fillna(0.0) + lengths
             )
             logger.info(
-                "Displacing {} generator(s) and storing connection length: {}".format(
-                    tech,
+                "Displacing offshore generator(s) and adding to {}: {} ".format(
+                    attr,
                     ", ".join(
                         "{:.1f} km for `{}`".format(d, b) for b, d in lengths.items()
                     ),
@@ -387,7 +386,7 @@ def _aggregate_and_move_components(
     busmap : pd.Series
         Mapping from previous bus names to new bus names.
     connection_lengths_to_bus : pd.DataFrame
-        Displacement connection length per bus (from Dijkstra on DC links).
+        Displacement connection lengths per bus.
     output : object
         Snakemake output object.
     aggregate_one_ports : set
@@ -406,7 +405,7 @@ def _aggregate_and_move_components(
             if not df.empty:
                 import_series_from_dataframe(n, df, c, attr)
 
-    _adjust_capital_costs_using_connection_lengths(n, connection_lengths_to_bus)
+    _add_displacement_connection_lengths(n, connection_lengths_to_bus)
 
     generator_strategies = aggregation_strategies["generators"]
     one_port_strategies = aggregation_strategies["one_ports"]

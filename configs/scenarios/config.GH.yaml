@@ -113,9 +113,8 @@ clustering:
       p_min_pu: mean
       p_max_pu: weighted_average
       marginal_cost: mean
-      average_distance: mean
-      underwater_fraction: mean
-      displacement_length: mean
+      connection_submarine_length: capacity_weighted_average
+      connection_underground_length: capacity_weighted_average
       committable: any
       ramp_limit_up: max
       ramp_limit_down: max

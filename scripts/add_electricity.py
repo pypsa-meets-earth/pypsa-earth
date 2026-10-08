@@ -623,17 +623,20 @@ def attach_wind_and_solar(
                 lifetime=renewable_lifetime,
             )
 
-            # Store the offshore connection geometry so per-horizon re-costing
-            # can recompute the full capital cost (technology + connection) using
-            # updated unit costs from the new cost table, without the profile.
+            # Store submarine and underground connection lengths [km] so per-horizon
+            # re-costing can recompute the connection cost without the profile.
+            # The cost is linear in these lengths, so aggregating them like
+            # capital_cost keeps simplification and clustering cost-consistent.
             # For non-offwind carriers these stay NaN and are unused.
             if supcarrier == "offwind":
-                n.generators.loc[new_generators, "average_distance"] = (
-                    ds["average_distance"].to_pandas().values
-                )
-                n.generators.loc[new_generators, "underwater_fraction"] = (
-                    ds["underwater_fraction"].to_pandas().values
-                )
+                distance = line_length_factor * ds["average_distance"].to_pandas()
+                underwater_fraction = ds["underwater_fraction"].to_pandas()
+                n.generators.loc[new_generators, "connection_submarine_length"] = (
+                    distance * underwater_fraction
+                ).values
+                n.generators.loc[new_generators, "connection_underground_length"] = (
+                    distance * (1.0 - underwater_fraction)
+                ).values
 
 
 def attach_conventional_generators(
