@@ -332,6 +332,33 @@ def _migrate_line_type_mappings(
         warn(f"lines.{key}", f"lines.{key}.default")
 
 
+def _migrate_custom_powerplants_method(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Move a legacy scalar ``electricity.custom_powerplants`` under ``method``.
+
+    The option used to be a single value (``false``, ``merge`` or ``replace``).
+    It is now a dict with ``filepaths`` and ``method``, so the old value is moved
+    to ``method`` and ``filepaths`` is set to ``data/custom_powerplants.csv``.
+    """
+    electricity = config.get("electricity")
+    if not isinstance(electricity, dict):
+        return
+
+    method = electricity.get("custom_powerplants")
+    if isinstance(method, dict) or "custom_powerplants" not in electricity:
+        return
+
+    electricity["custom_powerplants"] = {
+        "filepaths": ["data/custom_powerplants.csv"],
+        "method": method,
+    }
+    warn(
+        "electricity.custom_powerplants: " + str(method),
+        "electricity.custom_powerplants.method: " + str(method),
+    )
+
+
 def migrate_config(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]] | None = None,
@@ -348,7 +375,8 @@ def migrate_config(
     a legacy bool flag and the former ``{demand}`` / ``{h2export}`` wildcards
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
     scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
-    mappings, which are moved under their respective ``default`` keys.
+    mappings, which are moved under their respective ``default`` keys. A legacy
+    scalar ``electricity.custom_powerplants`` becomes its ``method``.
 
     Parameters
     ----------
@@ -371,6 +399,7 @@ def migrate_config(
         )
 
     _migrate_line_type_mappings(config, _warn)
+    _migrate_custom_powerplants_method(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
