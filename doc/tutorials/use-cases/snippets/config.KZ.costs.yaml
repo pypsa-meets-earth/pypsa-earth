@@ -31,7 +31,8 @@ electricity:
   estimate_renewable_capacities:
     stats: irena
     year: 2020
-  custom_powerplants: replace
+  custom_powerplants:
+    method: replace
 
 costs:
   year: 2020
