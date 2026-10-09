@@ -127,9 +127,6 @@ def set_lines_ids(lines, buses, distance_crs):
     lines["bus0"] = -1
     lines["bus1"] = -1
 
-    # Filter lines that are empty
-    lines_d = lines_d[~lines_d.geometry.boundary.is_empty]
-
     for key, lines_sel in lines_d.groupby(["voltage", "dc"]):
         buses_sel = buses_d.query(f"voltage == {key[0]} and dc == {key[1]}")
 
@@ -665,7 +662,11 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
 
     # remove lines that are rings (included for completion) or degenerate (e.g. single points), TODO: this should be a separate function
     df_l = df_l[
-        ~(df_l.geometry.is_ring | df_l.geometry.boundary.is_empty | (df_l.geometry.geom_type != "LineString"))
+        ~(
+            df_l.geometry.boundary.is_empty
+            | (df_l.geometry.geom_type != "LineString")
+            | (df_l["length"] <= tol)
+        )
     ].reset_index(drop=True)
 
     # buses should not be returned as they are not changed, but included for completion
