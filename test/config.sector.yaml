@@ -18,7 +18,7 @@ scenario:
   ll: ["copt"]
   clusters: [4]
   opts: [CCL-Co2L-24h]
-  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  planning_horizons: # investment years for multi-period runs; model years for overnight
   - 2030
   sopts:
   - "144h"
