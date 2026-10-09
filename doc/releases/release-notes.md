@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
 
+* Externalise retrieval of urban percentage using mirrored sources file [PR #2063](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2063)
+
 * Fix NaN shipping oil demand for nodes with several ports or no port [PR #2052](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2052)
 
 * Fix missing time import in databundle retries [PR #2054](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2054)
