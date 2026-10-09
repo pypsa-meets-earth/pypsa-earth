@@ -10,6 +10,18 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+*
+
+**Minor Changes and bug-fixing**
+
+*
+
+# PyPSA-Earth 0.10.0
+
+**New Features and Major Changes**
+
+* Update `technology-data` to v0.15.0 and align the cost-data reference year to 2025 [PR #1729](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1729)
+
 * Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
@@ -33,6 +45,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix fallback to closest available CO2 emission year [PR #2018](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2018)
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
+
+* Fix capacity_factor=False in hydro calculation to support atlite 0.6.0 [PR #2023](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2023)
 
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
