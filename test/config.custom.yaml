@@ -25,7 +25,7 @@ augmented_line_connection:
   add_to_snakefile: true  # If True, includes this rule to the workflow
   new_line_type: ["HVAC", "HVDC"]  # Expanded lines can be either ["HVAC"] or ["HVDC"] or both ["HVAC", "HVDC"]
 
-cluster_options:
+clustering:
   alternative_clustering: true  # "False" use Voronoi shapes, "True" use GADM shapes
 
 hydro:

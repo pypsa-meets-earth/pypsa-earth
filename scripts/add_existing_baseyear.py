@@ -8,15 +8,12 @@ horizon.
 """
 
 import logging
-import os
 from types import SimpleNamespace
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
-import powerplantmatching as pm
 import pypsa
-import xarray as xr
 from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
 
 # from _helpers import (
@@ -242,8 +239,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
-            h2export="120",
         )
 
     # configure_logging(snakemake)
@@ -262,11 +257,11 @@ if __name__ == "__main__":
     add_build_year_to_new_assets(n, baseyear)
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
-    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     grouping_years_heat = snakemake.params.existing_capacities["grouping_years_heat"]
 
     # TODO: not implemented in -sec yet
+    # costs = read_csv_nafix(snakemake.input.costs, index_col=0)
     # if options["enable"]["heat"]:
     #     time_dep_hp_cop = options["time_dep_hp_cop"]
     #     ashp_cop = (

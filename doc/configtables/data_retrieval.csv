@@ -1,0 +1,12 @@
+Parameter,Unit,Values,Description
+enable,,,
+-- retrieve_databundle,bool,"{true, false}",Retrieve databundle from Zenodo via ``retrieve_databundle_light``; recommended for the first run.
+-- download_osm_data,bool,"{true, false}",Download OpenStreetMap data for ``countries``.
+-- retrieve_cutout,bool,"{true, false}",Retrieve cutout databundle via ``retrieve_databundle_light``.
+-- retrieve_cost_data,bool,"{true, false}","Retrieve cost data from technology-data into ``resources/costs.csv``; ``false`` uses ``data/costs.csv``."
+-- retrieve_databundle_sector,bool,"{true, false}",Retrieve sector databundle.
+-- download_global_buildings,bool,"{true, false}",Download GlobalMLBuildingFootprints for ``countries``.
+-- build_cutout,bool,"{true, false}",Build cutouts via ``build_cutout``; requires CDS API key and uses ``snapshots`` and ``countries``.
+-- build_natura_raster,bool,"{true, false}",Build exclusion raster ``natura.tiff`` via ``build_natura_raster``.
+-- progress_bar,bool,"{true, false}",Show progress bars during long downloads and builds.
+-- custom_busmap,bool,"{true, false}","Use ``data/custom_busmap_elec_s{simpl}_{clusters}.csv`` instead of the clustering busmap algorithm."

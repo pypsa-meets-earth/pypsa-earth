@@ -163,7 +163,7 @@ def create_export_profile():
     """
 
     # convert TWh to MWh
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6
+    export_h2 = snakemake.params.h2export * 1e6
 
     if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760
@@ -211,8 +211,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144h",
             discountrate="0.071",
-            demand="AB",
-            h2export="120",
             # configfile="test/config.test1.yaml",
         )
 

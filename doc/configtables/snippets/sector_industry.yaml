@@ -1,5 +1,4 @@
-  # ------------------- INDUSTRY OPTIONS -------------------
-
+  # ------------------- Industry options -------------------
   industry_util_factor: 0.7
 
   efficiency_heat_oil_to_elec: 0.9

@@ -56,7 +56,6 @@ if __name__ == "__main__":
             simpl="",
             clusters="4",
             planning_horizons=2030,
-            demand="AB",
         )
 
     countries = snakemake.params.countries
@@ -64,7 +63,8 @@ if __name__ == "__main__":
     if snakemake.params.industry_demand:
         _logger.info(
             "Fetching custom industry demand data.. expecting file at 'data/custom/industry_demand_{0}_{1}.csv'".format(
-                snakemake.wildcards["demand"], snakemake.wildcards["planning_horizons"]
+                snakemake.params.demand_scenario,
+                snakemake.wildcards["planning_horizons"],
             )
         )
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             os.path.join(
                 BASE_DIR,
                 "data/custom/industry_demand_{0}_{1}.csv".format(
-                    snakemake.wildcards["demand"],
+                    snakemake.params.demand_scenario,
                     snakemake.wildcards["planning_horizons"],
                 ),
             ),

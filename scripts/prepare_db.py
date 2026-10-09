@@ -3,23 +3,13 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-Created on Sun May 30 18:11:07 2021.
-
-@author: haz43975
-"""
-
-
-# -*- coding: utf-8 -*-
-"""
 Created on Tue May  4 10:22:36 2021
 
 @author: haz43975
 """
 
-import os
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import pypsa
 
@@ -42,8 +32,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
-            h2export="120",
         )
 
     n0 = pypsa.Network(snakemake.input.network)

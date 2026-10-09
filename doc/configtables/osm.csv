@@ -1,0 +1,19 @@
+Parameter,Unit,Values,Description
+clean_osm_data,,,Options passed to the ``clean_osm_data`` rule.
+-- threshold_voltage,V,,"Assets below the voltage threshold will not be considered (cable, line, generator, etc.)."
+-- tag_substation,,"{transmission, distribution}",Filters only substations with the corresponding tag (transmission or distribution).
+-- names_by_shapes,bool,"{True, False}",True: the country name is set based on the extended country shapes.
+-- add_line_endings,bool,"{True, False}",True: line endings are added to the dataset of the substations.
+-- generator_name_method,,"{OSM, closest_city}",Methodology to specify the name of generators. From OpenStreetMap (OSM) or named after the closest city (closest_city).
+-- use_custom_lines,,"{OSM_only, custom_only, add_custom, none}","Method for selecting which type of data is used for lines in the clean_osm_data script."
+-- path_custom_lines,,str,"Path to custom line data when ``use_custom_lines`` is ``custom_only`` or ``add_custom``."
+-- use_custom_substations,,"{OSM_only, custom_only, add_custom, none}","Method for selecting which type of data is used for substations in the clean_osm_data script."
+-- path_custom_substations,,str,"Path to custom substation data when ``use_custom_substations`` is ``custom_only`` or ``add_custom``."
+-- use_custom_cables,,"{OSM_only, custom_only, add_custom, none}","Method for selecting which type of data is used for cables in the clean_osm_data script."
+-- path_custom_cables,,str,"Path to custom cable data when ``use_custom_cables`` is ``custom_only`` or ``add_custom``."
+build_osm_network,,,Options passed to the ``build_osm_network`` rule.
+-- group_close_buses,bool,"{True, False}",True: close buses are merged and guarantee the voltage matching among line endings.
+-- group_tolerance_buses,m,,Tolerance in meters of the close buses to merge.
+-- split_overpassing_lines,bool,"{True, False}",True: lines overpassing buses are splitted and connected to the buses.
+-- overpassing_lines_tolerance,m,,Tolerance to identify lines overpassing buses.
+-- force_ac,bool,"{True, False}",True: forces all components (lines and substation) to be AC-only. To be used if DC assets create problems.

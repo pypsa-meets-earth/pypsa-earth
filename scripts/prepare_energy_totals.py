@@ -2,22 +2,9 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import glob
 import logging
-import os
-import sys
-from io import BytesIO
-from pathlib import Path
-from urllib.request import urlopen
-from zipfile import ZipFile
 
-import country_converter as coco
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import py7zr
-import requests
-from _helpers import BASE_DIR, read_csv_nafix, three_2_two_digits_country
+from _helpers import read_csv_nafix
 
 _logger = logging.getLogger(__name__)
 
@@ -52,14 +39,13 @@ if __name__ == "__main__":
             "prepare_energy_totals",
             simpl="",
             clusters="4",
-            demand="AB",
             planning_horizons=2030,
         )
 
     countries = snakemake.params.countries
     # countries = ["NG", "BJ"]
     investment_year = int(snakemake.wildcards.planning_horizons)
-    demand_sc = snakemake.wildcards.demand  # loading the demand scenrario wildcard
+    demand_sc = snakemake.params.demand_scenario
 
     base_energy_totals = read_csv_nafix(snakemake.input.unsd_paths, index_col=0)
     growth_factors_cagr = read_csv_nafix(

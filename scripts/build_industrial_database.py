@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import math
-import os
 
 import country_converter as coco
 import numpy as np
@@ -548,7 +547,6 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
         )
 
     # Load parameters
