@@ -36,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
+* Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
+
 # PyPSA-Earth 0.9.0
 
 **New Features and Major Changes**
