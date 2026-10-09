@@ -32,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 
+* Fix offshore calculation error in build_renewable_profiels for shapes crossing the antimeridian [PR #2059](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2059)
+
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
 # PyPSA-Earth 0.9.0
