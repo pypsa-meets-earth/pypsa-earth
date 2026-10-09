@@ -377,17 +377,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/GridGrapher">
-                    <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
-                    <br />
-                    <sub><b>GridGrapher</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/drifter089">
                     <img src="https://avatars.githubusercontent.com/u/93286254?v=4" width="100;" alt="drifter089"/>
                     <br />
                     <sub><b>drifter089</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/GridGrapher">
+                    <img src="https://avatars.githubusercontent.com/u/127969728?v=4" width="100;" alt="GridGrapher"/>
+                    <br />
+                    <sub><b>GridGrapher</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -398,17 +398,17 @@ The documentation is available here: [documentation](https://pypsa-earth.readthe
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/ljansen-iee">
-                    <img src="https://avatars.githubusercontent.com/u/47030274?v=4" width="100;" alt="ljansen-iee"/>
-                    <br />
-                    <sub><b>ljansen-iee</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/Emre-Yorat89">
                     <img src="https://avatars.githubusercontent.com/u/62134151?v=4" width="100;" alt="Emre-Yorat89"/>
                     <br />
                     <sub><b>Emre-Yorat89</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/ljansen-iee">
+                    <img src="https://avatars.githubusercontent.com/u/47030274?v=4" width="100;" alt="ljansen-iee"/>
+                    <br />
+                    <sub><b>ljansen-iee</b></sub>
                 </a>
             </td>
 		</tr>

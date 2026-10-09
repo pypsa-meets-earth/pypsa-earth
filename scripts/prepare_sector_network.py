@@ -1677,6 +1677,12 @@ def add_shipping(
         # TODO double check the use of efficiency
     )  # TODO use real data here
 
+    # map the country demand per port before aggregating to nodes, since
+    # summing the "country" column joins the codes (e.g. "EGEG")
+    ports["navigation_p_set"] = (
+        ports["fraction"] * ports["country"].map(navigation_demand) * 1e6 / 8760
+    )
+
     ports = pd.concat([ports, ind]).drop(["Bus", "name"], axis=1, errors="ignore")
 
     # ports = ports.fillna(0.0)
@@ -1724,13 +1730,7 @@ def add_shipping(
     if shipping_hydrogen_share < 1:
         shipping_oil_share = 1 - shipping_hydrogen_share
 
-        ports["p_set"] = (
-            shipping_oil_share
-            * ports["fraction"]
-            * ports["country"].map(navigation_demand)
-            * 1e6
-            / 8760
-        )
+        ports["p_set"] = shipping_oil_share * ports["navigation_p_set"]
 
         n.add(
             "Load",
