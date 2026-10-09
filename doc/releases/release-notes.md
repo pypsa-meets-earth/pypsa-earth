@@ -34,6 +34,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 
+* Fix capacity_factor=False in hydro calculation to support atlite 0.6.0 [PR #2023](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2023)
+
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
 * Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
