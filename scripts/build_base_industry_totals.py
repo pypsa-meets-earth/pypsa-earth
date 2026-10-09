@@ -9,14 +9,11 @@ Created on Thu Jul 14 19:01:13 2022.
 """
 
 
-import os
-import re
 from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
 from _helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
-from prepare_sector_network import get
 
 # def calc_industry_base(df):
 
@@ -102,7 +99,6 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
 
     investment_year = int(snakemake.wildcards.planning_horizons)
-    demand_sc = snakemake.params.demand_scenario
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.params.base_year
     )

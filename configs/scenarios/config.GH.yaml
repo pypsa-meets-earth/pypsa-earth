@@ -8,7 +8,7 @@
 # set retrieve_databundle: true and retrieve_databundle_sector: true,
 # then revert to false for subsequent modelling runs.
 
-version: 0.9.0
+version: 0.10.0
 tutorial: false
 
 logging:
@@ -227,7 +227,10 @@ electricity:
     Link: [] # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
-  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+  custom_powerplants:
+    filepaths: # list of custom powerplant files used in "merge" and "replace" options
+    - data/custom_powerplants.csv
+    method: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -244,15 +247,6 @@ electricity:
       PV: [solar]
 
 lines:
-  ac_types:
-    132.: "243-AL1/39-ST1A 20.0"
-    220.: "Al/St 240/40 2-bundle 220.0"
-    300.: "Al/St 240/40 3-bundle 300.0"
-    380.: "Al/St 240/40 4-bundle 380.0"
-    500.: "Al/St 240/40 4-bundle 380.0"
-    750.: "Al/St 560/50 4-bundle 750.0"
-  dc_types:
-    500.: "HVDC XLPE 1000"
   s_max_pu: 0.7
   s_nom_max: .inf
   s_nom_max_min: -.inf

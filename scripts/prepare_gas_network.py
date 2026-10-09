@@ -45,33 +45,24 @@ inter-state pipeline capacities.
 """
 
 import logging
-
-logger = logging.getLogger(__name__)
-
 import os
 import zipfile
 from pathlib import Path
 from typing import Any, List, Union
 
-import fiona
 import geopandas as gpd
-import matplotlib.colors as colors
-import matplotlib.pyplot as plt
 import pandas as pd
 from _helpers import (
     BASE_DIR,
     content_retrieve,
     progress_retrieve,
-    three_2_two_digits_country,
-    two_2_three_digits_country,
 )
-from build_shapes import gadm
-from matplotlib.lines import Line2D
 from pyproj import CRS
 from pypsa.geo import haversine_pts
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import unary_union
-from shapely.validation import make_valid
+
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
