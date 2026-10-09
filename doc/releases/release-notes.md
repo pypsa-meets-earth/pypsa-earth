@@ -34,6 +34,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 
+* if custom_powerplants.csv is used, use efficiencies from custom_powerplants.csv instead of overwriting these with technology data default values [PR #2057](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2057)
+
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
 * Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
