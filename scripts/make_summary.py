@@ -74,18 +74,18 @@ def assign_carriers(n):
         for carrier in ["transport", "heat", "urban heat"]:
             n.loads.loc[n.loads.index.str.contains(carrier), "carrier"] = carrier
 
-    n.storage_units["carrier"].replace(
-        {"hydro": "hydro+PHS", "PHS": "hydro+PHS"}, inplace=True
+    n.storage_units["carrier"] = n.storage_units["carrier"].replace(
+        {"hydro": "hydro+PHS", "PHS": "hydro+PHS"}
     )
 
     if "carrier" not in n.lines:
         n.lines["carrier"] = "AC"
 
-    n.lines["carrier"].replace({"AC": "lines"}, inplace=True)
+    n.lines["carrier"] = n.lines["carrier"].replace({"AC": "lines"})
 
     if n.links.empty:
         n.links["carrier"] = pd.Series(dtype=str)
-    n.links["carrier"].replace({"DC": "lines"}, inplace=True)
+    n.links["carrier"] = n.links["carrier"].replace({"DC": "lines"})
 
     if (
         "EU gas store" in n.stores.index
@@ -439,18 +439,15 @@ def calculate_weighted_prices(n, label, weighted_prices):
             if names.empty:
                 continue
 
-            load += (
-                n.links_t.p0[names]
-                .groupby(n.links.loc[names, "bus0"], axis=1)
-                .sum(axis=1)
-            )
+            load += n.links_t.p0[names].T.groupby(n.links.loc[names, "bus0"]).sum().T
 
         # Add H2 Store when charging
         if carrier == "H2":
             stores = (
                 n.stores_t.p[buses + " Store"]
-                .groupby(n.stores.loc[buses + " Store", "bus"], axis=1)
-                .sum(axis=1)
+                .T.groupby(n.stores.loc[buses + " Store", "bus"])
+                .sum()
+                .T
             )
             stores[stores > 0.0] = 0.0
             load += -stores

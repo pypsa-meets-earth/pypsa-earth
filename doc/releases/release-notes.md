@@ -14,7 +14,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
 
-* Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
+* Support country-specific mappings and custom transmission line types [PR #1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
+
+* Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
+
+* Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
+
+* Migrate workflow scripts to pandas 3 [PR #2058](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2058)
 
 **Minor Changes and bug-fixing**
 

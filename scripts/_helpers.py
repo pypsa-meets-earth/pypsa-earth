@@ -35,6 +35,7 @@ grouped roughly as follows:
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -55,6 +56,8 @@ import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
+
+PYPSA_V1 = bool(re.match(r"^1\.\d", pypsa.__version__))
 
 logger = logging.getLogger(__name__)
 
@@ -640,7 +643,7 @@ def aggregate_p_nom(n: pypsa.Network) -> pd.Series:
             n.generators.groupby("carrier").p_nom_opt.sum(),
             n.storage_units.groupby("carrier").p_nom_opt.sum(),
             n.links.groupby("carrier").p_nom_opt.sum(),
-            n.loads_t.p.groupby(n.loads.carrier, axis=1).sum().mean(),
+            n.loads_t.p.T.groupby(n.loads.carrier).sum().T.mean(),
         ]
     )
 
@@ -942,8 +945,8 @@ def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict
 def mock_snakemake(
     rulename: str,
     root_dir: str | Path | None = None,
+    configfiles: str | None = None,
     submodule_dir: str | None = None,
-    configfile: str | None = None,
     **wildcards,
 ):
     """
@@ -957,21 +960,35 @@ def mock_snakemake(
     ----------
     rulename: str
         name of the rule for which the snakemake object should be generated
-    configfile: str
-        path to config file to be used in mock_snakemake
-    wildcards:
+    root_dir: str/path-like
+        path to the root directory of the snakemake project
+    configfiles: list, str
+        list of configfiles to be used to update the config
+    submodule_dir: str, Path
+        in case PyPSA-Earth is used as a submodule, submodule_dir is
+        the path of pypsa-earth relative to the project directory.
+    **wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
     import os
 
     import snakemake as sm
-
-    try:
-        from pypsa.descriptors import Dict
-    except:
-        from pypsa.definitions.structures import Dict  # from pypsa version v0.31
+    from packaging import version
+    from pypsa.definitions.structures import Dict
+    from snakemake import __version__ as sm_version
+    from snakemake.api import Workflow
+    from snakemake.common import SNAKEFILE_CHOICES
+    from snakemake.logging import LoggerManager
     from snakemake.script import Snakemake
+    from snakemake.settings.types import (
+        ConfigSettings,
+        DAGSettings,
+        OutputSettings,
+        ResourceSettings,
+        StorageSettings,
+        WorkflowSettings,
+    )
 
     script_dir = Path(__file__).parent.resolve()
     if root_dir is None:
@@ -979,6 +996,7 @@ def mock_snakemake(
     else:
         root_dir = Path(root_dir).resolve()
 
+    workdir = None
     user_in_script_dir = Path.cwd().resolve() == script_dir
     if str(submodule_dir) in __file__:
         # the submodule_dir path is only need to locate the project dir
@@ -986,44 +1004,63 @@ def mock_snakemake(
     elif user_in_script_dir:
         os.chdir(root_dir)
     elif Path.cwd().resolve() != root_dir:
-        raise RuntimeError(
-            "mock_snakemake has to be run from the repository root"
-            f" {root_dir} or scripts directory {script_dir}"
+        logger.info(
+            "Not in scripts or root directory, will assume this is a separate workdir"
         )
+        workdir = Path.cwd()
+
     try:
-        for p in sm.SNAKEFILE_CHOICES:
+        for p in SNAKEFILE_CHOICES:
+            p = root_dir / p
             if os.path.exists(p):
                 snakefile = p
                 break
+        if configfiles is None:
+            configfiles = []
+        elif isinstance(configfiles, str):
+            configfiles = [configfiles]
 
-        if isinstance(configfile, str):
-            with open(configfile, "r") as file:
-                configfile = yaml.safe_load(file)
+        resource_settings = ResourceSettings()
+        config_settings = ConfigSettings(configfiles=map(Path, configfiles))
+        workflow_settings = WorkflowSettings()
+        storage_settings = StorageSettings()
+        dag_settings = DAGSettings(rerun_triggers=[])
 
-        workflow = sm.Workflow(
-            snakefile,
-            overwrite_configfiles=[],
-            rerun_triggers=[],
-            overwrite_config=configfile,
+        workflow_kwargs = dict(
+            config_settings=config_settings,
+            resource_settings=resource_settings,
+            workflow_settings=workflow_settings,
+            storage_settings=storage_settings,
+            dag_settings=dag_settings,
+            storage_provider_settings=dict(),
+            overwrite_workdir=workdir,
         )
-        workflow.include(snakefile)
-        workflow.global_resources = {}
-        try:
-            rule = workflow.get_rule(rulename)
-        except Exception as exception:
-            print(
-                exception,
-                f"The {rulename} might be a conditional rule in the Snakefile.\n"
-                f"Did you enable {rulename} in the config?",
+
+        # Snakemake version-dependent logger handling
+        if version.parse(sm_version) >= version.parse("9.14.6"):
+            output_settings = OutputSettings()
+            workflow_kwargs["logger_manager"] = LoggerManager(
+                logger=logger, settings=output_settings
             )
-            raise
+
+        workflow = Workflow(**workflow_kwargs)
+        workflow.include(snakefile)
+
+        if configfiles:
+            for f in configfiles:
+                if not os.path.exists(f):
+                    raise FileNotFoundError(f"Config file {f} does not exist.")
+                workflow.configfile(f)
+
+        workflow.global_resources = {}
+        rule = workflow.get_rule(rulename)
         dag = sm.dag.DAG(workflow, rules=[rule])
         wc = Dict(wildcards)
         job = sm.jobs.Job(rule, dag, wc)
 
         def make_accessable(*ios):
             for io in ios:
-                for i in range(len(io)):
+                for i, _ in enumerate(io):
                     io[i] = os.path.abspath(io[i])
 
         make_accessable(job.input, job.output, job.log)
@@ -1039,8 +1076,6 @@ def mock_snakemake(
             job.rule.name,
             None,
         )
-        snakemake.benchmark = job.benchmark
-
         # create log and output dir if not existent
         for path in list(snakemake.log) + list(snakemake.output):
             Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -1653,10 +1688,9 @@ def cycling_shift(
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
     """
-    df = df.copy()
-    new_index = np.roll(df.index, steps)
-    df.values[:] = df.reindex(index=new_index).values
-    return df
+    shifted = df.iloc[np.roll(np.arange(len(df)), steps)].copy()
+    shifted.index = df.index
+    return shifted
 
 
 def get_country(target: str, **keys: str) -> str | float:
@@ -1778,13 +1812,16 @@ def _get_shape_col_gdf(
             if "GADM_ID" in gdf_shapes.columns:
                 col = "GADM_ID"
 
-                if gdf_shapes[col][0][
-                    :3
-                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                if (
+                    gdf_shapes[col].iloc[0][:3].isalpha()
+                ):  # TODO clean later by changing all codes to 2 letters
                     gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
-            elif gdf_shapes[col][0][:2].isalpha() and gdf_shapes[col][0][:3].isalpha():
+            elif (
+                gdf_shapes[col].iloc[0][:2].isalpha()
+                and gdf_shapes[col].iloc[0][:3].isalpha()
+            ):
                 gdf_shapes[col] = gdf_shapes[col].apply(
                     lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                 )
@@ -2072,7 +2109,7 @@ def lossy_bidirectional_links(n: pypsa.Network, carrier: str) -> None:
 
     # add the new reversed links to the network and fill the newly created trackers with default values for the other links
     n.links = pd.concat([n.links, rev_links], sort=False)
-    n.links["reversed"] = n.links["reversed"].fillna(False).infer_objects(copy=False)
+    n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool)
     n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
 
 

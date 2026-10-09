@@ -682,7 +682,7 @@ def plot_transmission_topology(network):
 
     n.lines = pd.concat([n.lines, DC_lines[["bus0", "bus1"]]])
 
-    n.madd("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
+    n.add("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
 
     fig = plt.figure()
     fig.set_size_inches(10.5, 9)
@@ -831,7 +831,7 @@ def plot_sector_map(
         costs = pd.concat([costs, costs_c], axis=1)
 
         print(comp, costs)
-    costs = costs.groupby(costs.columns, axis=1).sum()
+    costs = costs.T.groupby(costs.columns).sum().T
 
     costs.drop(list(costs.columns[(costs == 0.0).all()]), axis=1, inplace=True)
 
@@ -844,7 +844,7 @@ def plot_sector_map(
         if item not in tech_colors:
             print("Warning!", item, "not in config/plotting/tech_colors")
 
-    costs = costs.stack()  # .sort_index()
+    costs = costs.stack().dropna()  # .sort_index()
 
     n.links.drop(
         n.links.index[(n.links.carrier != "DC") & (n.links.carrier != "B2B")],

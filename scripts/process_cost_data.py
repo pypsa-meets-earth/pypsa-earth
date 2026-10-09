@@ -291,6 +291,7 @@ def apply_currency_conversion(
             return pd.Series([value, unit])
 
     cost_dataframe[["value", "unit"]] = cost_dataframe.apply(convert_row, axis=1)
+    cost_dataframe["value"] = pd.to_numeric(cost_dataframe["value"]).astype(float)
     return cost_dataframe
 
 

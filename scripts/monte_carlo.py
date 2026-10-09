@@ -16,7 +16,7 @@ Relevant Settings
     options:
         add_to_snakefile: false # When set to true, enables Monte Carlo sampling
         samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
-        sampling_strategy: "chaospy"  # "pydoe2", "chaospy", "scipy", packages that are supported
+        sampling_strategy: "chaospy"  # "chaospy", "scipy", packages that are supported
         seed: 42 # set seedling for reproducibilty
     uncertainties:
         loads_t.p_set:
@@ -55,7 +55,7 @@ when more than one feature are changed at the same time.
 
 To do so, the scripts is separated in two building blocks: One creates the experimental design,
 the other, modifies and outputs the network file. Building the experimental design is currently
-supported by the packages pyDOE2, chaospy and scipy. This should give users the freedom to
+supported by the packages chaospy and scipy. This should give users the freedom to
 explore alternative approaches. The orthogonal latin hypercube sampling is thereby found as most
 performant, hence, implemented here. Sampling the multi-dimensional uncertainty space is relatively
 easy. It only requires two things: The number of *samples* (defines the number of total networks to
@@ -72,47 +72,12 @@ import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
-import seaborn as sns
 from _helpers import configure_logging, create_logger
 from scipy.stats import qmc
 from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
 logger = create_logger(__name__)
-sns.set(style="whitegrid")
-
-
-def monte_carlo_sampling_pydoe2(
-    N_FEATURES: int,
-    SAMPLES: int,
-    uncertainties_values: dict,
-    random_state: int,
-    criterion: str = None,
-    iteration: int = None,
-    correlation_matrix: np.ndarray = None,
-) -> np.ndarray:
-    """
-    Creates Latin Hypercube Sample (LHS) implementation from PyDOE2 with
-    various options. Additionally, all "corners" are simulated.
-
-    Adapted from Disspaset: https://github.com/energy-modelling-toolkit/Dispa-SET/blob/master/scripts/build_and_run_hypercube.py
-    Documentation on PyDOE2: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
-    """
-    from pyDOE2 import lhs
-
-    # Generate a Nfeatures-dimensional latin hypercube varying between 0 and 1:
-    lh = lhs(
-        N_FEATURES,
-        samples=SAMPLES,
-        criterion=criterion,
-        iterations=iteration,
-        random_state=random_state,
-        correlation_matrix=correlation_matrix,
-    )
-
-    lh = rescale_distribution(lh, uncertainties_values)
-
-    return lh
 
 
 def monte_carlo_sampling_chaospy(
@@ -125,7 +90,7 @@ def monte_carlo_sampling_chaospy(
     """
     Creates Latin Hypercube Sample (LHS) implementation from chaospy.
 
-    Documentation on Chaospy: https://github.com/clicumu/pyDOE2 (fixes latin_cube errors)
+    Documentation on Chaospy: https://chaospy.readthedocs.io/en/master/ (fixes latin_cube errors)
     Documentation on Chaospy latin-hyper cube (quasi-Monte Carlo method): https://chaospy.readthedocs.io/en/master/user_guide/fundamentals/quasi_random_samples.html#Quasi-random-samples
     """
 
@@ -278,7 +243,7 @@ def validate_parameters(
     **Parameters**:
 
     - sampling_strategy: str
-        The chosen sampling strategy from chaospy, scipy and pydoe2
+        The chosen sampling strategy from chaospy and scipy
     - samples: int
         The number of samples to generate for the simulation
     - distribution: str
@@ -291,7 +256,7 @@ def validate_parameters(
     - ValueError: If the parameters are invalid for the specified distribution.
     """
 
-    valid_strategy = ["chaospy", "scipy", "pydoe2"]
+    valid_strategy = ["chaospy", "scipy"]
     valid_distribution = ["uniform", "normal", "lognormal", "triangle", "beta", "gamma"]
 
     # verifying samples and distribution_params
@@ -380,16 +345,6 @@ if __name__ == "__main__":
 
     # SCENARIO CREATION / SAMPLING STRATEGY
     ###
-    if SAMPLING_STRATEGY == "pydoe2":
-        lh = monte_carlo_sampling_pydoe2(
-            N_FEATURES,
-            SAMPLES,
-            UNCERTAINTIES_VALUES,
-            random_state=SEED,
-            criterion=None,
-            iteration=None,
-            correlation_matrix=None,
-        )
     if SAMPLING_STRATEGY == "scipy":
         lh = monte_carlo_sampling_scipy(
             N_FEATURES,
@@ -405,6 +360,8 @@ if __name__ == "__main__":
         )
 
     # create plot for the rescaled distributions (for development usage, commented by default)
+    # import seaborn as sns
+    # sns.set(style="whitegrid")
     # for idx in range(N_FEATURES):
     #     sns.displot(lh[:, idx], kde=True).set(
     #         title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"

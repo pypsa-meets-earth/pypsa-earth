@@ -206,7 +206,7 @@ def prepare_heat_data(n: pypsa.Network) -> tuple:
     # electric_nodes = n.loads.index[n.loads.carrier == "electricity"]
     # n.loads_t.p_set[electric_nodes] = (
     #     n.loads_t.p_set[electric_nodes]
-    #     - electric_heat_supply.groupby(level=1, axis=1).sum()[electric_nodes]
+    #     - electric_heat_supply.T.groupby(level=1).sum().T[electric_nodes]
     # )
 
     return (
