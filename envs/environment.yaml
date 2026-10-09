@@ -36,7 +36,6 @@ dependencies:
 - libgdal-netcdf
 - networkx
 - scipy<1.16
-- pydoe2
 - shapely!=2.0.4
 - pre-commit
 - matplotlib
