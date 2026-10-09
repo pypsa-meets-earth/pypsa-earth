@@ -69,7 +69,7 @@ preferred_order = pd.Index(
 
 def plot_costs(infn, snmk, fn=None):
     # For now ignore the simpl header
-    cost_df = read_csv_nafix(infn, index_col=list(range(3)), header=[1, 2, 3])
+    cost_df = read_csv_nafix(infn, index_col=list(range(3)), header=[1, 2, 3, 4])
 
     df = cost_df.groupby(cost_df.index.get_level_values(2)).sum()
 
@@ -139,7 +139,7 @@ def plot_costs(infn, snmk, fn=None):
 
 
 def plot_energy(infn, snmk, fn=None):
-    energy_df = read_csv_nafix(infn, index_col=list(range(2)), header=[1, 2, 3])
+    energy_df = read_csv_nafix(infn, index_col=list(range(2)), header=[1, 2, 3, 4])
 
     df = energy_df.groupby(energy_df.index.get_level_values(1)).sum()
 

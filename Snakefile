@@ -86,6 +86,7 @@ wildcard_constraints:
     sopts=r"[-+a-zA-Z0-9\.\s]*",
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     planning_horizons="20[2-9][0-9]|2100",
+    scope="elec|sec",  # process_cost_data: costs_{year}_{scope}.csv (elec=electricity, sec=sector)
 
 
 if config["custom_rules"] is not []:
@@ -107,7 +108,9 @@ rule clean:
 rule solve_all_networks:
     input:
         expand(
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             **config["scenario"],
         ),
 
@@ -117,7 +120,7 @@ rule plot_all_p_nom:
         expand(
             "results/"
             + RDIR
-            + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_p_nom.{ext}",
+            + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_p_nom.{ext}",
             **config["scenario"],
             ext=["png", "pdf"],
         ),
@@ -697,7 +700,9 @@ rule add_electricity:
             if str(fn).startswith("data/")
         },
         base_network="networks/" + RDIR + "base.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
         powerplants="resources/" + RDIR + "powerplants.csv",
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
         #using this line instead of the following will test updated gadm shapes for MA.
@@ -729,14 +734,12 @@ rule simplify_network:
         countries=config["countries"],
         build_shape_options=config["build_shape_options"],
         electricity=config["electricity"],
-        output_currency=config["costs"]["output_currency"],
         config_lines=config["lines"],
         config_links=config["links"],
         focus_weights=config.get("focus_weights", None),
     input:
         **retrieve_subregion("simplify_network"),
         network="networks/" + RDIR + "elec.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
         regions_onshore="resources/" + RDIR + "bus_regions/regions_onshore.geojson",
         regions_offshore="resources/" + RDIR + "bus_regions/regions_offshore.geojson",
     output:
@@ -748,9 +751,6 @@ rule simplify_network:
         + RDIR
         + "bus_regions/regions_offshore_elec_s{simpl}.geojson",
         busmap="resources/" + RDIR + "bus_regions/busmap_elec_s{simpl}.csv",
-        connection_costs="resources/"
-        + RDIR
-        + "bus_regions/connection_costs_s{simpl}.csv",
     log:
         "logs/" + RDIR + "simplify_network/elec_s{simpl}.log",
     benchmark:
@@ -795,7 +795,9 @@ rule cluster_network:
             if config["enable"].get("custom_busmap", False)
             else []
         ),
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
     output:
         network=branch(
             config["augmented_line_connection"].get("add_to_snakefile", False) == True,
@@ -865,7 +867,9 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
             hvdc_as_lines=config["electricity"]["hvdc_as_lines"],
             electricity=config["electricity"],
         input:
-            tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+            tech_costs="resources/"
+            + RDIR
+            + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
             network="networks/" + RDIR + "elec_s{simpl}_{clusters}_pre_augmentation.nc",
             regions_onshore="resources/"
             + RDIR
@@ -894,7 +898,9 @@ rule add_extra_components:
         csp_model=config["renewable"]["csp"]["csp_model"],
     input:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}.nc",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/"
+        + RDIR
+        + f"costs_{config['scenario']['planning_horizons'][0]}_elec.csv",
     output:
         "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
     log:
@@ -906,6 +912,38 @@ rule add_extra_components:
         mem_mb=3000,
     script:
         "scripts/add_extra_components.py"
+
+
+rule assign_costs:
+    params:
+        electricity=config["electricity"],
+        length_factor=config["lines"]["length_factor"],
+        hydro_capital_cost=config["renewable"]["hydro"].get("hydro_capital_cost", False),
+        output_currency=config["costs"]["output_currency"],
+        storage_techs=config["storage_techs"],
+    input:
+        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",  # {scope} from process_cost_data
+    output:
+        network="networks/"
+        + RDIR
+        + "elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc",
+        connection_costs="resources/"
+        + RDIR
+        + "bus_regions/connection_costs_s{simpl}_{clusters}_{planning_horizons}.csv",
+    log:
+        "logs/" + RDIR + "assign_costs/elec_s{simpl}_{clusters}_{planning_horizons}.log",
+    benchmark:
+        (
+            "benchmarks/"
+            + RDIR
+            + "assign_costs/elec_s{simpl}_{clusters}_{planning_horizons}"
+        )
+    threads: 1
+    resources:
+        mem_mb=2000,
+    script:
+        "scripts/assign_costs.py"
 
 
 if config["co2"]["automatic_emission"]["enable"]:
@@ -949,21 +987,25 @@ rule prepare_network:
         electricity=config["electricity"],
         co2=config["co2"],
     input:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
+        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_{planning_horizons}.nc",
         **branch(
             config["co2"]["automatic_emission"]["enable"],
             {"emissions": "resources/" + RDIR + "co2_emissions_elec_and_heat.csv"},
         ),
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
     output:
-        "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        "networks/"
+        + RDIR
+        + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
     log:
-        "logs/" + RDIR + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.log",
+        "logs/"
+        + RDIR
+        + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.log",
     benchmark:
         (
             "benchmarks/"
             + RDIR
-            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
         )
     threads: 1
     resources:
@@ -1004,24 +1046,28 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == False:
             augmented_line_connection=config["augmented_line_connection"],
             policy_config=config["policy_config"],
         input:
-            network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            network="networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
-            "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "results/"
+            + RDIR
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         log:
             solver=os.path.normpath(
                 "logs/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_solver.log"
             ),
             python="logs/"
             + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_python.log",
         benchmark:
             (
                 "benchmarks/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}"
             )
         threads: 20
         resources:
@@ -1038,18 +1084,22 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         params:
             monte_carlo=config["monte_carlo"],
         input:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+            "networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         output:
-            "networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            "networks/"
+            + RDIR
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
         log:
             "logs/"
             + RDIR
-            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.log",
+            + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.log",
         benchmark:
             (
                 "benchmarks/"
                 + RDIR
-                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+                + "prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}"
             )
         threads: 1
         resources:
@@ -1062,7 +1112,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             expand(
                 "networks/"
                 + RDIR
-                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
                 **config["scenario"],
             ),
 
@@ -1074,29 +1124,29 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         input:
             network="networks/"
             + RDIR
-            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             "results/"
             + RDIR
-            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+            + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
         log:
             solver=os.path.normpath(
                 "logs/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_solver.log"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}_solver.log"
             ),
             python="logs/"
             + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_python.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}_python.log",
             memory="logs/"
             + RDIR
-            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}_memory.log",
+            + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}_memory.log",
         benchmark:
             (
                 "benchmarks/"
                 + RDIR
-                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}"
+                + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}"
             )
         threads: 20
         resources:
@@ -1111,22 +1161,24 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             expand(
                 "results/"
                 + RDIR
-                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{unc}.nc",
+                + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{unc}.nc",
                 **config["scenario"],
             ),
 
 
 def input_make_summary(w):
-    # It's mildly hacky to include the separate costs input as first entry
     if w.ll.endswith("all"):
         ll = config["scenario"]["ll"]
         if len(w.ll) == 4:
             ll = [l for l in ll if l[0] == w.ll[0]]
     else:
         ll = w.ll
-    return ["resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv"] + expand(
-        "results/" + RDIR + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+    return expand(
+        "results/"
+        + RDIR
+        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         ll=ll,
+        planning_horizons=config["scenario"]["planning_horizons"],
         **{
             k: config["scenario"][k] if getattr(w, k) == "all" else getattr(w, k)
             for k in ["simpl", "clusters", "opts"]
@@ -1140,7 +1192,10 @@ rule make_summary:
         scenario=config["scenario"],
     input:
         input_make_summary,
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs=expand(
+            "resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
+            planning_horizons=config["scenario"]["planning_horizons"],
+        ),
     output:
         directory(
             "results/"
@@ -1348,7 +1403,9 @@ rule prepare_sector_network:
                 for country in config["countries"]
             },
         ),
-        network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        network="networks/"
+        + RDIR
+        + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
@@ -1957,22 +2014,22 @@ rule plot_network:
     input:
         network="results/"
         + RDIR
-        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc",
         extended_country_shape="resources/"
         + RDIR
         + "shapes/extended_country_shape.geojson",
-        tech_costs="resources/" + RDIR + f"costs_{config['costs']['year']}_elec.csv",
+        tech_costs="resources/" + RDIR + "costs_{planning_horizons}_elec.csv",
     output:
         only_map="results/"
         + RDIR
-        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}.{ext}",
+        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{attr}.{ext}",
         ext="results/"
         + RDIR
-        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_ext.{ext}",
+        + "plots/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{attr}_ext.{ext}",
     log:
         "logs/"
         + RDIR
-        + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
+        + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}_{attr}_{ext}.log",
     script:
         "scripts/plot_network.py"
 

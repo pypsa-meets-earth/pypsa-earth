@@ -35,12 +35,12 @@ Relevant Settings
 Inputs
 ------
 
-- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: confer :ref:`prepare`
+- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: confer :ref:`prepare`
 
 Outputs
 -------
 
-- ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Solved PyPSA network including optimisation results
+- ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: Solved PyPSA network including optimisation results
 
     .. image:: /img/results.png
         :width: 40 %
