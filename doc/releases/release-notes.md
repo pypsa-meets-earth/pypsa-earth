@@ -26,6 +26,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
+* Enable support of PyPSA 1+ and improve environment [PR # 1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
+
 **Minor Changes and bug-fixing**
 
 * Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
