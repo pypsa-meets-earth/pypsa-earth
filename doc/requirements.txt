@@ -41,7 +41,6 @@ numba
 ruamel.yaml>=0.18
 earth-osm>=3.0.2
 reverse-geocode
-pyDOE2
 graphviz
 
 fake_useragent
