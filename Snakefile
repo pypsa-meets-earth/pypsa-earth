@@ -292,12 +292,12 @@ rule build_shapes:
         countries=config["countries"],
         subregion=config["subregion"],
     input:
+        # retrieve_databundle_data may not be defined for default run; relevant only for tutorial to track the gadm shapes contained in the bundle
         databundle=(
             rules.retrieve_databundle_data.output
             if config["tutorial"] and config["enable"]["retrieve_databundle"]
             else []
         ),
-        # retrieve_databundle_data may not be defined for default run; relevant only for tutorial
         eez="data/eez/eez_v11.gpkg",
     output:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
