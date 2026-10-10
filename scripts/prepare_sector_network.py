@@ -240,6 +240,7 @@ Add sector based technologies to the PyPSA network, including:
 - CO2 storage and direct air capture technologies if carbon capture or negative emissions are enabled.
 
 """
+
 import logging
 import os
 import re

@@ -39,6 +39,7 @@ Description
 This module builds nodal heating energy totals, hourly heat demand time series, coefficient of performance (COP)
 profiles for air-source and ground-source heat pumps, solar thermal time series and the district heating share per node.
 """
+
 from itertools import product
 
 import pandas as pd
