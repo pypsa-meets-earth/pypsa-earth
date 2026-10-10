@@ -144,13 +144,13 @@ There are multiple ways to get involved and learn more about our work:
 
 ## Running the model in previous versions
 
-PyPSA-Earth version v0.11.0 brings major PyPSA updates which have advanced modelling capabilities, and make the model more convenient to use. However, the transition to PyPSA 0.33+ and snakemake 8+ that may lead to breaking changes, and you can find that your models created in older PyPSA-Earth versions need some fixes. To smoothen a transition, the model can be run in previous versions by checking out the respective tag. For instance, to run the model in version 0.10.0, which is the last version before the recent PyPSA update, the following command can be used:
+PyPSA-Earth version v0.11.0 brings major PyPSA updates that introduce advanced modelling capabilities and make the model more convenient to use. However, the transition to PyPSA 0.33+ and Snakemake 8+ may lead to breaking changes, meaning that models created with older PyPSA-Earth versions may require some fixes. To ease the transition, the model can be run in previous versions by checking out the corresponding Git tag. For instance, to run the model in version 0.10.0, the last release before the recent PyPSA update, use the following command:
 
 ```bash
 git checkout v0.10.0
 ```
 
-After checking out the tag, the model can be run as usual. Please make sure to use the environment built for the respective version using lock files built for this version.
+After checking out the tag, the model can be run as usual. Please make sure to use the environment built for the corresponding version, using the lock files provided with that release.
 
 
 ## Test run on tutorial
