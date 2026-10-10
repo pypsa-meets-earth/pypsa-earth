@@ -10,6 +10,7 @@ channels:
 dependencies:
 - python>=3.10,<3.14
 - pip
+- setuptools<81
 
 - pypsa>=0.33
 - atlite=0.4.1 # in versions >0.4.1 the computation of availability matrix in `build_renewable_profiles` fails due to https://github.com/PyPSA/atlite/issues/301 https://github.com/PyPSA/atlite/issues/514 for countries whose cutouts span over geometries crossing the antimeridian
