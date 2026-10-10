@@ -14,7 +14,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-*
+* Update backward compatibility notes [PR #264](https://github.com/pypsa-meets-earth/pypsa-earth/pull/264)
 
 # PyPSA-Earth 0.10.0
 
