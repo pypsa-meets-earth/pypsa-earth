@@ -72,14 +72,12 @@ import chaospy
 import numpy as np
 import pandas as pd
 import pypsa
-import seaborn as sns
 from _helpers import configure_logging, create_logger
 from scipy.stats import qmc
 from sklearn.preprocessing import MinMaxScaler
 from solve_network import *
 
 logger = create_logger(__name__)
-sns.set(style="whitegrid")
 
 
 def monte_carlo_sampling_chaospy(
@@ -362,6 +360,8 @@ if __name__ == "__main__":
         )
 
     # create plot for the rescaled distributions (for development usage, commented by default)
+    # import seaborn as sns
+    # sns.set(style="whitegrid")
     # for idx in range(N_FEATURES):
     #     sns.displot(lh[:, idx], kde=True).set(
     #         title=f"{MONTE_CARLO_PYPSA_FEATURES[idx]}"

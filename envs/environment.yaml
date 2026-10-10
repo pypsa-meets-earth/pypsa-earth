@@ -8,7 +8,7 @@ channels:
 - bioconda
 - gurobi
 dependencies:
-- python>=3.10, <3.12  # 3.12 has weird issues with snakemake https://github.com/snakemake/snakemake/issues/2480
+- python>=3.10,<3.14
 - pip
 - setuptools<81
 
@@ -22,7 +22,9 @@ dependencies:
 - xlrd
 - openpyxl
 - seaborn
-- snakemake-minimal<8
+- snakemake-minimal>=8.26.0
+- snakemake-storage-plugin-http>=0.3
+- snakemake-storage-plugin-cached-http >=0.2.1
 - memory_profiler
 - ruamel.yaml>=0.18
 - pytables
