@@ -35,6 +35,7 @@ grouped roughly as follows:
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -55,6 +56,8 @@ import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
+
+PYPSA_V1 = bool(re.match(r"^1\.\d", pypsa.__version__))
 
 logger = logging.getLogger(__name__)
 
