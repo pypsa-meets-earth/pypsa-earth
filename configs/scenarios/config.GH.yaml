@@ -8,7 +8,7 @@
 # set retrieve_databundle: true and retrieve_databundle_sector: true,
 # then revert to false for subsequent modelling runs.
 
-version: 0.9.0
+version: 0.10.0
 tutorial: false
 
 logging:
@@ -227,7 +227,10 @@ electricity:
     Link: [] # H2 pipeline
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
-  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+  custom_powerplants:
+    filepaths: # list of custom powerplant files used in "merge" and "replace" options
+    - data/custom_powerplants.csv
+    method: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -464,7 +467,7 @@ monte_carlo:
   options:
     add_to_snakefile: false # When set to true, enables Monte Carlo sampling
     samples: 9 # number of optimizations. Note that number of samples when using scipy has to be the square of a prime number
-    sampling_strategy: "chaospy" # "pydoe2", "chaospy", "scipy", packages that are supported
+    sampling_strategy: "chaospy" # "chaospy", "scipy", packages that are supported
     seed: 42 # set seedling for reproducibilty
   # Uncertanties on any PyPSA object are specified by declaring the specific PyPSA object under the key 'uncertainties'.
   # For each PyPSA object, the 'type' and 'args' keys represent the type of distribution and its argument, respectively.
