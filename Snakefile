@@ -98,11 +98,10 @@ if config["custom_rules"] is not []:
 
 rule clean:
     run:
-        try:
-            shell("snakemake -j 1 solve_all_networks --delete-all-output")
-        except:
-            shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
-            pass
+        shell(
+            "snakemake -j 1 solve_all_networks --delete-all-output || "
+            "snakemake -j 1 solve_all_networks_monte --delete-all-output"
+        )
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
 
 
@@ -293,12 +292,12 @@ rule build_shapes:
         countries=config["countries"],
         subregion=config["subregion"],
     input:
-        databundle=branch(config["tutorial"], rules.retrieve_databundle_data.output),
-        # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
-        # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
-        # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
-        # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
-        # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
+        # retrieve_databundle_data may not be defined for default run; relevant only for tutorial to track the gadm shapes contained in the bundle
+        databundle=(
+            rules.retrieve_databundle_data.output
+            if config["tutorial"] and config["enable"]["retrieve_databundle"]
+            else []
+        ),
         eez="data/eez/eez_v11.gpkg",
     output:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",

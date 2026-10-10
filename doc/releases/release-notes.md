@@ -18,7 +18,9 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Update backward compatibility notes [PR #264](https://github.com/pypsa-meets-earth/pypsa-earth/pull/264)
+* Update backward compatibility notes [PR #2064](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2064)
+
+* Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
 
 # PyPSA-Earth 0.10.0
 
