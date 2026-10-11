@@ -89,12 +89,10 @@ wildcard_constraints:
     demand=r"[-+a-zA-Z0-9\.\s]*",
     h2export="[0-9]+m?|all",
 #
-# fix to enable latest smakameke precommit
+# Fix for pre-commit snakefmk linting to induce error
 # fmt: off
-if config["custom_rules"] is not []:
-    for include_rule in config["custom_rules"]:
-
-        include: include_rule
+for include_rule in config.get("custom_rules", []):
+    include: include_rule
 # fmt: on
 rule clean:
     run:
