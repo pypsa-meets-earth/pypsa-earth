@@ -17,7 +17,6 @@ Description
 -----------
 """
 
-
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib as mpl

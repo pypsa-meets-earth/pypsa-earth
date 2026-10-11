@@ -88,14 +88,12 @@ wildcard_constraints:
     planning_horizons="20[2-9][0-9]|2100",
     demand=r"[-+a-zA-Z0-9\.\s]*",
     h2export="[0-9]+m?|all",
-
-
-if config["custom_rules"] is not []:
-    for rule in config["custom_rules"]:
-
-        include: rule
-
-
+#
+# Fix for pre-commit snakefmt linting to induce error
+# fmt: off
+for include_rule in config.get("custom_rules", []):
+    include: include_rule
+# fmt: on
 rule clean:
     run:
         shell(
@@ -2260,7 +2258,7 @@ rule build_existing_heating_distribution:
         + "logs/build_existing_heating_distribution_s{simpl}_{clusters}_{planning_horizons}.log",
     benchmark:
         RESDIR
-        +"benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
+        + "benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
     script:
         "scripts/build_existing_heating_distribution.py"
 
@@ -2314,7 +2312,7 @@ if config["foresight"] == "myopic":
             + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.log",
         benchmark:
             RESDIR
-            +"benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
+            + "benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         script:
             "scripts/add_existing_baseyear.py"
 
@@ -2331,7 +2329,6 @@ if config["foresight"] == "myopic":
         planning_horizons = config["scenario"]["planning_horizons"]
         i = planning_horizons.index(int(w.planning_horizons))
         planning_horizon_p = str(planning_horizons[i - 1])
-
         return (
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
@@ -2449,7 +2446,6 @@ rule run_scenario:
         mem_mb=5000,
     run:
         from subprocess import run
-
         import yaml
         from build_test_configs import create_test_config
 
@@ -2460,7 +2456,6 @@ rule run_scenario:
                 .get("run", {})
                 .get("base_config", "config.default.yaml")
             )
-
             # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
@@ -2480,7 +2475,6 @@ rule run_scenario:
             check=not config["run"]["allow_scenario_failure"],
         )
         copyfile("config.yaml", output.copyconfig)
-
 
 
 rule run_all_scenarios:

@@ -58,6 +58,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
+
 import re
 
 import numpy as np
