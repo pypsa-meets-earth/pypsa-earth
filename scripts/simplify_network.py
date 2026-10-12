@@ -551,13 +551,28 @@ def simplify_links(
             )
             name = all_dc_lengths.idxmax() + "+{}".format(len(all_dc_branches) - 1)
 
+            # `dc_edges` holds, for each pair of consecutive buses along the chain,
+            # the branches between them. Branches within a segment run in parallel,
+            # so their capacities add up; segments run in series, so the chain is
+            # limited by its weakest segment and its length is the sum of the
+            # segment lengths.
+            dc_component = "Link" if dc_as_links else "Line"
+            dc_df = n.links if dc_as_links else n.lines
+            capacity_attr = "p_nom" if dc_as_links else "s_nom"
+            segments = [
+                [i for c, i in segment if c == dc_component] for segment in dc_edges
+            ]
+            segments = [segment for segment in segments if segment]
+            length = sum(dc_df.loc[segment, "length"].mean() for segment in segments)
+            p_nom = min(
+                (dc_df.loc[segment, capacity_attr].sum() for segment in segments),
+                default=0.0,
+            )
+
             # HVDC part is represented as "Link" component
             if dc_as_links:
                 p_max_pu = config_links.get("p_max_pu", 1.0)
                 lengths = n.links.loc[all_links, "length"]
-                i_links = [i for _, i in sum(dc_edges, []) if _ == "Link"]
-                length = sum(n.links.loc[i_links, "length"].mean() for l in dc_edges)
-                p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in dc_edges)
                 underwater_fraction = (
                     lengths * n.links.loc[all_links, "underwater_fraction"]
                 ).sum() / lengths.sum()
@@ -565,8 +580,6 @@ def simplify_links(
             else:
                 p_max_pu = config_lines.get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
-                length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
-                p_nom = n.lines.loc[all_dc_lines, "s_nom"].min()
                 underwater_fraction = (
                     (lengths * n.lines.loc[all_dc_lines, "underwater_fraction"]).sum()
                     / lengths.sum()
