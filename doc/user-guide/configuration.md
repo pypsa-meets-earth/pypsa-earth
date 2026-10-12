@@ -631,6 +631,10 @@ Named presets used by ``solving.solver.options`` in ``configs/solving.default.ya
 --8<-- "configtables/snippets/solving_solver_options.yaml"
 ```
 
+### oetc
+
+Optional settings for solving on cloud infrastructure. See [OETC Cloud Solving](../utilities/oetc.md).
+
 ## Plotting
 
 The dedicated **`configs/plotting.default.yaml`** holds all plotting defaults, including map layout, plot thresholds, technology groupings, carrier colours, and display names.
