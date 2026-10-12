@@ -22,6 +22,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
 
+* Keep one copy of OSM elements that appear in more than one country extract, so that cross-border lines, cables and HVDC links are no longer counted once per extract [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+
 # PyPSA-Earth 0.10.0
 
 **New Features and Major Changes**
