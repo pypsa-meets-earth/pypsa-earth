@@ -16,14 +16,13 @@ Possible improvements:
 - Select port buses automatically (with both voronoi and gadm clustering). Use data/ports.csv?
 """
 
-
 import logging
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import locate_bus, override_component_attrs, prepare_costs
+from _helpers import locate_bus, read_csv_nafix
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ def select_ports(n):
     This function selects the buses where ports are located.
     """
 
-    ports = pd.read_csv(
+    ports = read_csv_nafix(
         snakemake.input.export_ports,
         index_col=None,
         keep_default_na=False,
@@ -54,8 +53,15 @@ def select_ports(n):
     gcol = "gadm_{}".format(gadm_layer_id)
     ports_sel = ports.loc[~ports[gcol].duplicated(keep="first")].set_index(gcol)
 
-    # Select the hydrogen buses based on nodes with ports
-    hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+    # Select the hydrogen buses based on nodes with ports. If no ports exist, print info and set all nodes as export
+    if ports_sel.empty:
+        hydrogen_buses_ports = n.buses[n.buses.carrier == "H2"]
+        logger.info(
+            "No hydrogen export ports are found. Setting all hydrogen buses as export nodes"
+        )
+    else:
+        hydrogen_buses_ports = n.buses.loc[ports_sel.index + " H2"]
+
     hydrogen_buses_ports.index.name = "Bus"
 
     return hydrogen_buses_ports
@@ -76,7 +82,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     n.add(
         "Bus",
         "H2 export bus",
-        carrier="H2",
+        carrier="H2 export",
         location="Earth",
         x=x_export,
         y=y_export,
@@ -84,9 +90,9 @@ def add_export(n, hydrogen_buses_ports, export_profile):
 
     # add export links
     logger.info("Adding export links")
-    n.madd(
+    n.add(
         "Link",
-        names=hydrogen_buses_ports.index + " export",
+        name=hydrogen_buses_ports.index + " export",
         bus0=hydrogen_buses_ports.index,
         bus1="H2 export bus",
         p_nom_extendable=True,
@@ -156,7 +162,7 @@ def create_export_profile():
     """
 
     # convert TWh to MWh
-    export_h2 = eval(snakemake.wildcards["h2export"]) * 1e6
+    export_h2 = snakemake.params.h2export * 1e6
 
     if snakemake.params.export_profile == "constant":
         export_profile = export_h2 / 8760
@@ -165,30 +171,27 @@ def create_export_profile():
 
     elif snakemake.params.export_profile == "ship":
         # Import hydrogen export ship profile and check if it matches the export demand obtained from the wildcard
-        export_profile = pd.read_csv(snakemake.input.ship_profile, index_col=0)
+        export_profile = read_csv_nafix(snakemake.input.ship_profile, index_col=0)
         export_profile.index = pd.to_datetime(export_profile.index)
         export_profile = pd.Series(
             export_profile["profile"], index=pd.to_datetime(export_profile.index)
         )
 
-        if np.abs(export_profile.sum() - export_h2) > 1:  # Threshold of 1 MWh
-            logger.error(
-                f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_h2} TWh)"
-            )
-            raise ValueError(
-                f"Sum of ship profile ({export_profile.sum()/1e6} TWh) does not match export demand ({export_h2} TWh)"
-            )
-
     # Resample to temporal resolution defined in wildcard "sopts" with pandas resample
     sel_export = export_profile[n.snapshots]
     pu_profile_export = sel_export / (1e-6 + sel_export.sum())
-    export_profile = pu_profile_export * export_profile.sum() * len(n.snapshots) / 8760
+    export_profile = pu_profile_export * export_profile.mean() * len(n.snapshots)
 
     # revise logger msg
     export_type = snakemake.params.export_profile
-    logger.info(
-        f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} method and resampled to {len(n.snapshots)} snapshots."
-    )
+
+    annual_export = export_profile.mean() * 8760
+    msg = f"The yearly export demand is {export_h2/1e6} TWh, profile generated based on {export_type} with total demand {round(annual_export/1e6, ndigits=0)} method and resampled to {len(n.snapshots)} snapshots."
+
+    if np.abs(export_h2 - annual_export) / 1e6 > 0.001:
+        raise ValueError(msg)
+    else:
+        logger.info(msg)
 
     return export_profile
 
@@ -201,20 +204,17 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "add_export",
             simpl="",
-            clusters="4",
-            ll="c1",
+            clusters="6",
+            ll="copt",
             opts="Co2L-4H",
             planning_horizons="2030",
-            sopts="144H",
+            sopts="144h",
             discountrate="0.071",
-            demand="AB",
-            h2export="120",
             # configfile="test/config.test1.yaml",
         )
 
-    overrides = override_component_attrs(snakemake.input.overrides)
-    n = pypsa.Network(snakemake.input.network, override_component_attrs=overrides)
-    countries = list(n.buses.country.unique())
+    n = pypsa.Network(snakemake.input.network)
+    countries = list(n.buses.country[n.buses.country != ""].unique())
 
     # Create export profile
     export_profile = create_export_profile()
@@ -222,16 +222,7 @@ if __name__ == "__main__":
     # Prepare the costs dataframe
     Nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    costs = prepare_costs(
-        snakemake.input.costs,
-        snakemake.config["costs"],
-        snakemake.params.costs["output_currency"],
-        snakemake.params.costs["fill_values"],
-        Nyears,
-        snakemake.params.costs["default_exchange_rate"],
-        snakemake.params.costs["future_exchange_rate_strategy"],
-        snakemake.params.costs["custom_future_exchange_rate"],
-    )
+    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     # get hydrogen export buses/ports
     hydrogen_buses_ports = select_ports(n)

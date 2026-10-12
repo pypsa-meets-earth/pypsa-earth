@@ -20,9 +20,8 @@ from _helpers import (
 )
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, MultiLineString, Point
-from shapely.ops import linemerge, nearest_points, split
+from shapely.ops import linemerge, nearest_points, snap, split
 from sklearn.cluster import DBSCAN
-from tqdm import tqdm
 
 logger = create_logger(__name__)
 
@@ -39,6 +38,7 @@ LINES_COLUMNS = [
     "length",
     "dc",
     "geometry",
+    "under_construction",
 ]
 CONVERTERS_COLUMNS = [
     "converter_id",
@@ -52,6 +52,21 @@ TRANSFORMERS_COLUMNS = [
     "bus1",
     "geometry",
 ]
+
+
+def join_non_null_unique(values, sep="|"):
+    """
+    Join unique non-null values as strings.
+
+    OSM tag columns may contain None/NaN values depending on the region.
+    Directly calling sep.join(values.unique()) can fail when non-string
+    or missing values are present.
+    """
+    return sep.join(
+        str(value)
+        for value in pd.Series(values).dropna().unique()
+        if str(value).strip()
+    )
 
 
 def line_endings_to_bus_conversion(lines):
@@ -206,9 +221,9 @@ def merge_stations_same_station_id(
                     v_name[0],  # "voltage"
                     bus_row["dc"].all(),  # "dc"
                     # bus_row["dc"].all(),  # "dc"
-                    "|".join(bus_row["symbol"].unique()),  # "symbol"
-                    bus_row["under_construction"].any(),  # "under_construction"
-                    "|".join(bus_row["tag_substation"].unique()),  # "tag_substation"
+                    join_non_null_unique(bus_row["symbol"]),  # "symbol"
+                    bus_row["under_construction"].all(),  # "under_construction"
+                    join_non_null_unique(bus_row["tag_substation"]),  # "tag_substation"
                     bus_row["tag_area"].sum(),  # "tag_area"
                     lon_bus,  # "lon"
                     lat_bus,  # "lat"
@@ -503,6 +518,11 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     logger.info("Stage 4c/5: Specify the bus ids of the line endings")
 
+    # Normalize DataFrame indices before assigning line endpoints.
+    lines = lines.reset_index(drop=True)
+    buses = buses.reset_index(drop=True)
+    buses["bus_id"] = buses.index
+
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses, distance_crs)
 
@@ -613,7 +633,7 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
         for point in nearest_points_list:
             # Split the line at the current point
             # The split function returns a GeometryCollection, so we need to convert it to a list
-            split_lines = split(split_line[-1], point)
+            split_lines = split(snap(split_line[-1], point, 1e-9), point)
             split_line = split_line[:-1] + list(split_lines.geoms)
 
         # convert the split line to a multilinestring
@@ -644,8 +664,14 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     # return to original crs
     df_l = df_l.to_crs(lines.crs)
 
-    # remove lines that are rings (included for completion), TODO: this should be a separate function
-    df_l = df_l[~df_l.geometry.is_ring].reset_index(drop=True)
+    # remove lines that are rings (included for completion) or degenerate (e.g. single points), TODO: this should be a separate function
+    df_l = df_l[
+        ~(
+            df_l.geometry.boundary.is_empty
+            | (df_l.geometry.geom_type != "LineString")
+            | (df_l["length"] <= tol)
+        )
+    ].reset_index(drop=True)
 
     # buses should not be returned as they are not changed, but included for completion
     return df_l, buses

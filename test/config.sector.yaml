@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-version: 0.7.0
 tutorial: true
 
 enable:
@@ -10,8 +9,8 @@ enable:
   retrieve_databundle_sector: true
 
 run:
-  name: sector
-  sector_name: "sector" # use this to keep track of sector scenario runs
+  name: "test"
+  sector_name: "test" # use this to keep track of sector scenario runs
   shared_cutouts: true
 
 scenario:
@@ -23,11 +22,11 @@ scenario:
   - 2030
   sopts:
   - "144h"
-  demand:
-  - "AB"
 
 countries: ["NG", "BJ"]
 
+co2:
+  limit: 7.75e+7
 
 electricity:
   agg_p_nom_limits: # enables to set country-wise maximum and minimum generation capacities for generators (e.g. renewables, nuclear, and geothermal)
@@ -37,10 +36,8 @@ electricity:
     Store: [H2]
     Link: [H2 pipeline]
 
-  co2limit: 7.75e7
-
 export:
-  h2export: [120] # Yearly export demand in TWh
+  h2export: 120 # Yearly export demand in TWh
   store: true # [True, False] # specifies whether an export store to balance demand is implemented
   store_capital_costs: "no_costs" # ["standard_costs", "no_costs"] # specifies the costs of the export store "standard_costs" takes CAPEX of "hydrogen storage tank type 1 including compressor"
 
@@ -61,6 +58,12 @@ policy_config:
 
 sector:
   solid_biomass_potential: 10 # TWh/a, Potential of whole modelled area
+  solar_rooftop:
+    use_building_size: true
+  hydrogen:
+    underground_storage:
+      enabled: true
+
 snapshots:
   # arguments to pd.date_range
   start: "2013-03-1"
@@ -69,3 +72,6 @@ snapshots:
 solving:
   solver:
     name: glpk
+
+demand_data:
+  scenario: "AB"

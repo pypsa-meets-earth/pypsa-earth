@@ -5,13 +5,12 @@
 """
 Build clustered population layouts.
 """
-import os
 
 import atlite
 import geopandas as gpd
 import pandas as pd
 import xarray as xr
-from _helpers import read_csv_nafix, to_csv_nafix
+from _helpers import to_csv_nafix
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -21,6 +20,7 @@ if __name__ == "__main__":
             "build_clustered_population_layouts",
             simpl="",
             clusters=4,
+            planning_horizons="2030",
         )
 
     cutout_path = (
@@ -29,12 +29,9 @@ if __name__ == "__main__":
     cutout = atlite.Cutout(cutout_path)
     # cutout = atlite.Cutout(snakemake.config['atlite']['cutout'])
 
-    clustered_regions = (
-        gpd.read_file(snakemake.input.regions_onshore)
-        .set_index("name")
-        .buffer(0)
-        .squeeze()
-    )
+    regions_gdf = gpd.read_file(snakemake.input.regions_onshore).set_index("name")
+
+    clustered_regions = regions_gdf.geometry.buffer(0)
 
     I = cutout.indicatormatrix(clustered_regions)
 

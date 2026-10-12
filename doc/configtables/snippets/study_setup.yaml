@@ -1,0 +1,12 @@
+countries: ["NG", "BJ"] # ISO codes, continent, or custom region
+# The PyPSA meets Earth initiative also provides some dedicated regional models
+# adopting dedicated input data, country-specific constraints, and other
+# region-specific features:
+#
+# - BN, KH, ID, LA, MY, MM, PH, SG, TH, TL, VN: [PyPSA-ASEAN](https://github.com/pypsa-meets-earth/pypsa-asean)
+# - US: [PyPSA-NorthAmerica](https://github.com/pypsa-meets-earth/pypsa-northamerica)
+#
+# For these countries, users are encouraged to check the available regional
+# models and contribute to their development.
+
+foresight: overnight # "myopic" or "overnight"

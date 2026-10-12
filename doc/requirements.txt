@@ -2,14 +2,19 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-setuptools
-sphinx
-sphinx_book_theme
-sphinxcontrib-bibtex
-myst-parser  # recommark is deprecated, https://stackoverflow.com/a/71660856/13573820
-sphinx-copybutton
+# MkDocs and theme
+mkdocs>=1.5.0, <2.0.0
+mkdocs-material>=9.5.0
+mkdocs-git-revision-date-localized-plugin
+mkdocs-table-reader-plugin
+mkdocs-video
+mkdocstrings[python]>=0.24.0
+mkdocs-autorefs
+mkdocstrings-python
+mkdocs-redirects
+pymdown-extensions
 
-pypsa >=0.25, <=0.30
+pypsa>=0.33
 vresutils>=0.3.1
 powerplantmatching>=0.5.19
 atlite>=0.4.1
@@ -33,11 +38,14 @@ gitpython
 
 chaospy
 numba
-ruamel.yaml<=0.17.26
-earth-osm>=2.3.post1
+ruamel.yaml>=0.18
+earth-osm>=3.0.2
 reverse-geocode
-pyDOE2
 graphviz
 
 fake_useragent
 currencyconverter
+
+# DAG generation (snakemake 8+ requires Python 3.12)
+snakemake<8
+pulp>=2.5.0,<2.8.0

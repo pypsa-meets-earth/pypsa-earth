@@ -27,7 +27,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
+    :ref:`meta_cf`, :ref:`renewable_cf`, :ref:`solving_cf`, :ref:`lines_cf`
 
 Inputs
 ------
@@ -122,7 +122,6 @@ Exemplary unsolved network clustered to 37 nodes:
 """
 
 import logging
-import os
 from functools import reduce
 
 import geopandas as gpd
@@ -132,22 +131,24 @@ import pandas as pd
 import pypsa
 from _helpers import (
     REGION_COLS,
+    add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
     locate_bus,
     nearest_shape,
+    read_csv_nafix,
+    restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
 )
-from add_electricity import load_costs
 from build_shapes import add_gdp_data, add_population_data
 from pypsa.clustering.spatial import (
+    aggregateoneport,
     busmap_by_greedy_modularity,
     busmap_by_hac,
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
-from shapely.geometry import Point
 
 idx = pd.IndexSlice
 
@@ -160,10 +161,13 @@ def normed(x):
 
 def weighting_for_country(n, x):
     conv_carriers = {"OCGT", "CCGT", "PHS", "hydro"}
-    gen = n.generators.loc[n.generators.carrier.isin(conv_carriers)].groupby(
-        "bus"
-    ).p_nom.sum().reindex(n.buses.index, fill_value=0.0) + n.storage_units.loc[
-        n.storage_units.carrier.isin(conv_carriers)
+    conv_carriers_pattern = "|".join(conv_carriers)
+    gen = n.generators.loc[
+        n.generators.carrier.str.contains(conv_carriers_pattern)
+    ].groupby("bus").p_nom.sum().reindex(
+        n.buses.index, fill_value=0.0
+    ) + n.storage_units.loc[
+        n.storage_units.carrier.str.contains(conv_carriers_pattern)
     ].groupby(
         "bus"
     ).p_nom.sum().reindex(
@@ -307,7 +311,9 @@ def distribute_clusters(
             n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
         )
 
-    N = n.buses.groupby(["country", "sub_network"]).size()
+    distribution_factor.index.name = "cluster"
+
+    N = n.buses.groupby(["country", "sub_network"]).size()[distribution_factor.index]
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -573,7 +579,7 @@ def clustering_for_n_clusters(
     )
 
     if not n.links.empty:
-        nc = clustering.network
+        nc = clustering.n
         nc.links["underwater_fraction"] = (
             n.links.eval("underwater_fraction * length").div(nc.links.length).dropna()
         )
@@ -585,7 +591,21 @@ def clustering_for_n_clusters(
             fill_value=0,
         )
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
-        clustering.network.lines["underwater_fraction"] = 0
+        clustering.n.lines["underwater_fraction"] = 0
+
+    # TODO: remove this code snippet after updating to PyPSA v1.1.0 (handled in PyPSA directly)
+    # Remove zero-filled or NaN-filled time series for StorageUnit
+    for attr in list(clustering.n.storage_units_t.keys()):
+        df = clustering.n.storage_units_t[attr]
+        if not df.empty:
+            # Check if all values are either 0 or NaN
+            all_zero_or_nan = ((df == 0) | df.isna()).all().all()
+            if all_zero_or_nan:
+                # Make it empty with correct index but no columns
+                clustering.n.storage_units_t[attr] = pd.DataFrame(index=df.index)
+                logger.info(
+                    f"Cleared zero/NaN-filled storage_units_t.{attr} after clustering"
+                )
 
     return clustering
 
@@ -604,25 +624,95 @@ def cluster_regions(busmaps, inputs, output):
         regions_c.to_file(getattr(output, which))
 
 
+def replace_components(n, c, df, pnl):
+    n.remove(c, n.df(c).index)
+
+    n.add(c, df.index, **df)
+    for attr, df in pnl.items():
+        if not df.empty:
+            n._import_series_from_df(df, c, attr)
+
+
+def groupby_bus_carrier(
+    network: pypsa.Network,
+    aggregation_strategies: dict,
+    exclude_carriers: list = [],
+) -> None:
+    """
+    Group generators and storage units by (bus, carrier).
+
+    Parameters
+    ----------
+    network : pypsa.Network
+        The PyPSA network to modify in-place.
+    aggregation_strategies : dict
+        Aggregation strategies for different columns.
+    exclude_carriers : list, optional
+        List of carriers to exclude from grouping, by default [].
+
+    Returns
+    -------
+    None
+    """
+    # Carriers for aggregation
+    carriers = set(network.generators.carrier) - set(exclude_carriers)
+
+    # Create 1:1 busmap
+    busmap = pd.Series(network.buses.index, index=network.buses.index)
+
+    # Add p_nom_extendable to aggregation strategy
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="generators",
+        dict_to_use={"p_nom_extendable": "any"},
+    )
+
+    # Group generators
+    generators, generators_pnl = aggregateoneport(
+        network,
+        busmap,
+        "Generator",
+        carriers=carriers,
+        custom_strategies=aggregation_strategies["generators"],
+    )
+
+    # Replace generators in network
+    replace_components(network, "Generator", generators, generators_pnl)
+
+    # Group storage units
+    storage_units, storage_units_pnl = aggregateoneport(
+        network,
+        busmap,
+        component="StorageUnit",
+        custom_strategies=aggregation_strategies["one_ports"]["StorageUnit"],
+    )
+
+    # Replace storage units in network
+    replace_components(network, "StorageUnit", storage_units, storage_units_pnl)
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "cluster_network", network="elec", simpl="", clusters="20flex"
+            "cluster_network", network="elec", simpl="", clusters="24"
         )
     configure_logging(snakemake)
 
     inputs, outputs, config = snakemake.input, snakemake.output, snakemake.config
 
     n = pypsa.Network(inputs.network)
+    source_line_types = n.line_types.copy()
 
-    alternative_clustering = snakemake.params.cluster_options["alternative_clustering"]
-    distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+    # Add year suffix to carrier names for clustering
+    add_year_suffix_to_carriers(n)
+
+    alternative_clustering = snakemake.params.clustering["alternative_clustering"]
+    distribution_cluster = snakemake.params.clustering["distribute_cluster"]
     gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
     focus_weights = (
-        snakemake.params.focus_weights
-        or snakemake.params.cluster_options["focus_weights"]
+        snakemake.params.focus_weights or snakemake.params.clustering["focus_weights"]
     )
     country_list = snakemake.params.countries
     geo_crs = snakemake.params.crs["geo_crs"]
@@ -635,30 +725,17 @@ if __name__ == "__main__":
         ]
     )
 
-    exclude_carriers = snakemake.params.cluster_options["cluster_network"].get(
+    exclude_carriers = snakemake.params.clustering["cluster_network"].get(
         "exclude_carriers", []
     )
     aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
 
     # Option for subregion
-    subregion_config = snakemake.params.subregion
-    if subregion_config["enable"]["cluster_network"]:
-        if subregion_config["define_by_gadm"]:
-            logger.info("Activate subregion classificaition based on GADM")
-            subregion_shapes = snakemake.input.subregion_shapes
-        elif subregion_config["path_custom_shapes"]:
-            logger.info("Activate subregion classificaition based on custom shapes")
-            subregion_shapes = subregion_config["path_custom_shapes"]
-        else:
-            logger.warning("Although enabled, no subregion classificaition is selected")
-            subregion_shapes = False
-
-        if subregion_shapes:
-            crs = snakemake.params.crs
-            tolerance = subregion_config["tolerance"]
-            n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
-    else:
-        subregion_shapes = False
+    subregion_shapes = snakemake.input.get("subregion_shapes")
+    if subregion_shapes:
+        crs = snakemake.params.crs
+        tolerance = snakemake.config.get("subregion", {}).get("tolerance", 100)
+        n = nearest_shape(n, subregion_shapes, crs, tolerance=tolerance)
 
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
@@ -674,7 +751,9 @@ if __name__ == "__main__":
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
 
-    if n_clusters == len(n.buses):
+    aggregation_strategies = snakemake.params.aggregation_strategies
+
+    if n_clusters == len(n.buses) and not alternative_clustering:
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
         linemap = n.lines.index.to_series()
@@ -686,12 +765,9 @@ if __name__ == "__main__":
     else:
         line_length_factor = snakemake.params.length_factor
         Nyears = n.snapshot_weightings.objective.sum() / 8760
-        hvac_overhead_cost = load_costs(
-            snakemake.input.tech_costs,
-            snakemake.params.costs,
-            snakemake.params.electricity,
-            Nyears,
-        ).at["HVAC overhead", "capital_cost"]
+        hvac_overhead_cost = read_csv_nafix(snakemake.input.tech_costs, index_col=0).at[
+            "HVAC overhead", "capital_cost"
+        ]
 
         def consense(x):
             v = x.iat[0]
@@ -699,8 +775,6 @@ if __name__ == "__main__":
                 x == v
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
-
-        aggregation_strategies = snakemake.params.aggregation_strategies
 
         # Aggregation strategies must be set for all columns
         update_config_dictionary(
@@ -721,12 +795,14 @@ if __name__ == "__main__":
 
         custom_busmap = snakemake.params.custom_busmap
         if custom_busmap:
-            busmap = pd.read_csv(snakemake.input.custom_busmap, index_col=0).squeeze()
+            busmap = read_csv_nafix(
+                snakemake.input.custom_busmap, index_col=0
+            ).squeeze()
             busmap.index = busmap.index.astype(str)
             logger.info(f"Imported custom busmap from {snakemake.input.custom_busmap}")
             custom_busmap = busmap
 
-        cluster_config = snakemake.config.get("cluster_options", {}).get(
+        cluster_config = snakemake.config.get("clustering", {}).get(
             "cluster_network", {}
         )
         clustering = clustering_for_n_clusters(
@@ -751,19 +827,55 @@ if __name__ == "__main__":
             focus_weights=focus_weights,
         )
 
-    update_p_nom_max(clustering.network)
+    nc = clustering.n
+    update_p_nom_max(nc)
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
-        country_shapes = snakemake.input.country_shapes
-        clustering.network = nearest_shape(
-            clustering.network, country_shapes, crs, tolerance=tolerance
+        original_shapes = snakemake.input.original_shapes
+        nc = nearest_shape(nc, original_shapes, crs, tolerance=tolerance)
+
+    # Restore base carrier names after all aggregation
+    restore_base_carrier_names(nc)
+
+    # Groupby carrier and bus for overnight simulation
+    if config["foresight"] == "overnight":
+        groupby_bus_carrier(nc, aggregation_strategies)
+
+    # Restore line types lost when clustering creates a new network.
+    used_line_types = pd.Index(
+        nc.lines["type"].dropna().loc[lambda values: values != ""].unique()
+    )
+    missing_line_types = used_line_types.difference(nc.line_types.index)
+
+    unavailable_line_types = missing_line_types.difference(source_line_types.index)
+    if not unavailable_line_types.empty:
+        raise ValueError(
+            "The following line types are used by clustered lines but are "
+            "unavailable in the source network: "
+            f"{unavailable_line_types.tolist()}"
         )
 
-    clustering.network.meta = dict(
-        snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
-    )
-    clustering.network.export_to_netcdf(outputs.network)
+    valid_attributes = n.component_attrs["LineType"].index
+
+    for line_type in missing_line_types:
+        attributes = (
+            source_line_types.loc[line_type]
+            .reindex(valid_attributes)
+            .dropna()
+            .to_dict()
+        )
+        nc.add("LineType", line_type, **attributes)
+
+    if not missing_line_types.empty:
+        logger.info(
+            "Restored line types removed during network clustering: %s",
+            missing_line_types.tolist(),
+        )
+
+    nc.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    nc.export_to_netcdf(outputs.network)
+
     for attr in (
         "busmap",
         "linemap",

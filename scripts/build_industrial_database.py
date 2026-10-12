@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pycountry
 import requests
-from _helpers import content_retrieve
+from _helpers import content_retrieve, read_csv_nafix
 from geopy.geocoders import Nominatim
 
 
@@ -67,10 +67,8 @@ def get_cocode_from_coords(df):
 def create_steel_db():
     # Global Steel Plant Tracker data set you requested from Global Energy Monitor from the link below:
 
-    # The following excel file was downloaded from the following webpage
-    # https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx . The dataset contains 1433 Steel plants globally.
-
-    url = "https://globalenergymonitor.org/wp-content/uploads/2023/03/Global-Steel-Plant-Tracker-2023-03.xlsx"
+    # The original data are available from https://globalenergymonitor.org/
+    url = "https://data.pypsa.org/workflows/eur/gem_gspt/april-2024-v1/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx"
 
     df_steel = pd.read_excel(
         content_retrieve(url),
@@ -82,10 +80,10 @@ def create_steel_db():
     df_steel = df_steel[
         [
             "Plant name (English)",
-            "Country",
+            "Country/Area",
             "Coordinates",
             "Coordinate accuracy",
-            "Status",
+            "Capacity operating status",
             "Start date",
             "Plant age (years)",
             "Nominal crude steel capacity (ttpa)",
@@ -106,11 +104,11 @@ def create_steel_db():
     ]
 
     # Keep only operating steel plants
-    df_steel = df_steel.loc[df_steel["Status"] == "operating"]
+    df_steel = df_steel.loc[df_steel["Capacity operating status"] == "operating"]
 
     # Create a column with iso2 country code
     cc = coco.CountryConverter()
-    Country = pd.Series(df_steel["Country"])
+    Country = pd.Series(df_steel["Country/Area"])
     df_steel["country"] = cc.pandas_convert(series=Country, to="ISO2")
 
     # Split Coordeinates column into x and y columns
@@ -149,7 +147,6 @@ def create_steel_db():
 
     # Merge them back to the main df
     df_steel = pd.concat([df_steel, BF_share, DRI_share])
-    df_steel["Main production process"].value_counts()
 
     # Remove plants with unknown production technology
     unknown_ind = df_steel[
@@ -162,7 +159,6 @@ def create_steel_db():
                 len(unknown_ind), len(df_steel)
             )
         )
-    df_steel["Main production process"].value_counts()
 
     # Dict to map the technology names of the source to that expected in the workflow
     iron_techs = {
@@ -172,6 +168,8 @@ def create_steel_db():
         "ironmaking (BF)": "Integrated steelworks",
         "ironmaking (DRI)": "DRI + Electric arc",
         "oxygen": "Integrated steelworks",
+        "ironmaking (other)": "Integrated steelworks",
+        "steelmaking (other)": "Integrated steelworks",
         "electric, oxygen": "Electric arc",
     }
 
@@ -192,12 +190,10 @@ def create_steel_db():
             "Plant ID": "ID",
         }
     )
-    df_steel.capacity = pd.to_numeric(df_steel.capacity)
-    df_steel["technology"] = df_steel["Main production process"].apply(
-        lambda x: iron_techs[x]
-    )
-    df_steel.x = df_steel.x.apply(lambda x: eval(x))
-    df_steel.y = df_steel.y.apply(lambda y: eval(y))
+    df_steel["technology"] = df_steel["Main production process"].replace(iron_techs)
+
+    for col in ["capacity", "x", "y"]:
+        df_steel[col] = pd.to_numeric(df_steel[col], errors="coerce")
 
     return df_steel[
         [
@@ -487,6 +483,57 @@ def create_paper_df():
     return industrial_database_paper
 
 
+def create_ammonia_db(ammonia_plants_file: str) -> pd.DataFrame:
+    """
+    Read ammonia plants database from resources.
+
+    The ammonia_plants.csv file is created by build_ammonia_production.py
+    and contains combined US and EU plant data with coordinates.
+
+    Parameters
+    ----------
+    ammonia_plants_file : str
+        Path to the ammonia plants CSV file.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing ammonia plant information with columns:
+        ['country', 'y', 'x', 'location', 'technology', 'capacity', 'unit', 'quality', 'ID'].
+    """
+    # Load ammonia plants data
+    df_ammonia = read_csv_nafix(ammonia_plants_file)
+
+    # Set location to plant name
+    df_ammonia["location"] = df_ammonia["plant"]
+
+    # Set technology to Haber-Bosch (the standard ammonia synthesis process)
+    df_ammonia["technology"] = "Haber-Bosch"
+
+    # Unit is kt/yr (kilotons per annum) of NH3
+    df_ammonia["unit"] = "kt/yr"
+
+    # Quality is exact (from actual plant data)
+    df_ammonia["quality"] = "exact"
+
+    # Use plant index as ID
+    df_ammonia["ID"] = df_ammonia.index
+
+    return df_ammonia[
+        [
+            "country",
+            "y",
+            "x",
+            "location",
+            "technology",
+            "capacity",
+            "unit",
+            "quality",
+            "ID",
+        ]
+    ]
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -500,13 +547,16 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144H",
             discountrate=0.071,
-            demand="AB",
         )
+
+    # Load parameters
+    ammonia_plants_file = snakemake.input.ammonia_plants
 
     industrial_database_steel = create_steel_db()
     industrial_database_cement = create_cement_db()
     industrial_database_refineries = create_refineries_df()
     industrial_database_paper = create_paper_df()
+    industrial_database_ammonia = create_ammonia_db(ammonia_plants_file)
 
     industrial_database = pd.concat(
         [
@@ -514,6 +564,7 @@ if __name__ == "__main__":
             industrial_database_cement,
             industrial_database_refineries,
             industrial_database_paper,
+            industrial_database_ammonia,
         ]
     )
 

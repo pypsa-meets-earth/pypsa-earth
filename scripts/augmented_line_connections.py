@@ -19,23 +19,34 @@ Relevant Settings
 Inputs
 ------
 
+- ``networks/elec_s{simpl}_{clusters}_pre_augmentation.nc``: Input network before augmentation.
+- ``resources/costs_{year}.csv``: Technology cost assumptions.
+
 
 Outputs
 -------
 
+- ``networks/elec_s{simpl}_{clusters}.nc``: Network with the configured connectivity augmentation applied.
 
 
 Description
 -----------
+
+New HVAC connections use country-specific line-type mappings only when enabled
+and when mappings are available for every configured country. Otherwise,
+the complete default mapping is used. Availability is evaluated separately
+for AC and DC mappings.
 """
-import os
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 import pypsa
-from _helpers import configure_logging, create_logger
-from add_electricity import load_costs
+from _helpers import (
+    configure_logging,
+    create_logger,
+    get_linetype_by_voltage_and_country,
+)
 from networkx.algorithms import complement
 from networkx.algorithms.connectivity.edge_augmentation import k_edge_augmentation
 from pypsa.geo import haversine_pts
@@ -61,13 +72,19 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
+
+    clusters = str(getattr(snakemake.wildcards, "clusters", ""))
+    ac_buses = n.buses.index[n.buses.carrier == "AC"]
+    if clusters == "1" or len(ac_buses) < 2:
+        logger.info(
+            f"Skipping augmentation (clusters={clusters}, AC buses={len(ac_buses)})."
+        )
+        n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+        n.export_to_netcdf(snakemake.output.network)
+        raise SystemExit(0)
+
     Nyears = n.snapshot_weightings.sum().values[0] / 8760.0
-    costs = load_costs(
-        snakemake.input.tech_costs,
-        snakemake.params.costs,
-        snakemake.params.electricity,
-        Nyears,
-    )
+    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
     # TODO: Implement below comment in future. Requires transformer consideration.
     # component_type = {"False": "Line", "True":  "Link"}.get(snakemake.params.hvdc_as_lines)
     options = snakemake.params.augmented_line_connection
@@ -130,14 +147,49 @@ if __name__ == "__main__":
     )
 
     #  add new lines to the network
+    lines_config = snakemake.params.lines
+    countries = snakemake.config["countries"]
+
+    ac_linetypes = lines_config["ac_types"]
+    dc_linetypes = lines_config["dc_types"]
+
+    use_country_specific_types = lines_config.get(
+        "use_country_specific_types",
+        False,
+    )
+
+    new_kedge_lines["country"] = new_kedge_lines["bus0"].map(n.buses["country"])
+    new_kedge_lines["v_nom"] = new_kedge_lines["bus0"].map(n.buses["v_nom"])
+    new_kedge_lines["type"] = new_kedge_lines.apply(
+        lambda line: get_linetype_by_voltage_and_country(
+            line.v_nom,
+            line.country,
+            ac_linetypes,
+            use_country_specific_types,
+        ),
+        axis=1,
+    )
+
+    new_long_lines["country"] = new_long_lines["bus0"].map(n.buses["country"])
+    new_long_lines["v_nom"] = new_long_lines["bus0"].map(n.buses["v_nom"])
+    new_long_lines["type"] = new_long_lines.apply(
+        lambda line: get_linetype_by_voltage_and_country(
+            line.v_nom,
+            line.country,
+            dc_linetypes,
+            use_country_specific_types,
+        ),
+        axis=1,
+    )
+
     if "HVDC" in list(line_type_option):
-        n.madd(
+        n.add(
             "Link",
             new_long_lines.index,
             suffix=" DC",
             bus0=new_long_lines.bus0,
             bus1=new_long_lines.bus1,
-            type=snakemake.params.lines.get("dc_types"),
+            type=new_long_lines["type"],
             p_min_pu=-1,  # network is bidirectional
             p_nom_extendable=True,
             p_nom_min=min_expansion_option,
@@ -150,13 +202,13 @@ if __name__ == "__main__":
         )
 
     if "HVAC" in list(line_type_option):
-        n.madd(
+        n.add(
             "Line",
             new_kedge_lines.index,
             suffix=" AC",
             bus0=new_kedge_lines.bus0,
             bus1=new_kedge_lines.bus1,
-            type=snakemake.params.lines["ac_types"].get(380),
+            type=new_kedge_lines["type"],
             s_nom_extendable=True,
             # TODO: Check if minimum value needs to be set.
             s_nom_min=min_expansion_option,

@@ -1,0 +1,4 @@
+Parameter,Unit,Values,Description
+conventional_generation,dict,generator : carrier,Add a more detailed description of conventional carriers. Any power generation requires the consumption of fuel from nodes representing that fuel.
+keep_existing_capacities,bool,"{true, false}",Add options to keep powerplant capacities previously assigned in add_electricity.
+marginal_cost_storage,currency/MW,,The default marginal cost of storage technologies.
