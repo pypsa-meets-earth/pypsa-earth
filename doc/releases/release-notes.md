@@ -22,7 +22,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
 
-* Give a merged HVDC chain the capacity of its weakest section and the sum of its section lengths, instead of the summed capacity of all its links [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Give a merged HVDC chain the capacity of its weakest section and the sum of its section lengths, instead of the summed capacity of all its links [PR #2077](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2077)
 
 # PyPSA-Earth 0.10.0
 
