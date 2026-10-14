@@ -72,9 +72,7 @@ def add_export(n, hydrogen_buses_ports, export_profile):
     # Compute centroids in the equal-area CRS and convert them back to
     # the geographic CRS
     crs = snakemake.params.crs
-    centroids = country_shape.to_crs(crs["area_crs"]).centroid.to_crs(
-        crs["geo_crs"]
-    )
+    centroids = country_shape.to_crs(crs["area_crs"]).centroid.to_crs(crs["geo_crs"])
 
     # Get coordinates of the most western and northern region centroids and add a buffer of 2 degrees (equiv. to approx 220 km)
     x_export = centroids.x.min() - 2
