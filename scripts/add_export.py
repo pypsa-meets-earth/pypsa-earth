@@ -69,14 +69,16 @@ def select_ports(n):
 
 def add_export(n, hydrogen_buses_ports, export_profile):
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
-    # Find most northwestern point in country shape and get x and y coordinates
-    country_shape = country_shape.to_crs(
-        "EPSG:3395"
-    )  # Project to Mercator projection (Projected)
+    # Compute centroids in the equal-area CRS and convert them back to
+    # the geographic CRS
+    crs = snakemake.params.crs
+    centroids = country_shape.to_crs(crs["area_crs"]).centroid.to_crs(
+        crs["geo_crs"]
+    )
 
-    # Get coordinates of the most western and northern point of the country and add a buffer of 2 degrees (equiv. to approx 220 km)
-    x_export = country_shape.geometry.centroid.x.min() - 2
-    y_export = country_shape.geometry.centroid.y.max() + 2
+    # Get coordinates of the most western and northern region centroids and add a buffer of 2 degrees (equiv. to approx 220 km)
+    x_export = centroids.x.min() - 2
+    y_export = centroids.y.max() + 2
 
     # add export bus
     n.add(
