@@ -146,34 +146,28 @@ def add_line_endings_tosubstations(substations, lines):
     return buses
 
 
-def drop_duplicate_osm_elements(df, asset_name):
+def drop_duplicate_osm_elements(df: pd.DataFrame, asset_name: str) -> pd.DataFrame:
     """
+    Drop duplicated ids by type (way, node, etc.) in OSM entries.
+
     Keep one copy of each OSM element found in more than one country extract.
-
-    The raw files concatenate the country extracts that earth-osm downloads
-    from Geofabrik. Neighbouring extracts overlap along borders, so an element
-    that crosses a border, or lies close to one, appears once per extract: same
-    OSM type and id, a different "Region", and coordinates that can differ in
-    the last digits. Without this step each copy becomes a separate network
-    element (set_unique_id names them <id>-1, <id>-2, ...) and its capacity is
-    counted once per extract.
-
-    Duplicates are identified by OSM type and id only. Elements tagged with
-    several voltage levels are split into several rows later, after this step,
-    so those rows are kept.
 
     Parameters
     ----------
-    df : GeoDataFrame
+    df : pd.DataFrame
         Raw OSM data as downloaded by earth-osm
     asset_name : str
         Name of the asset, used for logging; e.g. "lines"
+
+    Returns
+    -------
+    pd.DataFrame
+        OSM data with one row per element
     """
-    if df.empty or "id" not in df.columns:
+    if df.empty:
         return df
 
-    subset = ["id", "Type"] if "Type" in df.columns else ["id"]
-    is_duplicate = df.duplicated(subset=subset, keep="first")
+    is_duplicate = df.duplicated(subset=["id", "Type"], keep="first")
 
     if is_duplicate.any():
         logger.info(
