@@ -67,11 +67,15 @@ def select_ports(n):
     return hydrogen_buses_ports
 
 
-def add_export(n, hydrogen_buses_ports, export_profile):
+def add_export(
+    n: pypsa.Network,
+    hydrogen_buses_ports: pd.DataFrame,
+    export_profile: pd.Series,
+    crs: dict,
+) -> None:
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
     # Compute centroids in the equal-area CRS and convert them back to
-    # the geographic CRS
-    crs = snakemake.params.crs
+    # the geographic CRS (required since `.centroid` is CRS dependent)
     centroids = country_shape.to_crs(crs["area_crs"]).centroid.to_crs(crs["geo_crs"])
 
     # Get coordinates of the most western and northern region centroids and add a buffer of 2 degrees (equiv. to approx 220 km)
@@ -228,7 +232,7 @@ if __name__ == "__main__":
     hydrogen_buses_ports = select_ports(n)
 
     # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_profile)
+    add_export(n, hydrogen_buses_ports, export_profile, snakemake.params.crs)
 
     n.export_to_netcdf(snakemake.output[0])
 
