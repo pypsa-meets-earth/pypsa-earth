@@ -252,9 +252,7 @@ def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
 
     missing = ppl["efficiency"].isna()
     valid = (
-        ppl["efficiency"].notna()
-        & (ppl["efficiency"] > 0)
-        & (ppl["efficiency"] <= 1)
+        ppl["efficiency"].notna() & (ppl["efficiency"] > 0) & (ppl["efficiency"] <= 1)
     )
     invalid = ~valid & ~missing
 
@@ -274,8 +272,10 @@ def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
         defaults = ppl.loc[needs_default, "carrier"].map(costs["efficiency"])
         ppl.loc[needs_default, "efficiency"] = defaults
 
-        still_missing = ppl["efficiency"].isna() | (ppl["efficiency"] <= 0) | (
-            ppl["efficiency"] > 1
+        still_missing = (
+            ppl["efficiency"].isna()
+            | (ppl["efficiency"] <= 0)
+            | (ppl["efficiency"] > 1)
         )
         if still_missing.any():
             carriers = sorted(ppl.loc[still_missing, "carrier"].astype(str).unique())
