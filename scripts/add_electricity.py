@@ -759,8 +759,9 @@ def attach_conventional_generators(
         .join(costs, on="carrier", rsuffix="_r")
         .rename(index=lambda s: "C" + str(s))
     )
-    ppl = _fill_missing_efficiencies(
-        ppl, ppl.get("efficiency_r", ppl.get("efficiency"))
+    # adjust fuel costs to power plant specific efficiencies
+    ppl["marginal_cost"] += ppl["fuel"] * (
+        1 / ppl["efficiency"] - 1 / ppl["efficiency_r"]
     )
 
     # Aggregate power plants by (bus, carrier, grouping_year)
