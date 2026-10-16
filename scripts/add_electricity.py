@@ -147,9 +147,14 @@ def load_powerplants(
         .powerplant.to_pypsa_names()
         .powerplant.convert_country_to_alpha2()
         .rename(columns=str.lower)
-        .drop(columns=["efficiency"])
         .replace({"carrier": carrier_dict})
     )
+
+    # # split wind by technology; offshore uses the generic "offwind" cost entry
+    ppl.loc[ppl.technology == "Offshore", "carrier"] = "offwind"
+    ppl.loc[ppl.technology == "Onshore", "carrier"] = "onwind"
+    ppl.loc[ppl.carrier == "wind", "carrier"] = "onwind"  # unknown technology
+
     # drop powerplants with null capacity
     null_ppls = ppl[ppl.p_nom <= 0]
     if not null_ppls.empty:
@@ -159,7 +164,9 @@ def load_powerplants(
     # Fill missing datein and dateout columns
     if costs is not None and fill_values is not None:
         ppl = fill_datein_dateout(ppl, costs, fill_values)
-
+    # Fill missing or invalid efficiencies
+    if costs is not None:
+        ppl = fill_efficiency(ppl, costs)
     # Assign grouping years
     if grouping_years is not None:
         ppl["grouping_year"] = get_grouping_year(ppl["datein"], grouping_years)
@@ -216,6 +223,65 @@ def fill_datein_dateout(
         logger.warning(
             f"Filling missing 'dateout' for {len(missing_dateout)} powerplants based on 'datein' and technology lifetimes."
         )
+
+    return ppl
+
+
+def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fill missing or invalid efficiencies in ppl DataFrame.
+
+    Existing efficiencies (e.g. from custom_powerplants.csv) are kept if they
+    lie in (0, 1]. Otherwise the default per-carrier value from costs is used.
+
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Dataframe containing power plants.
+    costs : pd.DataFrame
+        DataFrame containing cost assumptions with an "efficiency" column.
+
+    Returns
+    -------
+    ppl : pd.DataFrame
+        Power plant list DataFrame with valid efficiencies.
+    """
+    if "efficiency" not in ppl.columns:
+        ppl["efficiency"] = np.nan
+    ppl["efficiency"] = pd.to_numeric(ppl["efficiency"], errors="coerce")
+
+    missing = ppl["efficiency"].isna()
+    valid = (
+        ppl["efficiency"].notna() & (ppl["efficiency"] > 0) & (ppl["efficiency"] <= 1)
+    )
+    invalid = ~valid & ~missing
+
+    logger.info(
+        f"Using plant-specific efficiencies from powerplants.csv for {int(valid.sum())} "
+        f"powerplants; filling {int(missing.sum())} missing efficiencies from the costs file."
+    )
+
+    if invalid.any():
+        logger.warning(
+            f"{int(invalid.sum())} powerplants have efficiencies outside (0, 1]; "
+            "falling back to default values from the cost table."
+        )
+
+    needs_default = missing | invalid
+    if needs_default.any():
+        defaults = ppl.loc[needs_default, "carrier"].map(costs["efficiency"])
+        ppl.loc[needs_default, "efficiency"] = defaults
+
+        still_missing = (
+            ppl["efficiency"].isna()
+            | (ppl["efficiency"] <= 0)
+            | (ppl["efficiency"] > 1)
+        )
+        if still_missing.any():
+            carriers = sorted(ppl.loc[still_missing, "carrier"].astype(str).unique())
+            logger.warning(
+                f"No valid default efficiency in cost table for carriers {carriers}."
+            )
 
     return ppl
 
@@ -533,7 +599,7 @@ def attach_wind_and_solar(
 
     # Force offshore to offwind-ac
     df.loc[df.technology == "Offshore", "carrier"] = "offwind-ac"
-    df.loc[df.technology == "Onshore", "carrier"] = "onwind"
+    df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
 
     estimate_cfg = snakemake.params.electricity.get("estimate_renewable_capacities", {})
     countries = snakemake.params.countries
@@ -735,7 +801,10 @@ def attach_conventional_generators(
         .join(costs, on="carrier", rsuffix="_r")
         .rename(index=lambda s: "C" + str(s))
     )
-    ppl["efficiency"] = ppl.efficiency.fillna(ppl.efficiency)
+    # adjust fuel costs to power plant specific efficiencies
+    ppl["marginal_cost"] += ppl["fuel"] * (
+        1 / ppl["efficiency"] - 1 / ppl["efficiency_r"]
+    )
 
     # Aggregate power plants by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -1004,7 +1073,7 @@ def attach_hydro(
             bus=ror["bus"],
             p_nom=ror["p_nom"],
             p_nom_extendable=False,
-            efficiency=costs.at["ror", "efficiency"],
+            efficiency=ror["efficiency"],
             capital_cost=costs.at["ror", "capital_cost"],
             weight=ror["p_nom"],
             p_max_pu=(

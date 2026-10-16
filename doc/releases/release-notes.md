@@ -52,6 +52,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 
+* preserve power plant specific efficiencies instead of overwriting these with technology data default values from the cost table in `add_electricity.py` (applicable for custom_powerplants.csv and power plants from powerplantmatching) [PR #2057](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2057)
+
 * Fix capacity_factor=False in hydro calculation to support atlite 0.6.0 [PR #2023](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2023)
 
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
