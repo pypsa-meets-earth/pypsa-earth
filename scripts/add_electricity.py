@@ -156,6 +156,12 @@ def load_powerplants(
         .rename(columns=str.lower)
         .replace({"carrier": carrier_dict})
     )
+    
+    # # split wind by technology; offshore uses the generic "offwind" cost entry
+    ppl.loc[ppl.technology == "Offshore", "carrier"] = "offwind"
+    ppl.loc[ppl.technology == "Onshore", "carrier"] = "onwind"
+    ppl.loc[ppl.carrier == "wind", "carrier"] = "onwind"  # unknown technology
+
     # drop powerplants with null capacity
     null_ppls = ppl[ppl.p_nom <= 0]
     if not null_ppls.empty:
