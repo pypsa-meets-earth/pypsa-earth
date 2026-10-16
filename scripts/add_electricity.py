@@ -156,7 +156,7 @@ def load_powerplants(
         .rename(columns=str.lower)
         .replace({"carrier": carrier_dict})
     )
-    
+
     # # split wind by technology; offshore uses the generic "offwind" cost entry
     ppl.loc[ppl.technology == "Offshore", "carrier"] = "offwind"
     ppl.loc[ppl.technology == "Onshore", "carrier"] = "onwind"
