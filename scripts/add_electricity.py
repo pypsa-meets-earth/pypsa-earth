@@ -111,13 +111,6 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     n.add("Carrier", emissions.index, **emissions)
 
 
-def _fill_missing_efficiencies(ppl, fallback):
-    ppl["efficiency"] = ppl.get(
-        "efficiency", pd.Series(index=ppl.index, dtype=float)
-    ).fillna(fallback)
-    return ppl
-
-
 def load_powerplants(
     ppl_fn: str,
     costs: pd.DataFrame = None,
@@ -156,8 +149,8 @@ def load_powerplants(
         .rename(columns=str.lower)
         .replace({"carrier": carrier_dict})
     )
-    
-    # # split wind by technology; offshore uses the generic "offwind" cost entry
+
+    # split wind by technology; offshore uses the generic "offwind" cost entry
     ppl.loc[ppl.technology == "Offshore", "carrier"] = "offwind"
     ppl.loc[ppl.technology == "Onshore", "carrier"] = "onwind"
     ppl.loc[ppl.carrier == "wind", "carrier"] = "onwind"  # unknown technology
@@ -230,6 +223,65 @@ def fill_datein_dateout(
         logger.warning(
             f"Filling missing 'dateout' for {len(missing_dateout)} powerplants based on 'datein' and technology lifetimes."
         )
+
+    return ppl
+
+
+def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fill missing or invalid efficiencies in ppl DataFrame.
+
+    Existing efficiencies (e.g. from custom_powerplants.csv) are kept if they
+    lie in (0, 1]. Otherwise the default per-carrier value from costs is used.
+
+    Parameters
+    ----------
+    ppl : pd.DataFrame
+        Dataframe containing power plants.
+    costs : pd.DataFrame
+        DataFrame containing cost assumptions with an "efficiency" column.
+
+    Returns
+    -------
+    ppl : pd.DataFrame
+        Power plant list DataFrame with valid efficiencies.
+    """
+    if "efficiency" not in ppl.columns:
+        ppl["efficiency"] = np.nan
+    ppl["efficiency"] = pd.to_numeric(ppl["efficiency"], errors="coerce")
+
+    missing = ppl["efficiency"].isna()
+    valid = (
+        ppl["efficiency"].notna()
+        & (ppl["efficiency"] > 0)
+        & (ppl["efficiency"] <= 1)
+    )
+    invalid = ~valid & ~missing
+
+    logger.info(
+        f"Using plant-specific efficiencies from powerplants.csv for {int(valid.sum())} "
+        f"powerplants; filling {int(missing.sum())} missing efficiencies from the costs file."
+    )
+
+    if invalid.any():
+        logger.warning(
+            f"{int(invalid.sum())} powerplants have efficiencies outside (0, 1]; "
+            "falling back to default values from the cost table."
+        )
+
+    needs_default = missing | invalid
+    if needs_default.any():
+        defaults = ppl.loc[needs_default, "carrier"].map(costs["efficiency"])
+        ppl.loc[needs_default, "efficiency"] = defaults
+
+        still_missing = ppl["efficiency"].isna() | (ppl["efficiency"] <= 0) | (
+            ppl["efficiency"] > 1
+        )
+        if still_missing.any():
+            carriers = sorted(ppl.loc[still_missing, "carrier"].astype(str).unique())
+            logger.warning(
+                f"No valid default efficiency in cost table for carriers {carriers}."
+            )
 
     return ppl
 
@@ -547,7 +599,7 @@ def attach_wind_and_solar(
 
     # Force offshore to offwind-ac
     df.loc[df.technology == "Offshore", "carrier"] = "offwind-ac"
-df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
+    df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
 
     estimate_cfg = snakemake.params.electricity.get("estimate_renewable_capacities", {})
     countries = snakemake.params.countries
@@ -561,7 +613,6 @@ df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
                 continue
 
             supcarrier = carrier.split("-", 2)[0]
-            default_efficiency = costs.at[supcarrier, "efficiency"]
 
             if supcarrier == "offwind":
                 underwater_fraction = ds["underwater_fraction"].to_pandas()
@@ -621,14 +672,6 @@ df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
                             f"{carrier}: reassigned {reassigned} plants without valid bus."
                         )
 
-                valid = _fill_missing_efficiencies(valid, default_efficiency)
-                efficiency_by_bus = (valid["efficiency"] * valid["p_nom"]).groupby(
-                    valid["bus"]
-                ).sum() / valid.groupby("bus")["p_nom"].sum()
-                efficiency = efficiency_by_bus.reindex(ds.indexes["bus"]).fillna(
-                    default_efficiency
-                )
-
                 caps_existing = (
                     valid.groupby("bus")["p_nom"]
                     .sum()
@@ -636,7 +679,6 @@ df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
                 )
             else:
                 caps_existing = pd.Series(0.0, index=ds.indexes["bus"])
-                efficiency = pd.Series(default_efficiency, index=ds.indexes["bus"])
 
             p_max_pu = ds["profile"].transpose("time", "bus").to_pandas()
             p_nom_max = ds["p_nom_max"].to_pandas()
@@ -708,7 +750,7 @@ df.loc[df.carrier == "offwind", "carrier"] = "offwind-ac"
                 weight=weight,
                 marginal_cost=costs.at[supcarrier, "marginal_cost"],
                 capital_cost=capital_cost,
-                efficiency=efficiency,
+                efficiency=costs.at[supcarrier, "efficiency"],
                 lifetime=renewable_lifetime,
             )
 
@@ -922,7 +964,6 @@ def attach_hydro(
         "Reservoir": "hydro",
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
-    ppl = _fill_missing_efficiencies(ppl, ppl["carrier"].map(costs["efficiency"]))
 
     # Aggregate by (bus, carrier, grouping_year)
     ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
@@ -981,7 +1022,6 @@ def attach_hydro(
         # Aggregate to_be_ror and to_be_hydro by (bus, carrier, grouping_year)
         to_be_hydro.loc[:, "carrier"] = "hydro"
         to_be_ror.loc[:, "carrier"] = "ror"
-        to_be_ror = _fill_missing_efficiencies(to_be_ror, costs.at["ror", "efficiency"])
         to_be_ror_grouped = aggregate_ppl_by_bus_carrier_year(to_be_ror)
         to_be_hydro_grouped = aggregate_ppl_by_bus_carrier_year(to_be_hydro)
         inflow_agg_ror = aggregate_inflow_by_group(
