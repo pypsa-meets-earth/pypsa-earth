@@ -10,11 +10,31 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Enable support of PyPSA 1+ and improve environment [PR # 1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
+
+* Enable support of Snakemake 8+ [PR # 2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
+
+* Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
+
+**Minor Changes and bug-fixing**
+
+* Update backward compatibility notes [PR #2064](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2064)
+
+* Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
+
+# PyPSA-Earth 0.10.0
+
+**New Features and Major Changes**
+
+* Update `technology-data` to v0.15.0 and align the cost-data reference year to 2025 [PR #1729](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1729)
+
 * Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 **Minor Changes and bug-fixing**
+
+* Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
 
 * Externalise retrieval of urban percentage using mirrored sources file [PR #2063](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2063)
 
@@ -34,7 +54,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * if custom_powerplants.csv is used, use efficiencies from custom_powerplants.csv instead of overwriting these with technology data default values [PR #2057](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2057)
 
+* Fix capacity_factor=False in hydro calculation to support atlite 0.6.0 [PR #2023](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2023)
+
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
+
+* Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
 
 # PyPSA-Earth 0.9.0
 

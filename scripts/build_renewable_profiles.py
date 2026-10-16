@@ -190,6 +190,7 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
   proportional to the layout until the limit of an individual grid cell is
   reached.
 """
+
 import functools
 import os
 import time
@@ -674,7 +675,7 @@ if __name__ == "__main__":
             ).to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
-            inflow = correction_factor * func(capacity_factor=True, **resource)
+            inflow = correction_factor * func(**resource)
 
             if "clip_min_inflow" in config:
                 inflow = inflow.where(inflow >= config["clip_min_inflow"], 0)
