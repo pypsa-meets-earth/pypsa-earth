@@ -6,75 +6,50 @@
 countries: ["KZ"]
 
 run:
-  name: "KZ" # use this to keep track of runs with different settings
-  sector_name: "KZ" # use this to keep track of sector scenario runs
-  shared_cutouts: true # set to true to share the default cutout(s) across runs
+  name: "KZ"
+  sector_name: "KZ"
+  shared_cutouts: false
 
 scenario:
   simpl: [""]
-  ll: ["copt"]
+  ll: ["v1.0"]
   clusters: [17]
   opts: [1h]
-  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  planning_horizons:
   - 2025
   sopts:
   - "1h"
-  demand:
-  - "AB"
 
 snapshots:
   start: "2013-01-01"
   end: "2014-01-01"
-  inclusive: "left" # end is not inclusive
+  inclusive: "left"
 
 enable:
-  retrieve_databundle: true #  Recommended 'true', for the first run. Otherwise data might be missing.
-  retrieve_databundle_sector: true
-  retrieve_cost_data: true # true: retrieves cost data from technology data and saves in resources/costs.csv, false: uses cost data in data/costs.csv
-  retrieve_cutout: true
-  download_osm_data: true # If 'true', OpenStreetMap data will be downloaded for the above given countries
-  download_global_buildings: false # If 'true', GlobalMLBuildingFootprints data will be downloaded for the above given countries
-  build_natura_raster: false # If 'true', then an exclusion raster will be build. Otherwise use pregenerated raster.
-  build_cutout: false
-  # If "build_cutout" : true, then environmental data is extracted according to `snapshots` date range and `countries`
-  # requires cds API key https://cds.climate.copernicus.eu/how-to-api
-  # More information https://atlite.readthedocs.io/en/latest/introduction.html#datasets
-  custom_busmap: false # if true, use "data/custom_busmap_elec_s{simpl}_{clusters}.csv" for the clustering instead of the clustering algorithms
-
-cluster_options:
-  simplify_network:
-    to_substations: false # network is simplified to nodes with positive or negative power injection (i.e. substations or offwind connections)
-    algorithm: kmeans # choose from: [hac, kmeans]
-    feature: solar+onwind-time # only for hac. choose from: [solar+onwind-time, solar+onwind-cap, solar-time, solar-cap, solar+offwind-cap] etc.
-    exclude_carriers: []
-    remove_stubs: true
-    remove_stubs_across_borders: false
-    p_threshold_drop_isolated: 10 # [MW] isolated (sub)networks or nodes are being discarded if total mean power is below the specified threshold
-    p_threshold_merge_isolated: 300 # [MW] isolated (sub)networks or nodes are being merged into a single isolated bus if total mean power is below the specified threshold
-    s_threshold_fetch_isolated: false # [-] a share of the national load for merging an isolated network into a backbone network
-  cluster_network:
-    algorithm: kmeans
-    feature: solar+onwind-time
-    exclude_carriers: []
-  alternative_clustering: false
+  retrieve_databundle: true
+  retrieve_cutout: false #true
 
 build_shape_options:
   gadm_layer_id: 1
 
-clean_osm_data_options: # osm = OpenStreetMap
-  names_by_shapes: true # Set the country name based on the extended country shapes
-  threshold_voltage: 35000 # [V] minimum voltage threshold to keep the asset (cable, line, generator, etc.) [V]
+osm:
+  clean_osm_data:
+    threshold_voltage: 35000
+
+cluster_options:
+  simplify_network:
+    remove_stubs: true
+    remove_stubs_across_borders: false
+    p_threshold_drop_isolated: false
+    p_threshold_merge_isolated: false
+    s_threshold_fetch_isolated: 0.05
+  alternative_clustering: false
 
 base_network:
-  min_voltage_substation_offshore: 35000 # [V] minimum voltage of the offshore substations
-  min_voltage_rebase_voltage: 35000 # [V] minimum voltage in base network
+  min_voltage_substation_offshore: 35000
+  min_voltage_rebase_voltage: 35000
 
 electricity:
-  base_voltage: 500.
-  voltages: [110., 220., 500., 750.]
-  co2limit: 7.75e+7 # European default, 0.05 * 3.1e9*0.5, needs to be adjusted for Africa
-  co2base: 3.17e+8  # Kazakhstan default for 1990
-
   extendable_carriers:
     Generator: []
     StorageUnit: []
@@ -82,7 +57,8 @@ electricity:
     Link: []
 
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
-  custom_powerplants: false #  "false" use only powerplantmatching (ppm) data, "merge" combines ppm and custom powerplants, "replace" use only custom powerplants
+  custom_powerplants:
+    method: false
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -90,13 +66,19 @@ electricity:
   estimate_renewable_capacities:
     stats: "irena"
 
-  lines:
+  base_voltage: 500.
+  voltages: [110., 220., 500.]
+
+lines:
   ac_types:
-    220.: "490-AL1/64-ST1A 220.0"             #"Al/St 240/40 2-bundle 220.0"
-    110.: "243-AL1/39-ST1A 110.0"             #"Al/St 240/40 3-bundle 300.0"
-    500.: "Al/St 240/40 4-bundle 380.0"       #"Al/St 560/50 4-bundle 750.0"       #
+    110.: "149-AL1/24-ST1A 110.0"
+    220.: "305-AL1/39-ST1A 110.0"
+    500.: "490-AL1/64-ST1A 380.0"
   dc_types:
     500.: "HVDC XLPE 1000"
+
+co2:
+  base: 3.17e+8  # Kazakhstan default for 1990
 
 solving:
   solver:
