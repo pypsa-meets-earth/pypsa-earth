@@ -8,15 +8,11 @@ Created on Thu Jul 14 19:01:13 2022.
 @author: user
 """
 
-
-import os
-import re
 from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
 from _helpers import aggregate_fuels, get_conv_factors, read_csv_nafix
-from prepare_sector_network import get
 
 # def calc_industry_base(df):
 
@@ -94,7 +90,6 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "build_base_industry_totals",
             planning_horizons=2030,
-            demand="AB",
         )
 
     # Loading config file and wild cards
@@ -103,7 +98,6 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
 
     investment_year = int(snakemake.wildcards.planning_horizons)
-    demand_sc = snakemake.wildcards.demand
     no_years = int(snakemake.wildcards.planning_horizons) - int(
         snakemake.params.base_year
     )
@@ -124,7 +118,8 @@ if __name__ == "__main__":
 
     # Create a dataframe from all downloaded files
     df = pd.concat(
-        (pd.read_csv(f, encoding="utf8", sep=";") for f in all_files), ignore_index=True
+        (read_csv_nafix(f, encoding="utf8", sep=";") for f in all_files),
+        ignore_index=True,
     )
 
     # Split 'Commodity', 'Transaction' column to two

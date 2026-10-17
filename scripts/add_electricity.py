@@ -21,7 +21,6 @@ Relevant Settings
         marginal_cost:
         capital_cost:
         conventional_carriers:
-        co2limit:
         extendable_carriers:
         include_renewable_capacities_from_OPSD:
         estimate_renewable_capacities_from_capacity_stats:
@@ -109,7 +108,7 @@ def _add_missing_carriers_from_costs(n, costs, carriers):
     suptechs = missing_carriers.str.split("-").str[0]
     emissions = costs.loc[suptechs, emissions_cols].fillna(0.0)
     emissions.index = missing_carriers
-    n.import_components_from_dataframe(emissions, "Carrier")
+    n.add("Carrier", emissions.index, **emissions)
 
 
 def load_powerplants(
@@ -240,7 +239,7 @@ def attach_load(n, demand_profiles):
     """
     demand_df = read_csv_nafix(demand_profiles, index_col=0, parse_dates=True)
 
-    n.madd("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
+    n.add("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
 
 
 def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
@@ -671,7 +670,7 @@ def attach_wind_and_solar(
                 else costs.at[carrier, "lifetime"]
             )
 
-            n.madd(
+            n.add(
                 "Generator",
                 ds.indexes["bus"],
                 suffix,
@@ -747,7 +746,7 @@ def attach_conventional_generators(
         )
     )
 
-    n.madd(
+    n.add(
         "Generator",
         ppl_grouped["bus"] + " " + ppl_grouped["carrier_gy"],
         carrier=ppl_grouped["carrier"],
@@ -771,7 +770,7 @@ def attach_conventional_generators(
     if extendable_conventional:
         for carrier in extendable_conventional:
             carrier_buses = ppl[ppl.carrier == carrier]["bus"].unique()
-            n.madd(
+            n.add(
                 "Generator",
                 carrier_buses,
                 suffix=" " + carrier,
@@ -998,7 +997,7 @@ def attach_hydro(
         )
 
     if "ror" in carriers and not ror.empty:
-        n.madd(
+        n.add(
             "Generator",
             ror.index,
             carrier=ror["carrier"],
@@ -1025,7 +1024,7 @@ def attach_hydro(
         # fill missing max hours to config value and
         # assume no natural inflow due to lack of data
         phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
-        n.madd(
+        n.add(
             "StorageUnit",
             phs.index,
             carrier=phs["carrier"],
@@ -1048,7 +1047,7 @@ def attach_hydro(
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = (
-            pd.read_csv(
+            read_csv_nafix(
                 snakemake.input.hydro_capacities,
                 comment="#",
                 na_values=["-"],
@@ -1087,7 +1086,7 @@ def attach_hydro(
             hydro.max_hours > 0, hydro.country.map(max_hours_country)
         ).fillna(hydro_max_hours_default)
 
-        n.madd(
+        n.add(
             "StorageUnit",
             hydro.index,
             carrier=hydro["carrier"],
@@ -1117,10 +1116,18 @@ def attach_hydro(
 
 
 def attach_existing_batteries(
-    n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    ppl: pd.DataFrame,
+    battery_techs: dict,
+    max_hours: float,
 ) -> None:
     """
     Add existing battery storage units from powerplants.csv to the network.
+
+    Currently existing batteries are attached as ``StorageUnit`` components on
+    the parent AC bus (see issue #1983 and PR #1990). Revert to a Store+Link
+    representation once clustering supports stores and links.
 
     Parameters
     ----------
@@ -1130,12 +1137,17 @@ def attach_existing_batteries(
         DataFrame containing technology costs.
     ppl : pd.DataFrame
         Power plant DataFrame.
+    battery_techs: dict
+        A dictionary mapping of battery and its technology parameters.
+    max_hours: float
+        Amount of time it takes to fully charge batteries from empty if done at maximum power rate.
 
     Returns
     -------
     None
     """
-    batteries = ppl.query('carrier == "battery"')
+    # TODO: support more battery technologies beyond Li
+    batteries = ppl.query('carrier == "battery" and technology == "Li"')
     if batteries.empty:
         logger.info("No existing batteries found in powerplants.csv.")
         return
@@ -1145,9 +1157,14 @@ def attach_existing_batteries(
     # Aggregate batteries by (bus, carrier, grouping_year)
     batteries_grouped = aggregate_ppl_by_bus_carrier_year(batteries)
 
-    max_hours = snakemake.params.electricity["max_hours"]["battery"]
+    lookup_inverter = battery_techs["bicharger"]
+    inverter_efficiency = costs.at[lookup_inverter, "efficiency"] ** 0.5
 
-    n.madd(
+    # TODO: make existing-battery representation selectable (StorageUnit
+    # or Store+Link). Currently StorageUnit only, because Store+Link extra buses
+    # are treated as isolated AC islands during clustering. See issue #1983.
+
+    n.add(
         "StorageUnit",
         batteries_grouped.index,
         bus=batteries_grouped["bus"],
@@ -1158,8 +1175,8 @@ def attach_existing_batteries(
         p_nom_max=batteries_grouped["p_nom"],
         capital_cost=costs.at["battery", "capital_cost"],
         max_hours=max_hours,
-        efficiency_store=np.sqrt(costs.at["battery", "efficiency"]),
-        efficiency_dispatch=np.sqrt(costs.at["battery", "efficiency"]),
+        efficiency_store=inverter_efficiency,
+        efficiency_dispatch=inverter_efficiency,
         cyclic_state_of_charge=True,
         marginal_cost=costs.at["battery", "marginal_cost"],
         build_year=batteries_grouped["build_year"],
@@ -1167,98 +1184,11 @@ def attach_existing_batteries(
     )
 
     logger.info(
-        f"Added {len(batteries_grouped)} existing batteries with total capacity "
-        f"{batteries_grouped.p_nom.sum()/1e3:.2f} GW (max_hours={max_hours})."
+        "Added {} existing batteries defined as StorageUnit with total capacity "
+        "{:.2f} GW (max_hours={}).".format(
+            len(batteries_grouped), batteries_grouped.p_nom.sum() / 1e3, max_hours
+        )
     )
-
-
-def attach_extendable_generators(
-    n: pypsa.Network, costs: pd.DataFrame, ppl: pd.DataFrame
-) -> None:
-    """
-    Add extendable conventional generators (OCGT, CCGT, nuclear) with zero capacity.
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        The PyPSA network to modify.
-    costs : pd.DataFrame
-        DataFrame containing technology costs.
-    ppl : pd.DataFrame
-        Power plant DataFrame.
-
-    Returns
-    -------
-    None
-    """
-    logger.warning("The function is deprecated with the next release")
-    elec_opts = snakemake.params.electricity
-    carriers = pd.Index(elec_opts["extendable_carriers"]["Generator"])
-
-    _add_missing_carriers_from_costs(n, costs, carriers)
-
-    for tech in carriers:
-        if tech.startswith("OCGT"):
-            ocgt = (
-                ppl.query("carrier in ['OCGT', 'CCGT']")
-                .groupby("bus", as_index=False)
-                .first()
-            )
-            n.madd(
-                "Generator",
-                ocgt.index,
-                suffix=" OCGT",
-                bus=ocgt["bus"],
-                carrier=tech,
-                p_nom_extendable=True,
-                p_nom=0.0,
-                capital_cost=costs.at["OCGT", "capital_cost"],
-                marginal_cost=costs.at["OCGT", "marginal_cost"],
-                efficiency=costs.at["OCGT", "efficiency"],
-            )
-
-        elif tech.startswith("CCGT"):
-            ccgt = (
-                ppl.query("carrier in ['OCGT', 'CCGT']")
-                .groupby("bus", as_index=False)
-                .first()
-            )
-            n.madd(
-                "Generator",
-                ccgt.index,
-                suffix=" CCGT",
-                bus=ccgt["bus"],
-                carrier=tech,
-                p_nom_extendable=True,
-                p_nom=0.0,
-                capital_cost=costs.at["CCGT", "capital_cost"],
-                marginal_cost=costs.at["CCGT", "marginal_cost"],
-                efficiency=costs.at["CCGT", "efficiency"],
-            )
-
-        elif tech.startswith("nuclear"):
-            nuclear = (
-                ppl.query("carrier == 'nuclear'").groupby("bus", as_index=False).first()
-            )
-            n.madd(
-                "Generator",
-                nuclear.index,
-                suffix=" nuclear",
-                bus=nuclear["bus"],
-                carrier=tech,
-                p_nom_extendable=True,
-                p_nom=0.0,
-                capital_cost=costs.at["nuclear", "capital_cost"],
-                marginal_cost=costs.at["nuclear", "marginal_cost"],
-                efficiency=costs.at["nuclear", "efficiency"],
-            )
-
-        else:
-            raise NotImplementedError(
-                f"Adding extendable generators for carrier "
-                "'{tech}' is not implemented, yet. "
-                "Only OCGT, CCGT and nuclear are allowed at the moment."
-            )
 
 
 def add_nice_carrier_names(n: pypsa.Network, config: dict) -> None:
@@ -1307,7 +1237,7 @@ if __name__ == "__main__":
     # Snakemake imports:
     demand_profiles = snakemake.input["demand_profiles"]
 
-    costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
+    costs = read_csv_nafix(snakemake.input.tech_costs, index_col=0)
     ppl = load_powerplants(
         snakemake.input.powerplants,
         costs,
@@ -1361,10 +1291,17 @@ if __name__ == "__main__":
     attach_hydro(
         n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
     )
-    attach_existing_batteries(n, costs, ppl)
+
+    attach_existing_batteries(
+        n,
+        costs,
+        ppl,
+        snakemake.params.battery_techs,
+        snakemake.params.electricity["max_hours"]["battery"],
+    )
     apply_nuclear_p_max_pu(
         n,
-        pd.read_csv(snakemake.input.nuclear_p_max_pu),
+        read_csv_nafix(snakemake.input.nuclear_p_max_pu),
     )
 
     update_p_nom_max(n)

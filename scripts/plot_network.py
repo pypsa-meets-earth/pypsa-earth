@@ -17,8 +17,6 @@ Description
 -----------
 """
 
-import os
-
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib as mpl
@@ -683,7 +681,7 @@ def plot_transmission_topology(network):
 
     n.lines = pd.concat([n.lines, DC_lines[["bus0", "bus1"]]])
 
-    n.madd("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
+    n.add("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
 
     fig = plt.figure()
     fig.set_size_inches(10.5, 9)
@@ -1005,7 +1003,6 @@ nice_names_n = {
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        import os
 
         from _helpers import mock_snakemake
 
@@ -1024,8 +1021,10 @@ if __name__ == "__main__":
 
     if snakemake.rule == "plot_network":
 
-        # load africa shape to identify borders of the image
-        africa_shape = gpd.read_file(snakemake.input.africa_shape)["geometry"].iloc[0]
+        # load extended country shape to identify borders of the image
+        extended_country_shape = gpd.read_file(snakemake.input.extended_country_shape)[
+            "geometry"
+        ].iloc[0]
 
         set_plot_style()
 
@@ -1034,7 +1033,7 @@ if __name__ == "__main__":
         map_boundaries = opts["map"]["boundaries"]
 
         if len(map_boundaries) != 4:
-            map_boundaries = africa_shape.boundary.bounds
+            map_boundaries = extended_country_shape.boundary.bounds
 
         n = pypsa.Network(snakemake.input.network)
 

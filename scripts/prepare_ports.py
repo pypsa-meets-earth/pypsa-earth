@@ -2,15 +2,12 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import logging
-import os
 import shutil
 from pathlib import Path
 
 import country_converter as coco
-import numpy as np
 import pandas as pd
-from _helpers import BASE_DIR
+from _helpers import BASE_DIR, read_csv_nafix
 
 # from _helpers import configure_logging
 
@@ -28,7 +25,7 @@ def download_ports():
     as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
     """
     fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
-    wpi_csv = pd.read_csv(fn, index_col=0)
+    wpi_csv = read_csv_nafix(fn, index_col=0)
 
     return wpi_csv
 

@@ -56,6 +56,8 @@ Scripts for sector-coupling features including heat, transport, industry, and hy
 
 ::: scripts.add_export
 
+::: scripts.build_salt_cavern_potentials
+
 ---
 
 ## Sector Network

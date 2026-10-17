@@ -12,7 +12,7 @@ To properly model any region of the Earth, PyPSA-Earth downloads and fetches dif
 
 Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart from that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
 
-![PyPSA-Earth Rulegraph](../img/gen_rulegraph.svg)
+![PyPSA-Earth Rulegraph](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph.svg)
 
 ## 1. Grid topology data
 

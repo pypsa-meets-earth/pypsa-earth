@@ -22,10 +22,11 @@ electricity:
     Generator: [solar, onwind, OCGT]
   renewable_carriers: [solar, csp, onwind, hydro]
 
-build_osm_network:
-  force_ac: true  # When true, it forces all components (lines and substation) to be AC-only
+osm:
+  build_osm_network:
+    force_ac: true  # When true, it forces all components (lines and substation) to be AC-only
 
-cluster_options:
+clustering:
   simplify_network:
     p_threshold_drop_isolated: 1
     p_threshold_merge_isolated: false

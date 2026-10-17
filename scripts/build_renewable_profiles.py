@@ -190,6 +190,7 @@ node (`p_nom_max`): ``simple`` and ``conservative``:
   proportional to the layout until the limit of an individual grid cell is
   reached.
 """
+
 import functools
 import os
 import time
@@ -202,45 +203,86 @@ import numpy as np
 import pandas as pd
 import progressbar as pgb
 import xarray as xr
-from _helpers import BASE_DIR, configure_logging, create_logger
+from _helpers import (
+    BASE_DIR,
+    configure_logging,
+    create_logger,
+    read_csv_nafix,
+)
 from add_electricity import load_powerplants
 from dask.distributed import Client
 from pypsa.geo import haversine
-from shapely.geometry import LineString, Point, box
+from shapely.geometry import LineString, box
 
 cc = coco.CountryConverter()
 
-logger = create_logger(__name__)
 
+logger = create_logger(__name__)
 
 COPERNICUS_CRS = "EPSG:4326"
 GEBCO_CRS = "EPSG:4326"
 PPL_CRS = "EPSG:4326"
 
 
+def _format_bounds(bounds):
+    """Format spatial bounds for a user-facing message."""
+    return "(" + ", ".join(f"{float(value):.15g}" for value in bounds) + ")"
+
+
 def check_cutout_match(cutout, regions):
+    """
+    Check whether a weather cutout covers the requested regions and report details.
+
+    A lack of overlap likely indicates that the cutout was created for a
+    different region. Partial coverage triggers a warning because excluding
+    remote areas may be intentional.
+    """
     cutout_box = box(*cutout.bounds)
     region_box = box(*regions.total_bounds)
 
+    outside_sides = [
+        side
+        for side, outside in (
+            ("west", region_box.bounds[0] < cutout_box.bounds[0]),
+            ("south", region_box.bounds[1] < cutout_box.bounds[1]),
+            ("east", region_box.bounds[2] > cutout_box.bounds[2]),
+            ("north", region_box.bounds[3] > cutout_box.bounds[3]),
+        )
+        if outside
+    ]
+    bounds_details = (
+        "Bounds use (minimum longitude, minimum latitude, maximum longitude, "
+        "maximum latitude).\n"
+        f"Cutout bounds: {_format_bounds(cutout_box.bounds)}\n"
+        f"Requested region bounds: {_format_bounds(region_box.bounds)}\n"
+        "Requested region exceeds cutout bounds on: "
+        f"{', '.join(outside_sides)}."
+    )
+
     assert not region_box.intersection(cutout_box).is_empty, (
-        "The requested region is completely out of the cutout area.\n\r"
-        "Check please the provided cutout.\n\r"
-        "More details on cutout generation are available in docs:\n\r"
-        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html\n\r"
+        "The requested region does not overlap the cutout.\n"
+        f"{bounds_details}\n"
+        "This usually means the cutout was generated for a different region.\n"
+        "More details on cutout generation are available in the documentation:\n"
+        "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
     )
 
     if not region_box.covered_by(cutout_box):
         logger.warning(
-            "Weather data does not fully cover the requester region.\n\r"
-            "It's recommended to check the provided cutout.\n\r"
-            "More details on cutout generation are available in docs:\n\r"
+            "Weather data only partially covers the requested region.\n"
+            f"{bounds_details}\n"
+            "Partial coverage can be intentional; check that the uncovered area "
+            "is acceptable.\n"
+            "More details on cutout generation are available in the documentation:\n"
             "https://pypsa-earth.readthedocs.io/en/latest/tutorial.html"
         )
 
 
 def get_eia_annual_hydro_generation(fn, countries):
     # in billion kWh/a = TWh/a
-    df = pd.read_csv(fn, skiprows=1, index_col=1, na_values=[" ", "--"]).iloc[1:, 1:]
+    df = read_csv_nafix(fn, skiprows=1, index_col=1, na_values=[" ", "--"])
+    df = df.apply(pd.to_numeric, errors="coerce")
+    df = df.iloc[1:, 1:]
     df.index = df.index.str.strip()
 
     df.loc["Germany"] = df.filter(like="Germany", axis=0).astype(float).sum()
@@ -298,7 +340,7 @@ def get_irena_annual_hydro_generation(fn, countries):
 
 def get_hydro_capacities_annual_hydro_generation(fn, countries, year):
     hydro_stats = (
-        pd.read_csv(
+        read_csv_nafix(
             fn,
             comment="#",
             keep_default_na=False,
@@ -549,6 +591,7 @@ if __name__ == "__main__":
     # crs
     geo_crs = snakemake.params.crs["geo_crs"]
     area_crs = snakemake.params.crs["area_crs"]
+    COPERNICUS_CRS = "EPSG:4326"  # projection for Copernicus data, used by atlite. "EPSG:4326" is the standard used by OSM and google maps
 
     if isinstance(config.get("copernicus", {}), list):
         config["copernicus"] = {"grid_codes": config["copernicus"]}
@@ -587,8 +630,8 @@ if __name__ == "__main__":
     if snakemake.wildcards.technology.startswith("hydro"):
         country_shapes = gpd.read_file(paths.country_shapes)
         hydrobasins_path = os.path.join(BASE_DIR, resource["hydrobasins"])
-        resource["hydrobasins"] = hydrobasins_path
         hydrobasins = gpd.read_file(hydrobasins_path)
+        resource["hydrobasins"] = hydrobasins
         ppls = load_powerplants(paths.powerplants)
 
         all_hydro_ppls = ppls[ppls.carrier == "hydro"]
@@ -632,7 +675,7 @@ if __name__ == "__main__":
             ).to_netcdf(snakemake.output.profile)
         else:
             # otherwise perform the calculations
-            inflow = correction_factor * func(capacity_factor=True, **resource)
+            inflow = correction_factor * func(**resource)
 
             if "clip_min_inflow" in config:
                 inflow = inflow.where(inflow >= config["clip_min_inflow"], 0)

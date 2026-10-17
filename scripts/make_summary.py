@@ -15,7 +15,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`
+    :ref:`meta_cf`
 
 Inputs
 ------
@@ -45,6 +45,7 @@ The line volume/cost cap field can be set to one of the following:
 
 Replacing *summaries* with *plots* creates nice colored maps of the results.
 """
+
 import os
 
 import pandas as pd
