@@ -8,18 +8,14 @@ import glob
 import logging
 import os
 import shutil
-import sys
 from io import BytesIO
 from pathlib import Path
 from urllib.request import urlopen
 from zipfile import ZipFile
 
 import country_converter as coco
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import py7zr
-import requests
 from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors, read_csv_nafix
 from googledrivedownloader import download_file_from_google_drive as download_gdrive
 
@@ -64,43 +60,43 @@ def calc_sector(sector):
 
         if df_sector.empty:
             if sector == "consumption by households":
-                energy_totals_base.at[country, "electricity residential"] = np.NaN
-                energy_totals_base.at[country, "residential oil"] = np.NaN
-                energy_totals_base.at[country, "residential biomass"] = np.NaN
-                energy_totals_base.at[country, "residential gas"] = np.NaN
-                energy_totals_base.at[country, "total residential space"] = np.NaN
-                energy_totals_base.at[country, "total residential water"] = np.NaN
+                energy_totals_base.at[country, "electricity residential"] = np.nan
+                energy_totals_base.at[country, "residential oil"] = np.nan
+                energy_totals_base.at[country, "residential biomass"] = np.nan
+                energy_totals_base.at[country, "residential gas"] = np.nan
+                energy_totals_base.at[country, "total residential space"] = np.nan
+                energy_totals_base.at[country, "total residential water"] = np.nan
 
             elif sector == "services":
-                energy_totals_base.at[country, "services electricity"] = np.NaN
-                energy_totals_base.at[country, "services oil"] = np.NaN
-                energy_totals_base.at[country, "services biomass"] = np.NaN
-                energy_totals_base.at[country, "services gas"] = np.NaN
-                energy_totals_base.at[country, "total services space"] = np.NaN
-                energy_totals_base.at[country, "total services water"] = np.NaN
+                energy_totals_base.at[country, "services electricity"] = np.nan
+                energy_totals_base.at[country, "services oil"] = np.nan
+                energy_totals_base.at[country, "services biomass"] = np.nan
+                energy_totals_base.at[country, "services gas"] = np.nan
+                energy_totals_base.at[country, "total services space"] = np.nan
+                energy_totals_base.at[country, "total services water"] = np.nan
 
             elif sector == "road":
-                energy_totals_base.at[country, "total road"] = np.NaN
+                energy_totals_base.at[country, "total road"] = np.nan
 
             elif sector == "agriculture":
-                energy_totals_base.at[country, "agriculture electricity"] = np.NaN
-                energy_totals_base.at[country, "agriculture oil"] = np.NaN
-                energy_totals_base.at[country, "agriculture biomass"] = np.NaN
-                # energy_totals_base.at[country, "electricity rail"] = np.NaN
+                energy_totals_base.at[country, "agriculture electricity"] = np.nan
+                energy_totals_base.at[country, "agriculture oil"] = np.nan
+                energy_totals_base.at[country, "agriculture biomass"] = np.nan
+                # energy_totals_base.at[country, "electricity rail"] = np.nan
 
             elif sector == "rail":
-                energy_totals_base.at[country, "total rail"] = np.NaN
-                energy_totals_base.at[country, "electricity rail"] = np.NaN
+                energy_totals_base.at[country, "total rail"] = np.nan
+                energy_totals_base.at[country, "electricity rail"] = np.nan
 
             elif sector == "aviation":
-                energy_totals_base.at[country, "total international aviation"] = np.NaN
-                energy_totals_base.at[country, "total domestic aviation"] = np.NaN
+                energy_totals_base.at[country, "total international aviation"] = np.nan
+                energy_totals_base.at[country, "total domestic aviation"] = np.nan
 
             elif sector == "navigation":
                 energy_totals_base.at[country, "total international navigation"] = (
-                    np.NaN
+                    np.nan
                 )
-                energy_totals_base.at[country, "total domestic navigation"] = np.NaN
+                energy_totals_base.at[country, "total domestic navigation"] = np.nan
 
             _logger.warning("No data for " + country + " in the sector " + sector + ".")
 

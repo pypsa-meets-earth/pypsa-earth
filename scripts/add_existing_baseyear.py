@@ -8,15 +8,12 @@ horizon.
 """
 
 import logging
-import os
 from types import SimpleNamespace
 
 import country_converter as coco
 import numpy as np
 import pandas as pd
-import powerplantmatching as pm
 import pypsa
-import xarray as xr
 from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
 
 # from _helpers import (
@@ -124,7 +121,7 @@ def add_heating_capacities_installed_before_baseyear(
             # installation is assumed to be linear for the past default_lifetime years
             ratio = (int(grouping_year) - int(grouping_years[i - 1])) / default_lifetime
 
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} {heat_pump_type} heat pump-{grouping_year}",
@@ -142,7 +139,7 @@ def add_heating_capacities_installed_before_baseyear(
             )
 
             # add resistive heater, gas boilers and oil boilers
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} resistive heater-{grouping_year}",
@@ -163,7 +160,7 @@ def add_heating_capacities_installed_before_baseyear(
                 lifetime=costs.at[f"{name_type} resistive heater", "lifetime"],
             )
 
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} gas boiler-{grouping_year}",
@@ -186,7 +183,7 @@ def add_heating_capacities_installed_before_baseyear(
                 lifetime=costs.at[f"{name_type} gas boiler", "lifetime"],
             )
 
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} oil boiler-{grouping_year}",
@@ -208,7 +205,7 @@ def add_heating_capacities_installed_before_baseyear(
             )
 
             # delete links with p_nom=nan corresponding to extra nodes in country
-            n.mremove(
+            n.remove(
                 "Link",
                 [
                     index
@@ -219,7 +216,7 @@ def add_heating_capacities_installed_before_baseyear(
 
             # delete links with capacities below threshold
             threshold = snakemake.params.existing_capacities["threshold_capacity"]
-            n.mremove(
+            n.remove(
                 "Link",
                 [
                     index
@@ -260,11 +257,11 @@ if __name__ == "__main__":
     add_build_year_to_new_assets(n, baseyear)
 
     Nyears = n.snapshot_weightings.generators.sum() / 8760.0
-    costs = read_csv_nafix(snakemake.input.costs, index_col=0)
 
     grouping_years_heat = snakemake.params.existing_capacities["grouping_years_heat"]
 
     # TODO: not implemented in -sec yet
+    # costs = read_csv_nafix(snakemake.input.costs, index_col=0)
     # if options["enable"]["heat"]:
     #     time_dep_hp_cop = options["time_dep_hp_cop"]
     #     ashp_cop = (

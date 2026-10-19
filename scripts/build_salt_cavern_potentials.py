@@ -22,18 +22,12 @@ The resulting dataset provides hydrogen storage potentials in **GWh per region**
 for use in PyPSA-Earth energy system models.
 """
 
-import functools
 import math
-import os
-import shutil
-import zipfile
-from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio.features
-import requests
 import rioxarray
 import shapely.geometry
 from _helpers import mock_snakemake, to_csv_nafix

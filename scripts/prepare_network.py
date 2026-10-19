@@ -58,6 +58,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
+
 import re
 
 import numpy as np
@@ -89,7 +90,7 @@ def emission_extractor(
         Path to the CSV file produced by build_co2_emissions. The file has
         columns country_code_a3 (three-letter ISO code), country_code_a2
         (two-letter ISO code), country_name (full country name), and year columns
-        named Y_YYYY.
+        named YYYY.
     emission_year : int or str
         Year of CO2 emissions.
     country_names : numpy.ndarray
@@ -119,7 +120,7 @@ def emission_extractor(
 
     country_codes = np.atleast_1d(country_names).tolist()
     available_countries = df.index.intersection(country_codes)
-    emission_by_country = df.loc[available_countries, str(emission_year)]
+    emission_by_country = df.loc[available_countries, str(closest_year)]
     if emission_by_country.index.has_duplicates:
         duplicate_countries = emission_by_country.index[
             emission_by_country.index.duplicated()
@@ -215,7 +216,7 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
         n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
             factor
         )
-    elif factor != "opt":  # implicitly also ll_type != "l"
+    elif factor != "opt" and float(factor) > 1.0:  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -240,7 +241,7 @@ def average_every_nhours(n, offset):
     # For example 24H is deprecated. Instead, 24h is allowed.
 
     logger.info(f"Resampling the network to {offset}")
-    m = n.copy(with_time=False)
+    m = n.copy(snapshots=[])
 
     snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
@@ -314,8 +315,8 @@ def enforce_autarky(n, only_crossborder=False):
     else:
         lines_rm = n.lines.index
         links_rm = n.links.loc[n.links.carrier == "DC"].index
-    n.mremove("Line", lines_rm)
-    n.mremove("Link", links_rm)
+    n.remove("Line", lines_rm)
+    n.remove("Link", links_rm)
 
 
 def set_line_nom_max(n, lines, links):

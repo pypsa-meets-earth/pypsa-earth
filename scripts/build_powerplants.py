@@ -179,7 +179,6 @@ from _helpers import (
     two_digits_2_name_country,
 )
 from scipy.spatial import cKDTree as KDTree
-from shapely.geometry import Point
 
 logger = create_logger(__name__)
 

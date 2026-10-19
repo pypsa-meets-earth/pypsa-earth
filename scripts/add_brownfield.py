@@ -64,8 +64,7 @@ import logging
 import numpy as np
 import pandas as pd
 import pypsa
-import xarray as xr
-from _helpers import read_csv_nafix, sanitize_carriers, sanitize_locations
+from _helpers import sanitize_carriers, sanitize_locations
 from add_existing_baseyear import add_build_year_to_new_assets
 
 # from pypsa.clustering.spatial import normed_or_uniform
@@ -109,17 +108,18 @@ def add_brownfield(n: pypsa.Network, n_p: pypsa.Network, year: int) -> None:
         attr = "e" if c.name == "Store" else "p"
 
         # Remove generators, links and stores that track global values since they exist in n
-        n_p.mremove(c.name, c.df.index[c.df.lifetime == np.inf])
+        n_p.remove(c.name, c.df.index[c.df.lifetime == np.inf])
 
         # Remove assets whose build_year + lifetime < year
-        n_p.mremove(c.name, c.df.index[c.df.build_year + c.df.lifetime < year])
+        n_p.remove(c.name, c.df.index[c.df.build_year + c.df.lifetime < year])
 
         # Remove assets that are not extendable since they already exist in n
-        n_p.mremove(c.name, c.df.index[~c.df[f"{attr}_nom_extendable"]])
+        n_p.remove(c.name, c.df.index[~c.df[f"{attr}_nom_extendable"]])
 
         # Remove assets if their optimized nominal capacity is lower than a threshold
         threshold = snakemake.params.threshold_capacity
-        n_p.mremove(
+
+        n_p.remove(
             c.name,
             c.df.index[
                 (c.df[f"{attr}_nom_extendable"] & (c.df[f"{attr}_nom_opt"] < threshold))
@@ -130,24 +130,24 @@ def add_brownfield(n: pypsa.Network, n_p: pypsa.Network, year: int) -> None:
         c.df[f"{attr}_nom"] = c.df[f"{attr}_nom_opt"]
         c.df[f"{attr}_nom_extendable"] = False
 
-        # Remove assets if name already exist in the new network
-        n_p.mremove(c.name, c.df.index.intersection(getattr(n, c.list_name).index))
+        # remove assets if name already exist in the new network
+        n_p.remove(c.name, c.df.index.intersection(getattr(n, c.list_name).index))
 
-        n.import_components_from_dataframe(c.df, c.name)
+        n.add(c.name, c.df.index, **c.df)
 
         # Copy time-dependent parameters of the optimized assets from previous horizon to current
         selection = n.component_attrs[c.name].type.str.contains(
             "series"
         ) & n.component_attrs[c.name].status.str.contains("Input")
         for tattr in n.component_attrs[c.name].index[selection]:
-            n.import_series_from_dataframe(c.pnl[tattr], c.name, tattr)
+            n._import_series_from_df(c.pnl[tattr], c.name, tattr)
 
         # deal with gas network
         pipe_carrier = ["gas pipeline"]
         if snakemake.params.H2_retrofit:
             # drop capacities of previous year to avoid duplicating
             to_drop = n.links.carrier.isin(pipe_carrier) & (n.links.build_year != year)
-            n.mremove("Link", n.links.loc[to_drop].index)
+            n.remove("Link", n.links.loc[to_drop].index)
 
             # subtract the already retrofitted from today's gas grid capacity
             h2_retrofitted_fixed_i = n.links[
@@ -243,6 +243,7 @@ def disable_grid_expansion_if_limit_hit(n: pypsa.Network) -> None:
                 n.global_constraints.drop(name, inplace=True)
 
 
+# from _helpers import read_csv_nafix
 # def adjust_renewable_profiles(n, input_profiles, params, year):
 #     """
 #     Adjusts renewable profiles according to the renewable technology specified,
