@@ -249,19 +249,19 @@ def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
     missing = ppl["efficiency"].isna()
     invalid = ~ppl["efficiency"].between(0, 1, inclusive="right") & ~missing
 
+    fill = missing | invalid
+    ppl.loc[fill, "efficiency"] = ppl.loc[fill, "carrier"].map(costs["efficiency"])
+
     logger.info(
-        f"Using plant-specific efficiencies from powerplants.csv for {int(valid.sum())} "
-        f"powerplants; filling {int(missing.sum())} missing efficiencies from the costs file."
+        f"Using plant-specific efficiencies from powerplants.csv,"
+        f"filling {int(missing.sum())} missing efficiencies from the costs file."
     )
 
     if invalid.any():
         logger.warning(
-            f"{int(invalid.sum())} powerplants have efficiencies outside (0, 1]; "
+            f"{int(invalid.sum())} powerplants have efficiencies outside (0, 1];"
             "falling back to default values from the cost table."
         )
-
-    fill = missing | invalid
-    ppl.loc[fill, "efficiency"] = ppl.loc[fill, "carrier"].map(costs["efficiency"])
 
     return ppl
 
