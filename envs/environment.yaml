@@ -8,7 +8,7 @@ channels:
 - bioconda
 - gurobi
 dependencies:
-- python>=3.10,<3.14
+- python>=3.11,<3.14
 - pip
 - setuptools<81
 
@@ -32,7 +32,7 @@ dependencies:
 - scip<=10.0.2  # experienced issues with 10.0.3 and 10.1. ImportError: libscip.so.10.0: cannot open shared object file
 - lxml
 - numpy>=1.26.4
-- pandas>=3
+- pandas>=3,<4
 - geopandas>=1
 - fiona>=1.10
 - xarray>=2026.1

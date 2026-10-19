@@ -832,7 +832,7 @@ def prepare_generators_df(df_all_generators):
     # convert electricity column from string to float value
     # TODO: this filtering can be improved
     df_all_generators = df_all_generators[
-        df_all_generators["power_output_MW"].astype(str).str.contains("MW")
+        df_all_generators["power_output_MW"].astype(str).str.contains("MW", na=False)
     ]
     df_all_generators["power_output_MW"] = (
         df_all_generators["power_output_MW"]
