@@ -246,15 +246,8 @@ def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
     ppl : pd.DataFrame
         Power plant list DataFrame with valid efficiencies.
     """
-    if "efficiency" not in ppl.columns:
-        ppl["efficiency"] = np.nan
-    ppl["efficiency"] = pd.to_numeric(ppl["efficiency"], errors="coerce")
-
     missing = ppl["efficiency"].isna()
-    valid = (
-        ppl["efficiency"].notna() & (ppl["efficiency"] > 0) & (ppl["efficiency"] <= 1)
-    )
-    invalid = ~valid & ~missing
+    invalid = ~ppl["efficiency"].between(0, 1, inclusive="right") & ~missing
 
     logger.info(
         f"Using plant-specific efficiencies from powerplants.csv for {int(valid.sum())} "
