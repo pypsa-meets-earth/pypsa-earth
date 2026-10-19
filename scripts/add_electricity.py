@@ -260,21 +260,8 @@ def fill_efficiency(ppl: pd.DataFrame, costs: pd.DataFrame) -> pd.DataFrame:
             "falling back to default values from the cost table."
         )
 
-    needs_default = missing | invalid
-    if needs_default.any():
-        defaults = ppl.loc[needs_default, "carrier"].map(costs["efficiency"])
-        ppl.loc[needs_default, "efficiency"] = defaults
-
-        still_missing = (
-            ppl["efficiency"].isna()
-            | (ppl["efficiency"] <= 0)
-            | (ppl["efficiency"] > 1)
-        )
-        if still_missing.any():
-            carriers = sorted(ppl.loc[still_missing, "carrier"].astype(str).unique())
-            logger.warning(
-                f"No valid default efficiency in cost table for carriers {carriers}."
-            )
+    fill = missing | invalid
+    ppl.loc[fill, "efficiency"] = ppl.loc[fill, "carrier"].map(costs["efficiency"])
 
     return ppl
 
