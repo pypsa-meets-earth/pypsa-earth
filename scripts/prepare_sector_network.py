@@ -1331,7 +1331,7 @@ def add_biomass(
             lifetime=costs.at[key, "lifetime"],
         )
 
-        if snakemake.params.sector_options["cc"]:
+        if options["cc"]:
             n.add(
                 "Link",
                 urban_central + " urban central solid biomass CHP CC",
