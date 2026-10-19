@@ -88,21 +88,18 @@ wildcard_constraints:
     planning_horizons="20[2-9][0-9]|2100",
     demand=r"[-+a-zA-Z0-9\.\s]*",
     h2export="[0-9]+m?|all",
-
-
-if config["custom_rules"] is not []:
-    for rule in config["custom_rules"]:
-
-        include: rule
-
-
+#
+# Fix for pre-commit snakefmt linting to induce error
+# fmt: off
+for include_rule in config.get("custom_rules", []):
+    include: include_rule
+# fmt: on
 rule clean:
     run:
-        try:
-            shell("snakemake -j 1 solve_all_networks --delete-all-output")
-        except:
-            shell("snakemake -j 1 solve_all_networks_monte --delete-all-output")
-            pass
+        shell(
+            "snakemake -j 1 solve_all_networks --delete-all-output || "
+            "snakemake -j 1 solve_all_networks_monte --delete-all-output"
+        )
         shell("snakemake -j 1 run_all_scenarios --delete-all-output")
 
 
@@ -293,12 +290,12 @@ rule build_shapes:
         countries=config["countries"],
         subregion=config["subregion"],
     input:
-        databundle=branch(config["tutorial"], rules.retrieve_databundle_data.output),
-        # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
-        # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
-        # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
-        # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
-        # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
+        # retrieve_databundle_data may not be defined for default run; relevant only for tutorial to track the gadm shapes contained in the bundle
+        databundle=(
+            rules.retrieve_databundle_data.output
+            if config["tutorial"] and config["enable"]["retrieve_databundle"]
+            else []
+        ),
         eez="data/eez/eez_v11.gpkg",
     output:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -1224,6 +1221,8 @@ rule prepare_airports:
 
 
 rule prepare_urban_percent:
+    input:
+        urban_percent_raw="data/urban_percent_raw.csv",
     output:
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:
@@ -1448,6 +1447,7 @@ rule add_export:
         endogenous_price=config["export"]["endogenous_price"],
         snapshots=config["snapshots"],
         h2export=config["export"]["h2export"],
+        crs=config["crs"],
     input:
         export_ports="resources/" + SECDIR + "export_ports.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
@@ -2202,6 +2202,15 @@ rule retrieve_ammonia_dataset:
         "scripts/retrieve_ammonia_dataset.py"
 
 
+rule retrieve_urban_percent:
+    params:
+        url_urban_percent="https://zenodo.org/records/23242372/files/US_PopTotal.csv.7z?download=1",
+    output:
+        urban_percent_raw="data/urban_percent_raw.csv",
+    script:
+        "scripts/retrieve_urban_percent.py"
+
+
 rule build_ammonia_production:
     input:
         ammonia_plants="data/industry/ammonia_plants.csv",
@@ -2250,7 +2259,7 @@ rule build_existing_heating_distribution:
         + "logs/build_existing_heating_distribution_s{simpl}_{clusters}_{planning_horizons}.log",
     benchmark:
         RESDIR
-        +"benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
+        + "benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
     script:
         "scripts/build_existing_heating_distribution.py"
 
@@ -2304,7 +2313,7 @@ if config["foresight"] == "myopic":
             + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.log",
         benchmark:
             RESDIR
-            +"benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
+            + "benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         script:
             "scripts/add_existing_baseyear.py"
 
@@ -2321,7 +2330,6 @@ if config["foresight"] == "myopic":
         planning_horizons = config["scenario"]["planning_horizons"]
         i = planning_horizons.index(int(w.planning_horizons))
         planning_horizon_p = str(planning_horizons[i - 1])
-
         return (
             RESDIR
             + "postnetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_"
@@ -2439,7 +2447,6 @@ rule run_scenario:
         mem_mb=5000,
     run:
         from subprocess import run
-
         import yaml
         from build_test_configs import create_test_config
 
@@ -2450,7 +2457,6 @@ rule run_scenario:
                 .get("run", {})
                 .get("base_config", "config.default.yaml")
             )
-
             # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
@@ -2470,7 +2476,6 @@ rule run_scenario:
             check=not config["run"]["allow_scenario_failure"],
         )
         copyfile("config.yaml", output.copyconfig)
-
 
 
 rule run_all_scenarios:

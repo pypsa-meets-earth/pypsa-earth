@@ -16,7 +16,6 @@ Possible improvements:
 - Select port buses automatically (with both voronoi and gadm clustering). Use data/ports.csv?
 """
 
-
 import logging
 
 import geopandas as gpd
@@ -68,16 +67,20 @@ def select_ports(n):
     return hydrogen_buses_ports
 
 
-def add_export(n, hydrogen_buses_ports, export_profile):
+def add_export(
+    n: pypsa.Network,
+    hydrogen_buses_ports: pd.DataFrame,
+    export_profile: pd.Series,
+    crs: dict,
+) -> None:
     country_shape = gpd.read_file(snakemake.input["shapes_path"])
-    # Find most northwestern point in country shape and get x and y coordinates
-    country_shape = country_shape.to_crs(
-        "EPSG:3395"
-    )  # Project to Mercator projection (Projected)
+    # Compute centroids in the equal-area CRS and convert them back to
+    # the geographic CRS (required since `.centroid` is CRS dependent)
+    centroids = country_shape.to_crs(crs["area_crs"]).centroid.to_crs(crs["geo_crs"])
 
-    # Get coordinates of the most western and northern point of the country and add a buffer of 2 degrees (equiv. to approx 220 km)
-    x_export = country_shape.geometry.centroid.x.min() - 2
-    y_export = country_shape.geometry.centroid.y.max() + 2
+    # Get coordinates of the most western and northern region centroids and add a buffer of 2 degrees (equiv. to approx 220 km)
+    x_export = centroids.x.min() - 2
+    y_export = centroids.y.max() + 2
 
     # add export bus
     n.add(
@@ -229,7 +232,7 @@ if __name__ == "__main__":
     hydrogen_buses_ports = select_ports(n)
 
     # add export value and components to network
-    add_export(n, hydrogen_buses_ports, export_profile)
+    add_export(n, hydrogen_buses_ports, export_profile, snakemake.params.crs)
 
     n.export_to_netcdf(snakemake.output[0])
 
