@@ -1447,6 +1447,7 @@ rule add_export:
         endogenous_price=config["export"]["endogenous_price"],
         snapshots=config["snapshots"],
         h2export=config["export"]["h2export"],
+        crs=config["crs"],
     input:
         export_ports="resources/" + SECDIR + "export_ports.csv",
         costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
