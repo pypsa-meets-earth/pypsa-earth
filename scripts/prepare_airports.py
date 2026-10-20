@@ -53,7 +53,7 @@ def preprocess_airports(df):
     # Keep only airports that have schedules
     df = df.loc[df["scheduled_service"].isin(["yes"])]
 
-    df.insert(2, "airport_size_nr", 1)
+    df.insert(2, "airport_size_nr", 1.0)
     df.loc[df["type"].isin(["medium_airport"]), "airport_size_nr"] = 1
     df.loc[df["type"].isin(["large_airport"]), "airport_size_nr"] = (
         snakemake.params.airport_sizing_factor
@@ -61,7 +61,7 @@ def preprocess_airports(df):
 
     # Calculate the number of total airports size
     df1 = df.copy()
-    df1 = df1.groupby(["iso_country"]).sum("airport_size_nr")
+    df1 = df1.groupby("iso_country")[["airport_size_nr"]].sum()
     df1 = df1[["airport_size_nr"]]
     df1 = df1.rename(columns={"airport_size_nr": "Total_airport_size_nr"}).reset_index()
 

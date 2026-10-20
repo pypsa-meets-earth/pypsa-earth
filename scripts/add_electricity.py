@@ -847,9 +847,8 @@ def attach_conventional_generators(
                 # First map generator buses to countries; then map countries to p_max_pu
                 values = read_csv_nafix(values, index_col=0).iloc[:, 0]
                 bus_values = n.buses.country.map(values)
-                n.generators[attr].update(
-                    n.generators.loc[idx].bus.map(bus_values).dropna()
-                )
+                updates = n.generators.loc[idx, "bus"].map(bus_values).dropna()
+                n.generators.loc[updates.index, attr] = updates
             else:
                 # Single value affecting all generators of technology k indiscriminantely of country
                 n.generators.loc[idx, attr] = values
@@ -1032,8 +1031,9 @@ def attach_hydro(
         # Merge inflow: sum overlapping columns, add new ones
         inflow_agg = (
             pd.concat([inflow_agg, inflow_agg_ror, inflow_agg_hydro], axis=1)
-            .groupby(level=0, axis=1)
+            .T.groupby(level=0)
             .sum()
+            .T
         )
 
         logger.info(

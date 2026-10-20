@@ -403,13 +403,12 @@ def prepare_IGGIELGN_data(
     df["p_nom_diameter"] = df.diameter_mm.apply(diameter_to_capacity)
     ratio = df.p_nom / df.p_nom_diameter
     not_nordstream = df.max_pressure_bar < 220
-    df.p_nom.update(
-        df.p_nom_diameter.where(
-            (df.p_nom <= 500)
-            | ((ratio > correction_threshold_p_nom) & not_nordstream)
-            | ((ratio < 1 / correction_threshold_p_nom) & not_nordstream)
-        )
+    correct_capacity = (
+        (df.p_nom <= 500)
+        | ((ratio > correction_threshold_p_nom) & not_nordstream)
+        | ((ratio < 1 / correction_threshold_p_nom) & not_nordstream)
     )
+    df.update({"p_nom": df.p_nom_diameter.where(correct_capacity)})
 
     # lines which have way too discrepant line lengths
     # get assigned haversine length * length factor
@@ -419,13 +418,12 @@ def prepare_IGGIELGN_data(
         axis=1,
     )
     ratio = df.eval("length / length_haversine")
-    df["length"].update(
-        df.length_haversine.where(
-            (df["length"] < 20)
-            | (ratio > correction_threshold_length)
-            | (ratio < 1 / correction_threshold_length)
-        )
+    correct_length = (
+        (df["length"] < 20)
+        | (ratio > correction_threshold_length)
+        | (ratio < 1 / correction_threshold_length)
     )
+    df.update({"length": df.length_haversine.where(correct_length)})
 
     # Convert CRS to EPSG:3857 so we can measure distances
     df = df.to_crs(epsg=3857)
