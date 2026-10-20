@@ -27,7 +27,7 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 9.0.2
+  rev: 10.0.0b1
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
@@ -92,7 +92,7 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v2.0.3
+  rev: v2.1.0
   hooks:
   - id: snakefmt
     args: [--no-sort]
