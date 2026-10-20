@@ -242,6 +242,7 @@ Add sector based technologies to the PyPSA network, including:
 """
 
 import logging
+import math
 import os
 import re
 from types import SimpleNamespace
@@ -1114,9 +1115,17 @@ def define_spatial(nodes: list, options: dict) -> SimpleNamespace:
     return spatial
 
 
-def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
+def add_biomass(
+    n: pypsa.Network, costs: pd.DataFrame, options: dict, pop_layout: pd.DataFrame
+) -> None:
     """
     Add biomass and biogas potentials to the network.
+
+    This function adds various biomass-related components including biogas,
+    solid biomass, biomass EOP, biomass transport, and different
+    biomass conversion technologies (biogas to gas, CHP).
+
+    NOTE: when biomass is enabled, biomass based carriers are converted into solid biomass.
 
     Parameters
     ----------
@@ -1124,26 +1133,16 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         The PyPSA network to which the biomass and biogas potentials will be added.
     costs : pd.DataFrame
         DataFrame containing the costs for the biomass and biogas technologies.
+    options : dict
+        Dictionary containing the options for biomass implementation in the sector network.
+    pop_layout : pd.DataFrame
+        DataFrame containing population layout information.
 
     Returns
     -------
     None
     """
     logger.info("adding biomass")
-
-    # TODO get biomass potentials dataset and enable spatially resolved potentials
-
-    # Get biomass and biogas potentials from config and convert from TWh to MWh
-    biomass_pot = (
-        snakemake.params.sector_options["solid_biomass_potential"] * 1e6
-    )  # MWh
-    biogas_pot = snakemake.params.sector_options["biogas_potential"] * 1e6  # MWh
-    logger.info("Biomass and Biogas potential fetched from config")
-
-    # Convert from total to nodal potentials,
-    biomass_pot_spatial = biomass_pot / len(spatial.biomass.nodes)
-    biogas_pot_spatial = biogas_pot / len(spatial.gas.biogas)
-    logger.info("Biomass potentials spatially resolved equally across all nodes")
 
     n.add("Carrier", "biogas")
     n.add("Carrier", "solid biomass")
@@ -1159,24 +1158,50 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         carrier="solid biomass",
     )
 
+    # Drop existing biomass sources in favor of the options below
+    drop_gen = n.generators[n.generators.carrier == "biomass"].index
+    n.remove("Generator", drop_gen)
+
+    if len(spatial.biomass.nodes) > 1:
+        node_map = spatial.biomass.df.nodes.to_dict()
+        pop_spatial = pop_layout.set_index(pop_layout.index.map(node_map))["total"]
+        pop_spatial /= pop_spatial.sum()
+    else:
+        pop_spatial = 1
+
+    solid_biomass_potentials_spatial = (
+        options["solid_biomass_potential"] * 1e6 * pop_spatial
+    )  # MWh
+
+    if len(spatial.gas.biogas) > 1:
+        node_map = spatial.gas.df.biogas.to_dict()
+        pop_spatial = pop_layout.set_index(pop_layout.index.map(node_map))["total"]
+        pop_spatial /= pop_spatial.sum()
+    else:
+        pop_spatial = 1
+
+    biogas_potentials_spatial = options["biogas_potential"] * 1e6 * pop_spatial  # MWh
+
     n.add(
-        "Store",
-        spatial.gas.biogas,
-        bus=spatial.gas.biogas,
-        carrier="biogas",
-        e_nom=biogas_pot_spatial,
-        marginal_cost=costs.at["biogas", "fuel"],
-        e_initial=biogas_pot_spatial,
+        "Generator",
+        spatial.biomass.nodes,
+        bus=spatial.biomass.nodes,
+        p_nom_extendable=True,
+        carrier="solid biomass",
+        marginal_cost=costs.at["solid biomass", "fuel"],
+        e_sum_min=0,
+        e_sum_max=solid_biomass_potentials_spatial,
     )
 
     n.add(
-        "Store",
-        spatial.biomass.nodes,
-        bus=spatial.biomass.nodes,
-        carrier="solid biomass",
-        e_nom=biomass_pot_spatial,
-        marginal_cost=costs.at["solid biomass", "fuel"],
-        e_initial=biomass_pot_spatial,
+        "Generator",
+        spatial.gas.biogas,
+        bus=spatial.gas.biogas,
+        p_nom_extendable=True,
+        carrier="biogas",
+        marginal_cost=costs.at["biogas", "fuel"],
+        e_sum_min=0,
+        e_sum_max=biogas_potentials_spatial,
     )
 
     biomass_gen = "biomass EOP"
@@ -1254,18 +1279,18 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
             logger.info(
                 "No transport values found for {0}, using default value of {1}".format(
                     ", ".join(countries_not_in_index),
-                    snakemake.params.sector_options["biomass_transport_default_cost"],
+                    options["biomass_transport_default_cost"],
                 )
             )
 
         bus0_costs = biomass_transport.bus0.apply(
             lambda x: transport_costs.get(
-                x[:2], snakemake.params.sector_options["biomass_transport_default_cost"]
+                x[:2], options["biomass_transport_default_cost"]
             )
         )
         bus1_costs = biomass_transport.bus1.apply(
             lambda x: transport_costs.get(
-                x[:2], snakemake.params.sector_options["biomass_transport_default_cost"]
+                x[:2], options["biomass_transport_default_cost"]
             )
         )
         biomass_transport["costs"] = pd.concat([bus0_costs, bus1_costs], axis=1).mean(
@@ -1306,7 +1331,7 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
             lifetime=costs.at[key, "lifetime"],
         )
 
-        if snakemake.params.sector_options["cc"]:
+        if options["cc"]:
             n.add(
                 "Link",
                 urban_central + " urban central solid biomass CHP CC",
@@ -3906,7 +3931,7 @@ if __name__ == "__main__":
         )
 
     if enable["biomass"]:
-        add_biomass(n, costs)
+        add_biomass(n, costs, options, pop_layout)
 
     if enable["industry"]:
         add_industry(

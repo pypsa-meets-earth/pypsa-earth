@@ -118,6 +118,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix handling of ``solid_biomass_potential`` and ``biogas_potential``. Improved spatial distribution of biomass and biogas potential [PR #1736](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1736)
+
 * Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
 
 * Fix country lookup for country-specific line type mappings [PR #2037](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2037)
