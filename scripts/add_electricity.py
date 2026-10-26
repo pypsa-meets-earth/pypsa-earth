@@ -650,7 +650,7 @@ def attach_wind_and_solar(
                 else costs.at[carrier, "lifetime"]
             )
 
-            new_generators = n.add(
+            n.add(
                 "Generator",
                 ds.indexes["bus"],
                 suffix,
@@ -676,10 +676,11 @@ def attach_wind_and_solar(
             if supcarrier == "offwind":
                 distance = line_length_factor * ds["average_distance"].to_pandas()
                 underwater_fraction = ds["underwater_fraction"].to_pandas()
-                n.generators.loc[new_generators, "connection_submarine_length"] = (
+                gens = ds.indexes["bus"] + suffix
+                n.generators.loc[gens, "connection_submarine_length"] = (
                     distance * underwater_fraction
                 ).values
-                n.generators.loc[new_generators, "connection_underground_length"] = (
+                n.generators.loc[gens, "connection_underground_length"] = (
                     distance * (1.0 - underwater_fraction)
                 ).values
 
