@@ -155,8 +155,6 @@ def prepare_network(n, solve_opts, config):
 
     if solve_opts.get("noisy_costs"):
         for t in n.iterate_components():
-            # if 'capital_cost' in t.df:
-            #    t.df['capital_cost'] += 1e1 + 2.*(np.random.random(len(t.df)) - 0.5)
             if "marginal_cost" in t.df:
                 np.random.seed(174)
                 t.df["marginal_cost"] += 1e-2 + 2e-3 * (
@@ -417,7 +415,6 @@ def add_SAFE_constraints(n, config):
     ext_gens_i = n.generators.query(
         "carrier in @conventional_carriers & p_nom_extendable"
     ).index
-    capacity_variable = n.model["Generator-p_nom"]
     p_nom = n.model["Generator-p_nom"].loc[ext_gens_i]
     lhs = p_nom.sum()
     exist_conv_caps = n.generators.query(
@@ -588,7 +585,6 @@ def add_RES_constraints(n, res_share, config):
     ggrouper = ren_gen.bus.map(n.buses.country)
     sgrouper = ren_stores.bus.map(n.buses.country)
     cgrouper = ren_charger.bus0.map(n.buses.country)
-    dgrouper = ren_discharger.bus0.map(n.buses.country)
 
     load = (
         n.snapshot_weightings.generators
