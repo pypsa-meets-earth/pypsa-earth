@@ -643,7 +643,7 @@ def aggregate_p_nom(n: pypsa.Network) -> pd.Series:
             n.generators.groupby("carrier").p_nom_opt.sum(),
             n.storage_units.groupby("carrier").p_nom_opt.sum(),
             n.links.groupby("carrier").p_nom_opt.sum(),
-            n.loads_t.p.groupby(n.loads.carrier, axis=1).sum().mean(),
+            n.loads_t.p.T.groupby(n.loads.carrier).sum().T.mean(),
         ]
     )
 
@@ -1688,10 +1688,9 @@ def cycling_shift(
     """
     Cyclic shift on index of pd.Series|pd.DataFrame by number of steps.
     """
-    df = df.copy()
-    new_index = np.roll(df.index, steps)
-    df.values[:] = df.reindex(index=new_index).values
-    return df
+    shifted = df.iloc[np.roll(np.arange(len(df)), steps)].copy()
+    shifted.index = df.index
+    return shifted
 
 
 def get_country(target: str, **keys: str) -> str | float:
@@ -1813,13 +1812,16 @@ def _get_shape_col_gdf(
             if "GADM_ID" in gdf_shapes.columns:
                 col = "GADM_ID"
 
-                if gdf_shapes[col][0][
-                    :3
-                ].isalpha():  # TODO clean later by changing all codes to 2 letters
+                if (
+                    gdf_shapes[col].iloc[0][:3].isalpha()
+                ):  # TODO clean later by changing all codes to 2 letters
                     gdf_shapes[col] = gdf_shapes[col].apply(
                         lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                     )
-            elif gdf_shapes[col][0][:2].isalpha() and gdf_shapes[col][0][:3].isalpha():
+            elif (
+                gdf_shapes[col].iloc[0][:2].isalpha()
+                and gdf_shapes[col].iloc[0][:3].isalpha()
+            ):
                 gdf_shapes[col] = gdf_shapes[col].apply(
                     lambda name: three_2_two_digits_country(name[:3]) + name[3:]
                 )
@@ -2107,7 +2109,7 @@ def lossy_bidirectional_links(n: pypsa.Network, carrier: str) -> None:
 
     # add the new reversed links to the network and fill the newly created trackers with default values for the other links
     n.links = pd.concat([n.links, rev_links], sort=False)
-    n.links["reversed"] = n.links["reversed"].fillna(False).infer_objects(copy=False)
+    n.links["reversed"] = n.links["reversed"].fillna(False).astype(bool)
     n.links["length_original"] = n.links["length_original"].fillna(n.links.length)
 
 

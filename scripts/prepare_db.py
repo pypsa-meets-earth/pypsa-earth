@@ -85,6 +85,7 @@ def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario 
     #     dbf.name=dbf.name.str.replace(' '+tech, '')
     dbf = (
         dbf.stack()
+        .dropna()
         .reset_index(level=0)
         .rename(columns={"snapshot": "DateTime", 0: "value"})
         .reset_index()
@@ -103,7 +104,7 @@ def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario 
         elif ngv == False:
             dbf["value"] = abs(dbf["value"])
 
-    db = db.append(dbf)
+    db = pd.concat([db, dbf])
 
 
 def add_gen(tech, carrier, reg=False):
@@ -120,7 +121,7 @@ def add_gen(tech, carrier, reg=False):
 def add_load(tech, carrier, reg=False):
     global db
     if tech == "ac":
-        ac_labels = loads.stack().reset_index(level=1).level_1
+        ac_labels = loads.stack().dropna().reset_index(level=1).level_1
         ac_labels = ac_labels[ac_labels.str.len() < 11].unique()
         tech_col = loads.filter(ac_labels.tolist())
         # ac_labels = loads.reset_index()[loads.reset_index().name.str.len()<7].name.tolist() #TODO hard coded
@@ -220,7 +221,7 @@ def net_flow(co_code, tech, carrier, flow):
     dbf["flow"] = flow
     dbf["tech"] = tech
     dbf["value"] = (inflow - outflow).reset_index(drop=True)  # /10**6
-    db = db.append(dbf)
+    db = pd.concat([db, dbf])
     return dbf
 
 
@@ -456,8 +457,8 @@ def energy_pie(carrier, node_id, sign):
     agg = agg.groupby("tech").sum().reset_index()
     agg["pct"] = round(agg["value"] / agg.value.sum(), 3)
     if agg.pct.sum() < 1:
-        agg = agg.append(
-            pd.DataFrame([["other", 0, 1 - agg.pct.sum()]], columns=agg.columns)
+        agg = pd.concat(
+            [agg, pd.DataFrame([["other", 0, 1 - agg.pct.sum()]], columns=agg.columns)]
         )
     agg = agg[agg.pct > 0.009]
 
