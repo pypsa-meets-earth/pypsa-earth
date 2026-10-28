@@ -10,15 +10,17 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
-* Enable support of PyPSA 1+ and improve environment [PR # 1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
+* Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
 
-* Enable support of Snakemake 8+ [PR # 2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
+* Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
 
 * Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
 **Minor Changes and bug-fixing**
 
-* Fix H2 export bus coordinates, which were stored in metres instead of lon/lat
+* Fix argument types for iterative transmission expansion [PR #2082](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2082)
+
+* Fix H2 export bus coordinates, which were stored in metres instead of lon/lat [PR #2071](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2071)
 
 * Update backward compatibility notes [PR #2064](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2064)
 
