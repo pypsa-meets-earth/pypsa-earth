@@ -412,14 +412,17 @@ def add_SAFE_constraints(n, config):
     margin = 1.0 + config["electricity"]["SAFE_reservemargin"]
     reserve_margin = peakdemand * margin
     conventional_carriers = config["electricity"]["conventional_carriers"]
-    ext_gens_i = n.generators.query(
-        "carrier in @conventional_carriers & p_nom_extendable"
-    ).index
+    ext_gens_i = n.generators.index[
+        n.generators["carrier"].isin(conventional_carriers)
+        & n.generators["p_nom_extendable"]
+    ]
     p_nom = n.model["Generator-p_nom"].loc[ext_gens_i]
     lhs = p_nom.sum()
-    exist_conv_caps = n.generators.query(
-        "~p_nom_extendable & carrier in @conventional_carriers"
-    ).p_nom.sum()
+    exist_conv_caps = n.generators.loc[
+        ~n.generators["p_nom_extendable"]
+        & n.generators["carrier"].isin(conventional_carriers),
+        "p_nom",
+    ].sum()
     rhs = reserve_margin - exist_conv_caps
     n.model.add_constraints(lhs >= rhs, name="safe_mintotalcap")
 
@@ -569,10 +572,10 @@ def add_RES_constraints(n, res_share, config):
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
-    ren_gen = n.generators.query("carrier in @renew_techs")
-    ren_stores = n.storage_units.query("carrier in @renew_techs")
-    ren_charger = n.links.query("carrier in @charger")
-    ren_discharger = n.links.query("carrier in @discharger")
+    ren_gen = n.generators.loc[n.generators["carrier"].isin(renew_techs)]
+    ren_stores = n.storage_units.loc[n.storage_units["carrier"].isin(renew_techs)]
+    ren_charger = n.links.loc[n.links["carrier"].isin(charger)]
+    ren_discharger = n.links.loc[n.links["carrier"].isin(discharger)]
 
     gens_i = ren_gen.index
     stores_i = ren_stores.index
@@ -1028,12 +1031,14 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
 
     # ensure that the 'reversed' column is boolean and identify all link carriers that have 'reversed' links
     n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
-    carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
+    carriers = n.links.loc[n.links.reversed, "carrier"].unique()
 
     # get the indices of all forward links (non-reversed), that have a reversed counterpart
-    forward_i = n.links.query(
-        "carrier in @carriers and ~reversed and p_nom_extendable"
-    ).index
+    forward_i = n.links.index[
+        n.links["carrier"].isin(carriers)
+        & ~n.links["reversed"]
+        & n.links["p_nom_extendable"]
+    ]
 
     # function to get backward (reversed) indices corresponding to forward links
     # this function is required to properly interact with the myopic naming scheme
