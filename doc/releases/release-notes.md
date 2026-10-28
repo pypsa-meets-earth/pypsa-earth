@@ -10,13 +10,45 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
+
+* Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
+
+* Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
+
+**Minor Changes and bug-fixing**
+
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
+
+* Fix argument types for iterative transmission expansion [PR #2082](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2082)
+
+* Fix H2 export bus coordinates, which were stored in metres instead of lon/lat [PR #2071](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2071)
+
+* Update backward compatibility notes [PR #2064](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2064)
+
+* Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
+
+* Keep one copy of OSM elements that appear in more than one country extract, so that cross-border lines, cables and HVDC links are no longer counted once per extract [PR #2076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2076)
+
+# PyPSA-Earth 0.10.0
+
+**New Features and Major Changes**
+
+* Update `technology-data` to v0.15.0 and align the cost-data reference year to 2025 [PR #1729](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1729)
 
 * Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
 
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 **Minor Changes and bug-fixing**
+
+* Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
+
+* Externalise retrieval of urban percentage using mirrored sources file [PR #2063](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2063)
+
+* Fix NaN shipping oil demand for nodes with several ports or no port [PR #2052](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2052)
+
+* Fix missing time import in databundle retries [PR #2054](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2054)
 
 * Remove duplicate configuration files for PyPSA-Earth-CLI [PR #2044](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2044)
 
@@ -27,6 +59,14 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix fallback to closest available CO2 emission year [PR #2018](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2018)
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
+
+* preserve power plant specific efficiencies instead of overwriting these with technology data default values from the cost table in `add_electricity.py` (applicable for custom_powerplants.csv and power plants from powerplantmatching) [PR #2057](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2057)
+
+* Fix capacity_factor=False in hydro calculation to support atlite 0.6.0 [PR #2023](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2023)
+
+* Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
+
+* Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
 
 # PyPSA-Earth 0.9.0
 
@@ -85,6 +125,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
 
 * Fix country lookup for country-specific line type mappings [PR #2037](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2037)
+
+* Include cutout and requested-region bounds in spatial mismatch messages [PR #2010](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2010)
 
 * Fix `shared_cutouts` logic [PR #2003](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2003)
 
