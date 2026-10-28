@@ -40,6 +40,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add representative Zambia-specific transmission line types and mappings [PR #2048](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2048).
+
 * Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
 
 * Externalise retrieval of urban percentage using mirrored sources file [PR #2063](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2063)
