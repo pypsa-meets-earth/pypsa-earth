@@ -22,6 +22,58 @@ def calculate_end_values(df):
     return (1 + df) ** no_years
 
 
+def build_nodal_demand_by_subsector(
+    nodal_production: pd.DataFrame,
+    industry_totals: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Build nodal industrial demand while preserving industry subsectors.
+
+    Parameters
+    ----------
+    nodal_production : pd.DataFrame
+        Nodal industry production indexed by node, with subsectors as columns.
+    industry_totals : pd.DataFrame
+        Industry demand indexed by carrier, with subsectors as columns.
+
+    Returns
+    -------
+    pd.DataFrame
+        Nodal industrial demand with ``carrier`` and ``subsector`` column levels.
+    """
+    if (
+        nodal_production.columns.has_duplicates
+        or industry_totals.columns.has_duplicates
+    ):
+        raise ValueError("Industry subsector columns must be unique.")
+
+    missing_in_totals = nodal_production.columns.difference(industry_totals.columns)
+    missing_in_production = industry_totals.columns.difference(nodal_production.columns)
+
+    if not missing_in_totals.empty or not missing_in_production.empty:
+        raise ValueError(
+            "Industry subsectors in nodal production and industry totals do not match. "
+            f"Missing in totals: {missing_in_totals.tolist()}; "
+            f"missing in production: {missing_in_production.tolist()}."
+        )
+
+    demand = {}
+
+    for subsector in nodal_production.columns:
+        for carrier in industry_totals.index:
+            demand[(carrier, subsector)] = (
+                nodal_production[subsector] * industry_totals.at[carrier, subsector]
+            )
+
+    demand = pd.DataFrame(demand, index=nodal_production.index)
+    demand.columns = pd.MultiIndex.from_tuples(
+        demand.columns,
+        names=["carrier", "subsector"],
+    )
+
+    return demand.sort_index(axis=1)
+
+
 def country_to_nodal(industrial_production, keys):
     # keys["country"] = keys.index.str[:2]  # TODO 2digit_3_digit adaptation needed
 
@@ -60,6 +112,9 @@ if __name__ == "__main__":
 
     countries = snakemake.params.countries
 
+    nodal_df = pd.DataFrame()
+    nodal_df_by_subsector = pd.DataFrame()
+
     if snakemake.params.industry_demand:
         _logger.info(
             "Fetching custom industry demand data.. expecting file at 'data/custom/industry_demand_{0}_{1}.csv'".format(
@@ -88,16 +143,24 @@ if __name__ == "__main__":
         )
         nodal_keys = country_to_nodal(production_base, dist_keys)
 
-        nodal_df = pd.DataFrame()
-
         for country in countries:
             nodal_production_tom_co = nodal_keys[
                 nodal_keys.index.to_series().str.startswith(country)
             ]
             industry_base_totals_co = industry_demand.loc[country]
-            # final energy consumption per node and industry (TWh/a)
+
+            # Preserve the existing carrier-aggregated demand.
             nodal_df_co = nodal_production_tom_co.dot(industry_base_totals_co.T)
             nodal_df = pd.concat([nodal_df, nodal_df_co])
+
+            # Preserve industry subsector detail in a separate output.
+            nodal_df_co_by_subsector = build_nodal_demand_by_subsector(
+                nodal_production_tom_co,
+                industry_base_totals_co,
+            )
+            nodal_df_by_subsector = pd.concat(
+                [nodal_df_by_subsector, nodal_df_co_by_subsector]
+            )
 
     else:
         no_years = int(snakemake.wildcards.planning_horizons) - int(
@@ -370,16 +433,24 @@ if __name__ == "__main__":
             )
             industry_base_totals.drop(columns=other_cols, inplace=True)
 
-        nodal_df = pd.DataFrame()
-
         for country in countries:
             nodal_production_tom_co = nodal_production_tom[
                 nodal_production_tom.index.to_series().str.startswith(country)
             ]
             industry_base_totals_co = industry_base_totals.loc[country]
-            # final energy consumption per node and industry (TWh/a)
+
+            # Preserve the existing carrier-aggregated demand.
             nodal_df_co = nodal_production_tom_co.dot(industry_base_totals_co.T)
             nodal_df = pd.concat([nodal_df, nodal_df_co])
+
+            # Preserve industry subsector detail in a separate output.
+            nodal_df_co_by_subsector = build_nodal_demand_by_subsector(
+                nodal_production_tom_co,
+                industry_base_totals_co,
+            )
+            nodal_df_by_subsector = pd.concat(
+                [nodal_df_by_subsector, nodal_df_co_by_subsector]
+            )
 
     rename_sectors = {
         "elec": "electricity",
@@ -387,9 +458,30 @@ if __name__ == "__main__":
         "heat": "low-temperature heat",
     }
     nodal_df.rename(columns=rename_sectors, inplace=True)
+    nodal_df_by_subsector.rename(
+        columns=rename_sectors,
+        level="carrier",
+        inplace=True,
+    )
+
+    # Merge columns that map to the same carrier/subsector pair after renaming.
+    nodal_df_by_subsector = (
+        nodal_df_by_subsector.T.groupby(
+            level=["carrier", "subsector"],
+            sort=False,
+        )
+        .sum(min_count=1)
+        .T
+    )
 
     nodal_df.index.name = "MWh/a (tCO2/a)"
+    nodal_df_by_subsector.index.name = "MWh/a (tCO2/a)"
 
     nodal_df.to_csv(
-        snakemake.output.industrial_energy_demand_per_node, float_format="%.2f"
+        snakemake.output.industrial_energy_demand_per_node,
+        float_format="%.2f",
+    )
+    nodal_df_by_subsector.to_csv(
+        snakemake.output.industrial_energy_demand_per_node_by_subsector,
+        float_format="%.2f",
     )
