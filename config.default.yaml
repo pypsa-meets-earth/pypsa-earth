@@ -284,6 +284,11 @@ lines:
       345.: "US_345kV"
       500.: "US_500kV"
       765.: "US_765kV"
+    # Zambia transmission LineType sources:
+    # JICA REMP for Zambia (2008), Tables 6-1 and 6-2:
+    # https://openjicareport.jica.go.jp/pdf/11871027_02.pdf
+    # Nyoni et al. (2021), ZESCO PSAT network representation:
+    # https://doi.org/10.3390/en14175330
     ZM:
       66.: "ZM_66kV_wolf"
       88.: "ZM_88kV_wolf"
