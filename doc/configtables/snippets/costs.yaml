@@ -1,6 +1,6 @@
 costs:
   year: 2030 # cost year for electricity-only and overnight sector runs; myopic sector runs use the closest available technology-data year to each planning horizon
-  technology_data_version: v0.13.2
+  technology_data_version: v0.15.0
   discountrate: [0.071] #, 0.086, 0.111]
   country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
   # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
