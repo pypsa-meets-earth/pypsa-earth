@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC-BY-4.0
 # Part 5: Adapt Fuel and Generation Costs
 
 !!! note
-    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 4](4-generation-data.md). Demand should be calibrated (`load_options.scale: 1.005`), the 2020 fleet locked with `custom_powerplants: replace`, and `config.KZ.yaml` should include those settings. The model will still shed **~7.7 TWh** of load on isolated buses at this point; that is expected, and it gets fixed in [Part 6](6-network-topology.md) and [Part 7](7-transmission-network.md).
+    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 4](4-generation-data.md). Demand should be calibrated (`load_options.scale: 1.005`), the 2020 fleet locked with `custom_powerplants.method: replace`, and `config.KZ.yaml` should include those settings. The model will still shed **~7.7 TWh** of load on isolated buses at this point; that is expected, and it gets fixed in [Part 6](6-network-topology.md) and [Part 7](7-transmission-network.md).
 
 ## Introduction
 

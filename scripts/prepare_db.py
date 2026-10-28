@@ -8,7 +8,6 @@ Created on Tue May  4 10:22:36 2021
 @author: haz43975
 """
 
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import pypsa

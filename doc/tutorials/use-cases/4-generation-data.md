@@ -259,7 +259,8 @@ PyPSA-Earth reads **`data/custom_powerplants.csv`** in **`build_powerplants`**. 
 
 ```yaml
 electricity:
-  custom_powerplants: replace   # "false" | "merge" | "replace"
+  custom_powerplants:
+    method: replace   # false | "merge" | "replace"
 ```
 
 | Value | Behaviour |
@@ -368,6 +369,6 @@ Solar and wind generation move close to KEGOC; coal stays too high and gas too l
 | 3 | `electricity.powerplants_filter` | Keep plants operating in **2020** |
 | 4a | `electricity.extendable_carriers` | Empty `Generator` means no new solar/wind/gas build |
 | 4b | `electricity.estimate_renewable_capacities` | IRENA **2020** solar/wind totals |
-| Adv. | `electricity.custom_powerplants: replace` | Use **`data/custom_powerplants.csv`** as the full fleet |
+| Adv. | `electricity.custom_powerplants.method: replace` | Use **`data/custom_powerplants.csv`** as the full fleet |
 
 Demand is calibrated (Part 3); the **2020 generation fleet** is now locked for capacity comparisons. The fleet matches KEGOC, yet dispatch stays coal-heavy and the model still sheds **~8 TWh** of load. **[Part 5](5-adapting-costs.md)** tackles dispatch economics (why gas stays idle despite capacity), and **[Part 6](6-network-topology.md)** then diagnoses and fixes the electrically isolated sub-networks behind the load shedding.
