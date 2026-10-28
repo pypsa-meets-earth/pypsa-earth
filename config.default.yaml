@@ -274,6 +274,11 @@ lines:
       275.: "Al/St 240/40 3-bundle 300.0"
       330.: "Al/St 240/40 4-bundle 380.0"
       500.: "Al/St 560/50 4-bundle 750.0"
+    # Representative Japanese transmission line types.
+    # Sources:
+    # - OCCTO: https://www.occto.or.jp/en/information_disclosure/
+    # - IEEJ standard bulk power system model: https://www.iee.or.jp/pes/model/english/kikan/Models/index.html
+    # - All-Japan-Grid: https://github.com/lutelute/All-Japan-Grid
     JP:
       66.: "JP_66kV"
       77.: "JP_77kV"
