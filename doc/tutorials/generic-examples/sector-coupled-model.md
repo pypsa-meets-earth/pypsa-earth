@@ -47,7 +47,7 @@ scenario:
   ll: ["copt"]
   clusters: [10]
   opts: [Co2L-3h]
-  planning_horizons: # investment years for myopic and perfect; or costs year for overnight
+  planning_horizons: # investment years for multi-period runs; model years for overnight
   - 2030
   sopts:
   - "144h"
@@ -162,7 +162,7 @@ Scenarios can be defined like for electricity-only studies, but with additional 
 scenario:
   simpl: [""]
   clusters: [4]
-  planning_horizons: [2030] # investment years for myopic and perfect; or costs year for overnight
+  planning_horizons: [2030] # investment years for multi-period runs; model years for overnight
   ll: ["c1"]
   opts: ["Co2L-24H"]
   sopts: ["144h"]
