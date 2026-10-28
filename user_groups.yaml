@@ -1,7 +1,0 @@
-# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-#
-# SPDX-License-Identifier: CC0-1.0
-
-Sandbox: ['countries', 'enable', 'run', 'scenario', 'snapshots']
-Specialist: ['countries', 'enable', 'run', 'scenario', 'snapshots', 'foresight', 'cluster_options', 'build_shape_options', 'clean_osm_data_options']
-Strategist: ['results_dir', 'summary_dir', 'countries', 'enable', 'custom_data']
