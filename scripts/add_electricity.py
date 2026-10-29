@@ -1032,8 +1032,9 @@ def attach_hydro(
         # Merge inflow: sum overlapping columns, add new ones
         inflow_agg = (
             pd.concat([inflow_agg, inflow_agg_ror, inflow_agg_hydro], axis=1)
-            .groupby(level=0, axis=1)
+            .T.groupby(level=0)
             .sum()
+            .T
         )
 
         logger.info(
