@@ -536,6 +536,8 @@ else:
 if config["enable"].get("retrieve_cost_data", True):
 
     rule retrieve_cost_data:
+        wildcard_constraints:
+            year=r"\d{4}",
         params:
             version=config["costs"]["technology_data_version"],
         input:
@@ -555,6 +557,9 @@ if config["enable"].get("retrieve_cost_data", True):
 
 
 rule process_cost_data:
+    wildcard_constraints:
+        year=r"\d{4}",
+        scope=r"elec|sec",
     params:
         costs=config["costs"],
         max_hours=config["electricity"]["max_hours"],
