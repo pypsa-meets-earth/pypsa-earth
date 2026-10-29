@@ -1964,7 +1964,7 @@ def add_industry(
     #     #except for the process emissions when naphtha is used for petrochemicals, which can be captured with other industry process emissions
     #     #tco2 per hour
     # TODO kerosene for aviation should be added too but in the right func.
-    co2_release = [" naphtha for industry"]
+    co2_release = " naphtha for industry"
     # check land transport
 
     co2 = (
