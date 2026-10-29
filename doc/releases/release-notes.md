@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
+
 * Fix argument types for iterative transmission expansion [PR #2082](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2082)
 
 * Fix H2 export bus coordinates, which were stored in metres instead of lon/lat [PR #2071](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2071)
