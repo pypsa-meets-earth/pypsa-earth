@@ -149,7 +149,7 @@ The solved networks can be analysed just like any other PyPSA network (e.g. in J
 ```python
 import pypsa
 
-network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc")
+network = pypsa.Network("results/networks/elec_s_6_ec_lcopt_Co2L-4H_2030.nc")
 ```
 
 !!! tip "Quick Statistics"

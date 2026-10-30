@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 !!! note
     This tutorial assumes you have completed [Part 1](1-baseline-model.md) and have a solved network file at
-    `results/KZ/networks/elec_s_10_ec_lcopt_6h.nc`.
+    `results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc`.
 
 ## Introduction
 
@@ -25,7 +25,7 @@ All of the work here is done in a Jupyter notebook. No Snakemake, no configurati
 After a successful run the solved network lands at:
 
 ```
-results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
+results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc
 ```
 
 This single NetCDF file is the heart of everything. It contains the full network topology, all generator and line parameters, the optimised capacities, and 1460 snapshots of dispatch data. Think of it as a self-contained database of your model run.
@@ -60,7 +60,7 @@ import pypsa
 import pandas as pd
 import matplotlib.pyplot as plt
 
-n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
+n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc")
 print(n)
 ```
 
