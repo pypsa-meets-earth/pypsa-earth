@@ -14,6 +14,7 @@ enable:
 
 scenario:
   opts: [6h]
+  planning_horizons: [2020]  # cost year: uses technology-data costs_2020.csv
 
 load_options:
   source: gegis
@@ -35,7 +36,6 @@ electricity:
     method: replace
 
 costs:
-  year: 2020
   marginal_cost:
     coal: 16.0
     CCGT: 51.0
