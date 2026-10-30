@@ -213,18 +213,19 @@ def simplify_network_to_base_voltage(
 def _prepare_connection_costs_per_link(
     n, costs, renewable_config, hvdc_as_lines, lines_length_factor
 ):
-    if n.links.empty:
-        return {}
-
     connection_costs_per_link = {}
 
-    # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
+    # Select DC branches according to their network representation.
     if hvdc_as_lines:
-        dc_lengths = n.lines.length
-        unterwater_fractions = n.lines.underwater_fraction
+        dc_branches = n.lines.loc[n.lines.carrier == "DC"]
     else:
-        dc_lengths = n.links.length
-        unterwater_fractions = n.links.underwater_fraction
+        dc_branches = n.links.loc[n.links.carrier == "DC"]
+
+    if dc_branches.empty:
+        return connection_costs_per_link
+
+    dc_lengths = dc_branches.length
+    unterwater_fractions = dc_branches.underwater_fraction
 
     for tech in renewable_config:
         if tech.startswith("offwind"):
@@ -242,6 +243,69 @@ def _prepare_connection_costs_per_link(
     return connection_costs_per_link
 
 
+def _build_connection_cost_graph(n, connection_costs, hvdc_as_lines):
+    """Build a sparse graph preserving zero-cost AC connections."""
+    from scipy.sparse import coo_matrix
+
+    link_edges = n.links[["bus0", "bus1"]].copy()
+    line_edges = n.lines[["bus0", "bus1"]].copy()
+
+    link_edges["weight"] = 0.0
+    line_edges["weight"] = 0.0
+
+    if hvdc_as_lines:
+        dc_mask = n.lines.carrier == "DC"
+        line_edges.loc[dc_mask, "weight"] = connection_costs.reindex(
+            n.lines.index[dc_mask]
+        )
+    else:
+        dc_mask = n.links.carrier == "DC"
+        link_edges.loc[dc_mask, "weight"] = connection_costs.reindex(
+            n.links.index[dc_mask]
+        )
+
+    edges = pd.concat([link_edges, line_edges], ignore_index=True)
+
+    if not np.isfinite(edges["weight"].to_numpy(dtype=float)).all():
+        invalid = edges.loc[~np.isfinite(edges["weight"].to_numpy(dtype=float))]
+        raise ValueError(
+            "Connection graph contains non-finite edge weights:\n"
+            + invalid.head(20).to_string()
+            + f"\nTotal invalid edges: {len(invalid)}"
+        )
+
+    if (edges["weight"] < 0).any():
+        raise ValueError("Connection graph contains negative edge weights.")
+
+    bus_indices = pd.Series(np.arange(len(n.buses)), index=n.buses.index)
+    edges["i"] = edges["bus0"].map(bus_indices)
+    edges["j"] = edges["bus1"].map(bus_indices)
+
+    if edges[["i", "j"]].isna().any().any():
+        raise ValueError("Connection graph references unknown buses.")
+
+    i = edges["i"].to_numpy(dtype=int)
+    j = edges["j"].to_numpy(dtype=int)
+
+    edges["i"] = np.minimum(i, j)
+    edges["j"] = np.maximum(i, j)
+
+    edges = edges.groupby(["i", "j"], as_index=False)["weight"].min()
+
+    graph = coo_matrix(
+        (
+            edges["weight"].to_numpy(dtype=float),
+            (
+                edges["i"].to_numpy(dtype=int),
+                edges["j"].to_numpy(dtype=int),
+            ),
+        ),
+        shape=(len(n.buses), len(n.buses)),
+    )
+
+    return graph.tocsr()
+
+
 def _compute_connection_costs_to_bus(
     n,
     busmap,
@@ -249,13 +313,12 @@ def _compute_connection_costs_to_bus(
     renewable_config,
     hvdc_as_lines,
     lines_length_factor,
-    connection_costs_per_link=None,
     buses=None,
 ):
-    if connection_costs_per_link is None:
-        connection_costs_per_link = _prepare_connection_costs_per_link(
-            n, costs, renewable_config, hvdc_as_lines, lines_length_factor
-        )
+    # Recompute costs after topology changes.
+    connection_costs_per_link = _prepare_connection_costs_per_link(
+        n, costs, renewable_config, hvdc_as_lines, lines_length_factor
+    )
 
     if buses is None:
         buses = busmap.index[busmap.index != busmap.values]
@@ -263,22 +326,33 @@ def _compute_connection_costs_to_bus(
     connection_costs_to_bus = pd.DataFrame(index=buses)
 
     for tech in connection_costs_per_link:
-        adj = n.adjacency_matrix(
-            weights=pd.concat(
-                dict(
-                    Link=connection_costs_per_link[tech]
-                    .reindex(n.links.index)
-                    .astype(float),
-                    Line=pd.Series(0.0, n.lines.index),
-                )
-            )
+        adj = _build_connection_cost_graph(
+            n,
+            connection_costs_per_link[tech],
+            hvdc_as_lines,
         )
+        source_indices = n.buses.index.get_indexer(buses)
+        target_indices = n.buses.index.get_indexer(busmap.loc[buses])
+
+        if (source_indices < 0).any() or (target_indices < 0).any():
+            raise ValueError("Connection cost busmap references unknown buses.")
+
         costs_between_buses = dijkstra(
-            adj, directed=False, indices=n.buses.index.get_indexer(buses)
+            adj,
+            directed=False,
+            indices=source_indices,
         )
+
         connection_costs_to_bus[tech] = costs_between_buses[
-            np.arange(len(buses)), n.buses.index.get_indexer(busmap.loc[buses])
+            np.arange(len(buses)), target_indices
         ]
+
+        unreachable = ~np.isfinite(connection_costs_to_bus[tech])
+        if unreachable.any():
+            raise ValueError(
+                f"Unreachable bus mappings for {tech}: "
+                f"{busmap.loc[buses[unreachable]].to_dict()}"
+            )
     return connection_costs_to_bus
 
 
@@ -535,8 +609,7 @@ def simplify_links(
                 costs,
                 renewable_config,
                 hvdc_as_lines,
-                config_lines,
-                connection_costs_per_link,
+                config_lines["length_factor"],
                 buses,
             )
 
