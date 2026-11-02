@@ -130,6 +130,9 @@ osm:
     overpassing_lines_tolerance: 1 # [m] (default 1) Tolerance to identify lines overpassing buses
     force_ac: false # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
+  download_osm_data: # Options of the download_osm_data script
+    nprocesses: 4 # number of processes to be used in download_osm_data
+
 # ------------------- Clustering -------------------
 clustering:
   alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
