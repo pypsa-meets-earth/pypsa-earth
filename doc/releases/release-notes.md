@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
+
 * Fix argument types for iterative transmission expansion [PR #2082](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2082)
 
 * Fix H2 export bus coordinates, which were stored in metres instead of lon/lat [PR #2071](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2071)
