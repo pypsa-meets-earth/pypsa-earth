@@ -83,3 +83,6 @@ dependencies:
 
 # Command Line Interface
 - rich
+
+# Avoid cuda versions of pyarrow
+- pyarrow-core=*=*cpu*
