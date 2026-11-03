@@ -115,7 +115,7 @@ def create_steel_db():
     df_steel[["y", "x"]] = df_steel["Coordinates"].str.split(",", expand=True)
 
     # Drop Coordinates column as it contains a ',' and is not needed anymore
-    df_steel = df_steel.drop(columns="Coordinates", axis=1)
+    df_steel = df_steel.drop(columns="Coordinates")
 
     # Fetch steel plants that uses DRI and BF techs and drop them from main df
     mixed_steel_plants = df_steel[
