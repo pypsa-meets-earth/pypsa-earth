@@ -73,7 +73,15 @@ solar = (gens.filter(regex="solar$")).reset_index
 
 summary_elec = pd.DataFrame(index=n0.buses.loc[n0.buses.carrier == "AC"].index)
 
-db = pd.DataFrame(columns=["node_id", "carrier", "flow", "tech", "value"])
+db = pd.DataFrame(
+    {
+        "node_id": pd.Series(dtype="str"),
+        "carrier": pd.Series(dtype="str"),
+        "flow": pd.Series(dtype="str"),
+        "tech": pd.Series(dtype="str"),
+        "value": pd.Series(dtype=float),
+    }
+)
 
 names = {"g": "Generator"}
 
