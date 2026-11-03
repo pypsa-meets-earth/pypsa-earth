@@ -88,6 +88,8 @@ names = {"g": "Generator"}
 
 def populate_db(tech_col, carrier, flow, tech, ngv=False):  # TODO Add scenario id
     global db
+    if tech_col.empty:
+        return
     dbf = tech_col.copy()
     # if tech != 'ac':
     #     dbf.name=dbf.name.str.replace(' '+tech, '')
@@ -429,8 +431,10 @@ h2_flows = pd.DataFrame(index=pipelines_h2.index.copy(), columns=["node_id", "fl
 
 db.reset_index(drop=True, inplace=True)
 # round(db).to_csv('db_fraction.csv')
-round(db).to_csv(snakemake.output.db)
-yearly_agg = round(db.groupby([db.node_id, db.carrier, db.flow, db.tech]).sum() / 1e3)
+db.assign(value=db["value"].round()).to_csv(snakemake.output.db)
+yearly_agg = (
+    db.groupby(["node_id", "carrier", "flow", "tech"])[["value"]].sum().div(1e3).round()
+)
 
 
 # yearly_agg.to_csv('summary_db.csv')
@@ -441,9 +445,13 @@ def calc_energy_flow(carrier, node_id):
     agg = agg[(agg.carrier == carrier)]
     agg.value = agg.value.apply(int)
     if node_id == "all":
-        agg = agg.groupby("tech").sum().reset_index()
+        agg = agg.groupby("tech", as_index=False)[["value"]].sum()
     else:
-        agg = agg[agg.node_id.str.contains(node_id)].groupby("tech").sum().reset_index()
+        agg = (
+            agg[agg.node_id.str.contains(node_id)]
+            .groupby("tech", as_index=False)[["value"]]
+            .sum()
+        )
     return agg
 
 
@@ -462,7 +470,7 @@ def energy_pie(carrier, node_id, sign):
         agg = agg[(agg.carrier == carrier) & (agg.value * sign > 0) & (agg.flow != "t")]
     else:
         agg = agg[agg.node_id.str.contains(node_id)]
-    agg = agg.groupby("tech").sum().reset_index()
+    agg = agg.groupby("tech", as_index=False)[["value"]].sum()
     agg["pct"] = round(agg["value"] / agg.value.sum(), 3)
     if agg.pct.sum() < 1:
         agg = pd.concat(
