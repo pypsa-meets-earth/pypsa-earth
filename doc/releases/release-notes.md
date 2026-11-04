@@ -20,6 +20,12 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove unused variables and obsolete commented-out code, and replace dynamic pandas queries with explicit boolean indexing [PR #2083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2083)
 
+* Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
+
+* Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
+
+* Fix naphtha-related industry CO2 emissions by correcting spatial load name construction [PR #2088](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2088)
+
 * Fix argument types for iterative transmission expansion [PR #2082](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2082)
 
 * Fix H2 export bus coordinates, which were stored in metres instead of lon/lat [PR #2071](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2071)
@@ -41,6 +47,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Support country-specific mappings and custom transmission line types [PR # 1933](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1933)
 
 **Minor Changes and bug-fixing**
+
+* Add representative Zambia-specific transmission line types and mappings [PR #2048](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2048).
 
 * Accept the legacy scalar `electricity.custom_powerplants` (`false`, `merge`, `replace`) again by migrating it to `custom_powerplants.method` with a deprecation warning, and update the Kazakhstan tutorial to the new layout [PR #2051](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2051)
 
