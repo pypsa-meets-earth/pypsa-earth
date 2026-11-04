@@ -28,7 +28,7 @@ countries: ["KZ"] # ISO codes, continent, or custom region
 foresight: overnight # "myopic" or "overnight"
 
 run:
-  name: "" # optional; stores intermediate files in a subfolder (e.g. "KZ" → resources/KZ/, results/KZ/); empty = no subfolder
+  name: "thesis_2045" # common directory for final S0-S6 thesis scenarios
   sector_name: "" # optional; sector-coupling only — subfolder under results_dir/
   shared_cutouts: true # true: cutouts/ shared across runs; false: cutouts/{name}/ per run
   allow_scenario_failure: false # If True, the workflow will continue even if a scenario in run_scenario fails
@@ -37,7 +37,14 @@ scenario:
   simpl: [""]
   ll: ["copt"]
   clusters: [10]
-  opts: [1h] # hyphen-joined options: 3h/6h/24h/Nseg temporal | Co2L/Ep/CH4L caps & prices | ATK/ATKc autarky | {carrier}+p/c/m scale | CCL/BAU/SAFE/RES/EQ solve constraints — see doc/user-guide/wildcards.md
+  opts:
+  - "S0-1h"
+  - "S1-Co2L-1h"
+  - "S2-BTC-1h"
+  - "S3-PEM-1h"
+  - "S4-Co2L-BTC-1h"
+  - "S5-Co2L-PEM-1h"
+  - "S6-Co2L-BTC-PEM-1h" # hyphen-joined options: 3h/6h/24h/Nseg temporal | Co2L/Ep/CH4L caps & prices | ATK/ATKc autarky | {carrier}+p/c/m scale | CCL/BAU/SAFE/RES/EQ solve constraints — see doc/user-guide/wildcards.md
   planning_horizons: # investment years for myopic; costs year for overnight
   - 2045
   sopts:
@@ -195,7 +202,23 @@ load_options:
 
 # ------------------- Electricity grid -------------------
 electricity:
-  co2limit: 2.846e7
+
+  # Thesis-specific flexible electricity consumers.
+  # Activated by BTC / PEM tokens in scenario.opts.
+  flexible_consumers:
+    connection_bus: "KZ0 0"
+
+    bitcoin:
+      p_nom: 1000.0
+      marginal_revenue: 62.7967
+
+    pem:
+      p_nom: 1000.0
+      annual_h2_kt: 100.0
+      efficiency_lhv: 0.640
+      variable_cost_eur_per_mwh_el: 1.884615
+      h2_lhv_kwh_per_kg: 33.33
+  #co2limit: 2.846e7
   # ----------------- Electricity generation -------------------
   extendable_carriers:
     Generator: [solar, onwind, OCGT] # Remove 'offwind-ac' and 'offwind-dc' for landlocked countries (e.g., Jordan, Austria, Switzerland)
@@ -222,7 +245,7 @@ electricity:
   powerplants_filter: (DateOut >= 2022 or DateOut != DateOut) and (DateIn <= 2023 or DateIn != DateIn)
   custom_powerplants:
     filepaths:
-    - data/custom_powerplants_kz.csv
+      - data/custom_powerplants_kz.csv
     method: replace
   # If you wish to replace the data for just one country (e.g. United States), you can use the option powerplants_filter as follows:
   # powerplants_filter: ... and (Country != 'United States')
@@ -565,7 +588,7 @@ costs:
   #   CCGT: 0.58
 
 co2:
-  limit: 7.75e+7     # annual cap [tCO2/year]; European default — adjust for your region; active via Co2L wildcard
+  limit: 0     # annual cap [tCO2/year]; European default — adjust for your region; active via Co2L wildcard
   base: 1.487e+9     # baseline emissions used for relative reduction targets; European default
   emission_price: 0. # [currency/tCO2]; active via Ep wildcard
   automatic_emission: # derive co2.limit from historical emission data instead of the value above
@@ -650,7 +673,7 @@ export:
 # ------------------- Sector-coupled demand data -------------------
 demand_data:
   scenario: "AB" # single demand-scenario label (formerly the {demand} wildcard; not a list)
-  update_data: false # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
+  update_data: true # if true, the workflow downloads the energy balances data saved in data/demand/unsd/data again. Turn on for the first run.
   base_year: 2019
   other_industries: false # Whether or not to include industries that are not specified. some countries have has exaggerated numbers, check carefully.
   aluminium_year: 2019 # Year of the aluminium demand data specified in `data/AL_production.csv`
@@ -694,6 +717,12 @@ sector:
     agriculture: true
     residential: true
     services: true
+    bitcoin_mining: true
+
+  bitcoin_mining:
+    bus: "KZ0 0"
+    p_nom: 1000.0
+    marginal_revenue: 62.7967
 
   gas:
     spatial_gas: true # ALWAYS TRUE
@@ -819,7 +848,7 @@ sector:
     central: 180
   boilers: true
   oil_boilers: false
-  chp: true
+  chp: false
   micro_chp: false
 
   solar_thermal_collector:
@@ -1002,7 +1031,7 @@ solving:
   # ------------------- Optimization options -------------------
   options:
     load_shedding: 100 # Set to "false" or willingness to pay in €/kWh, e.g. 100 €/kWh (intersect between macroeconomic and surveybased willingness to pay https://doi.org/10.3389/fenrg.2015.00055)
-    noisy_costs: true
+    noisy_costs: false
     formulation: kirchhoff
     min_iterations: 4
     max_iterations: 6
