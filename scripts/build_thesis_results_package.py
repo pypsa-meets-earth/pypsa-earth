@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-
 # ============================================================
 # PATHS
 # ============================================================
@@ -22,34 +21,22 @@ TEX.mkdir(parents=True, exist_ok=True)
 # INPUTS
 # ============================================================
 
-headline = pd.read_csv(
-    BASE / "table_01_final_headline_kpis.csv"
-).set_index("scenario")
+headline = pd.read_csv(BASE / "table_01_final_headline_kpis.csv").set_index("scenario")
 
-capacity = pd.read_csv(
-    BASE / "table_02_capacity_by_carrier.csv"
+capacity = pd.read_csv(BASE / "table_02_capacity_by_carrier.csv")
+
+generation = pd.read_csv(BASE / "table_03_generation_by_carrier.csv")
+
+storage = pd.read_csv(BASE / "table_04_storage_by_carrier.csv")
+
+battery = pd.read_csv(BASE / "table_04b_battery_results.csv").set_index("scenario")
+
+drivers = pd.read_csv(BASE / "table_07_physical_driver_summary.csv").set_index(
+    "comparison"
 )
 
-generation = pd.read_csv(
-    BASE / "table_03_generation_by_carrier.csv"
-)
 
-storage = pd.read_csv(
-    BASE / "table_04_storage_by_carrier.csv"
-)
-
-battery = pd.read_csv(
-    BASE / "table_04b_battery_results.csv"
-).set_index("scenario")
-
-drivers = pd.read_csv(
-    BASE / "table_07_physical_driver_summary.csv"
-).set_index("comparison")
-
-
-SCENARIOS = [
-    "S0", "S1", "S2", "S3", "S4", "S5", "S6"
-]
+SCENARIOS = ["S0", "S1", "S2", "S3", "S4", "S5", "S6"]
 
 SCENARIO_NAMES = {
     "S0": "Reference",
@@ -141,8 +128,7 @@ def add_values(ax, values, fmt="{:.1f}", offset=0.02):
 # ============================================================
 
 cap = (
-    capacity
-    .pivot(
+    capacity.pivot(
         index="scenario",
         columns="carrier",
         values="capacity_mw",
@@ -153,8 +139,7 @@ cap = (
 )
 
 gen = (
-    generation
-    .pivot(
+    generation.pivot(
         index="scenario",
         columns="carrier",
         values="generation_mwh",
@@ -165,22 +150,14 @@ gen = (
 )
 
 # Add reservoir hydro, represented as StorageUnit rather than Generator.
-hydro = storage[
-    storage["carrier"].astype(str).str.lower() == "hydro"
-].copy()
+hydro = storage[storage["carrier"].astype(str).str.lower() == "hydro"].copy()
 
 hydro_power = (
-    hydro.set_index("scenario")["power_mw"]
-    .reindex(SCENARIOS)
-    .fillna(0.0)
-    / 1000.0
+    hydro.set_index("scenario")["power_mw"].reindex(SCENARIOS).fillna(0.0) / 1000.0
 )
 
 hydro_generation = (
-    hydro.set_index("scenario")["discharge_mwh"]
-    .reindex(SCENARIOS)
-    .fillna(0.0)
-    / 1e6
+    hydro.set_index("scenario")["discharge_mwh"].reindex(SCENARIOS).fillna(0.0) / 1e6
 )
 
 cap["hydro"] = hydro_power
@@ -196,10 +173,7 @@ carrier_order = [
     "solar",
 ]
 
-carrier_order = [
-    c for c in carrier_order
-    if c in cap.columns or c in gen.columns
-]
+carrier_order = [c for c in carrier_order if c in cap.columns or c in gen.columns]
 
 
 # ============================================================
@@ -211,11 +185,7 @@ fig, ax = plt.subplots(figsize=(7.2, 4.3))
 bottom = np.zeros(len(SCENARIOS))
 
 for carrier in carrier_order:
-    values = (
-        cap[carrier].values
-        if carrier in cap.columns
-        else np.zeros(len(SCENARIOS))
-    )
+    values = cap[carrier].values if carrier in cap.columns else np.zeros(len(SCENARIOS))
 
     ax.bar(
         SCENARIOS,
@@ -255,11 +225,7 @@ fig, ax = plt.subplots(figsize=(7.2, 4.3))
 bottom = np.zeros(len(SCENARIOS))
 
 for carrier in carrier_order:
-    values = (
-        gen[carrier].values
-        if carrier in gen.columns
-        else np.zeros(len(SCENARIOS))
-    )
+    values = gen[carrier].values if carrier in gen.columns else np.zeros(len(SCENARIOS))
 
     ax.bar(
         SCENARIOS,
@@ -294,17 +260,9 @@ finish_figure(
 # FIGURE 3 — RENEWABLE CURTAILMENT
 # ============================================================
 
-solar_curt = (
-    headline
-    .reindex(SCENARIOS)["solar_curtailment_twh"]
-    .astype(float)
-)
+solar_curt = headline.reindex(SCENARIOS)["solar_curtailment_twh"].astype(float)
 
-wind_curt = (
-    headline
-    .reindex(SCENARIOS)["onwind_curtailment_twh"]
-    .astype(float)
-)
+wind_curt = headline.reindex(SCENARIOS)["onwind_curtailment_twh"].astype(float)
 
 fig, ax = plt.subplots(figsize=(7.2, 4.0))
 
@@ -344,11 +302,7 @@ finish_figure(
 # FIGURE 4 — BATTERY ENERGY CAPACITY
 # ============================================================
 
-battery_energy = (
-    headline
-    .reindex(SCENARIOS)["battery_energy_gwh"]
-    .astype(float)
-)
+battery_energy = headline.reindex(SCENARIOS)["battery_energy_gwh"].astype(float)
 
 fig, ax = plt.subplots(figsize=(7.2, 3.8))
 
@@ -379,11 +333,7 @@ finish_figure(
 # FIGURE 5 — TRANSMISSION EXPANSION
 # ============================================================
 
-transmission = (
-    headline
-    .reindex(SCENARIOS)["ac_line_expansion_gwkm"]
-    .astype(float)
-)
+transmission = headline.reindex(SCENARIOS)["ac_line_expansion_gwkm"].astype(float)
 
 fig, ax = plt.subplots(figsize=(7.2, 3.8))
 
@@ -414,12 +364,7 @@ finish_figure(
 # FIGURE 6 — UPSTREAM SYSTEM COST
 # ============================================================
 
-cost = (
-    headline
-    .reindex(SCENARIOS)["upstream_system_cost_eur"]
-    .astype(float)
-    / 1e9
-)
+cost = headline.reindex(SCENARIOS)["upstream_system_cost_eur"].astype(float) / 1e9
 
 fig, ax = plt.subplots(figsize=(7.2, 3.8))
 
@@ -451,12 +396,7 @@ finish_figure(
 # FIGURE 7 — DIRECT CO2 EMISSIONS
 # ============================================================
 
-co2 = (
-    headline
-    .reindex(SCENARIOS)["direct_generator_co2_t"]
-    .astype(float)
-    / 1e6
-)
+co2 = headline.reindex(SCENARIOS)["direct_generator_co2_t"].astype(float) / 1e6
 
 fig, ax = plt.subplots(figsize=(7.2, 3.8))
 
@@ -489,13 +429,9 @@ finish_figure(
 
 d = drivers.reindex(COMPARISONS)
 
-added = d[
-    "added_flexible_load_twh"
-].astype(float)
+added = d["added_flexible_load_twh"].astype(float)
 
-reduced = d[
-    "curtailment_reduction_twh"
-].astype(float)
+reduced = d["curtailment_reduction_twh"].astype(float)
 
 x = np.arange(len(COMPARISONS))
 width = 0.36
@@ -567,9 +503,7 @@ scenario_tex = r"""
 \end{table}
 """.strip()
 
-(TEX / "table_national_scenario_matrix.tex").write_text(
-    scenario_tex
-)
+(TEX / "table_national_scenario_matrix.tex").write_text(scenario_tex)
 
 
 # ============================================================
@@ -579,20 +513,16 @@ scenario_tex = r"""
 rows = []
 
 for s in SCENARIOS:
-    total_curt = (
-        float(
-            headline.loc[
-                s,
-                "solar_curtailment_twh",
-            ]
-        )
-        +
-        float(
-            headline.loc[
-                s,
-                "onwind_curtailment_twh",
-            ]
-        )
+    total_curt = float(
+        headline.loc[
+            s,
+            "solar_curtailment_twh",
+        ]
+    ) + float(
+        headline.loc[
+            s,
+            "onwind_curtailment_twh",
+        ]
     )
 
     rows.append(
@@ -601,11 +531,13 @@ for s in SCENARIOS:
             headline.loc[
                 s,
                 "upstream_system_cost_eur",
-            ] / 1e9,
+            ]
+            / 1e9,
             headline.loc[
                 s,
                 "direct_generator_co2_t",
-            ] / 1e6,
+            ]
+            / 1e6,
             headline.loc[
                 s,
                 "btc_twh",
@@ -645,7 +577,8 @@ for row in rows:
         f"{row[8]:,.0f} \\\\"
     )
 
-headline_tex = r"""
+headline_tex = (
+    r"""
 \begin{table}[H]
     \centering
     \caption{Headline results of the national PyPSA-Earth scenarios.}
@@ -673,16 +606,17 @@ headline_tex = r"""
         & [GWh]
         & [GW km] \\
         \midrule
-""" + "\n".join(lines) + r"""
+"""
+    + "\n".join(lines)
+    + r"""
         \bottomrule
     \end{tabular}
     }
 \end{table}
 """
-
-(TEX / "table_national_headline_results.tex").write_text(
-    headline_tex.strip()
 )
+
+(TEX / "table_national_headline_results.tex").write_text(headline_tex.strip())
 
 
 # ============================================================
@@ -706,7 +640,8 @@ for comparison in COMPARISONS:
         f"{r['delta_transmission_expansion_gwkm']:.1f} \\\\"
     )
 
-drivers_tex = r"""
+drivers_tex = (
+    r"""
 \begin{table}[H]
     \centering
     \caption{System-level effects of the flexible-consumer scenarios relative to their corresponding reference cases.}
@@ -734,16 +669,17 @@ drivers_tex = r"""
         & [GWh]
         & [GW km] \\
         \midrule
-""" + "\n".join(driver_lines) + r"""
+"""
+    + "\n".join(driver_lines)
+    + r"""
         \bottomrule
     \end{tabular}
     }
 \end{table}
 """
-
-(TEX / "table_national_physical_drivers.tex").write_text(
-    drivers_tex.strip()
 )
+
+(TEX / "table_national_physical_drivers.tex").write_text(drivers_tex.strip())
 
 
 # ============================================================
@@ -787,9 +723,7 @@ table_national_headline_results.tex
 table_national_physical_drivers.tex
 """.strip()
 
-(BASE / "THESIS_RESULTS_MANIFEST.txt").write_text(
-    manifest
-)
+(BASE / "THESIS_RESULTS_MANIFEST.txt").write_text(manifest)
 
 
 print("=" * 78)

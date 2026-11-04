@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import pypsa
 
-
 # ============================================================
 # FINAL THESIS SCENARIOS
 # ============================================================
@@ -99,6 +98,7 @@ EXPECTED_H2_KT = 100.0
 # HELPERS
 # ============================================================
 
+
 def nominal_capacity(df, base_col, opt_col):
     out = df[base_col].astype(float).copy()
 
@@ -129,12 +129,7 @@ def get_co2_results(n, weights):
     # Generator contribution
     # --------------------------------------------------------
 
-    gen_factor = (
-        n.generators["carrier"]
-        .map(co2)
-        .fillna(0.0)
-        .astype(float)
-    )
+    gen_factor = n.generators["carrier"].map(co2).fillna(0.0).astype(float)
 
     emitting_gens = n.generators.index[gen_factor != 0]
 
@@ -148,39 +143,28 @@ def get_co2_results(n, weights):
         # Positive generator dispatch only.
         p_positive = p.clip(lower=0.0)
 
-        efficiency = n.get_switchable_as_dense(
-            "Generator", "efficiency"
-        )[emitting_gens].astype(float)
+        efficiency = n.get_switchable_as_dense("Generator", "efficiency")[
+            emitting_gens
+        ].astype(float)
 
         factors = gen_factor.loc[emitting_gens]
 
-        emissions = (
-            p_positive
-            .div(efficiency)
-            .mul(factors, axis=1)
-            .mul(weights, axis=0)
-        )
+        emissions = p_positive.div(efficiency).mul(factors, axis=1).mul(weights, axis=0)
 
         generator_co2 = float(emissions.sum().sum())
 
-        positive_factor_gens = gen_factor[
-            gen_factor > 0
-        ].index.intersection(n.generators.index)
+        positive_factor_gens = gen_factor[gen_factor > 0].index.intersection(
+            n.generators.index
+        )
 
         if len(positive_factor_gens):
             p_emit = (
-                n.generators_t.p[positive_factor_gens]
-                .astype(float)
-                .clip(lower=0.0)
+                n.generators_t.p[positive_factor_gens].astype(float).clip(lower=0.0)
             )
 
-            emitting_generation_mwh = float(
-                p_emit.mul(weights, axis=0).sum().sum()
-            )
+            emitting_generation_mwh = float(p_emit.mul(weights, axis=0).sum().sum())
 
-            max_emitting_dispatch_mw = float(
-                p_emit.max().max()
-            )
+            max_emitting_dispatch_mw = float(p_emit.max().max())
 
     # --------------------------------------------------------
     # Store contribution
@@ -190,12 +174,7 @@ def get_co2_results(n, weights):
     emitting_stores = []
 
     if len(n.stores):
-        store_factor = (
-            n.stores["carrier"]
-            .map(co2)
-            .fillna(0.0)
-            .astype(float)
-        )
+        store_factor = n.stores["carrier"].map(co2).fillna(0.0).astype(float)
 
         for name in n.stores.index[store_factor != 0]:
             emitting_stores.append(name)
@@ -213,9 +192,7 @@ def get_co2_results(n, weights):
 
             final = float(n.stores_t.e[name].iloc[-1])
 
-            store_co2 += (
-                initial - final
-            ) * float(store_factor.loc[name])
+            store_co2 += (initial - final) * float(store_factor.loc[name])
 
     # --------------------------------------------------------
     # StorageUnit contribution
@@ -225,52 +202,25 @@ def get_co2_results(n, weights):
     emitting_storage_units = []
 
     if len(n.storage_units):
-        su_factor = (
-            n.storage_units["carrier"]
-            .map(co2)
-            .fillna(0.0)
-            .astype(float)
-        )
+        su_factor = n.storage_units["carrier"].map(co2).fillna(0.0).astype(float)
 
         for name in n.storage_units.index[su_factor != 0]:
             emitting_storage_units.append(name)
 
-            cyclic = bool(
-                n.storage_units.at[
-                    name,
-                    "cyclic_state_of_charge"
-                ]
-            )
+            cyclic = bool(n.storage_units.at[name, "cyclic_state_of_charge"])
 
             if cyclic:
                 continue
 
-            initial = n.storage_units.at[
-                name,
-                "state_of_charge_initial"
-            ]
+            initial = n.storage_units.at[name, "state_of_charge_initial"]
 
-            initial = (
-                float(initial)
-                if pd.notna(initial)
-                else 0.0
-            )
+            initial = float(initial) if pd.notna(initial) else 0.0
 
-            final = float(
-                n.storage_units_t.state_of_charge[
-                    name
-                ].iloc[-1]
-            )
+            final = float(n.storage_units_t.state_of_charge[name].iloc[-1])
 
-            storage_unit_co2 += (
-                initial - final
-            ) * float(su_factor.loc[name])
+            storage_unit_co2 += (initial - final) * float(su_factor.loc[name])
 
-    lhs = (
-        generator_co2
-        + store_co2
-        + storage_unit_co2
-    )
+    lhs = generator_co2 + store_co2 + storage_unit_co2
 
     return {
         "direct_generator_co2_t": generator_co2,
@@ -280,9 +230,7 @@ def get_co2_results(n, weights):
         "emitting_generation_mwh": emitting_generation_mwh,
         "max_emitting_dispatch_mw": max_emitting_dispatch_mw,
         "emitting_stores": "; ".join(emitting_stores),
-        "emitting_storage_units": "; ".join(
-            emitting_storage_units
-        ),
+        "emitting_storage_units": "; ".join(emitting_storage_units),
     }
 
 
@@ -297,12 +245,7 @@ def generation_and_capacity(n, weights, scenario):
 
     supply_gens = n.generators.index[
         (n.generators["sign"].astype(float) >= 0)
-        & (
-            n.generators["carrier"]
-            .astype(str)
-            .str.lower()
-            != "load shedding"
-        )
+        & (n.generators["carrier"].astype(str).str.lower() != "load shedding")
     ]
 
     cap = nominal_capacity(
@@ -311,17 +254,9 @@ def generation_and_capacity(n, weights, scenario):
         "p_nom_opt",
     ).loc[supply_gens]
 
-    gen = (
-        n.generators_t.p[supply_gens]
-        .astype(float)
-        .mul(weights, axis=0)
-        .sum()
-    )
+    gen = n.generators_t.p[supply_gens].astype(float).mul(weights, axis=0).sum()
 
-    carrier = n.generators.loc[
-        supply_gens,
-        "carrier"
-    ].astype(str)
+    carrier = n.generators.loc[supply_gens, "carrier"].astype(str)
 
     tmp = pd.DataFrame(
         {
@@ -331,19 +266,11 @@ def generation_and_capacity(n, weights, scenario):
         }
     )
 
-    capacity = (
-        tmp.groupby("carrier")["capacity_mw"]
-        .sum()
-        .reset_index()
-    )
+    capacity = tmp.groupby("carrier")["capacity_mw"].sum().reset_index()
 
     capacity.insert(0, "scenario", scenario)
 
-    generation = (
-        tmp.groupby("carrier")["generation_mwh"]
-        .sum()
-        .reset_index()
-    )
+    generation = tmp.groupby("carrier")["generation_mwh"].sum().reset_index()
 
     generation.insert(0, "scenario", scenario)
 
@@ -377,52 +304,27 @@ def renewable_curtailment(n, weights):
             results[f"{carrier}_curtailment_pct"] = np.nan
             continue
 
-        potential = (
-            p_max_pu[gens]
-            .mul(cap.loc[gens], axis=1)
-        )
+        potential = p_max_pu[gens].mul(cap.loc[gens], axis=1)
 
-        actual = (
-            n.generators_t.p[gens]
-            .astype(float)
-            .clip(lower=0.0)
-        )
+        actual = n.generators_t.p[gens].astype(float).clip(lower=0.0)
 
-        potential_mwh = float(
-            potential
-            .mul(weights, axis=0)
-            .sum()
-            .sum()
-        )
+        potential_mwh = float(potential.mul(weights, axis=0).sum().sum())
 
-        actual_mwh = float(
-            actual
-            .mul(weights, axis=0)
-            .sum()
-            .sum()
-        )
+        actual_mwh = float(actual.mul(weights, axis=0).sum().sum())
 
         curtailed_mwh = max(
             potential_mwh - actual_mwh,
             0.0,
         )
 
-        results[f"{carrier}_potential_twh"] = (
-            potential_mwh / 1e6
-        )
+        results[f"{carrier}_potential_twh"] = potential_mwh / 1e6
 
-        results[f"{carrier}_generation_twh"] = (
-            actual_mwh / 1e6
-        )
+        results[f"{carrier}_generation_twh"] = actual_mwh / 1e6
 
-        results[f"{carrier}_curtailment_twh"] = (
-            curtailed_mwh / 1e6
-        )
+        results[f"{carrier}_curtailment_twh"] = curtailed_mwh / 1e6
 
         results[f"{carrier}_curtailment_pct"] = (
-            100.0 * curtailed_mwh / potential_mwh
-            if potential_mwh > 0
-            else np.nan
+            100.0 * curtailed_mwh / potential_mwh if potential_mwh > 0 else np.nan
         )
 
     return results
@@ -449,33 +351,19 @@ def storage_results(n, weights, scenario):
         "p_nom_opt",
     )
 
-    max_hours = (
-        n.storage_units["max_hours"]
-        .fillna(0.0)
-        .astype(float)
-    )
+    max_hours = n.storage_units["max_hours"].fillna(0.0).astype(float)
 
     energy = cap * max_hours
 
     p = n.storage_units_t.p.astype(float)
 
-    charge = (
-        (-p.clip(upper=0.0))
-        .mul(weights, axis=0)
-        .sum()
-    )
+    charge = (-p.clip(upper=0.0)).mul(weights, axis=0).sum()
 
-    discharge = (
-        p.clip(lower=0.0)
-        .mul(weights, axis=0)
-        .sum()
-    )
+    discharge = p.clip(lower=0.0).mul(weights, axis=0).sum()
 
     tmp = pd.DataFrame(
         {
-            "carrier": n.storage_units[
-                "carrier"
-            ].astype(str),
+            "carrier": n.storage_units["carrier"].astype(str),
             "power_mw": cap,
             "energy_mwh": energy,
             "charge_mwh": charge,
@@ -483,11 +371,7 @@ def storage_results(n, weights, scenario):
         }
     )
 
-    grouped = (
-        tmp.groupby("carrier")
-        .sum(numeric_only=True)
-        .reset_index()
-    )
+    grouped = tmp.groupby("carrier").sum(numeric_only=True).reset_index()
 
     grouped.insert(0, "scenario", scenario)
 
@@ -506,26 +390,11 @@ def battery_results(n, weights, scenario):
     They are NOT StorageUnits in this model.
     """
 
-    store_mask = (
-        n.stores["carrier"]
-        .astype(str)
-        .str.lower()
-        == "battery"
-    )
+    store_mask = n.stores["carrier"].astype(str).str.lower() == "battery"
 
-    charger_mask = (
-        n.links["carrier"]
-        .astype(str)
-        .str.lower()
-        == "battery charger"
-    )
+    charger_mask = n.links["carrier"].astype(str).str.lower() == "battery charger"
 
-    discharger_mask = (
-        n.links["carrier"]
-        .astype(str)
-        .str.lower()
-        == "battery discharger"
-    )
+    discharger_mask = n.links["carrier"].astype(str).str.lower() == "battery discharger"
 
     stores = n.stores.index[store_mask]
     chargers = n.links.index[charger_mask]
@@ -533,16 +402,18 @@ def battery_results(n, weights, scenario):
 
     if not len(stores):
         return pd.DataFrame(
-            [{
-                "scenario": scenario,
-                "battery_store_count": 0,
-                "battery_energy_mwh": 0.0,
-                "battery_charge_power_mw": 0.0,
-                "battery_discharge_link_p_nom_mw": 0.0,
-                "battery_discharge_power_mw": 0.0,
-                "battery_charge_mwh": 0.0,
-                "battery_discharge_mwh": 0.0,
-            }]
+            [
+                {
+                    "scenario": scenario,
+                    "battery_store_count": 0,
+                    "battery_energy_mwh": 0.0,
+                    "battery_charge_power_mw": 0.0,
+                    "battery_discharge_link_p_nom_mw": 0.0,
+                    "battery_discharge_power_mw": 0.0,
+                    "battery_charge_mwh": 0.0,
+                    "battery_discharge_mwh": 0.0,
+                }
+            ]
         )
 
     # --------------------------------------------------------
@@ -555,9 +426,7 @@ def battery_results(n, weights, scenario):
         "e_nom_opt",
     )
 
-    battery_energy_mwh = float(
-        store_energy.loc[stores].sum()
-    )
+    battery_energy_mwh = float(store_energy.loc[stores].sum())
 
     # --------------------------------------------------------
     # Power capacities
@@ -569,29 +438,16 @@ def battery_results(n, weights, scenario):
         "p_nom_opt",
     )
 
-    battery_charge_power_mw = float(
-        link_power.loc[chargers].sum()
-    )
+    battery_charge_power_mw = float(link_power.loc[chargers].sum())
 
-    battery_discharge_link_p_nom_mw = float(
-        link_power.loc[dischargers].sum()
-    )
+    battery_discharge_link_p_nom_mw = float(link_power.loc[dischargers].sum())
 
     # Discharger p_nom is defined at bus0 (battery side).
     # Convert to electricity delivered at bus1.
-    discharge_efficiency = (
-        n.links.loc[
-            dischargers,
-            "efficiency"
-        ]
-        .astype(float)
-    )
+    discharge_efficiency = n.links.loc[dischargers, "efficiency"].astype(float)
 
     battery_discharge_power_mw = float(
-        (
-            link_power.loc[dischargers]
-            * discharge_efficiency
-        ).sum()
+        (link_power.loc[dischargers] * discharge_efficiency).sum()
     )
 
     # --------------------------------------------------------
@@ -599,54 +455,33 @@ def battery_results(n, weights, scenario):
     # --------------------------------------------------------
 
     if len(chargers):
-        charge = (
-            n.links_t.p0[chargers]
-            .astype(float)
-            .clip(lower=0.0)
-        )
+        charge = n.links_t.p0[chargers].astype(float).clip(lower=0.0)
 
-        battery_charge_mwh = float(
-            charge
-            .mul(weights, axis=0)
-            .sum()
-            .sum()
-        )
+        battery_charge_mwh = float(charge.mul(weights, axis=0).sum().sum())
     else:
         battery_charge_mwh = 0.0
 
     if len(dischargers):
         # Electricity delivered to the AC buses is -p1.
-        discharge = (
-            -n.links_t.p1[dischargers]
-            .astype(float)
-        ).clip(lower=0.0)
+        discharge = (-n.links_t.p1[dischargers].astype(float)).clip(lower=0.0)
 
-        battery_discharge_mwh = float(
-            discharge
-            .mul(weights, axis=0)
-            .sum()
-            .sum()
-        )
+        battery_discharge_mwh = float(discharge.mul(weights, axis=0).sum().sum())
     else:
         battery_discharge_mwh = 0.0
 
     return pd.DataFrame(
-        [{
-            "scenario": scenario,
-            "battery_store_count": len(stores),
-            "battery_energy_mwh":
-                battery_energy_mwh,
-            "battery_charge_power_mw":
-                battery_charge_power_mw,
-            "battery_discharge_link_p_nom_mw":
-                battery_discharge_link_p_nom_mw,
-            "battery_discharge_power_mw":
-                battery_discharge_power_mw,
-            "battery_charge_mwh":
-                battery_charge_mwh,
-            "battery_discharge_mwh":
-                battery_discharge_mwh,
-        }]
+        [
+            {
+                "scenario": scenario,
+                "battery_store_count": len(stores),
+                "battery_energy_mwh": battery_energy_mwh,
+                "battery_charge_power_mw": battery_charge_power_mw,
+                "battery_discharge_link_p_nom_mw": battery_discharge_link_p_nom_mw,
+                "battery_discharge_power_mw": battery_discharge_power_mw,
+                "battery_charge_mwh": battery_charge_mwh,
+                "battery_discharge_mwh": battery_discharge_mwh,
+            }
+        ]
     )
 
 
@@ -665,19 +500,11 @@ def transmission_results(n):
 
     base = n.lines["s_nom"].astype(float)
 
-    length = (
-        n.lines["length"]
-        .fillna(0.0)
-        .astype(float)
-    )
+    length = n.lines["length"].fillna(0.0).astype(float)
 
-    volume = float(
-        (cap * length).sum()
-    ) / 1000.0
+    volume = float((cap * length).sum()) / 1000.0
 
-    expansion = float(
-        ((cap - base).clip(lower=0.0) * length).sum()
-    ) / 1000.0
+    expansion = float(((cap - base).clip(lower=0.0) * length).sum()) / 1000.0
 
     return {
         "ac_line_volume_gwkm": volume,
@@ -712,11 +539,7 @@ for scenario, cfg in SCENARIOS.items():
     n = pypsa.Network(fn)
     meta = n.meta or {}
 
-    weights = (
-        n.snapshot_weightings["generators"]
-        .reindex(n.snapshots)
-        .astype(float)
-    )
+    weights = n.snapshot_weightings["generators"].reindex(n.snapshots).astype(float)
 
     # --------------------------------------------------------
     # General invariants
@@ -724,49 +547,27 @@ for scenario, cfg in SCENARIOS.items():
 
     assert len(n.snapshots) == 8760
 
-    opts = meta.get(
-        "wildcards",
-        {}
-    ).get("opts")
+    opts = meta.get("wildcards", {}).get("opts")
 
     assert opts == cfg["opts"], (
-        f"{scenario}: opts mismatch: "
-        f"{opts} != {cfg['opts']}"
+        f"{scenario}: opts mismatch: " f"{opts} != {cfg['opts']}"
     )
 
-    assert (
-        meta.get("solving", {})
-        .get("options", {})
-        .get("noisy_costs")
-        is False
-    )
+    assert meta.get("solving", {}).get("options", {}).get("noisy_costs") is False
 
-    assert (
-        meta.get("sector", {})
-        .get("chp")
-        is False
-    )
+    assert meta.get("sector", {}).get("chp") is False
 
     p_set = n.get_switchable_as_dense(
         "Load",
         "p_set",
     ).astype(float)
 
-    base_demand_mwh = float(
-        p_set
-        .mul(weights, axis=0)
-        .sum()
-        .sum()
-    )
+    base_demand_mwh = float(p_set.mul(weights, axis=0).sum().sum())
 
     base_demand_twh = base_demand_mwh / 1e6
 
-    assert abs(
-        base_demand_twh
-        - EXPECTED_BASE_DEMAND_TWH
-    ) < 1e-6, (
-        f"{scenario}: wrong base demand "
-        f"{base_demand_twh} TWh"
+    assert abs(base_demand_twh - EXPECTED_BASE_DEMAND_TWH) < 1e-6, (
+        f"{scenario}: wrong base demand " f"{base_demand_twh} TWh"
     )
 
     # --------------------------------------------------------
@@ -785,35 +586,24 @@ for scenario, cfg in SCENARIOS.items():
         and PEM_STORE in n.stores.index
     )
 
-    assert btc_present == cfg["btc"], (
-        f"{scenario}: BTC presence mismatch"
-    )
+    assert btc_present == cfg["btc"], f"{scenario}: BTC presence mismatch"
 
-    assert pem_present == cfg["pem"], (
-        f"{scenario}: PEM presence mismatch"
-    )
+    assert pem_present == cfg["pem"], f"{scenario}: PEM presence mismatch"
 
     # --------------------------------------------------------
     # CO2 constraint
     # --------------------------------------------------------
 
-    co2_constraint_present = (
-        "CO2Limit" in n.global_constraints.index
-    )
+    co2_constraint_present = "CO2Limit" in n.global_constraints.index
 
-    assert (
-        co2_constraint_present == cfg["co2"]
-    ), f"{scenario}: CO2 constraint mismatch"
+    assert co2_constraint_present == cfg["co2"], f"{scenario}: CO2 constraint mismatch"
 
     if cfg["co2"]:
         gc = n.global_constraints.loc["CO2Limit"]
 
         assert gc["sense"] == "<="
         assert gc["type"] == "primary_energy"
-        assert (
-            gc["carrier_attribute"]
-            == "co2_emissions"
-        )
+        assert gc["carrier_attribute"] == "co2_emissions"
         assert abs(float(gc["constant"])) < 1e-12
 
     # --------------------------------------------------------
@@ -834,35 +624,19 @@ for scenario, cfg in SCENARIOS.items():
         assert l.bus0 == CONNECTION_BUS
         assert l.bus1 == BTC_BUS
 
-        assert abs(
-            float(l.p_nom)
-            - EXPECTED_BTC_MW
-        ) < 1e-9
+        assert abs(float(l.p_nom) - EXPECTED_BTC_MW) < 1e-9
 
         assert not bool(l.p_nom_extendable)
 
-        assert abs(
-            float(l.efficiency) - 1.0
-        ) < 1e-12
+        assert abs(float(l.efficiency) - 1.0) < 1e-12
 
-        assert abs(
-            float(g.sign) + 1.0
-        ) < 1e-12
+        assert abs(float(g.sign) + 1.0) < 1e-12
 
-        assert abs(
-            float(g.marginal_cost)
-            + EXPECTED_BTC_VALUE
-        ) < 1e-9
+        assert abs(float(g.marginal_cost) + EXPECTED_BTC_VALUE) < 1e-9
 
-        p_btc = (
-            n.links_t.p0[BTC_LINK]
-            .astype(float)
-        )
+        p_btc = n.links_t.p0[BTC_LINK].astype(float)
 
-        p_service = (
-            n.generators_t.p[BTC_SERVICE]
-            .astype(float)
-        )
+        p_service = n.generators_t.p[BTC_SERVICE].astype(float)
 
         assert np.allclose(
             p_btc.values,
@@ -873,23 +647,15 @@ for scenario, cfg in SCENARIOS.items():
         assert p_btc.min() >= -1e-4
         assert p_btc.max() <= 1000.0 + 1e-4
 
-        btc_mwh = float(
-            (p_btc * weights).sum()
-        )
+        btc_mwh = float((p_btc * weights).sum())
 
         btc_twh = btc_mwh / 1e6
 
-        btc_flh = (
-            btc_mwh / EXPECTED_BTC_MW
-        )
+        btc_flh = btc_mwh / EXPECTED_BTC_MW
 
-        btc_cf = (
-            btc_flh / float(weights.sum())
-        )
+        btc_cf = btc_flh / float(weights.sum())
 
-        btc_service_value = (
-            btc_mwh * EXPECTED_BTC_VALUE
-        )
+        btc_service_value = btc_mwh * EXPECTED_BTC_VALUE
 
     # --------------------------------------------------------
     # PEM
@@ -911,87 +677,41 @@ for scenario, cfg in SCENARIOS.items():
         assert l.bus0 == CONNECTION_BUS
         assert l.bus1 == PEM_BUS
 
-        assert abs(
-            float(l.p_nom)
-            - EXPECTED_PEM_MW
-        ) < 1e-9
+        assert abs(float(l.p_nom) - EXPECTED_PEM_MW) < 1e-9
 
         assert not bool(l.p_nom_extendable)
 
-        assert abs(
-            float(l.efficiency)
-            - EXPECTED_PEM_EFF
-        ) < 1e-12
+        assert abs(float(l.efficiency) - EXPECTED_PEM_EFF) < 1e-12
 
-        assert abs(
-            float(l.marginal_cost)
-            - EXPECTED_PEM_MC
-        ) < 1e-9
+        assert abs(float(l.marginal_cost) - EXPECTED_PEM_MC) < 1e-9
 
-        assert abs(
-            float(s.e_nom)
-            - EXPECTED_H2_MWH
-        ) < 1e-6
+        assert abs(float(s.e_nom) - EXPECTED_H2_MWH) < 1e-6
 
-        p_pem = (
-            n.links_t.p0[PEM_LINK]
-            .astype(float)
-        )
+        p_pem = n.links_t.p0[PEM_LINK].astype(float)
 
-        pem_el_mwh = float(
-            (p_pem * weights).sum()
-        )
+        pem_el_mwh = float((p_pem * weights).sum())
 
         pem_el_twh = pem_el_mwh / 1e6
 
-        h2_mwh = (
-            pem_el_mwh
-            * EXPECTED_PEM_EFF
-        )
+        h2_mwh = pem_el_mwh * EXPECTED_PEM_EFF
 
-        h2_kt = (
-            h2_mwh
-            * 1000.0
-            / 33.33
-            / 1e6
-        )
+        h2_kt = h2_mwh * 1000.0 / 33.33 / 1e6
 
-        pem_flh = (
-            pem_el_mwh / EXPECTED_PEM_MW
-        )
+        pem_flh = pem_el_mwh / EXPECTED_PEM_MW
 
-        pem_cf = (
-            pem_flh / float(weights.sum())
-        )
+        pem_cf = pem_flh / float(weights.sum())
 
-        pem_variable_cost = (
-            pem_el_mwh
-            * EXPECTED_PEM_MC
-        )
+        pem_variable_cost = pem_el_mwh * EXPECTED_PEM_MC
 
-        final_h2 = float(
-            n.stores_t.e[PEM_STORE].iloc[-1]
-        )
+        final_h2 = float(n.stores_t.e[PEM_STORE].iloc[-1])
 
-        assert abs(
-            pem_el_mwh
-            - EXPECTED_PEM_EL_MWH
-        ) < 1.0
+        assert abs(pem_el_mwh - EXPECTED_PEM_EL_MWH) < 1.0
 
-        assert abs(
-            h2_mwh
-            - EXPECTED_H2_MWH
-        ) < 1.0
+        assert abs(h2_mwh - EXPECTED_H2_MWH) < 1.0
 
-        assert abs(
-            h2_kt
-            - EXPECTED_H2_KT
-        ) < 1e-6
+        assert abs(h2_kt - EXPECTED_H2_KT) < 1e-6
 
-        assert abs(
-            final_h2
-            - EXPECTED_H2_MWH
-        ) < 1.0
+        assert abs(final_h2 - EXPECTED_H2_MWH) < 1.0
 
     # --------------------------------------------------------
     # CO2 reconstruction
@@ -1005,28 +725,15 @@ for scenario, cfg in SCENARIOS.items():
     if cfg["co2"]:
 
         assert (
-            co2_result[
-                "direct_generator_co2_t"
-            ] < 1.0
-        ), (
-            f"{scenario}: generator CO2 is not zero"
-        )
+            co2_result["direct_generator_co2_t"] < 1.0
+        ), f"{scenario}: generator CO2 is not zero"
 
         assert (
-            co2_result[
-                "emitting_generation_mwh"
-            ] < 1.0
-        ), (
-            f"{scenario}: emitting generation is not zero"
-        )
+            co2_result["emitting_generation_mwh"] < 1.0
+        ), f"{scenario}: emitting generation is not zero"
 
-        assert (
-            co2_result[
-                "primary_energy_co2_lhs_t"
-            ] <= 1.0
-        ), (
-            f"{scenario}: reconstructed "
-            f"primary-energy CO2 LHS > tolerance"
+        assert co2_result["primary_energy_co2_lhs_t"] <= 1.0, (
+            f"{scenario}: reconstructed " f"primary-energy CO2 LHS > tolerance"
         )
 
     # --------------------------------------------------------
@@ -1035,28 +742,18 @@ for scenario, cfg in SCENARIOS.items():
 
     raw_objective = float(n.objective)
 
-    upstream_system_cost = (
-        raw_objective
-        + btc_service_value
-        - pem_variable_cost
-    )
+    upstream_system_cost = raw_objective + btc_service_value - pem_variable_cost
 
-    total_electricity_withdrawal_twh = (
-        base_demand_twh
-        + btc_twh
-        + pem_el_twh
-    )
+    total_electricity_withdrawal_twh = base_demand_twh + btc_twh + pem_el_twh
 
     # --------------------------------------------------------
     # Detailed electricity results
     # --------------------------------------------------------
 
-    cap_table, gen_table = (
-        generation_and_capacity(
-            n,
-            weights,
-            scenario,
-        )
+    cap_table, gen_table = generation_and_capacity(
+        n,
+        weights,
+        scenario,
     )
 
     capacity_tables.append(cap_table)
@@ -1091,41 +788,23 @@ for scenario, cfg in SCENARIOS.items():
 
     battery = battery_table.iloc[0]
 
-    battery_energy_mwh = float(
-        battery["battery_energy_mwh"]
-    )
+    battery_energy_mwh = float(battery["battery_energy_mwh"])
 
-    battery_charge_power_mw = float(
-        battery["battery_charge_power_mw"]
-    )
+    battery_charge_power_mw = float(battery["battery_charge_power_mw"])
 
-    battery_discharge_power_mw = float(
-        battery["battery_discharge_power_mw"]
-    )
+    battery_discharge_power_mw = float(battery["battery_discharge_power_mw"])
 
-    battery_charge_mwh = float(
-        battery["battery_charge_mwh"]
-    )
+    battery_charge_mwh = float(battery["battery_charge_mwh"])
 
-    battery_discharge_mwh = float(
-        battery["battery_discharge_mwh"]
-    )
+    battery_discharge_mwh = float(battery["battery_discharge_mwh"])
 
     # --------------------------------------------------------
     # Electricity price at common connection bus
     # --------------------------------------------------------
 
-    price = (
-        n.buses_t.marginal_price[
-            CONNECTION_BUS
-        ]
-        .astype(float)
-    )
+    price = n.buses_t.marginal_price[CONNECTION_BUS].astype(float)
 
-    mean_price = float(
-        (price * weights).sum()
-        / weights.sum()
-    )
+    mean_price = float((price * weights).sum() / weights.sum())
 
     median_price = float(price.median())
 
@@ -1137,108 +816,38 @@ for scenario, cfg in SCENARIOS.items():
         {
             "scenario": scenario,
             "regime": cfg["regime"],
-
             "base_demand_twh": base_demand_twh,
             "btc_twh": btc_twh,
             "btc_flh_h": btc_flh,
             "btc_cf_pct": btc_cf * 100.0,
-
             "pem_el_twh": pem_el_twh,
             "h2_twh_lhv": h2_mwh / 1e6,
             "h2_kt": h2_kt,
             "pem_flh_h": pem_flh,
             "pem_cf_pct": pem_cf * 100.0,
-
-            "total_electricity_withdrawal_twh":
-                total_electricity_withdrawal_twh,
-
-            "raw_objective_eur":
-                raw_objective,
-
-            "btc_service_value_eur":
-                btc_service_value,
-
-            "pem_variable_cost_eur":
-                pem_variable_cost,
-
-            "upstream_system_cost_eur":
-                upstream_system_cost,
-
-            "direct_generator_co2_t":
-                co2_result[
-                    "direct_generator_co2_t"
-                ],
-
-            "primary_energy_co2_lhs_t":
-                co2_result[
-                    "primary_energy_co2_lhs_t"
-                ],
-
-            "emitting_generation_twh":
-                co2_result[
-                    "emitting_generation_mwh"
-                ] / 1e6,
-
-            "solar_generation_twh":
-                curtailment[
-                    "solar_generation_twh"
-                ],
-
-            "solar_curtailment_twh":
-                curtailment[
-                    "solar_curtailment_twh"
-                ],
-
-            "solar_curtailment_pct":
-                curtailment[
-                    "solar_curtailment_pct"
-                ],
-
-            "onwind_generation_twh":
-                curtailment[
-                    "onwind_generation_twh"
-                ],
-
-            "onwind_curtailment_twh":
-                curtailment[
-                    "onwind_curtailment_twh"
-                ],
-
-            "onwind_curtailment_pct":
-                curtailment[
-                    "onwind_curtailment_pct"
-                ],
-
-            "battery_charge_power_gw":
-                battery_charge_power_mw / 1000.0,
-
-            "battery_discharge_power_gw":
-                battery_discharge_power_mw / 1000.0,
-
-            "battery_energy_gwh":
-                battery_energy_mwh / 1000.0,
-
-            "battery_charge_twh":
-                battery_charge_mwh / 1e6,
-
-            "battery_discharge_twh":
-                battery_discharge_mwh / 1e6,
-
-            "ac_line_volume_gwkm":
-                transmission[
-                    "ac_line_volume_gwkm"
-                ],
-
-            "ac_line_expansion_gwkm":
-                transmission[
-                    "ac_line_expansion_gwkm"
-                ],
-
-            "mean_price_kz0_eur_per_mwh":
-                mean_price,
-
-            "median_price_kz0_eur_per_mwh":
-                median_price,
+            "total_electricity_withdrawal_twh": total_electricity_withdrawal_twh,
+            "raw_objective_eur": raw_objective,
+            "btc_service_value_eur": btc_service_value,
+            "pem_variable_cost_eur": pem_variable_cost,
+            "upstream_system_cost_eur": upstream_system_cost,
+            "direct_generator_co2_t": co2_result["direct_generator_co2_t"],
+            "primary_energy_co2_lhs_t": co2_result["primary_energy_co2_lhs_t"],
+            "emitting_generation_twh": co2_result["emitting_generation_mwh"] / 1e6,
+            "solar_generation_twh": curtailment["solar_generation_twh"],
+            "solar_curtailment_twh": curtailment["solar_curtailment_twh"],
+            "solar_curtailment_pct": curtailment["solar_curtailment_pct"],
+            "onwind_generation_twh": curtailment["onwind_generation_twh"],
+            "onwind_curtailment_twh": curtailment["onwind_curtailment_twh"],
+            "onwind_curtailment_pct": curtailment["onwind_curtailment_pct"],
+            "battery_charge_power_gw": battery_charge_power_mw / 1000.0,
+            "battery_discharge_power_gw": battery_discharge_power_mw / 1000.0,
+            "battery_energy_gwh": battery_energy_mwh / 1000.0,
+            "battery_charge_twh": battery_charge_mwh / 1e6,
+            "battery_discharge_twh": battery_discharge_mwh / 1e6,
+            "ac_line_volume_gwkm": transmission["ac_line_volume_gwkm"],
+            "ac_line_expansion_gwkm": transmission["ac_line_expansion_gwkm"],
+            "mean_price_kz0_eur_per_mwh": mean_price,
+            "median_price_kz0_eur_per_mwh": median_price,
         }
     )
 
@@ -1308,9 +917,7 @@ comparison_pairs = [
     ("S6", "S4"),
 ]
 
-numeric_cols = headline.select_dtypes(
-    include=[np.number]
-).columns
+numeric_cols = headline.select_dtypes(include=[np.number]).columns
 
 comparison_rows = []
 
@@ -1319,55 +926,31 @@ h = headline.set_index("scenario")
 for case, baseline in comparison_pairs:
     for metric in numeric_cols:
 
-        case_value = float(
-            h.loc[case, metric]
-        )
+        case_value = float(h.loc[case, metric])
 
-        baseline_value = float(
-            h.loc[baseline, metric]
-        )
+        baseline_value = float(h.loc[baseline, metric])
 
-        delta = (
-            case_value
-            - baseline_value
-        )
+        delta = case_value - baseline_value
 
-        if (
-            np.isfinite(baseline_value)
-            and abs(baseline_value) > 1e-12
-        ):
-            delta_pct = (
-                100.0
-                * delta
-                / baseline_value
-            )
+        if np.isfinite(baseline_value) and abs(baseline_value) > 1e-12:
+            delta_pct = 100.0 * delta / baseline_value
         else:
             delta_pct = np.nan
 
         comparison_rows.append(
             {
-                "comparison":
-                    f"{case}-{baseline}",
-                "scenario":
-                    case,
-                "baseline":
-                    baseline,
-                "metric":
-                    metric,
-                "scenario_value":
-                    case_value,
-                "baseline_value":
-                    baseline_value,
-                "delta":
-                    delta,
-                "delta_pct":
-                    delta_pct,
+                "comparison": f"{case}-{baseline}",
+                "scenario": case,
+                "baseline": baseline,
+                "metric": metric,
+                "scenario_value": case_value,
+                "baseline_value": baseline_value,
+                "delta": delta,
+                "delta_pct": delta_pct,
             }
         )
 
-comparisons = pd.DataFrame(
-    comparison_rows
-)
+comparisons = pd.DataFrame(comparison_rows)
 
 
 # ============================================================
@@ -1379,10 +962,7 @@ interaction_rows = []
 
 for metric in numeric_cols:
 
-    values = [
-        h.loc[s, metric]
-        for s in ["S1", "S4", "S5", "S6"]
-    ]
+    values = [h.loc[s, metric] for s in ["S1", "S4", "S5", "S6"]]
 
     if not all(np.isfinite(values)):
         interaction = np.nan
@@ -1397,14 +977,11 @@ for metric in numeric_cols:
     interaction_rows.append(
         {
             "metric": metric,
-            "interaction_S6_minus_S4_minus_S5_plus_S1":
-                interaction,
+            "interaction_S6_minus_S4_minus_S5_plus_S1": interaction,
         }
     )
 
-interactions = pd.DataFrame(
-    interaction_rows
-)
+interactions = pd.DataFrame(interaction_rows)
 
 
 # ============================================================
@@ -1496,8 +1073,7 @@ display_cols = [
 ]
 
 print(
-    headline[display_cols]
-    .to_string(
+    headline[display_cols].to_string(
         index=False,
         float_format=lambda x: f"{x:,.6f}",
     )

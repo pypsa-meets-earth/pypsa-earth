@@ -362,17 +362,13 @@ def add_bitcoin_mining(
     marginal_revenue = float(btc["marginal_revenue"])
 
     if bus not in n.buses.index:
-        raise ValueError(
-            f"Bitcoin connection bus '{bus}' does not exist."
-        )
+        raise ValueError(f"Bitcoin connection bus '{bus}' does not exist.")
 
     if p_nom <= 0:
         raise ValueError("Bitcoin p_nom must be greater than zero.")
 
     if marginal_revenue < 0:
-        raise ValueError(
-            "Bitcoin marginal_revenue cannot be negative."
-        )
+        raise ValueError("Bitcoin marginal_revenue cannot be negative.")
 
     service_bus = f"{bus} bitcoin"
     link_name = f"{bus} Bitcoin mining"
@@ -385,9 +381,7 @@ def add_bitcoin_mining(
             service_name in n.generators.index,
         ]
     ):
-        raise ValueError(
-            "Bitcoin components already exist in the network."
-        )
+        raise ValueError("Bitcoin components already exist in the network.")
 
     logger.info(
         "Adding %.1f MW flexible Bitcoin mining at %s",
@@ -455,46 +449,32 @@ def add_hydrogen_production(
     p_nom = float(pem["p_nom"])
     annual_h2_kt = float(pem["annual_h2_kt"])
     efficiency = float(pem["efficiency_lhv"])
-    variable_cost = float(
-        pem["variable_cost_eur_per_mwh_el"]
-    )
+    variable_cost = float(pem["variable_cost_eur_per_mwh_el"])
     h2_lhv = float(pem["h2_lhv_kwh_per_kg"])
 
     if bus not in n.buses.index:
-        raise ValueError(
-            f"PEM connection bus '{bus}' does not exist."
-        )
+        raise ValueError(f"PEM connection bus '{bus}' does not exist.")
 
     if p_nom <= 0:
         raise ValueError("PEM p_nom must be greater than zero.")
 
     if annual_h2_kt <= 0:
-        raise ValueError(
-            "PEM annual_h2_kt must be greater than zero."
-        )
+        raise ValueError("PEM annual_h2_kt must be greater than zero.")
 
     if not 0 < efficiency <= 1:
-        raise ValueError(
-            "PEM efficiency_lhv must be in (0, 1]."
-        )
+        raise ValueError("PEM efficiency_lhv must be in (0, 1].")
 
     if variable_cost < 0:
-        raise ValueError(
-            "PEM variable cost cannot be negative."
-        )
+        raise ValueError("PEM variable cost cannot be negative.")
 
     if h2_lhv <= 0:
-        raise ValueError(
-            "Hydrogen LHV must be greater than zero."
-        )
+        raise ValueError("Hydrogen LHV must be greater than zero.")
 
     h2_kg = annual_h2_kt * 1_000_000.0
     target_mwh_h2 = h2_kg * h2_lhv / 1000.0
     target_mwh_el = target_mwh_h2 / efficiency
 
-    weighted_hours = float(
-        n.snapshot_weightings["generators"].sum()
-    )
+    weighted_hours = float(n.snapshot_weightings["generators"].sum())
 
     maximum_mwh_el = p_nom * weighted_hours
 
@@ -518,9 +498,7 @@ def add_hydrogen_production(
             store_name in n.stores.index,
         ]
     ):
-        raise ValueError(
-            "Thesis PEM components already exist in the network."
-        )
+        raise ValueError("Thesis PEM components already exist in the network.")
 
     logger.info(
         "Adding %.1f MW PEM at %s with %.3f kt_H2/a target",
@@ -587,11 +565,11 @@ def add_hydrogen_production(
     )
 
     logger.info(
-        "PEM annual requirement: %.3f TWh_H2/a, "
-        "%.3f TWh_el/a",
+        "PEM annual requirement: %.3f TWh_H2/a, " "%.3f TWh_el/a",
         target_mwh_h2 / 1e6,
         target_mwh_el / 1e6,
     )
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
