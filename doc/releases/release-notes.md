@@ -18,7 +18,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Polish license information in documentation: correct GADM, EEZ and Copernicus land cover licenses and update outdated links [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
 
