@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Ensure `exclude_carriers` is respected during network simplification and clustering, including year-tagged carriers and overnight grouping [PR #2056](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2056)
+
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
 
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
