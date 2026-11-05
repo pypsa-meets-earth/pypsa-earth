@@ -1060,7 +1060,7 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
         return
 
     weight = n.snapshot_weightings.generators.loc[snapshots]
-    Nyears = n.snapshot_weightings.objective.loc[snapshots].sum() / 8760.0
+    Nyears = weight.sum() / 8760.0
 
     link_country = (
         n.links.get(
@@ -1226,16 +1226,15 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
             )
             continue
 
-        link_dim = "name" if PYPSA_V1 else "Link"
         p_link = n.model["Link-p"].sel(
             snapshot=snapshots,
-            **{link_dim: active_links},
+            name=active_links,
         )
 
         link_factor = xr.DataArray(
             factor.loc[active_links].to_numpy(),
-            dims=[link_dim],
-            coords={link_dim: active_links},
+            dims=["name"],
+            coords={"name": active_links},
         )
 
         snapshot_weight = xr.DataArray(
