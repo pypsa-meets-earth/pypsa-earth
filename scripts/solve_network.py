@@ -1197,12 +1197,8 @@ def add_co2_sector_limits(n, policy_file, snapshots, planning_horizon):
         if load_names.empty:
             fixed_emissions = 0.0
         else:
-            p_load = get_as_dense(
-                n,
-                "Load",
-                "p_set",
-                snapshots=snapshots,
-                inds=load_names,
+            p_load = n.get_switchable_as_dense(
+                "Load", "p_set", snapshots=snapshots, inds=load_names
             )
             fixed_emissions = -(p_load.mul(weight, axis=0)).sum().sum()
 
