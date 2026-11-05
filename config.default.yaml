@@ -630,6 +630,9 @@ co2:
       2045: 0.25
       2050: 0.1
 
+  sector_policy:
+    policy_file: "configs/policy/co2_sector_limits.csv"
+
 # ------------------- Uncertainty -------------------
 monte_carlo:
   # Description: Specify Monte Carlo sampling options for uncertainty analysis.
