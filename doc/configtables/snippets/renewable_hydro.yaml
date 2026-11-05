@@ -11,6 +11,7 @@
     PHS_max_hours: 6
     hydro_max_hours: "energy_capacity_totals_by_country" # method to estimate max_hours of reservoirs without a reported duration: "energy_capacity_totals_by_country" or "estimate_by_large_installations"
     hydro_max_hours_default: 6.0 # (optional, default 6) Default value of max_hours for hydro when NaN values are found
+    custom_hydro_capacities: false # false, or path to a table in the format of data/hydro_capacities.csv whose rows replace those of the same countries
     clip_min_inflow: 1.0
     extendable: true
     normalization:

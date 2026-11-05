@@ -33,6 +33,10 @@ hydro:
     method: hydro
     normalization: eia
 
+renewable:
+  hydro:
+    custom_hydro_capacities: data/hydro_capacities.csv  # tests the option with the default values
+
 electricity:
   hvdc_as_lines: true  # should HVDC lines be modeled as `Line` or as `Link` component?
 

@@ -730,6 +730,11 @@ rule add_electricity:
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
         hydro_capacities="data/hydro_capacities.csv",
+        custom_hydro_capacities=branch(
+            config["renewable"]["hydro"]["custom_hydro_capacities"] is not False,
+            config["renewable"]["hydro"]["custom_hydro_capacities"],
+            [],
+        ),
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
         nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:

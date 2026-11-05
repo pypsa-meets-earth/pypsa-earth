@@ -30,6 +30,7 @@ Relevant Settings
             carriers:
             hydro_max_hours:
             hydro_max_hours_default:
+            custom_hydro_capacities:
             hydro_capital_cost:
 
     lines:
@@ -47,6 +48,7 @@ Inputs
 
     .. image:: /img/hydrocapacities.png
 
+- The file given by ``custom_hydro_capacities`` (optional): a table in the same format, whose rows replace those of the same countries.
 - ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
@@ -899,10 +901,36 @@ def apply_nuclear_p_max_pu(n, nuclear_p_max_pu):
     )
 
 
+def load_hydro_capacities(fn: str, custom_fn: str | None = None) -> pd.DataFrame:
+    """
+    Load hydro capacities by country.
+
+    Parameters
+    ----------
+    fn : str
+        Path to ``data/hydro_capacities.csv``.
+    custom_fn : str, optional
+        Path to a table in the same format, whose rows replace those of the same countries.
+
+    Returns
+    -------
+    pd.DataFrame
+        Hydro capacities indexed by country.
+    """
+    hydro_capacities = pd.concat(
+        read_csv_nafix(path, comment="#", na_values=["-"])
+        .groupby("Country")
+        .sum(numeric_only=True)
+        for path in ([fn, custom_fn] if custom_fn else [fn])
+    )
+    return hydro_capacities[~hydro_capacities.index.duplicated(keep="last")]
+
+
 def attach_hydro(
     n: pypsa.Network,
     costs: pd.DataFrame,
     ppl: pd.DataFrame,
+    hydro_stats: pd.DataFrame,
     hydro_min_inflow_pu: float = 1.0,
 ) -> None:
     """
@@ -916,6 +944,10 @@ def attach_hydro(
         DataFrame containing technology costs.
     ppl : pd.DataFrame
         Power plant DataFrame.
+    hydro_stats : pd.DataFrame
+        Hydro capacities by country, from ``load_hydro_capacities``.
+    hydro_min_inflow_pu : float, optional
+        Energy-to-capacity ratio above which hydro plants of unknown technology are reservoirs.
 
     Returns
     -------
@@ -1094,16 +1126,6 @@ def attach_hydro(
 
     if "hydro" in carriers and not hydro.empty:
         hydro_max_hours = c.get("hydro_max_hours")
-        hydro_stats = (
-            read_csv_nafix(
-                snakemake.input.hydro_capacities,
-                comment="#",
-                na_values=["-"],
-                index_col=0,
-            )
-            .groupby("Country")
-            .sum()
-        )
         e_target = hydro_stats["E_store[TWh]"].clip(lower=0.2) * 1e6
         e_installed = hydro.eval("p_nom * max_hours").groupby(hydro.country).sum()
         e_missing = e_target - e_installed
@@ -1337,7 +1359,14 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(
-        n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
+        n,
+        costs,
+        ppl,
+        load_hydro_capacities(
+            snakemake.input.hydro_capacities,
+            snakemake.input.custom_hydro_capacities,
+        ),
+        snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"],
     )
 
     attach_existing_batteries(
