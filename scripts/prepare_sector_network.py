@@ -1687,26 +1687,28 @@ def add_aviation(
         p_set=airports["p_set"],
     )
 
+    airport_country = _country_for_nodes(n, airports.index)
+
     if snakemake.params.sector_options["international_bunkers"]:
-        co2 = airports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
+        co2_by_node = airports["p_set"] * costs.at["oil", "CO2 intensity"]
     else:
         domestic_to_total = energy_totals["total domestic aviation"] / (
             energy_totals["total international aviation"]
             + energy_totals["total domestic aviation"]
         )
-
-        co2 = (
-            airports["p_set"].sum()
-            * domestic_to_total
+        co2_by_node = (
+            airports["p_set"]
+            * airport_country.map(domestic_to_total)
             * costs.at["oil", "CO2 intensity"]
-        ).sum()
+        )
 
-    n.add(
-        "Load",
-        "aviation oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="aviation oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="transport",
+        subsector="non_road_aviation",
     )
 
 
@@ -1887,26 +1889,28 @@ def add_shipping(
             p_set=ports["p_set"],
         )
 
+        port_country = _country_for_nodes(n, ports.index)
+
         if snakemake.params.sector_options["international_bunkers"]:
-            co2 = ports["p_set"].sum() * costs.at["oil", "CO2 intensity"]
+            co2_by_node = ports["p_set"] * costs.at["oil", "CO2 intensity"]
         else:
             domestic_to_total = energy_totals["total domestic navigation"] / (
                 energy_totals["total domestic navigation"]
                 + energy_totals["total international navigation"]
             )
-
-            co2 = (
-                ports["p_set"].sum()
-                * domestic_to_total
+            co2_by_node = (
+                ports["p_set"]
+                * port_country.map(domestic_to_total)
                 * costs.at["oil", "CO2 intensity"]
-            ).sum()
+            )
 
-        n.add(
-            "Load",
-            "shipping oil emissions",
-            bus="co2 atmosphere",
+        _add_country_emission_loads(
+            n,
+            co2_by_node,
+            name="shipping oil emissions",
             carrier="shipping oil emissions",
-            p_set=-co2,
+            sector="transport",
+            subsector="non_road_shipping",
         )
 
     if "oil" not in n.buses.carrier.unique():
@@ -2111,32 +2115,35 @@ def add_industry(
     # TODO kerosene for aviation should be added too but in the right func.
     # check land transport
 
-    co2 = (
-        n.loads.loc[spatial.nodes + " naphtha for industry", "p_set"].sum()
+    oil_loads = spatial.nodes + " naphtha for industry"
+    co2_by_node = (
+        pd.Series(
+            n.loads.loc[oil_loads, "p_set"].to_numpy(),
+            index=spatial.nodes,
+        )
         * costs.at["oil", "CO2 intensity"]
-    )  # No division by 8760 because p_set is already in MW
-
-    n.add(
-        "Load",
-        "industry oil emissions",
-        bus="co2 atmosphere",
-        carrier="industry oil emissions",
-        p_set=-co2,
     )
 
-    co2 = (
-        industrial_demand["coal"].sum()
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="industry oil emissions",
+        carrier="industry oil emissions",
+        sector="industry",
+    )
+
+    co2_by_node = (
+        industrial_demand.loc[spatial.nodes, "coal"]
         * costs.at["coal", "CO2 intensity"]
-        # - industrial_demand["process emission from feedstock"].sum()
         / 8760
     )
 
-    n.add(
-        "Load",
-        "industry coal emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="industry coal emissions",
         carrier="industry coal emissions",
-        p_set=-co2,
+        sector="industry",
     )
 
     ########################################################### CARRIER = HEAT
@@ -2617,19 +2624,20 @@ def add_land_transport(
             * transport[spatial.nodes].loc[n.snapshots],
         )
 
-        co2 = (
+        co2_by_node = (
             ice_share
             / ice_efficiency
-            * transport[spatial.nodes].sum(axis=1)
+            * transport[spatial.nodes]
             * costs.at["oil", "CO2 intensity"]
         )
 
-        n.add(
-            "Load",
-            "land transport oil emissions",
-            bus="co2 atmosphere",
+        _add_country_emission_loads(
+            n,
+            co2_by_node,
+            name="land transport oil emissions",
             carrier="land transport oil emissions",
-            p_set=-co2,
+            sector="transport",
+            subsector="road_transport",
         )
 
 
@@ -3191,14 +3199,14 @@ def add_services(
         p_set=p_set_oil,
     )
 
-    co2 = p_set_oil.sum(axis=1) * costs.at["oil", "CO2 intensity"]
+    co2_by_node = p_set_oil * costs.at["oil", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "services oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="services oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="services",
     )
 
     p_set_gas = p_set_from_scaling(
@@ -3214,14 +3222,14 @@ def add_services(
         p_set=p_set_gas,
     )
 
-    co2 = p_set_gas.sum(axis=1) * costs.at["gas", "CO2 intensity"]
+    co2_by_node = p_set_gas * costs.at["gas", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "services gas emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="services gas emissions",
         carrier="gas emissions",
-        p_set=-co2,
+        sector="services",
     )
 
 
@@ -3270,19 +3278,19 @@ def add_agriculture(
         carrier="agriculture oil",
         p_set=nodal_energy_totals.loc[spatial.nodes, "agriculture oil"] * 1e6 / 8760,
     )
-    co2 = (
+    co2_by_node = (
         nodal_energy_totals.loc[spatial.nodes, "agriculture oil"]
         * 1e6
         / 8760
         * costs.at["oil", "CO2 intensity"]
-    ).sum()
+    )
 
-    n.add(
-        "Load",
-        "agriculture oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="agriculture oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="agriculture",
     )
 
 
@@ -3429,14 +3437,14 @@ def add_residential(
         p_set=p_set_oil,
     )
 
-    co2 = p_set_oil.sum(axis=1) * costs.at["oil", "CO2 intensity"]
+    co2_by_node = p_set_oil * costs.at["oil", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "residential oil emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="residential oil emissions",
         carrier="oil emissions",
-        p_set=-co2,
+        sector="residential",
     )
     n.add(
         "Load",
@@ -3456,14 +3464,14 @@ def add_residential(
         p_set=p_set_gas,
     )
 
-    co2 = p_set_gas.sum(axis=1) * costs.at["gas", "CO2 intensity"]
+    co2_by_node = p_set_gas * costs.at["gas", "CO2 intensity"]
 
-    n.add(
-        "Load",
-        "residential gas emissions",
-        bus="co2 atmosphere",
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="residential gas emissions",
         carrier="gas emissions",
-        p_set=-co2,
+        sector="residential",
     )
 
     for country in countries:
@@ -3823,6 +3831,17 @@ def add_rail_transport(
         bus=spatial.nodes,
         carrier="rail transport electricity",
         p_set=p_set_elec * 1e6 / 8760,
+    )
+
+    co2_by_node = p_set_oil * 1e6 / 8760 * costs.at["oil", "CO2 intensity"]
+
+    _add_country_emission_loads(
+        n,
+        co2_by_node,
+        name="rail transport oil emissions",
+        carrier="rail transport oil emissions",
+        sector="transport",
+        subsector="non_road_rail",
     )
 
 
