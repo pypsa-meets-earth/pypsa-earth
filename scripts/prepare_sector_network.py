@@ -598,34 +598,47 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
         },
     }
 
-    if options["hydrogen"].get("hydrogen_colors", False):
-        color_techs = {
-            "grid H2": [
-                "H2 Electrolysis",
-                "Alkaline electrolyzer large",
-                "Alkaline electrolyzer medium",
-                "Alkaline electrolyzer small",
-                "PEM electrolyzer",
-                "SOEC",
-            ],
-            "green H2": [
-                "Solid biomass steam reforming",
-                "Biomass gasification",
-                "Biomass gasification CC",
-            ],
-            "grey H2": [
-                "SMR",
-                "Natural gas steam reforming",
-                "Coal gasification",
-                "Heavy oil partial oxidation",
-            ],
-            "blue H2": [
-                "SMR CC",
-                "Natural gas steam reforming CC",
-                "Coal gasification CC",
-            ],
-        }
+    color_techs = {
+        "grid H2": [
+            "H2 Electrolysis",
+            "Alkaline electrolyzer large",
+            "Alkaline electrolyzer medium",
+            "Alkaline electrolyzer small",
+            "PEM electrolyzer",
+            "SOEC",
+        ],
+        "green H2": [
+            "Solid biomass steam reforming",
+            "Biomass gasification",
+            "Biomass gasification CC",
+        ],
+        "grey H2": [
+            "SMR",
+            "Natural gas steam reforming",
+            "Coal gasification",
+            "Heavy oil partial oxidation",
+        ],
+        "blue H2": [
+            "SMR CC",
+            "Natural gas steam reforming CC",
+            "Coal gasification CC",
+        ],
+    }
 
+    h2_subsectors = {
+        tech: color.lower().replace(" ", "_")
+        for color, techs in color_techs.items()
+        for tech in techs
+    }
+
+    missing_h2_subsectors = set(h2_techs) - set(h2_subsectors)
+    if missing_h2_subsectors:
+        raise ValueError(
+            "Missing hydrogen subsector mapping for: "
+            + ", ".join(sorted(missing_h2_subsectors))
+        )
+
+    if options["hydrogen"].get("hydrogen_colors", False):
         for color, techs in color_techs.items():
             if set(h2_techs) & set(techs):
                 n.add(
@@ -680,7 +693,10 @@ def add_hydrogen(n: pypsa.Network, costs: pd.DataFrame) -> None:
             if key in params:
                 link_kwargs[key] = params[key]
 
-        n.add("Link", spatial.nodes + " " + h2_tech, **link_kwargs)
+        h2_links = spatial.nodes + " " + h2_tech
+        n.add("Link", h2_links, **link_kwargs)
+        n.links.loc[h2_links, "sector"] = "hydrogen"
+        n.links.loc[h2_links, "subsector"] = h2_subsectors[h2_tech]
 
     n.add(
         "Link",
