@@ -1556,7 +1556,7 @@ def _get_bus_country(n, bus):
 
 
 def _assign_sector_link_countries(n):
-    """Assign country metadata to sector-tagged Links."""
+    """Assign country metadata to sector-tagged Links where unambiguous."""
     sector = (
         n.links.get(
             "sector",
@@ -1567,6 +1567,12 @@ def _assign_sector_link_countries(n):
         .str.strip()
     )
 
+    if "country" not in n.links.columns:
+        n.links["country"] = ""
+
+    model_countries = n.buses["country"].fillna("").astype(str).str.strip()
+    model_countries = pd.Index(model_countries[model_countries.ne("")].unique())
+
     bus_columns = sorted(
         [
             column
@@ -1576,20 +1582,46 @@ def _assign_sector_link_countries(n):
         key=lambda column: int(column[3:]),
     )
 
+    unresolved = []
+
     for link_name in n.links.index[sector.ne("")]:
+        country = n.links.at[link_name, "country"]
+        country = "" if pd.isna(country) else str(country).strip()
+
         countries = {
             _get_bus_country(n, n.links.at[link_name, bus_column])
             for bus_column in bus_columns
         }
         countries.discard("")
 
-        if len(countries) != 1:
+        if len(countries) > 1:
             raise ValueError(
                 "Could not uniquely determine country for sector Link "
                 f"'{link_name}': {sorted(countries)}"
             )
 
-        n.links.at[link_name, "country"] = next(iter(countries))
+        if country:
+            if countries and country not in countries:
+                raise ValueError(
+                    f"Country metadata for sector Link '{link_name}' "
+                    f"conflicts with connected buses: '{country}' vs "
+                    f"{sorted(countries)}"
+                )
+            continue
+
+        if countries:
+            n.links.at[link_name, "country"] = next(iter(countries))
+        elif len(model_countries) == 1:
+            n.links.at[link_name, "country"] = model_countries[0]
+        else:
+            unresolved.append(link_name)
+
+    if unresolved:
+        logger.warning(
+            "Could not assign country metadata to %d sector-tagged Links "
+            "without country-specific buses in a multi-country network.",
+            len(unresolved),
+        )
 
 
 def _assign_sector_load_countries(n):
@@ -2023,6 +2055,8 @@ def add_industry(
             * costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
         )
+        n.links.loc[spatial.biomass.industry_cc, "sector"] = "industry"
+        n.links.loc[spatial.biomass.industry_cc, "subsector"] = ""
 
     # CARRIER = FOSSIL GAS
 
@@ -2067,6 +2101,9 @@ def add_industry(
         efficiency=1.0,
         efficiency2=costs.at["gas", "CO2 intensity"],
     )
+    n.links.loc[spatial.gas.industry, "sector"] = "industry"
+    n.links.loc[spatial.gas.industry, "subsector"] = ""
+
     if snakemake.params.sector_options["cc"]:
         n.add(
             "Link",
@@ -2086,6 +2123,8 @@ def add_industry(
             * costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
         )
+        n.links.loc[spatial.gas.industry_cc, "sector"] = "industry"
+        n.links.loc[spatial.gas.industry_cc, "subsector"] = ""
 
     #################################################### CARRIER = HYDROGEN
 
@@ -2190,42 +2229,63 @@ def add_industry(
         p_set=industrial_elec.loc[spatial.nodes],
     )
 
-    n.add("Bus", "process emissions", location="Earth", carrier="process emissions")
+    process_node_country = _country_for_nodes(n, spatial.nodes)
+    process_emissions_by_country = (
+        industrial_demand.loc[spatial.nodes, "process emissions"]
+        .groupby(process_node_country)
+        .sum()
+        / 8760
+    )
 
-    # this should be process emissions fossil+feedstock
-    # then need load on atmosphere for feedstock emissions that are currently going to atmosphere via Link Fischer-Tropsch demand
+    process_countries = pd.Index(process_emissions_by_country.index)
+    process_buses = process_countries + " process emissions"
+
+    n.add(
+        "Bus",
+        process_buses,
+        location=process_countries,
+        carrier="process emissions",
+    )
+    n.buses.loc[process_buses, "country"] = process_countries.to_numpy()
+
     n.add(
         "Load",
-        spatial.nodes,
-        suffix=" process emissions",
-        bus="process emissions",
+        process_buses,
+        bus=process_buses,
         carrier="process emissions",
-        p_set=-(
-            #    industrial_demand.loc[spatial.nodes, "process emission from feedstock"]+
-            industrial_demand.loc[spatial.nodes, "process emissions"]
-        )
-        / 8760,
+        p_set=-process_emissions_by_country.to_numpy(),
     )
 
     n.add(
         "Link",
-        "process emissions",
-        bus0="process emissions",
+        process_buses,
+        bus0=process_buses,
         bus1="co2 atmosphere",
         carrier="process emissions",
         p_nom_extendable=True,
         efficiency=1.0,
     )
+    n.links.loc[process_buses, "sector"] = "industry_process_emissions"
+    n.links.loc[process_buses, "subsector"] = ""
 
     # assume enough local waste heat for CC
     if snakemake.params.sector_options["cc"]:
+        if options["co2_network"]:
+            co2_location_country = _country_for_nodes(n, spatial.co2.locations)
+            process_cc_links = spatial.co2.locations + " process emissions CC"
+            process_cc_bus0 = (co2_location_country + " process emissions").to_numpy()
+            process_cc_bus2 = spatial.co2.nodes
+        else:
+            process_cc_links = process_countries + " process emissions CC"
+            process_cc_bus0 = process_buses
+            process_cc_bus2 = spatial.co2.nodes[0]
+
         n.add(
             "Link",
-            spatial.co2.locations,
-            suffix=" process emissions CC",
-            bus0="process emissions",
+            process_cc_links,
+            bus0=process_cc_bus0,
             bus1="co2 atmosphere",
-            bus2=spatial.co2.nodes,
+            bus2=process_cc_bus2,
             carrier="process emissions CC",
             p_nom_extendable=True,
             capital_cost=costs.at["cement capture", "fixed"],
@@ -2233,6 +2293,8 @@ def add_industry(
             efficiency2=costs.at["cement capture", "capture_rate"],
             lifetime=costs.at["cement capture", "lifetime"],
         )
+        n.links.loc[process_cc_links, "sector"] = "industry_process_emissions"
+        n.links.loc[process_cc_links, "subsector"] = ""
 
 
 def add_ammonia(
