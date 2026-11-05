@@ -24,7 +24,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
 
-* Add the option `custom_hydro_capacities` to replace or extend the rows of `data/hydro_capacities.csv`, which only covers African countries, and correct the descriptions of `hydro_max_hours` and of that table [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Add the option `custom_hydro_capacities` to replace or extend the rows of `data/hydro_capacities.csv`, which only covers African countries, and correct the descriptions of `hydro_max_hours` and of that table [PR #2099](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2099)
 
 * Fix naphtha-related industry CO2 emissions by correcting spatial load name construction [PR #2088](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2088)
 
