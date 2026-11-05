@@ -1479,6 +1479,151 @@ def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
         )
 
 
+def _country_for_nodes(n, nodes):
+    """Return the country associated with network nodes."""
+    nodes = pd.Index(nodes)
+
+    countries = n.buses.loc[nodes, "country"].fillna("").astype(str).str.strip()
+
+    if countries.eq("").any():
+        missing = countries.index[countries.eq("")]
+        raise ValueError(
+            "Missing country information for buses: " + ", ".join(missing.astype(str))
+        )
+
+    return countries
+
+
+def _add_country_emission_loads(
+    n,
+    emissions_by_node,
+    name,
+    carrier,
+    sector,
+    subsector="",
+):
+    """Add static or time-dependent atmospheric CO2 Loads aggregated by country."""
+    if isinstance(emissions_by_node, pd.DataFrame):
+        countries = _country_for_nodes(n, emissions_by_node.columns)
+        emissions_by_country = emissions_by_node.T.groupby(countries).sum().T
+        country_emissions = (
+            (country, emissions_by_country[country])
+            for country in emissions_by_country.columns
+        )
+    else:
+        emissions_by_node = pd.Series(emissions_by_node, dtype=float)
+        countries = _country_for_nodes(n, emissions_by_node.index)
+        emissions_by_country = emissions_by_node.groupby(countries).sum()
+        country_emissions = emissions_by_country.items()
+
+    for country, emissions in country_emissions:
+        load_name = f"{country} {name}"
+
+        n.add(
+            "Load",
+            load_name,
+            bus="co2 atmosphere",
+            carrier=carrier,
+            p_set=-emissions,
+        )
+        n.loads.loc[load_name, "country"] = country
+        n.loads.loc[load_name, "sector"] = sector
+        n.loads.loc[load_name, "subsector"] = subsector
+
+
+def _get_bus_country(n, bus):
+    """Return the country of a bus, falling back to its location bus."""
+    if pd.isna(bus) or bus == "" or bus == "co2 atmosphere":
+        return ""
+
+    if bus not in n.buses.index:
+        return ""
+
+    country = n.buses.at[bus, "country"]
+    country = "" if pd.isna(country) else str(country).strip()
+    if country:
+        return country
+
+    location = n.buses.at[bus, "location"]
+    if pd.isna(location) or location not in n.buses.index:
+        return ""
+
+    country = n.buses.at[location, "country"]
+    return "" if pd.isna(country) else str(country).strip()
+
+
+def _assign_sector_link_countries(n):
+    """Assign country metadata to sector-tagged Links."""
+    sector = (
+        n.links.get(
+            "sector",
+            pd.Series("", index=n.links.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    bus_columns = sorted(
+        [
+            column
+            for column in n.links.columns
+            if column.startswith("bus") and column[3:].isdigit()
+        ],
+        key=lambda column: int(column[3:]),
+    )
+
+    for link_name in n.links.index[sector.ne("")]:
+        countries = {
+            _get_bus_country(n, n.links.at[link_name, bus_column])
+            for bus_column in bus_columns
+        }
+        countries.discard("")
+
+        if len(countries) != 1:
+            raise ValueError(
+                "Could not uniquely determine country for sector Link "
+                f"'{link_name}': {sorted(countries)}"
+            )
+
+        n.links.at[link_name, "country"] = next(iter(countries))
+
+
+def _assign_sector_load_countries(n):
+    """Assign country metadata to sector-tagged Loads."""
+    sector = (
+        n.loads.get(
+            "sector",
+            pd.Series("", index=n.loads.index, dtype=object),
+        )
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    if "country" not in n.loads.columns:
+        n.loads["country"] = ""
+
+    for load_name in n.loads.index[sector.ne("")]:
+        country = n.loads.at[load_name, "country"]
+        country = "" if pd.isna(country) else str(country).strip()
+
+        # Keep explicitly assigned countries, e.g. aggregated CO2 emission loads.
+        if country:
+            continue
+
+        bus = n.loads.at[load_name, "bus"]
+        country = _get_bus_country(n, bus)
+
+        if not country:
+            raise ValueError(
+                f"Could not determine country for sector Load '{load_name}' "
+                f"from bus '{bus}'."
+            )
+
+        n.loads.at[load_name, "country"] = country
+
+
 def add_aviation(
     n: pypsa.Network, costs: pd.DataFrame, energy_totals: pd.DataFrame, airports_fn: str
 ) -> None:
@@ -3988,6 +4133,8 @@ if __name__ == "__main__":
 
     sanitize_carriers(n, snakemake.config)
     sanitize_locations(n)
+    _assign_sector_link_countries(n)
+    _assign_sector_load_countries(n)
 
     n.export_to_netcdf(snakemake.output[0])
 
