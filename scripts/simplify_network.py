@@ -411,7 +411,7 @@ def simplify_links(
     output: object,
     exclude_carriers: list = [],
     aggregation_strategies: dict = dict(),
-):
+) -> tuple[pypsa.Network, pd.Series]:
     """
     Simplifies multi-node DC link components into single links between end-points.
 
@@ -440,6 +440,8 @@ def simplify_links(
     -------
     n : pypsa.Network
         The simplified PyPSA network.
+    busmap : pd.Series
+        Mapping of the original buses to the buses of the simplified network.
     """
     # Complex multi-node links are folded into end-points
     logger.info("Simplifying connected link components")
@@ -549,15 +551,20 @@ def simplify_links(
             all_dc_lengths = pd.concat(
                 [n.links.loc[all_links, "length"], n.lines.loc[all_dc_lines, "length"]]
             )
+            all_dc_capacities = pd.concat(
+                [n.links.loc[all_links, "p_nom"], n.lines.loc[all_dc_lines, "s_nom"]]
+            )
             name = all_dc_lengths.idxmax() + "+{}".format(len(all_dc_branches) - 1)
+
+            # branches of a segment run in parallel, segments run in series
+            segments = [[i for _, i in segment] for segment in dc_edges]
+            length = sum(all_dc_lengths.loc[s].mean() for s in segments)
+            p_nom = min(all_dc_capacities.loc[s].sum() for s in segments)
 
             # HVDC part is represented as "Link" component
             if dc_as_links:
                 p_max_pu = config_links.get("p_max_pu", 1.0)
                 lengths = n.links.loc[all_links, "length"]
-                i_links = [i for _, i in sum(dc_edges, []) if _ == "Link"]
-                length = sum(n.links.loc[i_links, "length"].mean() for l in dc_edges)
-                p_nom = min(n.links.loc[i_links, "p_nom"].sum() for l in dc_edges)
                 underwater_fraction = (
                     lengths * n.links.loc[all_links, "underwater_fraction"]
                 ).sum() / lengths.sum()
@@ -565,8 +572,6 @@ def simplify_links(
             else:
                 p_max_pu = config_lines.get("p_max_pu", 1.0)
                 lengths = n.lines.loc[all_dc_lines, "length"]
-                length = lengths.sum() / len(lengths) if len(lengths) > 0 else 0
-                p_nom = n.lines.loc[all_dc_lines, "s_nom"].min()
                 underwater_fraction = (
                     (lengths * n.lines.loc[all_dc_lines, "underwater_fraction"]).sum()
                     / lengths.sum()
