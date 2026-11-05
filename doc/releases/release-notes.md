@@ -18,9 +18,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Fill missing `max_hours` (NaN as well as 0) of pumped hydro plants with `PHS_max_hours`, so that plants without a reported duration get storage [PR #2096](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2096)
+* Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
+
+* Fill missing `max_hours` (NaN as well as 0) of pumped hydro plants with `PHS_max_hours`, so that plants without a reported duration get storage [PR #2096](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2096)
 
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
 
