@@ -43,11 +43,10 @@ Inputs
 ------
 
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
-- ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
+- ``data/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country. Used to estimate ``max_hours`` of hydro reservoirs without a reported duration.
 
     .. image:: /img/hydrocapacities.png
 
-- ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
 - ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
