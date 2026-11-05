@@ -27,7 +27,7 @@ repos:
 
 # Sort package imports alphabetically
 - repo: https://github.com/PyCQA/isort
-  rev: 9.0.2
+  rev: 10.0.0b2
   hooks:
   - id: isort
     args: ["--profile", "black", "--filter-files"]
@@ -92,14 +92,14 @@ repos:
 
 # Format Snakemake rule / workflow files
 - repo: https://github.com/snakemake/snakefmt
-  rev: v2.0.3
+  rev: v2.1.0
   hooks:
   - id: snakefmt
     args: [--no-sort]
 
 # Check for FSFE REUSE compliance (licensing)
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v6.2.0
+  rev: v6.3.0
   hooks:
   - id: reuse
 
