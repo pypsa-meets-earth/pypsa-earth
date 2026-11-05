@@ -1340,6 +1340,9 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
                 * costs.at["biomass CHP capture", "capture_rate"],
                 lifetime=costs.at[key, "lifetime"],
             )
+            biomass_chp_cc = urban_central + " urban central solid biomass CHP CC"
+            n.links.loc[biomass_chp_cc, "sector"] = "power_and_heat_generation"
+            n.links.loc[biomass_chp_cc, "subsector"] = "chp"
 
 
 def add_co2(n: pypsa.Network, costs: pd.DataFrame, co2_network: bool) -> None:
@@ -2934,6 +2937,18 @@ def add_heat(
 
             key = f"{name_type} gas boiler"
 
+            if name == "urban central":
+                emission_sector = "power_and_heat_generation"
+                emission_subsector = "heat"
+            elif name.startswith("residential"):
+                emission_sector = "residential"
+                emission_subsector = ""
+            elif name.startswith("services"):
+                emission_sector = "services"
+                emission_subsector = ""
+            else:
+                raise ValueError(f"Unknown heat system: {name}")
+
             n.add(
                 "Link",
                 h_nodes[name] + f" {name} gas boiler",
@@ -2947,6 +2962,9 @@ def add_heat(
                 capital_cost=costs.at[key, "efficiency"] * costs.at[key, "fixed"],
                 lifetime=costs.at[key, "lifetime"],
             )
+            gas_boilers = h_nodes[name] + f" {name} gas boiler"
+            n.links.loc[gas_boilers, "sector"] = emission_sector
+            n.links.loc[gas_boilers, "subsector"] = emission_subsector
 
         if options["solar_thermal_collector"]["enable"]:
             n.add("Carrier", name + " solar thermal")
@@ -2983,6 +3001,10 @@ def add_heat(
                 efficiency3=costs.at["gas", "CO2 intensity"],
                 lifetime=costs.at["central gas CHP", "lifetime"],
             )
+            central_gas_chp = h_nodes[name] + " urban central gas CHP"
+            n.links.loc[central_gas_chp, "sector"] = "power_and_heat_generation"
+            n.links.loc[central_gas_chp, "subsector"] = "chp"
+
             if snakemake.params.sector_options["cc"]:
                 n.add(
                     "Link",
@@ -3022,8 +3044,18 @@ def add_heat(
                     * costs.at["biomass CHP capture", "capture_rate"],
                     lifetime=costs.at["central gas CHP", "lifetime"],
                 )
+                central_gas_chp_cc = h_nodes[name] + " urban central gas CHP CC"
+                n.links.loc[central_gas_chp_cc, "sector"] = "power_and_heat_generation"
+                n.links.loc[central_gas_chp_cc, "subsector"] = "chp"
 
         if options["chp"] and options["micro_chp"] and name != "urban central":
+            if name.startswith("residential"):
+                micro_chp_sector = "residential"
+            elif name.startswith("services"):
+                micro_chp_sector = "services"
+            else:
+                raise ValueError(f"Unknown heat system: {name}")
+
             n.add(
                 "Link",
                 h_nodes[name] + f" {name} micro gas CHP",
@@ -3040,6 +3072,9 @@ def add_heat(
                 capital_cost=costs.at["micro CHP", "fixed"],
                 lifetime=costs.at["micro CHP", "lifetime"],
             )
+            micro_chp = h_nodes[name] + f" {name} micro gas CHP"
+            n.links.loc[micro_chp, "sector"] = micro_chp_sector
+            n.links.loc[micro_chp, "subsector"] = ""
 
 
 def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
@@ -3928,6 +3963,8 @@ def convert_conventional_generators_to_links(
             build_year=carrier_gens["build_year"],
             lifetime=carrier_gens["lifetime"],
         )
+        n.links.loc[carrier_gens.index, "sector"] = "power_and_heat_generation"
+        n.links.loc[carrier_gens.index, "subsector"] = "power"
 
         logger.info(
             f"Converted {len(carrier_gens)} {carrier} generators with {carrier_gens['p_nom'].sum():.2f} MW total capacity to links"
