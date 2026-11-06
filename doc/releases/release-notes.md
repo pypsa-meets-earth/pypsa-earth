@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix RES and EQ custom constraints by updating Linopy grouping, aggregating RES shares annually by country, handling optional storage and link components, and correcting charging/discharging accounting [PR #2107](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2107)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
