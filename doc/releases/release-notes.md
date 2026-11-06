@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Apply snapshot weightings consistently in summary energy, curtailment and price statistics, and make weighted-price aggregation robust to optional links, stores and independently named loads [PR #2108](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2108)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
