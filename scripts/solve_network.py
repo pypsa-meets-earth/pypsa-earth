@@ -96,6 +96,12 @@ from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 
 logger = create_logger(__name__)
 
+
+def _get_model_variable_index(variable):
+    """Return the component index represented by a Linopy variable."""
+    return variable.indexes[variable.dims[-1]]
+
+
 if PYPSA_V1:
     pypsa.optimization.optimize.logger.setLevel(logging.WARNING)
 else:
@@ -380,10 +386,8 @@ def add_BAU_constraints(n, config):
     """
     mincaps = pd.Series(config["electricity"]["BAU_mincapacities"])
     p_nom = n.model["Generator-p_nom"]
-    ext_i = n.generators.query("p_nom_extendable")
-    ext_carrier = ext_i.carrier
-    if not PYPSA_V1:
-        ext_carrier = ext_carrier.rename_axis("Generator-ext")
+    ext_i = _get_model_variable_index(p_nom)
+    ext_carrier = n.generators.loc[ext_i, "carrier"].rename_axis(p_nom.dims[-1])
     ext_carrier_i = xr.DataArray(ext_carrier)
     lhs = p_nom.groupby(ext_carrier_i).sum()
     rhs = mincaps[lhs.indexes["carrier"]].rename_axis("carrier")
@@ -414,15 +418,20 @@ def add_SAFE_constraints(n, config):
     margin = 1.0 + config["electricity"]["SAFE_reservemargin"]
     reserve_margin = peakdemand * margin
     conventional_carriers = config["electricity"]["conventional_carriers"]
-    ext_gens_i = n.generators.query(
-        "carrier in @conventional_carriers & p_nom_extendable"
-    ).index
-    capacity_variable = n.model["Generator-p_nom"]
-    p_nom = n.model["Generator-p_nom"].loc[ext_gens_i]
-    lhs = p_nom.sum()
-    exist_conv_caps = n.generators.query(
-        "~p_nom_extendable & carrier in @conventional_carriers"
-    ).p_nom.sum()
+    p_nom = n.model["Generator-p_nom"]
+    p_nom_i = _get_model_variable_index(p_nom)
+    ext_gens_i = (
+        n.generators.loc[p_nom_i].query("carrier in @conventional_carriers").index
+    )
+    lhs = p_nom.loc[ext_gens_i].sum()
+
+    dispatch_i = _get_model_variable_index(n.model["Generator-p"])
+    fixed_conv_i = (
+        n.generators.loc[dispatch_i]
+        .query("~p_nom_extendable & carrier in @conventional_carriers")
+        .index
+    )
+    exist_conv_caps = n.generators.loc[fixed_conv_i, "p_nom"].sum()
     rhs = reserve_margin - exist_conv_caps
     n.model.add_constraints(lhs >= rhs, name="safe_mintotalcap")
 
@@ -441,26 +450,28 @@ def add_operational_reserve_margin_constraint(n, sns, config):
     EPSILON_VRES = reserve_config["epsilon_vres"]
     CONTINGENCY = reserve_config["contingency"]
 
-    col_name = "name" if PYPSA_V1 else "Generator"
+    dispatch = n.model["Generator-p"]
+    generator_dim = dispatch.dims[-1]
+    gen_i = _get_model_variable_index(dispatch)
 
     # Reserve Variables
-    n.model.add_variables(
-        0, np.inf, coords=[sns, n.generators.index], name="Generator-r"
-    )
+    n.model.add_variables(0, np.inf, coords=[sns, gen_i], name="Generator-r")
     reserve = n.model["Generator-r"]
-    summed_reserve = reserve.sum(col_name)
+    lhs = reserve.sum(generator_dim)
 
     # Share of extendable renewable capacities
-    ext_i = n.generators.query("p_nom_extendable").index
-    vres_i = n.generators_t.p_max_pu.columns
+    ext_i = n.generators.loc[gen_i].query("p_nom_extendable").index
+    vres_i = n.generators_t.p_max_pu.columns.intersection(gen_i)
     if not ext_i.empty and not vres_i.empty:
-        capacity_factor = n.generators_t.p_max_pu[vres_i.intersection(ext_i)]
-        p_nom_vres = n.model["Generator-p_nom"].loc[vres_i.intersection(ext_i)]
-        if not PYPSA_V1:
-            p_nom_vres = p_nom_vres.rename({"Generator-ext": "Generator"})
-        lhs = summed_reserve + (
-            p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor))
-        ).sum(col_name)
+        vres_ext_i = vres_i.intersection(ext_i)
+        if not vres_ext_i.empty:
+            capacity_factor = n.generators_t.p_max_pu[vres_ext_i]
+            p_nom_vres = n.model["Generator-p_nom"].loc[vres_ext_i]
+            if p_nom_vres.dims[-1] != generator_dim:
+                p_nom_vres = p_nom_vres.rename({p_nom_vres.dims[-1]: generator_dim})
+            lhs += (p_nom_vres * (-EPSILON_VRES * xr.DataArray(capacity_factor))).sum(
+                generator_dim
+            )
 
     # Total demand per t
     demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
@@ -477,25 +488,26 @@ def add_operational_reserve_margin_constraint(n, sns, config):
 
 
 def update_capacity_constraint(n):
-    gen_i = n.generators.index
-    ext_i = n.generators.query("p_nom_extendable").index
-    fix_i = n.generators.query("not p_nom_extendable").index
-
     dispatch = n.model["Generator-p"]
     reserve = n.model["Generator-r"]
+    generator_dim = dispatch.dims[-1]
+    gen_i = _get_model_variable_index(dispatch)
 
-    capacity_fixed = n.generators.p_nom[fix_i]
+    ext_i = n.generators.loc[gen_i].query("p_nom_extendable").index
+    fix_i = n.generators.loc[gen_i].query("not p_nom_extendable").index
 
+    capacity_fixed = n.generators.loc[fix_i, "p_nom"]
     p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
 
     lhs = dispatch + reserve
 
-    # TODO check if `p_max_pu[ext_i]` is safe for empty `ext_i` and drop if cause in case
     if not ext_i.empty:
-        capacity_variable = n.model["Generator-p_nom"]
-        if not PYPSA_V1:
-            capacity_variable = capacity_variable.rename({"Generator-ext": "Generator"})
-        lhs = dispatch + reserve - capacity_variable * xr.DataArray(p_max_pu[ext_i])
+        capacity_variable = n.model["Generator-p_nom"].loc[ext_i]
+        if capacity_variable.dims[-1] != generator_dim:
+            capacity_variable = capacity_variable.rename(
+                {capacity_variable.dims[-1]: generator_dim}
+            )
+        lhs -= capacity_variable * xr.DataArray(p_max_pu[ext_i])
 
     rhs = (p_max_pu[fix_i] * capacity_fixed).reindex(columns=gen_i, fill_value=0)
 
@@ -536,14 +548,28 @@ def add_battery_constraints(n):
     discharger_bool = n.links.index.str.contains("battery discharger")
     charger_bool = n.links.index.str.contains("battery charger")
 
-    dischargers_ext = n.links[discharger_bool].query("p_nom_extendable").index
-    chargers_ext = n.links[charger_bool].query("p_nom_extendable").index
+    links_p_nom = n.model["Link-p_nom"]
+    links_p_nom_i = _get_model_variable_index(links_p_nom)
 
-    eff = n.links.efficiency[dischargers_ext].values
-    lhs = (
-        n.model["Link-p_nom"].loc[chargers_ext]
-        - n.model["Link-p_nom"].loc[dischargers_ext] * eff
+    dischargers_ext = (
+        n.links[discharger_bool]
+        .query("p_nom_extendable")
+        .index.intersection(links_p_nom_i)
     )
+    chargers_ext = (
+        n.links[charger_bool]
+        .query("p_nom_extendable")
+        .index.intersection(links_p_nom_i)
+    )
+
+    if len(chargers_ext) != len(dischargers_ext):
+        raise ValueError("Mismatch between active battery chargers and dischargers.")
+
+    if chargers_ext.empty:
+        return
+
+    eff = n.links.loc[dischargers_ext, "efficiency"].values
+    lhs = links_p_nom.loc[chargers_ext] - links_p_nom.loc[dischargers_ext] * eff
 
     n.model.add_constraints(lhs == 0, name="Link-charger_ratio")
 
@@ -1056,23 +1082,22 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
     # get the indices of all backward links (reversed)
     backward_i = get_backward_i(forward_i)
 
-    # get the p_nom optimization variables for the links using the get_var function
     links_p_nom = n.model["Link-p_nom"]
+    links_p_nom_i = _get_model_variable_index(links_p_nom)
 
-    if PYPSA_V1:
-        links_p_nom_index = links_p_nom.indexes["name"]
-    else:
-        links_p_nom_index = links_p_nom.indexes["Link-ext"]
+    forward_active = forward_i.isin(links_p_nom_i)
+    backward_active = backward_i.isin(links_p_nom_i)
 
-    # only consider forward and backward links that are present in the optimization variables
-    subset_forward = forward_i.intersection(links_p_nom_index)
-    subset_backward = backward_i.intersection(links_p_nom_index)
+    if not np.array_equal(forward_active, backward_active):
+        raise ValueError("Mismatch between active forward and backward links.")
 
-    # ensure we have a matching number of forward and backward links
-    if len(subset_forward) != len(subset_backward):
-        raise ValueError("Mismatch between forward and backward links.")
+    forward_i = forward_i[forward_active]
+    backward_i = backward_i[backward_active]
 
-    # define the lefthand side of the constrain p_nom (forward) - p_nom (backward) = 0
+    if forward_i.empty:
+        return
+
+    # define the lefthand side of the constraint p_nom (forward) - p_nom (backward) = 0
     # this ensures that the forward links always have the same maximum nominal power as their backward counterpart
     lhs = links_p_nom.loc[backward_i] - links_p_nom.loc[forward_i]
 
