@@ -319,12 +319,11 @@ def add_EQ_constraints(n, o, scaling=1e-1):
         lgrouper = n.loads.bus
         sgrouper = n.storage_units.bus
     load = (
-        n.snapshot_weightings.generators
-        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+        n.snapshot_weightings.generators @ n.loads_t.p_set.T.groupby(lgrouper).sum().T
     )
     inflow = (
         n.snapshot_weightings.stores
-        @ n.storage_units_t.inflow.groupby(sgrouper, axis=1).sum()
+        @ n.storage_units_t.inflow.T.groupby(sgrouper).sum().T
     )
     inflow = inflow.reindex(load.index).fillna(0.0)
     rhs = scaling * (level * load - inflow)
@@ -591,8 +590,7 @@ def add_RES_constraints(n, res_share, config):
     dgrouper = ren_discharger.bus0.map(n.buses.country)
 
     load = (
-        n.snapshot_weightings.generators
-        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+        n.snapshot_weightings.generators @ n.loads_t.p_set.T.groupby(lgrouper).sum().T
     )
     rhs = res_share * load
 
@@ -649,7 +647,7 @@ def _add_land_use_constraint(n):
         existing.index += " " + carrier + "-" + snakemake.wildcards.planning_horizons
         n.generators.loc[existing.index, "p_nom_max"] -= existing
 
-    n.generators.p_nom_max.clip(lower=0, inplace=True)
+    n.generators["p_nom_max"] = n.generators.p_nom_max.clip(lower=0)
 
     # Where land use constraint reduces p_nom_max below p_nom / p_nom_min,
     # cap both down to p_nom_max to remain feasible.
@@ -701,7 +699,7 @@ def _add_land_use_constraint_m(n):
                 sel_p_year
             ].rename(lambda x: x[:-4] + current_horizon)
 
-    n.generators.p_nom_max.clip(lower=0, inplace=True)
+    n.generators["p_nom_max"] = n.generators.p_nom_max.clip(lower=0)
 
 
 def add_h2_network_cap(n, cap):
@@ -1031,7 +1029,7 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
         return
 
     # ensure that the 'reversed' column is boolean and identify all link carriers that have 'reversed' links
-    n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
+    n.links["reversed"] = n.links.reversed.fillna(False).astype(bool)
     carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
 
     # get the indices of all forward links (non-reversed), that have a reversed counterpart

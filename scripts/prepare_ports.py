@@ -123,7 +123,7 @@ if __name__ == "__main__":
     ports.loc[ports["Harbor Size"].isin(["Large"]), "Harbor_size_nr"] = 3
 
     df1 = ports.copy()
-    df1 = df1.groupby(["country_full_name"]).sum("Harbor_size_nr")
+    df1 = df1.groupby("country_full_name")[["Harbor_size_nr"]].sum()
     df1 = df1[["Harbor_size_nr"]]
     df1 = df1.rename(columns={"Harbor_size_nr": "Total_Harbor_size_nr"})
 

@@ -449,7 +449,7 @@ def aggregate_computational_stats(name, dict_dfs):
     if df_comb.empty:
         return pd.DataFrame()
 
-    df_comb_agg = df_comb.agg({"total_time": np.sum, "max_memory": np.max})
+    df_comb_agg = df_comb.agg({"total_time": "sum", "max_memory": "max"})
     df_comb_agg["mean_load"] = weigh_avg(df_comb)
 
     df_comb_agg = df_comb_agg.to_frame().transpose().reset_index(drop=True)

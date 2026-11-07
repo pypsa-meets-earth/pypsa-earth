@@ -110,9 +110,9 @@ if __name__ == "__main__":
 
     # countries = ["EG", "BH"]
 
-    if regions["name"][0][
-        :3
-    ].isalpha():  # TODO clean later by changing all codes to 2 letters
+    if (
+        regions["name"].iloc[0][:3].isalpha()
+    ):  # TODO clean later by changing all codes to 2 letters
         regions["name"] = regions["name"].apply(
             lambda name: three_2_two_digits_country(name[:3]) + name[3:]
         )
