@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix country and carrier capacity limit constraints to use generators represented in the optimization model, exclude inactive generators from existing-capacity accounting, and fix the `include_existing` code path [PR #2110](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2110)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
