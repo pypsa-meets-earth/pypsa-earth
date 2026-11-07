@@ -817,7 +817,12 @@ def drop_isolated_networks(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
@@ -1025,7 +1030,12 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
