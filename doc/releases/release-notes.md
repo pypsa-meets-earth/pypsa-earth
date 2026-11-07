@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix bus-level load aggregation by grouping loads by their connected buses when identifying, merging, and transforming isolated subnetworks [PR #2112](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2112)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)

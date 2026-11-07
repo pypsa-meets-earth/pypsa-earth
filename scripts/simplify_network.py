@@ -876,7 +876,8 @@ def transform_to_gdf(n, network_crs):
     buses_df["bus_id"] = buses_df.index
 
     # load data are crucial to deal with sub-networks
-    buses_df = buses_df.join(n.loads_t.p_set.sum().T.rename("load"))
+    load_by_bus = n.loads_t.p_set.sum().groupby(n.loads.bus).sum()
+    buses_df["load"] = load_by_bus.reindex(buses_df.index, fill_value=0.0)
     buses_df["load_in_subnetw"] = buses_df.groupby(["country", "sub_network"])[
         "load"
     ].transform("sum")
