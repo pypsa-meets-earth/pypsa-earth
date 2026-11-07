@@ -2889,6 +2889,13 @@ def add_heat(
             )
 
 
+def _weighted_resample(df, weights, offset):
+    """Resample a time series using snapshot durations as weights."""
+    weighted_sum = df.multiply(weights, axis=0).resample(offset).sum()
+    valid_weights = df.notna().multiply(weights, axis=0).resample(offset).sum()
+    return weighted_sum.divide(valid_weights.where(valid_weights != 0))
+
+
 def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
     """
     Resample the network to a lower temporal resolution by averaging every n hours.
@@ -2905,23 +2912,30 @@ def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
     pypsa.Network
         A new PyPSA network resampled to the specified temporal resolution.
     """
-    # logger.info(f'Resampling the network to {offset}')
+    offset = offset.casefold()
+
     m = n.copy(snapshots=[])
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
     for c in n.iterate_components():
         pnl = getattr(m, c.list_name + "_t")
+        weights = (
+            n.snapshot_weightings.stores
+            if c.name in {"Store", "StorageUnit"}
+            else n.snapshot_weightings.generators
+        )
+
         for k, df in c.pnl.items():
             if not df.empty:
                 if c.list_name == "stores" and k == "e_max_pu":
-                    pnl[k] = df.resample(offset.casefold()).min()
+                    pnl[k] = df.resample(offset).min()
                 elif c.list_name == "stores" and k == "e_min_pu":
-                    pnl[k] = df.resample(offset.casefold()).max()
+                    pnl[k] = df.resample(offset).max()
                 else:
-                    pnl[k] = df.resample(offset.casefold()).mean()
+                    pnl[k] = _weighted_resample(df, weights, offset)
 
     return m
 
