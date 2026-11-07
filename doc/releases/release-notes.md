@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
