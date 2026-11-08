@@ -6,9 +6,9 @@ import logging
 import shutil
 
 import country_converter as coco
-import numpy as np
 import pandas as pd
-from _helpers import BASE_DIR, read_csv_nafix
+import requests
+from _helpers import BASE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,9 @@ def download_number_of_vehicles():
     Downloads and returns the number of registered vehicles as tabular data
     from the Global Health Observatory (GHO) repository data and from Wikipedia.
 
-    The csv data from the WHO website is imported
-    from 'https://apps.who.int/gho/data/node.main.A995'.
+    The data on the indicator RS_194 ("Number of registered vehicles") is
+    retrieved from the WHO GHO OData API: 'https://ghoapi.azureedge.net/api/RS_194'.
+    See 'https://www.who.int/data/gho/info/gho-odata-api' for documentation.
     A few countries are missing in the WHO list (e.g. South Africa, Algeria).
     Therefore, the number of vehicles per country table from Wikipedia
     is also imported for completion (prio 2):
@@ -47,15 +48,15 @@ def download_number_of_vehicles():
 
     def _clean_data(df):
         df = df.dropna(subset=["number cars"])
-        df.loc[:, "number cars"] = df.loc[:, "number cars"].astype(int)
+        df = df.assign(**{"number cars": df["number cars"].astype(int)})
         return df  # [["Country", "number cars"]]
 
     storage_options = {"User-Agent": "Mozilla/5.0"}
-    url = "https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv"
+    url = "https://ghoapi.azureedge.net/api/RS_194"
     try:
-        vehicles_gho = read_csv_nafix(
-            url, storage_options=storage_options, encoding="utf8"
-        )
+        response = requests.get(url, headers=storage_options, timeout=60)
+        response.raise_for_status()
+        vehicles_gho = pd.DataFrame(response.json()["value"])
         print("File read successfully.")
     except Exception as e:
         logger.warning(
@@ -63,18 +64,19 @@ def download_number_of_vehicles():
         )
         return pd.DataFrame()
 
+    vehicles_gho = vehicles_gho[vehicles_gho["SpatialDimType"] == "COUNTRY"]
+
+    # Keep only the most recent record of each country
+    vehicles_gho = vehicles_gho.sort_values("TimeDim").drop_duplicates(
+        subset="SpatialDim", keep="last"
+    )
+
     vehicles_gho = vehicles_gho.rename(
-        columns={
-            "Countries, territories and areas": "Country",
-            "Number of registered vehicles": "number cars",
-        }
-    )
+        columns={"SpatialDim": "Country", "NumericValue": "number cars"}
+    )[["Country", "number cars"]]
 
+    # The OData API provides ISO3 codes, which are converted to ISO2 here
     vehicles_gho = add_iso2_country_code(vehicles_gho)
-
-    vehicles_gho["number cars"] = (
-        vehicles_gho["number cars"].str.replace(" ", "").replace("", np.nan)
-    )
 
     vehicles_gho = _clean_data(vehicles_gho)
 
