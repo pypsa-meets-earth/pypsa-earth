@@ -18,7 +18,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `prepare_transport_data_input` is no longer available [Issue #2031](https://github.com/pypsa-meets-earth/pypsa-earth/issues/2031)
+* Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `prepare_transport_data_input` is no longer available [PR #2118](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2118)
 
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
