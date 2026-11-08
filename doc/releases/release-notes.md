@@ -24,7 +24,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix AC branch detection during link simplification by passing the network explicitly to `contains_ac`, avoiding reliance on a module-level network variable [PR #2113](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2113)
 
-* Fix natura exclusion removing all land (zero solar and wind potential) with recent GDAL versions by selecting protected cells explicitly [Issue #2093](https://github.com/pypsa-meets-earth/pypsa-earth/issues/2093)
+* Fix natura exclusion removing all land (zero solar and wind potential) with recent GDAL versions by selecting protected cells explicitly [PR #2117](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2117)
 
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
