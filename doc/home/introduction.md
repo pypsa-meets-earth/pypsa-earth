@@ -74,7 +74,7 @@ PyPSA-Earth work is released under multiple licenses:
 - Configuration files are mostly licensed under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).
 - Data files are licensed under different licenses as noted below.
 
-Individual files contain license information in the header or in the [dep5](.reuse/dep5). Additional licenses and urls of the data used in PyPSA-Earth:
+Individual files contain license information in the header or in the [REUSE.toml](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/REUSE.toml). Additional licenses and urls of the data used in PyPSA-Earth:
 
 {{ read_csv('configtables/licenses.csv') }}
 
