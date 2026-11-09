@@ -38,6 +38,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Keep one copy of OSM elements that appear in more than one country extract, so that cross-border lines, cables and HVDC links are no longer counted once per extract [PR #2076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2076)
 
+* Add alternate source for downloading World Port Index data [PR #2116](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2116)
+
 # PyPSA-Earth 0.10.0
 
 **New Features and Major Changes**
