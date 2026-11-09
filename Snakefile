@@ -5,7 +5,6 @@
 import os
 import sys
 import warnings
-import yaml
 
 sys.path.append("./scripts")
 
@@ -24,6 +23,7 @@ from _helpers import (
     update_cutout_config,
 )
 from build_demand_profiles import get_load_paths_gegis
+from cost_year import read_available_cost_years, resolve_sector_cost_year
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
@@ -78,64 +78,41 @@ RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 def get_available_cost_years():
     metadata = checkpoints.retrieve_technology_data_config.get().output[0]
-
-    with metadata.open() as f:
-        technology_data_config = yaml.safe_load(f)
-
-    years = technology_data_config.get("years")
-    if not years:
-        raise ValueError(
-            "No cost years found in the configured technology-data release."
-        )
-
-    return sorted(map(int, years))
+    return read_available_cost_years(metadata)
 
 
-def get_closest_cost_year(year):
-    year = int(year)
+def get_configured_sector_cost_year(planning_horizon):
+    selection = config["costs"].get("year_selection", "closest")
+    retrieve_cost_data = config["enable"].get("retrieve_cost_data", True)
 
+    available_years = None
+
+    if (
+        config["foresight"] == "myopic"
+        and selection == "closest"
+        and retrieve_cost_data
+    ):
+        available_years = get_available_cost_years()
+
+    return resolve_sector_cost_year(
+        planning_horizon,
+        foresight=config["foresight"],
+        costs=config["costs"],
+        retrieve_cost_data=retrieve_cost_data,
+        available_years=available_years,
+    )
+
+
+def get_raw_cost_file(wildcards):
     if not config["enable"].get("retrieve_cost_data", True):
-        return year
+        return "data/costs.csv"
 
-    available_years = get_available_cost_years()
-
-    if year in available_years:
-        return year
-
-    closest_year = min(
-        available_years,
-        key=lambda available_year: abs(available_year - year),
-    )
-
-    warnings.warn(
-        f"Cost year {year} is not available in technology-data. "
-        f"Using closest available year {closest_year} instead."
-    )
-
-    return closest_year
-
-
-def get_sector_costs(wildcards):
-    if config["foresight"] == "overnight":
-        year = config["costs"]["year"]
+    if wildcards.scope == "sec":
+        year = get_configured_sector_cost_year(wildcards.year)
     else:
-        year = get_closest_cost_year(wildcards.planning_horizons)
+        year = int(wildcards.year)
 
-    return f"resources/{RDIR}costs_{year}_sec.csv"
-
-
-def get_all_sector_costs(wildcards):
-    if config["foresight"] == "overnight":
-        return f"resources/{RDIR}costs_{config['costs']['year']}_sec.csv"
-
-    years = sorted(
-        {
-            get_closest_cost_year(year)
-            for year in config["scenario"]["planning_horizons"]
-        }
-    )
-
-    return [f"resources/{RDIR}costs_{year}_sec.csv" for year in years]
+    return f"resources/{RDIR}costs_{year}.csv"
 
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
@@ -639,11 +616,7 @@ rule process_cost_data:
         storage_techs=config["storage_techs"],
     input:
         network="networks/" + RDIR + "base.nc",
-        costs=branch(
-            config["enable"].get("retrieve_cost_data", True),
-            "resources/" + RDIR + "costs_{year}.csv",
-            "data/costs.csv",
-        ),
+        costs=get_raw_cost_file,
     output:
         "resources/" + RDIR + "costs_{year}_{scope}.csv",
     log:
@@ -1452,7 +1425,7 @@ rule prepare_sector_network:
             },
         ),
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        costs=get_sector_costs,
+        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
             "resources/"
@@ -1528,7 +1501,7 @@ rule add_export:
         crs=config["crs"],
     input:
         export_ports="resources/" + SECDIR + "export_ports.csv",
-        costs=get_sector_costs,
+        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         ship_profile="resources/" + SECDIR + "ship_profile.csv",
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
@@ -1958,7 +1931,7 @@ if config["foresight"] == "overnight":
         input:
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
-            costs=get_sector_costs,
+            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
@@ -2005,7 +1978,10 @@ rule make_sector_summary:
             **config["scenario"],
             **config["costs"],
         ),
-        costs=get_all_sector_costs,
+        costs=expand(
+            "resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            planning_horizons=config["scenario"]["planning_horizons"],
+        ),
         plots=expand(
             RESDIR
             + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}.pdf",
@@ -2247,7 +2223,7 @@ rule build_industry_demand:  #default data
         + "demand/base_industry_totals_{planning_horizons}.csv",
         industrial_database="resources/industrial_database.csv",
         ammonia_production="resources/ammonia_production.csv",
-        costs=get_sector_costs,
+        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
         industrial_energy_demand_per_node="resources/"
@@ -2374,7 +2350,7 @@ if config["foresight"] == "myopic":
             # clustered_pop_layout="resources/"
             # + SECDIR
             # + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
-            costs=get_sector_costs,
+            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
         output:
             RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
@@ -2434,7 +2410,7 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
             network_p=solved_previous_horizon,  #solved network at previous time step
-            costs=get_sector_costs,
+            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             cop_soil_total="resources/"
             + SECDIR
             + "cops/cop_soil_total_elec_s{simpl}_{clusters}_{planning_horizons}.nc",
@@ -2473,7 +2449,7 @@ if config["foresight"] == "myopic":
         input:
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
-            costs=get_sector_costs,
+            costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
