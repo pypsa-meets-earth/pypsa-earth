@@ -646,7 +646,8 @@ def _add_land_use_constraint(n):
             .sum()
         )
         existing.index += " " + carrier + "-" + snakemake.wildcards.planning_horizons
-        n.generators.loc[existing.index, "p_nom_max"] -= existing
+        target = existing.index.intersection(n.generators.index)
+        n.generators.loc[target, "p_nom_max"] -= existing.loc[target]
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 
@@ -694,11 +695,14 @@ def _add_land_use_constraint_m(n):
             ind2 = [
                 i for i in ind if i + " " + carrier + "-" + p_year in existing.index
             ]
-            sel_current = [i + " " + carrier + "-" + current_horizon for i in ind2]
             sel_p_year = [i + " " + carrier + "-" + p_year for i in ind2]
-            n.generators.loc[sel_current, "p_nom_max"] -= existing.loc[
-                sel_p_year
-            ].rename(lambda x: x[:-4] + current_horizon)
+            existing_current = existing.loc[sel_p_year].rename(
+                lambda x: x[:-4] + current_horizon
+            )
+            existing_current = existing_current[
+                existing_current.index.isin(n.generators.index)
+            ]
+            n.generators.loc[existing_current.index, "p_nom_max"] -= existing_current
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 
