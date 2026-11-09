@@ -1004,21 +1004,26 @@ def add_existing(n):
             .replace(".nc", ".csv")
         )
         df = read_csv_nafix(directory + "/electrolyzer_caps_" + n_name, index_col=0)
-        existing_electrolyzers = df.p_nom_opt.values
+        existing_electrolyzers = df["p_nom_opt"]
 
         h2_index = n.links[n.links.carrier == "H2 Electrolysis"].index
-        n.links.loc[h2_index, "p_nom_min"] = existing_electrolyzers
+        matching_h2 = h2_index.intersection(existing_electrolyzers.index)
+        n.links.loc[matching_h2, "p_nom_min"] = existing_electrolyzers.reindex(
+            matching_h2
+        )
 
         # n_name = snakemake.input.network.split("/")[-1].replace(str(snakemake.config["scenario"]["clusters"][0]), "").\
         #     replace(".nc", ".csv").replace(str(snakemake.config["costs"]["discountrate"][0]), "")
         df = read_csv_nafix(directory + "/res_caps_" + n_name, index_col=0)
 
         for tech in snakemake.config["custom_data"]["renewables"]:
-            # df = read_csv_nafix(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
             existing_res = df.loc[tech]
-            existing_res.index = existing_res.index.str.apply(lambda x: x + tech)
             tech_index = n.generators[n.generators.carrier == tech].index
-            n.generators.loc[tech_index, tech] = existing_res
+
+            capacities = n.generators.loc[tech_index, "bus"].map(existing_res)
+            capacities = capacities.dropna()
+
+            n.generators.loc[capacities.index, "p_nom_min"] = capacities
 
 
 def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
