@@ -32,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix myopic land-use constraints to handle missing current-horizon generators without raising `KeyError`, for both standard and generator-clustered networks [PR #2114](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2114)
 
+* Fix myopic land-use accounting by excluding current-horizon capacities from existing land-use deductions and raising an explicit error when land-use limits conflict with mandatory capacities [PR #2120](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2120)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Remove unused variables and obsolete commented-out code, and replace dynamic pandas queries with explicit boolean indexing [PR #2083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2083)
