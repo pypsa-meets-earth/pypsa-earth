@@ -389,16 +389,17 @@ def _aggregate_and_move_components(
 
 
 # Filter AC lines to avoid mixing with DC part when processing links
-def contains_ac(ls):
+def contains_ac(n, ls):
     def is_ac_branch(x):
         if x[0] == "Link":
             return n.links.loc[x[1]].dc != True
         elif x[0] == "Line":
             return n.lines.loc[x[1]].dc != True
         else:
-            logger.error("Unknown branch type for the instance {x}")
+            logger.error(f"Unknown branch type for the instance {x}")
+            return False
 
-    return any(list(map(lambda x: is_ac_branch(x), ls)))
+    return any(is_ac_branch(x) for x in ls)
 
 
 def simplify_links(
@@ -485,7 +486,7 @@ def simplify_links(
             for m, ls in G.adj[u].items():
                 # AC lines can be captured in case of complicated network topologies
                 # even despite using `nodes` defined by links
-                if m not in nodes or m in seen or contains_ac(ls):
+                if m not in nodes or m in seen or contains_ac(n, ls):
                     continue
 
                 buses = [u, m]
@@ -495,7 +496,7 @@ def simplify_links(
                     seen.add(m)
                     for m2, ls2 in G.adj[m].items():
                         # there may be AC lines which connect ends of DC chains
-                        if m2 in seen or m2 == u or contains_ac(ls2):
+                        if m2 in seen or m2 == u or contains_ac(n, ls2):
                             continue
                         buses.append(m2)
                         links.append(list(ls2))  # [name for name in ls])
@@ -817,7 +818,12 @@ def drop_isolated_networks(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
@@ -871,7 +877,8 @@ def transform_to_gdf(n, network_crs):
     buses_df["bus_id"] = buses_df.index
 
     # load data are crucial to deal with sub-networks
-    buses_df = buses_df.join(n.loads_t.p_set.sum().T.rename("load"))
+    load_by_bus = n.loads_t.p_set.sum().groupby(n.loads.bus).sum()
+    buses_df["load"] = load_by_bus.reindex(buses_df.index, fill_value=0.0)
     buses_df["load_in_subnetw"] = buses_df.groupby(["country", "sub_network"])[
         "load"
     ].transform("sum")
@@ -1025,7 +1032,12 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
