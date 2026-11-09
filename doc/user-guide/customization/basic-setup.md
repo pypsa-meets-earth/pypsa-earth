@@ -98,7 +98,7 @@ When deriving a year from snapshots, the range must remain within one calendar y
 
 PyPSA-Earth processes historical weather data using [atlite](https://atlite.readthedocs.io/en/latest/). The selected cutout must cover the snapshot dates.
 
-Set `atlite.default: derive_from_snapshots` to generate the cutout name from the snapshot year and the module configured under `atlite.cutouts.derive_from_snapshots`:
+Set `atlite.default: derive_from_snapshots` to format `name_template` with the snapshot year and the configured module:
 
 ```yaml
 snapshots:
@@ -114,12 +114,13 @@ atlite:
   default: derive_from_snapshots
   cutouts:
     derive_from_snapshots:
+      name_template: "cutout-{year}-{module}"
       module: era5
       dx: 0.3
       dy: 0.3
 ```
 
-This selects `cutout-2018-era5`. Tutorial runs append `-tutorial`. Automatic cutout naming uses the snapshot year independently of an explicitly selected demand year. The planning horizon remains unchanged.
+This selects `cutout-2018-era5.nc`. Set `name_template` without the `.nc` extension. Tutorial runs append `-tutorial`. Automatic cutout naming uses the snapshot year independently of an explicitly selected demand year. The planning horizon remains unchanged.
 
 For a custom cutout, specify its name and definition explicitly:
 

@@ -504,8 +504,10 @@ def resolve_weather_configuration(config: dict) -> dict:
             )
 
         cutout_config = cutouts[automatic].copy()
-        module = cutout_config["module"]
-        cutout_name = f"cutout-{snapshot_year}-{module}"
+        name_template = cutout_config.pop("name_template")
+        cutout_name = name_template.format(
+            year=snapshot_year, module=cutout_config["module"]
+        )
         if config.get("tutorial", False):
             cutout_name += "-tutorial"
 
@@ -521,9 +523,9 @@ def validate_cutout_configuration(config: dict) -> dict:
     """
     Validate how the resolved weather cutout is obtained.
 
-    The function prevents conflicting build and retrieve options, checks
-    whether a requested pre-built cutout is available, and logs an informational message when the user
-    chooses to build a cutout that can already be retrieved.
+    Check whether a requested pre-built cutout is available and log an
+    informational message when the user chooses to build a cutout that
+    can already be retrieved.
 
     Parameters
     ----------
@@ -541,11 +543,6 @@ def validate_cutout_configuration(config: dict) -> dict:
     build_cutout = config["enable"].get("build_cutout", False)
     retrieve_cutout = config["enable"].get("retrieve_cutout", False)
     cutout_name = config["atlite"]["default"]
-
-    if build_cutout and retrieve_cutout:
-        raise ValueError(
-            "`build_cutout` and `retrieve_cutout` cannot both be enabled. Choose one method for obtaining the weather cutout."
-        )
 
     prebuilt_cutouts = {
         Path(output).stem

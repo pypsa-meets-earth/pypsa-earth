@@ -1,8 +1,9 @@
 atlite:
   nprocesses: 4
-  default: derive_from_snapshots # Or an explicit cutout name
+  default: derive_from_snapshots # Use an explicit cutout name or derive it from snapshots
   cutouts:
     derive_from_snapshots:
+      name_template: "cutout-{year}-{module}" # File stem; e.g. cutout-2013-era5.nc
       module: era5
       dx: 0.3 # cutout resolution
       dy: 0.3 # cutout resolution

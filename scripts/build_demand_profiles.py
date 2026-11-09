@@ -290,19 +290,14 @@ def read_demcast_load(
 def align_demand_to_snapshots(
     demand_profiles: pd.DataFrame,
     weather_year: int,
-    start_date,
-    end_date,
+    snapshots: pd.DatetimeIndex,
 ) -> pd.DataFrame:
     """
-    Align hourly demand to snapshots by calendar month, day, and hour.
+    Map demand by calendar date and hour, without preserving weekdays.
 
-    The end boundary is exclusive. February 29 uses February 28 when
-    the source year is not a leap year. Weekdays are not preserved
-    when mapping between different years.
+    Use February 28 demand for February 29 snapshots if the source year
+    is not a leap year.
     """
-    snapshots = pd.date_range(
-        start=start_date, end=end_date, freq="h", inclusive="left"
-    )
     if snapshots.empty:
         raise ValueError("The configured demand snapshot range is empty.")
 
@@ -311,18 +306,14 @@ def align_demand_to_snapshots(
     if profiles.index.hasnans or not profiles.index.is_unique:
         raise ValueError("Demand timestamps must be valid and unique.")
 
-    source_times = []
-    leap_day_fallback = False
     source_is_leap = pd.Timestamp(year=weather_year, month=1, day=1).is_leap_year
-
-    for timestamp in snapshots:
-        if timestamp.month == 2 and timestamp.day == 29 and not source_is_leap:
-            source_times.append(timestamp.replace(year=weather_year, day=28))
-            leap_day_fallback = True
-        else:
-            source_times.append(timestamp.replace(year=weather_year))
-
-    source_times = pd.DatetimeIndex(source_times)
+    leap_days = (snapshots.month == 2) & (snapshots.day == 29) & (not source_is_leap)
+    source_times = pd.DatetimeIndex(
+        [
+            timestamp.replace(year=weather_year, day=28 if fallback else timestamp.day)
+            for timestamp, fallback in zip(snapshots, leap_days)
+        ]
+    )
     missing = source_times.difference(profiles.index)
     if not missing.empty:
         raise ValueError(
@@ -337,13 +328,12 @@ def align_demand_to_snapshots(
             "Demand data contain missing values for the requested snapshots."
         )
 
-    if leap_day_fallback:
+    if leap_days.any():
         logger.info(
             "Demand year %s has no February 29; using February 28 demand "
             "for February 29 snapshots.",
             weather_year,
         )
-
     return aligned
 
 
@@ -356,8 +346,6 @@ def build_demand_profiles(
     countries,
     scale,
     weather_year,
-    start_date,
-    end_date,
     out_path,
 ):
     """
@@ -378,10 +366,6 @@ def build_demand_profiles(
         List of countries that is config input
     scale : float
         The scale factor is multiplied with the load (1.3 = 30% more load)
-    start_date: parameter
-        The start_date is the first hour of the first day of the snapshots
-    end_date: parameter
-        The end_date is the last hour of the last day of the snapshots
 
     Returns
     -------
@@ -475,7 +459,7 @@ def build_demand_profiles(
     )
 
     demand_profiles = align_demand_to_snapshots(
-        demand_profiles, weather_year, start_date, end_date
+        demand_profiles, weather_year, n.snapshots
     )
     demand_profiles.to_csv(out_path, header=True)
 
@@ -498,8 +482,6 @@ if __name__ == "__main__":
     countries = snakemake.params.countries
     admin_shapes = snakemake.input.gadm_shapes
     scale = snakemake.params.load_options.get("scale", 1.0)
-    start_date = snakemake.params.snapshots["start"]
-    end_date = snakemake.params.snapshots["end"]
     out_path = snakemake.output[0]
 
     load_source = snakemake.params.load_options.get("source", "gegis")
@@ -519,7 +501,5 @@ if __name__ == "__main__":
         countries,
         scale,
         weather_year,
-        start_date,
-        end_date,
         out_path,
     )
