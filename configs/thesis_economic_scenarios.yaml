@@ -1,0 +1,4 @@
+# Additional thesis economic scenario parameters.
+# Merge with the existing PyPSA-Earth configuration.
+costs:
+  additional_technology_costs: data/thesis_technology_costs.csv

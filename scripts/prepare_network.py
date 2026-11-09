@@ -544,6 +544,7 @@ def add_hydrogen_production(
             )
 
         capital_cost = float(costs.at[technology, "capital_cost"])
+        efficiency = float(costs.at[technology, "efficiency"])
 
         if not np.isfinite(capital_cost) or capital_cost <= 0:
             raise ValueError(
