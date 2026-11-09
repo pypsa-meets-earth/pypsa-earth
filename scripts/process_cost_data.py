@@ -415,32 +415,22 @@ def load_costs(
         ).sort_index()
 
         if additional.index.has_duplicates:
-            raise ValueError(
-                "Duplicate entries in additional technology costs."
-            )
+            raise ValueError("Duplicate entries in additional technology costs.")
 
         overlap = costs.index.intersection(additional.index)
         if len(overlap):
             raise ValueError(
-                "Additional technology costs overlap official data: "
-                f"{list(overlap)}"
+                "Additional technology costs overlap official data: " f"{list(overlap)}"
             )
 
         # The native currency converter handles exchange rates,
         # not inflation between different monetary years.
-        monetary = additional["unit"].astype(str).str.match(
-            r"^[A-Z]{3}/"
-        )
-        investment = (
-            additional.index.get_level_values("parameter")
-            == "investment"
-        )
-        years = pd.to_numeric(
-            additional["currency_year"], errors="coerce"
-        )
+        monetary = additional["unit"].astype(str).str.match(r"^[A-Z]{3}/")
+        investment = additional.index.get_level_values("parameter") == "investment"
+        years = pd.to_numeric(additional["currency_year"], errors="coerce")
 
-        invalid = monetary & investment & (
-            years.isna() | (years != TECH_DATA_REFERENCE_YEAR)
+        invalid = (
+            monetary & investment & (years.isna() | (years != TECH_DATA_REFERENCE_YEAR))
         )
 
         if invalid.any():
@@ -453,7 +443,6 @@ def load_costs(
             )
 
         costs = pd.concat([costs, additional]).sort_index()
-
 
     # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
