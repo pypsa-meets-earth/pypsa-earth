@@ -393,16 +393,17 @@ def _aggregate_and_move_components(
 
 
 # Filter AC lines to avoid mixing with DC part when processing links
-def contains_ac(ls):
+def contains_ac(n, ls):
     def is_ac_branch(x):
         if x[0] == "Link":
             return n.links.loc[x[1]].dc != True
         elif x[0] == "Line":
             return n.lines.loc[x[1]].dc != True
         else:
-            logger.error("Unknown branch type for the instance {x}")
+            logger.error(f"Unknown branch type for the instance {x}")
+            return False
 
-    return any(list(map(lambda x: is_ac_branch(x), ls)))
+    return any(is_ac_branch(x) for x in ls)
 
 
 def simplify_links(
@@ -489,7 +490,7 @@ def simplify_links(
             for m, ls in G.adj[u].items():
                 # AC lines can be captured in case of complicated network topologies
                 # even despite using `nodes` defined by links
-                if m not in nodes or m in seen or contains_ac(ls):
+                if m not in nodes or m in seen or contains_ac(n, ls):
                     continue
 
                 buses = [u, m]
@@ -499,7 +500,7 @@ def simplify_links(
                     seen.add(m)
                     for m2, ls2 in G.adj[m].items():
                         # there may be AC lines which connect ends of DC chains
-                        if m2 in seen or m2 == u or contains_ac(ls2):
+                        if m2 in seen or m2 == u or contains_ac(n, ls2):
                             continue
                         buses.append(m2)
                         links.append(list(ls2))  # [name for name in ls])
