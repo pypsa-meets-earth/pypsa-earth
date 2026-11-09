@@ -77,6 +77,7 @@ according to the following rules:
 - ``cutouts``: input data unzipped into the cutouts folder
 
 """
+
 import datetime as dt
 import os
 import re
@@ -132,11 +133,15 @@ def load_databundle_config(config: dict | str) -> dict:
 
 
 def download_and_unzip_zenodo(
-    config: dict, rootpath: str, hot_run: bool = True, disable_progress: bool = False
+    config: dict,
+    rootpath: str,
+    hot_run: bool = True,
+    disable_progress: bool = False,
 ) -> bool:
     """
-    download_and_unzip_zenodo(config, rootpath, dest_path, hot_run=True,
-    disable_progress=False)
+    download_and_unzip_zenodo(
+        config, rootpath, dest_path, hot_run=True, disable_progress=False
+    )
 
     Function to download and unzip the data from zenodo
 
@@ -157,22 +162,38 @@ def download_and_unzip_zenodo(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = os.path.join(rootpath, "tempfile.zip")
+    file_path = os.path.join(rootpath, f"tempfile_{resource}.zip")
     destination = os.path.join(BASE_DIR, config["destination"])
     url = config["urls"]["zenodo"]
 
     if hot_run:
         try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
             logger.info(f"Downloading resource '{resource}' from cloud '{url}'")
-            progress_retrieve(url, file_path, disable_progress=disable_progress)
-            logger.info(f"Extracting resources")
+            progress_retrieve(
+                url,
+                file_path,
+                disable_progress=disable_progress,
+            )
+            logger.info("Extracting resources")
             with ZipFile(file_path, "r") as zipObj:
                 # Extract all the contents of zip file in current directory
                 zipObj.extractall(path=destination)
+
             os.remove(file_path)
             logger.info(f"Downloaded resource '{resource}' from cloud '{url}'.")
-        except:
-            logger.warning(f"Failed download resource '{resource}' from cloud '{url}'.")
+            return True
+
+        except Exception as exc:
+            logger.warning(
+                f"Failed download resource '{resource}' from cloud '{url}': {exc}"
+            )
+
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
             return False
 
     return True
@@ -204,7 +225,7 @@ def download_and_unzip_gdrive(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = os.path.join(rootpath, "tempfile.zip")
+    file_path = os.path.join(rootpath, f"tempfile_{resource}.zip")
     destination = os.path.join(BASE_DIR, config["destination"])
     url = config["urls"]["gdrive"]
 
@@ -282,7 +303,7 @@ def download_and_unzip_protectedplanet(
     True when download is successful, False otherwise
     """
     resource = config["category"]
-    file_path = os.path.join(rootpath, "tempfile_wpda.zip")
+    file_path = os.path.join(rootpath, f"tempfile_{resource}.zip")
     destination = os.path.join(BASE_DIR, config["destination"])
     url = config["urls"]["protectedplanet"]
 
@@ -646,6 +667,46 @@ def _check_disabled_by_opt(config_bundle: dict, config_enable: dict) -> list:
     return disabled_outs
 
 
+def get_databundle_categories(
+    config_bundles: dict,
+    include_categories: list | None = None,
+    exclude_categories: list | None = None,
+) -> list:
+    """
+    get_databundle_categories(config_bundles, include_categories, exclude_categories)
+
+    Function to get the list of categories of data to download from the configuration file
+
+    Parameters
+    ----------
+    config_bundles : dict
+        Dictionary of configurations for all available bundles
+    include_categories : list, optional
+        List of categories to include in the result
+    exclude_categories : list, optional
+        List of categories to exclude from the result
+
+    Returns
+    -------
+    list
+        List of categories of data to download
+    """
+    if include_categories is None:
+        include_categories = []
+    if exclude_categories is None:
+        exclude_categories = []
+
+    categories = list(
+        set([config_bundles[conf]["category"] for conf in config_bundles])
+        - set(exclude_categories)
+    )
+
+    if include_categories:
+        categories = [cat for cat in categories if cat in include_categories]
+
+    return sorted(categories)
+
+
 def get_best_bundles_by_category(
     country_list: list,
     category: str,
@@ -731,8 +792,8 @@ def get_best_bundles(
     config_bundles: dict,
     tutorial: bool,
     config_enable: dict,
-    include_categories: list = [],
-    exclude_categories: list = [],
+    include_categories: list | None = None,
+    exclude_categories: list | None = None,
 ) -> list:
     """
     get_best_bundles(countries, category, config_bundles, tutorial)
@@ -760,9 +821,9 @@ def get_best_bundles(
         Whether data for tutorial shall be downloaded
     config_enable : dict
         Dictionary of the enabled/disabled scripts
-    include_categories : list
+    include_categories : list | None
         (Optional) Lists of config bundle categories to include; when empty
-    exclude_categories : list
+    exclude_categories : list | None
         (Optional) Lists of config bundle categories to exclude; when empty
 
     Returns
@@ -770,35 +831,27 @@ def get_best_bundles(
     list
         List of bundles to download
     """
+    databudles = dict(config_bundles)  # work on a copy
 
     # categories of data to download
-    categories = list(
-        set([config_bundles[conf]["category"] for conf in config_bundles])
+    categories = get_databundle_categories(
+        databudles, include_categories, exclude_categories
     )
-    if include_categories:
-        categories = [
-            category for category in categories if category in include_categories
-        ]
-
-    if exclude_categories:
-        categories = [
-            category for category in categories if category not in exclude_categories
-        ]
 
     # identify matched countries for every bundle
-    for bname in config_bundles:
-        config_bundles[bname]["matched_countries"] = [
-            c for c in config_bundles[bname]["countries"] if c in countries
+    for bname in databudles:
+        databudles[bname]["matched_countries"] = [
+            c for c in databudles[bname]["countries"] if c in countries
         ]
-        n_matched = len(config_bundles[bname]["matched_countries"])
-        config_bundles[bname]["n_matched"] = n_matched
+        n_matched = len(databudles[bname]["matched_countries"])
+        databudles[bname]["n_matched"] = n_matched
 
     # bundles to download
     bundles_to_download = []
 
     for cat in categories:
         selection_bundles = get_best_bundles_by_category(
-            countries, cat, config_bundles, tutorial, config_enable
+            countries, cat, databudles, tutorial, config_enable
         )
 
         # check if non-empty dictionary
@@ -815,7 +868,9 @@ def get_best_bundles(
 
 
 def get_best_bundles_in_snakemake(
-    config: dict, include_categories: list = [], exclude_categories: list = []
+    config: dict,
+    include_categories: list | None = None,
+    exclude_categories: list | None = None,
 ) -> list:
     """
     Function to get the best bundles to download in snakemake, given the configuration file and the categories to include/exclude.
@@ -824,9 +879,9 @@ def get_best_bundles_in_snakemake(
     ----------
     config : dict
         Configuration for the data bundles
-    include_categories : list
+    include_categories : list | None
         (Optional) Lists of config bundle categories to include; when empty
-    exclude_categories : list
+    exclude_categories : list | None
         (Optional) Lists of config bundle categories to exclude; when empty
 
     Returns
@@ -870,7 +925,7 @@ def datafiles_retrivedatabundle(config: dict, bundles_to_download: list) -> list
         List of output files from the bundles to download
     """
 
-    listoutputs = list(
+    listoutputs = sorted(
         set(
             [
                 inneroutput
@@ -977,13 +1032,11 @@ def retrieve_databundle(
         The function downloads and unzips the databundles and does not return anything.
     """
 
-    logger.warning(
-        "DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
+    logger.warning("DISCLAIMER LICENSES: the use of PyPSA-Earth is conditioned \n \
         to the acceptance of its multiple licenses.\n \
         The use of the code automatically implies that you accept all the licenses.\n \
         See our documentation for more information. \n \
-        Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence"
-    )
+        Link: https://pypsa-earth.readthedocs.io/en/latest/introduction.html#licence")
 
     logger.info("Bundles to be downloaded:\n\t" + "\n\t".join(bundles_to_download))
 
@@ -1001,6 +1054,7 @@ def retrieve_databundle(
 
     # initialize downloaded and missing bundles
     downloaded_bundles = []
+    max_attempts = 3
 
     # download the selected bundles
     for b_name in bundles_to_download:
@@ -1014,12 +1068,33 @@ def retrieve_databundle(
 
             try:
                 download_and_unzip = globals()[f"download_and_unzip_{host}"]
-                if download_and_unzip(
-                    config_bundles[b_name], rootpath, disable_progress=disable_progress
-                ):
-                    downloaded_bundle = True
-            except Exception:
-                logger.warning(f"Error in downloading bundle {b_name} - host {host}")
+            except KeyError:
+                logger.warning(f"No download function available for host {host}")
+                continue
+
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    downloaded_bundle = download_and_unzip(
+                        config_bundles[b_name],
+                        rootpath,
+                        disable_progress=disable_progress,
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        f"Error in downloading bundle {b_name} - host {host} "
+                        f"(attempt {attempt}/{max_attempts}): {exc}"
+                    )
+                    downloaded_bundle = False
+
+                if downloaded_bundle:
+                    break
+
+                if attempt < max_attempts:
+                    logger.info(
+                        f"Retrying bundle {b_name} - host {host} "
+                        f"(attempt {attempt + 1}/{max_attempts})"
+                    )
+                    time.sleep(10 * attempt)
 
             if downloaded_bundle:
                 downloaded_bundles.append(b_name)
@@ -1045,9 +1120,11 @@ def retrieve_databundle(
 
     missing_bundles = set(bundles_to_download) - set(downloaded_bundles)
     if missing_bundles:
-        logger.warning(
-            "The following bundles could not be downloaded:\n\t"
+        raise RuntimeError(
+            "Databundle retrieval was incomplete. The following bundles could not be downloaded:\n\t"
             + "\n\t".join(list(missing_bundles))
+            + "\n"
+            "Retry or run `python scripts/non_workflow/databundle_cli.py` for inspection."
         )
 
 
@@ -1116,7 +1193,9 @@ if __name__ == "__main__":
 
         from _helpers import mock_snakemake
 
-        snakemake = mock_snakemake("retrieve_databundle_light")
+        snakemake = mock_snakemake(
+            "retrieve_cutout", cutout="cutout-era5-2013-tutorial"
+        )
 
     # TODO Make logging compatible with progressbar (see PR #102, PyPSA-Eur)
     configure_logging(snakemake)
@@ -1147,4 +1226,4 @@ if __name__ == "__main__":
     if snakemake.input:
         check_retrieved_cutout_match(snakemake)
 
-    debug_using_databundle_cli(snakemake)
+    # debug_using_databundle_cli(snakemake)
