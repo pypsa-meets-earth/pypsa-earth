@@ -639,32 +639,37 @@ def add_land_use_constraint(n):
 def _add_land_use_constraint(n):
     # warning: this will miss existing offwind which is not classed AC-DC and has carrier 'offwind'
 
+    current_horizon = int(snakemake.wildcards.planning_horizons)
+
     for carrier in ["solar", "solar rooftop", "onwind", "offwind-ac", "offwind-dc"]:
-        existing = (
-            n.generators.loc[n.generators.carrier == carrier, "p_nom"]
-            .groupby(n.generators.bus.map(n.buses.location))
-            .sum()
-        )
-        existing.index += " " + carrier + "-" + snakemake.wildcards.planning_horizons
+        # Only capacities built before the current horizon consume land.
+        previous = n.generators.loc[
+            (n.generators.carrier == carrier)
+            & (n.generators.build_year < current_horizon)
+            & (n.generators.p_nom > 0)
+        ]
+
+        if previous.empty:
+            continue
+
+        existing = previous.groupby(previous.bus.map(n.buses.location))["p_nom"].sum()
+
+        existing.index += f" {carrier}-{current_horizon}"
+
         target = existing.index.intersection(n.generators.index)
+
         n.generators.loc[target, "p_nom_max"] -= existing.loc[target]
 
-    n.generators.p_nom_max.clip(lower=0, inplace=True)
+    n.generators["p_nom_max"] = n.generators["p_nom_max"].clip(lower=0)
 
-    # Where land use constraint reduces p_nom_max below p_nom / p_nom_min,
-    # cap both down to p_nom_max to remain feasible.
-    # This happens when existing capacity already exceeds the land use budget.
-    violating = n.generators.p_nom_min > n.generators.p_nom_max
+    # Never silently reduce mandatory existing capacities.
+    violating = n.generators.p_nom_min > n.generators.p_nom_max + 1e-6
+
     if violating.any():
-        logger.warning(
-            f"Land use constraint reduced p_nom_max below p_nom/p_nom_min for "
-            f"{violating.sum()} generators. Capping p_nom and p_nom_min to p_nom_max:\n"
-            f"{n.generators.index[violating].tolist()}"
+        names = n.generators.index[violating].tolist()
+        raise ValueError(
+            "Land-use constraints conflict with mandatory capacities: " f"{names}"
         )
-        n.generators.loc[violating, "p_nom_min"] = n.generators.loc[
-            violating, "p_nom_max"
-        ]
-        n.generators.loc[violating, "p_nom"] = n.generators.loc[violating, "p_nom_max"]
 
 
 def _add_land_use_constraint_m(n):
