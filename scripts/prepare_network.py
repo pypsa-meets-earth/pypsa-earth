@@ -430,7 +430,6 @@ def add_bitcoin_mining(
     )
 
 
-
 def add_bitcoin_mining_optimized(
     n: pypsa.Network,
     options: dict,
@@ -449,51 +448,35 @@ def add_bitcoin_mining_optimized(
     btc = options["bitcoin"]
     technology = "bitcoin mining"
 
-    max_capacity = float(
-        btc.get("p_nom_max", btc["p_nom"])
-    )
+    max_capacity = float(btc.get("p_nom_max", btc["p_nom"]))
     revenue = float(btc["marginal_revenue"])
 
     if bus not in n.buses.index:
-        raise ValueError(
-            f"Bitcoin connection bus '{bus}' does not exist."
-        )
+        raise ValueError(f"Bitcoin connection bus '{bus}' does not exist.")
 
     if not np.isfinite(max_capacity) or max_capacity <= 0:
-        raise ValueError(
-            "BTCopt maximum capacity must be positive and finite."
-        )
+        raise ValueError("BTCopt maximum capacity must be positive and finite.")
 
     if not np.isfinite(revenue) or revenue < 0:
-        raise ValueError(
-            "BTCopt revenue must be finite and nonnegative."
-        )
+        raise ValueError("BTCopt revenue must be finite and nonnegative.")
 
-    if (
-        technology not in costs.index
-        or "capital_cost" not in costs.columns
-    ):
+    if technology not in costs.index or "capital_cost" not in costs.columns:
         raise ValueError(
             "BTCopt requires a 'bitcoin mining' entry with "
             "'capital_cost' in the processed PyPSA cost table."
         )
 
-    capital_cost = float(
-        costs.at[technology, "capital_cost"]
-    )
+    capital_cost = float(costs.at[technology, "capital_cost"])
 
     if not np.isfinite(capital_cost) or capital_cost <= 0:
         raise ValueError(
-            "BTCopt requires a positive, finite, validated "
-            "annualized capital_cost."
+            "BTCopt requires a positive, finite, validated " "annualized capital_cost."
         )
 
     name = f"{bus} Bitcoin mining optimized"
 
     if name in n.generators.index:
-        raise ValueError(
-            f"Bitcoin component '{name}' already exists."
-        )
+        raise ValueError(f"Bitcoin component '{name}' already exists.")
 
     if technology not in n.carriers.index:
         n.add("Carrier", technology)
@@ -784,9 +767,7 @@ if __name__ == "__main__":
     # Thesis flexible electricity consumers are activated through
     # the standard scenario opts wildcard.
     if "BTCopt" in opts:
-        add_bitcoin_mining_optimized(
-            n, flexible_consumers, costs
-        )
+        add_bitcoin_mining_optimized(n, flexible_consumers, costs)
     elif "BTC" in opts:
         add_bitcoin_mining(n, flexible_consumers)
 
