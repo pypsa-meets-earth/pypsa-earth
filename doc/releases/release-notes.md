@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix AC branch detection during link simplification by passing the network explicitly to `contains_ac`, avoiding reliance on a module-level network variable [PR #2113](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2113)
+
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
