@@ -1069,9 +1069,10 @@ def attach_hydro(
         )
 
     if "PHS" in carriers and not phs.empty:
-        # fill missing max hours to config value and
+        # fill missing max hours (0 or NaN) to config value and
         # assume no natural inflow due to lack of data
-        phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
+        max_hours = c["PHS_max_hours"]
+        phs = phs.replace({"max_hours": {0: max_hours, np.nan: max_hours}})
         n.add(
             "StorageUnit",
             phs.index,
