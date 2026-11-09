@@ -155,16 +155,15 @@ def shapes_to_shapes(orig, dest):
     """
     Adopted from vresutils.transfer.Shapes2Shapes()
     """
+    orig = list(orig)
+    dest = list(dest)
     orig_prepped = list(map(prep, orig))
     transfer = sparse.lil_matrix((len(dest), len(orig)), dtype=float)
 
     for i, j in product(range(len(dest)), range(len(orig))):
-        dest_geom = dest.iloc[i] if hasattr(dest, "iloc") else dest[i]
-        orig_geom = orig.iloc[j] if hasattr(orig, "iloc") else orig[j]
-
-        if orig_prepped[j].intersects(dest_geom):
-            area = orig_geom.intersection(dest_geom).area
-            transfer[i, j] = area / dest_geom.area
+        if orig_prepped[j].intersects(dest[i]):
+            area = orig[j].intersection(dest[i]).area
+            transfer[i, j] = area / dest[i].area
 
     return transfer
 
