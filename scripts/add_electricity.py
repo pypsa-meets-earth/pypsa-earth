@@ -1032,8 +1032,9 @@ def attach_hydro(
         # Merge inflow: sum overlapping columns, add new ones
         inflow_agg = (
             pd.concat([inflow_agg, inflow_agg_ror, inflow_agg_hydro], axis=1)
-            .groupby(level=0, axis=1)
+            .T.groupby(level=0)
             .sum()
+            .T
         )
 
         logger.info(
@@ -1069,9 +1070,10 @@ def attach_hydro(
         )
 
     if "PHS" in carriers and not phs.empty:
-        # fill missing max hours to config value and
+        # fill missing max hours (0 or NaN) to config value and
         # assume no natural inflow due to lack of data
-        phs = phs.replace({"max_hours": {0: c["PHS_max_hours"]}})
+        max_hours = c["PHS_max_hours"]
+        phs = phs.replace({"max_hours": {0: max_hours, np.nan: max_hours}})
         n.add(
             "StorageUnit",
             phs.index,
