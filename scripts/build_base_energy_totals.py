@@ -101,11 +101,16 @@ def calc_sector(sector):
             _logger.warning("No data for " + country + " in the sector " + sector + ".")
 
         else:
-            index_mass = df_sector.loc[
-                df_sector["Unit"] == "Metric tons,  thousand"
-            ].index
-            df_sector.loc[index_mass, "Quantity_TWh"] = df_sector.loc[index_mass].apply(
-                lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1
+            index_mass = df_sector["Unit"] == "Metric tons,  thousand"
+            mass_factors = df_sector.loc[index_mass, "Commodity"].map(fuels_conv_toTWh)
+            if mass_factors.isna().any():
+                missing = df_sector.loc[index_mass, "Commodity"][
+                    mass_factors.isna()
+                ].unique()
+                raise KeyError(f"Missing fuel conversion factors: {missing}")
+
+            df_sector.loc[index_mass, "Quantity_TWh"] = (
+                df_sector.loc[index_mass, "Quantity"] * mass_factors
             )
 
             index_energy = df_sector[
@@ -120,12 +125,19 @@ def calc_sector(sector):
                 index_energy_TJ
             ].apply(lambda x: x["Quantity"] / 3600, axis=1)
 
-            index_volume = df_sector[
-                df_sector["Unit"] == "Cubic metres, thousand"
-            ].index
-            df_sector.loc[index_volume, "Quantity_TWh"] = df_sector.loc[
-                index_volume
-            ].apply(lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1)
+            index_volume = df_sector["Unit"] == "Cubic metres, thousand"
+            volume_factors = df_sector.loc[index_volume, "Commodity"].map(
+                fuels_conv_toTWh
+            )
+            if volume_factors.isna().any():
+                missing = df_sector.loc[index_volume, "Commodity"][
+                    volume_factors.isna()
+                ].unique()
+                raise KeyError(f"Missing fuel conversion factors: {missing}")
+
+            df_sector.loc[index_volume, "Quantity_TWh"] = (
+                df_sector.loc[index_volume, "Quantity"] * volume_factors
+            )
 
             sectors_dfs[sector] = df_sector.copy()
 
