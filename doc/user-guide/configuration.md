@@ -32,6 +32,7 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `electricity.co2base` | `co2.base` |
 | `electricity.automatic_emission` | `co2.automatic_emission.enable` |
 | `electricity.automatic_emission_base_year` | `co2.automatic_emission.base_year` |
+| `electricity.custom_powerplants` *(scalar `false`, `merge` or `replace`)* | `electricity.custom_powerplants.method` |
 | `costs.emission_prices.co2` | `co2.emission_price` |
 | `co2_budget.enable` | `co2.budget.enable` |
 | `co2_budget.override_co2opt` | `co2.budget.override_co2opt` |

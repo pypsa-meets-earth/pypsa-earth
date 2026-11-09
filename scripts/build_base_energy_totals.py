@@ -60,52 +60,57 @@ def calc_sector(sector):
 
         if df_sector.empty:
             if sector == "consumption by households":
-                energy_totals_base.at[country, "electricity residential"] = np.NaN
-                energy_totals_base.at[country, "residential oil"] = np.NaN
-                energy_totals_base.at[country, "residential biomass"] = np.NaN
-                energy_totals_base.at[country, "residential gas"] = np.NaN
-                energy_totals_base.at[country, "total residential space"] = np.NaN
-                energy_totals_base.at[country, "total residential water"] = np.NaN
+                energy_totals_base.at[country, "electricity residential"] = np.nan
+                energy_totals_base.at[country, "residential oil"] = np.nan
+                energy_totals_base.at[country, "residential biomass"] = np.nan
+                energy_totals_base.at[country, "residential gas"] = np.nan
+                energy_totals_base.at[country, "total residential space"] = np.nan
+                energy_totals_base.at[country, "total residential water"] = np.nan
 
             elif sector == "services":
-                energy_totals_base.at[country, "services electricity"] = np.NaN
-                energy_totals_base.at[country, "services oil"] = np.NaN
-                energy_totals_base.at[country, "services biomass"] = np.NaN
-                energy_totals_base.at[country, "services gas"] = np.NaN
-                energy_totals_base.at[country, "total services space"] = np.NaN
-                energy_totals_base.at[country, "total services water"] = np.NaN
+                energy_totals_base.at[country, "services electricity"] = np.nan
+                energy_totals_base.at[country, "services oil"] = np.nan
+                energy_totals_base.at[country, "services biomass"] = np.nan
+                energy_totals_base.at[country, "services gas"] = np.nan
+                energy_totals_base.at[country, "total services space"] = np.nan
+                energy_totals_base.at[country, "total services water"] = np.nan
 
             elif sector == "road":
-                energy_totals_base.at[country, "total road"] = np.NaN
+                energy_totals_base.at[country, "total road"] = np.nan
 
             elif sector == "agriculture":
-                energy_totals_base.at[country, "agriculture electricity"] = np.NaN
-                energy_totals_base.at[country, "agriculture oil"] = np.NaN
-                energy_totals_base.at[country, "agriculture biomass"] = np.NaN
-                # energy_totals_base.at[country, "electricity rail"] = np.NaN
+                energy_totals_base.at[country, "agriculture electricity"] = np.nan
+                energy_totals_base.at[country, "agriculture oil"] = np.nan
+                energy_totals_base.at[country, "agriculture biomass"] = np.nan
+                # energy_totals_base.at[country, "electricity rail"] = np.nan
 
             elif sector == "rail":
-                energy_totals_base.at[country, "total rail"] = np.NaN
-                energy_totals_base.at[country, "electricity rail"] = np.NaN
+                energy_totals_base.at[country, "total rail"] = np.nan
+                energy_totals_base.at[country, "electricity rail"] = np.nan
 
             elif sector == "aviation":
-                energy_totals_base.at[country, "total international aviation"] = np.NaN
-                energy_totals_base.at[country, "total domestic aviation"] = np.NaN
+                energy_totals_base.at[country, "total international aviation"] = np.nan
+                energy_totals_base.at[country, "total domestic aviation"] = np.nan
 
             elif sector == "navigation":
                 energy_totals_base.at[country, "total international navigation"] = (
-                    np.NaN
+                    np.nan
                 )
-                energy_totals_base.at[country, "total domestic navigation"] = np.NaN
+                energy_totals_base.at[country, "total domestic navigation"] = np.nan
 
             _logger.warning("No data for " + country + " in the sector " + sector + ".")
 
         else:
-            index_mass = df_sector.loc[
-                df_sector["Unit"] == "Metric tons,  thousand"
-            ].index
-            df_sector.loc[index_mass, "Quantity_TWh"] = df_sector.loc[index_mass].apply(
-                lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1
+            index_mass = df_sector["Unit"] == "Metric tons,  thousand"
+            mass_factors = df_sector.loc[index_mass, "Commodity"].map(fuels_conv_toTWh)
+            if mass_factors.isna().any():
+                missing = df_sector.loc[index_mass, "Commodity"][
+                    mass_factors.isna()
+                ].unique()
+                raise KeyError(f"Missing fuel conversion factors: {missing}")
+
+            df_sector.loc[index_mass, "Quantity_TWh"] = (
+                df_sector.loc[index_mass, "Quantity"] * mass_factors
             )
 
             index_energy = df_sector[
@@ -120,12 +125,19 @@ def calc_sector(sector):
                 index_energy_TJ
             ].apply(lambda x: x["Quantity"] / 3600, axis=1)
 
-            index_volume = df_sector[
-                df_sector["Unit"] == "Cubic metres, thousand"
-            ].index
-            df_sector.loc[index_volume, "Quantity_TWh"] = df_sector.loc[
-                index_volume
-            ].apply(lambda x: x["Quantity"] * fuels_conv_toTWh[x["Commodity"]], axis=1)
+            index_volume = df_sector["Unit"] == "Cubic metres, thousand"
+            volume_factors = df_sector.loc[index_volume, "Commodity"].map(
+                fuels_conv_toTWh
+            )
+            if volume_factors.isna().any():
+                missing = df_sector.loc[index_volume, "Commodity"][
+                    volume_factors.isna()
+                ].unique()
+                raise KeyError(f"Missing fuel conversion factors: {missing}")
+
+            df_sector.loc[index_volume, "Quantity_TWh"] = (
+                df_sector.loc[index_volume, "Quantity"] * volume_factors
+            )
 
             sectors_dfs[sector] = df_sector.copy()
 

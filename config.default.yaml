@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 # =================== META ===================
-version: 0.9.0
+version: 0.10.0
 tutorial: false
 
 logging:
@@ -274,6 +274,22 @@ lines:
       275.: "Al/St 240/40 3-bundle 300.0"
       330.: "Al/St 240/40 4-bundle 380.0"
       500.: "Al/St 560/50 4-bundle 750.0"
+    # Representative Japanese transmission line types.
+    # Sources:
+    # - OCCTO: https://www.occto.or.jp/en/information_disclosure/
+    # - IEEJ standard bulk power system model: https://www.iee.or.jp/pes/model/english/kikan/Models/index.html
+    # - All-Japan-Grid: https://github.com/lutelute/All-Japan-Grid
+    JP:
+      66.: "JP_66kV"
+      77.: "JP_77kV"
+      100.: "JP_100kV"
+      110.: "JP_110kV"
+      132.: "JP_132kV"
+      154.: "JP_154kV"
+      187.: "JP_187kV"
+      220.: "JP_220kV"
+      275.: "JP_275kV"
+      500.: "JP_500kV"
     US:
       69.: "US_69kV"
       100.: "US_100kV"
@@ -284,6 +300,17 @@ lines:
       345.: "US_345kV"
       500.: "US_500kV"
       765.: "US_765kV"
+    # Zambia transmission LineType sources:
+    # JICA REMP for Zambia (2008), Tables 6-1 and 6-2:
+    # https://openjicareport.jica.go.jp/pdf/11871027_02.pdf
+    # Nyoni et al. (2021), ZESCO PSAT network representation:
+    # https://doi.org/10.3390/en14175330
+    ZM:
+      66.: "ZM_66kV_wolf"
+      88.: "ZM_88kV_wolf"
+      132.: "ZM_132kV_wolf"
+      220.: "ZM_220kV_bison"
+      330.: "ZM_330kV_bison_2bundle"
   dc_types:
     default:
       500.: "HVDC XLPE 1000"
@@ -538,8 +565,8 @@ storage_techs:
 
 # ------------------- Costs & emissions -------------------
 costs:
-  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
-  technology_data_version: v0.13.2
+  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is 2025
+  technology_data_version: v0.15.0
   discountrate: [0.071] #, 0.086, 0.111]
   country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
   # Only needed if "US" is selected as `country_specific_data`, otherwise ignore
