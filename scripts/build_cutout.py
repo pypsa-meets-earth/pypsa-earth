@@ -93,7 +93,6 @@ Description
 -----------
 
 """
-import os
 
 import atlite
 import geopandas as gpd

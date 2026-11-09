@@ -32,7 +32,6 @@ grouped roughly as follows:
   ``rename_techs``, ``safe_divide``.
 """
 
-import calendar
 import io
 import logging
 import os
@@ -44,7 +43,6 @@ import time
 import warnings
 import zipfile
 from collections.abc import Callable, Iterable, Sequence
-from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Any
@@ -58,6 +56,8 @@ import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
+
+PYPSA_V1 = bool(re.match(r"^1\.\d", pypsa.__version__))
 
 logger = logging.getLogger(__name__)
 
@@ -301,21 +301,65 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
-def _migrate_fossil_reserves(
-    config: dict[str, Any], warn: Callable[[str, str], None]
+def _migrate_line_type_mappings(
+    config: dict[str, Any],
+    warn: Callable[[str, str], None],
 ) -> None:
-    """Move ``fossil_reserves.{carrier}`` to ``sector.{carrier}.reserves``."""
-    fossil_reserves = config.get("fossil_reserves")
-    if not isinstance(fossil_reserves, dict):
+    """Move legacy voltage mappings under the ``default`` key."""
+    lines = config.get("lines")
+    if not isinstance(lines, dict):
         return
 
-    for carrier, reserves in fossil_reserves.items():
-        if not isinstance(carrier, str):
+    for key in ("ac_types", "dc_types"):
+        mappings = lines.get(key)
+        if not isinstance(mappings, dict):
             continue
-        old_path = f"fossil_reserves.{carrier}"
-        new_path = f"sector.{carrier}.reserves"
-        _set_nested(config, new_path, reserves)
-        warn(old_path, new_path)
+
+        legacy_mapping = {
+            voltage: line_type
+            for voltage, line_type in mappings.items()
+            if not isinstance(line_type, dict)
+        }
+
+        if not legacy_mapping:
+            continue
+
+        migrated_mappings = {
+            name: mapping
+            for name, mapping in mappings.items()
+            if isinstance(mapping, dict)
+        }
+        migrated_mappings["default"] = legacy_mapping
+
+        lines[key] = migrated_mappings
+        warn(f"lines.{key}", f"lines.{key}.default")
+
+
+def _migrate_custom_powerplants_method(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Move a legacy scalar ``electricity.custom_powerplants`` under ``method``.
+
+    The option used to be a single value (``false``, ``merge`` or ``replace``).
+    It is now a dict with ``filepaths`` and ``method``, so the old value is moved
+    to ``method`` and ``filepaths`` is set to ``data/custom_powerplants.csv``.
+    """
+    electricity = config.get("electricity")
+    if not isinstance(electricity, dict):
+        return
+
+    method = electricity.get("custom_powerplants")
+    if isinstance(method, dict) or "custom_powerplants" not in electricity:
+        return
+
+    electricity["custom_powerplants"] = {
+        "filepaths": ["data/custom_powerplants.csv"],
+        "method": method,
+    }
+    warn(
+        "electricity.custom_powerplants: " + str(method),
+        "electricity.custom_powerplants.method: " + str(method),
+    )
 
 
 def migrate_config(
@@ -331,10 +375,11 @@ def migrate_config(
     Simple renames (including whole option dicts such as OSM settings) are listed
     in ``CONFIG_MIGRATIONS``. Special handlers cover ``co2_budget.co2base_value``
     (renames values, not just paths), ``sector.solar_thermal`` when it is still
-    a legacy bool flag, ``fossil_reserves.{carrier}`` reserve values, and the
-    former ``{demand}`` / ``{h2export}`` wildcards
+    a legacy bool flag and the former ``{demand}`` / ``{h2export}`` wildcards
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
-    scalar).
+    scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
+    mappings, which are moved under their respective ``default`` keys. A legacy
+    scalar ``electricity.custom_powerplants`` becomes its ``method``.
 
     Parameters
     ----------
@@ -356,9 +401,10 @@ def migrate_config(
             stacklevel=2,
         )
 
+    _migrate_line_type_mappings(config, _warn)
+    _migrate_custom_powerplants_method(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
-    _migrate_fossil_reserves(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
     _migrate_simple_keys(config, migrations or CONFIG_MIGRATIONS, _warn)
 
@@ -899,8 +945,8 @@ def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict
 def mock_snakemake(
     rulename: str,
     root_dir: str | Path | None = None,
+    configfiles: str | None = None,
     submodule_dir: str | None = None,
-    configfile: str | None = None,
     **wildcards,
 ):
     """
@@ -914,21 +960,35 @@ def mock_snakemake(
     ----------
     rulename: str
         name of the rule for which the snakemake object should be generated
-    configfile: str
-        path to config file to be used in mock_snakemake
-    wildcards:
+    root_dir: str/path-like
+        path to the root directory of the snakemake project
+    configfiles: list, str
+        list of configfiles to be used to update the config
+    submodule_dir: str, Path
+        in case PyPSA-Earth is used as a submodule, submodule_dir is
+        the path of pypsa-earth relative to the project directory.
+    **wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
     import os
 
     import snakemake as sm
-
-    try:
-        from pypsa.descriptors import Dict
-    except:
-        from pypsa.definitions.structures import Dict  # from pypsa version v0.31
+    from packaging import version
+    from pypsa.definitions.structures import Dict
+    from snakemake import __version__ as sm_version
+    from snakemake.api import Workflow
+    from snakemake.common import SNAKEFILE_CHOICES
+    from snakemake.logging import LoggerManager
     from snakemake.script import Snakemake
+    from snakemake.settings.types import (
+        ConfigSettings,
+        DAGSettings,
+        OutputSettings,
+        ResourceSettings,
+        StorageSettings,
+        WorkflowSettings,
+    )
 
     script_dir = Path(__file__).parent.resolve()
     if root_dir is None:
@@ -936,6 +996,7 @@ def mock_snakemake(
     else:
         root_dir = Path(root_dir).resolve()
 
+    workdir = None
     user_in_script_dir = Path.cwd().resolve() == script_dir
     if str(submodule_dir) in __file__:
         # the submodule_dir path is only need to locate the project dir
@@ -943,44 +1004,63 @@ def mock_snakemake(
     elif user_in_script_dir:
         os.chdir(root_dir)
     elif Path.cwd().resolve() != root_dir:
-        raise RuntimeError(
-            "mock_snakemake has to be run from the repository root"
-            f" {root_dir} or scripts directory {script_dir}"
+        logger.info(
+            "Not in scripts or root directory, will assume this is a separate workdir"
         )
+        workdir = Path.cwd()
+
     try:
-        for p in sm.SNAKEFILE_CHOICES:
+        for p in SNAKEFILE_CHOICES:
+            p = root_dir / p
             if os.path.exists(p):
                 snakefile = p
                 break
+        if configfiles is None:
+            configfiles = []
+        elif isinstance(configfiles, str):
+            configfiles = [configfiles]
 
-        if isinstance(configfile, str):
-            with open(configfile, "r") as file:
-                configfile = yaml.safe_load(file)
+        resource_settings = ResourceSettings()
+        config_settings = ConfigSettings(configfiles=map(Path, configfiles))
+        workflow_settings = WorkflowSettings()
+        storage_settings = StorageSettings()
+        dag_settings = DAGSettings(rerun_triggers=[])
 
-        workflow = sm.Workflow(
-            snakefile,
-            overwrite_configfiles=[],
-            rerun_triggers=[],
-            overwrite_config=configfile,
+        workflow_kwargs = dict(
+            config_settings=config_settings,
+            resource_settings=resource_settings,
+            workflow_settings=workflow_settings,
+            storage_settings=storage_settings,
+            dag_settings=dag_settings,
+            storage_provider_settings=dict(),
+            overwrite_workdir=workdir,
         )
-        workflow.include(snakefile)
-        workflow.global_resources = {}
-        try:
-            rule = workflow.get_rule(rulename)
-        except Exception as exception:
-            print(
-                exception,
-                f"The {rulename} might be a conditional rule in the Snakefile.\n"
-                f"Did you enable {rulename} in the config?",
+
+        # Snakemake version-dependent logger handling
+        if version.parse(sm_version) >= version.parse("9.14.6"):
+            output_settings = OutputSettings()
+            workflow_kwargs["logger_manager"] = LoggerManager(
+                logger=logger, settings=output_settings
             )
-            raise
+
+        workflow = Workflow(**workflow_kwargs)
+        workflow.include(snakefile)
+
+        if configfiles:
+            for f in configfiles:
+                if not os.path.exists(f):
+                    raise FileNotFoundError(f"Config file {f} does not exist.")
+                workflow.configfile(f)
+
+        workflow.global_resources = {}
+        rule = workflow.get_rule(rulename)
         dag = sm.dag.DAG(workflow, rules=[rule])
         wc = Dict(wildcards)
         job = sm.jobs.Job(rule, dag, wc)
 
         def make_accessable(*ios):
             for io in ios:
-                for i in range(len(io)):
+                for i, _ in enumerate(io):
                     io[i] = os.path.abspath(io[i])
 
         make_accessable(job.input, job.output, job.log)
@@ -996,8 +1076,6 @@ def mock_snakemake(
             job.rule.name,
             None,
         )
-        snakemake.benchmark = job.benchmark
-
         # create log and output dir if not existent
         for path in list(snakemake.log) + list(snakemake.output):
             Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -1048,6 +1126,87 @@ def three_2_two_digits_country(three_code_country: str) -> str:
 
     two_code_country = coco.convert(three_code_country, to="ISO2")
     return two_code_country
+
+
+def convert_country_codes(
+    country_codes: pd.Series | list[str],
+    src: str | None,
+    to: str,
+) -> pd.Series | list[str]:
+    """
+    Convert country codes for a Series or list.
+
+    Parameters
+    ----------
+    country_codes: pandas.Series or list
+        Country codes to convert.
+    src: str or None, default None
+        Source format. If None, country_converter auto-detects the source.
+    to: str, default "ISO3"
+        Target format.
+
+    Returns
+    ----------
+    converted_country_codes: pandas.Series or list
+        Converted country codes.
+    """
+    custom_codes = {
+        ("SEN-GMB", "ISO2"): "SN-GM",
+        ("SEN-GMB", "ISO3"): "SEN-GMB",
+        ("SN-GM", "ISO2"): "SN-GM",
+        ("SN-GM", "ISO3"): "SEN-GMB",
+    }
+
+    if isinstance(country_codes, (pd.Series, list)):
+        unique_codes = set(country_codes)
+    else:
+        raise ValueError(
+            "Input must be a pandas Series or list containing country codes."
+        )
+
+    # convert only the unique codes to avoid redundant conversions
+    converted_codes = coco.convert(
+        names=unique_codes,
+        src=src,
+        to=to,
+    )
+
+    # replace custom codes in the converted codes
+    for (custom_code, target_format), custom_value in custom_codes.items():
+        if target_format.lower() != to.lower():
+            continue
+        for id, cvalue in enumerate(unique_codes):
+            if cvalue.lower() == custom_code.lower():
+                converted_codes[id] = custom_codes[(custom_code, target_format)]
+
+    replace_dict = dict(zip(unique_codes, converted_codes))
+
+    # prepare output
+    if isinstance(country_codes, pd.Series):
+        converted_country_codes = country_codes.map(replace_dict)
+    elif isinstance(country_codes, list):
+        converted_country_codes = [replace_dict[code] for code in country_codes]
+
+    return converted_country_codes
+
+
+def three_2_two_digits_countries(
+    three_code_countries: pd.Series | list[str],
+) -> pd.Series | list[str]:
+    """
+    Convert 3-digit to 2-digit country codes for a Series or list.
+
+    Parameters
+    ----------
+    three_code_countries: pandas.Series or list
+        3-digit country names
+
+    Returns
+    ----------
+    two_code_countries: pandas.Series or list
+        2-digit country names
+    """
+    return convert_country_codes(three_code_countries, src=None, to="ISO2")
 
 
 def two_digits_2_name_country(
@@ -1521,44 +1680,6 @@ def create_dummy_data(n: pypsa.Network, sector: str, carriers: list) -> pd.DataF
     )  # TODO change 1 with temp. resolution
 
     return pd.DataFrame(data, index=ind, columns=col)
-
-
-# def create_transport_data_dummy(pop_layout,
-#                                 transport_data,
-#                                 cars=4000000,
-#                                 average_fuel_efficiency=0.7):
-
-#     for country in pop_layout.ct.unique():
-
-#         country_data = pd.DataFrame(
-#             data=[[cars, average_fuel_efficiency]],
-#             columns=transport_data.columns,
-#             index=[country],
-#         )
-#         transport_data = pd.concat([transport_data, country_data], axis=0)
-
-#     transport_data_dummy = transport_data
-
-#     return transport_data_dummy
-
-# def create_temperature_dummy(pop_layout, temperature):
-
-#     temperature_dummy = pd.DataFrame(index=temperature.index)
-
-#     for index in pop_layout.index:
-#         temperature_dummy[index] = temperature["ES0 0"]
-
-#     return temperature_dummy
-
-# def create_energy_totals_dummy(pop_layout, energy_totals):
-#     """
-#     Function to add additional countries specified in pop_layout.index to energy_totals, these countries take the same values as Spain
-#     """
-#     # All countries in pop_layout get the same values as Spain
-#     for country in pop_layout.ct.unique():
-#         energy_totals.loc[country] = energy_totals.loc["ES"]
-
-#     return energy_totals
 
 
 def cycling_shift(
@@ -2379,3 +2500,31 @@ def sanitize_locations(n: pypsa.Network) -> None:
             n.buses.country.ne("") & n.buses.country.notnull(),
             n.buses.location.map(n.buses.country),
         )
+
+
+def get_linetype_by_voltage_and_country(
+    v_nom,
+    country,
+    linetypes,
+    use_country_specific_types,
+):
+    """Return the closest line type from the selected mapping."""
+    if "default" not in linetypes:
+        raise ValueError("Missing 'default' line type mapping.")
+
+    mapping_name = (
+        country if use_country_specific_types and (country in linetypes) else "default"
+    )
+
+    mapping = linetypes[mapping_name]
+
+    if not mapping:
+        raise ValueError(
+            f"Empty line type mapping found for line mapping '{mapping_name}'."
+        )
+
+    voltage = min(
+        mapping,
+        key=lambda candidate: abs(float(candidate) - float(v_nom)),
+    )
+    return mapping[voltage]
