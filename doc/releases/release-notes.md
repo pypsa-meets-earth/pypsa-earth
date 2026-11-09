@@ -36,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
 
+* Fill missing `max_hours` (NaN as well as 0) of pumped hydro plants with `PHS_max_hours`, so that plants without a reported duration get storage [PR #2096](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2096)
+
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
 
 * Fix naphtha-related industry CO2 emissions by correcting spatial load name construction [PR #2088](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2088)
