@@ -543,20 +543,15 @@ def add_hydrogen_production(
                 "'PEM electrolysis 1 GW' in the processed cost table."
             )
 
-        capital_cost = float(
-            costs.at[technology, "capital_cost"]
-        )
+        capital_cost = float(costs.at[technology, "capital_cost"])
 
         if not np.isfinite(capital_cost) or capital_cost <= 0:
             raise ValueError(
-                "PEMopt requires positive, finite annualized "
-                "capital costs."
+                "PEMopt requires positive, finite annualized " "capital costs."
             )
 
         if not np.isfinite(capacity_limit) or capacity_limit <= 0:
-            raise ValueError(
-                "PEMopt capacity limit must be positive and finite."
-            )
+            raise ValueError("PEMopt capacity limit must be positive and finite.")
 
     if bus not in n.buses.index:
         raise ValueError(f"PEM connection bus '{bus}' does not exist.")
@@ -804,7 +799,9 @@ if __name__ == "__main__":
 
     if "PEMopt" in opts:
         add_hydrogen_production(
-            n, flexible_consumers, costs,
+            n,
+            flexible_consumers,
+            costs,
             optimize_capacity=True,
         )
     elif "PEM" in opts:
