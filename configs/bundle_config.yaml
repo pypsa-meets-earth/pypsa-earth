@@ -11,7 +11,7 @@
 
 #   bundle_name:  # name of the bundle
 #     countries: [country code, region code or country list]  # list of countries represented in the databundle
-#     [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
+#     tutorial: "any"  # optional: true for tutorials, false (default) for full runs, "any" for both
 #     category: common/resources/data/cutouts  # category of data contained in the bundle:
 #     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
 #     urls:  # list of urls by source, e.g. zenodo or google
@@ -102,17 +102,6 @@ databundles:
       gdrive: https://drive.google.com/file/d/19IpXSlChTnrqGm57GLT3rjQiAnDcvGR0/view?usp=drive_link
       #direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
     output: [data/hydrobasins_hydroshare/africa-geoglows-atlite.shp]
-
-  # World Port Index dataset for ports, harbors, and terminals
-  bundle_ports_tutorial:
-    countries: [Earth]
-    tutorial: true
-    category: ports
-    destination: "data/ports"
-    urls:
-      direct: "https://web.archive.org/web/20260929232408id_/https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
-    unzip: false
-    output: [data/ports/UpdatedPub150.csv]
 
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
@@ -228,18 +217,7 @@ databundles:
   # Original source: https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2025/Jul/IRENA_Statistics_Extract_2025H2.xlsx
   bundle_irena_statistics:
     countries: [Earth]
-    tutorial: false
-    category: irena
-    destination: "data"
-    urls:
-      direct: https://github.com/pypsa-meets-earth/temporary_storage/raw/refs/heads/main/datasets/IRENA_Statistics_Extract_2025H2.xlsx
-    output:
-    - data/IRENA_Statistics_Extract_2025H2.xlsx
-
-  # TODO: make options in bundle_config for retrival regardless of tutorial
-  bundle_irena_statistics_tutorial:
-    countries: [Earth]
-    tutorial: true
+    tutorial: "any"
     category: irena
     destination: "data"
     urls:
@@ -280,7 +258,7 @@ databundles:
   # World Port Index dataset for ports, harbors, and terminals. Source: NGA, 2026. World Port Index (Pub. 150), 33rd Edition, National Geospatial-Intelligence Agency, Bethesda, MD, USA.
   bundle_ports:
     countries: [Earth]
-    tutorial: false
+    tutorial: "any"
     category: ports
     destination: "data/ports"
     urls:
