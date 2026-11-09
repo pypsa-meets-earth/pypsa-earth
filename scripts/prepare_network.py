@@ -509,6 +509,8 @@ def add_bitcoin_mining_optimized(
 def add_hydrogen_production(
     n: pypsa.Network,
     options: dict,
+    costs: pd.DataFrame | None = None,
+    optimize_capacity: bool = False,
 ) -> None:
     """
     Add the thesis PEM hydrogen-production flexible consumer.
@@ -527,6 +529,34 @@ def add_hydrogen_production(
     efficiency = float(pem["efficiency_lhv"])
     variable_cost = float(pem["variable_cost_eur_per_mwh_el"])
     h2_lhv = float(pem["h2_lhv_kwh_per_kg"])
+
+    capacity_limit = p_nom
+    capital_cost = 0.0
+
+    if optimize_capacity:
+        capacity_limit = float(pem.get("p_nom_max", p_nom))
+        technology = "PEM electrolysis 1 GW"
+
+        if costs is None or technology not in costs.index:
+            raise ValueError(
+                "PEMopt requires the validated technology "
+                "'PEM electrolysis 1 GW' in the processed cost table."
+            )
+
+        capital_cost = float(
+            costs.at[technology, "capital_cost"]
+        )
+
+        if not np.isfinite(capital_cost) or capital_cost <= 0:
+            raise ValueError(
+                "PEMopt requires positive, finite annualized "
+                "capital costs."
+            )
+
+        if not np.isfinite(capacity_limit) or capacity_limit <= 0:
+            raise ValueError(
+                "PEMopt capacity limit must be positive and finite."
+            )
 
     if bus not in n.buses.index:
         raise ValueError(f"PEM connection bus '{bus}' does not exist.")
@@ -552,7 +582,7 @@ def add_hydrogen_production(
 
     weighted_hours = float(n.snapshot_weightings["generators"].sum())
 
-    maximum_mwh_el = p_nom * weighted_hours
+    maximum_mwh_el = capacity_limit * weighted_hours
 
     if target_mwh_el > maximum_mwh_el + 1e-6:
         raise ValueError(
@@ -600,13 +630,14 @@ def add_hydrogen_production(
         bus0=bus,
         bus1=h2_bus,
         carrier=carrier,
-        p_nom=p_nom,
-        p_nom_extendable=False,
+        p_nom=0.0 if optimize_capacity else p_nom,
+        p_nom_extendable=optimize_capacity,
+        p_nom_max=capacity_limit if optimize_capacity else float("inf"),
         p_min_pu=0.0,
         p_max_pu=1.0,
         efficiency=efficiency,
         marginal_cost=variable_cost,
-        capital_cost=0.0,
+        capital_cost=capital_cost,
     )
 
     e_min_pu = pd.Series(
@@ -771,7 +802,12 @@ if __name__ == "__main__":
     elif "BTC" in opts:
         add_bitcoin_mining(n, flexible_consumers)
 
-    if "PEM" in opts:
+    if "PEMopt" in opts:
+        add_hydrogen_production(
+            n, flexible_consumers, costs,
+            optimize_capacity=True,
+        )
+    elif "PEM" in opts:
         add_hydrogen_production(n, flexible_consumers)
 
     sanitize_carriers(n, snakemake.config)
