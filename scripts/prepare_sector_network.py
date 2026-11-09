@@ -1964,11 +1964,10 @@ def add_industry(
     #     #except for the process emissions when naphtha is used for petrochemicals, which can be captured with other industry process emissions
     #     #tco2 per hour
     # TODO kerosene for aviation should be added too but in the right func.
-    co2_release = [" naphtha for industry"]
     # check land transport
 
     co2 = (
-        n.loads.loc[spatial.nodes + co2_release, "p_set"].sum()
+        n.loads.loc[spatial.nodes + " naphtha for industry", "p_set"].sum()
         * costs.at["oil", "CO2 intensity"]
     )  # No division by 8760 because p_set is already in MW
 

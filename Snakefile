@@ -1254,6 +1254,8 @@ rule solve_sector_networks:
 
 
 rule prepare_ports:
+    input:
+        ports="data/ports/UpdatedPub150.csv",
     params:
         custom_export=config["custom_data"]["export_ports"],
     output:
