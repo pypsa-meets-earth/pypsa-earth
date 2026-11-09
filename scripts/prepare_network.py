@@ -430,6 +430,99 @@ def add_bitcoin_mining(
     )
 
 
+
+def add_bitcoin_mining_optimized(
+    n: pypsa.Network,
+    options: dict,
+    costs: pd.DataFrame,
+) -> None:
+    """
+    Add endogenous flexible Bitcoin-mining demand.
+
+    A negative-sign Generator directly consumes electricity
+    from the existing electricity bus.
+
+    The investment capacity and hourly consumption are
+    optimized using standard PyPSA component attributes.
+    """
+    bus = options["connection_bus"]
+    btc = options["bitcoin"]
+    technology = "bitcoin mining"
+
+    max_capacity = float(
+        btc.get("p_nom_max", btc["p_nom"])
+    )
+    revenue = float(btc["marginal_revenue"])
+
+    if bus not in n.buses.index:
+        raise ValueError(
+            f"Bitcoin connection bus '{bus}' does not exist."
+        )
+
+    if not np.isfinite(max_capacity) or max_capacity <= 0:
+        raise ValueError(
+            "BTCopt maximum capacity must be positive and finite."
+        )
+
+    if not np.isfinite(revenue) or revenue < 0:
+        raise ValueError(
+            "BTCopt revenue must be finite and nonnegative."
+        )
+
+    if (
+        technology not in costs.index
+        or "capital_cost" not in costs.columns
+    ):
+        raise ValueError(
+            "BTCopt requires a 'bitcoin mining' entry with "
+            "'capital_cost' in the processed PyPSA cost table."
+        )
+
+    capital_cost = float(
+        costs.at[technology, "capital_cost"]
+    )
+
+    if not np.isfinite(capital_cost) or capital_cost <= 0:
+        raise ValueError(
+            "BTCopt requires a positive, finite, validated "
+            "annualized capital_cost."
+        )
+
+    name = f"{bus} Bitcoin mining optimized"
+
+    if name in n.generators.index:
+        raise ValueError(
+            f"Bitcoin component '{name}' already exists."
+        )
+
+    if technology not in n.carriers.index:
+        n.add("Carrier", technology)
+
+    n.add(
+        "Generator",
+        name,
+        bus=bus,
+        carrier=technology,
+        sign=-1,
+        p_nom_extendable=True,
+        p_nom_min=0.0,
+        p_nom_max=max_capacity,
+        p_min_pu=0.0,
+        p_max_pu=1.0,
+        capital_cost=capital_cost,
+        marginal_cost=-revenue,
+    )
+
+    logger.info(
+        "Added BTCopt at %s: capacity limit %.1f MW, "
+        "capital cost %.2f EUR/MW, revenue %.2f EUR/MWh",
+        bus,
+        max_capacity,
+        capital_cost,
+        revenue,
+    )
+
+
 def add_hydrogen_production(
     n: pypsa.Network,
     options: dict,
@@ -690,7 +783,11 @@ if __name__ == "__main__":
 
     # Thesis flexible electricity consumers are activated through
     # the standard scenario opts wildcard.
-    if "BTC" in opts:
+    if "BTCopt" in opts:
+        add_bitcoin_mining_optimized(
+            n, flexible_consumers, costs
+        )
+    elif "BTC" in opts:
         add_bitcoin_mining(n, flexible_consumers)
 
     if "PEM" in opts:
