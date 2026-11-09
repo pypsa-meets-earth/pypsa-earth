@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Vectorize fuel quantity conversions in sectoral energy totals and explicitly validate missing conversion factors [PR #2087](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2087)
+
 * Fix bus-level load aggregation by grouping loads by their connected buses when identifying, merging, and transforming isolated subnetworks [PR #2112](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2112)
 
 * Fix brownfield asset retirement at the lifetime boundary so assets expiring at the start of a planning horizon are not carried forward [PR #2106](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2106)
