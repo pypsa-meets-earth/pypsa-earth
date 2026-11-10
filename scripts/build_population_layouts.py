@@ -37,7 +37,9 @@ if __name__ == "__main__":
     nuts3["pop"] = nuts3["pop"] / 1000
 
     # Indicator matrix NUTS3 -> grid cells
-    I = atlite.cutout.compute_indicatormatrix(nuts3.geometry, grid_cells)
+    I = atlite.cutout.compute_indicatormatrix(
+        nuts3.geometry.reset_index(drop=True), grid_cells
+    )
 
     # Indicator matrix grid_cells -> NUTS3; inprinciple Iinv*I is identity
     # but imprecisions mean not perfect

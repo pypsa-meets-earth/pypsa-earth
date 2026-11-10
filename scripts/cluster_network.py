@@ -311,8 +311,6 @@ def distribute_clusters(
             n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
         )
 
-    distribution_factor.index.name = "cluster"
-
     N = n.buses.groupby(["country", "sub_network"]).size()[distribution_factor.index]
 
     assert (
@@ -345,7 +343,12 @@ def distribute_clusters(
 
     m = linopy.Model()
     clusters = m.add_variables(
-        lower=1, upper=N, coords=[distribution_factor.index], name="n", integer=True
+        lower=1,
+        upper=N,
+        coords=[distribution_factor.index],
+        dims=["cluster"],
+        name="n",
+        integer=True,
     )
 
     m.add_constraints(clusters.sum() == n_clusters, name="tot")

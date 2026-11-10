@@ -3,10 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-import math
-
 import country_converter as coco
-import numpy as np
 import pandas as pd
 import pycountry
 import requests
@@ -115,7 +112,14 @@ def create_steel_db():
     df_steel[["y", "x"]] = df_steel["Coordinates"].str.split(",", expand=True)
 
     # Drop Coordinates column as it contains a ',' and is not needed anymore
-    df_steel = df_steel.drop(columns="Coordinates", axis=1)
+    df_steel = df_steel.drop(columns="Coordinates")
+
+    for col in [
+        "Nominal crude steel capacity (ttpa)",
+        "Nominal iron capacity (ttpa)",
+        "Nominal BF capacity (ttpa)",
+    ]:
+        df_steel[col] = pd.to_numeric(df_steel[col], errors="coerce").astype(float)
 
     # Fetch steel plants that uses DRI and BF techs and drop them from main df
     mixed_steel_plants = df_steel[
@@ -130,11 +134,11 @@ def create_steel_db():
     DRI_share["Main production process"] = "integrated (DRI)"
 
     # Calculate the share of both techs according to the capacities of iron production
-    BF_share["Nominal crude steel capacity (ttpa)"] = BF_share[
-        "Nominal crude steel capacity (ttpa)"
-    ] * mixed_steel_plants.apply(
-        lambda x: x["Nominal BF capacity (ttpa)"] / x["Nominal iron capacity (ttpa)"],
-        axis=1,
+    iron_capacity = mixed_steel_plants["Nominal iron capacity (ttpa)"]
+    BF_share["Nominal crude steel capacity (ttpa)"] = (
+        mixed_steel_plants["Nominal crude steel capacity (ttpa)"]
+        * mixed_steel_plants["Nominal BF capacity (ttpa)"]
+        / iron_capacity.where(iron_capacity > 0)
     )
     DRI_share["Nominal crude steel capacity (ttpa)"] = (
         mixed_steel_plants["Nominal crude steel capacity (ttpa)"]
@@ -248,7 +252,7 @@ def create_cement_db():
     )
     df_cement["unit"] = "Kt/yr"
     df_cement["technology"] = "Cement"
-    df_cement["capacity"] = df_cement["capacity"] * 1000
+    df_cement["capacity"] = pd.to_numeric(df_cement["capacity"], errors="coerce") * 1000
     # Keep only operating steel plants
     df_cement = df_cement.loc[df_cement["status"] == "Operating"]
 
@@ -264,20 +268,14 @@ def create_cement_db():
             len(na_index), len(df_cement)
         )
     )
-    avg_c_cap = df_cement.groupby(df_cement.country)["capacity"].mean()
-    df_cement["capacity"] = df_cement.apply(
-        lambda x: (
-            avg_c_cap[x["country"]] if math.isnan(x["capacity"]) else x["capacity"]
-        ),
-        axis=1,
+    df_cement["capacity"] = df_cement["capacity"].fillna(
+        df_cement.groupby("country")["capacity"].transform("mean")
     )
 
     df_cement["quality"] = "actual"
-    df_cement.loc[na_index, "quality"] = "actual"  # TODO change
 
     df_cement = df_cement.reset_index()
     df_cement = df_cement.rename(columns={"uid": "ID"})
-    df_cement.capacity = pd.to_numeric(df_cement.capacity)
 
     return df_cement[
         [
@@ -417,11 +415,7 @@ def create_paper_df():
     )
     df_paper["unit"] = "10kt/yr"
     df_paper["technology"] = "Paper"
-    df_paper["capacity"] = df_paper["capacity"]
-
-    df_paper.capacity = df_paper.capacity.apply(
-        lambda x: x if type(x) == int or type(x) == int == float else np.nan
-    )
+    df_paper["capacity"] = pd.to_numeric(df_paper["capacity"], errors="coerce")
 
     # Keep only operating steel plants
     # df_paper = df_paper.loc[df_paper["status"] == "Operating"]
@@ -438,19 +432,11 @@ def create_paper_df():
             len(na_index), len(df_paper)
         )
     )
-    avg_c_cap = df_paper.groupby(df_paper.country)["capacity"].mean()
-    na_index
-
-    df_paper["capacity"] = df_paper.apply(
-        lambda x: (
-            avg_c_cap[x["country"]] if math.isnan(x["capacity"]) else x["capacity"]
-        ),
-        axis=1,
+    df_paper["capacity"] = df_paper["capacity"].fillna(
+        df_paper.groupby("country")["capacity"].transform("mean")
     )
 
     df_paper["quality"] = "actual"
-    df_paper.loc[na_index, "quality"] = "actual"  # TODO change
-    df_paper.capacity = pd.to_numeric(df_paper.capacity)
 
     df_paper = df_paper.reset_index()
     df_paper = df_paper.rename(columns={"uid": "ID"})

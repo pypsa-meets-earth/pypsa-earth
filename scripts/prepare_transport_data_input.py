@@ -47,7 +47,7 @@ def download_number_of_vehicles():
 
     def _clean_data(df):
         df = df.dropna(subset=["number cars"])
-        df.loc[:, "number cars"] = df.loc[:, "number cars"].astype(int)
+        df["number cars"] = pd.to_numeric(df["number cars"], errors="raise").astype(int)
         return df  # [["Country", "number cars"]]
 
     storage_options = {"User-Agent": "Mozilla/5.0"}

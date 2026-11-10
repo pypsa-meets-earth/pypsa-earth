@@ -155,6 +155,8 @@ def shapes_to_shapes(orig, dest):
     """
     Adopted from vresutils.transfer.Shapes2Shapes()
     """
+    orig = list(orig)
+    dest = list(dest)
     orig_prepped = list(map(prep, orig))
     transfer = sparse.lil_matrix((len(dest), len(orig)), dtype=float)
 
