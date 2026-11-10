@@ -745,7 +745,13 @@ if __name__ == "__main__":
         excluder = atlite.ExclusionContainer(crs=area_crs, res=100)
 
         if check_flag(config, "natura"):
-            excluder.add_raster(paths.natura, nodata=0, allow_no_overlap=True)
+            # natura.tiff is binary (1: protected, 0: not protected). Select the
+            # protected code explicitly: with recent GDAL, reprojection with
+            # nodata=0 shifts valid zeros to the next float (5e-324), which
+            # atlite's default non-zero check would treat as protected (#2093)
+            excluder.add_raster(
+                paths.natura, codes=[1], nodata=0, allow_no_overlap=True
+            )
 
         if check_flag(config, "copernicus"):
             copernicus = config["copernicus"]

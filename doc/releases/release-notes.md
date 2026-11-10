@@ -16,7 +16,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
+* Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
+
 **Minor Changes and bug-fixing**
+
+* Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
 
 * Fix ambiguous Snakemake rule matching between `retrieve_cost_data` and `process_cost_data` by constraining cost-year and scope wildcards [PR #2089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2089)
 
@@ -29,6 +33,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix existing-capacity carry-over by aligning electrolyzer capacities by component name and mapping renewable capacities to `p_nom_min` by bus [PR #2111](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2111)
 
 * Fix AC branch detection during link simplification by passing the network explicitly to `contains_ac`, avoiding reliance on a module-level network variable [PR #2113](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2113)
+
+* Fix natura exclusion removing all land (zero solar and wind potential) with recent GDAL versions by selecting protected cells explicitly [PR #2117](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2117)
 
 * Fix myopic land-use constraints to handle missing current-horizon generators without raising `KeyError`, for both standard and generator-clustered networks [PR #2114](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2114)
 
@@ -53,6 +59,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
 
 * Keep one copy of OSM elements that appear in more than one country extract, so that cross-border lines, cables and HVDC links are no longer counted once per extract [PR #2076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2076)
+
+* Support earth-osm v0.3.1 and introduce option to control multi-threading [PR #2095](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2095)
 
 * Add alternate source for downloading World Port Index data [PR #2116](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2116)
 
