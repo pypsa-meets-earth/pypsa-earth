@@ -1,4 +1,7 @@
-# Additional thesis economic scenario parameters.
-# Merge with the existing PyPSA-Earth configuration.
 costs:
   additional_technology_costs: data/thesis_technology_costs.csv
+electricity:
+  flexible_consumers:
+    pemopt_economics:
+      routine_vom_eur_per_mwh_el: 0.0
+      stack_replacement_method: full_load_hour_proxy

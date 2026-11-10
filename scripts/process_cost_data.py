@@ -426,7 +426,9 @@ def load_costs(
         # The native currency converter handles exchange rates,
         # not inflation between different monetary years.
         monetary = additional["unit"].astype(str).str.match(r"^[A-Z]{3}/")
-        investment = additional.index.get_level_values("parameter") == "investment"
+        investment = additional.index.get_level_values("parameter").isin(
+            ["investment", "stack_investment"]
+        )
         years = pd.to_numeric(additional["currency_year"], errors="coerce")
 
         invalid = (
