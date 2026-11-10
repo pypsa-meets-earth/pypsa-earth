@@ -155,8 +155,6 @@ def prepare_network(n, solve_opts, config):
 
     if solve_opts.get("noisy_costs"):
         for t in n.iterate_components():
-            # if 'capital_cost' in t.df:
-            #    t.df['capital_cost'] += 1e1 + 2.*(np.random.random(len(t.df)) - 0.5)
             if "marginal_cost" in t.df:
                 np.random.seed(174)
                 t.df["marginal_cost"] += 1e-2 + 2e-3 * (
@@ -414,15 +412,17 @@ def add_SAFE_constraints(n, config):
     margin = 1.0 + config["electricity"]["SAFE_reservemargin"]
     reserve_margin = peakdemand * margin
     conventional_carriers = config["electricity"]["conventional_carriers"]
-    ext_gens_i = n.generators.query(
-        "carrier in @conventional_carriers & p_nom_extendable"
-    ).index
-    capacity_variable = n.model["Generator-p_nom"]
+    ext_gens_i = n.generators.index[
+        n.generators["carrier"].isin(conventional_carriers)
+        & n.generators["p_nom_extendable"]
+    ]
     p_nom = n.model["Generator-p_nom"].loc[ext_gens_i]
     lhs = p_nom.sum()
-    exist_conv_caps = n.generators.query(
-        "~p_nom_extendable & carrier in @conventional_carriers"
-    ).p_nom.sum()
+    exist_conv_caps = n.generators.loc[
+        ~n.generators["p_nom_extendable"]
+        & n.generators["carrier"].isin(conventional_carriers),
+        "p_nom",
+    ].sum()
     rhs = reserve_margin - exist_conv_caps
     n.model.add_constraints(lhs >= rhs, name="safe_mintotalcap")
 
@@ -572,10 +572,10 @@ def add_RES_constraints(n, res_share, config):
     charger = ["H2 electrolysis", "battery charger"]
     discharger = ["H2 fuel cell", "battery discharger"]
 
-    ren_gen = n.generators.query("carrier in @renew_techs")
-    ren_stores = n.storage_units.query("carrier in @renew_techs")
-    ren_charger = n.links.query("carrier in @charger")
-    ren_discharger = n.links.query("carrier in @discharger")
+    ren_gen = n.generators.loc[n.generators["carrier"].isin(renew_techs)]
+    ren_stores = n.storage_units.loc[n.storage_units["carrier"].isin(renew_techs)]
+    ren_charger = n.links.loc[n.links["carrier"].isin(charger)]
+    ren_discharger = n.links.loc[n.links["carrier"].isin(discharger)]
 
     gens_i = ren_gen.index
     stores_i = ren_stores.index
@@ -588,7 +588,6 @@ def add_RES_constraints(n, res_share, config):
     ggrouper = ren_gen.bus.map(n.buses.country)
     sgrouper = ren_stores.bus.map(n.buses.country)
     cgrouper = ren_charger.bus0.map(n.buses.country)
-    dgrouper = ren_discharger.bus0.map(n.buses.country)
 
     load = (
         n.snapshot_weightings.generators
@@ -647,7 +646,8 @@ def _add_land_use_constraint(n):
             .sum()
         )
         existing.index += " " + carrier + "-" + snakemake.wildcards.planning_horizons
-        n.generators.loc[existing.index, "p_nom_max"] -= existing
+        target = existing.index.intersection(n.generators.index)
+        n.generators.loc[target, "p_nom_max"] -= existing.loc[target]
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 
@@ -695,11 +695,14 @@ def _add_land_use_constraint_m(n):
             ind2 = [
                 i for i in ind if i + " " + carrier + "-" + p_year in existing.index
             ]
-            sel_current = [i + " " + carrier + "-" + current_horizon for i in ind2]
             sel_p_year = [i + " " + carrier + "-" + p_year for i in ind2]
-            n.generators.loc[sel_current, "p_nom_max"] -= existing.loc[
-                sel_p_year
-            ].rename(lambda x: x[:-4] + current_horizon)
+            existing_current = existing.loc[sel_p_year].rename(
+                lambda x: x[:-4] + current_horizon
+            )
+            existing_current = existing_current[
+                existing_current.index.isin(n.generators.index)
+            ]
+            n.generators.loc[existing_current.index, "p_nom_max"] -= existing_current
 
     n.generators.p_nom_max.clip(lower=0, inplace=True)
 
@@ -1325,21 +1328,26 @@ def add_existing(n):
             .replace(".nc", ".csv")
         )
         df = read_csv_nafix(directory + "/electrolyzer_caps_" + n_name, index_col=0)
-        existing_electrolyzers = df.p_nom_opt.values
+        existing_electrolyzers = df["p_nom_opt"]
 
         h2_index = n.links[n.links.carrier == "H2 Electrolysis"].index
-        n.links.loc[h2_index, "p_nom_min"] = existing_electrolyzers
+        matching_h2 = h2_index.intersection(existing_electrolyzers.index)
+        n.links.loc[matching_h2, "p_nom_min"] = existing_electrolyzers.reindex(
+            matching_h2
+        )
 
         # n_name = snakemake.input.network.split("/")[-1].replace(str(snakemake.config["scenario"]["clusters"][0]), "").\
         #     replace(".nc", ".csv").replace(str(snakemake.config["costs"]["discountrate"][0]), "")
         df = read_csv_nafix(directory + "/res_caps_" + n_name, index_col=0)
 
         for tech in snakemake.config["custom_data"]["renewables"]:
-            # df = read_csv_nafix(snakemake.config["custom_data"]["existing_renewables"], index_col=0)
             existing_res = df.loc[tech]
-            existing_res.index = existing_res.index.str.apply(lambda x: x + tech)
             tech_index = n.generators[n.generators.carrier == tech].index
-            n.generators.loc[tech_index, tech] = existing_res
+
+            capacities = n.generators.loc[tech_index, "bus"].map(existing_res)
+            capacities = capacities.dropna()
+
+            n.generators.loc[capacities.index, "p_nom_min"] = capacities
 
 
 def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
@@ -1352,12 +1360,14 @@ def add_lossy_bidirectional_link_constraints(n: pypsa.Network) -> None:
 
     # ensure that the 'reversed' column is boolean and identify all link carriers that have 'reversed' links
     n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
-    carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
+    carriers = n.links.loc[n.links.reversed, "carrier"].unique()
 
     # get the indices of all forward links (non-reversed), that have a reversed counterpart
-    forward_i = n.links.query(
-        "carrier in @carriers and ~reversed and p_nom_extendable"
-    ).index
+    forward_i = n.links.index[
+        n.links["carrier"].isin(carriers)
+        & ~n.links["reversed"]
+        & n.links["p_nom_extendable"]
+    ]
 
     # function to get backward (reversed) indices corresponding to forward links
     # this function is required to properly interact with the myopic naming scheme
