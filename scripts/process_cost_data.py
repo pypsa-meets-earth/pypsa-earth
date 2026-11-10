@@ -503,6 +503,41 @@ def load_costs(
 
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
 
+    # BTCopt: annualise hardware and infrastructure separately.
+    # Historical fixed-capacity BTC uses an independent pathway.
+    btc_assets = (
+        "bitcoin mining ASIC",
+        "bitcoin mining infrastructure",
+    )
+    btc_present = [asset in costs.index for asset in btc_assets]
+
+    if any(btc_present):
+        if not all(btc_present):
+            raise ValueError(
+                "BTCopt requires both cost components."
+            )
+        if "bitcoin mining" in costs.index:
+            raise ValueError(
+                "BTCopt aggregate technology already exists."
+            )
+
+        asset_costs = costs.loc[
+            list(btc_assets), "capital_cost"
+        ]
+
+        if not (
+            asset_costs.notna().all()
+            and asset_costs.abs().lt(float("inf")).all()
+            and asset_costs.gt(0).all()
+        ):
+            raise ValueError(
+                "BTCopt capital costs must be positive and finite."
+            )
+
+        costs.at["bitcoin mining", "capital_cost"] = float(
+            asset_costs.sum()
+        )
+
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
     # TODO: rename the technologies in hosted tutorial data to match technology data
