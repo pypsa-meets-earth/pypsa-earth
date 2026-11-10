@@ -16,9 +16,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
+* Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
+
 **Minor Changes and bug-fixing**
 
 * Align custom optimization constraints with active Linopy model variables to correctly handle inactive generators and links [PR #2105](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2105)
+
+* Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
 
 * Fix ambiguous Snakemake rule matching between `retrieve_cost_data` and `process_cost_data` by constraining cost-year and scope wildcards [PR #2089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2089)
 
