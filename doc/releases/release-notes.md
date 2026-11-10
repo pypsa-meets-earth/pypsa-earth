@@ -32,6 +32,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix AC branch detection during link simplification by passing the network explicitly to `contains_ac`, avoiding reliance on a module-level network variable [PR #2113](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2113)
 
+* Fix natura exclusion removing all land (zero solar and wind potential) with recent GDAL versions by selecting protected cells explicitly [PR #2117](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2117)
+
 * Fix myopic land-use constraints to handle missing current-horizon generators without raising `KeyError`, for both standard and generator-clustered networks [PR #2114](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2114)
 
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
@@ -55,6 +57,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
 
 * Keep one copy of OSM elements that appear in more than one country extract, so that cross-border lines, cables and HVDC links are no longer counted once per extract [PR #2076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2076)
+
+* Support earth-osm v0.3.1 and introduce option to control multi-threading [PR #2095](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2095)
 
 * Add alternate source for downloading World Port Index data [PR #2116](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2116)
 
