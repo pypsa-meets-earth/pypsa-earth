@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
+
 * Fix ambiguous Snakemake rule matching between `retrieve_cost_data` and `process_cost_data` by constraining cost-year and scope wildcards [PR #2089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2089)
 
 * Vectorize fuel quantity conversions in sectoral energy totals and explicitly validate missing conversion factors [PR #2087](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2087)
