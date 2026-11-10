@@ -18,4 +18,4 @@ build_osm_network,,,Options passed to the ``build_osm_network`` rule.
 -- overpassing_lines_tolerance,m,,Tolerance to identify lines overpassing buses.
 -- force_ac,bool,"{True, False}",True: forces all components (lines and substation) to be AC-only. To be used if DC assets create problems.
 download_osm_data,,,Options passed to the ``download_osm_data`` rule.
--- nprocesses,,int or bool,"If set to False, the download will be done sequentially, if set to True, the download will be done using all available processes in parallel, if set to an integer, the download will be done using the specified number of processes in parallel."
+-- nprocesses,,int or bool,"If set to False, the download will be done sequentially, if set to True, the download will be done in parallel using all available CPUs but one, if set to an integer, the download will be done in parallel using the specified number of processes."
