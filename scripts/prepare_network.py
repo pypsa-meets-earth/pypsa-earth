@@ -555,15 +555,9 @@ def add_hydrogen_production(
                 "full_load_hour_proxy replacement method."
             )
 
-        routine_vom = float(
-            economics["routine_vom_eur_per_mwh_el"]
-        )
-        stack_investment = float(
-            costs.at[technology, "stack_investment"]
-        )
-        replacement_hours = float(
-            costs.at[technology, "stack_replacement_hours"]
-        )
+        routine_vom = float(economics["routine_vom_eur_per_mwh_el"])
+        stack_investment = float(costs.at[technology, "stack_investment"])
+        replacement_hours = float(costs.at[technology, "stack_replacement_hours"])
 
         if not np.isfinite(routine_vom) or routine_vom < 0:
             raise ValueError("Invalid PEMopt routine variable O&M.")
@@ -576,9 +570,7 @@ def add_hydrogen_production(
 
         # Approximate stack replacement using full-load hours.
         # This is not a discounted replacement-event model.
-        variable_cost = (
-            routine_vom + stack_investment / replacement_hours
-        )
+        variable_cost = routine_vom + stack_investment / replacement_hours
 
         if not np.isfinite(capital_cost) or capital_cost <= 0:
             raise ValueError(
