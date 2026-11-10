@@ -8,8 +8,8 @@ No Snakemake or optimization is invoked.
 Reproducibility reference: ba-pypsa-earth, commit a89178b9.
 """
 
-from pathlib import Path
 import math
+from pathlib import Path
 
 import pandas as pd
 import pypsa
@@ -25,13 +25,31 @@ BTC_NAME = "KZ0 0 Bitcoin mining optimized"
 PEM_NAME = "THESIS PEM electrolyser"
 H2_STORE = "THESIS H2 annual product accumulator"
 
-ORDER = ["E0", "E1", "E2", "E3", "E4R35", "E4R38", "E4R40", "E4R100", "E5C75", "E5C125", "E6CAP2000"]
+ORDER = [
+    "E0",
+    "E1",
+    "E2",
+    "E3",
+    "E4R35",
+    "E4R38",
+    "E4R40",
+    "E4R100",
+    "E5C75",
+    "E5C125",
+    "E6CAP2000",
+]
 LABELS = {
-    "E0": "Reference", "E1": "BTC optimized", "E2": "PEM optimized",
-    "E3": "BTC + PEM optimized", "E4R35": "BTC revenue 35 EUR/MWh",
-    "E4R38": "BTC revenue 38 EUR/MWh", "E4R40": "BTC revenue 40 EUR/MWh",
-    "E4R100": "BTC revenue 100 EUR/MWh", "E5C75": "BTC CAPEX x0.75",
-    "E5C125": "BTC CAPEX x1.25", "E6CAP2000": "BTC cap 2000 MW",
+    "E0": "Reference",
+    "E1": "BTC optimized",
+    "E2": "PEM optimized",
+    "E3": "BTC + PEM optimized",
+    "E4R35": "BTC revenue 35 EUR/MWh",
+    "E4R38": "BTC revenue 38 EUR/MWh",
+    "E4R40": "BTC revenue 40 EUR/MWh",
+    "E4R100": "BTC revenue 100 EUR/MWh",
+    "E5C75": "BTC CAPEX x0.75",
+    "E5C125": "BTC CAPEX x1.25",
+    "E6CAP2000": "BTC cap 2000 MW",
 }
 
 
@@ -75,31 +93,43 @@ def read_scenario(key, option, h2_lhv_kwh_per_kg):
         capacity = float(g.p_nom_opt)
         electricity_mwh = weighted_mwh(n.generators_t.p[BTC_NAME], weights)
         revenue_rate = -float(g.marginal_cost)
-        row.update({
-            "btc_capacity_MW": capacity,
-            "btc_electricity_TWh": electricity_mwh / 1e6,
-            "btc_full_load_hours": electricity_mwh / capacity if capacity > 0 else 0.0,
-            "btc_revenue_MEUR_per_a": electricity_mwh * revenue_rate / 1e6,
-            "btc_annualized_capex_MEUR_per_a": capacity * float(g.capital_cost) / 1e6,
-            "btc_revenue_assumption_EUR_per_MWh": revenue_rate,
-            "btc_capacity_bound_MW": float(g.p_nom_max),
-        })
+        row.update(
+            {
+                "btc_capacity_MW": capacity,
+                "btc_electricity_TWh": electricity_mwh / 1e6,
+                "btc_full_load_hours": (
+                    electricity_mwh / capacity if capacity > 0 else 0.0
+                ),
+                "btc_revenue_MEUR_per_a": electricity_mwh * revenue_rate / 1e6,
+                "btc_annualized_capex_MEUR_per_a": capacity
+                * float(g.capital_cost)
+                / 1e6,
+                "btc_revenue_assumption_EUR_per_MWh": revenue_rate,
+                "btc_capacity_bound_MW": float(g.p_nom_max),
+            }
+        )
 
     if PEM_NAME in n.links.index:
         if H2_STORE not in n.stores.index:
             raise ValueError(f"PEM present but H2 accumulator missing: {key}")
         pem = n.links.loc[PEM_NAME]
-        capacity = float(pem.p_nom_opt) if bool(pem.p_nom_extendable) else float(pem.p_nom)
+        capacity = (
+            float(pem.p_nom_opt) if bool(pem.p_nom_extendable) else float(pem.p_nom)
+        )
         electricity_mwh = weighted_mwh(n.links_t.p0[PEM_NAME], weights)
         # This dedicated Store represents cumulative H2 product, not a real tank.
         h2_mwh = float(n.stores_t.e[H2_STORE].iloc[-1])
-        row.update({
-            "pem_capacity_MW": capacity,
-            "pem_electricity_TWh": electricity_mwh / 1e6,
-            "pem_full_load_hours": electricity_mwh / capacity if capacity > 0 else 0.0,
-            "h2_production_kt_per_a": h2_mwh / h2_lhv_kwh_per_kg / 1000.0,
-            "pem_efficiency_LHV": float(pem.efficiency),
-        })
+        row.update(
+            {
+                "pem_capacity_MW": capacity,
+                "pem_electricity_TWh": electricity_mwh / 1e6,
+                "pem_full_load_hours": (
+                    electricity_mwh / capacity if capacity > 0 else 0.0
+                ),
+                "h2_production_kt_per_a": h2_mwh / h2_lhv_kwh_per_kg / 1000.0,
+                "pem_efficiency_LHV": float(pem.efficiency),
+            }
+        )
     return row
 
 
@@ -141,7 +171,9 @@ def main():
         config = yaml.safe_load(fh)
     with BASE_CONFIG.open(encoding="utf-8") as fh:
         base = yaml.safe_load(fh)
-    h2_lhv = float(base["electricity"]["flexible_consumers"]["pem"]["h2_lhv_kwh_per_kg"])
+    h2_lhv = float(
+        base["electricity"]["flexible_consumers"]["pem"]["h2_lhv_kwh_per_kg"]
+    )
     options = {opt.split("-", 1)[0]: opt for opt in config["scenario"]["opts"]}
     missing = sorted(set(ORDER) - set(options))
     if missing:
@@ -155,13 +187,21 @@ def main():
     df["delta_objective_vs_E0_MEUR_per_a"] = df["system_objective_MEUR_per_a"] - obj0
     df["delta_objective_vs_E1_MEUR_per_a"] = df["system_objective_MEUR_per_a"] - obj1
 
-    effects = df[[
-        "scenario", "description", "btc_revenue_assumption_EUR_per_MWh",
-        "btc_capacity_bound_MW", "btc_capacity_MW", "btc_electricity_TWh",
-        "btc_revenue_MEUR_per_a", "btc_annualized_capex_MEUR_per_a",
-        "system_objective_MEUR_per_a", "delta_objective_vs_E0_MEUR_per_a",
-        "delta_objective_vs_E1_MEUR_per_a",
-    ]].copy()
+    effects = df[
+        [
+            "scenario",
+            "description",
+            "btc_revenue_assumption_EUR_per_MWh",
+            "btc_capacity_bound_MW",
+            "btc_capacity_MW",
+            "btc_electricity_TWh",
+            "btc_revenue_MEUR_per_a",
+            "btc_annualized_capex_MEUR_per_a",
+            "system_objective_MEUR_per_a",
+            "delta_objective_vs_E0_MEUR_per_a",
+            "delta_objective_vs_E1_MEUR_per_a",
+        ]
+    ].copy()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     file1 = OUT_DIR / "table_01_economic_scenario_kpis.csv"
@@ -197,7 +237,17 @@ def main():
         encoding="utf-8",
     )
     print(f"Completed {len(df)} economic scenarios; no optimization performed.")
-    print(df[["scenario", "btc_capacity_MW", "pem_capacity_MW", "h2_production_kt_per_a", "system_objective_MEUR_per_a"]].to_string(index=False, float_format=lambda x: f"{x:.3f}"))
+    print(
+        df[
+            [
+                "scenario",
+                "btc_capacity_MW",
+                "pem_capacity_MW",
+                "h2_production_kt_per_a",
+                "system_objective_MEUR_per_a",
+            ]
+        ].to_string(index=False, float_format=lambda x: f"{x:.3f}")
+    )
     print(f"Economic interaction E3-E1-E2+E0: {interaction:+.4f} MEUR/a")
     print(f"Files written to: {OUT_DIR}")
     for path in (file1, file2, file3, manifest):
