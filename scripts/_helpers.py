@@ -480,7 +480,7 @@ def copy_default_files() -> None:
 
 def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger:
     """
-    Create a logger for a module and adds a handler needed to capture in logs
+    Create a logger for a module and adds a hook needed to capture in logs
     traceback from exceptions emerging during the workflow.
     """
     logger = logging.getLogger(logger_name)
