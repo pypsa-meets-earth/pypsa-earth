@@ -455,14 +455,10 @@ def add_bitcoin_mining_optimized(
     sensitivities = options.get("btcopt_sensitivities", {})
     tokens = scenario_opts or []
 
-    selected = [
-        token for token in tokens
-        if token in sensitivities
-    ]
+    selected = [token for token in tokens if token in sensitivities]
 
     sensitivity_tokens = [
-        token for token in tokens
-        if token.startswith(("E4R", "E5C", "E6CAP"))
+        token for token in tokens if token.startswith(("E4R", "E5C", "E6CAP"))
     ]
 
     if len(selected) > 1 or set(selected) != set(sensitivity_tokens):
@@ -471,13 +467,9 @@ def add_bitcoin_mining_optimized(
             "or not uniquely configured."
         )
 
-    sensitivity = (
-        sensitivities[selected[0]] if selected else {}
-    )
+    sensitivity = sensitivities[selected[0]] if selected else {}
 
-    max_capacity = float(
-        sensitivity.get("p_nom_max", max_capacity)
-    )
+    max_capacity = float(sensitivity.get("p_nom_max", max_capacity))
 
     revenue = float(
         sensitivity.get(
@@ -486,14 +478,10 @@ def add_bitcoin_mining_optimized(
         )
     )
 
-    capex_multiplier = float(
-        sensitivity.get("capex_multiplier", 1.0)
-    )
+    capex_multiplier = float(sensitivity.get("capex_multiplier", 1.0))
 
     if not np.isfinite(capex_multiplier) or capex_multiplier <= 0:
-        raise ValueError(
-            "BTCopt CAPEX multiplier must be positive and finite."
-        )
+        raise ValueError("BTCopt CAPEX multiplier must be positive and finite.")
 
     if bus not in n.buses.index:
         raise ValueError(f"Bitcoin connection bus '{bus}' does not exist.")
@@ -510,10 +498,7 @@ def add_bitcoin_mining_optimized(
             "'capital_cost' in the processed PyPSA cost table."
         )
 
-    capital_cost = (
-        float(costs.at[technology, "capital_cost"])
-        * capex_multiplier
-    )
+    capital_cost = float(costs.at[technology, "capital_cost"]) * capex_multiplier
 
     if not np.isfinite(capital_cost) or capital_cost <= 0:
         raise ValueError(
@@ -867,9 +852,7 @@ if __name__ == "__main__":
     # Thesis flexible electricity consumers are activated through
     # the standard scenario opts wildcard.
     if "BTCopt" in opts:
-        add_bitcoin_mining_optimized(
-            n, flexible_consumers, costs, scenario_opts=opts
-        )
+        add_bitcoin_mining_optimized(n, flexible_consumers, costs, scenario_opts=opts)
     elif "BTC" in opts:
         add_bitcoin_mining(n, flexible_consumers)
 
