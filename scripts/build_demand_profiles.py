@@ -251,19 +251,22 @@ def read_demcast_load(
     "DemandCast: Global hourly electricity demand forecasting"
     https://arxiv.org/abs/2510.08000
     """
-    demcast_full_load = pd.read_parquet(load_paths)
+    countries_iso3 = coco.convert(names=countries, to="ISO3")
+    if isinstance(countries_iso3, str):
+        countries_iso3 = [countries_iso3]
+
+    # Filter by country while reading to avoid loading the whole dataset
+    demcast_full_load = pd.read_parquet(
+        load_paths,
+        columns=["Time (UTC)", "Entity code", "Forecast load (MW)"],
+        filters=[("Entity code", "in", countries_iso3)],
+    )
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
     demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
     demcast_load = demcast_load.rename(
         columns={"Forecast load (MW)": "Electricity demand"}
     )
-
-    countries_iso3 = coco.convert(names=countries, to="ISO3")
-    if isinstance(countries_iso3, str):
-        countries_iso3 = [countries_iso3]
-
-    demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
 
     demcast_load = add_transform_iso3(
         demcast_load,
