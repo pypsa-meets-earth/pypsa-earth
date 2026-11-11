@@ -1145,8 +1145,8 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         if np.isnan(potential) or potential < 0:
             raise ValueError(f"{name} must be non-negative or infinite.")
 
-    biomass_pot = potentials["solid_biomass_potential"] * 1e6 * n_years
-    biogas_pot = potentials["biogas_potential"] * 1e6 * n_years
+    biomass_pot = potentials["solid_biomass_potential"] * 1e6 * n_years  # MWh
+    biogas_pot = potentials["biogas_potential"] * 1e6 * n_years  # MWh
     logger.info("Biomass and Biogas potential fetched from config")
 
     # Convert from total to nodal potentials,
