@@ -1208,8 +1208,6 @@ rule prepare_ports:
         ports="data/ports/UpdatedPub150.csv",
     params:
         custom_export=config["custom_data"]["export_ports"],
-    input:
-        ports_raw="data/ports_raw.csv",
     output:
         ports="resources/" + SECDIR + "ports.csv",
         export_ports="resources/" + SECDIR + "export_ports.csv",
@@ -2241,15 +2239,6 @@ rule retrieve_urban_percent:
         urban_percent_raw="data/urban_percent_raw.csv",
     script:
         "scripts/retrieve_urban_percent.py"
-
-
-rule retrieve_ports:
-    params:
-        url_ports=get_datasource_url("sea_ports_nga"),
-    output:
-        ports_raw="data/ports_raw.csv",
-    script:
-        "scripts/retrieve_ports.py"
 
 
 rule retrieve_airports:

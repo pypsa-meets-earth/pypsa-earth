@@ -59,7 +59,7 @@ if __name__ == "__main__":
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    df = read_csv_nafix(snakemake.input.ports_raw, index_col=0).copy()
+    df = read_csv_nafix(snakemake.input.ports, index_col=0, compression="gzip")
 
     # Add ISO2 country code for each country
     df = df.rename(
