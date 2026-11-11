@@ -104,6 +104,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
 
+* Drop duplication of logging to console [PR #2025](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2025)
+
 # PyPSA-Earth 0.9.0
 
 **New Features and Major Changes**
