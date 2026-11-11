@@ -118,6 +118,8 @@ def render_row(entry):
     link = entry.get("origin_url") or entry.get("url")
     if link and "{" not in link:
         name_hyperlinked = f"[{long_name}]({link})"
+    else:
+        name_hyperlinked = f"**{long_name}**"
     output = entry.get("output")
     output = f"`{render_cell(output)}`" if output else ""
     description = render_cell(entry.get("description", ""))
