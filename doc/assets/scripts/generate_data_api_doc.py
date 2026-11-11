@@ -74,7 +74,7 @@ SPDX-License-Identifier: CC-BY-4.0
 """
 
 
-TABLE_HEADER = "| Dataset | Output | Description |\n|---|---|---|\n"
+TABLE_HEADER = "| Dataset | Modelling-Ready Input | Description |\n|---|---|---|\n"
 
 
 def render_cell(value):
