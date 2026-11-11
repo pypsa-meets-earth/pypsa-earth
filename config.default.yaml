@@ -130,6 +130,9 @@ osm:
     overpassing_lines_tolerance: 1 # [m] (default 1) Tolerance to identify lines overpassing buses
     force_ac: false # When true, it forces all components (lines and substation) to be AC-only. To be used if DC assets create problem.
 
+  download_osm_data: # Options of the download_osm_data script
+    nprocesses: 4 # number of processes to be used in download_osm_data
+
 # ------------------- Clustering -------------------
 clustering:
   alternative_clustering: false # "False" use Voronoi shapes, "True" use GADM shapes
@@ -188,7 +191,7 @@ base_network:
 
 # ------------------- Demand -------------------
 load_options:
-  source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2024 available): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
+  source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2025 available, 2025 for 91 countries): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
   weather_year: derive_from_snapshots # Use an integer to select the demand weather year or derive it from snapshots
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load

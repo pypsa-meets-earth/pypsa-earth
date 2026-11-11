@@ -483,10 +483,10 @@ def resolve_weather_configuration(config: dict) -> dict:
                 "load source. Supported years are 2011, 2013, and 2018."
             )
     elif load_source == "demcast":
-        if not 2000 <= weather_year <= 2024:
+        if not 2000 <= weather_year <= 2025:
             raise ValueError(
                 f"Weather year {weather_year} is not available for the "
-                "DemandCast load source. Supported years range from 2000 to 2024."
+                "DemandCast load source. Supported years range from 2000 to 2025 (2025 is available for 91 countries)."
             )
     else:
         raise ValueError(
@@ -641,13 +641,10 @@ def copy_default_files() -> None:
 
 def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger:
     """
-    Create a logger for a module and adds a handler needed to capture in logs
+    Create a logger for a module and adds a hook needed to capture in logs
     traceback from exceptions emerging during the workflow.
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(level)
-    handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
     sys.excepthook = handle_exception
     return logger
 

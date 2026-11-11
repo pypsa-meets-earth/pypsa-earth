@@ -18,7 +18,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
+* Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
+
 **Minor Changes and bug-fixing**
+
+* Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
 
 * Fix ambiguous Snakemake rule matching between `retrieve_cost_data` and `process_cost_data` by constraining cost-year and scope wildcards [PR #2089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2089)
 
@@ -57,6 +61,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Avoid try/catch in rule definition, clean snakefile, and bugfix branch usage retrieve_databundle_data [PR #2067](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2067)
 
 * Keep one copy of OSM elements that appear in more than one country extract, so that cross-border lines, cables and HVDC links are no longer counted once per extract [PR #2076](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2076)
+
+* Support earth-osm v0.3.1 and introduce option to control multi-threading [PR #2095](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2095)
 
 * Add alternate source for downloading World Port Index data [PR #2116](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2116)
 
@@ -99,6 +105,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
 * Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
+
+* Drop duplication of logging to console [PR #2025](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2025)
 
 # PyPSA-Earth 0.9.0
 

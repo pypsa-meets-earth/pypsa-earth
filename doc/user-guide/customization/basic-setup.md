@@ -86,7 +86,7 @@ load_options:
   scale: 1
 ```
 
-For GEGIS, `weather_year` selects the weather conditions used to generate the demand profile, while `prediction_year` selects the socioeconomic scenario year. Supported weather years are 2011, 2013, and 2018. DemandCast provides demand years from 2000 to 2024 and does not use `prediction_year`.
+For GEGIS, `weather_year` selects the weather conditions used to generate the demand profile, while `prediction_year` selects the socioeconomic scenario year. Supported weather years are 2011, 2013, and 2018. DemandCast provides demand years from 2000 to 2025 (2025 is available for 91 countries) and does not use `prediction_year`.
 
 An explicit integer, such as `weather_year: 2013`, selects the demand year independently of snapshots and cutout selection. The configured snapshot range is never changed.
 
