@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Description of datasets used by workflow
 
-| Dataset | Modelling-ready Input | Description |
+| Dataset | Modelling-Ready Input | Description |
 |---|---|---|
 | OpenStreetMap | `resources/osm/raw/all_raw_cables.geojson, resources/osm/raw/all_raw_generators.geojson, resources/osm/raw/all_raw_generators.csv, resources/osm/raw/all_raw_lines.geojson, resources/osm/raw/all_raw_substations.geojson` | OpenStreetMap database used as a primary source of power-infrastructure data on substations, lines, cables, generators. OSM data are fetched for requested countries via the earth-osm package (github.com/pypsa-meets-earth/earth-osm) which downloads regional .osm.pbf extracts from Geofabrik and filters them to power-tagged features. For each country, url are resolved dynamically from Geofabrik's index. Cite: © OpenStreetMap contributors, data extracted via Geofabrik (https://download.geofabrik.de/). |
 | ERA5 hourly reanalysis on single levels from 1940 to present, Copernicus/ECMWF | `cutouts/{cutout}.nc` | ERA5 hourly data on single levels from 1940 to present. Atmospheric reanalysis produced by European Centre for Medium-Range Weather Forecasts (ECMWF). Retrieved from Copernicus Climate Change Service (C3S) using atlite package to build weather cutouts for the wind, influx, temperature and runoff features. Cite: Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horanyi, A., Munoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thepaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). DOI: https://doi.org/10.24381/cds.adbb2d47 |
