@@ -555,15 +555,17 @@ source:
   license_link: https://unctadstat.unctad.org/EN/About.html
 
 - name: sea_ports_nga
+  # TODO harmonise with configs/bundle_config.yaml: the url is duplicated in bundle_ports and bundle_ports_tutorial, and is currently retrieved via retrieve_databundle_light rather than read from this inventory
   long_name: Sea port worldwide, NGA World Port Index
-  output: resources/ports.csv
-  description: "NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency. The dataset is updated monthly and contains 3711 ports."
+  output: data/ports/UpdatedPub150.csv
+  description: "NGA World Port Index (Publication 150): location, harbor size/type, and facilities of ports, shipping terminals and oil terminals worldwide, published by the US National Geospatial-Intelligence Agency. The upstream dataset is updated monthly; a fixed snapshot archived on web.archive.org (2026-09-29, 3807 ports) is used to keep runs reproducible."
   tutorial: false
   countries: Earth
-  url: https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv
-  version: ""
+  url: https://web.archive.org/web/20260929232408id_/https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv
+  origin_url: https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv
+  version: "Pub. 150, 33rd Edition"
   checksum: ""
-  code_line: "[retrieve_ports:download_ports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_ports.py#L9)"
+  code_line: "[bundle_config.yaml:bundle_ports](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L280), [bundle_config.yaml:bundle_ports_tutorial](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L107)"
   license: Public Domain
   license_link: https://www.nga.mil/resources/Public_Release.html
 
