@@ -99,21 +99,29 @@ def render_row(entry):
     """
     Translate a dataset entry into a properly formatted markdown table row.
 
+    The dataset name is rendered as a hyperlink to "origin_url" if present,
+    otherwise to "url". Templated urls containing placeholders (e.g.
+    "{region}") are not valid links, so the name is left as plain text.
+
     Parameters
     ----------
     entry : dict
         Dataset entry from the inventory containing "long_name",
-        "output" and "description" keys.
+        with a source hyperlink attached, "output" and "description" keys.
 
     Returns
     -------
     str
         A table row for the automated data documenting table.
     """
+    long_name = render_cell(entry["long_name"])
+    link = entry.get("origin_url") or entry.get("url")
+    if link and "{" not in link:
+        name_hyperlinked = f"[{long_name}]({link})"
     output = entry.get("output")
     output = f"`{render_cell(output)}`" if output else ""
     description = render_cell(entry.get("description", ""))
-    return f"| {render_cell(entry['long_name'])} | {output} | {description} |"
+    return f"| {name_hyperlinked} | {output} | {description} |"
 
 
 def order_entries(entries, order=DATASET_ORDER):
