@@ -103,6 +103,17 @@ databundles:
       #direct: https://www.hydroshare.org/resource/121bbce392a841178476001843e7510b/data/contents/africa-geoglows-catchment.zip
     output: [data/hydrobasins_hydroshare/africa-geoglows-atlite.shp]
 
+  # World Port Index dataset for ports, harbors, and terminals
+  bundle_ports_tutorial:
+    countries: [Earth]
+    tutorial: true
+    category: ports
+    destination: "data/ports"
+    urls:
+      direct: "https://web.archive.org/web/20260929232408id_/https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
+    unzip: false
+    output: [data/ports/UpdatedPub150.csv]
+
   # tutorial bundle specific for Nigeria and Benin only
   bundle_cutouts_tutorial_NGBJ:
     countries: [NG, BJ]
@@ -195,7 +206,7 @@ databundles:
     category: el_demand
     destination: "data/demand"
     urls:
-      direct: "https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet"
+      direct: "https://zenodo.org/records/23924756/files/forecasts_on_historical_period.parquet"
     unzip: false
     output:
     - data/demand/forecasts_on_historical_period.parquet
@@ -206,8 +217,7 @@ databundles:
     category: el_demand
     destination: "data/demand"
     urls:
-      # TODO Cross-check with DemandCast team and move to full-scale Zenodo
-      direct: "https://sandbox.zenodo.org/records/493116/files/forecasts_on_historical_period.parquet"
+      direct: "https://zenodo.org/records/24115459/files/forecasts_on_historical_period.parquet"
     unzip: false
     output:
     - data/demand/forecasts_on_historical_period.parquet
@@ -265,6 +275,17 @@ databundles:
       gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
     - data/natura/natura.tiff
+
+  # World Port Index dataset for ports, harbors, and terminals. Source: NGA, 2026. World Port Index (Pub. 150), 33rd Edition, National Geospatial-Intelligence Agency, Bethesda, MD, USA.
+  bundle_ports:
+    countries: [Earth]
+    tutorial: false
+    category: ports
+    destination: "data/ports"
+    urls:
+      direct: "https://web.archive.org/web/20260929232408id_/https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
+    unzip: false
+    output: [data/ports/UpdatedPub150.csv]
 
   # # data bundle of the data folder for the african continent
   # bundle_landclassification:
