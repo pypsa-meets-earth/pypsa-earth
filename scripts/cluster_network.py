@@ -727,8 +727,8 @@ if __name__ == "__main__":
         ]
     )
 
-    exclude_carriers = set(
-        snakemake.params.clustering["cluster_network"].get("exclude_carriers", [])
+    exclude_carriers = snakemake.params.clustering["cluster_network"].get(
+        "exclude_carriers", []
     )
     aggregate_carriers = get_aggregate_carriers(n, exclude_carriers)
 

@@ -2364,11 +2364,11 @@ def get_aggregate_carriers(
     excluding ``coal`` also excludes internally year-tagged carriers such as
     ``coal-2020``.
     """
-    exclude_carriers = set(exclude_carriers)
+    excluded_carriers = set(exclude_carriers)
     return {
         carrier
         for carrier in network.generators.carrier.unique()
-        if get_base_carrier(carrier) not in exclude_carriers
+        if get_base_carrier(carrier) not in excluded_carriers
     }
 
 
