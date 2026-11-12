@@ -219,11 +219,14 @@ def add_CCL_constraints(n, config):
     )
 
     capacity_variable = n.model["Generator-p_nom"]
+    generator_dim = capacity_variable.dims[-1]
+    extendable_i = capacity_variable.indexes[generator_dim]
 
-    # get carriers to which CCL constraints apply
+    # Get carriers to which CCL constraints apply from generators represented
+    # by the nominal-capacity variable.
+    gens = n.generators.loc[extendable_i]
     ccl_carriers = agg_p_nom_minmax.index.get_level_values(1).unique()
-    ext_carriers = n.generators.query("p_nom_extendable").carrier.unique()
-    ccl_carriers = ccl_carriers[ccl_carriers.isin(ext_carriers)]
+    ccl_carriers = ccl_carriers[ccl_carriers.isin(gens.carrier.unique())]
 
     # If no CCL carriers found, return early
     if not ccl_carriers.any():
@@ -232,8 +235,9 @@ def add_CCL_constraints(n, config):
         )
         return
 
-    # Get extendable generators for relevant carriers
-    gens = n.generators[n.generators.carrier.isin(ccl_carriers)]
+    gens = gens[gens.carrier.isin(ccl_carriers)]
+    capacity_variable = capacity_variable.loc[gens.index]
+
     if not PYPSA_V1:
         gens = gens.rename_axis(index="Generator-ext")
 
@@ -245,22 +249,39 @@ def add_CCL_constraints(n, config):
     # Prepare LHS
     lhs = capacity_variable.groupby(grouper).sum()
 
-    # Obtain existing capacities
-    existing_capacities = gens.p_nom.groupby(
-        [grouper["country"], grouper["carrier"]]
-    ).sum()
-
     # Obtain minimum and maximum constraint limits
     min_values = agg_p_nom_minmax["min"]
     max_values = agg_p_nom_minmax["max"]
 
-    # Adjust limits if existing capacities are considered
+    # Adjust limits for active fixed capacity if requested.
     if agg_p_nom_limits.get("include_existing", False):
-        min_values = (min_values - existing_capacities).clip(lower=0)
-        max_values = (max_values - existing_capacities).clip(lower=0)
-        logger.info(
-            f"Considered existing capacities in CCL constraints for carrier {c}."
+        dispatch_variable = n.model["Generator-p"]
+        dispatch_dim = dispatch_variable.dims[-1]
+        active_i = dispatch_variable.indexes[dispatch_dim]
+
+        fixed_i = active_i.difference(extendable_i)
+        fixed = n.generators.loc[fixed_i]
+        fixed = fixed[fixed.carrier.isin(ccl_carriers)]
+
+        fixed_grouper = pd.concat(
+            [
+                fixed.bus.map(n.buses.country).rename("country"),
+                fixed.carrier,
+            ],
+            axis=1,
         )
+        existing_capacities = fixed.p_nom.groupby(
+            [fixed_grouper["country"], fixed_grouper["carrier"]]
+        ).sum()
+
+        min_values = min_values.subtract(existing_capacities, fill_value=0).clip(
+            lower=0
+        )
+        max_values = max_values.subtract(existing_capacities, fill_value=0).clip(
+            lower=0
+        )
+
+        logger.info("Considered existing fixed capacities in CCL constraints.")
 
     # Convert limits to xarray for masking
     min_values = xr.DataArray(min_values.dropna()).rename(dim_0="group")
