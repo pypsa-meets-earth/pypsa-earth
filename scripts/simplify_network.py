@@ -92,17 +92,14 @@ from _helpers import (
     add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
+    get_aggregate_carriers,
     get_linetype_by_voltage_and_country,
     nearest_shape,
     restore_base_carrier_names,
     update_config_dictionary,
     update_p_nom_max,
 )
-from cluster_network import (
-    cluster_regions,
-    clustering_for_n_clusters,
-    get_aggregate_carriers,
-)
+from cluster_network import cluster_regions, clustering_for_n_clusters
 from pypsa.clustering.spatial import (
     aggregateoneport,
     busmap_by_stubs,
