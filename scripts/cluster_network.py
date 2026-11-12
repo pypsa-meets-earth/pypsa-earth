@@ -122,6 +122,7 @@ Exemplary unsolved network clustered to 37 nodes:
 """
 
 import logging
+from collections.abc import Iterable
 from functools import reduce
 
 import geopandas as gpd
@@ -638,7 +639,7 @@ def replace_components(n, c, df, pnl):
 def groupby_bus_carrier(
     network: pypsa.Network,
     aggregation_strategies: dict,
-    exclude_carriers: list = [],
+    exclude_carriers: Iterable[str] = (),
 ) -> None:
     """
     Group generators and storage units by (bus, carrier).
