@@ -887,66 +887,6 @@ def hydrogen_temporal_constraint(
     )
 
 
-def add_chp_constraints(n):
-    if n.links.empty:
-        return
-
-    electric_bool = (
-        n.links.index.str.contains("urban central")
-        & n.links.index.str.contains("CHP")
-        & n.links.index.str.contains("electric")
-    )
-    heat_bool = (
-        n.links.index.str.contains("urban central")
-        & n.links.index.str.contains("CHP")
-        & n.links.index.str.contains("heat")
-    )
-
-    electric = n.links.index[electric_bool]
-    heat = n.links.index[heat_bool]
-
-    electric_ext = n.links[electric_bool].query("p_nom_extendable").index
-    heat_ext = n.links[heat_bool].query("p_nom_extendable").index
-
-    electric_fix = n.links[electric_bool].query("~p_nom_extendable").index
-    heat_fix = n.links[heat_bool].query("~p_nom_extendable").index
-
-    p = n.model["Link-p"]  # dimension: [time, link]
-
-    # output ratio between heat and electricity and top_iso_fuel_line for extendable
-    if not electric_ext.empty:
-        p_nom = n.model["Link-p_nom"]
-
-        lhs = (
-            p_nom.loc[electric_ext]
-            * (n.links.p_nom_ratio * n.links.efficiency)[electric_ext].values
-            - p_nom.loc[heat_ext] * n.links.efficiency[heat_ext].values
-        )
-        n.model.add_constraints(lhs == 0, name="chplink-fix_p_nom_ratio")
-
-        rename = {} if PYPSA_V1 else {"Link-ext": "Link"}
-        lhs = (
-            p.loc[:, electric_ext]
-            + p.loc[:, heat_ext]
-            - p_nom.rename(rename).loc[electric_ext]
-        )
-        n.model.add_constraints(lhs <= 0, name="chplink-top_iso_fuel_line_ext")
-
-    # top_iso_fuel_line for fixed
-    if not electric_fix.empty:
-        lhs = p.loc[:, electric_fix] + p.loc[:, heat_fix]
-        rhs = n.links.p_nom[electric_fix]
-        n.model.add_constraints(lhs <= rhs, name="chplink-top_iso_fuel_line_fix")
-
-    # back-pressure
-    if not electric.empty:
-        lhs = (
-            p.loc[:, heat] * (n.links.efficiency[heat] * n.links.c_b[electric].values)
-            - p.loc[:, electric] * n.links.efficiency[electric]
-        )
-        n.model.add_constraints(lhs <= 0, name="chplink-backpressure")
-
-
 def add_co2_sequestration_limit(n, sns):
     co2_stores = n.stores.loc[n.stores.carrier == "co2 stored"].index
 
@@ -1140,10 +1080,6 @@ def extra_functionality(n, snapshots):
 
     add_battery_constraints(n)
     add_lossy_bidirectional_link_constraints(n)
-
-    if snakemake.config["sector"]["chp"]:
-        logger.info("setting CHP constraints")
-        add_chp_constraints(n)
 
     additionality = snakemake.params.policy_config["hydrogen"]["additionality"]
     ref_for_additionality = snakemake.params.policy_config["hydrogen"]["is_reference"]
