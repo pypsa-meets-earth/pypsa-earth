@@ -1,0 +1,5 @@
+# Code owners of the repository.
+# Automatically request reviews from PyPSA-Earth Core Maintainers.
+# The main branch ruleset should require approval from a code owner.
+
+* @pypsa-meets-earth/pypsa-earth-core-maintainers
