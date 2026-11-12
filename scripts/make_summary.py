@@ -143,11 +143,17 @@ def calculate_costs(n, label, costs):
 def calculate_curtailment(n, label, curtailment):
     avail = (
         n.generators_t.p_max_pu.multiply(n.generators.p_nom_opt)
+        .multiply(n.snapshot_weightings.generators, axis=0)
         .sum()
         .groupby(n.generators.carrier)
         .sum()
     )
-    used = n.generators_t.p.sum().groupby(n.generators.carrier).sum()
+    used = (
+        n.generators_t.p.multiply(n.snapshot_weightings.generators, axis=0)
+        .sum()
+        .groupby(n.generators.carrier)
+        .sum()
+    )
 
     curtailment[label] = (((avail - used) / avail) * 100).round(3)
 
@@ -298,8 +304,15 @@ def calculate_supply_energy(n, label, supply_energy):
             if len(items_c) == 0 or c.pnl.p.empty:
                 continue
 
+            weights = (
+                n.snapshot_weightings.stores
+                if c.name in {"StorageUnit", "Store"}
+                else n.snapshot_weightings.generators
+            )
+
             s = (
                 c.pnl.p[items_c]
+                .multiply(weights, axis=0)
                 .sum()
                 .multiply(c.df.loc[items_c, "sign"])
                 .groupby(c.df.loc[items_c, "carrier"])
@@ -319,9 +332,9 @@ def calculate_supply_energy(n, label, supply_energy):
                 if len(items_cend) == 0 or c.pnl["p" + end].empty:
                     continue
 
-                s = (-1) * c.pnl["p" + end][items_cend].sum().groupby(
-                    c.df.loc[items_cend, "carrier"]
-                ).sum()
+                s = (-1) * c.pnl["p" + end][items_cend].multiply(
+                    n.snapshot_weightings.generators, axis=0
+                ).sum().groupby(c.df.loc[items_cend, "carrier"]).sum()
 
                 supply_energy = supply_energy.reindex(
                     supply_energy.index.union(
@@ -377,7 +390,11 @@ def calculate_prices(n, label, prices):
     prices = prices.reindex(prices.index.union(bus_type.value_counts().index))
 
     logger.warning("Prices are time-averaged, not load-weighted")
-    prices[label] = n.buses_t.marginal_price.mean().groupby(bus_type).mean()
+    weights = n.snapshot_weightings.generators
+    time_weighted_prices = (
+        n.buses_t.marginal_price.multiply(weights, axis=0).sum() / weights.sum()
+    )
+    prices[label] = time_weighted_prices.groupby(bus_type).mean()
 
     return prices
 
@@ -427,38 +444,52 @@ def calculate_weighted_prices(n, label, weighted_prices):
         if buses.empty:
             continue
 
-        if carrier in ["H2", "gas"]:
-            load = pd.DataFrame(index=n.snapshots, columns=buses, data=0.0)
-        # elif carrier[:5] == "space": TODO: space carrier shall be investigated, heat_demand_df not defined
-        #     load = heat_demand_df[buses.str[:2]].rename(columns=lambda i: str(i)+suffix)
-        else:
-            load = n.loads_t.p_set[buses]
+        load = pd.DataFrame(0.0, index=n.snapshots, columns=buses)
+        loads_i = n.loads.index[n.loads.bus.isin(buses)]
 
-        for tech in link_loads[carrier]:
-            names = n.links.index[n.links.index.to_series().str[-len(tech) :] == tech]
-
-            if names.empty:
-                continue
-
-            load += (
-                n.links_t.p0[names]
-                .groupby(n.links.loc[names, "bus0"], axis=1)
-                .sum(axis=1)
+        if not loads_i.empty:
+            loads_by_bus = (
+                n.loads_t.p_set[loads_i].T.groupby(n.loads.loc[loads_i, "bus"]).sum().T
             )
+            load += loads_by_bus.reindex(columns=buses, fill_value=0.0)
 
-        # Add H2 Store when charging
+        if not n.links.empty:
+            for tech in link_loads[carrier]:
+                names = n.links.index[
+                    n.links.index.to_series().str[-len(tech) :] == tech
+                ]
+
+                if names.empty:
+                    continue
+
+                load += (
+                    n.links_t.p0[names].T.groupby(n.links.loc[names, "bus0"]).sum().T
+                )
+
+        # Add H2 Store charging as load
         if carrier == "H2":
-            stores = (
-                n.stores_t.p[buses + " Store"]
-                .groupby(n.stores.loc[buses + " Store", "bus"], axis=1)
-                .sum(axis=1)
-            )
-            stores[stores > 0.0] = 0.0
-            load += -stores
+            stores_i = n.stores.index[n.stores.bus.isin(buses)]
+
+            if not stores_i.empty:
+                stores = (
+                    n.stores_t.p[stores_i]
+                    .T.groupby(n.stores.loc[stores_i, "bus"])
+                    .sum()
+                    .T.reindex(columns=buses, fill_value=0.0)
+                )
+                stores = stores.clip(upper=0.0)
+                load += -stores
+
+        weights = n.snapshot_weightings.generators
+        weighted_load = load.multiply(weights, axis=0)
+        total_load = weighted_load.sum().sum()
+
+        if total_load == 0:
+            continue
 
         weighted_prices.loc[carrier, label] = (
             load * n.buses_t.marginal_price[buses]
-        ).sum().sum() / load.sum().sum()
+        ).multiply(weights, axis=0).sum().sum() / total_load
 
         if carrier[:5] == "space":
             print(load * n.buses_t.marginal_price[buses])

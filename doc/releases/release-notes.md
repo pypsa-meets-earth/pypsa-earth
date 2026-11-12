@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Apply snapshot weightings consistently in summary energy, curtailment and price statistics, and make weighted-price aggregation robust to optional links, stores and independently named loads [PR #2108](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2108)
+
 * Restore CO2 emissions from rail transport oil consumption [PR #2123](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2123)
 
 * Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
