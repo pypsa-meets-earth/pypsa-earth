@@ -16,9 +16,15 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
+* Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
+
 **Minor Changes and bug-fixing**
 
 * Fix connection cost calculations during network simplification by preserving zero-cost AC connections and correctly accounting for HVDC links and lines [PR #2091](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2091)
+
+* Restore CO2 emissions from rail transport oil consumption [PR #2123](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2123)
+
+* Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
 
 * Fix ambiguous Snakemake rule matching between `retrieve_cost_data` and `process_cost_data` by constraining cost-year and scope wildcards [PR #2089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2089)
 
@@ -101,6 +107,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
 * Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
+
+* Drop duplication of logging to console [PR #2025](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2025)
 
 # PyPSA-Earth 0.9.0
 
