@@ -499,13 +499,10 @@ def copy_default_files() -> None:
 
 def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger:
     """
-    Create a logger for a module and adds a handler needed to capture in logs
+    Create a logger for a module and adds a hook needed to capture in logs
     traceback from exceptions emerging during the workflow.
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(level)
-    handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
     sys.excepthook = handle_exception
     return logger
 
@@ -2373,6 +2370,25 @@ def get_base_carrier(carrier: str) -> str:
     if _is_year_tagged(carrier):
         return carrier.rsplit("-", 1)[0]
     return carrier
+
+
+def get_aggregate_carriers(
+    network: pypsa.Network,
+    exclude_carriers: Iterable[str],
+) -> set[str]:
+    """
+    Return carrier variants that should be aggregated.
+
+    Exclusions are matched against the base carrier so that, for example,
+    excluding ``coal`` also excludes internally year-tagged carriers such as
+    ``coal-2020``.
+    """
+    excluded_carriers = set(exclude_carriers)
+    return {
+        carrier
+        for carrier in network.generators.carrier.unique()
+        if get_base_carrier(carrier) not in excluded_carriers
+    }
 
 
 def restore_base_carrier_names(n: pypsa.Network) -> None:

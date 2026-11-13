@@ -88,6 +88,7 @@ from _helpers import (
     add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
+    get_aggregate_carriers,
     get_linetype_by_voltage_and_country,
     nearest_shape,
     restore_base_carrier_names,
@@ -410,7 +411,7 @@ def _aggregate_and_move_components(
     generator_strategies = aggregation_strategies["generators"]
     one_port_strategies = aggregation_strategies["one_ports"]
 
-    carriers = set(n.generators.carrier) - set(exclude_carriers)
+    carriers = get_aggregate_carriers(n, exclude_carriers)
     generators, generators_pnl = aggregateoneport(
         n,
         busmap,
@@ -887,7 +888,12 @@ def drop_isolated_networks(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
@@ -941,7 +947,8 @@ def transform_to_gdf(n, network_crs):
     buses_df["bus_id"] = buses_df.index
 
     # load data are crucial to deal with sub-networks
-    buses_df = buses_df.join(n.loads_t.p_set.sum().T.rename("load"))
+    load_by_bus = n.loads_t.p_set.sum().groupby(n.loads.bus).sum()
+    buses_df["load"] = load_by_bus.reindex(buses_df.index, fill_value=0.0)
     buses_df["load_in_subnetw"] = buses_df.groupby(["country", "sub_network"])[
         "load"
     ].transform("sum")
@@ -1095,7 +1102,12 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index

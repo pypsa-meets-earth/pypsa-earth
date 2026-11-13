@@ -542,13 +542,13 @@ if config["enable"].get("retrieve_cost_data", True):
         input:
             storage.http(
                 f"https://raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
-                + "costs_{year}.csv",
+                + "costs_{planning_horizons}.csv",
                 keep_local=True,
             ),
         output:
-            "resources/" + RDIR + "costs_{year}.csv",
+            "resources/" + RDIR + "costs_{planning_horizons}.csv",
         log:
-            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+            "logs/" + RDIR + "retrieve_cost_data_{planning_horizons}.log",
         resources:
             mem_mb=5000,
         run:
@@ -556,6 +556,8 @@ if config["enable"].get("retrieve_cost_data", True):
 
 
 rule process_cost_data:
+    wildcard_constraints:
+        scope=r"elec|sec",
     params:
         costs=config["costs"],
         max_hours=config["electricity"]["max_hours"],
@@ -564,15 +566,15 @@ rule process_cost_data:
         network="networks/" + RDIR + "base.nc",
         costs=branch(
             config["enable"].get("retrieve_cost_data", True),
-            "resources/" + RDIR + "costs_{year}.csv",
+            "resources/" + RDIR + "costs_{planning_horizons}.csv",
             "data/costs.csv",
         ),
     output:
-        "resources/" + RDIR + "costs_{year}_{scope}.csv",
+        "resources/" + RDIR + "costs_{planning_horizons}_{scope}.csv",
     log:
-        "logs/" + RDIR + "build_cost_data_{year}_{scope}.log",
+        "logs/" + RDIR + "build_cost_data_{planning_horizons}_{scope}.log",
     benchmark:
-        "benchmarks/" + RDIR + "build_cost_data_{year}_{scope}"
+        "benchmarks/" + RDIR + "build_cost_data_{planning_horizons}_{scope}"
     threads: 1
     resources:
         mem_mb=4000,
@@ -614,7 +616,7 @@ rule build_demand_profiles:
 def inputs_hydro(w):
     if w.technology == "hydro":
         HYDRO_PROFILES = {
-            "hydro_capacities": "data/hydro_capacities.csv",
+            "hydro_capacities": config["renewable"]["hydro"]["hydro_capacities"],
             "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
             "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
             "powerplants": "resources/" + RDIR + "powerplants.csv",
@@ -732,7 +734,7 @@ rule add_electricity:
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        hydro_capacities="data/hydro_capacities.csv",
+        hydro_capacities=config["renewable"]["hydro"]["hydro_capacities"],
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
         nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:
