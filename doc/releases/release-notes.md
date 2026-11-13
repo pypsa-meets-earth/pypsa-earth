@@ -20,7 +20,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Update EDGAR historical CO2 emissions to the 2026 release (1970–2025), preserve missing emission values, and correct the ktCO2-to-tCO2 conversion for automatically derived CO2 limits.
+* Update EDGAR historical CO2 emissions to the 2026 release (1970–2025), preserve missing emission values, and correct the ktCO2-to-tCO2 conversion for automatically derived CO2 limits. [PR #2130](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2130)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
 
