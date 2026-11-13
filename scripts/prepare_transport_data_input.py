@@ -2,8 +2,10 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
+import io
 import logging
 import shutil
+from pathlib import Path
 
 import country_converter as coco
 import pandas as pd
@@ -11,24 +13,22 @@ import requests
 from _helpers import BASE_DIR
 
 logger = logging.getLogger(__name__)
+CC = coco.CountryConverter()
+HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-def add_iso2_country_code(df):
+def add_iso2_country_code(df, source_col="Country"):
     """
-    Converts 'Country' names to ISO2 codes in a new 'country' column.
-    Cleans DataFrame by removing rows with invalid 'country' values.
+    Converts country names or codes in `source_col` to ISO2 codes in a new
+    'country' column. Cleans DataFrame by removing rows with invalid 'country' values.
     """
-
-    cc = coco.CountryConverter()
-    df.loc[:, "country"] = cc.pandas_convert(
-        series=pd.Series(df["Country"]), to="ISO2", not_found="not found"
+    df = df.copy()
+    df["country"] = CC.pandas_convert(
+        series=df[source_col], to="ISO2", not_found="not found"
     )
-
-    df = df[df.country != "not found"]
-
+    df = df[df["country"] != "not found"]
     # Drop region names where country column contains list of countries
-    df = df.loc[df.country.apply(lambda x: isinstance(x, str)), :]
-
+    df = df[df["country"].apply(lambda x: isinstance(x, str))]
     return df
 
 
@@ -47,14 +47,15 @@ def download_number_of_vehicles():
     """
 
     def _clean_data(df):
+        df = df.copy()
+        df["number cars"] = pd.to_numeric(df["number cars"], errors="coerce")
         df = df.dropna(subset=["number cars"])
-        df = df.assign(**{"number cars": df["number cars"].astype(int)})
-        return df  # [["Country", "number cars"]]
+        df["number cars"] = df["number cars"].astype(int)
+        return df
 
-    storage_options = {"User-Agent": "Mozilla/5.0"}
     url = "https://ghoapi.azureedge.net/api/RS_194"
     try:
-        response = requests.get(url, headers=storage_options, timeout=60)
+        response = requests.get(url, headers=HEADERS, timeout=60)
         response.raise_for_status()
         vehicles_gho = pd.DataFrame(response.json()["value"])
         print("File read successfully.")
@@ -83,7 +84,10 @@ def download_number_of_vehicles():
     url = "https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita"
     try:
         vehicles_wiki = pd.read_html(
-            url, storage_options=storage_options, encoding="utf8"
+            url,
+            match="Road motor vehicles",
+            storage_options=HEADERS,
+            encoding="utf8",
         )[0]
         print("File read successfully.")
     except Exception as e:
@@ -124,26 +128,26 @@ def download_CO2_emissions():
     """
     url = "https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel"
 
-    # Read the 'Data' sheet directly from the Excel file at the provided URL
+    # Read the 'Data' sheet of the Excel file at the provided URL
     try:
-        CO2_emissions = pd.read_excel(url, sheet_name="Data", skiprows=[0, 1, 2])
-        print("File read successfully.")
+        response = requests.get(url, headers=HEADERS, timeout=60)
+        response.raise_for_status()
+        CO2_emissions = pd.read_excel(
+            io.BytesIO(response.content), sheet_name="Data", skiprows=[0, 1, 2]
+        )
+        logger.info("CO2 emissions file read successfully.")
     except Exception as e:
         logger.warning(
             f"Failed to read the file. Falling back on hard-coded data. \nError: {e}"
         )
         return pd.DataFrame()
 
-    CO2_emissions = CO2_emissions[
-        ["Country Name", "Country Code", "Indicator Name", "2014"]
-    ]
+    CO2_emissions = CO2_emissions[["Country Code", "2014"]].copy()
 
     # Estimate efficiency based on CO2 emissions from transport (% of total fuel combustion)
     CO2_emissions["average fuel efficiency"] = (100 - CO2_emissions["2014"]) / 100
 
-    CO2_emissions = CO2_emissions.rename(columns={"Country Name": "Country"})
-
-    CO2_emissions = add_iso2_country_code(CO2_emissions)
+    CO2_emissions = add_iso2_country_code(CO2_emissions, source_col="Country Code")
 
     return CO2_emissions
 
@@ -167,7 +171,7 @@ if __name__ == "__main__":
 
     if nbr_vehicles.empty or CO2_emissions.empty:
         # In case one of the urls is not working, we can use the hard-coded data
-        src = BASE_DIR + "/data/temp_hard_coded/transport_data.csv"
+        src = Path(BASE_DIR) / "data" / "temp_hard_coded" / "transport_data.csv"
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:
@@ -175,7 +179,7 @@ if __name__ == "__main__":
         # which will be saved as transport_data.csv in the resource folder and used
         # to prepare further (nodal) transport data in prepare_transport_data
         # and to scale the e-mob parameters in prepare_sector_network.
-        transport = pd.merge(nbr_vehicles, CO2_emissions, on="country")
+        transport = pd.merge(nbr_vehicles, CO2_emissions, on="country", how="left")
         transport = transport[["country", "number cars", "average fuel efficiency"]]
 
         missing = transport.index[transport["average fuel efficiency"].isna()]
