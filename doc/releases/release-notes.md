@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
 
+* Add the `osm_data` option to download historical OpenStreetMap data at a given `target_date` or to use custom `.pbf` files. Raw OSM data is now stored per snapshot in `data/osm/<subdir>/` (`latest`, `YYYYMM` or `custom`), so OSM data previously downloaded to `data/osm/` is downloaded again [PR #2005](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2005)
+
 **Minor Changes and bug-fixing**
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
