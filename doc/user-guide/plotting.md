@@ -34,10 +34,10 @@ sizes represent installed capacity and line widths represent transfer capacity.
 
 ```bash
 # Plot a solved network using the supported attr wildcard p_nom
-snakemake -j 1 "results/plots/elec_s_10_ec_lcopt_Co2L-3H_p_nom.pdf"
+snakemake -j 1 "results/plots/elec_s_10_ec_lcopt_Co2L-3H_2030_p_nom.pdf"
 
 # Plot the same map as a PNG
-snakemake -j 1 "results/plots/elec_s_10_ec_lcopt_Co2L-3H_p_nom.png"
+snakemake -j 1 "results/plots/elec_s_10_ec_lcopt_Co2L-3H_2030_p_nom.png"
 ```
 
 The `{attr}` wildcard is currently required and only supports `p_nom`. The
@@ -241,7 +241,7 @@ Python and use PyPSA's `n.plot()` method.
 ```python
 import pypsa
 
-n = pypsa.Network("results/networks/elec_s_10_ec_lcopt_Co2L-3H.nc")
+n = pypsa.Network("results/networks/elec_s_10_ec_lcopt_Co2L-3H_2030.nc")
 ```
 
 ### Static network map
@@ -313,7 +313,7 @@ plt.savefig("line_loading.png", dpi=150)
 
 | Task | Command |
 |---|---|
-| Plot a solved network map | `snakemake -j 1 "results/plots/elec_s_10_ec_lcopt_Co2L-3H_p_nom.pdf"` |
+| Plot a solved network map | `snakemake -j 1 "results/plots/elec_s_10_ec_lcopt_Co2L-3H_2030_p_nom.pdf"` |
 | Generate summary CSVs | `snakemake -j 1 make_summary` |
 | Country-specific summary | `snakemake -j 1 "results/summaries/elec_s_all_ec_lall_Co2L-3H_NG"` |
 | Plot summary charts | `snakemake -j 1 plot_summary` |
