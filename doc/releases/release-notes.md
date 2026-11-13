@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0
+
 * Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
 
 * Restore CO2 emissions from rail transport oil consumption [PR #2123](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2123)
