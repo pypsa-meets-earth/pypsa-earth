@@ -940,13 +940,13 @@ if config["co2"]["automatic_emission"]["enable"]:
     rule retrieve_emissions:
         input:
             storage.http(
-                "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
+                "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/EDGAR_2026_GHG/IEA_EDGAR_CO2_1970_2025.zip",
                 keep_local=True,
             ),
         output:
             edgar_folder=directory("data/co2_emissions/"),
-            edgar_zip="data/co2_emissions/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
-            edgar_xlsx="data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+            edgar_zip="data/co2_emissions/IEA_EDGAR_CO2_1970_2025.zip",
+            edgar_xlsx="data/co2_emissions/IEA_EDGAR_CO2_1970_2025.xlsx",
         log:
             "logs/" + RDIR + "retrieve_emissions.log",
         run:
@@ -955,7 +955,7 @@ if config["co2"]["automatic_emission"]["enable"]:
 
     rule build_co2_emissions:
         input:
-            edgar="data/co2_emissions/v60_CO2_excl_short-cycle_org_C_1970_2018.xls",
+            edgar="data/co2_emissions/IEA_EDGAR_CO2_1970_2025.xlsx",
         output:
             emissions="resources/" + RDIR + "co2_emissions_elec_and_heat.csv",
         log:
