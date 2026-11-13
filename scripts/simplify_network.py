@@ -92,6 +92,7 @@ from _helpers import (
     add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
+    get_aggregate_carriers,
     get_linetype_by_voltage_and_country,
     nearest_shape,
     restore_base_carrier_names,
@@ -434,7 +435,7 @@ def _aggregate_and_move_components(
     generator_strategies = aggregation_strategies["generators"]
     one_port_strategies = aggregation_strategies["one_ports"]
 
-    carriers = set(n.generators.carrier) - set(exclude_carriers)
+    carriers = get_aggregate_carriers(n, exclude_carriers)
     generators, generators_pnl = aggregateoneport(
         n,
         busmap,
