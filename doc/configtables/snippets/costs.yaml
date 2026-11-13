@@ -1,5 +1,11 @@
 costs:
-  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is 2025
+  year: 2030 # Cost year for electricity-only and overnight sector runs
+  # Myopic sector cost-year selection:
+  # - "closest": select the closest available technology-data year (default).
+  # - Mapping: explicitly assign a cost year to each planning horizon.
+  #   Example: {2023: 2020, 2030: 2030, 2040: 2035}
+  # Ignored for overnight runs.
+  year_selection: closest
   technology_data_version: v0.15.0
   discountrate: [0.071] #, 0.086, 0.111]
   country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory
