@@ -1,0 +1,45 @@
+costs:
+  additional_technology_costs: data/thesis_technology_costs.csv
+electricity:
+  flexible_consumers:
+    pemopt_economics:
+      routine_vom_eur_per_mwh_el: 0.0
+      stack_replacement_method: full_load_hour_proxy
+    btcopt_sensitivities:
+      E4R40:
+        revenue_eur_per_mwh: 40.0
+        capex_multiplier: 1.0
+      E4R100:
+        revenue_eur_per_mwh: 100.0
+        capex_multiplier: 1.0
+      E5C75:
+        revenue_eur_per_mwh: 62.7967
+        capex_multiplier: 0.75
+      E5C125:
+        revenue_eur_per_mwh: 62.7967
+        capex_multiplier: 1.25
+      E4R35:
+        revenue_eur_per_mwh: 35.0
+        capex_multiplier: 1.0
+      E4R38:
+        revenue_eur_per_mwh: 38.0
+        capex_multiplier: 1.0
+      E6CAP2000:
+        revenue_eur_per_mwh: 62.7967
+        capex_multiplier: 1.0
+        p_nom_max: 2000.0
+run:
+  name: thesis_economic_2045
+scenario:
+  opts:
+  - E0-Co2L-1h
+  - E1-Co2L-BTCopt-1h
+  - E2-Co2L-PEMopt-1h
+  - E3-Co2L-BTCopt-PEMopt-1h
+  - E4R40-Co2L-BTCopt-1h
+  - E4R100-Co2L-BTCopt-1h
+  - E5C75-Co2L-BTCopt-1h
+  - E5C125-Co2L-BTCopt-1h
+  - E4R35-Co2L-BTCopt-1h
+  - E4R38-Co2L-BTCopt-1h
+  - E6CAP2000-Co2L-BTCopt-1h

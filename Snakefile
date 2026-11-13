@@ -562,6 +562,7 @@ rule process_cost_data:
         max_hours=config["electricity"]["max_hours"],
         storage_techs=config["storage_techs"],
     input:
+        additional_costs=config["costs"].get("additional_technology_costs", []),
         network="networks/" + RDIR + "base.nc",
         costs=branch(
             config["enable"].get("retrieve_cost_data", True),

@@ -405,6 +405,48 @@ def load_costs(
     """
     costs = pd.read_csv(tech_costs, index_col=["technology", "parameter"]).sort_index()
 
+    # Optional locally versioned technology-data extension.
+    # Uses the existing PyPSA-Earth unit and currency conversion.
+    additional_file = config.get("additional_technology_costs")
+
+    if additional_file:
+        additional = pd.read_csv(
+            additional_file,
+            index_col=["technology", "parameter"],
+        ).sort_index()
+
+        if additional.index.has_duplicates:
+            raise ValueError("Duplicate entries in additional technology costs.")
+
+        overlap = costs.index.intersection(additional.index)
+        if len(overlap):
+            raise ValueError(
+                "Additional technology costs overlap official data: " f"{list(overlap)}"
+            )
+
+        # The native currency converter handles exchange rates,
+        # not inflation between different monetary years.
+        monetary = additional["unit"].astype(str).str.match(r"^[A-Z]{3}/")
+        investment = additional.index.get_level_values("parameter").isin(
+            ["investment", "stack_investment"]
+        )
+        years = pd.to_numeric(additional["currency_year"], errors="coerce")
+
+        invalid = (
+            monetary & investment & (years.isna() | (years != TECH_DATA_REFERENCE_YEAR))
+        )
+
+        if invalid.any():
+            raise ValueError(
+                "Additional investment costs must be expressed "
+                f"in the reference monetary year "
+                f"{TECH_DATA_REFERENCE_YEAR}. "
+                "Convert and document the source values first: "
+                f"{list(additional.index[invalid])}"
+            )
+
+        costs = pd.concat([costs, additional]).sort_index()
+
     # correct units to MW and output_currency
     costs.loc[costs.unit.str.contains("/kW"), "value"] *= 1e3
     costs.unit = costs.unit.str.replace("/kW", "/MW")
@@ -461,6 +503,31 @@ def load_costs(
     costs.at["CCGT", "fuel"] = costs.at["gas", "fuel"]
 
     costs["marginal_cost"] = costs["VOM"] + costs["fuel"] / costs["efficiency"]
+
+    # BTCopt: annualise hardware and infrastructure separately.
+    # Historical fixed-capacity BTC uses an independent pathway.
+    btc_assets = (
+        "bitcoin mining ASIC",
+        "bitcoin mining infrastructure",
+    )
+    btc_present = [asset in costs.index for asset in btc_assets]
+
+    if any(btc_present):
+        if not all(btc_present):
+            raise ValueError("BTCopt requires both cost components.")
+        if "bitcoin mining" in costs.index:
+            raise ValueError("BTCopt aggregate technology already exists.")
+
+        asset_costs = costs.loc[list(btc_assets), "capital_cost"]
+
+        if not (
+            asset_costs.notna().all()
+            and asset_costs.abs().lt(float("inf")).all()
+            and asset_costs.gt(0).all()
+        ):
+            raise ValueError("BTCopt capital costs must be positive and finite.")
+
+        costs.at["bitcoin mining", "capital_cost"] = float(asset_costs.sum())
 
     costs = costs.rename(columns={"CO2 intensity": "co2_emissions"})
     # rename because technology data & pypsa earth costs.csv use different names
