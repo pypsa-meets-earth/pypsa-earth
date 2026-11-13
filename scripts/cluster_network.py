@@ -122,6 +122,7 @@ Exemplary unsolved network clustered to 37 nodes:
 """
 
 import logging
+from collections.abc import Iterable
 from functools import reduce
 
 import geopandas as gpd
@@ -134,6 +135,8 @@ from _helpers import (
     add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
+    get_aggregate_carriers,
+    get_base_carrier,
     locate_bus,
     nearest_shape,
     read_csv_nafix,
@@ -149,7 +152,6 @@ from pypsa.clustering.spatial import (
     busmap_by_kmeans,
     get_clustering_from_busmap,
 )
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 
 idx = pd.IndexSlice
 
@@ -312,7 +314,9 @@ def distribute_clusters(
             n_df.groupby(["country", "sub_network"]).sum().pipe(normed).squeeze()
         )
 
-    N = n.buses.groupby(["country", "sub_network"]).size()
+    distribution_factor.index.name = "cluster"
+
+    N = n.buses.groupby(["country", "sub_network"]).size()[distribution_factor.index]
 
     assert (
         n_clusters >= len(N) and n_clusters <= N.sum()
@@ -578,7 +582,7 @@ def clustering_for_n_clusters(
     )
 
     if not n.links.empty:
-        nc = clustering.network
+        nc = clustering.n
         nc.links["underwater_fraction"] = (
             n.links.eval("underwater_fraction * length").div(nc.links.length).dropna()
         )
@@ -590,18 +594,18 @@ def clustering_for_n_clusters(
             fill_value=0,
         )
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
-        clustering.network.lines["underwater_fraction"] = 0
+        clustering.n.lines["underwater_fraction"] = 0
 
     # TODO: remove this code snippet after updating to PyPSA v1.1.0 (handled in PyPSA directly)
     # Remove zero-filled or NaN-filled time series for StorageUnit
-    for attr in list(clustering.network.storage_units_t.keys()):
-        df = clustering.network.storage_units_t[attr]
+    for attr in list(clustering.n.storage_units_t.keys()):
+        df = clustering.n.storage_units_t[attr]
         if not df.empty:
             # Check if all values are either 0 or NaN
             all_zero_or_nan = ((df == 0) | df.isna()).all().all()
             if all_zero_or_nan:
                 # Make it empty with correct index but no columns
-                clustering.network.storage_units_t[attr] = pd.DataFrame(index=df.index)
+                clustering.n.storage_units_t[attr] = pd.DataFrame(index=df.index)
                 logger.info(
                     f"Cleared zero/NaN-filled storage_units_t.{attr} after clustering"
                 )
@@ -624,18 +628,18 @@ def cluster_regions(busmaps, inputs, output):
 
 
 def replace_components(n, c, df, pnl):
-    n.mremove(c, n.df(c).index)
+    n.remove(c, n.df(c).index)
 
-    import_components_from_dataframe(n, df, c)
+    n.add(c, df.index, **df)
     for attr, df in pnl.items():
         if not df.empty:
-            import_series_from_dataframe(n, df, c, attr)
+            n._import_series_from_df(df, c, attr)
 
 
 def groupby_bus_carrier(
     network: pypsa.Network,
     aggregation_strategies: dict,
-    exclude_carriers: list = [],
+    exclude_carriers: Iterable[str] = (),
 ) -> None:
     """
     Group generators and storage units by (bus, carrier).
@@ -654,7 +658,7 @@ def groupby_bus_carrier(
     None
     """
     # Carriers for aggregation
-    carriers = set(network.generators.carrier) - set(exclude_carriers)
+    carriers = get_aggregate_carriers(network, exclude_carriers)
 
     # Create 1:1 busmap
     busmap = pd.Series(network.buses.index, index=network.buses.index)
@@ -727,7 +731,7 @@ if __name__ == "__main__":
     exclude_carriers = snakemake.params.clustering["cluster_network"].get(
         "exclude_carriers", []
     )
-    aggregate_carriers = set(n.generators.carrier) - set(exclude_carriers)
+    aggregate_carriers = get_aggregate_carriers(n, exclude_carriers)
 
     # Option for subregion
     subregion_shapes = snakemake.input.get("subregion_shapes")
@@ -739,7 +743,14 @@ if __name__ == "__main__":
     n.determine_network_topology()
     if snakemake.wildcards.clusters.endswith("m"):
         n_clusters = int(snakemake.wildcards.clusters[:-1])
-        aggregate_carriers = snakemake.params.electricity.get("conventional_carriers")
+        conventional_carriers = set(
+            snakemake.params.electricity.get("conventional_carriers", [])
+        )
+        aggregate_carriers = {
+            carrier
+            for carrier in aggregate_carriers
+            if get_base_carrier(carrier) in conventional_carriers
+        }
     elif snakemake.wildcards.clusters.endswith("flex"):
         n_clusters = min(len(n.buses), int(snakemake.wildcards.clusters[:-4]))
     elif snakemake.wildcards.clusters == "all":
@@ -748,7 +759,6 @@ if __name__ == "__main__":
         n_clusters = n.buses.groupby(["country", "sub_network"]).ngroups
     else:
         n_clusters = int(snakemake.wildcards.clusters)
-        aggregate_carriers = None
 
     aggregation_strategies = snakemake.params.aggregation_strategies
 
@@ -826,30 +836,30 @@ if __name__ == "__main__":
             focus_weights=focus_weights,
         )
 
-    update_p_nom_max(clustering.network)
+    nc = clustering.n
+    update_p_nom_max(nc)
 
     if subregion_shapes:
         logger.info("Deactivate subregion classificaition")
         original_shapes = snakemake.input.original_shapes
-        clustering.network = nearest_shape(
-            clustering.network, original_shapes, crs, tolerance=tolerance
-        )
+        nc = nearest_shape(nc, original_shapes, crs, tolerance=tolerance)
 
     # Restore base carrier names after all aggregation
-    restore_base_carrier_names(clustering.network)
+    restore_base_carrier_names(nc)
 
     # Groupby carrier and bus for overnight simulation
     if config["foresight"] == "overnight":
-        groupby_bus_carrier(clustering.network, aggregation_strategies)
+        groupby_bus_carrier(
+            nc,
+            aggregation_strategies,
+            exclude_carriers=exclude_carriers,
+        )
 
     # Restore line types lost when clustering creates a new network.
     used_line_types = pd.Index(
-        clustering.network.lines["type"]
-        .dropna()
-        .loc[lambda values: values != ""]
-        .unique()
+        nc.lines["type"].dropna().loc[lambda values: values != ""].unique()
     )
-    missing_line_types = used_line_types.difference(clustering.network.line_types.index)
+    missing_line_types = used_line_types.difference(nc.line_types.index)
 
     unavailable_line_types = missing_line_types.difference(source_line_types.index)
     if not unavailable_line_types.empty:
@@ -868,7 +878,7 @@ if __name__ == "__main__":
             .dropna()
             .to_dict()
         )
-        clustering.network.add("LineType", line_type, **attributes)
+        nc.add("LineType", line_type, **attributes)
 
     if not missing_line_types.empty:
         logger.info(
@@ -876,10 +886,9 @@ if __name__ == "__main__":
             missing_line_types.tolist(),
         )
 
-    clustering.network.meta = dict(
-        snakemake.config, **dict(wildcards=dict(snakemake.wildcards))
-    )
-    clustering.network.export_to_netcdf(outputs.network)
+    nc.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    nc.export_to_netcdf(outputs.network)
+
     for attr in (
         "busmap",
         "linemap",

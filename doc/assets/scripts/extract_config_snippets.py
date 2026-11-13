@@ -124,6 +124,7 @@ def main():
         "export": ["export"],
         "demand_data": ["demand_data"],
         "custom_data": ["custom_data"],
+        "osm_data": ["osm_data"],
         "existing_capacities": ["existing_capacities"],
         "sector_toplevel": {
             "start": "sector:",

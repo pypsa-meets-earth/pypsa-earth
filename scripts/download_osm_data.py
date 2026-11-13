@@ -29,7 +29,7 @@ Outputs
   - ``<date>`` is formatted as YYYYMM/ for historical data or "latest/" for current data
 - ``resources/osm/raw``: Prepared and per type (e.g. cable/lines) aggregated power data as .geojson and .csv files
 """
-import inspect
+
 import os
 import shutil
 from datetime import datetime
@@ -113,8 +113,8 @@ if __name__ == "__main__":
     country_list = country_list_to_geofk(snakemake.params.countries)
 
     # Get unified OSM data configuration
-    osm_config = snakemake.config.get("osm_data", {})
-    source = osm_config.get("source", "latest").lower()
+    osm_config = snakemake.config["osm_data"]
+    source = str(osm_config["source"]).lower()
 
     # Validate source option
     valid_sources = ["latest", "historical", "custom"]
@@ -124,27 +124,31 @@ if __name__ == "__main__":
         )
         source = "latest"
 
-    # Extract configuration based on source
-    custom_path_config = osm_config.get("custom_path", {})
-    target_date = str(osm_config.get("target_date", None))
+    custom_pbf_path = osm_config["custom_path"]["pbf"]
+    custom_power_path = osm_config["custom_path"]["power"]
 
-    # Handle custom_path - dict with pbf/power keys
-    if isinstance(custom_path_config, dict):
-        custom_pbf_path = custom_path_config.get("pbf", "data/custom/osm/pbf")
-        custom_power_path = custom_path_config.get("power", "data/custom/osm/power")
-    else:
-        # Default paths
-        custom_pbf_path = "data/custom/osm/pbf"
-        custom_power_path = "data/custom/osm/power"
+    # Parse target_date (for historical source). YAML may give a string,
+    # a date object (unquoted value) or None (empty value)
+    target_date = None
+    if source == "historical":
+        raw_date = osm_config["target_date"]
+        if raw_date is None or str(raw_date).strip() == "":
+            logger.warning(
+                "Historical source selected but no target_date provided. Falling back to latest data download."
+            )
+            source = "latest"
+        else:
+            try:
+                target_date = datetime.strptime(str(raw_date), "%Y-%m-%d")
+            except ValueError:
+                logger.warning(
+                    f"Invalid date format '{raw_date}', expected YYYY-MM-DD. Falling back to latest data download."
+                )
+                source = "latest"
 
-    # Create date-specific subdirectory for OSM data if historical date is provided
-    osm_subdir = ""
-    if source == "historical" and target_date:
-        if isinstance(target_date, str):
-            # Extract YYYYMM from date string
-            osm_subdir = target_date.replace("-", "")[:6]  # Format: YYYYMM
-        elif isinstance(target_date, datetime):
-            osm_subdir = target_date.strftime("%Y%m")
+    # Store raw data per snapshot so different dates do not overwrite each other
+    if source == "historical":
+        osm_subdir = target_date.strftime("%Y%m")
     elif source == "custom":
         osm_subdir = "custom"
     else:
@@ -154,49 +158,11 @@ if __name__ == "__main__":
         Path(BASE_DIR), "resources", RDIR, "osm", "raw"
     )
     store_path_data = Path.joinpath(Path(BASE_DIR), "data", "osm", osm_subdir)
-
-    # Parse target_date if provided as string (for historical source)
-    if source == "historical" and target_date:
-        if isinstance(target_date, str):
-            try:
-                target_date = datetime.strptime(target_date, "%Y-%m-%d")
-                logger.info(
-                    f"Historical OSM data mode: Using data from {target_date.strftime('%Y-%m-%d')}"
-                )
-                # Update osm_subdir after parsing
-                osm_subdir = target_date.strftime("%Y%m")
-                store_path_data = Path.joinpath(
-                    Path(BASE_DIR), "data", "osm", osm_subdir
-                )
-            except ValueError:
-                logger.warning(
-                    f"Invalid date format '{target_date}', expected YYYY-MM-DD. Falling back to latest data download."
-                )
-                source = "latest"
-                target_date = None
-                osm_subdir = "latest"
-                store_path_data = Path.joinpath(
-                    Path(BASE_DIR), "data", "osm", osm_subdir
-                )
-        else:
-            logger.info(
-                f"Historical OSM data mode: Using data from {target_date.strftime('%Y-%m-%d')}"
-            )
-    elif source == "historical" and not target_date:
-        logger.warning(
-            "Historical source selected but no target_date provided. Falling back to latest data download."
-        )
-        source = "latest"
-
-    # Log the data storage path
     logger.info(f"OSM data will be stored in: {store_path_data}")
 
-    # Process OSM data based on selected source
     if source == "custom":
         # Custom data mode: copy user-provided OSM files then process them
         # PBF path is required, power path is optional
-
-        # Check if pbf path exists (required)
         if not os.path.exists(custom_pbf_path):
             raise FileNotFoundError(
                 f"Custom OSM pbf data path '{custom_pbf_path}' does not exist. "
@@ -205,22 +171,12 @@ if __name__ == "__main__":
             )
 
         # Validate that required pbf files exist for the specified countries
-        # country_list contains ISO codes or special region codes
-        # Earth-osm converts these to lowercase country names for pbf files
+        # e.g., "BO" -> "Bolivia" -> "bolivia-latest.osm.pbf"
         missing_files = []
         for country_code in country_list:
-            # Convert ISO code to full country name, then lowercase for geofabrik format
-            # e.g., "BO" -> "Bolivia" -> "bolivia"
-            # Special regions like "SN-GM" are handled by the helper function
-            try:
-                country_name = two_digits_2_name_country(country_code).lower()
-            except:
-                # If conversion fails, use the code itself lowercased
-                country_name = country_code.lower()
-
+            country_name = two_digits_2_name_country(country_code).lower()
             expected_file = f"{country_name}-latest.osm.pbf"
-            expected_path = os.path.join(custom_pbf_path, expected_file)
-            if not os.path.exists(expected_path):
+            if not os.path.exists(os.path.join(custom_pbf_path, expected_file)):
                 missing_files.append(expected_file)
 
         if missing_files:
@@ -231,18 +187,15 @@ if __name__ == "__main__":
                 f"Please provide the required pbf files or change osm_data.source to 'latest'."
             )
 
-        # Create the data directories
         os.makedirs(store_path_data, exist_ok=True)
         pbf_target_path = Path.joinpath(store_path_data, "pbf")
         power_target_path = Path.joinpath(store_path_data, "power")
 
-        # Copy pbf files (required)
         logger.info(
             f"Custom OSM data mode: Copying pbf files from '{custom_pbf_path}' to '{pbf_target_path}'"
         )
         shutil.copytree(custom_pbf_path, pbf_target_path, dirs_exist_ok=True)
 
-        # Copy power files if path exists (optional)
         if os.path.exists(custom_power_path):
             logger.info(
                 f"Custom OSM data mode: Copying power files from '{custom_power_path}' to '{power_target_path}'"
@@ -253,43 +206,30 @@ if __name__ == "__main__":
                 f"Custom power files path '{custom_power_path}' not found. "
                 f"OSM data will be processed from pbf files only."
             )
-
-    # Prepare save_osm_data arguments for all sources
-    # earth-osm will skip downloading if pbf files already exist (custom mode)
-    save_args = {
-        "primary_name": "power",
-        "region_list": country_list,
-        "feature_list": ["substation", "line", "cable", "generator"],
-        "update": False,
-        "mp": True,
-        "data_dir": store_path_data,
-        "out_dir": store_path_resources,
-        "out_format": ["csv", "geojson"],
-        "out_aggregate": True,
-        "progress_bar": snakemake.config["enable"]["progress_bar"],
-    }
-
-    # Add historical date support if source is 'historical' and earth-osm supports it
-    if source == "historical" and target_date:
-        if "target_date" in inspect.signature(eo.save_osm_data).parameters:
-            save_args["target_date"] = target_date
-            logger.info(
-                f"Downloading historical OSM data for {target_date.strftime('%Y-%m-%d')}"
-            )
-        else:
-            logger.warning(
-                f"Historical date requested but earth-osm version doesn't support target_date parameter. "
-                f"Downloading the latest OSM data instead."
-            )
-    elif source == "latest":
-        logger.info("Downloading latest OSM data")
-    elif source == "custom":
         logger.info(
             "Processing custom OSM data (earth-osm will use existing pbf files)"
         )
+    elif source == "historical":
+        logger.info(
+            f"Downloading historical OSM data for {target_date.strftime('%Y-%m-%d')}"
+        )
+    else:
+        logger.info("Downloading latest OSM data")
 
-    # Process OSM data (download or process existing pbf files)
-    eo.save_osm_data(**save_args)
+    # earth-osm skips downloading if pbf files already exist (custom mode)
+    eo.save_osm_data(
+        primary_name="power",
+        region_list=country_list,
+        feature_list=["substation", "line", "cable", "generator"],
+        update=False,
+        mp=snakemake.config["osm"]["download_osm_data"]["nprocesses"],
+        data_dir=store_path_data,
+        out_dir=store_path_resources,
+        out_format=["csv", "geojson"],
+        out_aggregate=True,
+        progress_bar=snakemake.config["enable"]["progress_bar"],
+        target_date=target_date,
+    )
 
     out_path = Path.joinpath(store_path_resources, "out")
     names = ["generator", "cable", "line", "substation"]

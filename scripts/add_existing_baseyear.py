@@ -121,7 +121,7 @@ def add_heating_capacities_installed_before_baseyear(
             # installation is assumed to be linear for the past default_lifetime years
             ratio = (int(grouping_year) - int(grouping_years[i - 1])) / default_lifetime
 
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} {heat_pump_type} heat pump-{grouping_year}",
@@ -139,7 +139,7 @@ def add_heating_capacities_installed_before_baseyear(
             )
 
             # add resistive heater, gas boilers and oil boilers
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} resistive heater-{grouping_year}",
@@ -160,7 +160,7 @@ def add_heating_capacities_installed_before_baseyear(
                 lifetime=costs.at[f"{name_type} resistive heater", "lifetime"],
             )
 
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} gas boiler-{grouping_year}",
@@ -183,7 +183,7 @@ def add_heating_capacities_installed_before_baseyear(
                 lifetime=costs.at[f"{name_type} gas boiler", "lifetime"],
             )
 
-            n.madd(
+            n.add(
                 "Link",
                 nodes,
                 suffix=f" {name} oil boiler-{grouping_year}",
@@ -205,7 +205,7 @@ def add_heating_capacities_installed_before_baseyear(
             )
 
             # delete links with p_nom=nan corresponding to extra nodes in country
-            n.mremove(
+            n.remove(
                 "Link",
                 [
                     index
@@ -216,7 +216,7 @@ def add_heating_capacities_installed_before_baseyear(
 
             # delete links with capacities below threshold
             threshold = snakemake.params.existing_capacities["threshold_capacity"]
-            n.mremove(
+            n.remove(
                 "Link",
                 [
                     index

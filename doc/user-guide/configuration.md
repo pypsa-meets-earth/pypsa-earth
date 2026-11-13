@@ -32,6 +32,7 @@ The table below lists all keys that have been renamed or moved. The old keys sti
 | `electricity.co2base` | `co2.base` |
 | `electricity.automatic_emission` | `co2.automatic_emission.enable` |
 | `electricity.automatic_emission_base_year` | `co2.automatic_emission.base_year` |
+| `electricity.custom_powerplants` *(scalar `false`, `merge` or `replace`)* | `electricity.custom_powerplants.method` |
 | `costs.emission_prices.co2` | `co2.emission_price` |
 | `co2_budget.enable` | `co2.budget.enable` |
 | `co2_budget.override_co2opt` | `co2.budget.override_co2opt` |
@@ -509,6 +510,16 @@ Specifies which custom datasets are used to replace or supplement the default mo
 ```
 
 {{ read_csv('configtables/custom_data.csv') }}
+
+### osm_data
+
+Selects which OpenStreetMap snapshot ``download_osm_data`` uses: the latest data, a historical snapshot at a given date, or user-provided files.
+
+```yaml
+--8<-- "configtables/snippets/osm_data.yaml"
+```
+
+{{ read_csv('configtables/osm_data.csv') }}
 
 ### existing_capacities
 

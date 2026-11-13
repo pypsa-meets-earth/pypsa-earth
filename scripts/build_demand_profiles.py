@@ -40,6 +40,7 @@ It creates the load paths for GEGIS outputs by combining the input parameters of
 Then with a function that takes in the PyPSA network "base.nc", region and gadm shape data, the countries of interest, a scale factor, and the snapshots,
 it returns a csv file called "demand_profiles.csv", that allocates the load to the buses of the network according to GDP and population.
 """
+
 import os
 import os.path
 from itertools import product
@@ -154,6 +155,8 @@ def shapes_to_shapes(orig, dest):
     """
     Adopted from vresutils.transfer.Shapes2Shapes()
     """
+    orig = list(orig)
+    dest = list(dest)
     orig_prepped = list(map(prep, orig))
     transfer = sparse.lil_matrix((len(dest), len(orig)), dtype=float)
 
@@ -250,19 +253,22 @@ def read_demcast_load(
     "DemandCast: Global hourly electricity demand forecasting"
     https://arxiv.org/abs/2510.08000
     """
-    demcast_full_load = pd.read_parquet(load_paths)
+    countries_iso3 = coco.convert(names=countries, to="ISO3")
+    if isinstance(countries_iso3, str):
+        countries_iso3 = [countries_iso3]
+
+    # Filter by country while reading to avoid loading the whole dataset
+    demcast_full_load = pd.read_parquet(
+        load_paths,
+        columns=["Time (UTC)", "Entity code", "Forecast load (MW)"],
+        filters=[("Entity code", "in", countries_iso3)],
+    )
 
     demcast_full_load["time"] = pd.to_datetime(demcast_full_load["Time (UTC)"])
     demcast_load = demcast_full_load[demcast_full_load["time"].dt.year == weather_year]
     demcast_load = demcast_load.rename(
         columns={"Forecast load (MW)": "Electricity demand"}
     )
-
-    countries_iso3 = coco.convert(names=countries, to="ISO3")
-    if isinstance(countries_iso3, str):
-        countries_iso3 = [countries_iso3]
-
-    demcast_load = demcast_load.loc[demcast_load["Entity code"].isin(countries_iso3)]
 
     demcast_load = add_transform_iso3(
         demcast_load,
