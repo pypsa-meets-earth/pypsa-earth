@@ -14,7 +14,11 @@ from _helpers import BASE_DIR
 
 logger = logging.getLogger(__name__)
 CC = coco.CountryConverter()
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+# web.archive.org rejects generic browser user agents (HTTP 429), while
+# Wikipedia rejects the python default ones (HTTP 403)
+HEADERS = {
+    "User-Agent": "pypsa-earth (https://github.com/pypsa-meets-earth/pypsa-earth)"
+}
 
 
 def add_iso2_country_code(df, source_col="Country"):
