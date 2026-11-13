@@ -367,7 +367,7 @@ def process_bundle(
                     {
                         "bundle": bundle.name,
                         "group": bundle.group,
-                        "countries": ",".join(bundle.countries),
+                        "countries": ", ".join(bundle.countries),
                         "zenodo_url": bundle.url,
                         "cutout_member": member,
                         "zip_size_gb": zip_size_gb,

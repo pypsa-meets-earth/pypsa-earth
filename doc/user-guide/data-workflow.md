@@ -112,7 +112,7 @@ A number of pre-computed cutouts are available as shown in the following images.
 
 #### Detailed information on cutout bundles
 
-The table lists the geographic coverage, compressed download size, and available weather-data period.
+The table lists the geographic coverage, compressed download size, and available weather-data period. Geographic notations follow ISO2 country codes or custom definitions for bigger regions specified in `configs/regions_definition_config.yaml`.
 
 {{ read_csv('user-guide/data/cutout_bundle_info.csv', usecols=[0, 1, 2, 5, 7, 8], header=0, names=['Bundle', 'Group', 'Coverage', 'ZIP size (GB)', 'Start date', 'End date']) }}
 
