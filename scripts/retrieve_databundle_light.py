@@ -26,7 +26,7 @@ Each data bundle entry has the following structure:
 
   bundle_name:  # name of the bundle
     countries: [country code, region code or country list]  # list of countries represented in the databundle
-    [tutorial: true/false]  # (optional, default false) whether the bundle is a tutorial or not
+    [tutorial: "any"]  # optional: true for tutorials, false (default) for full runs, "any" for both
     category: common/resources/data/cutouts  # category of data contained in the bundle:
     destination: "."  # folder where to unzip the files with respect to the repository root (\"\" or \".\")
     urls:  # list of urls by source, e.g. zenodo or google
@@ -46,9 +46,8 @@ Each data bundle entry has the following structure:
 Depending on the country list that is asked to perform, all needed databundles are downloaded
 according to the following rules:
 
-- The databundle shall adhere to the tutorial configuration: when
-  the tutorial configuration is running, only the databundles having tutorial flag true
-  shall be downloaded
+- The bundle's tutorial flag must match the workflow's tutorial setting,
+  or be ``"any"`` to allow the bundle in both modes. Omitted flags default to false.
 - For every data category, the most suitable bundles are downloaded by order of
   number of countries matched: for every bundles matching the category,
   the algorithm sorts the bundles by the number of countries that are matched and starts
@@ -722,7 +721,7 @@ def get_best_bundles_by_category(
     given category and tutorial characteristics.
 
     The selected bundles shall adhere to the following criteria:
-    - The bundles' tutorial parameter shall match the tutorial argument
+    - The bundles' tutorial parameter shall match the tutorial argument or be "any"
     - The bundles' category shall match the category of data to download
     - When multiple bundles are identified for the same set of users,
     the bundles matching more countries are first selected and more bundles
@@ -752,7 +751,7 @@ def get_best_bundles_by_category(
     for bname, bvalue in config_bundles.items():
         if (
             bvalue["category"] == category
-            and bvalue.get("tutorial", False) == tutorial
+            and bvalue.get("tutorial", False) in (tutorial, "any")
             and _check_disabled_by_opt(bvalue, config_enable) != ["all"]
         ):
             df_matches.loc[bname] = [
@@ -805,7 +804,7 @@ def get_best_bundles(
     the bundles that match the list of countries and tutorial configuration.
 
     Then, the bundles to be downloaded shall adhere to the following criteria:
-    - The bundles' tutorial parameter shall match the tutorial argument
+    - The bundles' tutorial parameter shall match the tutorial argument or be "any"
     - The bundles' category shall match the category of data to download
     - When multiple bundles are identified for the same set of users,
       the bundles matching more countries are first selected and more bundles
@@ -972,7 +971,7 @@ def normalise_hydrobasins(config_hydrobasin: dict) -> None:
     hydrobasins = gpd.read_file(basins_path)
     # In case africa-geoglows-catchment is used
     # column names and CRS must be adjusted accordingly
-    if config_hydrobasin.get("tutorial", False):
+    if config_hydrobasin.get("tutorial", False) is True:
         hydrobasins = hydrobasins.rename(
             columns={
                 "HydroID": "HYBAS_ID",
@@ -1049,7 +1048,7 @@ def retrieve_databundle(
         b_name for b_name in bundles_to_download if "hydrobasins" in b_name
     ]
     if len(hydrobasin_bundles) > 0:
-        if not config_bundles[hydrobasin_bundles[0]]["tutorial"]:
+        if config_bundles[hydrobasin_bundles[0]].get("tutorial", False) is not True:
             config_bundles[hydrobasin_bundles[0]]["level_code"] = hydrobasins_level
 
     # initialize downloaded and missing bundles
@@ -1104,7 +1103,7 @@ def retrieve_databundle(
             logger.error(f"Bundle {b_name} cannot be downloaded")
 
     if len(hydrobasin_bundles) > 0:
-        if not config_bundles[hydrobasin_bundles[0]]["tutorial"]:
+        if config_bundles[hydrobasin_bundles[0]].get("tutorial", False) is not True:
             logger.info("Merging regional hydrobasins files into a global shapefile")
             merge_hydrobasins_shape(
                 config_bundles[hydrobasin_bundles[0]], hydrobasins_level
