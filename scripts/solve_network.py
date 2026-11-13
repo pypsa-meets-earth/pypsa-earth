@@ -340,7 +340,6 @@ def add_EQ_constraints(n, o, scaling=1e-1):
         spillage_variable = n.model["StorageUnit-spill"]
         lhs_spill = (
             (spillage_variable * (-n.snapshot_weightings.stores * scaling))
-            .groupby_sum(sgrouper)
             .groupby(sgrouper.to_xarray())
             .sum()
             .sum("snapshot")
@@ -551,7 +550,7 @@ def add_battery_constraints(n):
 def add_RES_constraints(n, res_share, config):
     """
     The constraint ensures that a predefined share of power is generated
-    by renewable sources
+    by renewable sources.
 
     Parameters
     ----------
@@ -569,62 +568,113 @@ def add_RES_constraints(n, res_share, config):
 
     renew_techs = config["electricity"]["renewable_carriers"]
 
-    charger = ["H2 electrolysis", "battery charger"]
-    discharger = ["H2 fuel cell", "battery discharger"]
+    charger_carriers = ["H2 electrolysis", "battery charger"]
+    discharger_carriers = ["H2 fuel cell", "battery discharger"]
 
-    ren_gen = n.generators.loc[n.generators["carrier"].isin(renew_techs)]
-    ren_stores = n.storage_units.loc[n.storage_units["carrier"].isin(renew_techs)]
-    ren_charger = n.links.loc[n.links["carrier"].isin(charger)]
-    ren_discharger = n.links.loc[n.links["carrier"].isin(discharger)]
-
-    gens_i = ren_gen.index
-    stores_i = ren_stores.index
-    charger_i = ren_charger.index
-    discharger_i = ren_discharger.index
-
-    stores_t_weights = n.snapshot_weightings.stores
-
-    lgrouper = n.loads.bus.map(n.buses.country)
-    ggrouper = ren_gen.bus.map(n.buses.country)
-    sgrouper = ren_stores.bus.map(n.buses.country)
-    cgrouper = ren_charger.bus0.map(n.buses.country)
+    lgrouper = n.loads.bus.map(n.buses.country).rename("country")
 
     load = (
-        n.snapshot_weightings.generators
-        @ n.loads_t.p_set.groupby(lgrouper, axis=1).sum()
+        n.snapshot_weightings.generators @ n.loads_t.p_set.T.groupby(lgrouper).sum().T
     )
     rhs = res_share * load
 
-    # Generators
-    lhs_gen = (
-        (n.model["Generator-p"].loc[:, gens_i] * n.snapshot_weightings.generators)
+    dispatch = n.model["Generator-p"]
+    generator_dim = dispatch.dims[-1]
+    model_generators = dispatch.indexes[generator_dim]
+
+    gens_i = n.generators.index[n.generators.carrier.isin(renew_techs)].intersection(
+        model_generators
+    )
+
+    ggrouper = n.generators.loc[gens_i, "bus"].map(n.buses.country).rename("country")
+
+    lhs = (
+        (dispatch.loc[:, gens_i] * n.snapshot_weightings.generators)
         .groupby(ggrouper.to_xarray())
         .sum()
+        .sum("snapshot")
     )
 
-    # StorageUnits
-    store_disp_expr = (
-        n.model["StorageUnit-p_dispatch"].loc[:, stores_i] * stores_t_weights
-    )
-    store_expr = n.model["StorageUnit-p_store"].loc[:, stores_i] * stores_t_weights
-    charge_expr = n.model["Link-p"].loc[:, charger_i] * stores_t_weights.apply(
-        lambda r: r * n.links.loc[charger_i].efficiency
-    )
-    discharge_expr = n.model["Link-p"].loc[:, discharger_i] * stores_t_weights.apply(
-        lambda r: r * n.links.loc[discharger_i].efficiency
-    )
+    if "StorageUnit-p_dispatch" in n.model.variables:
+        storage_dispatch = n.model["StorageUnit-p_dispatch"]
+        storage_dim = storage_dispatch.dims[-1]
+        model_storage_units = storage_dispatch.indexes[storage_dim]
 
-    lhs_dispatch = store_disp_expr.groupby(sgrouper).sum()
-    lhs_store = store_expr.groupby(sgrouper).sum()
+        stores_i = n.storage_units.index[
+            n.storage_units.carrier.isin(renew_techs)
+        ].intersection(model_storage_units)
 
-    # Stores (or their resp. Link components)
-    # Note that the variables "p0" and "p1" currently do not exist.
-    # Thus, p0 and p1 must be derived from "p" (which exists), taking into account the link efficiency.
-    lhs_charge = charge_expr.groupby(cgrouper).sum()
+        if not stores_i.empty:
+            storage_store = n.model["StorageUnit-p_store"]
+            sgrouper = (
+                n.storage_units.loc[stores_i, "bus"]
+                .map(n.buses.country)
+                .rename("country")
+            )
+            weights = n.snapshot_weightings.stores
 
-    lhs_discharge = discharge_expr.groupby(cgrouper).sum()
+            lhs_dispatch = (
+                (storage_dispatch.loc[:, stores_i] * weights)
+                .groupby(sgrouper.to_xarray())
+                .sum()
+                .sum("snapshot")
+            )
+            lhs_store = (
+                (storage_store.loc[:, stores_i] * weights)
+                .groupby(sgrouper.to_xarray())
+                .sum()
+                .sum("snapshot")
+            )
 
-    lhs = lhs_gen + lhs_dispatch - lhs_store - lhs_charge + lhs_discharge
+            lhs = lhs + lhs_dispatch - lhs_store
+
+    if "Link-p" in n.model.variables:
+        link_dispatch = n.model["Link-p"]
+        link_dim = link_dispatch.dims[-1]
+        model_links = link_dispatch.indexes[link_dim]
+        weights = n.snapshot_weightings.stores
+
+        charger_i = n.links.index[n.links.carrier.isin(charger_carriers)].intersection(
+            model_links
+        )
+
+        if not charger_i.empty:
+            cgrouper = (
+                n.links.loc[charger_i, "bus0"].map(n.buses.country).rename("country")
+            )
+
+            # Link-p is the electrical input at bus0 for charging links.
+            lhs_charge = (
+                (link_dispatch.loc[:, charger_i] * weights)
+                .groupby(cgrouper.to_xarray())
+                .sum()
+                .sum("snapshot")
+            )
+
+            lhs = lhs - lhs_charge
+
+        discharger_i = n.links.index[
+            n.links.carrier.isin(discharger_carriers)
+        ].intersection(model_links)
+
+        if not discharger_i.empty:
+            dgrouper = (
+                n.links.loc[discharger_i, "bus1"].map(n.buses.country).rename("country")
+            )
+            efficiency = n.links.loc[discharger_i, "efficiency"]
+
+            # Electrical output at bus1 is Link-p multiplied by efficiency.
+            lhs_discharge = (
+                (
+                    link_dispatch.loc[:, discharger_i]
+                    * weights.apply(lambda r: r * efficiency)
+                )
+                .groupby(dgrouper.to_xarray())
+                .sum()
+                .sum("snapshot")
+            )
+
+            lhs = lhs + lhs_discharge
 
     n.model.add_constraints(lhs == rhs, name="res_share")
 

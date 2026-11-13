@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix RES and EQ custom constraints by updating Linopy grouping, aggregating RES shares annually by country, handling optional storage and link components, and correcting charging/discharging accounting [PR #2107](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2107)
+
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
 
 * Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
