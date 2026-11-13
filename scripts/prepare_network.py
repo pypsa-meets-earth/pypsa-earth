@@ -121,6 +121,14 @@ def emission_extractor(
     country_codes = np.atleast_1d(country_names).tolist()
     available_countries = df.index.intersection(country_codes)
     emission_by_country = df.loc[available_countries, str(closest_year)]
+
+    missing_values = emission_by_country.index[emission_by_country.isna()]
+    if len(missing_values):
+        raise ValueError(
+            f"Missing EDGAR CO2 emissions for countries "
+            f"{missing_values.tolist()} in year {closest_year}."
+        )
+
     if emission_by_country.index.has_duplicates:
         duplicate_countries = emission_by_country.index[
             emission_by_country.index.duplicated()
@@ -133,8 +141,9 @@ def emission_extractor(
 
     missing_ccs = np.setdiff1d(country_codes, available_countries)
     if missing_ccs.size:
-        logger.warning(
-            f"The emission value for the following countries has not been found: {missing_ccs}"
+        raise ValueError(
+            "Missing EDGAR CO2 emissions for countries "
+            f"{missing_ccs.tolist()} in year {closest_year}."
         )
     if emission_by_country.empty:
         raise ValueError(
@@ -145,6 +154,12 @@ def emission_extractor(
             "configured countries."
         )
     return emission_by_country
+
+
+def historical_co2_limit(emission_csv, emission_year, country_names):
+    """Return the historical EDGAR CO2 limit in tonnes."""
+    emissions_kt = emission_extractor(emission_csv, emission_year, country_names)
+    return emissions_kt.sum() * 1e3
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
@@ -369,9 +384,9 @@ if __name__ == "__main__":
             if snakemake.params.co2["automatic_emission"]["enable"]:
                 country_names = n.buses.country.unique()
                 emission_year = snakemake.params.co2["automatic_emission"]["base_year"]
-                co2limit = emission_extractor(
+                co2limit = historical_co2_limit(
                     snakemake.input.emissions, emission_year, country_names
-                ).sum()
+                )
                 if len(m) > 0:
                     co2limit = co2limit * float(m[0])
                 logger.info("Setting CO2 limit according to emission base year.")
