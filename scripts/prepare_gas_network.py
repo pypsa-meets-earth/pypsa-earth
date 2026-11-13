@@ -64,23 +64,6 @@ from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
-if __name__ == "__main__":
-    if "snakemake" not in globals():
-        from _helpers import mock_snakemake
-
-        snakemake = mock_snakemake(
-            "prepare_gas_network",
-            simpl="",
-            clusters="4",
-        )
-
-    # configure_logging(snakemake)
-
-    # run = snakemake.config.get("run", {})
-    # RDIR = run["name"] + "/" if run.get("name") else ""
-    # store_path_data = Path.joinpath(Path().cwd(), "data")
-    # country_list = country_list_to_geofk(snakemake.config["countries"])'
-
 
 def download_IGGIELGN_gas_network() -> None:
     """
@@ -847,64 +830,90 @@ def cluster_gas_network(
 #     fig.savefig(snakemake.output.gas_network_fig_2, dpi=300, bbox_inches="tight")
 
 
-if not snakemake.params.custom_gas_network:
-    if snakemake.params.gas_config["network_data"] == "GGIT":
-        pipelines = download_GGIT_gas_network()
-        pipelines = prepare_GGIT_data(pipelines)
+if __name__ == "__main__":
+    if "snakemake" not in globals():
+        from _helpers import mock_snakemake
 
-    elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
-        download_IGGIELGN_gas_network()
-
-        gas_network = os.path.join(
-            BASE_DIR, "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson"
+        snakemake = mock_snakemake(
+            "prepare_gas_network",
+            simpl="",
+            clusters="4",
         )
 
-        pipelines = load_IGGIELGN_data(gas_network)
-        pipelines = prepare_IGGIELGN_data(pipelines)
+    # configure_logging(snakemake)
 
-    bus_regions_onshore = load_bus_region(snakemake.input.regions_onshore, pipelines)[0]
-    bus_regions_onshore.geometry = bus_regions_onshore.geometry.buffer(0)
-    country_borders = load_bus_region(snakemake.input.regions_onshore, pipelines)[1]
+    # run = snakemake.config.get("run", {})
+    # RDIR = run["name"] + "/" if run.get("name") else ""
+    # store_path_data = Path.joinpath(Path().cwd(), "data")
+    # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    pipelines = parse_states(pipelines, bus_regions_onshore)
+    if not snakemake.params.custom_gas_network:
+        if snakemake.params.gas_config["network_data"] == "GGIT":
+            pipelines = download_GGIT_gas_network()
+            pipelines = prepare_GGIT_data(pipelines)
 
-    if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
-        # TODO: plotting should be a extra rule!
-        # plot_gas_network(pipelines, country_borders, bus_regions_onshore)
+        elif snakemake.params.gas_config["network_data"] == "IGGIELGN":
+            download_IGGIELGN_gas_network()
 
-        pipelines = cluster_gas_network(
-            pipelines, bus_regions_onshore, length_factor=1.25
-        )
+            gas_network = os.path.join(
+                BASE_DIR,
+                "data/gas_network/scigrid-gas/data/IGGIELGN_PipeSegments.geojson",
+            )
 
-        # Conversion of GADM id to from 3 to 2-digit
-        # pipelines["bus0"] = pipelines["bus0"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
+            pipelines = load_IGGIELGN_data(gas_network)
+            pipelines = prepare_IGGIELGN_data(pipelines)
 
-        # pipelines["bus1"] = pipelines["bus1"].apply(
-        #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
-        # )
+        bus_regions_onshore = load_bus_region(
+            snakemake.input.regions_onshore, pipelines
+        )[0]
+        bus_regions_onshore.geometry = bus_regions_onshore.geometry.buffer(0)
+        country_borders = load_bus_region(snakemake.input.regions_onshore, pipelines)[1]
 
-        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+        pipelines = parse_states(pipelines, bus_regions_onshore)
 
-        # TODO: plotting should be a extra rule!
-        # plot_clustered_gas_network(pipelines, bus_regions_onshore)
+        if len(pipelines.loc[pipelines.amount_states_passed >= 2]) > 0:
+            # TODO: plotting should be a extra rule!
+            # plot_gas_network(pipelines, country_borders, bus_regions_onshore)
 
-        average_length = pipelines["length"].mean()
-        print("average_length = ", average_length)
+            pipelines = cluster_gas_network(
+                pipelines, bus_regions_onshore, length_factor=1.25
+            )
 
-        total_system_capacity = pipelines["GWKm"].sum()
-        print("total_system_capacity = ", total_system_capacity)
+            # Conversion of GADM id to from 3 to 2-digit
+            # pipelines["bus0"] = pipelines["bus0"].apply(
+            #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+            # )
 
-    else:
-        bus_regions_onshore["country"] = bus_regions_onshore["gadm_id"]
-        print(
-            "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
-            + ", ".join(bus_regions_onshore.country.unique().tolist())
-        )
+            # pipelines["bus1"] = pipelines["bus1"].apply(
+            #     lambda id: three_2_two_digits_country(id[:3]) + id[3:]
+            # )
 
-        # Create an empty DataFrame with the specified column names
-        pipelines = {"bus0": [], "bus1": [], "capacity": [], "length": [], "GWKm": []}
+            pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
 
-        pipelines = pd.DataFrame(pipelines)
-        pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
+            # TODO: plotting should be a extra rule!
+            # plot_clustered_gas_network(pipelines, bus_regions_onshore)
+
+            average_length = pipelines["length"].mean()
+            print("average_length = ", average_length)
+
+            total_system_capacity = pipelines["GWKm"].sum()
+            print("total_system_capacity = ", total_system_capacity)
+
+        else:
+            bus_regions_onshore["country"] = bus_regions_onshore["gadm_id"]
+            print(
+                "The following countries have no existing Natural Gas network between the chosen bus regions:\n"
+                + ", ".join(bus_regions_onshore.country.unique().tolist())
+            )
+
+            # Create an empty DataFrame with the specified column names
+            pipelines = {
+                "bus0": [],
+                "bus1": [],
+                "capacity": [],
+                "length": [],
+                "GWKm": [],
+            }
+
+            pipelines = pd.DataFrame(pipelines)
+            pipelines.to_csv(snakemake.output.clustered_gas_network, index=False)
