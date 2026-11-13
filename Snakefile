@@ -625,7 +625,7 @@ rule build_demand_profiles:
 def inputs_hydro(w):
     if w.technology == "hydro":
         HYDRO_PROFILES = {
-            "hydro_capacities": "data/hydro_capacities.csv",
+            "hydro_capacities": config["renewable"]["hydro"]["hydro_capacities"],
             "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
             "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
             "powerplants": "resources/" + RDIR + "powerplants.csv",
@@ -741,7 +741,7 @@ rule add_electricity:
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes="resources/" + RDIR + "shapes/gadm_shapes.geojson",
-        hydro_capacities="data/hydro_capacities.csv",
+        hydro_capacities=config["renewable"]["hydro"]["hydro_capacities"],
         demand_profiles="resources/" + RDIR + "demand_profiles.csv",
         nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:

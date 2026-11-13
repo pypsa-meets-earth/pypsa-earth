@@ -1150,10 +1150,19 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
     # TODO get biomass potentials dataset and enable spatially resolved potentials
 
     # Get biomass and biogas potentials from config and convert from TWh to MWh
-    biomass_pot = (
-        snakemake.params.sector_options["solid_biomass_potential"] * 1e6
-    )  # MWh
-    biogas_pot = snakemake.params.sector_options["biogas_potential"] * 1e6  # MWh
+    n_years = n.snapshot_weightings.generators.sum() / 8760.0
+
+    potentials = {
+        name: float(snakemake.params.sector_options[name])
+        for name in ("solid_biomass_potential", "biogas_potential")
+    }
+
+    for name, potential in potentials.items():
+        if np.isnan(potential) or potential < 0:
+            raise ValueError(f"{name} must be non-negative or infinite.")
+
+    biomass_pot = potentials["solid_biomass_potential"] * 1e6 * n_years  # MWh
+    biogas_pot = potentials["biogas_potential"] * 1e6 * n_years  # MWh
     logger.info("Biomass and Biogas potential fetched from config")
 
     # Convert from total to nodal potentials,
@@ -1168,32 +1177,63 @@ def add_biomass(n: pypsa.Network, costs: pd.DataFrame) -> None:
         "Bus", spatial.gas.biogas, location=spatial.biomass.locations, carrier="biogas"
     )
 
-    n.add(
-        "Bus",
-        spatial.biomass.nodes,
-        location=spatial.biomass.locations,
-        carrier="solid biomass",
-    )
+    biomass_nodes = pd.Index(spatial.biomass.nodes)
+    biomass_locations = pd.Series(spatial.biomass.locations, index=biomass_nodes)
+    missing_biomass_nodes = biomass_nodes.difference(n.buses.index)
 
-    n.add(
-        "Store",
-        spatial.gas.biogas,
-        bus=spatial.gas.biogas,
-        carrier="biogas",
-        e_nom=biogas_pot_spatial,
-        marginal_cost=costs.at["biogas", "fuel"],
-        e_initial=biogas_pot_spatial,
-    )
+    if not missing_biomass_nodes.empty:
+        n.add(
+            "Bus",
+            missing_biomass_nodes,
+            location=biomass_locations.loc[missing_biomass_nodes],
+            carrier="solid biomass",
+        )
 
-    n.add(
-        "Store",
-        spatial.biomass.nodes,
-        bus=spatial.biomass.nodes,
-        carrier="solid biomass",
-        e_nom=biomass_pot_spatial,
-        marginal_cost=costs.at["solid biomass", "fuel"],
-        e_initial=biomass_pot_spatial,
-    )
+    n.buses.loc[biomass_nodes, "carrier"] = "solid biomass"
+
+    # Remove unrestricted biomass fuel supply created during
+    # conventional generator conversion. Existing power plants are
+    # already represented as Links at this stage.
+    biomass_supply = n.generators.index[
+        n.generators.carrier.eq("biomass")
+        & n.generators.bus.isin(spatial.biomass.nodes)
+    ]
+
+    if not biomass_supply.empty:
+        n.remove("Generator", biomass_supply)
+
+    # Remove redundant cyclic stores created for conventional biomass supply.
+    legacy_stores = (biomass_nodes + " Store").intersection(n.stores.index)
+    legacy_stores = legacy_stores[
+        n.stores.loc[legacy_stores, "carrier"].eq("biomass").to_numpy()
+    ]
+
+    if not legacy_stores.empty:
+        n.remove("Store", legacy_stores)
+
+    # Supply potentials are specified in TWh per optimization year.
+    # Generator.e_sum_max limits weighted energy production in MWh.
+    if biomass_pot > 0:
+        n.add(
+            "Generator",
+            spatial.biomass.nodes,
+            bus=spatial.biomass.nodes,
+            carrier="solid biomass",
+            p_nom_extendable=True,
+            marginal_cost=costs.at["solid biomass", "fuel"],
+            e_sum_max=biomass_pot_spatial,
+        )
+
+    if biogas_pot > 0:
+        n.add(
+            "Generator",
+            spatial.gas.biogas,
+            bus=spatial.gas.biogas,
+            carrier="biogas",
+            p_nom_extendable=True,
+            marginal_cost=costs.at["biogas", "fuel"],
+            e_sum_max=biogas_pot_spatial,
+        )
 
     biomass_gen = "biomass EOP"
     n.add(
