@@ -2,13 +2,10 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import logging
-import os
 import shutil
 from pathlib import Path
 
 import country_converter as coco
-import numpy as np
 import pandas as pd
 from _helpers import BASE_DIR, read_csv_nafix
 
@@ -16,21 +13,6 @@ from _helpers import BASE_DIR, read_csv_nafix
 
 
 # logger = logging.getLogger(__name__)
-
-
-def download_ports():
-    """
-    Downloads the world ports index csv File and NOT as shape or other because
-    it is updated on a monthly basis.
-
-    The following csv file was downloaded from the webpage
-    https://msi.nga.mil/Publications/WPI
-    as a csv file that is updated monthly as mentioned on the webpage. The dataset contains 3711 ports.
-    """
-    fn = "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv"
-    wpi_csv = read_csv_nafix(fn, index_col=0)
-
-    return wpi_csv
 
 
 def filter_ports(dataframe):
@@ -77,7 +59,7 @@ if __name__ == "__main__":
     # store_path_data = Path.joinpath(Path().cwd(), "data")
     # country_list = country_list_to_geofk(snakemake.config["countries"])'
 
-    df = download_ports().copy()
+    df = read_csv_nafix(snakemake.input.ports, index_col=0, compression="gzip")
 
     # Add ISO2 country code for each country
     df = df.rename(
@@ -126,8 +108,7 @@ if __name__ == "__main__":
     ports.loc[ports["Harbor Size"].isin(["Large"]), "Harbor_size_nr"] = 3
 
     df1 = ports.copy()
-    df1 = df1.groupby(["country_full_name"]).sum("Harbor_size_nr")
-    df1 = df1[["Harbor_size_nr"]]
+    df1 = df1.groupby("country_full_name")[["Harbor_size_nr"]].sum()
     df1 = df1.rename(columns={"Harbor_size_nr": "Total_Harbor_size_nr"})
 
     ports = ports.set_index("country_full_name").join(df1, how="left")

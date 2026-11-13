@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
 import shutil
-from pathlib import Path
 
 import country_converter as coco
 import numpy as np

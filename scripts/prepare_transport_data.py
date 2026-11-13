@@ -2,14 +2,13 @@
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-import os
 
 import numpy as np
 import pandas as pd
 import pypsa
 import pytz
 import xarray as xr
-from _helpers import BASE_DIR, read_csv_nafix
+from _helpers import read_csv_nafix
 
 
 def transport_degree_factor(

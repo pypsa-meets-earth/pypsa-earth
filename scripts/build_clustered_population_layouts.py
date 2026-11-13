@@ -5,13 +5,12 @@
 """
 Build clustered population layouts.
 """
-import os
 
 import atlite
 import geopandas as gpd
 import pandas as pd
 import xarray as xr
-from _helpers import read_csv_nafix, to_csv_nafix
+from _helpers import to_csv_nafix
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
