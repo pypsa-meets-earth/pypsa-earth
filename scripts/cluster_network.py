@@ -596,20 +596,6 @@ def clustering_for_n_clusters(
     if not n.lines.loc[n.lines.carrier == "DC"].empty:
         clustering.n.lines["underwater_fraction"] = 0
 
-    # TODO: remove this code snippet after updating to PyPSA v1.1.0 (handled in PyPSA directly)
-    # Remove zero-filled or NaN-filled time series for StorageUnit
-    for attr in list(clustering.n.storage_units_t.keys()):
-        df = clustering.n.storage_units_t[attr]
-        if not df.empty:
-            # Check if all values are either 0 or NaN
-            all_zero_or_nan = ((df == 0) | df.isna()).all().all()
-            if all_zero_or_nan:
-                # Make it empty with correct index but no columns
-                clustering.n.storage_units_t[attr] = pd.DataFrame(index=df.index)
-                logger.info(
-                    f"Cleared zero/NaN-filled storage_units_t.{attr} after clustering"
-                )
-
     return clustering
 
 
