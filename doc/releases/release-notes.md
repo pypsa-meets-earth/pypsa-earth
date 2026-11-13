@@ -22,7 +22,13 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix connection cost calculations during network simplification by preserving zero-cost AC connections and correctly accounting for HVDC links and lines [PR #2091](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2091)
 
+* Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
+
+* Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
+
 * Restore CO2 emissions from rail transport oil consumption [PR #2123](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2123)
+
+* Enforce annual biomass and biogas supply potentials and remove unrestricted biomass supply [PR #2124](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2124)
 
 * Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
 
@@ -52,6 +58,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
 
+* Add the option `hydro_capacities` to set the path of the hydro capacities table, as `data/hydro_capacities.csv` only covers African countries, and correct the descriptions of `hydro_max_hours` and of that table [PR #2099](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2099)
+
 * Fix naphtha-related industry CO2 emissions by correcting spatial load name construction [PR #2088](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2088)
 
 * Fix argument types for iterative transmission expansion [PR #2082](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2082)
@@ -67,6 +75,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Support earth-osm v0.3.1 and introduce option to control multi-threading [PR #2095](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2095)
 
 * Add alternate source for downloading World Port Index data [PR #2116](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2116)
+
+* Add plot of available cutout databundles to the documentation [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
 
 # PyPSA-Earth 0.10.0
 
@@ -163,6 +173,7 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be deprecated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+* Update Data workflow section to update databundles, include cutouts details and script to collect cutout info [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
 
 * Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
 
