@@ -949,40 +949,36 @@ def attach_hydro(
     }
     ppl["carrier"] = ppl["technology"].map(tech_to_carrier)
 
-    # Aggregate by (bus, carrier, grouping_year)
-    ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
+    # Only run-of-river, reservoir, and unclassified hydro plants require inflow.
+    # Pumped-storage plants are retained even when no inflow profile is available.
+    inflow_plants = ppl[
+        ppl["carrier"].isin(["ror", "hydro"]) | ppl["technology"].isna()
+    ]
+    inflow_t = pd.DataFrame()
 
-    ror = ppl_grouped[ppl_grouped["carrier"] == "ror"]
-    phs = ppl_grouped[ppl_grouped["carrier"] == "PHS"]
-    hydro = ppl_grouped[ppl_grouped["carrier"] == "hydro"]
-    tbd = ppl[ppl.technology.isna()]  # To be determined technologies
-
-    inflow_idx = ror.index.union(hydro.index).union(tbd.index)
-    if not inflow_idx.empty:
+    if not inflow_plants.empty:
         with xr.open_dataarray(snakemake.input.profile_hydro) as inflow:
-            found_plants = ppl.ppl_id[ppl.ppl_id.isin(inflow.indexes["plant"])]
-            missing_plants_idxs = ppl.index.difference(found_plants.index)
+            found_plants = inflow_plants.ppl_id[
+                inflow_plants.ppl_id.isin(inflow.indexes["plant"])
+            ]
+            missing_plants_idxs = inflow_plants.index.difference(found_plants.index)
 
-            # if missing time series are found, notify the user and exclude missing hydro plants
+            # Remove missing plants before aggregation so that they cannot be
+            # reintroduced when unclassified hydro technologies are assigned.
             if not missing_plants_idxs.empty:
-                # original total p_nom
-                total_p_nom = ror.p_nom.sum() + hydro.p_nom.sum() + tbd.p_nom.sum()
-
-                ror = ror.loc[ror.index.intersection(found_plants.index)]
-                hydro = hydro.loc[hydro.index.intersection(found_plants.index)]
-                tbd = tbd.loc[tbd.index.intersection(found_plants.index)]
-
-                # loss of p_nom
-                loss_p_nom = (
-                    ror.p_nom.sum() + hydro.p_nom.sum() + tbd.p_nom.sum() - total_p_nom
-                )
+                total_p_nom = inflow_plants.p_nom.sum()
+                loss_p_nom = inflow_plants.loc[missing_plants_idxs, "p_nom"].sum()
+                ppl = ppl.drop(index=missing_plants_idxs)
 
                 logger.warning(
-                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series for at least one bus: {', '.join(missing_plants_idxs)}."
-                    f"Corresponding hydro plants are dropped, corresponding to a total loss of {loss_p_nom:.2f}MW out of {total_p_nom:.2f}MW."
+                    f"'{snakemake.input.profile_hydro}' is missing inflow time-series "
+                    "for the following hydro plants: "
+                    f"{', '.join(missing_plants_idxs)}. "
+                    "Corresponding hydro plants are dropped, resulting in a "
+                    f"total capacity loss of {loss_p_nom:.2f} MW out of "
+                    f"{total_p_nom:.2f} MW."
                 )
 
-            # if there are any plants for which runoff data are available
             if not found_plants.empty:
                 inflow_t = (
                     inflow.sel(plant=found_plants.values)
@@ -992,8 +988,16 @@ def attach_hydro(
                     .to_pandas()
                 )
 
-                # Aggregate inflow by (bus, carrier, grouping_year)
-                inflow_agg = aggregate_inflow_by_group(ppl, ppl_grouped, inflow_t)
+    # Aggregate only after plants without inflow have been removed.
+    ppl_grouped = aggregate_ppl_by_bus_carrier_year(ppl)
+
+    ror = ppl_grouped[ppl_grouped["carrier"] == "ror"]
+    phs = ppl_grouped[ppl_grouped["carrier"] == "PHS"]
+    hydro = ppl_grouped[ppl_grouped["carrier"] == "hydro"]
+    tbd = ppl[ppl.technology.isna()]  # To be determined technologies
+
+    if not inflow_t.empty:
+        inflow_agg = aggregate_inflow_by_group(ppl, ppl_grouped, inflow_t)
 
     # Heuristics for missing hydro technologies
     if not tbd.empty:
