@@ -22,6 +22,14 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
+* Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
+
+* Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
+
+* Restore CO2 emissions from rail transport oil consumption [PR #2123](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2123)
+
+* Enforce annual biomass and biogas supply potentials and remove unrestricted biomass supply [PR #2124](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2124)
+
 * Fix positional geometry indexing in demand profiles to support GeoSeries with non-default indices [PR #2085](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2085)
 
 * Fix ambiguous Snakemake rule matching between `retrieve_cost_data` and `process_cost_data` by constraining cost-year and scope wildcards [PR #2089](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2089)
@@ -42,6 +50,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
 
+* Ensure `exclude_carriers` is respected during network simplification and clustering, including year-tagged carriers and overnight grouping [PR #2056](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2056)
+
 * Remove unused variables and obsolete commented-out code, and replace dynamic pandas queries with explicit boolean indexing [PR #2083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2083)
 
 * Fix hydropower inflow aggregation by replacing deprecated Pandas column grouping [PR #2086](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2086)
@@ -49,6 +59,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fill missing `max_hours` (NaN as well as 0) of pumped hydro plants with `PHS_max_hours`, so that plants without a reported duration get storage [PR #2096](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2096)
 
 * Add representative Japan-specific transmission line types [PR #2047](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2047)
+
+* Add the option `hydro_capacities` to set the path of the hydro capacities table, as `data/hydro_capacities.csv` only covers African countries, and correct the descriptions of `hydro_max_hours` and of that table [PR #2099](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2099)
 
 * Fix naphtha-related industry CO2 emissions by correcting spatial load name construction [PR #2088](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2088)
 
@@ -65,6 +77,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Support earth-osm v0.3.1 and introduce option to control multi-threading [PR #2095](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2095)
 
 * Add alternate source for downloading World Port Index data [PR #2116](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2116)
+
+* Add plot of available cutout databundles to the documentation [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
 
 # PyPSA-Earth 0.10.0
 
@@ -105,6 +119,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Update sector config tables with missing hydrogen and ammonia options [PR #2060](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2060)
 
 * Add a fix to remove empty geometries in `build_osm_network` script [PR #1929](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1929)
+
+* Drop duplication of logging to console [PR #2025](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2025)
 
 # PyPSA-Earth 0.9.0
 
@@ -159,6 +175,7 @@ This part of documentation collects descriptive release notes to capture the mai
 * Reorganize config for ``co2``, ``solar_thermal``, and line length settings. Old config keys will be deprecated in future releases [PR #1863](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1863)
 
 **Minor Changes and bug-fixing**
+* Update Data workflow section to update databundles, include cutouts details and script to collect cutout info [PR #1986](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1986)
 
 * Retry failed databundle downloads before falling back to the next configured host [PR #2013](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2013)
 
