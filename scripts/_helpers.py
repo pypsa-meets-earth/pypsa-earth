@@ -1036,11 +1036,15 @@ def mock_snakemake(
             overwrite_workdir=workdir,
         )
 
-        # Snakemake version-dependent logger handling
+        # Snakemake version-dependent logger handling. Pass Snakemake its own
+        # logger: handing over this module's logger lets Snakemake attach its
+        # formatter to it, which drops message arguments and tracebacks.
         if version.parse(sm_version) >= version.parse("9.14.6"):
+            from snakemake.logging import logger as sm_logger
+
             output_settings = OutputSettings()
             workflow_kwargs["logger_manager"] = LoggerManager(
-                logger=logger, settings=output_settings
+                logger=sm_logger, settings=output_settings
             )
 
         workflow = Workflow(**workflow_kwargs)
@@ -1076,6 +1080,9 @@ def mock_snakemake(
             job.rule.name,
             None,
         )
+        # Not set by the Snakemake constructor; used e.g. by make_statistics
+        snakemake.benchmark = job.benchmark
+
         # create log and output dir if not existent
         for path in list(snakemake.log) + list(snakemake.output):
             Path(path).parent.mkdir(parents=True, exist_ok=True)
