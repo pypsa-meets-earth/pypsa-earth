@@ -100,8 +100,9 @@ def render_row(entry):
     Translate a dataset entry into a properly formatted markdown table row.
 
     The dataset name is rendered as a hyperlink to "origin_url" if present,
-    otherwise to "url". Templated urls containing placeholders (e.g.
-    "{region}") are not valid links, so the name is left as plain text.
+    otherwise to "url". If "origin_url" lists several entries (e.g. multiple
+    versions of a dataset), the last one is assumed to be the latest and is
+    used.
 
     Parameters
     ----------
@@ -115,7 +116,14 @@ def render_row(entry):
         A table row for the automated data documenting table.
     """
     long_name = render_cell(entry["long_name"])
-    link = entry.get("origin_url") or entry.get("url")
+
+    url = entry.get("url")
+
+    # url can contain several instances
+    url_latest = url[-1] if isinstance(url, list) else url
+    # origin url corresponds to a single source of truth
+    link = entry["origin_url"] if entry.get("origin_url") else url_latest
+
     if link and "{" not in link:
         name_hyperlinked = f"[{long_name}]({link})"
     else:
