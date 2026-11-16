@@ -22,6 +22,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `prepare_transport_data_input` is no longer available [PR #2118](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2118)
 
+* Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
+
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
 
 * Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
@@ -49,6 +51,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix myopic land-use constraints to handle missing current-horizon generators without raising `KeyError`, for both standard and generator-clustered networks [PR #2114](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2114)
 
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
+
+* Ensure `exclude_carriers` is respected during network simplification and clustering, including year-tagged carriers and overnight grouping [PR #2056](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2056)
 
 * Remove unused variables and obsolete commented-out code, and replace dynamic pandas queries with explicit boolean indexing [PR #2083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2083)
 
