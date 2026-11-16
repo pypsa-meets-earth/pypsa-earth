@@ -945,7 +945,7 @@ def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict
 def mock_snakemake(
     rulename: str,
     root_dir: str | Path | None = None,
-    configfiles: str | None = None,
+    configfiles: str | list | None = None,
     submodule_dir: str | None = None,
     **wildcards,
 ):
@@ -972,6 +972,10 @@ def mock_snakemake(
         needed.
     """
     import os
+
+    # Avoid silently treating the former ``configfile`` argument as a wildcard
+    if "configfile" in wildcards:
+        raise TypeError("mock_snakemake(): 'configfile' was renamed to 'configfiles'.")
 
     import snakemake as sm
     from packaging import version
