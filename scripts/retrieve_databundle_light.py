@@ -399,6 +399,27 @@ def download_and_unzip_protectedplanet(
     return downloaded
 
 
+def get_filename_from_url(url: str) -> str:
+    """
+    Get the name of the file to save from a download url.
+
+    The last part of the url is used, without query string or fragment,
+    e.g. ``https://zenodo.org/records/1/files/data.parquet?download=1``
+    gives ``data.parquet``.
+
+    Parameters
+    ----------
+    url : str
+        Url to download data from
+
+    Returns
+    -------
+    str
+        Name of the file
+    """
+    return os.path.basename(url).split("?")[0].split("#")[0]
+
+
 def download_and_unpack(
     url: str,
     file_path: str,
@@ -481,7 +502,7 @@ def download_and_unzip_direct(
     destination = os.path.join(BASE_DIR, config["destination"])
     url = config["urls"]["direct"]
 
-    file_path = os.path.join(destination, os.path.basename(url))
+    file_path = os.path.join(destination, get_filename_from_url(url))
 
     unzip = config.get("unzip", False)
     downloaded = download_and_unpack(
@@ -594,7 +615,7 @@ def download_and_unzip_post(
     # remove url feature
     url = postdata.pop("url")
 
-    file_path = os.path.join(destination, os.path.basename(url))
+    file_path = os.path.join(destination, get_filename_from_url(url))
 
     if hot_run:
         if os.path.exists(file_path):
