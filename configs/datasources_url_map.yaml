@@ -53,9 +53,7 @@ source:
   countries: Earth
   url: [https://zenodo.org/records/18374352/files/forecasts_on_historical_period.parquet, https://zenodo.org/records/23924756/files/forecasts_on_historical_period.parquet]
   version: [1.0.0 (2026-01-26), 2.0.0 (2026-11-03)]
-  checksum: [md5:be6b47c118d547fccf22245ec7cd8323, md5:35d90ca580ceff4312839b29e13ae8a5
-
-]
+  checksum: [md5:be6b47c118d547fccf22245ec7cd8323, md5:35d90ca580ceff4312839b29e13ae8a5]
   code_line: "[bundle_config.yaml:demandcast_full](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/configs/bundle_config.yaml#L192)"
   license: CC BY 4.0
   license_link: https://zenodo.org/records/18374352
