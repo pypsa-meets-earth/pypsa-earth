@@ -1,0 +1,6 @@
+Parameter,Unit,Values,Description
+source,--,"One of {latest, historical, custom}","Which OpenStreetMap snapshot ``download_osm_data`` uses. ``latest``: current OSM data. ``historical``: OSM data as of ``target_date``. ``custom``: user-provided ``.pbf`` (and optionally power) files from ``custom_path``. Raw data is stored per snapshot in ``data/osm/<subdir>/``, where ``<subdir>`` is ``latest``, ``YYYYMM`` or ``custom``."
+custom_path,,,Paths to user-provided OSM files. Only used when ``source`` is ``custom``.
+-- pbf,--,path,"Folder with the raw OSM ``.pbf`` files (required). Files must be named ``<country>-latest.osm.pbf``, e.g. ``bolivia-latest.osm.pbf``, for every country in ``countries``."
+-- power,--,path,"Folder with pre-filtered power ``.json`` files (optional). If the folder does not exist, the power data is extracted from the ``.pbf`` files."
+target_date,--,YYYY-MM-DD,"Date of the OSM snapshot to download. Only used when ``source`` is ``historical``. If empty or not in YYYY-MM-DD format, the latest OSM data is downloaded instead."

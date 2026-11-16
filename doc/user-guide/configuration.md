@@ -511,6 +511,16 @@ Specifies which custom datasets are used to replace or supplement the default mo
 
 {{ read_csv('configtables/custom_data.csv') }}
 
+### osm_data
+
+Selects which OpenStreetMap snapshot ``download_osm_data`` uses: the latest data, a historical snapshot at a given date, or user-provided files.
+
+```yaml
+--8<-- "configtables/snippets/osm_data.yaml"
+```
+
+{{ read_csv('configtables/osm_data.csv') }}
+
 ### existing_capacities
 
 Vintage grouping and thresholds for brownfield power and heating capacities in ``add_existing_baseyear`` and related rules.
