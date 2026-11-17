@@ -605,6 +605,8 @@ def cluster_gas_network(
         pipelines_per_state = pipelines_interstate.loc[:, column_set].reset_index(
             drop=True
         )
+    else:
+        raise ValueError("gas network_data must be 'GGIT' or 'IGGIELGN'")
 
     # Explode the column containing lists of tuples
     df_exploded = pipelines_per_state.explode("nodes").reset_index(drop=True)
@@ -862,6 +864,8 @@ if __name__ == "__main__":
 
             pipelines = load_IGGIELGN_data(gas_network)
             pipelines = prepare_IGGIELGN_data(pipelines)
+        else:
+            raise ValueError("gas network_data must be 'GGIT' or 'IGGIELGN'")
 
         bus_regions_onshore = load_bus_region(
             snakemake.input.regions_onshore, pipelines
