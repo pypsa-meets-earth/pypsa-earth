@@ -2353,6 +2353,25 @@ def get_base_carrier(carrier: str) -> str:
     return carrier
 
 
+def get_aggregate_carriers(
+    network: pypsa.Network,
+    exclude_carriers: Iterable[str],
+) -> set[str]:
+    """
+    Return carrier variants that should be aggregated.
+
+    Exclusions are matched against the base carrier so that, for example,
+    excluding ``coal`` also excludes internally year-tagged carriers such as
+    ``coal-2020``.
+    """
+    excluded_carriers = set(exclude_carriers)
+    return {
+        carrier
+        for carrier in network.generators.carrier.unique()
+        if get_base_carrier(carrier) not in excluded_carriers
+    }
+
+
 def restore_base_carrier_names(n: pypsa.Network) -> None:
     """
     Restore carrier names from carrier_gy format (e.g., "solar-2020") to base carrier (e.g., "solar").

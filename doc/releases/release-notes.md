@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
+
 * Run `prepare_gas_network` only under its `__main__` guard, so importing the script no longer executes the workflow [PR #2127](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2127)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
@@ -49,6 +51,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix myopic land-use constraints to handle missing current-horizon generators without raising `KeyError`, for both standard and generator-clustered networks [PR #2114](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2114)
 
 * Updated dataset license specifications for GADM, Copernicus, and EEZ datasets [PR #2097](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2097)
+
+* Ensure `exclude_carriers` is respected during network simplification and clustering, including year-tagged carriers and overnight grouping [PR #2056](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2056)
 
 * Remove unused variables and obsolete commented-out code, and replace dynamic pandas queries with explicit boolean indexing [PR #2083](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2083)
 
