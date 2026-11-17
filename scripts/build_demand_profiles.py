@@ -72,6 +72,25 @@ def normed(s):
     return s / s.sum()
 
 
+def _validate_time_coverage(index, start_date, end_date):
+    """Validate that demand data covers every requested hourly timestamp."""
+    expected = pd.date_range(start=start_date, end=end_date, freq="h")
+    missing = expected.difference(pd.DatetimeIndex(index))
+
+    if missing.empty:
+        return
+
+    preview = ", ".join(str(timestamp) for timestamp in missing[:5])
+    if len(missing) > 5:
+        preview += ", ..."
+
+    raise ValueError(
+        "Demand profile does not fully cover the requested period "
+        f"from {start_date} to {end_date}. Missing {len(missing)} hourly "
+        f"timestamp(s): {preview}"
+    )
+
+
 def get_gegis_regions(countries):
     """
     Get the GEGIS region from the config file.
@@ -422,6 +441,7 @@ def build_demand_profiles(
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date) - pd.Timedelta(hours=1)
     demand_profiles = demand_profiles.loc[start_date:end_date]
+    _validate_time_coverage(demand_profiles.index, start_date, end_date)
     demand_profiles.to_csv(out_path, header=True)
 
     logger.info(f"Demand_profiles csv file created for the corresponding snapshots.")
