@@ -18,6 +18,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
 
+* Streamline data management #1711 by externalising on-fly data downloads and creating a data inventory [PR #1711](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1711)
+
 **Minor Changes and bug-fixing**
 
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
