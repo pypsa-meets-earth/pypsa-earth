@@ -46,7 +46,7 @@ source:
   license_link: https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003
 
 - name: demandcast_forecasts
-  long_name: Global Dataset of Forecasted Hourly Electricity Demand from 2000 to 2024 Using DemandCast. E. Antonini, P. Goli, K. Steijn
+  long_name: Global Dataset of Forecasted Hourly Electricity Demand from 2000 to 2025 Using DemandCast. E. Antonini, P. Goli, K. Steijn
   output: data/demand/forecasts_on_historical_period.parquet
   description: "DemandCast: machine-learning-generated hourly electricity demand forecasts (2000-2024) for 184 countries, combining historical demand data, weather variables and socioeconomic indicators. E. Antonini, P. Goli and K. Steijn."
   tutorial: false
