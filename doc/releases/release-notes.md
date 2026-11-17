@@ -10,6 +10,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Optionally derive demand weather years and cutout names from snapshots while preserving custom cutouts and snapshot ranges; align explicitly selected demand years to snapshots and validate pre-built cutout availability [PR #1941](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1941)
+
 * Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
 
 * Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
