@@ -260,7 +260,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from prepare_network import add_co2limit
+from prepare_network import _weighted_resample, add_co2limit
 
 logger = logging.getLogger(__name__)
 
@@ -2927,13 +2927,6 @@ def add_heat(
                 capital_cost=costs.at["micro CHP", "fixed"],
                 lifetime=costs.at["micro CHP", "lifetime"],
             )
-
-
-def _weighted_resample(df, weights, offset):
-    """Resample a time series using snapshot durations as weights."""
-    weighted_sum = df.multiply(weights, axis=0).resample(offset).sum()
-    valid_weights = df.notna().multiply(weights, axis=0).resample(offset).sum()
-    return weighted_sum.divide(valid_weights.where(valid_weights != 0))
 
 
 def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
