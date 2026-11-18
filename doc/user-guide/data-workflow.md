@@ -12,6 +12,30 @@ To properly model any region of the Earth, PyPSA-Earth downloads and fetches dif
 
 Two major parts of the energy modeling workflow are preparing of power grid layout and climate inputs. Apart from that, PyPSA-Earth is relying of a number of environmental, economical and technological datasets.
 
+## Retrieving missing databundle files
+
+If a workflow reports missing databundle files, use the interactive retrieval CLI to inspect the local data and download the missing files without rerunning the full Snakemake workflow. From the repository root, run:
+
+```bash
+python scripts/non_workflow/databundle_cli.py
+```
+
+The CLI prints a checklist of the files in the configured databundles and then accepts one of these inputs:
+
+- `check` — refresh the checklist after adding files.
+- `all` — retrieve every missing databundle that can be downloaded automatically.
+- `rerun` — retrieve every configured databundle again.
+- A databundle name, such as `bundle_data_earth`, to retrieve selected bundles.
+- Press **Enter** on an empty prompt to exit.
+
+The command reads `logs/databundle_cli.yaml` when that file exists; otherwise it uses the default `retrieve_databundle_light` configuration. Install the `rich` package first if it is not already available so the checklist and instructions render correctly:
+
+```bash
+pip install rich
+```
+
+After retrieving files, run `check` again and then rerun the failed workflow. If you want Snakemake to use the files you retrieved manually rather than downloading them again, set `retrieve_databundle: false` in your configuration.
+
 ![PyPSA-Earth Rulegraph](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph.svg)
 
 ## 1. Grid topology data
