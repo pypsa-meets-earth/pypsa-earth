@@ -37,6 +37,8 @@ rule cluster_global_buildings:
 
 
 rule prepare_ports:
+    input:
+        ports="data/ports/UpdatedPub150.csv",
     params:
         custom_export=config["custom_data"]["export_ports"],
     output:
@@ -57,6 +59,8 @@ rule prepare_airports:
 
 
 rule prepare_urban_percent:
+    input:
+        urban_percent_raw=rules.retrieve_urban_percent.output.urban_percent_raw,
     output:
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:
@@ -541,7 +545,7 @@ rule build_industry_demand:  #default data
         industrial_database=rules.build_industrial_database.output.industrial_database,
         ammonia_production=rules.build_ammonia_production.output.ammonia_production,
         costs=rules.process_cost_data.output.costs.format(
-            year="{planning_horizons}", scope="sec"
+            planning_horizons="{planning_horizons}", scope="sec"
         ),
         industry_growth_cagr="data/demand/industry_growth_cagr.csv",
     output:
@@ -584,7 +588,7 @@ rule build_existing_heating_distribution:
         + "logs/build_existing_heating_distribution_s{simpl}_{clusters}_{planning_horizons}.log",
     benchmark:
         RESDIR
-        +"benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
+        + "benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
     script:
         scripts("build_existing_heating_distribution.py")
 
@@ -646,7 +650,7 @@ rule prepare_sector_network:
         ),
         network=rules.prepare_network.output.network,
         costs=rules.process_cost_data.output.costs.format(
-            year="{planning_horizons}", scope="sec"
+            planning_horizons="{planning_horizons}", scope="sec"
         ),
         nodal_energy_totals=branch(
             sector_enable["rail_transport"] or sector_enable["agriculture"],
@@ -712,10 +716,11 @@ rule add_export:
         endogenous_price=config["export"]["endogenous_price"],
         snapshots=config["snapshots"],
         h2export=config["export"]["h2export"],
+        crs=config["crs"],
     input:
         export_ports=rules.prepare_ports.output.export_ports,
         costs=rules.process_cost_data.output.costs.format(
-            year="{planning_horizons}", scope="sec"
+            planning_horizons="{planning_horizons}", scope="sec"
         ),
         ship_profile=rules.build_ship_profile.output.ship_profile,
         network=rules.prepare_sector_network.output.network,

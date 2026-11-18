@@ -13,7 +13,7 @@ def input_make_summary(w):
         ll = w.ll
     return [
         rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         )
     ] + expand(
         rules.solve_network.output.network,
@@ -38,7 +38,7 @@ rule make_summary:
     input:
         input_make_summary,
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
     output:
         summary=directory(
@@ -77,7 +77,7 @@ rule plot_network:
         network=rules.solve_network.output.network,
         extended_country_shape=rules.build_shapes.output.extended_country_shape,
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
     output:
         only_map="results/"
@@ -139,7 +139,7 @@ rule make_sector_summary:
     input:
         networks=expand(sector_postnetwork, **config["scenario"], **config["costs"]),
         costs=rules.process_cost_data.output.costs.format(
-            year="{planning_horizons}", scope="sec"
+            planning_horizons="{planning_horizons}", scope="sec"
         ),
         plots=expand(
             rules.plot_sector_network.output.map,

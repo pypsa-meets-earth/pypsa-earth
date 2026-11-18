@@ -40,11 +40,12 @@ rule build_shapes:
         countries=config["countries"],
         subregion=config["subregion"],
     input:
-        # naturalearth='data/bundle/naturalearth/ne_10m_admin_0_countries.shp',
-        # eez='data/bundle/eez/World_EEZ_v8_2014.shp',
-        # nuts3='data/bundle/NUTS_2013_60M_SH/data/NUTS_RG_60M_2013.shp',
-        # nuts3pop='data/bundle/nama_10r_3popgdp.tsv.gz',
-        # nuts3gdp='data/bundle/nama_10r_3gdp.tsv.gz',
+        # retrieve_databundle_data may not be defined for default run; relevant only for tutorial to track the gadm shapes contained in the bundle
+        databundle=(
+            rules.retrieve_databundle_data.output
+            if config["tutorial"] and config["enable"]["retrieve_databundle"]
+            else []
+        ),
         eez="data/eez/eez_v11.gpkg",
     output:
         country_shapes="resources/" + RDIR + "shapes/country_shapes.geojson",
@@ -281,7 +282,7 @@ rule build_demand_profiles:
 def inputs_hydro(w):
     if w.technology == "hydro":
         HYDRO_PROFILES = {
-            "hydro_capacities": "data/hydro_capacities.csv",
+            "hydro_capacities": config["renewable"]["hydro"]["hydro_capacities"],
             "eia_hydro_generation": "data/eia_hydro_annual_generation.csv",
             "irena_stats": "data/IRENA_Statistics_Extract_2025H2.xlsx",
             "powerplants": rules.build_powerplants.output.powerplants,
@@ -370,6 +371,8 @@ else:
 
 
 rule process_cost_data:
+    wildcard_constraints:
+        scope=r"elec|sec",
     params:
         costs=config["costs"],
         max_hours=config["electricity"]["max_hours"],
@@ -378,11 +381,11 @@ rule process_cost_data:
         network=rules.base_network.output.network,
         costs=cost_data,
     output:
-        costs="resources/" + RDIR + "costs_{year}_{scope}.csv",
+        costs="resources/" + RDIR + "costs_{planning_horizons}_{scope}.csv",
     log:
-        "logs/" + RDIR + "build_cost_data_{year}_{scope}.log",
+        "logs/" + RDIR + "build_cost_data_{planning_horizons}_{scope}.log",
     benchmark:
-        "benchmarks/" + RDIR + "build_cost_data_{year}_{scope}"
+        "benchmarks/" + RDIR + "build_cost_data_{planning_horizons}_{scope}"
     threads: 1
     resources:
         mem_mb=4000,
@@ -418,7 +421,7 @@ rule add_electricity:
         },
         base_network=rules.base_network.output.network,
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
         powerplants=rules.build_powerplants.output.powerplants,
         #gadm_shapes="resources/" + RDIR + "shapes/MAR2.geojson",
@@ -426,7 +429,7 @@ rule add_electricity:
         #To use: downlaod file from the google drive and place it in resources/" + RDIR + "shapes/
         #Link: https://drive.google.com/drive/u/1/folders/1dkW1wKBWvSY4i-XEuQFFBj242p0VdUlM
         gadm_shapes=rules.build_shapes.output.gadm_shapes,
-        hydro_capacities="data/hydro_capacities.csv",
+        hydro_capacities=config["renewable"]["hydro"]["hydro_capacities"],
         demand_profiles=rules.build_demand_profiles.output.demand_profiles,
         nuclear_p_max_pu="data/nuclear_p_max_pu.csv",
     output:
@@ -459,7 +462,7 @@ rule simplify_network:
         **retrieve_subregion("simplify_network"),
         network=rules.add_electricity.output.network,
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
         regions_onshore=rules.build_bus_regions.output.regions_onshore,
         regions_offshore=rules.build_bus_regions.output.regions_offshore,
@@ -515,7 +518,7 @@ rule cluster_network:
             else []
         ),
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
     output:
         network=branch(
@@ -552,7 +555,7 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
             electricity=config["electricity"],
         input:
             tech_costs=rules.process_cost_data.output.costs.format(
-                year=config["costs"]["year"], scope="elec"
+                planning_horizons=config["costs"]["year"], scope="elec"
             ),
             network=rules.cluster_network.output.network,
             regions_onshore=rules.cluster_network.output.regions_onshore,
@@ -585,7 +588,7 @@ rule add_extra_components:
     input:
         network=clustered_network,
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
     output:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec.nc",
@@ -634,7 +637,7 @@ rule prepare_network:
         **emissions_input,
         network=rules.add_extra_components.output.network,
         tech_costs=rules.process_cost_data.output.costs.format(
-            year=config["costs"]["year"], scope="elec"
+            planning_horizons=config["costs"]["year"], scope="elec"
         ),
     output:
         network="networks/" + RDIR + "elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",

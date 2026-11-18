@@ -100,7 +100,7 @@ if config["foresight"] == "overnight":
         input:
             network=rules.add_export.output.network,
             costs=rules.process_cost_data.output.costs.format(
-                year="{planning_horizons}", scope="sec"
+                planning_horizons="{planning_horizons}", scope="sec"
             ),
             configs=rules.copy_config.output.config,  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
@@ -155,7 +155,7 @@ if config["foresight"] == "myopic":
             # + SECDIR
             # + "population_shares/pop_layout_elec_s{simpl}_{clusters}_{planning_horizons}.csv",
             costs=rules.process_cost_data.output.costs.format(
-                year="{planning_horizons}", scope="sec"
+                planning_horizons="{planning_horizons}", scope="sec"
             ),
         output:
             network=RESDIR
@@ -173,7 +173,7 @@ if config["foresight"] == "myopic":
             + "logs/add_existing_baseyear_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.log",
         benchmark:
             RESDIR
-            +"benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
+            + "benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         script:
             scripts("add_existing_baseyear.py")
 
@@ -211,7 +211,7 @@ if config["foresight"] == "myopic":
             network=rules.add_export.output.network,
             network_p=solved_previous_horizon,  #solved network at previous time step
             costs=rules.process_cost_data.output.costs.format(
-                year="{planning_horizons}", scope="sec"
+                planning_horizons="{planning_horizons}", scope="sec"
             ),
             cop_soil_total=rules.build_cop_profiles.output.cop_soil_total,
             cop_air_total=rules.build_cop_profiles.output.cop_air_total,
@@ -248,7 +248,7 @@ if config["foresight"] == "myopic":
             network=RESDIR
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             costs=rules.process_cost_data.output.costs.format(
-                year="{planning_horizons}", scope="sec"
+                planning_horizons="{planning_horizons}", scope="sec"
             ),
             configs=rules.copy_config.output.config,  # included to trigger copy_config rule
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
@@ -292,7 +292,6 @@ rule run_scenario:
         mem_mb=5000,
     run:
         from subprocess import run
-
         import yaml
         from build_test_configs import create_test_config
 
@@ -303,7 +302,6 @@ rule run_scenario:
                 .get("run", {})
                 .get("base_config", "config.default.yaml")
             )
-
             # Ensure the scenario name matches the name of the configuration
         create_test_config(
             input.diff_config,
@@ -323,7 +321,6 @@ rule run_scenario:
             check=not config["run"]["allow_scenario_failure"],
         )
         copyfile("config.yaml", output.copyconfig)
-
 
 
 rule run_all_scenarios:

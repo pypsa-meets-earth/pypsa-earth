@@ -12,6 +12,7 @@ Description
 This functions takes data from the `Minerals Yearbook <https://www.usgs.gov/centers/national-minerals-information-center/nitrogen-statistics-and-information>`_
  (July 2024) published by the US Geological Survey (USGS) and the National Minerals Information Center and extracts the annual ammonia production per country in ktonN/a. The data is converted to ktonNH3/a.
 """
+
 import country_converter as coco
 import pandas as pd
 from _helpers import configure_logging, create_logger, read_csv_nafix, to_csv_nafix

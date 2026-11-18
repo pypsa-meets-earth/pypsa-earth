@@ -5,10 +5,8 @@
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
+    get_databundle_categories,
 )
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
-HTTP = HTTPRemoteProvider()
 
 country_data = config["costs"].get("country_specific_data", "")
 countries = config.get("countries", [])
@@ -26,25 +24,48 @@ else:
 
 if config["enable"].get("retrieve_databundle", True):
 
-    bundles_to_download = get_best_bundles_in_snakemake(
-        config, exclude_categories=["cutouts"]
+    # Collect all databundle categories, except cutouts that are treated separately
+    databundle_categories = get_databundle_categories(
+        config["databundles"], exclude_categories=["cutouts"]
     )
 
-    rule retrieve_databundle_light:
-        params:
-            bundles_to_download=bundles_to_download,
-            hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
-        output:  #expand(directory('{file}') if isdir('{file}') else '{file}', file=datafiles)
-            expand(
-                "{file}", file=datafiles_retrivedatabundle(config, bundles_to_download)
-            ),
-            directory("data/landcover"),
-        log:
-            "logs/" + RDIR + "retrieve_databundle.log",
-        benchmark:
-            "benchmarks/" + RDIR + "retrieve_databundle_light"
-        script:
-            scripts("retrieve_databundle_light.py")
+    # get the best bundles for each category
+    bundle_dict = {
+        category: get_best_bundles_in_snakemake(config, include_categories=[category])
+        for category in databundle_categories
+    }
+
+    # List selected bundles for each category
+    print("\n====================================================")
+    print("Selected bundles for each category:")
+    for category, bundles in bundle_dict.items():
+        if len(bundles) >= 1:
+            print(f"\t{category}: {bundles}")
+    print("====================================================\n")
+
+    for category, bundles in bundle_dict.items():
+        output_files = datafiles_retrivedatabundle(config, bundles)
+        contains_landcover = any([f for f in output_files if "landcover" in f])
+
+        if not bundles:
+            continue
+
+        rule:
+            name:
+                f"retrieve_databundle_{category}"
+            params:
+                tutorial=config["tutorial"],
+                bundles_to_download=bundles,
+                hydrobasins_level=config["renewable"]["hydro"]["hydrobasins_level"],
+            output:
+                expand("{file}", file=output_files),
+                branch(contains_landcover, directory("data/landcover")),
+            log:
+                "logs/" + RDIR + f"retrieve_databundle_{category}.log",
+            benchmark:
+                "benchmarks/" + RDIR + f"retrieve_databundle_{category}"
+            script:
+                scripts("retrieve_databundle_light.py")
 
 
 if config["enable"].get("download_global_buildings", True):
@@ -83,8 +104,11 @@ if config["enable"].get("retrieve_cutout", False):
         config, include_categories=["cutouts"]
     )
 
+    print("Cutout to download: ", cutout_to_download)
+
     rule retrieve_cutout:
         params:
+            tutorial=config["tutorial"],
             bundles_to_download=cutout_to_download,
             hydrobasins_level=[],
         input:
@@ -107,15 +131,15 @@ if config["enable"].get("retrieve_cost_data", True):
         params:
             version=config["costs"]["technology_data_version"],
         input:
-            HTTP.remote(
-                f"raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
-                + "costs_{year}.csv",
+            storage.http(
+                f"https://raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/outputs/{cost_directory}"
+                + "costs_{planning_horizons}.csv",
                 keep_local=True,
             ),
         output:
-            costs="resources/" + RDIR + "costs_{year}.csv",
+            costs="resources/" + RDIR + "costs_{planning_horizons}.csv",
         log:
-            "logs/" + RDIR + "retrieve_cost_data_{year}.log",
+            "logs/" + RDIR + "retrieve_cost_data_{planning_horizons}.log",
         resources:
             mem_mb=5000,
         run:
@@ -124,7 +148,7 @@ if config["enable"].get("retrieve_cost_data", True):
 
 rule retrieve_potash_data:
     input:
-        potash_zip=HTTP.remote(
+        potash_zip=storage.http(
             "https://pubs.usgs.gov/sir/2010/5090/s/PotashGIS.zip",
             keep_local=True,
         ),
@@ -139,7 +163,7 @@ if config["co2"]["automatic_emission"]["enable"]:
 
     rule retrieve_emissions:
         input:
-            HTTP.remote(
+            storage.http(
                 "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/v60_GHG/CO2_excl_short-cycle_org_C/v60_GHG_CO2_excl_short-cycle_org_C_1970_2018.zip",
                 keep_local=True,
             ),
@@ -166,3 +190,12 @@ rule retrieve_ammonia_dataset:
         usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
     script:
         scripts("retrieve_ammonia_dataset.py")
+
+
+rule retrieve_urban_percent:
+    params:
+        url_urban_percent="https://zenodo.org/records/23242372/files/US_PopTotal.csv.7z?download=1",
+    output:
+        urban_percent_raw="data/urban_percent_raw.csv",
+    script:
+        scripts("retrieve_urban_percent.py")

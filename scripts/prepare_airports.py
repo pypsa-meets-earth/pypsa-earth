@@ -6,7 +6,6 @@
 import shutil
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from _helpers import BASE_DIR, read_csv_nafix
 
