@@ -99,7 +99,7 @@ def emission_extractor(
     Returns
     -------
     pd.Series
-        CO2 emission values (in kt CO2) of studied countries for the given year.
+        CO2 emission values (in t CO2) of studied countries for the given year.
     """
     emission_year = int(emission_year)
     df = pd.read_csv(emission_csv).set_index("country_code_a2")
@@ -144,7 +144,7 @@ def emission_extractor(
             "Please check the emission data file, the requested base year, or the "
             "configured countries."
         )
-    return emission_by_country
+    return emission_by_country * 1e3
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
