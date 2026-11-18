@@ -233,25 +233,39 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
     return n
 
 
-def average_every_nhours(n, offset):
+def _weighted_resample(df, weights, offset):
+    """Resample a time series using snapshot durations as weights."""
+    weighted_sum = df.multiply(weights, axis=0).resample(offset).sum()
+    valid_weights = df.notna().multiply(weights, axis=0).resample(offset).sum()
+    return weighted_sum.divide(valid_weights.where(valid_weights != 0))
 
+
+def average_every_nhours(n, offset):
     # Please note that a casefold is applied to the offset during the resampling.
     # This is because the usage of offset where the time interval is in capital
     # letters is deprecated in future versions of pandas.
     # For example 24H is deprecated. Instead, 24h is allowed.
 
     logger.info(f"Resampling the network to {offset}")
+    offset = offset.casefold()
+
     m = n.copy(snapshots=[])
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
     for c in n.iterate_components():
         pnl = getattr(m, c.list_name + "_t")
+        weights = (
+            n.snapshot_weightings.stores
+            if c.name in {"Store", "StorageUnit"}
+            else n.snapshot_weightings.generators
+        )
+
         for k, df in c.pnl.items():
             if not df.empty:
-                pnl[k] = df.resample(offset.casefold()).mean()
+                pnl[k] = _weighted_resample(df, weights, offset)
 
     return m
 
