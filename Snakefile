@@ -18,7 +18,9 @@ from _helpers import (
     content_retrieve,
     copy_default_files,
     create_country_list,
+    cutout_overwrite_guard,
     get_last_commit_message,
+    memory,
     migrate_config,
     update_cutout_config,
     script_path_provider,
@@ -74,6 +76,9 @@ ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 scripts = script_path_provider(Path(BASE_DIR))
 
+# input function aborting build/retrieve_cutout if the cutout file already exists
+terminate_if_cutout_exists = cutout_overwrite_guard(CDIR, config["tutorial"])
+
 
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
@@ -92,7 +97,6 @@ wildcard_constraints:
 for include_rule in config.get("custom_rules", []):
     include: include_rule
 # fmt: on
-include: "rules/common.smk"
 include: "rules/retrieve.smk"
 include: "rules/build_electricity.smk"
 include: "rules/build_sector.smk"

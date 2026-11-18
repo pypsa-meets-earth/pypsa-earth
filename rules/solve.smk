@@ -3,6 +3,22 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 
+rule copy_config:
+    params:
+        summary_dir=config["summary_dir"],
+        run=run,
+    output:
+        folder=directory(SDIR + "configs"),
+        config=SDIR + "configs/config.yaml",
+    threads: 1
+    resources:
+        mem_mb=1000,
+    benchmark:
+        SDIR + "benchmarks/copy_config"
+    script:
+        scripts("copy_config.py")
+
+
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) != True:
 
     rule solve_network:

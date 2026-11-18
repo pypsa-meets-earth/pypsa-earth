@@ -2565,3 +2565,80 @@ def script_path_provider(project_dir: Path) -> Callable[[str], Path]:
         return project_dir / "scripts" / script
 
     return _get_script_path
+
+
+def cutout_overwrite_guard(cutout_dir: str, tutorial: bool) -> Callable:
+    """
+    Return a Snakemake input function that protects existing cutouts.
+
+    The returned function checks whether the requested cutout file already
+    exists. If it does, execution is terminated to avoid overwriting it.
+    Tutorial cutouts are exempt and should be removed once no longer needed.
+
+    Parameters
+    ----------
+    cutout_dir : str
+        Cutout subdirectory relative to ``cutouts/`` (``CDIR`` in the Snakefile).
+    tutorial : bool
+        Whether the workflow runs in tutorial mode.
+
+    Returns
+    -------
+    Callable
+        Input function taking the rule wildcards and returning an empty list.
+    """
+
+    def _terminate_if_cutout_exists(w):
+        cutout_fl = "cutouts/" + cutout_dir + f"{w.cutout}.nc"
+
+        if os.path.exists(cutout_fl) and not tutorial:
+            raise Exception(
+                f"An option `build_cutout` or `retrieve_cutout` is enabled, while a cutout file '{cutout_fl}' "
+                "still exists and risks to be overwritten. If this is an intended behavior, "
+                "please move, rename or delete this file and re-run the rule. Otherwise, "
+                "just disable the `build_cutout` and `retrieve_cutout` rule in the config file."
+            )
+
+        return []
+
+    return _terminate_if_cutout_exists
+
+
+def memory(w) -> int:
+    """
+    Estimate the memory (MB) required to solve a network from its wildcards.
+
+    The estimate scales with the number of clusters and is reduced by temporal
+    aggregation (``<N>h``) or segmentation (``<N>seg``) in the ``opts`` wildcard.
+
+    Parameters
+    ----------
+    w : snakemake.io.Wildcards
+        Rule wildcards; requires ``opts`` and ``clusters``.
+
+    Returns
+    -------
+    int
+        Estimated memory in MB.
+    """
+    factor = 3.0
+    for o in w.opts.split("-"):
+        m = re.match(r"^(\d+)h$", o, re.IGNORECASE)
+        if m is not None:
+            factor /= int(m.group(1))
+            break
+    for o in w.opts.split("-"):
+        m = re.match(r"^(\d+)seg$", o, re.IGNORECASE)
+        if m is not None:
+            factor *= int(m.group(1)) / 8760
+            break
+    if w.clusters.endswith("m"):
+        return int(factor * (18000 + 180 * int(w.clusters[:-1])))
+    elif w.clusters.endswith("flex"):
+        return int(factor * (18000 + 180 * int(w.clusters[:-4])))
+    elif w.clusters == "all":
+        return int(factor * (18000 + 180 * 4000))
+    elif w.clusters == "min":
+        return int(factor * (18000 + 180 * 20))
+    else:
+        return int(factor * (10000 + 195 * int(w.clusters)))
