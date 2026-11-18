@@ -326,6 +326,400 @@ def set_line_nom_max(n, lines, links):
     n.links.p_nom_max = n.links.p_nom_max.clip(lower=p_min, upper=p_max)
 
 
+def add_bitcoin_mining(
+    n: pypsa.Network,
+    options: dict,
+) -> None:
+    """
+    Add the thesis Bitcoin-mining flexible electricity consumer.
+
+    A fixed-capacity Link consumes electricity from the selected AC bus
+    and supplies a dedicated Bitcoin-service bus. A negative-sign
+    Generator on that bus represents the gross economic value of the
+    mining service.
+
+    Mining can operate continuously between zero and nominal capacity.
+    There is no annual energy requirement and curtailed mining is not
+    shifted to another hour.
+    """
+
+    bus = options["connection_bus"]
+    btc = options["bitcoin"]
+
+    p_nom = float(btc["p_nom"])
+    marginal_revenue = float(btc["marginal_revenue"])
+
+    if bus not in n.buses.index:
+        raise ValueError(f"Bitcoin connection bus '{bus}' does not exist.")
+
+    if p_nom <= 0:
+        raise ValueError("Bitcoin p_nom must be greater than zero.")
+
+    if marginal_revenue < 0:
+        raise ValueError("Bitcoin marginal_revenue cannot be negative.")
+
+    service_bus = f"{bus} bitcoin"
+    link_name = f"{bus} Bitcoin mining"
+    service_name = f"{bus} Bitcoin service"
+
+    if any(
+        [
+            service_bus in n.buses.index,
+            link_name in n.links.index,
+            service_name in n.generators.index,
+        ]
+    ):
+        raise ValueError("Bitcoin components already exist in the network.")
+
+    logger.info(
+        "Adding %.1f MW flexible Bitcoin mining at %s",
+        p_nom,
+        bus,
+    )
+
+    if "bitcoin" not in n.carriers.index:
+        n.add("Carrier", "bitcoin")
+
+    if "bitcoin mining" not in n.carriers.index:
+        n.add("Carrier", "bitcoin mining")
+
+    n.add(
+        "Bus",
+        service_bus,
+        carrier="bitcoin",
+        x=n.buses.at[bus, "x"],
+        y=n.buses.at[bus, "y"],
+    )
+
+    n.add(
+        "Link",
+        link_name,
+        bus0=bus,
+        bus1=service_bus,
+        carrier="bitcoin mining",
+        p_nom=p_nom,
+        p_nom_extendable=False,
+        p_min_pu=0.0,
+        p_max_pu=1.0,
+        efficiency=1.0,
+    )
+
+    n.add(
+        "Generator",
+        service_name,
+        bus=service_bus,
+        carrier="bitcoin",
+        sign=-1,
+        p_nom=p_nom,
+        p_nom_extendable=False,
+        p_min_pu=0.0,
+        p_max_pu=1.0,
+        marginal_cost=-marginal_revenue,
+    )
+
+
+def add_bitcoin_mining_optimized(
+    n: pypsa.Network,
+    options: dict,
+    costs: pd.DataFrame,
+    scenario_opts=None,
+) -> None:
+    """
+    Add endogenous flexible Bitcoin-mining demand.
+
+    A negative-sign Generator directly consumes electricity
+    from the existing electricity bus.
+
+    The investment capacity and hourly consumption are
+    optimized using standard PyPSA component attributes.
+    """
+    bus = options["connection_bus"]
+    btc = options["bitcoin"]
+    technology = "bitcoin mining"
+
+    max_capacity = float(btc.get("p_nom_max", btc["p_nom"]))
+
+    # Optional economic sensitivity, selected by scenario token.
+    sensitivities = options.get("btcopt_sensitivities", {})
+    tokens = scenario_opts or []
+
+    selected = [token for token in tokens if token in sensitivities]
+
+    sensitivity_tokens = [
+        token for token in tokens if token.startswith(("E4R", "E5C", "E6CAP"))
+    ]
+
+    if len(selected) > 1 or set(selected) != set(sensitivity_tokens):
+        raise ValueError(
+            "BTCopt sensitivity token is missing, duplicated, "
+            "or not uniquely configured."
+        )
+
+    sensitivity = sensitivities[selected[0]] if selected else {}
+
+    max_capacity = float(sensitivity.get("p_nom_max", max_capacity))
+
+    revenue = float(
+        sensitivity.get(
+            "revenue_eur_per_mwh",
+            btc["marginal_revenue"],
+        )
+    )
+
+    capex_multiplier = float(sensitivity.get("capex_multiplier", 1.0))
+
+    if not np.isfinite(capex_multiplier) or capex_multiplier <= 0:
+        raise ValueError("BTCopt CAPEX multiplier must be positive and finite.")
+
+    if bus not in n.buses.index:
+        raise ValueError(f"Bitcoin connection bus '{bus}' does not exist.")
+
+    if not np.isfinite(max_capacity) or max_capacity <= 0:
+        raise ValueError("BTCopt maximum capacity must be positive and finite.")
+
+    if not np.isfinite(revenue) or revenue < 0:
+        raise ValueError("BTCopt revenue must be finite and nonnegative.")
+
+    if technology not in costs.index or "capital_cost" not in costs.columns:
+        raise ValueError(
+            "BTCopt requires a 'bitcoin mining' entry with "
+            "'capital_cost' in the processed PyPSA cost table."
+        )
+
+    capital_cost = float(costs.at[technology, "capital_cost"]) * capex_multiplier
+
+    if not np.isfinite(capital_cost) or capital_cost <= 0:
+        raise ValueError(
+            "BTCopt requires a positive, finite, validated " "annualized capital_cost."
+        )
+
+    name = f"{bus} Bitcoin mining optimized"
+
+    if name in n.generators.index:
+        raise ValueError(f"Bitcoin component '{name}' already exists.")
+
+    if technology not in n.carriers.index:
+        n.add("Carrier", technology)
+
+    n.add(
+        "Generator",
+        name,
+        bus=bus,
+        carrier=technology,
+        sign=-1,
+        p_nom_extendable=True,
+        p_nom_min=0.0,
+        p_nom_max=max_capacity,
+        p_min_pu=0.0,
+        p_max_pu=1.0,
+        capital_cost=capital_cost,
+        marginal_cost=-revenue,
+    )
+
+    logger.info(
+        "Added BTCopt at %s: capacity limit %.1f MW, "
+        "capital cost %.2f EUR/MW, revenue %.2f EUR/MWh",
+        bus,
+        max_capacity,
+        capital_cost,
+        revenue,
+    )
+
+
+def add_hydrogen_production(
+    n: pypsa.Network,
+    options: dict,
+    costs: pd.DataFrame | None = None,
+    optimize_capacity: bool = False,
+) -> None:
+    """
+    Add the thesis PEM hydrogen-production flexible consumer.
+
+    A fixed-capacity PEM Link converts electricity into H2 product.
+    A bookkeeping Store accumulates H2 output and enforces the exact
+    annual production target. The Store is an accounting device and
+    does not represent physical hydrogen storage.
+    """
+
+    bus = options["connection_bus"]
+    pem = options["pem"]
+
+    p_nom = float(pem["p_nom"])
+    annual_h2_kt = float(pem["annual_h2_kt"])
+    efficiency = float(pem["efficiency_lhv"])
+    variable_cost = float(pem["variable_cost_eur_per_mwh_el"])
+    h2_lhv = float(pem["h2_lhv_kwh_per_kg"])
+
+    capacity_limit = p_nom
+    capital_cost = 0.0
+
+    if optimize_capacity:
+        capacity_limit = float(pem.get("p_nom_max", p_nom))
+        technology = "PEM electrolysis 1 GW"
+
+        if costs is None or technology not in costs.index:
+            raise ValueError(
+                "PEMopt requires the validated technology "
+                "'PEM electrolysis 1 GW' in the processed cost table."
+            )
+
+        capital_cost = float(costs.at[technology, "capital_cost"])
+        efficiency = float(costs.at[technology, "efficiency"])
+
+        economics = options.get("pemopt_economics", {})
+        method = economics.get("stack_replacement_method")
+
+        if method != "full_load_hour_proxy":
+            raise ValueError(
+                "PEMopt requires the explicit "
+                "full_load_hour_proxy replacement method."
+            )
+
+        routine_vom = float(economics["routine_vom_eur_per_mwh_el"])
+        stack_investment = float(costs.at[technology, "stack_investment"])
+        replacement_hours = float(costs.at[technology, "stack_replacement_hours"])
+
+        if not np.isfinite(routine_vom) or routine_vom < 0:
+            raise ValueError("Invalid PEMopt routine variable O&M.")
+
+        if not np.isfinite(stack_investment) or stack_investment <= 0:
+            raise ValueError("Invalid PEMopt stack investment.")
+
+        if not np.isfinite(replacement_hours) or replacement_hours <= 0:
+            raise ValueError("Invalid PEMopt stack replacement interval.")
+
+        # Approximate stack replacement using full-load hours.
+        # This is not a discounted replacement-event model.
+        variable_cost = routine_vom + stack_investment / replacement_hours
+
+        if not np.isfinite(capital_cost) or capital_cost <= 0:
+            raise ValueError(
+                "PEMopt requires positive, finite annualized " "capital costs."
+            )
+
+        if not np.isfinite(capacity_limit) or capacity_limit <= 0:
+            raise ValueError("PEMopt capacity limit must be positive and finite.")
+
+    if bus not in n.buses.index:
+        raise ValueError(f"PEM connection bus '{bus}' does not exist.")
+
+    if p_nom <= 0:
+        raise ValueError("PEM p_nom must be greater than zero.")
+
+    if annual_h2_kt <= 0:
+        raise ValueError("PEM annual_h2_kt must be greater than zero.")
+
+    if not 0 < efficiency <= 1:
+        raise ValueError("PEM efficiency_lhv must be in (0, 1].")
+
+    if variable_cost < 0:
+        raise ValueError("PEM variable cost cannot be negative.")
+
+    if h2_lhv <= 0:
+        raise ValueError("Hydrogen LHV must be greater than zero.")
+
+    h2_kg = annual_h2_kt * 1_000_000.0
+    target_mwh_h2 = h2_kg * h2_lhv / 1000.0
+    target_mwh_el = target_mwh_h2 / efficiency
+
+    weighted_hours = float(n.snapshot_weightings["generators"].sum())
+
+    maximum_mwh_el = capacity_limit * weighted_hours
+
+    if target_mwh_el > maximum_mwh_el + 1e-6:
+        raise ValueError(
+            "PEM annual target is infeasible: "
+            f"{target_mwh_el:.3f} MWh_el required but "
+            f"only {maximum_mwh_el:.3f} MWh_el available "
+            "at nominal capacity."
+        )
+
+    h2_bus = "THESIS H2 product bus"
+    link_name = "THESIS PEM electrolyser"
+    store_name = "THESIS H2 annual product accumulator"
+    carrier = "thesis H2 product"
+
+    if any(
+        [
+            h2_bus in n.buses.index,
+            link_name in n.links.index,
+            store_name in n.stores.index,
+        ]
+    ):
+        raise ValueError("Thesis PEM components already exist in the network.")
+
+    logger.info(
+        "Adding %.1f MW PEM at %s with %.3f kt_H2/a target",
+        p_nom,
+        bus,
+        annual_h2_kt,
+    )
+
+    if carrier not in n.carriers.index:
+        n.add("Carrier", carrier)
+
+    n.add(
+        "Bus",
+        h2_bus,
+        carrier=carrier,
+        x=n.buses.at[bus, "x"],
+        y=n.buses.at[bus, "y"],
+    )
+
+    n.add(
+        "Link",
+        link_name,
+        bus0=bus,
+        bus1=h2_bus,
+        carrier=carrier,
+        p_nom=0.0 if optimize_capacity else p_nom,
+        p_nom_extendable=optimize_capacity,
+        p_nom_max=capacity_limit if optimize_capacity else float("inf"),
+        p_min_pu=0.0,
+        p_max_pu=1.0,
+        efficiency=efficiency,
+        marginal_cost=variable_cost,
+        capital_cost=capital_cost,
+    )
+
+    e_min_pu = pd.Series(
+        0.0,
+        index=n.snapshots,
+        dtype=float,
+    )
+    e_max_pu = pd.Series(
+        1.0,
+        index=n.snapshots,
+        dtype=float,
+    )
+
+    # Force exact annual H2 accumulation at the final snapshot.
+    e_min_pu.iloc[-1] = 1.0
+    e_max_pu.iloc[-1] = 1.0
+
+    n.add(
+        "Store",
+        store_name,
+        bus=h2_bus,
+        carrier=carrier,
+        e_nom=target_mwh_h2,
+        e_nom_extendable=False,
+        e_initial=0.0,
+        e_cyclic=False,
+        e_min_pu=e_min_pu,
+        e_max_pu=e_max_pu,
+        standing_loss=0.0,
+        capital_cost=0.0,
+        marginal_cost=0.0,
+    )
+
+    logger.info(
+        "PEM annual requirement: %.3f TWh_H2/a, " "%.3f TWh_el/a",
+        target_mwh_h2 / 1e6,
+        target_mwh_el / 1e6,
+    )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -436,6 +830,28 @@ if __name__ == "__main__":
         enforce_autarky(n)
     elif "ATKc" in opts:
         enforce_autarky(n, only_crossborder=True)
+
+    flexible_consumers = snakemake.config["electricity"].get(
+        "flexible_consumers",
+        {},
+    )
+
+    # Thesis flexible electricity consumers are activated through
+    # the standard scenario opts wildcard.
+    if "BTCopt" in opts:
+        add_bitcoin_mining_optimized(n, flexible_consumers, costs, scenario_opts=opts)
+    elif "BTC" in opts:
+        add_bitcoin_mining(n, flexible_consumers)
+
+    if "PEMopt" in opts:
+        add_hydrogen_production(
+            n,
+            flexible_consumers,
+            costs,
+            optimize_capacity=True,
+        )
+    elif "PEM" in opts:
+        add_hydrogen_production(n, flexible_consumers)
 
     sanitize_carriers(n, snakemake.config)
     sanitize_locations(n)
