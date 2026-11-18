@@ -77,6 +77,16 @@ RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
 
+def sector_policy_file(wildcards):
+    """Track the sector CO2 policy file when a Co2L option is active."""
+    if not any(option.startswith("Co2L") for option in wildcards.opts.split("-")):
+        return []
+
+    policy_file = (config.get("co2", {}).get("sector_policy") or {}).get("policy_file")
+
+    return [policy_file] if policy_file else []
+
+
 wildcard_constraints:
     simpl="[a-zA-Z0-9]*|all",
     clusters="[0-9]+(m|flex)?|all|min",
@@ -1886,6 +1896,7 @@ if config["foresight"] == "overnight":
             + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
+            sector_policy=sector_policy_file,
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             RESDIR
@@ -2401,6 +2412,7 @@ if config["foresight"] == "myopic":
             + "prenetworks-brownfield/elec_s{simpl}_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}.nc",
             costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
             configs=SDIR + "configs/config.yaml",  # included to trigger copy_config rule
+            sector_policy=sector_policy_file,
             agg_p_nom_minmax=config["electricity"]["agg_p_nom_limits"]["file"],  # ensure the CSV with capacity constraints is copied into the shadow directory (needed on Windows, since shadowed scripts can’t access files outside `input`)
         output:
             network=RESDIR
