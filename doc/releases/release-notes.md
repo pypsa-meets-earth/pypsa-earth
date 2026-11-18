@@ -22,6 +22,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
+* Keep the CRS of country, offshore and extended country shapes in `build_shapes`, which was lost during polygon simplification and caused CRS warnings [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
 
 * Remove obsolete custom CHP constraints for the former separate `CHP electric` and `CHP heat` representation, since current CHP plants are modeled as single multi-output Links with fixed electricity-to-heat ratios [PR #2115](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2115)
