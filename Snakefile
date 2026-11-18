@@ -98,7 +98,6 @@ include: "rules/build_electricity.smk"
 include: "rules/build_sector.smk"
 include: "rules/solve.smk"
 include: "rules/postprocess.smk"
-include: "rules/collect.smk"
 
 
 rule clean:

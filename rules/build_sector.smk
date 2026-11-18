@@ -730,3 +730,12 @@ rule add_export:
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
     script:
         scripts("add_export.py")
+
+
+rule prepare_sector_networks:
+    input:
+        expand(
+            rules.prepare_sector_network.output.network,
+            **config["scenario"],
+            **config["costs"],
+        ),

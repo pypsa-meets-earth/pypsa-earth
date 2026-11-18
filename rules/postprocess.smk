@@ -25,12 +25,6 @@ def input_make_summary(w):
     )
 
 
-if config["foresight"] == "overnight":
-    sector_postnetwork = rules.solve_sector_network.output.network
-elif config["foresight"] == "myopic":
-    sector_postnetwork = rules.solve_network_myopic.output.network
-
-
 rule make_summary:
     params:
         ll=config["scenario"]["ll"],
@@ -69,6 +63,26 @@ rule plot_summary:
         scripts("plot_summary.py")
 
 
+rule make_all_summaries:
+    input:
+        expand(
+            rules.make_summary.output.summary,
+            **config["scenario"],
+            country=["all"] + config["countries"],
+        ),
+
+
+rule plot_all_summaries:
+    input:
+        expand(
+            rules.plot_summary.output.plot,
+            summary=["energy", "costs"],
+            **config["scenario"],
+            country=["all"] + config["countries"],
+            ext=["png", "pdf"],
+        ),
+
+
 rule plot_network:
     params:
         electricity=config["electricity"],
@@ -92,6 +106,16 @@ rule plot_network:
         + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
     script:
         scripts("plot_network.py")
+
+
+rule plot_all_p_nom:
+    input:
+        expand(
+            rules.plot_network.output.only_map,
+            **config["scenario"],
+            attr=["p_nom"],
+            ext=["png", "pdf"],
+        ),
 
 
 rule make_statistics:

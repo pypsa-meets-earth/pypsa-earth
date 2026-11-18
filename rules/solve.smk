@@ -90,6 +90,11 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
             expand(rules.solve_network.output.network, **config["scenario"]),
 
 
+rule solve_all_networks:
+    input:
+        expand(rules.solve_network.output.network, **config["scenario"]),
+
+
 if config["foresight"] == "overnight":
 
     rule solve_sector_network:
@@ -279,6 +284,17 @@ if config["foresight"] == "myopic":
             )
         script:
             scripts("solve_network.py")
+
+
+if config["foresight"] == "overnight":
+    sector_postnetwork = rules.solve_sector_network.output.network
+elif config["foresight"] == "myopic":
+    sector_postnetwork = rules.solve_network_myopic.output.network
+
+
+rule solve_sector_networks:
+    input:
+        expand(sector_postnetwork, **config["scenario"], **config["costs"]),
 
 
 rule run_scenario:
