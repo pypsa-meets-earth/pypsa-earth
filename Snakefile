@@ -23,6 +23,7 @@ from _helpers import (
     update_cutout_config,
 )
 from build_demand_profiles import get_load_paths_gegis
+from cost_year import read_available_cost_years, resolve_sector_cost_year
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
     get_best_bundles_in_snakemake,
@@ -73,6 +74,46 @@ CDIR = RDIR if not run.get("shared_cutouts") else ""
 SECDIR = run["sector_name"] + "/" if run.get("sector_name") else ""
 SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
+
+
+def get_available_cost_years():
+    metadata = checkpoints.retrieve_technology_data_config.get().output[0]
+    return read_available_cost_years(metadata)
+
+
+def get_configured_sector_cost_year(planning_horizon):
+    selection = config["costs"].get("year_selection", "closest")
+    retrieve_cost_data = config["enable"].get("retrieve_cost_data", True)
+
+    available_years = None
+
+    if (
+        config["foresight"] == "myopic"
+        and selection == "closest"
+        and retrieve_cost_data
+    ):
+        available_years = get_available_cost_years()
+
+    return resolve_sector_cost_year(
+        planning_horizon,
+        foresight=config["foresight"],
+        costs=config["costs"],
+        retrieve_cost_data=retrieve_cost_data,
+        available_years=available_years,
+    )
+
+
+def get_raw_cost_file(wildcards):
+    if not config["enable"].get("retrieve_cost_data", True):
+        return "data/costs.csv"
+
+    if wildcards.scope == "sec":
+        year = get_configured_sector_cost_year(wildcards.planning_horizons)
+    else:
+        year = int(wildcards.planning_horizons)
+
+    return f"resources/{RDIR}costs_{year}.csv"
+
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 
@@ -535,6 +576,20 @@ else:
 
 if config["enable"].get("retrieve_cost_data", True):
 
+    checkpoint retrieve_technology_data_config:
+        input:
+            storage.http(
+                f"https://raw.githubusercontent.com/PyPSA/technology-data/{config['costs']['technology_data_version']}/config.yaml",
+                keep_local=True,
+            ),
+        output:
+            "resources/"
+            + RDIR
+            + f"technology_data_config_{config['costs']['technology_data_version']}.yaml",
+        run:
+            Path(output[0]).parent.mkdir(parents=True, exist_ok=True)
+            copyfile(input[0], output[0])
+
     rule retrieve_cost_data:
         params:
             version=config["costs"]["technology_data_version"],
@@ -563,11 +618,7 @@ rule process_cost_data:
         storage_techs=config["storage_techs"],
     input:
         network="networks/" + RDIR + "base.nc",
-        costs=branch(
-            config["enable"].get("retrieve_cost_data", True),
-            "resources/" + RDIR + "costs_{planning_horizons}.csv",
-            "data/costs.csv",
-        ),
+        costs=get_raw_cost_file,
     output:
         "resources/" + RDIR + "costs_{planning_horizons}_{scope}.csv",
     log:
@@ -1931,7 +1982,10 @@ rule make_sector_summary:
             **config["scenario"],
             **config["costs"],
         ),
-        costs="resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+        costs=expand(
+            "resources/" + RDIR + "costs_{planning_horizons}_sec.csv",
+            planning_horizons=config["scenario"]["planning_horizons"],
+        ),
         plots=expand(
             RESDIR
             + "maps/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}-costs-all_{planning_horizons}_{discountrate}.pdf",
