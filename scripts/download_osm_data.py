@@ -111,7 +111,7 @@ if __name__ == "__main__":
         region_list=country_list,
         feature_list=["substation", "line", "cable", "generator"],
         update=False,
-        mp=True,
+        mp=snakemake.config["osm"]["download_osm_data"]["nprocesses"],
         data_dir=store_path_data,
         out_dir=store_path_resources,
         out_format=["csv", "geojson"],

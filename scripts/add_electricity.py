@@ -30,6 +30,7 @@ Relevant Settings
             carriers:
             hydro_max_hours:
             hydro_max_hours_default:
+            hydro_capacities:
             hydro_capital_cost:
 
     lines:
@@ -43,11 +44,10 @@ Inputs
 ------
 
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
-- ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
+- ``data/hydro_capacities.csv``, or the table given by ``hydro_capacities``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country. Used to estimate ``max_hours`` of hydro reservoirs without a reported duration.
 
     .. image:: /img/hydrocapacities.png
 
-- ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
 - ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
@@ -904,6 +904,7 @@ def attach_hydro(
     n: pypsa.Network,
     costs: pd.DataFrame,
     ppl: pd.DataFrame,
+    hydro_capacities: str,
     hydro_min_inflow_pu: float = 1.0,
 ) -> None:
     """
@@ -917,6 +918,10 @@ def attach_hydro(
         DataFrame containing technology costs.
     ppl : pd.DataFrame
         Power plant DataFrame.
+    hydro_capacities : str
+        Path to the table of hydro capacities by country, in the format of ``data/hydro_capacities.csv``.
+    hydro_min_inflow_pu : float, optional
+        Energy-to-capacity ratio above which hydro plants of unknown technology are reservoirs.
 
     Returns
     -------
@@ -1098,7 +1103,7 @@ def attach_hydro(
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = (
             read_csv_nafix(
-                snakemake.input.hydro_capacities,
+                hydro_capacities,
                 comment="#",
                 na_values=["-"],
                 index_col=0,
@@ -1339,7 +1344,11 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(
-        n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
+        n,
+        costs,
+        ppl,
+        snakemake.input.hydro_capacities,
+        snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"],
     )
 
     attach_existing_batteries(
