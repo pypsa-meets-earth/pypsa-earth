@@ -28,7 +28,7 @@ DAGS = {
     ],
     "rulegraph-myopic": [
         "--rulegraph",
-        "solve_sector_networks_myopic",
+        "solve_sector_networks",
         "--configfile",
         "test/config.myopic.yaml",
     ],

@@ -11,7 +11,7 @@ test:
 	# add custom config to tutorial config
 	snakemake -c4 solve_all_networks_monte --configfile config.tutorial.yaml test/config.monte_carlo.yaml
 	snakemake -c4 solve_sector_networks --configfile config.tutorial.yaml test/config.sector.yaml
-	snakemake -c4 solve_sector_networks_myopic --configfile config.tutorial.yaml test/config.myopic.yaml
+	snakemake -c4 solve_sector_networks --configfile config.tutorial.yaml test/config.myopic.yaml
 	snakemake -c4 solve_all_networks --configfile config.tutorial.yaml test/config.custom.yaml
 	snakemake -c4 solve_all_networks --configfile config.tutorial.yaml test/config.landlock.yaml
 	echo "All tests completed successfully."
