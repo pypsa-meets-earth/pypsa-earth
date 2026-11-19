@@ -16,7 +16,7 @@ rule copy_config:
     benchmark:
         SDIR + "benchmarks/copy_config"
     script:
-        scripts("copy_config.py")
+        "../scripts/copy_config.py"
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) != True:
@@ -54,7 +54,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) != True:
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         script:
-            scripts("solve_network.py")
+            "../scripts/solve_network.py"
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
@@ -99,7 +99,7 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         shadow:
             "copy-minimal" if os.name == "nt" else "shallow"
         script:
-            scripts("solve_network.py")
+            "../scripts/solve_network.py"
 
     rule solve_all_networks_monte:
         input:
@@ -149,7 +149,7 @@ if config["foresight"] == "overnight":
                 + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
             )
         script:
-            scripts("solve_network.py")
+            "../scripts/solve_network.py"
 
 
 if config["foresight"] == "myopic":
@@ -196,7 +196,7 @@ if config["foresight"] == "myopic":
             RESDIR
             + "benchmarks/add_existing_baseyear/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         script:
-            scripts("add_existing_baseyear.py")
+            "../scripts/add_existing_baseyear.py"
 
     def input_profile_tech_brownfield(w):
         return {
@@ -251,7 +251,7 @@ if config["foresight"] == "myopic":
                 + "benchmarks/add_brownfield/elec_s{simpl}_ec_{clusters}_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
             )
         script:
-            scripts("add_brownfield.py")
+            "../scripts/add_brownfield.py"
 
     ruleorder: add_existing_baseyear > add_brownfield
 
@@ -299,7 +299,7 @@ if config["foresight"] == "myopic":
                 + "benchmarks/solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
             )
         script:
-            scripts("solve_network.py")
+            "../scripts/solve_network.py"
 
 
 if config["foresight"] == "overnight":

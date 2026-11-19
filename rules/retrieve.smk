@@ -65,7 +65,7 @@ if config["enable"].get("retrieve_databundle", True):
             benchmark:
                 "benchmarks/" + RDIR + f"retrieve_databundle_{category}"
             script:
-                scripts("retrieve_databundle_light.py")
+                "../scripts/retrieve_databundle_light.py"
 
 
 if config["enable"].get("download_global_buildings", True):
@@ -76,7 +76,7 @@ if config["enable"].get("download_global_buildings", True):
         output:
             "data/global_buildings/{country}_global_buildings_raw.parquet",
         script:
-            scripts("download_global_buildings.py")
+            "../scripts/download_global_buildings.py"
 
 
 if config["enable"].get("download_osm_data", True):
@@ -95,7 +95,7 @@ if config["enable"].get("download_osm_data", True):
         benchmark:
             "benchmarks/" + RDIR + "download_osm_data"
         script:
-            scripts("download_osm_data.py")
+            "../scripts/download_osm_data.py"
 
 
 if config["enable"].get("retrieve_cutout", False):
@@ -122,7 +122,7 @@ if config["enable"].get("retrieve_cutout", False):
         benchmark:
             "benchmarks/" + RDIR + "retrieve_cutout_{cutout}"
         script:
-            scripts("retrieve_databundle_light.py")
+            "../scripts/retrieve_databundle_light.py"
 
 
 if config["enable"].get("retrieve_cost_data", True):
@@ -182,14 +182,14 @@ rule retrieve_us_cities_dataset:
     output:
         us_cities="data/industry/us_cities.csv",
     script:
-        scripts("retrieve_us_cities_dataset.py")
+        "../scripts/retrieve_us_cities_dataset.py"
 
 
 rule retrieve_ammonia_dataset:
     output:
         usgs_ammonia_dataset="data/industry/USGS_ammonia_dataset.xlsx",
     script:
-        scripts("retrieve_ammonia_dataset.py")
+        "../scripts/retrieve_ammonia_dataset.py"
 
 
 rule retrieve_urban_percent:
@@ -198,4 +198,4 @@ rule retrieve_urban_percent:
     output:
         urban_percent_raw="data/urban_percent_raw.csv",
     script:
-        scripts("retrieve_urban_percent.py")
+        "../scripts/retrieve_urban_percent.py"

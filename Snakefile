@@ -23,7 +23,6 @@ from _helpers import (
     memory,
     migrate_config,
     update_cutout_config,
-    script_path_provider,
 )
 from build_demand_profiles import get_load_paths_gegis
 
@@ -73,8 +72,6 @@ SDIR = config["summary_dir"].strip("/") + f"/{SECDIR}"
 RESDIR = config["results_dir"].strip("/") + f"/{SECDIR}"
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
-
-scripts = script_path_provider(Path(BASE_DIR))
 
 # input function aborting build/retrieve_cutout if the cutout file already exists
 terminate_if_cutout_exists = cutout_overwrite_guard(CDIR, config["tutorial"])

@@ -64,7 +64,7 @@ rule build_shapes:
     resources:
         mem_mb=3096,
     script:
-        scripts("build_shapes.py")
+        "../scripts/build_shapes.py"
 
 
 rule clean_osm_data:
@@ -89,7 +89,7 @@ rule clean_osm_data:
     benchmark:
         "benchmarks/" + RDIR + "clean_osm_data"
     script:
-        scripts("clean_osm_data.py")
+        "../scripts/clean_osm_data.py"
 
 
 rule build_osm_network:
@@ -124,7 +124,7 @@ rule build_osm_network:
     benchmark:
         "benchmarks/" + RDIR + "build_osm_network"
     script:
-        scripts("build_osm_network.py")
+        "../scripts/build_osm_network.py"
 
 
 rule base_network:
@@ -155,7 +155,7 @@ rule base_network:
     resources:
         mem_mb=500,
     script:
-        scripts("base_network.py")
+        "../scripts/base_network.py"
 
 
 rule build_bus_regions:
@@ -184,7 +184,7 @@ rule build_bus_regions:
     resources:
         mem_mb=1000,
     script:
-        scripts("build_bus_regions.py")
+        "../scripts/build_bus_regions.py"
 
 
 if config["enable"].get("build_cutout", False):
@@ -207,7 +207,7 @@ if config["enable"].get("build_cutout", False):
         resources:
             mem_mb=ATLITE_NPROCESSES * 1000,
         script:
-            scripts("build_cutout.py")
+            "../scripts/build_cutout.py"
 
 
 if config["enable"].get("build_natura_raster", False):
@@ -232,7 +232,7 @@ if config["enable"].get("build_natura_raster", False):
         benchmark:
             "benchmarks/" + RDIR + "build_natura_raster"
         script:
-            scripts("build_natura_raster.py")
+            "../scripts/build_natura_raster.py"
 
 
 if not config["enable"].get("build_natura_raster", False):
@@ -276,7 +276,7 @@ rule build_demand_profiles:
     resources:
         mem_mb=3000,
     script:
-        scripts("build_demand_profiles.py")
+        "../scripts/build_demand_profiles.py"
 
 
 def inputs_hydro(w):
@@ -325,7 +325,7 @@ rule build_renewable_profiles:
     resources:
         mem_mb=ATLITE_NPROCESSES * 5000,
     script:
-        scripts("build_renewable_profiles.py")
+        "../scripts/build_renewable_profiles.py"
 
 
 rule build_powerplants:
@@ -361,7 +361,7 @@ rule build_powerplants:
     resources:
         mem_mb=500,
     script:
-        scripts("build_powerplants.py")
+        "../scripts/build_powerplants.py"
 
 
 if config["enable"].get("retrieve_cost_data", True):
@@ -390,7 +390,7 @@ rule process_cost_data:
     resources:
         mem_mb=4000,
     script:
-        scripts("process_cost_data.py")
+        "../scripts/process_cost_data.py"
 
 
 rule add_electricity:
@@ -442,7 +442,7 @@ rule add_electricity:
     resources:
         mem_mb=3000,
     script:
-        scripts("add_electricity.py")
+        "../scripts/add_electricity.py"
 
 
 rule simplify_network:
@@ -486,7 +486,7 @@ rule simplify_network:
     resources:
         mem_mb=4000,
     script:
-        scripts("simplify_network.py")
+        "../scripts/simplify_network.py"
 
 
 rule cluster_network:
@@ -542,7 +542,7 @@ rule cluster_network:
     resources:
         mem_mb=3000,
     script:
-        scripts("cluster_network.py")
+        "../scripts/cluster_network.py"
 
 
 if config["augmented_line_connection"].get("add_to_snakefile") == True:
@@ -570,7 +570,7 @@ if config["augmented_line_connection"].get("add_to_snakefile") == True:
         resources:
             mem_mb=3000,
         script:
-            scripts("augmented_line_connections.py")
+            "../scripts/augmented_line_connections.py"
 
 
 if config["augmented_line_connection"].get("add_to_snakefile") == True:
@@ -600,7 +600,7 @@ rule add_extra_components:
     resources:
         mem_mb=3000,
     script:
-        scripts("add_extra_components.py")
+        "../scripts/add_extra_components.py"
 
 
 if config["co2"]["automatic_emission"]["enable"]:
@@ -617,7 +617,7 @@ if config["co2"]["automatic_emission"]["enable"]:
         resources:
             mem_mb=2000,
         script:
-            scripts("build_co2_emissions.py")
+            "../scripts/build_co2_emissions.py"
 
 
 if config["co2"]["automatic_emission"]["enable"]:
@@ -653,7 +653,7 @@ rule prepare_network:
     resources:
         mem_mb=4000,
     script:
-        scripts("prepare_network.py")
+        "../scripts/prepare_network.py"
 
 
 if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
@@ -681,4 +681,4 @@ if config["monte_carlo"]["options"].get("add_to_snakefile", False) == True:
         resources:
             mem_mb=4000,
         script:
-            scripts("monte_carlo.py")
+            "../scripts/monte_carlo.py"

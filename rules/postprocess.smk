@@ -45,7 +45,7 @@ rule make_summary:
         + RDIR
         + "make_summary/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}.log",
     script:
-        scripts("make_summary.py")
+        "../scripts/make_summary.py"
 
 
 rule plot_summary:
@@ -60,7 +60,7 @@ rule plot_summary:
         + RDIR
         + "plot_summary/{summary}_elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{country}_{ext}.log",
     script:
-        scripts("plot_summary.py")
+        "../scripts/plot_summary.py"
 
 
 rule make_all_summaries:
@@ -105,7 +105,7 @@ rule plot_network:
         + RDIR
         + "plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{attr}_{ext}.log",
     script:
-        scripts("plot_network.py")
+        "../scripts/plot_network.py"
 
 
 rule plot_all_p_nom:
@@ -129,7 +129,7 @@ rule make_statistics:
         stats="results/" + RDIR + "stats.csv",
     threads: 1
     script:
-        scripts("make_statistics.py")
+        "../scripts/make_statistics.py"
 
 
 rule plot_sector_network:
@@ -147,7 +147,7 @@ rule plot_sector_network:
             + "benchmarks/plot_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         )
     script:
-        scripts("plot_network.py")
+        "../scripts/plot_network.py"
 
 
 rule make_sector_summary:
@@ -192,7 +192,7 @@ rule make_sector_summary:
     benchmark:
         SDIR + "benchmarks/make_summary"
     script:
-        scripts("make_summary.py")
+        "../scripts/make_summary.py"
 
 
 rule plot_sector_summary:
@@ -210,7 +210,7 @@ rule plot_sector_summary:
     benchmark:
         SDIR + "benchmarks/plot_summary"
     script:
-        scripts("plot_summary.py")
+        "../scripts/plot_summary.py"
 
 
 rule prepare_db:
@@ -230,4 +230,4 @@ rule prepare_db:
             + "benchmarks/prepare_db/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         )
     script:
-        scripts("prepare_db.py")
+        "../scripts/prepare_db.py"

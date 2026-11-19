@@ -33,7 +33,7 @@ rule cluster_global_buildings:
             + "solar_rooftop/solar_rooftop_layout_elec_s{simpl}_{clusters}_{country}.csv",
         ),
     script:
-        scripts("cluster_global_buildings.py")
+        "../scripts/cluster_global_buildings.py"
 
 
 rule prepare_ports:
@@ -45,7 +45,7 @@ rule prepare_ports:
         ports="resources/" + SECDIR + "ports.csv",
         export_ports="resources/" + SECDIR + "export_ports.csv",
     script:
-        scripts("prepare_ports.py")
+        "../scripts/prepare_ports.py"
 
 
 rule prepare_airports:
@@ -55,7 +55,7 @@ rule prepare_airports:
     output:
         airports="resources/" + SECDIR + "airports.csv",
     script:
-        scripts("prepare_airports.py")
+        "../scripts/prepare_airports.py"
 
 
 rule prepare_urban_percent:
@@ -64,14 +64,14 @@ rule prepare_urban_percent:
     output:
         urban_percent="resources/" + SECDIR + "urban_percent.csv",
     script:
-        scripts("prepare_urban_percent.py")
+        "../scripts/prepare_urban_percent.py"
 
 
 rule prepare_transport_data_input:
     output:
         transport_data_input="resources/" + SECDIR + "transport_data.csv",
     script:
-        scripts("prepare_transport_data_input.py")
+        "../scripts/prepare_transport_data_input.py"
 
 
 if (
@@ -96,7 +96,7 @@ if (
         resources:
             mem_mb=2000,
         script:
-            scripts("build_salt_cavern_potentials.py")
+            "../scripts/build_salt_cavern_potentials.py"
 
 
 if not config["custom_data"]["gas_network"]:
@@ -116,7 +116,7 @@ if not config["custom_data"]["gas_network"]:
             # gas_network_fig_1="resources/gas_networks/existing_gas_pipelines_{simpl}_{clusters}.png",
             # gas_network_fig_2="resources/gas_networks/clustered_gas_pipelines_{simpl}_{clusters}.png",
         script:
-            scripts("prepare_gas_network.py")
+            "../scripts/prepare_gas_network.py"
 
 
 rule build_population_layouts:
@@ -149,7 +149,7 @@ rule build_population_layouts:
         ("benchmarks/" + SECDIR + "build_population_layouts_{planning_horizons}")
     threads: 8
     script:
-        scripts("build_population_layouts.py")
+        "../scripts/build_population_layouts.py"
 
 
 rule build_clustered_population_layouts:
@@ -180,7 +180,7 @@ rule build_clustered_population_layouts:
             + "build_clustered_population_layouts/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
-        scripts("build_clustered_population_layouts.py")
+        "../scripts/build_clustered_population_layouts.py"
 
 
 rule build_base_energy_totals:
@@ -196,7 +196,7 @@ rule build_base_energy_totals:
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
         unsd_export_path=directory("data/demand/unsd/data/"),
     script:
-        scripts("build_base_energy_totals.py")
+        "../scripts/build_base_energy_totals.py"
 
 
 rule prepare_energy_totals:
@@ -214,7 +214,7 @@ rule prepare_energy_totals:
     output:
         energy_totals="resources/" + SECDIR + "energy_totals_{planning_horizons}.csv",
     script:
-        scripts("prepare_energy_totals.py")
+        "../scripts/prepare_energy_totals.py"
 
 
 rule build_heat_demand:
@@ -249,7 +249,7 @@ rule build_heat_demand:
             + "build_heat_demand/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
-        scripts("build_heat_demand.py")
+        "../scripts/build_heat_demand.py"
 
 
 rule build_temperature_profiles:
@@ -293,7 +293,7 @@ rule build_temperature_profiles:
             + "build_temperature_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
-        scripts("build_temperature_profiles.py")
+        "../scripts/build_temperature_profiles.py"
 
 
 rule build_cop_profiles:
@@ -334,7 +334,7 @@ rule build_cop_profiles:
             + "build_cop_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
-        scripts("build_cop_profiles.py")
+        "../scripts/build_cop_profiles.py"
 
 
 rule build_solar_thermal_profiles:
@@ -370,7 +370,7 @@ rule build_solar_thermal_profiles:
             + "build_solar_thermal_profiles/s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
-        scripts("build_solar_thermal_profiles.py")
+        "../scripts/build_solar_thermal_profiles.py"
 
 
 rule prepare_heat_data:
@@ -404,7 +404,7 @@ rule prepare_heat_data:
         + SECDIR
         + "demand/heat/district_heat_share_s{simpl}_{clusters}_{planning_horizons}.csv",
     script:
-        scripts("prepare_heat_data.py")
+        "../scripts/prepare_heat_data.py"
 
 
 rule prepare_transport_data:
@@ -431,7 +431,7 @@ rule prepare_transport_data:
         + SECDIR
         + "demand/nodal_transport_data_s{simpl}_{clusters}_{planning_horizons}.csv",
     script:
-        scripts("prepare_transport_data.py")
+        "../scripts/prepare_transport_data.py"
 
 
 rule move_hardcoded_files_temp:
@@ -459,7 +459,7 @@ rule build_ammonia_production:
     benchmark:
         RESDIR + "benchmarks/build_ammonia_production"
     script:
-        scripts("build_ammonia_production.py")
+        "../scripts/build_ammonia_production.py"
 
 
 rule build_industrial_database:
@@ -468,7 +468,7 @@ rule build_industrial_database:
     output:
         industrial_database="resources/industrial_database.csv",
     script:
-        scripts("build_industrial_database.py")
+        "../scripts/build_industrial_database.py"
 
 
 rule build_industrial_distribution_key:  #default data
@@ -497,7 +497,7 @@ rule build_industrial_distribution_key:  #default data
             + "build_industrial_distribution_key_elec_s{simpl}_{clusters}_{planning_horizons}"
         )
     script:
-        scripts("build_industrial_distribution_key.py")
+        "../scripts/build_industrial_distribution_key.py"
 
 
 rule build_base_industry_totals:  #default data
@@ -522,7 +522,7 @@ rule build_base_industry_totals:  #default data
     benchmark:
         ("benchmarks/" + SECDIR + "build_base_industry_totals_{planning_horizons}")
     script:
-        scripts("build_base_industry_totals.py")
+        "../scripts/build_base_industry_totals.py"
 
 
 rule build_industry_demand:  #default data
@@ -562,7 +562,7 @@ rule build_industry_demand:  #default data
             + "industrial_energy_demand_per_node_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
         )
     script:
-        scripts("build_industry_demand.py")
+        "../scripts/build_industry_demand.py"
 
 
 rule build_existing_heating_distribution:
@@ -590,7 +590,7 @@ rule build_existing_heating_distribution:
         RESDIR
         + "benchmarks/build_existing_heating_distribution/s{simpl}_{clusters}_{planning_horizons}"
     script:
-        scripts("build_existing_heating_distribution.py")
+        "../scripts/build_existing_heating_distribution.py"
 
 
 sector_enable = config["sector"]["enable"]
@@ -691,7 +691,7 @@ rule prepare_sector_network:
             + "benchmarks/prepare_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}"
         )
     script:
-        scripts("prepare_sector_network.py")
+        "../scripts/prepare_sector_network.py"
 
 
 rule build_ship_profile:
@@ -702,7 +702,7 @@ rule build_ship_profile:
     output:
         ship_profile="resources/" + SECDIR + "ship_profile.csv",
     script:
-        scripts("build_ship_profile.py")
+        "../scripts/build_ship_profile.py"
 
 
 rule add_export:
@@ -729,7 +729,7 @@ rule add_export:
         network=RESDIR
         + "prenetworks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{sopts}_{planning_horizons}_{discountrate}_export.nc",
     script:
-        scripts("add_export.py")
+        "../scripts/add_export.py"
 
 
 rule prepare_sector_networks:
