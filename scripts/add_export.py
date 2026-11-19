@@ -214,7 +214,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144h",
             discountrate="0.071",
-            # configfile="test/config.test1.yaml",
+            # configfiles="test/config.test1.yaml",
         )
 
     n = pypsa.Network(snakemake.input.network)

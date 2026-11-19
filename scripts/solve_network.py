@@ -1160,7 +1160,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             discountrate="0.071",
             sopts="144H",
-            configfile="config.tutorial.yaml",
+            configfiles="config.tutorial.yaml",
         )
 
     configure_logging(snakemake)

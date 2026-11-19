@@ -336,7 +336,7 @@ if __name__ == "__main__":
             clusters="6",
             ll="copt",
             opts="Co2L-4H",
-            # configfile="test/config.sector.yaml",
+            # configfiles="test/config.sector.yaml",
         )
 
     configure_logging(snakemake)

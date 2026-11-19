@@ -86,8 +86,6 @@ wildcard_constraints:
     sopts=r"[-+a-zA-Z0-9\.\s]*",
     discountrate=r"[-+a-zA-Z0-9\.\s]*",
     planning_horizons="20[2-9][0-9]|2100",
-    demand=r"[-+a-zA-Z0-9\.\s]*",
-    h2export="[0-9]+m?|all",
 #
 # Fix for pre-commit snakefmt linting to induce error
 # fmt: off

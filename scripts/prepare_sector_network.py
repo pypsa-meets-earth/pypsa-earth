@@ -3872,7 +3872,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             sopts="144h",
             discountrate=0.071,
-            configfile="test/config.sector.yaml",
+            configfiles="test/config.sector.yaml",
         )
 
     # Load population layout
