@@ -20,6 +20,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Separate residential and services district heating demand into sector-specific Loads and explicitly represent distribution losses, preserving the original hourly heat demand and shared district heating bus [PR #2138](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2138)
+
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)

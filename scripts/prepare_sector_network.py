@@ -260,7 +260,6 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from district_heat_loads import split_urban_central_heat_demand
 from prepare_network import add_co2limit
 
 logger = logging.getLogger(__name__)
@@ -2705,12 +2704,21 @@ def add_heat(
                 )
 
         if name == "urban central":
-            central_loads = split_urban_central_heat_demand(
-                heat_demand,
-                h_nodes[name],
-                dist_fraction,
-                options["district_heating"]["district_heating_loss"],
-            )
+            central_loads = {}
+
+            for sector in sectors:
+                sector_demand = (
+                    heat_demand[[f"{sector} water", f"{sector} space"]]
+                    .T.groupby(level=1)
+                    .sum()
+                    .T[h_nodes[name]]
+                    .multiply(dist_fraction[h_nodes[name]])
+                )
+                central_loads[sector] = sector_demand
+
+            central_loads["distribution losses"] = (
+                central_loads["residential"] + central_loads["services"]
+            ) * options["district_heating"]["district_heating_loss"]
 
             for sector, demand in central_loads.items():
                 carrier = (
