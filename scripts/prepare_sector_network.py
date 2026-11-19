@@ -260,6 +260,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
+from district_heat_loads import split_urban_central_heat_demand
 from prepare_network import add_co2limit
 
 logger = logging.getLogger(__name__)
@@ -2704,23 +2705,38 @@ def add_heat(
                 )
 
         if name == "urban central":
-            heat_load = (
-                heat_demand.T.groupby(level=1)
-                .sum()
-                .T[h_nodes[name]]
-                .multiply(
-                    factor * (1 + options["district_heating"]["district_heating_loss"])
-                )
+            central_loads = split_urban_central_heat_demand(
+                heat_demand,
+                h_nodes[name],
+                dist_fraction,
+                options["district_heating"]["district_heating_loss"],
             )
 
-        n.add(
-            "Load",
-            h_nodes[name],
-            suffix=f" {name} heat",
-            bus=h_nodes[name] + f" {name} heat",
-            carrier=name + " heat",
-            p_set=heat_load.loc[n.snapshots],
-        )
+            for sector, demand in central_loads.items():
+                carrier = (
+                    "urban central heat distribution losses"
+                    if sector == "distribution losses"
+                    else f"{sector} urban central heat"
+                )
+
+                n.add("Carrier", carrier)
+                n.add(
+                    "Load",
+                    h_nodes[name],
+                    suffix=f" {carrier}",
+                    bus=h_nodes[name] + " urban central heat",
+                    carrier=carrier,
+                    p_set=demand.loc[n.snapshots],
+                )
+        else:
+            n.add(
+                "Load",
+                h_nodes[name],
+                suffix=f" {name} heat",
+                bus=h_nodes[name] + f" {name} heat",
+                carrier=name + " heat",
+                p_set=heat_load.loc[n.snapshots],
+            )
 
         ## Add heat pumps
 
