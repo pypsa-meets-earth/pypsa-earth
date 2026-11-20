@@ -10,6 +10,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Integrate `planning_horizon` wildcard into electricity-only networks. The cost year now follows `scenario.planning_horizons` and `costs.year` is removed (a deprecation warning is raised if it is still set) [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
+
 * Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
 
 * Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
