@@ -307,7 +307,6 @@ def config_setup():
         choice = display_choice_menu(title, config_options, required_height)
 
         if choice == "return to main menu":
-            return_to_main = True
             console.print("[bold blue]⏳ Returning to main menu [/bold blue]")
             break
 
@@ -562,7 +561,6 @@ def quiz_zone() -> None:
     None
     """
 
-    title = "🗺️  Select use-case to try"
     menu_items = [
         {
             "num": "1",

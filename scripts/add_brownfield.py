@@ -110,8 +110,8 @@ def add_brownfield(n: pypsa.Network, n_p: pypsa.Network, year: int) -> None:
         # Remove generators, links and stores that track global values since they exist in n
         n_p.remove(c.name, c.df.index[c.df.lifetime == np.inf])
 
-        # Remove assets whose build_year + lifetime < year
-        n_p.remove(c.name, c.df.index[c.df.build_year + c.df.lifetime < year])
+        # Remove assets whose lifetime ends at or before the planning horizon
+        n_p.remove(c.name, c.df.index[c.df.build_year + c.df.lifetime <= year])
 
         # Remove assets that are not extendable since they already exist in n
         n_p.remove(c.name, c.df.index[~c.df[f"{attr}_nom_extendable"]])
