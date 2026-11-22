@@ -2021,6 +2021,9 @@ def add_industry(
         efficiency2=costs.at["coal", "CO2 intensity"],
     )
 
+    n.links.loc[spatial.coal.industry, "sector"] = "industry"
+    n.links.loc[spatial.coal.industry, "subsector"] = ""
+
     #################################################### CARRIER = HYDROGEN
 
     if not (
