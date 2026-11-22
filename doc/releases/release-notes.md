@@ -20,7 +20,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Filter custom powerplants by the modelled countries in `build_powerplants` [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Filter custom powerplants by the modelled countries in `build_powerplants` [PR #2141](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2141)
 
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
