@@ -160,7 +160,7 @@ def load_config_descriptions(config_path: str = "config.default.yaml") -> dict:
             indent = len(line) - len(line.lstrip())
             content = line.strip()
 
-            match = re.match(r'^([^:#][^:]*):(?:.*?)(?:\s+#\s*(.*))?$', content)
+            match = re.match(r"^([^:#][^:]*):(?:.*?)(?:\s+#\s*(.*))?$", content)
             if not match:
                 continue
 
@@ -367,12 +367,9 @@ def config_setup():
                         parameter_path, "No description available."
                     )
                     display_label = (
-                        f"{index}. {key} : {value}\n"
-                        f"   [Description] {description}"
+                        f"{index}. {key} : {value}\n" f"   [Description] {description}"
                     )
-                    subchoice_options.append(
-                        Choice(value=key, name=display_label)
-                    )
+                    subchoice_options.append(Choice(value=key, name=display_label))
 
                 subchoice_options.append(
                     Choice(
@@ -395,8 +392,7 @@ def config_setup():
                     parameter_path, "No description available."
                 )
                 updated_value = ask(
-                    f"{subchoice} - {description}\n"
-                    "Enter the new value"
+                    f"{subchoice} - {description}\n" "Enter the new value"
                 )
                 if isinstance(updated_config[choice][subchoice], list):
                     updated_value = updated_value.split(",")
@@ -405,13 +401,8 @@ def config_setup():
                 updated_config[choice][subchoice] = updated_value
         else:
             # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
-            description = config_descriptions.get(
-                choice, "No description available."
-            )
-            updated_value = ask(
-                f"{choice} - {description}\n"
-                "Enter the new value"
-            )
+            description = config_descriptions.get(choice, "No description available.")
+            updated_value = ask(f"{choice} - {description}\n" "Enter the new value")
             if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
