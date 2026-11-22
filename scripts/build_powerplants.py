@@ -468,6 +468,15 @@ if __name__ == "__main__":
         replace_natural_gas_technology
     )
 
+    # keep only powerplants located in the modelled countries
+    n_ppl_before = len(ppl)
+    ppl = ppl.query("Country in @countries_codes")
+    n_ppl_dropped = n_ppl_before - len(ppl)
+    if n_ppl_dropped > 0:
+        logger.info(
+            f"Removed {n_ppl_dropped} powerplants located outside the modelled countries"
+        )
+
     # define unique index
     ppl = ppl.reset_index(drop=True)
 
