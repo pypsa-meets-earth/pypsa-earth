@@ -286,16 +286,20 @@ def add_carrier_buses(n: pypsa.Network, carrier: str, nodes: list = None) -> Non
         nodes = vars(spatial)[carrier].nodes
     location = vars(spatial)[carrier].locations
 
-    # skip if carrier already exists
-    if carrier in n.carriers.index:
-        return
-
     if not isinstance(nodes, pd.Index):
         nodes = pd.Index(nodes)
 
-    n.add("Carrier", carrier, co2_emissions=costs.at[carrier, "CO2 intensity"])
+    if carrier not in n.carriers.index:
+        n.add("Carrier", carrier, co2_emissions=costs.at[carrier, "CO2 intensity"])
 
-    n.add("Bus", nodes, location=location, carrier=carrier)
+    missing_nodes = nodes.difference(n.buses.index)
+    if missing_nodes.empty:
+        return
+
+    locations = pd.Series(location, index=nodes).loc[missing_nodes]
+    n.add("Bus", missing_nodes, location=locations, carrier=carrier)
+
+    nodes = missing_nodes
 
     n.add(
         "Store",
@@ -1975,6 +1979,48 @@ def add_industry(
             lifetime=costs.at["cement capture", "lifetime"],
         )
 
+    #################################################### CARRIER = COAL
+
+    # Ensure coal supply is available even without coal-fired power plants.
+    add_carrier_buses(n, "coal")
+
+    # Coal emissions are explicitly represented by Links to the atmosphere.
+    n.carriers.loc["coal", "co2_emissions"] = 0.0
+
+    n.add(
+        "Bus",
+        spatial.coal.industry,
+        location=spatial.coal.locations,
+        carrier="coal for industry",
+    )
+
+    coal_demand = industrial_demand.loc[spatial.nodes, "coal"] / 8760.0
+
+    if options["coal"]["spatial_coal"]:
+        coal_demand = coal_demand.rename(index=lambda node: node + " coal for industry")
+    else:
+        coal_demand = coal_demand.sum()
+
+    n.add(
+        "Load",
+        spatial.coal.industry,
+        bus=spatial.coal.industry,
+        carrier="coal for industry",
+        p_set=coal_demand,
+    )
+
+    n.add(
+        "Link",
+        spatial.coal.industry,
+        bus0=spatial.coal.nodes,
+        bus1=spatial.coal.industry,
+        bus2="co2 atmosphere",
+        carrier="coal for industry",
+        p_nom_extendable=True,
+        efficiency=1.0,
+        efficiency2=costs.at["coal", "CO2 intensity"],
+    )
+
     #################################################### CARRIER = HYDROGEN
 
     if not (
@@ -2016,21 +2062,6 @@ def add_industry(
         "industry oil emissions",
         bus="co2 atmosphere",
         carrier="industry oil emissions",
-        p_set=-co2,
-    )
-
-    co2 = (
-        industrial_demand["coal"].sum()
-        * costs.at["coal", "CO2 intensity"]
-        # - industrial_demand["process emission from feedstock"].sum()
-        / 8760
-    )
-
-    n.add(
-        "Load",
-        "industry coal emissions",
-        bus="co2 atmosphere",
-        carrier="industry coal emissions",
         p_set=-co2,
     )
 
