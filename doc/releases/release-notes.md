@@ -10,6 +10,10 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Align electricity and sector technology costs with planning horizons [PR #2024](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2024)
+
+* Integrate the `planning_horizon` wildcard into electricity-only networks and introduce horizon-specific electricity cost assignment [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
+
 * Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
 
 * Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
@@ -109,8 +113,6 @@ This part of documentation collects descriptive release notes to capture the mai
 * Normalize OSM network indices before assigning line endpoints [PR #2038](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2038)
 
 * Fix fallback to closest available CO2 emission year [PR #2018](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2018)
-
-* Align sector technology cost selection with the configured foresight mode. [PR #2024](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2024)
 
 * Update guidance on creating a new release [PR #2002](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2002)
 

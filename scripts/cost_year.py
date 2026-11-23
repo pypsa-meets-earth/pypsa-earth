@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-"""Utilities for selecting sector technology cost years."""
+"""Utilities for selecting technology cost years."""
 
 import warnings
 from collections.abc import Mapping
@@ -26,18 +26,14 @@ def read_available_cost_years(metadata_path: str | Path) -> list[int]:
     return sorted({int(year) for year in years})
 
 
-def resolve_sector_cost_year(
+def resolve_cost_year(
     planning_horizon: int,
     *,
-    foresight: str,
     costs: Mapping,
     retrieve_cost_data: bool,
     available_years: list[int] | None = None,
 ) -> int:
-    """Resolve the sector cost year according to the configured policy."""
-    if foresight == "overnight":
-        return int(costs["year"])
-
+    """Resolve the technology cost year according to the configured policy."""
     horizon = int(planning_horizon)
     selection = costs.get("year_selection", "closest")
 

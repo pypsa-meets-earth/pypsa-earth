@@ -159,6 +159,8 @@ clustering:
       p_min_pu: mean
       p_max_pu: weighted_average
       marginal_cost: mean
+      connection_submarine_length: capacity_weighted_average  # offshore wind; same strategy as capital_cost
+      connection_underground_length: capacity_weighted_average  # offshore wind; same strategy as capital_cost
       committable: any
       ramp_limit_up: max
       ramp_limit_down: max
@@ -569,12 +571,10 @@ storage_techs:
 
 # ------------------- Costs & emissions -------------------
 costs:
-  year: 2030 # Cost year for electricity-only and overnight sector runs
-  # Myopic sector cost-year selection:
+  # Cost-year selection for electricity and sector (overnight and myopic):
   # - "closest": select the closest available technology-data year (default).
   # - Mapping: explicitly assign a cost year to each planning horizon.
   #   Example: {2023: 2020, 2030: 2030, 2040: 2035}
-  # Ignored for overnight runs.
   year_selection: closest
   technology_data_version: v0.15.0
   discountrate: [0.071] #, 0.086, 0.111]
