@@ -22,7 +22,6 @@ from scipy.spatial import cKDTree
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import linemerge, nearest_points, snap, split
 from sklearn.cluster import DBSCAN
-from tqdm import tqdm
 
 logger = create_logger(__name__)
 
@@ -519,6 +518,11 @@ def merge_stations_lines_by_station_id_and_voltage(
 
     logger.info("Stage 4c/5: Specify the bus ids of the line endings")
 
+    # Normalize DataFrame indices before assigning line endpoints.
+    lines = lines.reset_index(drop=True)
+    buses = buses.reset_index(drop=True)
+    buses["bus_id"] = buses.index
+
     # set the bus ids to the line dataset
     lines, buses = set_lines_ids(lines, buses, distance_crs)
 
@@ -660,8 +664,14 @@ def fix_overpassing_lines(lines, buses, distance_crs, tol=1):
     # return to original crs
     df_l = df_l.to_crs(lines.crs)
 
-    # remove lines that are rings (included for completion), TODO: this should be a separate function
-    df_l = df_l[~df_l.geometry.is_ring].reset_index(drop=True)
+    # remove lines that are rings (included for completion) or degenerate (e.g. single points), TODO: this should be a separate function
+    df_l = df_l[
+        ~(
+            df_l.geometry.boundary.is_empty
+            | (df_l.geometry.geom_type != "LineString")
+            | (df_l["length"] <= tol)
+        )
+    ].reset_index(drop=True)
 
     # buses should not be returned as they are not changed, but included for completion
     return df_l, buses

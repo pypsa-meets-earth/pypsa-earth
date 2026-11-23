@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: CC0-1.0
+
+countries: ["KZ"]
+
+run:
+  name: "KZ"
+  shared_cutouts: false
+
+scenario:
+  opts: [6h]
+
+solving:
+  solver:
+    name: highs

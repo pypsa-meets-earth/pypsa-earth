@@ -1,0 +1,26 @@
+Abbreviation,Definition,Category
+battery,Battery (Lithium-Ion),Electrochemical
+home battery,Home Battery (Lithium-Ion),Electrochemical
+li-ion,Lithium-Ion Battery,Electrochemical
+lfp,Lithium Iron Phosphate (LFP) Battery,Electrochemical
+vanadium,Vanadium Redox Flow Battery,Electrochemical
+lair,Liquid Air Energy Storage (LAES),Mechanical
+pair,Compressed Air Energy Storage (Adiabatic CAES),Mechanical
+iron-air,Iron-Air Battery,Electrochemical
+H2,Hydrogen Energy Storage (Tank),Chemical
+H2 underground,Hydrogen Energy Storage (Underground Storage),Chemical
+concrete,Concrete Thermal Battery,Thermal
+gravity,Gravity Bricks,Mechanical
+gravitywa,Gravity Water Aboveground,Mechanical
+gravitywu,Gravity Water Underground,Mechanical
+salthight,High-Temperature Molten Salt Battery,Thermal
+lead,Lead-Acid Battery,Electrochemical
+nmc,Lithium Nickel Manganese Cobalt Oxide (NMC) Battery,Electrochemical
+saltlowt,Low-Temperature Molten Salt Battery,Thermal
+nizn,Nickel-Zinc Battery,Electrochemical
+phes,Pumped Heat Energy Storage (PHES),Thermal
+phs,Pumped Hydro Storage,Mechanical
+sand,Sand Thermal Battery,Thermal
+znair,Zinc-Air Battery,Electrochemical
+znbrflow,Zinc-Bromine Flow Battery,Electrochemical
+znbr,Zinc-Bromine Battery,Electrochemical

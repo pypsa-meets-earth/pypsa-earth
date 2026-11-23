@@ -12,9 +12,9 @@ only key/value strings that are different from the tutorial config. The
 below scripts 'updates' the test configs and adds all options of the
 tutorial config.
 """
+
 import collections.abc
 import copy
-import os
 from pathlib import Path
 
 from ruamel.yaml import YAML

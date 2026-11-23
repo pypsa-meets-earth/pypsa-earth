@@ -1,0 +1,8 @@
+Parameter,Unit,Values,Description
+{carrier},  ,  ,Name of the storage carrier.
+-- store,  ,str,"Storage name as listed in costs.csv, used to determine their storage capacity cost and lifetime."
+-- bicharger,  ,str,"Charger and discharger name as listed in costs.csv, used to determine their charging/discharging costs, efficiencies, and lifetimes."
+{carrier},  ,  ,Name of the storage carrier.
+-- store,  ,str,"Storage name as listed in costs.csv, used to determine their storage capacity cost and lifetime."
+-- charger,  ,str,"Charger name as listed in costs.csv, used to determine their charging costs, efficiencies, and lifetimes."
+-- discharger,  ,str,"Discharger name as listed in costs.csv, used to determine their discharging costs, efficiencies, and lifetimes."

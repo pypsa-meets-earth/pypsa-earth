@@ -5,9 +5,9 @@
 
 # -*- coding: utf-8 -*-
 """
-Lifts electrical transmission network to a single 380 kV voltage layer, removes
-dead-ends of the network, and reduces multi-hop HVDC connections to a single
-link.
+Lifts the electrical transmission network to a single configured voltage layer,
+removes dead ends of the network, and reduces multi-hop HVDC connections to a
+single link.
 
 Relevant Settings
 -----------------
@@ -18,8 +18,8 @@ Relevant Settings
         simplify:
         aggregation_strategies:
 
-    costs:
-        output_currency:
+    electricity:
+        base_voltage:
 
     lines:
         length_factor:
@@ -33,13 +33,12 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`costs_cf`, :ref:`electricity_cf`, :ref:`renewable_cf`,
+    :ref:`electricity_cf`, :ref:`renewable_cf`,
     :ref:`lines_cf`, :ref:`links_cf`, :ref:`solving_cf`
 
 Inputs
 ------
 
-- ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
 - ``resources/regions_onshore.geojson``: confer :ref:`busregions`
 - ``resources/regions_offshore.geojson``: confer :ref:`busregions`
 - ``networks/elec.nc``: confer :ref:`electricity`
@@ -68,15 +67,15 @@ Description
 
 The rule :mod:`simplify_network` does up to four things:
 
-1. Create an equivalent transmission network in which all voltage levels are mapped to the 380 kV level by the function ``simplify_network(...)``.
+1. Create an equivalent transmission network in which all voltage levels are mapped to the configured base-voltage layer by ``simplify_network_to_base_voltage(...)``. Country-specific line-type mappings are used only when enabled and when mappings are available for every configured country. Otherwise, the complete default mapping is used. AC and DC mappings are evaluated separately.
 
-2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The grid connection cost of offshore wind generators are added to the capital costs of the generator.
+2. DC only sub-networks that are connected at only two buses to the AC network are reduced to a single representative link in the function ``simplify_links(...)``. The components attached to buses in between are moved to the nearest endpoint. The submarine and underground lengths of the path an offshore wind generator is moved along are added to its ``connection_submarine_length`` and ``connection_underground_length``, which ``assign_costs`` converts into connection costs.
 
-3. Stub lines and links, i.e. dead-ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
+3. Stub lines and links, i.e. dead ends of the network, are sequentially removed from the network in the function ``remove_stubs(...)``. Components are moved along.
 
 4. Optionally, if an integer were provided for the wildcard ``{simpl}`` (e.g. ``networks/elec_s500.nc``), the network is clustered to this number of clusters with the routines from the ``cluster_network`` rule with the function ``cluster_network.cluster(...)``. This step is usually skipped!
 """
-import os
+
 import sys
 from functools import reduce
 
@@ -89,6 +88,8 @@ from _helpers import (
     add_year_suffix_to_carriers,
     configure_logging,
     create_logger,
+    get_aggregate_carriers,
+    get_linetype_by_voltage_and_country,
     nearest_shape,
     restore_base_carrier_names,
     update_config_dictionary,
@@ -100,7 +101,6 @@ from pypsa.clustering.spatial import (
     busmap_by_stubs,
     get_clustering_from_busmap,
 )
-from pypsa.io import import_components_from_dataframe, import_series_from_dataframe
 from scipy.sparse.csgraph import connected_components, dijkstra
 
 sys.settrace
@@ -108,29 +108,77 @@ sys.settrace
 logger = create_logger(__name__)
 
 
-def simplify_network_to_base_voltage(n, linetype, base_voltage):
+def simplify_network_to_base_voltage(
+    n,
+    ac_types,
+    dc_types,
+    base_voltage,
+    use_country_specific_ac_types,
+    use_country_specific_dc_types,
+):
     """
-    Fix all lines to a voltage level of base voltage level and remove all
-    transformers.
+    Map all lines to a common voltage while preserving country-specific types.
 
-    The function preserves the transmission capacity for each line while
-    updating its voltage level, line type and number of parallel bundles
-    (num_parallel). Transformers are removed and connected components
-    are moved from their starting bus to their ending bus. The
-    corresponding starting buses are removed as well.
+    Each line is assigned the closest available line type for the country of
+    its first bus. Transmission capacity is preserved by recalculating the
+    number of parallel bundles after updating the voltage and line type.
+    Transformers are removed and connected components are moved from their
+    starting bus to their ending bus.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Network to simplify.
+    ac_types : dict
+        AC line-type mappings by country and nominal voltage.
+    dc_types : dict
+        DC line-type mappings by country and nominal voltage.
+    base_voltage : float
+        Common nominal voltage assigned to buses and lines.
+    use_country_specific_ac_types : bool
+        Whether to use country-specific AC mappings.
+    use_country_specific_dc_types : bool
+        Whether to use country-specific DC mappings.
+
+    Returns
+    -------
+    tuple
+        Simplified network and transformer bus mapping.
     """
 
     logger.info(f"Mapping all network lines onto a single {int(base_voltage)}kV layer")
     n.buses["v_nom"] = base_voltage
-    n.lines["type"] = linetype
+
+    line_countries = n.lines["bus0"].map(n.buses["country"])
+
+    ac_line_mask = n.lines["carrier"] == "AC"
+    dc_line_mask = n.lines["carrier"] == "DC"
+
+    n.lines.loc[ac_line_mask, "type"] = line_countries.loc[ac_line_mask].map(
+        lambda country: get_linetype_by_voltage_and_country(
+            base_voltage,
+            country,
+            ac_types,
+            use_country_specific_ac_types,
+        )
+    )
+
+    n.lines.loc[dc_line_mask, "type"] = line_countries.loc[dc_line_mask].map(
+        lambda country: get_linetype_by_voltage_and_country(
+            base_voltage,
+            country,
+            dc_types,
+            use_country_specific_dc_types,
+        )
+    )
+
     n.lines["v_nom"] = base_voltage
-    n.lines["i_nom"] = n.line_types.i_nom[linetype]
+    n.lines["i_nom"] = n.lines["type"].map(n.line_types["i_nom"])
     # Note: s_nom is set in base_network
     n.lines["num_parallel"] = n.lines.eval("s_nom / (sqrt(3) * v_nom * i_nom)")
 
     # Re-define s_nom for DC lines
-    is_dc_carrier = n.lines["carrier"] == "DC"
-    n.lines.loc[is_dc_carrier, "num_parallel"] = n.lines.loc[is_dc_carrier].eval(
+    n.lines.loc[dc_line_mask, "num_parallel"] = n.lines.loc[dc_line_mask].eval(
         "s_nom / (v_nom * i_nom)"
     )
 
@@ -153,19 +201,42 @@ def simplify_network_to_base_voltage(n, linetype, base_voltage):
             if col.startswith("bus"):
                 df[col] = df[col].map(trafo_map)
 
-    n.mremove("Transformer", n.transformers.index)
-    n.mremove("Bus", n.buses.index.difference(trafo_map))
+    n.remove("Transformer", n.transformers.index)
+    n.remove("Bus", n.buses.index.difference(trafo_map))
 
     return n, trafo_map
 
 
-def _prepare_connection_costs_per_link(
-    n, costs, renewable_config, hvdc_as_lines, lines_length_factor
-):
-    if n.links.empty:
-        return {}
+def _prepare_connection_lengths_per_link(
+    n: pypsa.Network,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    lines_length_factor: float,
+) -> dict:
+    """
+    Return per-link submarine and underground lengths for offshore connections.
 
-    connection_costs_per_link = {}
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    lines_length_factor : float
+        Factor to scale line lengths by.
+
+    Returns
+    -------
+    dict
+        Per-link submarine and underground lengths [km], keyed by the generator
+        attributes ``connection_submarine_length`` and
+        ``connection_underground_length``. Empty if there are no links or no
+        offshore wind carriers.
+    """
+    if n.links.empty or not any(t.startswith("offwind") for t in renewable_config):
+        return {}
 
     # initialize dc_lengths and underwater_fractions by the hvdc_as_lines option
     if hvdc_as_lines:
@@ -175,97 +246,133 @@ def _prepare_connection_costs_per_link(
         dc_lengths = n.links.length
         unterwater_fractions = n.links.underwater_fraction
 
-    for tech in renewable_config:
-        if tech.startswith("offwind"):
-            connection_costs_per_link[tech] = (
-                dc_lengths
-                * lines_length_factor
-                * (
-                    unterwater_fractions
-                    * costs.at[tech + "-connection-submarine", "capital_cost"]
-                    + (1.0 - unterwater_fractions)
-                    * costs.at[tech + "-connection-underground", "capital_cost"]
-                )
-            )
-
-    return connection_costs_per_link
+    # keys are the generator attributes the displacement lengths are added to
+    return {
+        "connection_submarine_length": dc_lengths
+        * lines_length_factor
+        * unterwater_fractions,
+        "connection_underground_length": dc_lengths
+        * lines_length_factor
+        * (1.0 - unterwater_fractions),
+    }
 
 
-def _compute_connection_costs_to_bus(
-    n,
-    busmap,
-    costs,
-    renewable_config,
-    hvdc_as_lines,
-    lines_length_factor,
-    connection_costs_per_link=None,
-    buses=None,
-):
-    if connection_costs_per_link is None:
-        connection_costs_per_link = _prepare_connection_costs_per_link(
-            n, costs, renewable_config, hvdc_as_lines, lines_length_factor
+def _compute_connection_lengths_to_bus(
+    n: pypsa.Network,
+    busmap: pd.Series,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    lines_length_factor: float,
+    connection_lengths_per_link: dict = None,
+    buses: pd.Index = None,
+) -> pd.DataFrame:
+    """
+    Compute connection lengths to buses for offshore techs.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    busmap : pd.Series
+        Mapping from previous bus names to new bus names.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    lines_length_factor : float
+        Factor to scale line lengths by.
+    connection_lengths_per_link : dict
+        Per-link submarine and underground lengths, see
+        :func:`_prepare_connection_lengths_per_link`.
+    buses : pd.Index
+        Indices of buses to compute connection lengths to.
+
+    Returns
+    -------
+    pd.DataFrame
+        Submarine and underground connection lengths to buses [km].
+        Index is the indices of the buses, columns are
+        ``connection_submarine_length`` and ``connection_underground_length``.
+    """
+    if connection_lengths_per_link is None:
+        connection_lengths_per_link = _prepare_connection_lengths_per_link(
+            n, renewable_config, hvdc_as_lines, lines_length_factor
         )
 
     if buses is None:
         buses = busmap.index[busmap.index != busmap.values]
 
-    connection_costs_to_bus = pd.DataFrame(index=buses)
+    connection_lengths_to_bus = pd.DataFrame(index=buses)
 
-    for tech in connection_costs_per_link:
+    for attr in connection_lengths_per_link:
         adj = n.adjacency_matrix(
             weights=pd.concat(
                 dict(
-                    Link=connection_costs_per_link[tech]
+                    Link=connection_lengths_per_link[attr]
                     .reindex(n.links.index)
                     .astype(float),
                     Line=pd.Series(0.0, n.lines.index),
                 )
             )
         )
-        costs_between_buses = dijkstra(
+        lengths_between_buses = dijkstra(
             adj, directed=False, indices=n.buses.index.get_indexer(buses)
         )
-        connection_costs_to_bus[tech] = costs_between_buses[
+        connection_lengths_to_bus[attr] = lengths_between_buses[
             np.arange(len(buses)), n.buses.index.get_indexer(busmap.loc[buses])
         ]
-    return connection_costs_to_bus
+    return connection_lengths_to_bus
 
 
-def _adjust_capital_costs_using_connection_costs(
-    n, connection_costs_to_bus, output, currency
-):
-    connection_costs = {}
-    for tech in connection_costs_to_bus:
-        tech_b = n.generators.carrier == tech
-        costs = (
-            n.generators.loc[tech_b, "bus"]
-            .map(connection_costs_to_bus[tech])
+def _add_displacement_connection_lengths(
+    n: pypsa.Network,
+    connection_lengths_to_bus: pd.DataFrame,
+) -> None:
+    """
+    Add displacement connection lengths to offshore wind generators in-place.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    connection_lengths_to_bus : pd.DataFrame
+        Submarine and underground connection lengths per bus, see
+        :func:`_compute_connection_lengths_to_bus`.
+
+    Returns
+    -------
+    None
+    """
+    offwind_b = n.generators.carrier.str.startswith("offwind")
+    for attr in connection_lengths_to_bus:
+        lengths = (
+            n.generators.loc[offwind_b, "bus"]
+            .map(connection_lengths_to_bus[attr])
             .loc[lambda s: s > 0]
         )
-        if not costs.empty:
-            n.generators.loc[costs.index, "capital_cost"] += costs
+        if not lengths.empty:
+            n.generators.loc[lengths.index, attr] = (
+                n.generators.loc[lengths.index, attr].fillna(0.0) + lengths
+            )
             logger.info(
-                "Displacing {} generator(s) and adding connection costs to capital_costs: {} ".format(
-                    tech,
+                "Displacing offshore generator(s) and adding to {}: {} ".format(
+                    attr,
                     ", ".join(
-                        "{:.0f} {}/MW/a for `{}`".format(d, currency, b)
-                        for b, d in costs.items()
+                        "{:.1f} km for `{}`".format(d, b) for b, d in lengths.items()
                     ),
                 )
             )
-            connection_costs[tech] = costs
-    pd.DataFrame(connection_costs).to_csv(output.connection_costs)
 
 
 def _aggregate_and_move_components(
-    n,
-    busmap,
-    connection_costs_to_bus,
-    output,
-    aggregate_one_ports={"Load", "StorageUnit"},
-    aggregation_strategies=dict(),
-    exclude_carriers=[],
-):
+    n: pypsa.Network,
+    busmap: pd.Series,
+    connection_lengths_to_bus: pd.DataFrame,
+    output: object,
+    aggregate_one_ports: set = {"Load", "StorageUnit"},
+    aggregation_strategies: dict = dict(),
+    exclude_carriers: list = [],
+) -> None:
     """
     Aggregate and move components according to busmap.
 
@@ -279,8 +386,8 @@ def _aggregate_and_move_components(
         The network to modify.
     busmap : pd.Series
         Mapping from previous bus names to new bus names.
-    connection_costs_to_bus : pd.DataFrame
-        Connection costs per bus.
+    connection_lengths_to_bus : pd.DataFrame
+        Displacement connection lengths per bus.
     output : object
         Snakemake output object.
     aggregate_one_ports : set
@@ -292,24 +399,19 @@ def _aggregate_and_move_components(
     """
 
     def replace_components(n, c, df, pnl):
-        n.mremove(c, n.df(c).index)
+        n.remove(c, n.df(c).index)
 
-        import_components_from_dataframe(n, df, c)
+        n.add(c, df.index, **df)
         for attr, df in pnl.items():
             if not df.empty:
-                import_series_from_dataframe(n, df, c, attr)
+                n._import_series_from_df(df, c, attr)
 
-    _adjust_capital_costs_using_connection_costs(
-        n,
-        connection_costs_to_bus,
-        snakemake.output,
-        snakemake.params.output_currency,
-    )
+    _add_displacement_connection_lengths(n, connection_lengths_to_bus)
 
     generator_strategies = aggregation_strategies["generators"]
     one_port_strategies = aggregation_strategies["one_ports"]
 
-    carriers = set(n.generators.carrier) - set(exclude_carriers)
+    carriers = get_aggregate_carriers(n, exclude_carriers)
     generators, generators_pnl = aggregateoneport(
         n,
         busmap,
@@ -331,28 +433,28 @@ def _aggregate_and_move_components(
         replace_components(n, one_port, df, pnl)
 
     buses_to_del = n.buses.index.difference(busmap)
-    n.mremove("Bus", buses_to_del)
+    n.remove("Bus", buses_to_del)
     for c in n.branch_components:
         df = n.df(c)
-        n.mremove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
+        n.remove(c, df.index[df.bus0.isin(buses_to_del) | df.bus1.isin(buses_to_del)])
 
 
 # Filter AC lines to avoid mixing with DC part when processing links
-def contains_ac(ls):
+def contains_ac(n, ls):
     def is_ac_branch(x):
         if x[0] == "Link":
             return n.links.loc[x[1]].dc != True
         elif x[0] == "Line":
             return n.lines.loc[x[1]].dc != True
         else:
-            logger.error("Unknown branch type for the instance {x}")
+            logger.error(f"Unknown branch type for the instance {x}")
+            return False
 
-    return any(list(map(lambda x: is_ac_branch(x), ls)))
+    return any(is_ac_branch(x) for x in ls)
 
 
 def simplify_links(
     n: pypsa.Network,
-    costs: pd.DataFrame,
     renewable_config: dict,
     hvdc_as_lines: bool,
     config_lines: dict,
@@ -368,8 +470,6 @@ def simplify_links(
     ----------
     n : pypsa.Network
         The PyPSA network to be simplified.
-    costs : pd.DataFrame
-        DataFrame containing technology costs.
     renewable_config : dict
         Configuration dictionary for renewable technologies.
     hvdc_as_lines : bool
@@ -394,8 +494,6 @@ def simplify_links(
     logger.info("Simplifying connected link components")
 
     if n.links.empty:
-        with open(output.connection_costs, "w") as fp:
-            pass
         return n, n.buses.index.to_series()
 
     dc_as_links = not (n.lines.carrier == "DC").any()
@@ -434,7 +532,7 @@ def simplify_links(
             for m, ls in G.adj[u].items():
                 # AC lines can be captured in case of complicated network topologies
                 # even despite using `nodes` defined by links
-                if m not in nodes or m in seen or contains_ac(ls):
+                if m not in nodes or m in seen or contains_ac(n, ls):
                     continue
 
                 buses = [u, m]
@@ -444,7 +542,7 @@ def simplify_links(
                     seen.add(m)
                     for m2, ls2 in G.adj[m].items():
                         # there may be AC lines which connect ends of DC chains
-                        if m2 in seen or m2 == u or contains_ac(ls2):
+                        if m2 in seen or m2 == u or contains_ac(n, ls2):
                             continue
                         buses.append(m2)
                         links.append(list(ls2))  # [name for name in ls])
@@ -459,11 +557,11 @@ def simplify_links(
 
     busmap = n.buses.index.to_series()
 
-    connection_costs_per_link = _prepare_connection_costs_per_link(
-        n, costs, renewable_config, hvdc_as_lines, config_lines["length_factor"]
+    connection_lengths_per_link = _prepare_connection_lengths_per_link(
+        n, renewable_config, hvdc_as_lines, config_lines["length_factor"]
     )
-    connection_costs_to_bus = pd.DataFrame(
-        0.0, index=n.buses.index, columns=list(connection_costs_per_link)
+    connection_lengths_to_bus = pd.DataFrame(
+        0.0, index=n.buses.index, columns=list(connection_lengths_per_link)
     )
 
     for lbl in labels.value_counts().loc[lambda s: s > 2].index:
@@ -478,14 +576,13 @@ def simplify_links(
                 n.buses.loc[b, ["x", "y"]], n.buses.loc[buses[1:-1], ["x", "y"]]
             )
             busmap.loc[buses] = b[np.r_[0, m.argmin(axis=0), 1]]
-            connection_costs_to_bus.loc[buses] += _compute_connection_costs_to_bus(
+            connection_lengths_to_bus.loc[buses] += _compute_connection_lengths_to_bus(
                 n,
                 busmap,
-                costs,
                 renewable_config,
                 hvdc_as_lines,
-                config_lines,
-                connection_costs_per_link,
+                config_lines["length_factor"],
+                connection_lengths_per_link,
                 buses,
             )
 
@@ -542,8 +639,8 @@ def simplify_links(
                 )
             )
 
-            n.mremove("Link", all_links)
-            n.mremove("Line", all_dc_lines)
+            n.remove("Link", all_links)
+            n.remove("Line", all_dc_lines)
 
             static_attrs = n.components["Link"]["attrs"].loc[lambda df: df.static]
             for attr, default in static_attrs.default.items():
@@ -555,7 +652,7 @@ def simplify_links(
     _aggregate_and_move_components(
         n,
         busmap,
-        connection_costs_to_bus,
+        connection_lengths_to_bus,
         output,
         aggregation_strategies=aggregation_strategies,
         exclude_carriers=exclude_carriers,
@@ -564,15 +661,41 @@ def simplify_links(
 
 
 def remove_stubs(
-    n,
-    costs,
-    cluster_config,
-    renewable_config,
-    hvdc_as_lines,
-    lines_length_factor,
-    output,
-    aggregation_strategies=dict(),
+    n: pypsa.Network,
+    cluster_config: dict,
+    renewable_config: dict,
+    hvdc_as_lines: bool,
+    lines_length_factor: float,
+    output: object,
+    aggregation_strategies: dict = dict(),
 ):
+    """
+    Remove stubs from the network.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        The network to modify.
+    cluster_config : dict
+        Configuration dictionary for cluster configuration.
+    renewable_config : dict
+        Configuration dictionary for renewable technologies.
+    hvdc_as_lines : bool
+        Flag indicating whether HVDC lines are treated as lines.
+    lines_length_factor : float
+        Factor to scale line lengths by.
+    output : object
+        Output Snakemake object to write to.
+    aggregation_strategies : dict
+        Strategies for aggregating components.
+
+    Returns
+    -------
+    n : pypsa.Network
+        The network with stubs removed.
+    busmap : pd.Series
+        Mapping from previous bus names to new bus names.
+    """
     logger.info("Removing stubs")
 
     across_borders = cluster_config.get("remove_stubs_across_borders", True)
@@ -580,10 +703,9 @@ def remove_stubs(
 
     busmap = busmap_by_stubs(n, matching_attrs)
 
-    connection_costs_to_bus = _compute_connection_costs_to_bus(
+    connection_lengths_to_bus = _compute_connection_lengths_to_bus(
         n,
         busmap,
-        costs,
         renewable_config,
         hvdc_as_lines,
         lines_length_factor,
@@ -594,7 +716,7 @@ def remove_stubs(
     _aggregate_and_move_components(
         n,
         busmap,
-        connection_costs_to_bus,
+        connection_lengths_to_bus,
         output,
         aggregation_strategies=aggregation_strategies,
         exclude_carriers=exclude_carriers,
@@ -676,7 +798,7 @@ def aggregate_to_substations(n, aggregation_strategies=dict(), buses_i=None):
         one_port_strategies=one_port_strategies,
         scale_link_capital_costs=False,
     )
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 def cluster(
@@ -739,7 +861,7 @@ def cluster(
         focus_weights=focus_weights,
     )
 
-    return clustering.network, clustering.busmap
+    return clustering.n, clustering.busmap
 
 
 def drop_isolated_networks(n, threshold):
@@ -766,7 +888,12 @@ def drop_isolated_networks(n, threshold):
     load_mean_origin = n.loads_t.p_set.mean().mean()
 
     # duplicated sub-networks mean that there is at least one interconnection between buses
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
@@ -797,11 +924,11 @@ def drop_isolated_networks(n, threshold):
         n.lines.bus0.isin(i_islands) | n.lines.bus1.isin(i_islands)
     ].index
 
-    n.mremove("Bus", i_islands)
-    n.mremove("Load", i_loads_drop)
-    n.mremove("Generator", i_generators_drop)
-    n.mremove("Link", i_links_drop)
-    n.mremove("Line", i_lines_drop)
+    n.remove("Bus", i_islands)
+    n.remove("Load", i_loads_drop)
+    n.remove("Generator", i_generators_drop)
+    n.remove("Link", i_links_drop)
+    n.remove("Line", i_lines_drop)
 
     n.determine_network_topology()
 
@@ -820,7 +947,8 @@ def transform_to_gdf(n, network_crs):
     buses_df["bus_id"] = buses_df.index
 
     # load data are crucial to deal with sub-networks
-    buses_df = buses_df.join(n.loads_t.p_set.sum().T.rename("load"))
+    load_by_bus = n.loads_t.p_set.sum().groupby(n.loads.bus).sum()
+    buses_df["load"] = load_by_bus.reindex(buses_df.index, fill_value=0.0)
     buses_df["load_in_subnetw"] = buses_df.groupby(["country", "sub_network"])[
         "load"
     ].transform("sum")
@@ -902,7 +1030,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
     nearest_bus_df = n.buses.loc[n.buses.index.isin(gdf_map.bus_id_right)]
 
     i_lines_islands = n.lines.loc[n.lines.bus1.isin(gdf_islands.index)].index
-    n.mremove("Line", i_lines_islands)
+    n.remove("Line", i_lines_islands)
 
     isolated_buses_mapping = (
         gdf_map[["bus_id_right"]].droplevel("country").to_dict()["bus_id_right"]
@@ -945,7 +1073,7 @@ def merge_into_network(n, threshold, aggregation_strategies=dict()):
         f"Fetched {len(gdf_islands)} isolated buses into the network. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
@@ -974,7 +1102,12 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
 
     n.determine_network_topology()
 
-    p_by_node = n.loads_t.p_set.mean().reindex(n.buses.index, fill_value=0.0)
+    p_by_node = (
+        n.loads_t.p_set.mean()
+        .groupby(n.loads.bus)
+        .sum()
+        .reindex(n.buses.index, fill_value=0.0)
+    )
     p_by_sub = p_by_node.groupby(p_by_node.index.map(n.buses.sub_network)).sum()
 
     small_subs = p_by_sub[p_by_sub < threshold].index
@@ -1033,7 +1166,7 @@ def merge_isolated_networks(n, threshold, aggregation_strategies=dict()):
         f"Merged {len(i_islands_merge)} buses. Load attached to a single bus with discrepancies of {(100 * ((load_mean_final - load_mean_origin)/load_mean_origin)):2.1E}% and {(100 * ((generators_mean_final - generators_mean_origin)/generators_mean_origin)):2.1E}% for load and generation capacity, respectively"
     )
 
-    return clustering.network, busmap
+    return clustering.n, busmap
 
 
 if __name__ == "__main__":
@@ -1045,13 +1178,31 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
+    source_line_types = n.line_types.copy()
 
     # Add year suffix to carrier names for clustering
     add_year_suffix_to_carriers(n)
 
     base_voltage = snakemake.params.electricity["base_voltage"]
-    linetype = snakemake.params.config_lines["ac_types"][base_voltage]
-    exclude_carriers = snakemake.params.cluster_options["simplify_network"].get(
+    lines_config = snakemake.params.config_lines
+    countries = snakemake.config["countries"]
+
+    use_country_specific_types = lines_config.get(
+        "use_country_specific_types",
+        False,
+    )
+
+    ac_types = lines_config["ac_types"]
+    dc_types = lines_config["dc_types"]
+
+    use_country_specific_ac_types = use_country_specific_types and all(
+        country in ac_types for country in countries
+    )
+
+    use_country_specific_dc_types = use_country_specific_types and all(
+        country in dc_types for country in countries
+    )
+    exclude_carriers = snakemake.params.clustering["simplify_network"].get(
         "exclude_carriers", []
     )
     hvdc_as_lines = snakemake.params.electricity["hvdc_as_lines"]
@@ -1074,15 +1225,17 @@ if __name__ == "__main__":
         },
     )
 
-    n, trafo_map = simplify_network_to_base_voltage(n, linetype, base_voltage)
-
-    Nyears = n.snapshot_weightings.objective.sum() / 8760
-
-    technology_costs = pd.read_csv(snakemake.input.tech_costs, index_col=0)
+    n, trafo_map = simplify_network_to_base_voltage(
+        n,
+        ac_types,
+        dc_types,
+        base_voltage,
+        use_country_specific_ac_types,
+        use_country_specific_dc_types,
+    )
 
     n, simplify_links_map = simplify_links(
         n,
-        technology_costs,
         snakemake.params.renewable,
         hvdc_as_lines,
         snakemake.params.config_lines,
@@ -1094,13 +1247,12 @@ if __name__ == "__main__":
 
     busmaps = [trafo_map, simplify_links_map]
 
-    cluster_config = snakemake.params.cluster_options["simplify_network"]
+    cluster_config = snakemake.params.clustering["simplify_network"]
     renewable_config = snakemake.params.renewable
     lines_length_factor = snakemake.params.config_lines["length_factor"]
     if cluster_config.get("remove_stubs", True):
         n, stub_map = remove_stubs(
             n,
-            technology_costs,
             cluster_config,
             renewable_config,
             hvdc_as_lines,
@@ -1117,7 +1269,7 @@ if __name__ == "__main__":
     # treatment of outliers (nodes without a profile for considered carrier):
     # all nodes that have no profile of the given carrier are being aggregated to closest neighbor
     if (
-        snakemake.config.get("cluster_options", {})
+        snakemake.config.get("clustering", {})
         .get("cluster_network", {})
         .get("algorithm", "hac")
         == "hac"
@@ -1147,15 +1299,13 @@ if __name__ == "__main__":
             busmaps.append(busmap_hac)
 
     if snakemake.wildcards.simpl:
-        alternative_clustering = snakemake.params.cluster_options[
-            "alternative_clustering"
-        ]
+        alternative_clustering = snakemake.params.clustering["alternative_clustering"]
         build_shape_options = snakemake.params.build_shape_options
         country_list = snakemake.params.countries
-        distribution_cluster = snakemake.params.cluster_options["distribute_cluster"]
+        distribution_cluster = snakemake.params.clustering["distribute_cluster"]
         focus_weights = (
             snakemake.params.focus_weights
-            or snakemake.params.cluster_options["focus_weights"]
+            or snakemake.params.clustering["focus_weights"]
         )
         gadm_layer_id = snakemake.params.build_shape_options["gadm_layer_id"]
         geo_crs = snakemake.params.crs["geo_crs"]
@@ -1231,6 +1381,32 @@ if __name__ == "__main__":
 
     # Restore base carrier names (remove year suffixes) before saving
     restore_base_carrier_names(n)
+
+    # Restore line types lost when clustering creates a new network.
+    used_line_types = pd.Index(
+        n.lines["type"].dropna().loc[lambda values: values != ""].unique()
+    )
+    missing_line_types = used_line_types.difference(n.line_types.index)
+
+    unavailable_line_types = missing_line_types.difference(source_line_types.index)
+    if not unavailable_line_types.empty:
+        raise ValueError(
+            "The following line types are used by lines but are unavailable in "
+            f"the source network: {unavailable_line_types.tolist()}"
+        )
+
+    for line_type in missing_line_types:
+        n.add(
+            "LineType",
+            line_type,
+            **source_line_types.loc[line_type].dropna().to_dict(),
+        )
+
+    if not missing_line_types.empty:
+        logger.info(
+            "Restored line types removed during network clustering: %s",
+            missing_line_types.tolist(),
+        )
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)

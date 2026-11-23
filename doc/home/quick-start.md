@@ -31,7 +31,7 @@ conda activate pypsa-earth
 Execute the tutorial workflow:
 
 ```bash
-snakemake -call results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile config.tutorial.yaml
+snakemake -call results/networks/elec_s_6_ec_lcopt_Co2L-4H_2030.nc --configfile config.tutorial.yaml
 ```
 
 This command will:
@@ -47,7 +47,7 @@ The tutorial model typically completes in 5-15 minutes depending on your system.
 
 Once complete, you can find:
 
-  - **Network file**: `results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc`
+  - **Network file**: `results/networks/elec_s_6_ec_lcopt_Co2L-4H_2030.nc`
   - **Summary statistics**: `results/stats/`
   - **Plots**: `results/plots/`
 
@@ -55,8 +55,8 @@ Once complete, you can find:
 
 Now that you've run your first model, explore:
 
-- **[Electricity Tutorial](../tutorials/electricity-model.md)** - Learn to customize electricity models
-- **[Sector-Coupled Tutorial](../tutorials/sector-coupled-model.md)** - Build multi-sector models
+- **[Electricity Tutorial](../tutorials/generic-examples/electricity-model.md)** - Learn to customize electricity models
+- **[Sector-Coupled Tutorial](../tutorials/generic-examples/sector-coupled-model.md)** - Build multi-sector models
 - **[Configuration Guide](../user-guide/configuration.md)** - Understand all configuration options
 - **[Model Customization](../user-guide/model-customization.md)** - Adapt the model to your needs
 
@@ -75,7 +75,7 @@ If data download fails:
 ```bash
 # Clear cache and retry
 snakemake -call --delete-all-output
-snakemake -call results/networks/elec_s_6_ec_lcopt_Co2L-4H.nc --configfile config.tutorial.yaml
+snakemake -call results/networks/elec_s_6_ec_lcopt_Co2L-4H_2030.nc --configfile config.tutorial.yaml
 ```
 
 ### Solver Errors

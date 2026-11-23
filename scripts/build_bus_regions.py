@@ -17,7 +17,7 @@ Relevant Settings
 
 .. seealso::
     Documentation of the configuration file ``config.yaml`` at
-    :ref:`toplevel_cf`
+    :ref:`meta_cf`
 
 Inputs
 ------
@@ -42,7 +42,7 @@ Outputs
 Description
 -----------
 """
-import os
+
 import warnings
 
 import geopandas as gpd
