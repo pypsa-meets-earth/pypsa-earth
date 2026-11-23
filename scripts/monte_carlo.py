@@ -34,14 +34,14 @@ Relevant Settings
 
 Inputs
 ------
-- ``networks/elec_s_10_ec_lcopt_Co2L-24H.nc``
+- ``networks/elec_s_10_ec_lcopt_Co2L-24H_2030.nc``
 
 Outputs
 -------
-- ``networks/elec_s_10_ec_lcopt_Co2L-24H_{unc}.nc``
+- ``networks/elec_s_10_ec_lcopt_Co2L-24H_2030_{unc}.nc``
 
-e.g.    networks/elec_s_10_ec_lcopt_Co2L-24H_m0.nc
-        networks/elec_s_10_ec_lcopt_Co2L-24H_m1.nc
+e.g.    networks/elec_s_10_ec_lcopt_Co2L-24H_2030_m0.nc
+        networks/elec_s_10_ec_lcopt_Co2L-24H_2030_m1.nc
         ...
 
 Description

@@ -11,19 +11,16 @@ from _helpers import configure_logging, content_retrieve, create_logger
 
 logger = create_logger(__name__)
 
-USGS_AMMONIA_SOURCES = {
-    "primary": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/myb1-2023-nitro-ERT.xlsx",
-    "archive": "https://data.pypsa.org/workflows/eur/nitrogen_statistics/2023/myb1-2023-nitro-ERT.xlsx",
-}
 
-
-def download_ammonia_production_data(ammonia_sources: dict) -> bytes:
+def download_ammonia_production_data(url_primary: str, url_archive: str) -> bytes:
     """
     Download ammonia production data from the USGS website, with a fallback to an archived version if the primary source is unavailable.
     Parameters
     ----------
-    ammonia_sources : dict
-        Dictionary containing the URLs for the primary and archive sources.
+    url_primary : str
+        URL of the primary USGS source.
+    url_archive : str
+        URL of the archived fallback mirror.
     Returns
     -------
     bytes
@@ -32,12 +29,10 @@ def download_ammonia_production_data(ammonia_sources: dict) -> bytes:
     # Download ammonia production data - try primary source, fallback to mirror if needed
     logger.info("Downloading ammonia production data from USGS...")
     try:
-        url = ammonia_sources["primary"]
-        content = content_retrieve(url)
+        content = content_retrieve(url_primary)
     except Exception:
         logger.warning("Primary source failed, trying fallback mirror...")
-        url = ammonia_sources["archive"]
-        content = content_retrieve(url)
+        content = content_retrieve(url_archive)
 
     return content
 
@@ -51,7 +46,10 @@ if __name__ == "__main__":
     configure_logging(snakemake)
 
     # Download ammonia production dataset
-    content = download_ammonia_production_data(USGS_AMMONIA_SOURCES)
+    content = download_ammonia_production_data(
+        snakemake.params.url_primary,
+        snakemake.params.url_archive,
+    )
 
     # Save raw Excel file
     with open(snakemake.output.usgs_ammonia_dataset, "wb") as f:
