@@ -301,6 +301,22 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
+def _migrate_costs_year(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Drop the removed ``costs.year``.
+
+    The cost year now follows ``scenario.planning_horizons``, so a ``costs.year``
+    left in a user config would otherwise be silently ignored.
+    """
+    costs = config.get("costs")
+    if not isinstance(costs, dict) or "year" not in costs:
+        return
+
+    costs.pop("year")
+    warn("costs.year", "scenario.planning_horizons")
+
+
 def _migrate_line_type_mappings(
     config: dict[str, Any],
     warn: Callable[[str, str], None],
@@ -379,7 +395,9 @@ def migrate_config(
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
     scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
     mappings, which are moved under their respective ``default`` keys. A legacy
-    scalar ``electricity.custom_powerplants`` becomes its ``method``.
+    scalar ``electricity.custom_powerplants`` becomes its ``method``. The removed
+    ``costs.year`` is dropped with a warning, as the cost year now follows
+    ``scenario.planning_horizons``.
 
     Parameters
     ----------
@@ -403,6 +421,7 @@ def migrate_config(
 
     _migrate_line_type_mappings(config, _warn)
     _migrate_custom_powerplants_method(config, _warn)
+    _migrate_costs_year(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
@@ -2351,6 +2370,25 @@ def get_base_carrier(carrier: str) -> str:
     if _is_year_tagged(carrier):
         return carrier.rsplit("-", 1)[0]
     return carrier
+
+
+def get_aggregate_carriers(
+    network: pypsa.Network,
+    exclude_carriers: Iterable[str],
+) -> set[str]:
+    """
+    Return carrier variants that should be aggregated.
+
+    Exclusions are matched against the base carrier so that, for example,
+    excluding ``coal`` also excludes internally year-tagged carriers such as
+    ``coal-2020``.
+    """
+    excluded_carriers = set(exclude_carriers)
+    return {
+        carrier
+        for carrier in network.generators.carrier.unique()
+        if get_base_carrier(carrier) not in excluded_carriers
+    }
 
 
 def restore_base_carrier_names(n: pypsa.Network) -> None:
