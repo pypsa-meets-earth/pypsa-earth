@@ -204,7 +204,7 @@ Complete log: .snakemake/log/...
 The solved network file is written to:
 
 ```
-results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
+results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc
 ```
 
 This is a PyPSA `Network` object stored as file in NetCDF format. In **[Part 2](2-analyze-results.md)** we open it, inspect installed capacities and dispatch, and validate against national statistics.

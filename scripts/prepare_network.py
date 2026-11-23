@@ -48,7 +48,7 @@ Inputs
 Outputs
 -------
 
-- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
+- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
 
 Description
 -----------
@@ -70,7 +70,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import update_transmission_costs
+from assign_costs import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -336,6 +336,7 @@ if __name__ == "__main__":
             clusters="6",
             ll="copt",
             opts="Co2L-4H",
+            planning_horizons=2030,
             # configfile="test/config.sector.yaml",
         )
 
