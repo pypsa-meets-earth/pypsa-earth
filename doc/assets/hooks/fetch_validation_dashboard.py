@@ -136,8 +136,7 @@ def make_grouped_bar_html(carriers_data, unit):
             width_pct = (val / max_val) * 100 if max_val > 0 else 0
             val_str = f"{val:.1f}" if val > 0 else "0"
 
-            bars_html.append(
-                f"""
+            bars_html.append(f"""
             <div style="display: flex; align-items: center; margin-bottom: 3px;">
                 <span style="font-size: 10px; font-weight: 500; color: #64748b; width: 60px; text-transform: uppercase;">{src_label}</span>
                 <div style="flex-grow: 1; background-color: #f1f5f9; height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid #e2e8f0; max-width: 350px;">
@@ -145,11 +144,9 @@ def make_grouped_bar_html(carriers_data, unit):
                 </div>
                 <span style="font-size: 10px; font-weight: 600; color: #334155; margin-left: 8px; width: 80px;">{val_str} {unit}</span>
             </div>
-            """
-            )
+            """)
 
-        rows_html.append(
-            f"""
+        rows_html.append(f"""
         <div style="display: flex; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; align-items: flex-start;">
             <div style="width: 110px; font-weight: 600; color: #475569; font-size: 12px; padding-top: 2px; text-align: right; margin-right: 16px; word-break: break-all;">
                 {carrier_name}
@@ -158,8 +155,7 @@ def make_grouped_bar_html(carriers_data, unit):
                 {"".join(bars_html)}
             </div>
         </div>
-        """
-        )
+        """)
 
     # Legend HTML
     legend_items = []
@@ -169,14 +165,12 @@ def make_grouped_bar_html(carriers_data, unit):
         ("IRENA", "#f59e0b"),
         ("OWID", "#8b5cf6"),
     ]:
-        legend_items.append(
-            f"""
+        legend_items.append(f"""
         <span style="display: inline-flex; align-items: center; margin-right: 16px; font-size: 11px; color: #475569; font-weight: 500;">
             <i style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background-color: {color}; margin-right: 6px;"></i>
             {label}
         </span>
-        """
-        )
+        """)
 
     html = f"""
 <div style="margin: 20px 0; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; max-width: 650px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
