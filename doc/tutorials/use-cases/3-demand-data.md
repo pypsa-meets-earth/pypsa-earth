@@ -51,7 +51,7 @@ PyPSA-Earth builds hourly load from a synthetic **global demand dataset** which 
 | Source | Config value | Weather years | Data location |
 |---|---|---|---|
 | **[GEGIS](http://dx.doi.org/10.1016/j.esr.2020.100606)** | `gegis` | 2011, 2013, 2018 | `data/ssp2-2.6/{prediction_year}/era5_{weather_year}/` (regional `.nc` / `.csv`, e.g. `Asia.nc` for KZ) |
-| **[DemandCast](https://github.com/open-energy-transition/demandcast)** | `demcast` | 2000–2024 (must match `snapshots` year) | `data/demand/forecasts_on_historical_period.parquet` (via databundle) |
+| **[DemandCast](https://github.com/open-energy-transition/demandcast)** | `demcast` | 2000–2025 (2025 for 91 countries; must match `snapshots` year) | `data/demand/forecasts_on_historical_period.parquet` (via databundle) |
 
 **GEGIS** is the default. Profiles are pre-calculated from population and GDP using the [synde](https://github.com/euronion/synde) workflow; `prediction_year` selects the SSP pathway folder (e.g. `2030` under `ssp2-2.6`).
 
@@ -100,7 +100,7 @@ load_options:
 !!! tip
     Validating against **2020** statistics does not mean setting `weather_year: 2020` or `prediction_year: 2020` under GEGIS as it offers neither of those. Keep `weather_year: 2013` and `prediction_year: 2030`, then adjust the **annual total** with `scale` (next step). If you change GEGIS `weather_year` to 2011 or 2018, update `snapshots` `start` / `end` to that same calendar year.
 
-If you experiment with **DemandCast** (`source: demcast`), set `weather_year` to the **calendar year you simulate** which is the same year as `snapshots` `start` / `end`. The parquet holds 2000–2024, but `build_demand_profiles` keeps only rows inside the snapshot window; a mismatch (e.g. `weather_year: 2020` with default 2013 snapshots) produces an **empty** `demand_profiles.csv`.
+If you experiment with **DemandCast** (`source: demcast`), set `weather_year` to the **calendar year you simulate** which is the same year as `snapshots` `start` / `end`. The parquet holds 2000–2025 (2025 for 91 countries only), but `build_demand_profiles` keeps only rows inside the snapshot window; a mismatch (e.g. `weather_year: 2020` with default 2013 snapshots) produces an **empty** `demand_profiles.csv`.
 
 ---
 
@@ -181,7 +181,7 @@ Snakemake compares your config with the last run and **rebuilds only what change
 When the run finishes, the updated solved network overwrites the same file you analysed in Part 2:
 
 ```
-results/KZ/networks/elec_s_10_ec_lcopt_6h.nc
+results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc
 ```
 
 **Expected runtime:** much faster than Part 1, on the order of **7-10 minutes** with HiGHS, because most upstream rules are skipped.
@@ -195,7 +195,7 @@ Reopen the notebook from Part 2 and reload the network. Total demand should matc
 ```python
 import pypsa
 
-n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
+n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc")
 weights = n.snapshot_weightings.generators
 total_TWh = n.loads_t.p_set.multiply(weights, axis=0).sum().sum() / 1e6
 print(f"Total annual demand: {total_TWh:.1f} TWh")

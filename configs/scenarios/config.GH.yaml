@@ -113,6 +113,8 @@ clustering:
       p_min_pu: mean
       p_max_pu: weighted_average
       marginal_cost: mean
+      connection_submarine_length: capacity_weighted_average
+      connection_underground_length: capacity_weighted_average
       committable: any
       ramp_limit_up: max
       ramp_limit_down: max
@@ -173,7 +175,7 @@ base_network:
   min_voltage_rebase_voltage: 33000 #minimum for Ghana #51000 # [V] minimum voltage in base network
 
 # DemandCast and GEGIS are two available options
-# DemandCast covers 2000-2024
+# DemandCast covers 2000-2025 (2025 is available for 91 countries)
 # GEGIS dataset provides data for 2011, 2013, 2018
 # Details and comparison are provided in
 # https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724
@@ -410,7 +412,6 @@ renewable:
 # TODO: Needs to be adjusted for Africa.
 # Costs Configuration
 costs:
-  year: 2030 # cost file selection, i.e. costs_2030.csv in this case; reference year for costs is always 2020
   technology_data_version: v0.13.2
   discountrate: [0.071] #, 0.086, 0.111]
   country_specific_data: "" # (optional) Reference to the desired technology-data directory for techno-economic input data; Only "" and "US" supported, for other values check the technology-data output directory

@@ -184,7 +184,7 @@ Reopen the notebook from Part 2 and reload the solved network. Use the same **`s
 ```python
 import pypsa
 
-n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h.nc")
+n = pypsa.Network("results/KZ/networks/elec_s_10_ec_lcopt_6h_2030.nc")
 
 caps = n.statistics()["Installed Capacity"].dropna() / 1e3  # GW
 caps = caps.drop(["Line", "Load"], errors="ignore")  # dropping line and load values
