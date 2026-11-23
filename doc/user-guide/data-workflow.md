@@ -14,6 +14,8 @@ Two major parts of the energy modeling workflow are preparing of power grid layo
 
 ![PyPSA-Earth Rulegraph](https://raw.githubusercontent.com/pypsa-meets-earth/documentation/main/doc/img/gen_rulegraph.svg)
 
+This section contains a high-level overview of the datasets used by the workflow. A detailed description of specific datasets we are using can be found in the [Data API](data_api.md) page.
+
 ## 1. Grid topology data
 
 OpenStreetMap [OSM](https://www.openstreetmap.org/) data are used to build power grid topology model. OSM is the biggest crowd-sourced collection of geographic information, which is daily updated and includes geolocation references. The data are available under ODbL licence and should be [credited appropriately](https://osm.org/copyright/) when used.
