@@ -168,11 +168,8 @@ def prepare_transport_data(n):
 
         transport = transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears
     else:
-        energy_totals_transport = (
-            nodal_energy_totals["total road"]
-            + nodal_energy_totals["total rail"]
-            - nodal_energy_totals["electricity rail"]
-        )
+        # Rail energy demand is accounted for separately in add_rail_transport().
+        energy_totals_transport = nodal_energy_totals["total road"]
         transport = (
             (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
             .divide(efficiency_gain * ice_correction)
