@@ -20,7 +20,7 @@ logger = create_logger(__name__)
 
 def process_edgar_emission_data(
     excel_file: str,
-    target_sheet: str = "v6.0_EM_CO2_fossil_IPCC2006",
+    target_sheet: str = "IPCC 2006",
 ) -> pd.DataFrame:
     """
     Process EDGAR CO2 emission Excel data into a clean DataFrame.
@@ -28,7 +28,7 @@ def process_edgar_emission_data(
     Detects the CO2 fossil fuel emissions sheet automatically, filters to
     'Public electricity and heat production' rows, and returns a DataFrame
     with country identifier columns (country_code_a3, country_code_a2, country_name)
-    and year columns (Y_YYYY).
+    and year columns (YYYY), with emissions in ktCO2.
 
     Parameters
     ----------
@@ -36,7 +36,7 @@ def process_edgar_emission_data(
         Path to the EDGAR CO2 emission Excel file (.xls or .xlsx).
     target_sheet : str, optional
         Name of the sheet in the Excel file to process. Defaults to
-        'v6.0_EM_CO2_fossil_IPCC2006'.
+        'IPCC 2006'.
 
     Returns
     -------
@@ -47,12 +47,11 @@ def process_edgar_emission_data(
     """
     logger.info(f"Processing EDGAR emission data from sheet: '{target_sheet}'")
 
-    df = pd.read_excel(excel_file, sheet_name=target_sheet, skiprows=8)
-    df.columns = df.iloc[0]
-    df = df.iloc[1:]
+    df = pd.read_excel(excel_file, sheet_name=target_sheet, header=9)
     df = df.loc[
-        df["ipcc_code_2006_for_standard_report_name"]
-        == "Main Activity Electricity and Heat Production"
+        (df["ipcc_code_2006_for_standard_report"] == "1.A.1.a")
+        & (df["Substance"] == "CO2")
+        & (df["fossil_bio"] == "fossil")
     ]  # TODO: extend filter to other relevant sectors
 
     year_cols = [
@@ -67,7 +66,7 @@ def process_edgar_emission_data(
     )
     df["country_code_a2"] = three_2_two_digits_countries(df["country_code_a3"])
     df = df[["country_code_a3", "country_code_a2", "country_name"] + year_cols]
-    df[year_cols] = df[year_cols].astype(float).ffill(axis=1).bfill(axis=1)
+    df[year_cols] = df[year_cols].astype(float)
 
     # rename year columns to remove 'Y_' prefix
     df = df.rename(columns={col: col[2:] for col in year_cols})
