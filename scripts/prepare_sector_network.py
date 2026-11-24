@@ -2285,6 +2285,34 @@ def align_transport_profile(
     return aligned.reindex(snapshots)
 
 
+def road_transport_service_factor(ice_share, electric_share, fuel_cell_share, options):
+    """Convert projected final road energy into equivalent transport demand."""
+    shares = np.array([ice_share, electric_share, fuel_cell_share])
+    efficiencies = np.array(
+        [
+            options["transport_internal_combustion_efficiency"],
+            options["bev_charge_efficiency"],
+            options["transport_fuel_cell_efficiency"],
+        ]
+    )
+
+    if (
+        not np.isfinite(shares).all()
+        or (shares < 0).any()
+        or not np.isclose(shares.sum(), 1.0)
+    ):
+        raise ValueError("Invalid land transport technology shares.")
+
+    if (
+        not np.isfinite(efficiencies).all()
+        or (efficiencies <= 0).any()
+        or (efficiencies > 1).any()
+    ):
+        raise ValueError("Land transport efficiencies must be in (0, 1].")
+
+    return 1.0 / (shares / efficiencies).sum()
+
+
 def add_land_transport(
     n: pypsa.Network,
     costs: pd.DataFrame,
@@ -2387,6 +2415,16 @@ def add_land_transport(
     logger.info("ICEV share: {}".format(ice_share))
 
     assert ice_share >= 0, "Error, more FCEV and EV share than 1."
+
+    # Replace the ICE reference conversion with the scenario fleet efficiency.
+    # Custom transport demand is already expressed as equivalent service demand.
+    if not snakemake.config["custom_data"]["transport_demand"]:
+        fleet_efficiency = road_transport_service_factor(
+            ice_share, electric_share, fuel_cell_share, options
+        )
+        transport *= (
+            fleet_efficiency / options["transport_internal_combustion_efficiency"]
+        )
 
     # Nodes are already defined, remove it from here
     # nodes = pop_layout.index
