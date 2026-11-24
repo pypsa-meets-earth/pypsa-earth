@@ -283,7 +283,7 @@ def get_GADM_layer(
         geodf_list.append(geodf_temp)
 
     geodf_GADM = gpd.GeoDataFrame(pd.concat(geodf_list, ignore_index=True))
-    geodf_GADM.set_crs(geo_crs)
+    geodf_GADM = geodf_GADM.set_crs(geo_crs)
 
     return geodf_GADM
 
@@ -383,9 +383,11 @@ def countries(
     df_countries = df_countries[["GID_0", "geometry"]].copy()
     df_countries.rename(columns={"GID_0": "name"}, inplace=True)
 
-    # set index and simplify polygons
-    ret_df = df_countries.set_index("name")["geometry"].map(
-        lambda x: _simplify_polys(x, tolerance=tolerance, minarea=minarea)
+    # set index and simplify polygons (map drops the CRS, so set it again)
+    ret_df = (
+        df_countries.set_index("name")["geometry"]
+        .map(lambda x: _simplify_polys(x, tolerance=tolerance, minarea=minarea))
+        .set_crs(geo_crs)
     )
 
     # there may be "holes" in the countries geometry which cause troubles along the workflow
@@ -545,7 +547,8 @@ def eez(
                 df_eez.geometry.loc[df_eez.name == cc].geometry.union_all()
                 for cc in eez_countries
             ],
-        }
+        },
+        crs=geo_crs,
     ).set_index("name")
 
     if simplify_gadm:
@@ -553,10 +556,12 @@ def eez(
             lambda x: _simplify_polys(x, minarea=minarea, tolerance=tolerance)
         )
 
-        ret_df = ret_df.apply(lambda x: make_valid(x))
+        ret_df = ret_df.apply(lambda x: make_valid(x)).set_crs(geo_crs)
 
-    country_shapes_with_buffer = country_shapes.buffer(distance)
-    ret_df_new = ret_df.difference(country_shapes_with_buffer)
+    # buffering in a geographic CRS triggers a warning, so only do it when needed
+    if distance:
+        country_shapes = country_shapes.buffer(distance)
+    ret_df_new = ret_df.difference(country_shapes)
 
     if simplify_gadm:
         # repeat to simplify after the buffer correction
@@ -567,7 +572,9 @@ def eez(
                 else _simplify_polys(x, minarea=minarea, tolerance=tolerance)
             )
         )
-        ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
+        ret_df_new = ret_df_new.apply(
+            lambda x: x if x is None else make_valid(x)
+        ).set_crs(geo_crs)
 
     # Drops empty geometry
     ret_df = ret_df_new.dropna()
@@ -2058,7 +2065,8 @@ if __name__ == "__main__":
     offshore_shapes.reset_index().to_file(out.offshore_shapes)
 
     extended_country_shape = gpd.GeoDataFrame(
-        geometry=[country_cover(country_shapes, offshore_shapes.geometry)]
+        geometry=[country_cover(country_shapes, offshore_shapes.geometry)],
+        crs=geo_crs,
     )
     extended_country_shape.reset_index().to_file(out.extended_country_shape)
 
