@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix regressions from Snakemake 9 support: `make_statistics` failure, unreadable error messages, ignored `configfile` in `mock_snakemake`, and leftover `demand`/`h2export` wildcard constraints [PR #2131](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2131)
+
 * Filter custom powerplants by the modelled countries in `add_custom_powerplants` [PR #2141](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2141)
 
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
