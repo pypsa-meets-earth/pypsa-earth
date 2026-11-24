@@ -26,7 +26,11 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Fix regressions from Snakemake 9 support: `make_statistics` failure, unreadable error messages, ignored `configfile` in `mock_snakemake`, and leftover `demand`/`h2export` wildcard constraints [PR #2131](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2131)
 
+* Filter custom powerplants by the modelled countries in `add_custom_powerplants` [PR #2141](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2141)
+
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
+
+* Keep the CRS of country, offshore and extended country shapes in `build_shapes`, which was lost during polygon simplification and caused CRS warnings [PR #2137](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2137)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
 
