@@ -43,10 +43,11 @@ if __name__ == "__main__":
 
         missing = transport.index[transport["average fuel efficiency"].isna()]
         if not missing.empty:
+            missing_countries = transport.loc[missing, "country"].unique()
             logger.info(
-                "Missing data on fuel efficiency from:\n",
-                f"{list(transport.loc[missing].country)}.",
-                "\nFilling gaps with averaged data.",
+                "Missing fuel efficiency data for:\n%s\n"
+                "Filling gaps with average fuel efficiency.",
+                missing_countries,
             )
 
             fill_value = transport["average fuel efficiency"].mean()
