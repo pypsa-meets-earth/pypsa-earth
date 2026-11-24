@@ -10,6 +10,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Integrate `planning_horizon` wildcard into electricity-only networks. The cost year now follows `scenario.planning_horizons` and `costs.year` is removed (a deprecation warning is raised if it is still set) [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
+
 * Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
 
 * Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
@@ -17,6 +19,8 @@ This part of documentation collects descriptive release notes to capture the mai
 * Remove support of `pydoe2` [PR #2022](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2022)
 
 * Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
+
+* Streamline data management #1711 by externalising on-fly data downloads and creating a data inventory [PR #1711](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1711)
 
 **Minor Changes and bug-fixing**
 

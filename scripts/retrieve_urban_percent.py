@@ -3,11 +3,14 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+import logging
 import os
 
 import py7zr
 import requests
-from _helpers import read_csv_nafix
+from _helpers import read_csv_nafix, to_csv_nafix
+
+logger = logging.getLogger(__name__)
 
 
 def download_urban_percent(fn):
@@ -15,9 +18,8 @@ def download_urban_percent(fn):
     Downloads the United Nations "Total and urban population, annual" .7z File
     and extracts it as csv File.
 
-    The above file was downloaded from the webpage
-    https://unctadstat.unctad.org/datacentre/
-    as a .7z file. The dataset contains urban percent for most countries from 1950 and predictions until 2050.
+    Data on urban population as a percentage worldwide ("pop_total_un"
+    dataset).
     """
     # Make a GET request to the URL
     response = requests.get(fn)
@@ -35,13 +37,13 @@ def download_urban_percent(fn):
         with open(filename, "wb") as f:
             f.write(response.content)
 
-        print(f"Urban percent downloaded successfully as {filename}")
+        logger.info(f"Urban percent downloaded successfully as {filename}")
 
         # Extract the downloaded .7z file
         with py7zr.SevenZipFile(filename, "r") as archive:
             archive.extractall()
 
-        print(f"Urban percent extracted successfully")
+        logger.info(f"Urban percent extracted successfully")
 
         # Read the extracted CSV file
         csv_filename = os.path.splitext(filename)[
@@ -49,14 +51,16 @@ def download_urban_percent(fn):
         ]  # Remove the .7z extension to get the CSV filename
         urban_percent_orig = read_csv_nafix(csv_filename)
 
-        print("Urban percent CSV file read successfully:")
+        logger.info("Urban percent CSV file read successfully:")
 
         # Remove the downloaded .7z and .csv files
         os.remove(filename)
         os.remove(csv_filename)
 
     else:
-        print(f"Failed to download file: Status code {response.status_code}")
+        raise RuntimeError(
+            f"Failed to download urban percent file from {fn}: status code {response.status_code}"
+        )
 
     return urban_percent_orig
 
@@ -68,4 +72,4 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("retrieve_urban_percent")
 
     df = download_urban_percent(snakemake.params.url_urban_percent)
-    df.to_csv(snakemake.output.urban_percent_raw)
+    to_csv_nafix(df, snakemake.output.urban_percent_raw)
