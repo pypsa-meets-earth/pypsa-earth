@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Correct the conversion of road transport final energy into equivalent transport-service demand [PR #2146](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2146)
+
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)

@@ -119,21 +119,8 @@ def prepare_transport_data(n):
     nodal_transport_data["number cars"] = (
         pop_layout["fraction"] * nodal_transport_data["number cars"]
     )
-    nodal_transport_data.loc[
-        nodal_transport_data["average fuel efficiency"] == 0.0,
-        "average fuel efficiency",
-    ] = transport_data["average fuel efficiency"].mean()
-
-    # electric motors are more efficient, so alter transport demand
-
-    plug_to_wheels_eta = options.get("bev_plug_to_wheel_efficiency", 0.2)
-    battery_to_wheels_eta = plug_to_wheels_eta * options.get(
-        "bev_charge_efficiency", 0.9
-    )
-
-    efficiency_gain = (
-        nodal_transport_data["average fuel efficiency"] / battery_to_wheels_eta
-    )
+    # The input's "average fuel efficiency" is not a physical
+    # powertrain efficiency and must not be used to scale road demand.
 
     # get heating demand for correction to demand time series
     temperature = xr.open_dataarray(snakemake.input.temp_air_total).to_pandas()
@@ -147,16 +134,8 @@ def prepare_transport_data(n):
         options["ICE_upper_degree_factor"],
     )
 
-    dd_EV = transport_degree_factor(
-        temperature,
-        options["transport_heating_deadband_lower"],
-        options["transport_heating_deadband_upper"],
-        options["EV_lower_degree_factor"],
-        options["EV_upper_degree_factor"],
-    )
-
-    # divide out the heating/cooling demand from ICE totals
-    # and multiply back in the heating/cooling demand for EVs
+    # Use ICE temperature corrections for the reference road profile.
+    # Normalize the profile to preserve annual final energy demand.
     weighted_transport_shape = transport_shape.mul(snapshot_weights, axis=0)
 
     ice_correction = (
@@ -173,11 +152,18 @@ def prepare_transport_data(n):
             + nodal_energy_totals["total rail"]
             - nodal_energy_totals["electricity rail"]
         )
-        transport = (
-            (transport_shape.multiply(energy_totals_transport) * 1e6 * Nyears)
-            .divide(efficiency_gain * ice_correction)
-            .multiply(1 + dd_EV)
-        )
+        # Convert final road energy to equivalent useful transport energy.
+        # The reference fleet is assumed to be ICE-dominated.
+        ice_efficiency = float(options["transport_internal_combustion_efficiency"])
+
+        if not np.isfinite(ice_efficiency) or not 0 < ice_efficiency <= 1:
+            raise ValueError(
+                "transport_internal_combustion_efficiency must be in (0, 1]."
+            )
+
+        transport = transport_shape.multiply(
+            energy_totals_transport * 1e6 * Nyears * ice_efficiency / ice_correction
+        ).multiply(1 + dd_ICE)
 
     # derive plugged-in availability for PKW's (cars)
 
