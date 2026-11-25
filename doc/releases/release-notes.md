@@ -24,7 +24,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Add interactive dry-run validation option and `--dry-run` flag to PyPSA-Earth CLI model runner
+* Add interactive dry-run validation option and `--dry-run` flag to PyPSA-Earth CLI model runner [PR #2149](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2149)
 
 * Fix the ktCO2-to-tCO2 conversion for automatically derived historical CO2 limits. [PR #2136](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2136)
 
