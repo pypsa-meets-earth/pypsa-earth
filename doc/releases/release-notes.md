@@ -24,7 +24,7 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
-* Use the built-in PyPSA time segmentation in `prepare_network`, which also fixes the segmentation option with tsam v3+ [PR #XXXX](https://github.com/pypsa-meets-earth/pypsa-earth/pull/XXXX)
+* Use the built-in PyPSA time segmentation in `prepare_network`, which also fixes the segmentation option with tsam v3+ [PR #2150](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2150)
 
 * Fix the ktCO2-to-tCO2 conversion for automatically derived historical CO2 limits. [PR #2136](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2136)
 
