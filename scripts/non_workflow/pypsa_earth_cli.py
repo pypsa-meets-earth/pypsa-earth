@@ -610,7 +610,7 @@ def quiz_zone() -> None:
 
 
 @app.command("run-model")
-def run_model(config_path="") -> None:
+def run_model(config_path: str = "", dry_run: bool = False) -> None:
     """
     Run the PyPSA-Earth model using snakemake
 
@@ -618,6 +618,8 @@ def run_model(config_path="") -> None:
     ----------
     config_path: str
         Path to the config file to be used for the model run. If not provided, the user will be prompted to select a config file.
+    dry_run: bool
+        Whether to perform a dry run (-n) to inspect jobs and DAG without executing.
 
     Returns
     -------
@@ -643,7 +645,16 @@ def run_model(config_path="") -> None:
     elif env == "conda":
         env_command = "conda run -n pypsa-earth"
 
-    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete"
+    # Prompt user if they want to perform a dry run (if not already specified via flag)
+    if not dry_run:
+        dry_run_choice = display_choice_menu(
+            "Do you want to perform a dry run first?", ["no", "yes"], 3
+        )
+        if dry_run_choice == "yes":
+            dry_run = True
+
+    dry_run_flag = " -n" if dry_run else ""
+    snakemake_command = f"{env_command} snakemake -c {cores} {target_rule} --configfile {config_path} --rerun-incomplete{dry_run_flag}"
 
     console.print(style="dim")
     console.print(
