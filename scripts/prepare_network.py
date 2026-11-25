@@ -257,51 +257,23 @@ def average_every_nhours(n, offset):
 
 
 def apply_time_segmentation(n, segments, solver_name):
+    """
+    Aggregate the network time series into segments of variable duration.
+
+    Uses the built-in PyPSA segmentation, which clusters all time-varying
+    data of the network. The snapshot weightings of each segment are the
+    sum of the original weightings it covers, so the total modelled time
+    stays the same (e.g. when the snapshots are scaled to a full year).
+    """
     logger.info(f"Aggregating time series to {segments} segments.")
-    try:
-        import tsam.timeseriesaggregation as tsam
-    except:
-        raise ModuleNotFoundError(
-            "Optional dependency 'tsam' not found." "Install via 'pip install tsam'"
-        )
 
-    p_max_pu_norm = n.generators_t.p_max_pu.abs().max().clip(lower=1e-6)
-    p_max_pu = n.generators_t.p_max_pu / p_max_pu_norm
-
-    load_norm = n.loads_t.p_set.abs().max().clip(lower=1e-6)
-    load = n.loads_t.p_set / load_norm
-
-    inflow_norm = n.storage_units_t.inflow.abs().max().clip(lower=1e-6)
-    inflow = n.storage_units_t.inflow / inflow_norm
-
-    raw = pd.concat([p_max_pu, load, inflow], axis=1, sort=False)
-
-    agg = tsam.TimeSeriesAggregation(
-        raw,
-        hoursPerPeriod=len(raw),
-        noTypicalPeriods=1,
-        noSegments=int(segments),
-        segmentation=True,
-        solver=solver_name,
+    result = n.cluster.temporal.get_segment_result(int(segments), solver=solver_name)
+    m = result.n
+    m.snapshot_weightings = (
+        n.snapshot_weightings.groupby(result.snapshot_map).sum().reindex(m.snapshots)
     )
 
-    segmented = agg.createTypicalPeriods()
-
-    weightings = segmented.index.get_level_values("Segment Duration")
-    offsets = np.insert(np.cumsum(weightings[:-1]), 0, 0)
-    snapshots = [n.snapshots[0] + pd.Timedelta(f"{offset}h") for offset in offsets]
-
-    n.set_snapshots(pd.DatetimeIndex(snapshots, name="name"))
-    n.snapshot_weightings = pd.Series(
-        weightings, index=snapshots, name="weightings", dtype="float64"
-    )
-
-    segmented.index = snapshots
-    n.generators_t.p_max_pu = segmented[n.generators_t.p_max_pu.columns] * p_max_pu_norm
-    n.loads_t.p_set = segmented[n.loads_t.p_set.columns] * load_norm
-    n.storage_units_t.inflow = segmented[n.storage_units_t.inflow.columns] * inflow_norm
-
-    return n
+    return m
 
 
 def enforce_autarky(n, only_crossborder=False):
