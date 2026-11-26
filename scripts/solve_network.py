@@ -92,6 +92,7 @@ from _helpers import (
     read_csv_nafix,
 )
 from linopy import LinearExpression
+from process_cost_data import get_yearly_currency_exchange_rate
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 
 logger = create_logger(__name__)
@@ -140,6 +141,23 @@ def prepare_network(n, solve_opts, config):
         n.line_volume_limit_dual = n.global_constraints.at["lv_limit", "mu"]
 
     if solve_opts.get("load_shedding"):
+        costs_config = config["costs"]
+        output_currency = costs_config["output_currency"]
+        exchange_rate = 1.0
+        if output_currency != "EUR":
+            exchange_rate = get_yearly_currency_exchange_rate(
+                "EUR",
+                output_currency,
+                default_exchange_rate=costs_config.get("default_exchange_rate"),
+                future_exchange_rate_strategy=costs_config.get(
+                    "future_exchange_rate_strategy", "reference"
+                ),
+                custom_future_exchange_rate=costs_config.get(
+                    "custom_future_exchange_rate"
+                ),
+            )
+        # Convert EUR/kWh to model currency/MWh.
+        shedding_cost = solve_opts["load_shedding"] * 1000 * exchange_rate
         required_p_nom = get_load_shedding_capacity(n, safety_margin=1.2)
         n.add("Carrier", "load shedding", color="#dd2e23", nice_name="Load shedding")
         n.add(
@@ -149,7 +167,7 @@ def prepare_network(n, solve_opts, config):
             bus=n.buses.index,
             carrier="load shedding",
             sign=1,
-            marginal_cost=solve_opts.get("load_shedding") * 1000,  # convert to Eur/MWh
+            marginal_cost=shedding_cost,
             p_nom=required_p_nom.reindex(n.buses.index, fill_value=0.5e6),
         )
 
@@ -172,7 +190,7 @@ def prepare_network(n, solve_opts, config):
         n.set_snapshots(n.snapshots[:nhours])
         n.snapshot_weightings[:] = 8760.0 / nhours
 
-    if snakemake.config["foresight"] == "myopic":
+    if config["foresight"] == "myopic":
         add_land_use_constraint(n)
 
     return n
@@ -1197,7 +1215,7 @@ if __name__ == "__main__":
     else:
         n_ref = None
 
-    n = prepare_network(n, solve_opts, config=solve_opts)
+    n = prepare_network(n, solve_opts, config=snakemake.config)
 
     n = solve_network(
         n,
