@@ -86,4 +86,3 @@ if __name__ == "__main__":
     # zipFilesInDir("./resources", "resources.zip", lambda x: True, include_parent=False)
     zipFilesInDir("./data", "data.zip", lambda x: True, include_parent=False)
     # zipFilesInDir("./cutouts", "cutouts.zip", lambda x: True, include_parent=False)
-

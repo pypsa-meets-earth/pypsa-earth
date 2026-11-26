@@ -27,15 +27,15 @@ The following module-level constants control the script behaviour:
 
 .. code-block:: python
 
-    SANDBOX_BOOL        # True → use sandbox.zenodo.org for safe testing
-    NEW_PROJECT         # True → create a new deposition; False → reuse EXISTING_PROJECT_ID
-    EXISTING_PROJECT_ID # Deposition ID to update when NEW_PROJECT is False
-    TYPE                # "upload" or "delete"
-    PUBLISH_BOOL        # True → publish after upload (irreversible!)
-    ROOT                # Absolute path to the directory containing the files
-    UPLOAD_PATHS        # List of filenames (relative to ROOT) to upload
-    DELETE_PATHS        # List of filenames (relative to ROOT) to delete
-    METADATA            # Dict with Zenodo deposition metadata
+    SANDBOX_BOOL  # True → use sandbox.zenodo.org for safe testing
+    NEW_PROJECT  # True → create a new deposition; False → reuse EXISTING_PROJECT_ID
+    EXISTING_PROJECT_ID  # Deposition ID to update when NEW_PROJECT is False
+    TYPE  # "upload" or "delete"
+    PUBLISH_BOOL  # True → publish after upload (irreversible!)
+    ROOT  # Absolute path to the directory containing the files
+    UPLOAD_PATHS  # List of filenames (relative to ROOT) to upload
+    DELETE_PATHS  # List of filenames (relative to ROOT) to delete
+    METADATA  # Dict with Zenodo deposition metadata
 
 Inputs
 ------
