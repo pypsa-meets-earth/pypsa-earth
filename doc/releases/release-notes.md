@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix logging calls in `monte_carlo` and `prepare_transport_data_input` that passed values without a `%s` placeholder and printed a logging error instead of the message [PR #2135](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2135)
+
 * Fix the ktCO2-to-tCO2 conversion for automatically derived historical CO2 limits. [PR #2136](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2136)
 
 * Fix regressions from Snakemake 9 support: `make_statistics` failure, unreadable error messages, ignored `configfile` in `mock_snakemake`, and leftover `demand`/`h2export` wildcard constraints [PR #2131](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2131)
