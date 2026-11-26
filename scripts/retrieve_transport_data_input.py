@@ -93,7 +93,7 @@ def download_number_of_vehicles(fn_who, fn_wiki):
         )[0]
         logger.info("File read successfully.")
     except Exception as e:
-        logger.warning(f"Failed to read the file. \nError: {e}")
+        logger.warning("Failed to read the file: %s", e)
         vehicles_wiki = pd.DataFrame(columns=["Country", "country", "number cars"])
 
     vehicles_wiki.rename(
@@ -140,7 +140,7 @@ def download_CO2_emissions(fn):
         logger.info("CO2 emissions file read successfully.")
     except Exception as e:
         logger.warning(
-            f"Failed to read the file. Falling back on hard-coded data. \nError: {e}"
+            "Failed to read the file. Falling back on hard-coded data: %s", e
         )
         return pd.DataFrame()
 

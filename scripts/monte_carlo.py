@@ -158,7 +158,7 @@ def report_discrepancy(latin_hypercube: np.ndarray):
 
     discrepancy = qmc.discrepancy(lht)
     logger.info(
-        "Discrepancy is:", discrepancy, " more details in function documentation."
+        "Discrepancy is: %s (more details in the function documentation)", discrepancy
     )
 
 
