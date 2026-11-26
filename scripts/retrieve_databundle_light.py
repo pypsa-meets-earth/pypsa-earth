@@ -805,6 +805,15 @@ def get_best_bundles_by_category(
 
                 returned_bundles.append(bname)
 
+        # the main tutorial data is available only for a few countries
+        if tutorial and category == "data" and remaining_countries:
+            raise ValueError(
+                "Tutorial data is not available for the countries: "
+                f"{sorted(remaining_countries)}. "
+                "Please select countries supported by the tutorial bundles "
+                "or set 'tutorial: false' in the configuration file."
+            )
+
     return returned_bundles
 
 

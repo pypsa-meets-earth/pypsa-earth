@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Raise a clear error when the tutorial is used for countries not covered by the tutorial data bundles [PR #2144](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2144)
+
 * Fix logging calls in `monte_carlo` and `prepare_transport_data_input` that passed values without a `%s` placeholder and printed a logging error instead of the message [PR #2135](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2135)
 
 * Fix the ktCO2-to-tCO2 conversion for automatically derived historical CO2 limits. [PR #2136](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2136)
@@ -31,7 +33,6 @@ This part of documentation collects descriptive release notes to capture the mai
 * Fix regressions from Snakemake 9 support: `make_statistics` failure, unreadable error messages, ignored `configfile` in `mock_snakemake`, and leftover `demand`/`h2export` wildcard constraints [PR #2131](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2131)
 
 * Filter custom powerplants by the modelled countries in `add_custom_powerplants` [PR #2141](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2141)
-
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
 * Keep the CRS of country, offshore and extended country shapes in `build_shapes`, which was lost during polygon simplification and caused CRS warnings [PR #2137](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2137)
