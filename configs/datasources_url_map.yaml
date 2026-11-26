@@ -668,10 +668,10 @@ source:
   description: "WHO Global Health Observatory (GHO) 'Registered vehicles' indicator (RS_194, Road Safety theme): number of registered motor vehicles by country. Fetched via the GHO OData API. A few countries are missing from this list (e.g. South Africa, Algeria)."
   tutorial: false
   countries: Earth
-  url: https://apps.who.int/gho/athena/data/GHO/RS_194?filter=COUNTRY:*&ead=&x-sideaxis=COUNTRY;YEAR;DATASOURCE&x-topaxis=GHO&profile=crosstable&format=csv
+  url: https://ghoapi.azureedge.net/api/RS_194
   version: ""
   checksum: ""
-  code_line: "[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L39)"
+  code_line: "[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L42)"
   license: CC BY-NC-SA 3.0 IGO + Permission is required for commercial uses and licensing of WHO materials
   license_link: https://www.who.int/about/policies/publishing/copyright
 
@@ -684,7 +684,7 @@ source:
   url: https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_motor_vehicles_per_capita
   version: ""
   checksum: ""
-  code_line: "[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L39)"
+  code_line: "[retrieve_transport_data_input:download_number_of_vehicles](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L42)"
   license: Creative Commons Attribution-ShareAlike 4.0 License and GNU FDL
   license_link: https://en.wikipedia.org/wiki/Wikipedia:Copyrights
 
@@ -697,7 +697,7 @@ source:
   url: https://web.archive.org/web/20240521093243if_/https://api.worldbank.org/v2/en/indicator/EN.CO2.TRAN.ZS?downloadformat=excel
   version: Wayback Machine snapshot 2024-05-21
   checksum: ""
-  code_line: "[retrieve_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L115)"
+  code_line: "[retrieve_transport_data_input:download_CO2_emissions](https://github.com/pypsa-meets-earth/pypsa-earth/blob/main/scripts/retrieve_transport_data_input.py#L123)"
   license: CC BY 4.0
   license_link: https://datacatalog.worldbank.org/public-licenses
 
