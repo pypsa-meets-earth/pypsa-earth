@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC-BY-4.0
 # Part 5: Adapt Fuel and Generation Costs
 
 !!! note
-    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 4](4-generation-data.md). Demand should be calibrated (`load_options.scale: 1.005`), the 2020 fleet locked with `custom_powerplants: replace`, and `config.KZ.yaml` should include those settings. The model will still shed **~7.7 TWh** of load on isolated buses at this point; that is expected, and it gets fixed in [Part 6](6-network-topology.md) and [Part 7](7-transmission-network.md).
+    This tutorial assumes you have completed [Part 1](1-baseline-model.md) through [Part 4](4-generation-data.md). Demand should be calibrated (`load_options.scale: 1.005`), the 2020 fleet locked with `custom_powerplants.method: replace`, and `config.KZ.yaml` should include those settings. The model will still shed **~7.7 TWh** of load on isolated buses at this point; that is expected, and it gets fixed in [Part 6](6-network-topology.md) and [Part 7](7-transmission-network.md).
 
 ## Introduction
 
@@ -51,7 +51,7 @@ add_electricity      →  attaches generators with those marginal costs
 
 | Step | What happens |
 |---|---|
-| **`retrieve_cost_data`** | Downloads [PyPSA/technology-data](https://github.com/PyPSA/technology-data) for `costs.year` (default **2030**) |
+| **`retrieve_cost_data`** | Downloads [PyPSA/technology-data](https://github.com/PyPSA/technology-data) for each year in `scenario.planning_horizons` (default **2030**) |
 | **`process_cost_data`** | Builds `capital_cost` and `marginal_cost`; applies config overrides |
 | **`add_electricity`** | Copies those values onto generators / storage units |
 
@@ -127,11 +127,11 @@ OCGT           24.57    4.76        0.410           64.68
 
 ## Step 2: Choose the cost year
 
-Defaults use **`costs.year: 2030`** (forward-looking technology-data). For a **2020 validation** study, pin the same year as your fleet and IRENA settings:
+The cost year follows `scenario.planning_horizons`. Defaults use **`planning_horizons: [2030]`** (forward-looking technology-data). For a **2020 validation** study, pin the same year as your fleet and IRENA settings:
 
 ```yaml
-costs:
-  year: 2020
+scenario:
+  planning_horizons: [2020]
 ```
 
 This switches which `costs_{year}.csv` is retrieved and processed. The fuel prices in the 2020 file may differ a little from the 2030 defaults, but coal usually stays cheaper than gas relative to each other. You still need Step 3 to bring in country-specific cost data.
@@ -288,7 +288,7 @@ A second confusion that is not cost-related sits in the network. By default, PyP
 
 | Step | Config key | Role |
 |---|---|---|
-| 2 | `costs.year` | Use **2020** technology-data for the validation year |
+| 2 | `scenario.planning_horizons` | Use **2020** technology-data for the validation year |
 | 3 | *(sourced Kazakhstan fuel + O&amp;M data)* | Compute the country-specific marginal cost per technology (already EUR/MWh<sub>el</sub>) |
 | 4 | `costs.marginal_cost.*` | Apply the computed values, replacing technology-data's generic figures |
 

@@ -15,6 +15,7 @@ enable:
 scenario:
   ll: ["v1.0"]
   opts: [6h]
+  planning_horizons: [2020]  # cost year: uses technology-data costs_2020.csv
 
 load_options:
   source: gegis
@@ -36,7 +37,8 @@ electricity:
   estimate_renewable_capacities:
     stats: irena
     year: 2020
-  custom_powerplants: replace
+  custom_powerplants:
+    method: replace
   base_voltage: 500
   voltages: [110, 220, 500]
 
@@ -47,7 +49,6 @@ lines:
     500.: "490-AL1/64-ST1A 380.0"
 
 costs:
-  year: 2020
   marginal_cost:            # EUR/MWh_el, sourced Kazakhstan fuel + O&M data
     coal: 16.0
     CCGT: 51.0

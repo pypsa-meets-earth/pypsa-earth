@@ -48,7 +48,7 @@ Inputs
 Outputs
 -------
 
-- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
+- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
 
 Description
 -----------
@@ -58,6 +58,7 @@ Description
     for all ``scenario`` s in the configuration file
     the rule :mod:`prepare_network`.
 """
+
 import re
 
 import numpy as np
@@ -69,7 +70,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import update_transmission_costs
+from assign_costs import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -98,7 +99,7 @@ def emission_extractor(
     Returns
     -------
     pd.Series
-        CO2 emission values (in kt CO2) of studied countries for the given year.
+        CO2 emission values (in t CO2) of studied countries for the given year.
     """
     emission_year = int(emission_year)
     df = pd.read_csv(emission_csv).set_index("country_code_a2")
@@ -143,7 +144,7 @@ def emission_extractor(
             "Please check the emission data file, the requested base year, or the "
             "configured countries."
         )
-    return emission_by_country
+    return emission_by_country * 1e3
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
@@ -215,7 +216,7 @@ def set_transmission_limit(n, ll_type, factor, costs, lines, links):
         n.links.loc[links_dc_b, "p_nom_max"] = n.links.loc[links_dc_b, "p_nom"] * float(
             factor
         )
-    elif factor != "opt":  # implicitly also ll_type != "l"
+    elif factor != "opt" and float(factor) > 1.0:  # implicitly also ll_type != "l"
         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
         rhs = float(factor) * ref
         n.add(
@@ -240,7 +241,7 @@ def average_every_nhours(n, offset):
     # For example 24H is deprecated. Instead, 24h is allowed.
 
     logger.info(f"Resampling the network to {offset}")
-    m = n.copy(with_time=False)
+    m = n.copy(snapshots=[])
 
     snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
     m.set_snapshots(snapshot_weightings.index)
@@ -314,8 +315,8 @@ def enforce_autarky(n, only_crossborder=False):
     else:
         lines_rm = n.lines.index
         links_rm = n.links.loc[n.links.carrier == "DC"].index
-    n.mremove("Line", lines_rm)
-    n.mremove("Link", links_rm)
+    n.remove("Line", lines_rm)
+    n.remove("Link", links_rm)
 
 
 def set_line_nom_max(n, lines, links):
@@ -335,6 +336,7 @@ if __name__ == "__main__":
             clusters="6",
             ll="copt",
             opts="Co2L-4H",
+            planning_horizons=2030,
             # configfile="test/config.sector.yaml",
         )
 

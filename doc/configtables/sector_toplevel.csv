@@ -23,7 +23,27 @@ Parameter,Unit,Values,Description
 -- network_limit,GWkm,,Add maximum hydrogen network capacity.
 -- network_routes,--,"One of {'gas', 'greenfield'}",Specify if either hydrogen network follows the topology of gas networks (gas) or closely resembles electrical transmission lines (greenfield).
 -- gas_network_repurposing,bool,"{true, false}",Specify if gas networks can be repurposed for hydrogen networks.
--- underground_storage,bool,"{true, false}",Add options for storing hydrogen underground. Storage potential depends regionally.
+-- h2_turbine,bool,"{true, false}","Add option for converting hydrogen back to electricity with hydrogen turbines. Their techno-economic parameters are approximated with those of open-cycle gas turbines (OCGT)."
+-- underground_storage,  ,  ,Settings for hydrogen storage in underground salt caverns.
+-- -- enabled,bool,"{true, false}",Add options for storing hydrogen underground. Storage potential depends regionally.
+-- -- min_area_km2,km2,,Minimum area of a salt cavern site to be considered for storage.
+-- -- method,--,"{surface, physics}",Method used to calculate the storage potential of the salt caverns.
+-- -- technical_realization_factor,float,,Factor applied to the theoretical cavern capacity to obtain the technically realisable storage potential.
+-- -- energy_density_MWh_per_m3,MWh/m3,,Energy density of stored hydrogen per cavern volume.
+-- -- cavern_height_bedded_m,m,,Height of a cavern in bedded salt.
+-- -- cavern_diameter_bedded_m,m,,Diameter of a cavern in bedded salt.
+-- -- cavern_height_dome_m,m,,Height of a cavern in a salt dome.
+-- -- cavern_diameter_dome_m,m,,Diameter of a cavern in a salt dome.
+-- -- salt_buffer_m_bedded,m,,Inward buffer applied to bedded salt shapes before land-use exclusions.
+-- -- salt_buffer_m_dome,m,,Inward buffer applied to salt dome shapes before land-use exclusions.
+-- -- copernicus,  ,  ,Land-use exclusions based on Copernicus land cover data.
+-- -- -- grid_codes,list,,Copernicus land cover grid codes whose areas are excluded from cavern siting.
+-- -- -- distance_buffer_by_code,dict,,Buffer distance in metres around excluded areas for each grid code.
+-- -- rho_min,kg/m3,,Minimum hydrogen density in the cavern (at low pressure).
+-- -- rho_max,kg/m3,,Maximum hydrogen density in the cavern (at high pressure).
+-- -- theta_safety,float,"[0, 1]",Usable working gas fraction; the share of stored hydrogen that can actually be withdrawn.
+-- -- lhv_h2,MJ/kg,,Lower heating value of hydrogen.
+-- -- locations,list,"Any subset of {onshore, offshore}",Types of cavern locations that are included as storage sites.
 -- hydrogen_colors,bool,"{true, false}",Specify if hydrogen carriers are disaggregated based on their source.
 -- set_color_shares,bool,"{true, false}",Add option if hydrogen sources must be derived from specific sources.
 -- blue_share,float,"[0, 1]",Share of hydrogen derived from gas with carbon capture.
@@ -42,6 +62,7 @@ Parameter,Unit,Values,Description
   ,  ,  ,"  "
 **ammonia**,  ,  ,Configuration for `sector.ammonia` settings.
 -- enable,bool,"{true, false}",Flag to include conventional Haber-Bosch ammonia production in the industry sector.
+-- spatial_ammonia,bool,"{true, false}",Add option to spatially resolve carrier representing ammonia supply.
 -- production_year,int,"[2019, 2023]",Year of ammonia production statistics used to scale nodal demand (data available 2019–2023).
 -- gas_MWh_per_tNH3,MWh/t,,Natural gas consumption per tonne of NH3 (feedstock + fuel for SMR-based Haber-Bosch route).
 -- elec_MWh_per_tNH3,MWh/t,,Electricity consumption per tonne of NH3 (SMR-based Haber-Bosch route).

@@ -32,7 +32,6 @@ grouped roughly as follows:
   ``rename_techs``, ``safe_divide``.
 """
 
-import calendar
 import io
 import logging
 import os
@@ -44,7 +43,6 @@ import time
 import warnings
 import zipfile
 from collections.abc import Callable, Iterable, Sequence
-from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Any
@@ -58,6 +56,8 @@ import requests
 import yaml
 from currency_converter import CurrencyConverter
 from fake_useragent import UserAgent
+
+PYPSA_V1 = bool(re.match(r"^1\.\d", pypsa.__version__))
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,34 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 # absolute path to config.default.yaml
 CONFIG_DEFAULT_PATH = os.path.join(BASE_DIR, "config.default.yaml")
+
+# absolute path to configs/datasources_url_map.yaml
+YAML_INVENTORY_PATH = os.path.join(BASE_DIR, "configs", "datasources_url_map.yaml")
+
+
+def get_datasource_url(dataset_name: str, yaml_path: str = YAML_INVENTORY_PATH) -> str:
+    """
+    Map a dataset dataset_name into a corersponding URL.
+
+    Parameters
+    ----------
+    dataset_name : str
+        The dataset's "name" key in the yaml inventory.
+    yaml_path : str
+        Path to the yaml inventory.
+
+    Returns
+    -------
+    str
+        A url string for a requested dataset.
+    """
+    with open(yaml_path) as f:
+        dataset_url = {s["name"]: s["url"] for s in yaml.safe_load(f)["source"]}
+
+    if dataset_name not in dataset_url:
+        raise KeyError(f"No entry named '{dataset_name}' found in {yaml_path}")
+
+    return dataset_url[dataset_name]
 
 
 def check_config_version(config: dict, fp_config: str = CONFIG_DEFAULT_PATH) -> None:
@@ -301,6 +329,22 @@ def _migrate_solar_thermal_enable(
     warn("sector.solar_thermal", "sector.solar_thermal_collector.enable")
 
 
+def _migrate_costs_year(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Drop the removed ``costs.year``.
+
+    The cost year now follows ``scenario.planning_horizons``, so a ``costs.year``
+    left in a user config would otherwise be silently ignored.
+    """
+    costs = config.get("costs")
+    if not isinstance(costs, dict) or "year" not in costs:
+        return
+
+    costs.pop("year")
+    warn("costs.year", "scenario.planning_horizons")
+
+
 def _migrate_line_type_mappings(
     config: dict[str, Any],
     warn: Callable[[str, str], None],
@@ -335,6 +379,33 @@ def _migrate_line_type_mappings(
         warn(f"lines.{key}", f"lines.{key}.default")
 
 
+def _migrate_custom_powerplants_method(
+    config: dict[str, Any], warn: Callable[[str, str], None]
+) -> None:
+    """Move a legacy scalar ``electricity.custom_powerplants`` under ``method``.
+
+    The option used to be a single value (``false``, ``merge`` or ``replace``).
+    It is now a dict with ``filepaths`` and ``method``, so the old value is moved
+    to ``method`` and ``filepaths`` is set to ``data/custom_powerplants.csv``.
+    """
+    electricity = config.get("electricity")
+    if not isinstance(electricity, dict):
+        return
+
+    method = electricity.get("custom_powerplants")
+    if isinstance(method, dict) or "custom_powerplants" not in electricity:
+        return
+
+    electricity["custom_powerplants"] = {
+        "filepaths": ["data/custom_powerplants.csv"],
+        "method": method,
+    }
+    warn(
+        "electricity.custom_powerplants: " + str(method),
+        "electricity.custom_powerplants.method: " + str(method),
+    )
+
+
 def migrate_config(
     config: dict[str, Any],
     migrations: Sequence[tuple[str, str]] | None = None,
@@ -351,7 +422,10 @@ def migrate_config(
     a legacy bool flag and the former ``{demand}`` / ``{h2export}`` wildcards
     (``scenario.demand`` → ``demand_data.scenario``, list ``export.h2export`` →
     scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
-    mappings, which are moved under their respective ``default`` keys.
+    mappings, which are moved under their respective ``default`` keys. A legacy
+    scalar ``electricity.custom_powerplants`` becomes its ``method``. The removed
+    ``costs.year`` is dropped with a warning, as the cost year now follows
+    ``scenario.planning_horizons``.
 
     Parameters
     ----------
@@ -374,6 +448,8 @@ def migrate_config(
         )
 
     _migrate_line_type_mappings(config, _warn)
+    _migrate_custom_powerplants_method(config, _warn)
+    _migrate_costs_year(config, _warn)
     _migrate_solar_thermal_enable(config, _warn)
     _migrate_co2_budget_base_value(config, _warn)
     _migrate_demand_and_h2export(config, _warn)
@@ -451,13 +527,10 @@ def copy_default_files() -> None:
 
 def create_logger(logger_name: str, level: int = logging.INFO) -> logging.Logger:
     """
-    Create a logger for a module and adds a handler needed to capture in logs
+    Create a logger for a module and adds a hook needed to capture in logs
     traceback from exceptions emerging during the workflow.
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(level)
-    handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
     sys.excepthook = handle_exception
     return logger
 
@@ -916,8 +989,8 @@ def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict
 def mock_snakemake(
     rulename: str,
     root_dir: str | Path | None = None,
+    configfiles: str | list | None = None,
     submodule_dir: str | None = None,
-    configfile: str | None = None,
     **wildcards,
 ):
     """
@@ -931,21 +1004,39 @@ def mock_snakemake(
     ----------
     rulename: str
         name of the rule for which the snakemake object should be generated
-    configfile: str
-        path to config file to be used in mock_snakemake
-    wildcards:
+    root_dir: str/path-like
+        path to the root directory of the snakemake project
+    configfiles: list, str
+        list of configfiles to be used to update the config
+    submodule_dir: str, Path
+        in case PyPSA-Earth is used as a submodule, submodule_dir is
+        the path of pypsa-earth relative to the project directory.
+    **wildcards:
         keyword arguments fixing the wildcards. Only necessary if wildcards are
         needed.
     """
     import os
 
-    import snakemake as sm
+    # Avoid silently treating the former ``configfile`` argument as a wildcard
+    if "configfile" in wildcards:
+        raise TypeError("mock_snakemake(): 'configfile' was renamed to 'configfiles'.")
 
-    try:
-        from pypsa.descriptors import Dict
-    except:
-        from pypsa.definitions.structures import Dict  # from pypsa version v0.31
+    import snakemake as sm
+    from packaging import version
+    from pypsa.definitions.structures import Dict
+    from snakemake import __version__ as sm_version
+    from snakemake.api import Workflow
+    from snakemake.common import SNAKEFILE_CHOICES
+    from snakemake.logging import LoggerManager
     from snakemake.script import Snakemake
+    from snakemake.settings.types import (
+        ConfigSettings,
+        DAGSettings,
+        OutputSettings,
+        ResourceSettings,
+        StorageSettings,
+        WorkflowSettings,
+    )
 
     script_dir = Path(__file__).parent.resolve()
     if root_dir is None:
@@ -953,6 +1044,7 @@ def mock_snakemake(
     else:
         root_dir = Path(root_dir).resolve()
 
+    workdir = None
     user_in_script_dir = Path.cwd().resolve() == script_dir
     if str(submodule_dir) in __file__:
         # the submodule_dir path is only need to locate the project dir
@@ -960,44 +1052,67 @@ def mock_snakemake(
     elif user_in_script_dir:
         os.chdir(root_dir)
     elif Path.cwd().resolve() != root_dir:
-        raise RuntimeError(
-            "mock_snakemake has to be run from the repository root"
-            f" {root_dir} or scripts directory {script_dir}"
+        logger.info(
+            "Not in scripts or root directory, will assume this is a separate workdir"
         )
+        workdir = Path.cwd()
+
     try:
-        for p in sm.SNAKEFILE_CHOICES:
+        for p in SNAKEFILE_CHOICES:
+            p = root_dir / p
             if os.path.exists(p):
                 snakefile = p
                 break
+        if configfiles is None:
+            configfiles = []
+        elif isinstance(configfiles, str):
+            configfiles = [configfiles]
 
-        if isinstance(configfile, str):
-            with open(configfile, "r") as file:
-                configfile = yaml.safe_load(file)
+        resource_settings = ResourceSettings()
+        config_settings = ConfigSettings(configfiles=map(Path, configfiles))
+        workflow_settings = WorkflowSettings()
+        storage_settings = StorageSettings()
+        dag_settings = DAGSettings(rerun_triggers=[])
 
-        workflow = sm.Workflow(
-            snakefile,
-            overwrite_configfiles=[],
-            rerun_triggers=[],
-            overwrite_config=configfile,
+        workflow_kwargs = dict(
+            config_settings=config_settings,
+            resource_settings=resource_settings,
+            workflow_settings=workflow_settings,
+            storage_settings=storage_settings,
+            dag_settings=dag_settings,
+            storage_provider_settings=dict(),
+            overwrite_workdir=workdir,
         )
-        workflow.include(snakefile)
-        workflow.global_resources = {}
-        try:
-            rule = workflow.get_rule(rulename)
-        except Exception as exception:
-            print(
-                exception,
-                f"The {rulename} might be a conditional rule in the Snakefile.\n"
-                f"Did you enable {rulename} in the config?",
+
+        # Snakemake version-dependent logger handling. Pass Snakemake its own
+        # logger: handing over this module's logger lets Snakemake attach its
+        # formatter to it, which drops message arguments and tracebacks.
+        if version.parse(sm_version) >= version.parse("9.14.6"):
+            from snakemake.logging import logger as sm_logger
+
+            output_settings = OutputSettings()
+            workflow_kwargs["logger_manager"] = LoggerManager(
+                logger=sm_logger, settings=output_settings
             )
-            raise
+
+        workflow = Workflow(**workflow_kwargs)
+        workflow.include(snakefile)
+
+        if configfiles:
+            for f in configfiles:
+                if not os.path.exists(f):
+                    raise FileNotFoundError(f"Config file {f} does not exist.")
+                workflow.configfile(f)
+
+        workflow.global_resources = {}
+        rule = workflow.get_rule(rulename)
         dag = sm.dag.DAG(workflow, rules=[rule])
         wc = Dict(wildcards)
         job = sm.jobs.Job(rule, dag, wc)
 
         def make_accessable(*ios):
             for io in ios:
-                for i in range(len(io)):
+                for i, _ in enumerate(io):
                     io[i] = os.path.abspath(io[i])
 
         make_accessable(job.input, job.output, job.log)
@@ -1013,6 +1128,7 @@ def mock_snakemake(
             job.rule.name,
             None,
         )
+        # Not set by the Snakemake constructor; used e.g. by make_statistics
         snakemake.benchmark = job.benchmark
 
         # create log and output dir if not existent
@@ -1096,16 +1212,8 @@ def convert_country_codes(
         ("SN-GM", "ISO3"): "SEN-GMB",
     }
 
-    unique_codes = (
-        set(country_codes)
-        if isinstance(country_codes, list)
-        else set(country_codes.unique())
-    )
-
-    if isinstance(country_codes, pd.Series):
-        unique_codes = list(set(country_codes))
-    elif isinstance(country_codes, list):
-        unique_codes = list(set(country_codes))
+    if isinstance(country_codes, (pd.Series, list)):
+        unique_codes = set(country_codes)
     else:
         raise ValueError(
             "Input must be a pandas Series or list containing country codes."
@@ -2301,6 +2409,25 @@ def get_base_carrier(carrier: str) -> str:
     if _is_year_tagged(carrier):
         return carrier.rsplit("-", 1)[0]
     return carrier
+
+
+def get_aggregate_carriers(
+    network: pypsa.Network,
+    exclude_carriers: Iterable[str],
+) -> set[str]:
+    """
+    Return carrier variants that should be aggregated.
+
+    Exclusions are matched against the base carrier so that, for example,
+    excluding ``coal`` also excludes internally year-tagged carriers such as
+    ``coal-2020``.
+    """
+    excluded_carriers = set(exclude_carriers)
+    return {
+        carrier
+        for carrier in network.generators.carrier.unique()
+        if get_base_carrier(carrier) not in excluded_carriers
+    }
 
 
 def restore_base_carrier_names(n: pypsa.Network) -> None:

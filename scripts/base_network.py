@@ -55,6 +55,7 @@ Outputs
 Description
 -----------
 """
+
 import os
 
 import geopandas as gpd
@@ -871,8 +872,8 @@ def base_network(
         Fully assembled base network with buses, lines, links, transformers,
         converters, country assignments, and underwater fractions.
     """
-    buses = _load_buses_from_osm(inputs.osm_buses).reset_index(drop=True)
-    lines = _load_lines_from_osm(inputs.osm_lines).reset_index(drop=True)
+    buses = _load_buses_from_osm(inputs.osm_buses)
+    lines = _load_lines_from_osm(inputs.osm_lines)
     transformers = _load_transformers_from_osm(inputs.osm_transformers, buses)
     converters = _load_converters_from_osm(inputs.osm_converters, buses)
 
@@ -916,11 +917,11 @@ def base_network(
     n.set_snapshots(pd.date_range(freq="h", **snapshots_config))
     n.snapshot_weightings[:] *= 8760.0 / n.snapshot_weightings.sum()
 
-    n.import_components_from_dataframe(buses, "Bus")
+    n.add("Bus", buses.index, **buses)
 
     if hvdc_as_lines_config:
         lines = pd.concat([lines_ac, lines_dc])
-        n.import_components_from_dataframe(lines, "Line")
+        n.add("Line", lines.index, **lines)
     else:
         lines_dc = _set_electrical_parameters_links(links_config, lines_dc)
         # parse line information into p_nom required for converters
@@ -929,11 +930,11 @@ def base_network(
             axis=1,
             result_type="reduce",
         )
-        n.import_components_from_dataframe(lines_ac, "Line")
-        n.import_components_from_dataframe(lines_dc, "Link")
+        n.add("Line", lines_ac.index, **lines_ac)
+        n.add("Link", lines_dc.index, **lines_dc)
 
-    n.import_components_from_dataframe(transformers, "Transformer")
-    n.import_components_from_dataframe(converters, "Link")
+    n.add("Transformer", transformers.index, **transformers)
+    n.add("Link", converters.index, **converters)
 
     # greenfield capacity expansion is represented with null capacity using num_parallel==0
     n.lines["num_parallel"] = n.lines["num_parallel"].where(

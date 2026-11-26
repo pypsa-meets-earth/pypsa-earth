@@ -17,8 +17,6 @@ Description
 -----------
 """
 
-import os
-
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib as mpl
@@ -683,7 +681,7 @@ def plot_transmission_topology(network):
 
     n.lines = pd.concat([n.lines, DC_lines[["bus0", "bus1"]]])
 
-    n.madd("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
+    n.add("Line", names=DC_lines.index, bus0=DC_lines.bus0, bus1=DC_lines.bus1)
 
     fig = plt.figure()
     fig.set_size_inches(10.5, 9)
@@ -1005,7 +1003,6 @@ nice_names_n = {
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        import os
 
         from _helpers import mock_snakemake
 
