@@ -1,22 +1,52 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
-
-# -*- coding: utf-8 -*-
 """
-Uploads local files to Zenodo or sandbox.Zenodo.
+Upload or delete dataset files on Zenodo (or sandbox.Zenodo) via the REST API.
+
+This non-workflow helper script is used by maintainers to push release datasets
+(ZIP archives, cutouts, etc.) to a Zenodo deposition so that they can be
+downloaded by end-users during ``snakemake`` runs.
 
 Requirements
 ------------
-- Install zenodopy: pip git+https://github.com/pz-max/zenodopy@patch-4
+Install the patched ``zenodopy`` client::
 
-- Setup zenodopy (token): https://github.com/pz-max/zenodopy/tree/patch-4#using-the-package
+    pip install git+https://github.com/pz-max/zenodopy@patch-4
 
-- Be aware of Zenodo REST API e.g. for metadata modifications: https://developers.zenodo.org/#introduction
+Obtain a personal API token from your Zenodo account and configure
+``zenodopy`` as described at:
+https://github.com/pz-max/zenodopy/tree/patch-4#using-the-package
+
+For metadata customisation refer to the Zenodo REST API docs:
+https://developers.zenodo.org/#introduction
 
 Relevant Settings
 -----------------
+The following module-level constants control the script behaviour:
+
+.. code-block:: python
+
+    SANDBOX_BOOL  # True → use sandbox.zenodo.org for safe testing
+    NEW_PROJECT  # True → create a new deposition; False → reuse EXISTING_PROJECT_ID
+    EXISTING_PROJECT_ID  # Deposition ID to update when NEW_PROJECT is False
+    TYPE  # "upload" or "delete"
+    PUBLISH_BOOL  # True → publish after upload (irreversible!)
+    ROOT  # Absolute path to the directory containing the files
+    UPLOAD_PATHS  # List of filenames (relative to ROOT) to upload
+    DELETE_PATHS  # List of filenames (relative to ROOT) to delete
+    METADATA  # Dict with Zenodo deposition metadata
+
+Inputs
+------
+- Local files or directories listed in ``UPLOAD_PATHS``, resolved relative to
+  ``ROOT``.  Directories are automatically compressed to ZIP before upload.
+
+Outputs
+-------
+- Files uploaded to (or deleted from) the specified Zenodo deposition.
+- If ``PUBLISH_BOOL`` is ``True`` the deposition is published and becomes
+  publicly accessible with a persistent DOI.
 """
 
 from pathlib import Path
@@ -86,14 +116,14 @@ if NEW_PROJECT == False:
                             zeno.upload_file(str(path))
                         elif path.is_dir():
                             zeno.upload_zip(str(path))
-                    except:
+                    except Exception:
                         zeno.update(path)
                         continue
 
             if TYPE == "delete":
                 try:
                     zeno.delete_file(str(path))
-                except:
+                except Exception:
                     print(f"Cannot delete {path}. Repo needs to be in edit mode.")
         else:
             raise FileNotFoundError(f"{path} does not exist")
