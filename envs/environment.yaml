@@ -38,6 +38,7 @@ dependencies:
 - xarray>=2026.1
 - netcdf4
 - libgdal-netcdf
+- libgdal-core<3.13
 - networkx
 - scipy
 - shapely!=2.0.4
