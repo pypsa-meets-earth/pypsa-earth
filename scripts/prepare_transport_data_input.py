@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
 import shutil
+from pathlib import Path
 
 import pandas as pd
 from _helpers import BASE_DIR, read_csv_nafix
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
     if nbr_vehicles.empty or CO2_emissions.empty:
         # In case one of the urls is not working, we can use the hard-coded data
-        src = BASE_DIR + "/data/temp_hard_coded/transport_data.csv"
+        src = Path(BASE_DIR) / "data" / "temp_hard_coded" / "transport_data.csv"
         dest = snakemake.output.transport_data_input
         shutil.copy(src, dest)
     else:
@@ -38,7 +39,7 @@ if __name__ == "__main__":
         # which will be saved as transport_data.csv in the resource folder and used
         # to prepare further (nodal) transport data in prepare_transport_data
         # and to scale the e-mob parameters in prepare_sector_network.
-        transport = pd.merge(nbr_vehicles, CO2_emissions, on="country")
+        transport = pd.merge(nbr_vehicles, CO2_emissions, on="country", how="left")
         transport = transport[["country", "number cars", "average fuel efficiency"]]
 
         missing = transport.index[transport["average fuel efficiency"].isna()]
