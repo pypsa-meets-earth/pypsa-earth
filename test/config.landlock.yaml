@@ -21,6 +21,7 @@ electricity:
   extendable_carriers:
     Generator: [solar, onwind, OCGT]
   renewable_carriers: [solar, csp, onwind, hydro]
+  fill_missing_hydro_tech: "reservoir"
 
 osm:
   build_osm_network:
