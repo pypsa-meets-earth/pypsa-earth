@@ -36,6 +36,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
 
+* Run `prepare_gas_network` only under its `__main__` guard, so importing the script no longer executes the workflow [PR #2127](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2127)
+
 * Keep the CRS of country, offshore and extended country shapes in `build_shapes`, which was lost during polygon simplification and caused CRS warnings [PR #2137](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2137)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
