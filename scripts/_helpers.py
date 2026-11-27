@@ -989,7 +989,7 @@ def get_aggregation_strategies(aggregation_strategies: dict) -> tuple[dict, dict
 def mock_snakemake(
     rulename: str,
     root_dir: str | Path | None = None,
-    configfiles: str | None = None,
+    configfiles: str | list | None = None,
     submodule_dir: str | None = None,
     **wildcards,
 ):
@@ -1016,6 +1016,10 @@ def mock_snakemake(
         needed.
     """
     import os
+
+    # Avoid silently treating the former ``configfile`` argument as a wildcard
+    if "configfile" in wildcards:
+        raise TypeError("mock_snakemake(): 'configfile' was renamed to 'configfiles'.")
 
     import snakemake as sm
     from packaging import version
@@ -1080,11 +1084,15 @@ def mock_snakemake(
             overwrite_workdir=workdir,
         )
 
-        # Snakemake version-dependent logger handling
+        # Snakemake version-dependent logger handling. Pass Snakemake its own
+        # logger: handing over this module's logger lets Snakemake attach its
+        # formatter to it, which drops message arguments and tracebacks.
         if version.parse(sm_version) >= version.parse("9.14.6"):
+            from snakemake.logging import logger as sm_logger
+
             output_settings = OutputSettings()
             workflow_kwargs["logger_manager"] = LoggerManager(
-                logger=logger, settings=output_settings
+                logger=sm_logger, settings=output_settings
             )
 
         workflow = Workflow(**workflow_kwargs)
@@ -1120,6 +1128,9 @@ def mock_snakemake(
             job.rule.name,
             None,
         )
+        # Not set by the Snakemake constructor; used e.g. by make_statistics
+        snakemake.benchmark = job.benchmark
+
         # create log and output dir if not existent
         for path in list(snakemake.log) + list(snakemake.output):
             Path(path).parent.mkdir(parents=True, exist_ok=True)

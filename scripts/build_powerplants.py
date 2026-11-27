@@ -306,6 +306,7 @@ def add_custom_powerplants(
     ppl: pd.DataFrame,
     custom_powerplants_files: list[str],
     method: bool | str,
+    countries_names: list[str],
 ) -> pd.DataFrame:
     """
     Merge or replace powerplantmatching data with custom powerplant files.
@@ -319,6 +320,9 @@ def add_custom_powerplants(
     method : bool or str
         Method applied to all custom files together. Accepted values are
         ``False``, ``"merge"``, and ``"replace"``.
+    countries_names : list[str]
+        Short names of the modelled countries. Custom powerplants located
+        in other countries are removed.
 
     Returns
     -------
@@ -353,6 +357,17 @@ def add_custom_powerplants(
         ignore_index=True,
         sort=False,
     )
+
+    # keep only custom powerplants located in the modelled countries
+    custom_ppls = custom_ppls.powerplant.convert_to_short_name()
+    n_custom_before = len(custom_ppls)
+    custom_ppls = custom_ppls.query("Country in @countries_names")
+    n_custom_dropped = n_custom_before - len(custom_ppls)
+    if n_custom_dropped > 0:
+        logger.info(
+            f"Removed {n_custom_dropped} custom powerplants located outside "
+            "the modelled countries"
+        )
 
     if method == "replace":
         return custom_ppls
@@ -462,6 +477,7 @@ if __name__ == "__main__":
         ppl=ppl,
         custom_powerplants_files=list(snakemake.input.custom_powerplants),
         method=custom_method,
+        countries_names=countries_names,
     ).query(ppl_query)
 
     ppl = ppl.powerplant.convert_country_to_alpha2().pipe(
