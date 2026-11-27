@@ -378,9 +378,9 @@ def update_generator_costs(
     """
     Update horizon-specific cost attributes on generators in-place.
 
-    - **marginal_cost** is refreshed for **all** generators whose carrier is
-      in the cost table (operating costs change per horizon for existing and
-      new-build units).
+    - **marginal_cost** is refreshed using horizon-specific technology costs.
+      Existing generators retain their plant-specific fuel-efficiency
+      corrections, while extendable generators use reference technology costs.
     - **capital_cost**, **efficiency**, and **lifetime** are refreshed **only
       for extendable** (new-build) generators. Non-extendable plants keep
       build-time efficiency and lifetime; their capital_cost is irrelevant to
@@ -419,12 +419,37 @@ def update_generator_costs(
         is_carrier = n.generators.carrier == carrier
         is_ext = is_carrier & n.generators.p_nom_extendable
 
-        # marginal_cost: refresh for all units — operating costs change per horizon
+        # Update marginal costs using the selected horizon's technology data.
+        reference_marginal_cost = costs.at[cost_key, "marginal_cost"]
         _assign_component_attrs(
             n.generators,
             is_carrier,
-            marginal_cost=costs.at[cost_key, "marginal_cost"],
+            marginal_cost=reference_marginal_cost,
         )
+
+        # Preserve plant-specific efficiency corrections for existing generators.
+        is_fixed = is_carrier & ~n.generators.p_nom_extendable
+        if is_fixed.any() and "fuel" in costs.columns:
+            fuel_cost = costs.at[cost_key, "fuel"]
+
+            if pd.notna(fuel_cost) and fuel_cost != 0:
+                reference_efficiency = costs.at[cost_key, "efficiency"]
+                efficiencies = n.generators.loc[is_fixed, "efficiency"]
+
+                if (
+                    pd.isna(reference_efficiency)
+                    or reference_efficiency <= 0
+                    or efficiencies.isna().any()
+                    or (efficiencies <= 0).any()
+                ):
+                    raise ValueError(
+                        f"Invalid efficiency for existing {carrier} generators."
+                    )
+
+                n.generators.loc[is_fixed, "marginal_cost"] = (
+                    reference_marginal_cost
+                    + fuel_cost * (1 / efficiencies - 1 / reference_efficiency)
+                )
 
         # capital_cost / efficiency / lifetime: extendable units only
         if not is_ext.any():

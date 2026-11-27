@@ -334,15 +334,15 @@ def _migrate_costs_year(
 ) -> None:
     """Drop the removed ``costs.year``.
 
-    The cost year now follows ``scenario.planning_horizons``, so a ``costs.year``
-    left in a user config would otherwise be silently ignored.
+    Technology cost years now use ``costs.year_selection`` for each
+    planning horizon, so legacy ``costs.year`` must not be silently ignored.
     """
     costs = config.get("costs")
     if not isinstance(costs, dict) or "year" not in costs:
         return
 
     costs.pop("year")
-    warn("costs.year", "scenario.planning_horizons")
+    warn("costs.year", "costs.year_selection")
 
 
 def _migrate_line_type_mappings(
@@ -424,8 +424,8 @@ def migrate_config(
     scalar), and legacy ``lines.ac_types`` and ``lines.dc_types`` voltage
     mappings, which are moved under their respective ``default`` keys. A legacy
     scalar ``electricity.custom_powerplants`` becomes its ``method``. The removed
-    ``costs.year`` is dropped with a warning, as the cost year now follows
-    ``scenario.planning_horizons``.
+    ``costs.year`` is dropped with a warning. Technology cost years are
+    selected per planning horizon using ``costs.year_selection``.
 
     Parameters
     ----------
