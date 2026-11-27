@@ -40,7 +40,7 @@ Outputs
 -------
 
 - ``cutouts/{cutout}``: weather data from either the `ERA5 <https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5>`_
-  reanalysis weather dataset or `SARAH-2 <https://wui.cmsaf.eu/safira/action/viewProduktSearch>`_
+  reanalysis weather dataset or `SARAH-3 <https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003>`_
   satellite-based historic weather data with the following structure:
 
 **ERA5 cutout:**
@@ -83,7 +83,7 @@ Outputs
     .. image:: /img/era5.png
         :width: 40 %
 
-A **SARAH-2 cutout** can be used to amend the fields ``temperature``, ``influx_toa``, ``influx_direct``, ``albedo``,
+A **SARAH-3 cutout** can be used to amend the fields ``temperature``, ``influx_toa``, ``influx_direct``, ``albedo``,
 ``influx_diffuse`` of ERA5 using satellite-based radiation observations.
 
     .. image:: /img/sarah.png
