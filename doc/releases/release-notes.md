@@ -100,6 +100,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Fix load shedding cost conversion for non-EUR currencies [PR #2155](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2155)
+
 * Update `technology-data` to v0.15.0 and align the cost-data reference year to 2025 [PR #1729](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1729)
 
 * Add a command line interface (CLI) to help beginners to PyPSA-Earth to navigate through the model [PR #1959](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1959)
