@@ -38,6 +38,8 @@ co2:
   base: 1.487e+9
   automatic_emission:
     enable: true
+  sector_policy:
+    policy_file: "configs/policy/co2_sector_limits.csv"
 
 
 atlite:
