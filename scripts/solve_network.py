@@ -568,14 +568,25 @@ def add_RES_constraints(n, res_share, config):
 
     renew_techs = config["electricity"]["renewable_carriers"]
 
-    charger_carriers = ["H2 electrolysis", "battery charger"]
-    discharger_carriers = ["H2 fuel cell", "battery discharger"]
+    storage_carriers = n.stores.carrier[
+        n.stores.carrier.isin(config["storage_techs"])
+    ].unique()
+
+    charger_carriers = [
+        f"{carrier} {suffix}"
+        for carrier in storage_carriers
+        for suffix in ("charger", "electrolysis")
+    ]
+    discharger_carriers = [
+        f"{carrier} {suffix}"
+        for carrier in storage_carriers
+        for suffix in ("discharger", "fuel cell")
+    ]
 
     lgrouper = n.loads.bus.map(n.buses.country).rename("country")
 
-    load = (
-        n.snapshot_weightings.generators @ n.loads_t.p_set.T.groupby(lgrouper).sum().T
-    )
+    load_profiles = n.get_switchable_as_dense("Load", "p_set")
+    load = n.snapshot_weightings.generators @ load_profiles.T.groupby(lgrouper).sum().T
     rhs = res_share * load
 
     dispatch = n.model["Generator-p"]
