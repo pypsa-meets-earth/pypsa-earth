@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Fix RES and EQ custom constraints by updating Linopy grouping, aggregating RES shares annually by country, handling optional storage and link components, and correcting charging/discharging accounting [PR #2107](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2107)
+
 * Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `retrieve_transport_data_input` is no longer available [PR #2118](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2118)
 
 * Fix logging calls in `monte_carlo` and `prepare_transport_data_input` that passed values without a `%s` placeholder and printed a logging error instead of the message [PR #2135](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2135)
