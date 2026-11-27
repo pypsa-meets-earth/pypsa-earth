@@ -56,3 +56,8 @@ solving:
   solver:
     name: glpk
     options: glpk-default
+
+
+demand_data:
+  unsd_source: "legacy" # Options: "legacy" (archived UNdata exports), "sdmx" (UNSD SDMX API).
+  unsd_max_year_gap: 0 # Maximum lookback in years for missing base-year observations (SDMX only). 0 requires exact-year data.

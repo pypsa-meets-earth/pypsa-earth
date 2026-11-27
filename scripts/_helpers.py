@@ -1968,7 +1968,13 @@ def get_conv_factors(sector: str) -> dict:
             "Aviation gasoline": 0.01230,
             "Biodiesel": 0.01022,
             "Natural gas liquids": 0.01228,
+            "Natural Gas Liquids": 0.01228,
+            "Other oil products n.e.c.": 0.0118044444,
+            "White spirit and special boiling point industrial spirits": 0.0120021667,
             "Biogasoline": 0.007444,
+            "Other liquid biofuels": 27.4 / 3600,  # UNSD IRES default NCV
+            "Of which: biogasoline": 0.007444,
+            "Of which: biodiesel": 0.01022,
             "Bitumen": 0.01117,
             "Fuel oil": 0.01122,
             "Liquefied petroleum gas (LPG)": 0.01313,
@@ -2059,6 +2065,9 @@ def aggregate_fuels(sector: str) -> tuple[list[str], ...]:
         "Gasoline-type jet fuel",  ##
         "Paraffin waxes",  ##
         "Natural gas liquids",  #
+        "Natural Gas Liquids",
+        "Other oil products n.e.c.",
+        "White spirit and special boiling point industrial spirits",
         "Other kerosene",
     ]
 
@@ -2067,6 +2076,9 @@ def aggregate_fuels(sector: str) -> tuple[list[str], ...]:
         "Fuelwood",  #
         "Biogases",
         "Biogasoline",  #
+        "Other liquid biofuels",
+        "Of which: biogasoline",
+        "Of which: biodiesel",
         "Biodiesel",  #
         "Charcoal",  #
         "Black Liquor",  #

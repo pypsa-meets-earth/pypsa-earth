@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add UNSD SDMX API support for sectoral energy demand [PR #2160](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2160)
+
 * Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `retrieve_transport_data_input` is no longer available [PR #2118](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2118)
 
 * Fix logging calls in `monte_carlo` and `prepare_transport_data_input` that passed values without a `%s` placeholder and printed a logging error instead of the message [PR #2135](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2135)
