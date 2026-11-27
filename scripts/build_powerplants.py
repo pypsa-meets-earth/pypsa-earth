@@ -183,7 +183,24 @@ from scipy.spatial import cKDTree as KDTree
 logger = create_logger(__name__)
 
 
-def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
+def convert_osm_to_pm(
+    filepath_ppl_osm: str, filepath_ppl_pm: str
+) -> pd.DataFrame | None:
+    """
+    Convert OSM-extracted generator data into powerplantmatching format.
+
+    Parameters
+    ----------
+    filepath_ppl_osm : str
+        Path to the cleaned OSM generators CSV file.
+    filepath_ppl_pm : str
+        Output path for the converted powerplantmatching-compatible CSV file.
+
+    Returns
+    -------
+    pd.DataFrame or None
+        Converted powerplants dataframe, or ``None`` if the input file is empty.
+    """
     if os.stat(filepath_ppl_osm).st_size == 0:
         return to_csv_nafix(pd.DataFrame(), filepath_ppl_pm, index=False)
 
@@ -221,7 +238,6 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     "gasoline": "Oil",
                     "waste": "Waste",
                     "osmotic": "Other",
-                    "wave": "Other",
                     # approximation
                     # TODO: this shall be improved, one entry shall be Oil and the otherone gas
                     "gas;oil": "Oil",
@@ -236,8 +252,8 @@ def convert_osm_to_pm(filepath_ppl_osm, filepath_ppl_pm):
                     # a very strong assumption
                     "wind_turbine": "Onshore",
                     "horizontal_axis": "Onshore",
-                    "vertical_axis": "Offhore",
-                    "solar_photovoltaic_panel": "Pv",
+                    "vertical_axis": "Offshore",
+                    "solar_photovoltaic_panel": "PV",
                 },
                 Set={"generator": "PP", "plant": "PP"},
             )
@@ -412,6 +428,34 @@ def replace_natural_gas_technology(df: pd.DataFrame):
     return df
 
 
+def _has_external_database(config: dict) -> bool:
+    """
+    Check whether ``EXTERNAL_DATABASE`` is enabled in the powerplantmatching config.
+
+    Supports both plain source names (e.g. ``"EXTERNAL_DATABASE"``) and
+    query-filtered mapping entries (e.g. ``{"EXTERNAL_DATABASE": "Fueltype != 'Hydro'"}``).
+
+    Parameters
+    ----------
+    config : dict
+        Loaded powerplantmatching configuration dictionary.
+
+    Returns
+    -------
+    bool
+        ``True`` if ``EXTERNAL_DATABASE`` appears in ``matching_sources`` or
+        ``fully_included_sources``, ``False`` otherwise.
+    """
+    sources = (config.get("matching_sources") or []) + (
+        config.get("fully_included_sources") or []
+    )
+    return any(
+        source == "EXTERNAL_DATABASE"
+        or (isinstance(source, dict) and "EXTERNAL_DATABASE" in source)
+        for source in sources
+    )
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -432,16 +476,16 @@ if __name__ == "__main__":
 
     config["target_countries"] = countries_names
 
-    if (
-        "EXTERNAL_DATABASE"
-        in config["matching_sources"] + config["fully_included_sources"]
-    ):
+    if _has_external_database(config):
         if "EXTERNAL_DATABASE" not in config:
-            logger.error(
-                "Missing configuration EXTERNAL_DATABASE in powerplantmatching config yaml\n\t"
-                "Please check file configs/powerplantmatching_config.yaml"
+            msg = (
+                "Missing configuration EXTERNAL_DATABASE in powerplantmatching "
+                "config yaml. Please check file configs/powerplantmatching_config.yaml"
             )
+            logger.error(msg)
+            raise KeyError(msg)
         logger.info("Parsing OSM generator data to powerplantmatching format")
+        convert_osm_to_pm(filepath_osm_ppl, filepath_osm2pm_ppl)
         config["EXTERNAL_DATABASE"]["fn"] = os.path.join(
             os.getcwd(), filepath_osm2pm_ppl
         )
