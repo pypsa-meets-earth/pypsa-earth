@@ -676,7 +676,7 @@ def add_RES_constraints(n, res_share, config):
 
             lhs = lhs + lhs_discharge
 
-    n.model.add_constraints(lhs == rhs, name="res_share")
+    n.model.add_constraints(lhs >= rhs, name="res_share")
 
 
 def add_land_use_constraint(n):
