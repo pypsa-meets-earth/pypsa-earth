@@ -23,6 +23,7 @@ from _helpers import (
     migrate_config,
     update_cutout_config,
 )
+from download_unsd_sdmx import country_to_unsd_area
 from build_demand_profiles import get_load_paths_gegis
 from retrieve_databundle_light import (
     datafiles_retrivedatabundle,
@@ -1676,18 +1677,78 @@ rule prepare_heat_data:
         "scripts/prepare_heat_data.py"
 
 
+UNSD_SOURCE = config["demand_data"].get("unsd_source", "legacy")
+UNSD_MAX_YEAR_GAP = config["demand_data"].get("unsd_max_year_gap", 0)
+UNSD_SDMX_DIR = "data/demand/unsd/sdmx"
+
+if UNSD_SOURCE not in ("legacy", "sdmx"):
+    raise ValueError(f"Unsupported UNSD source: {UNSD_SOURCE}")
+
+UNSD_SDMX = UNSD_SOURCE == "sdmx"
+
+UNSD_STRUCTURE = UNSD_SDMX_DIR + "/structure.xml" if UNSD_SDMX else []
+
+UNSD_COUNTRY_FILES = (
+    expand(
+        UNSD_SDMX_DIR + "/{unsd_area}.csv",
+        unsd_area=sorted({country_to_unsd_area(c) for c in config["countries"]}),
+    )
+    if UNSD_SDMX
+    else []
+)
+
+UNSD_REFRESH = "--refresh" if config["demand_data"]["update_data"] else ""
+
+
+rule retrieve_unsd_sdmx_structure:
+    input:
+        downloader="scripts/download_unsd_sdmx.py",
+    output:
+        UNSD_SDMX_DIR + "/structure.xml",
+    params:
+        directory=UNSD_SDMX_DIR,
+        refresh=UNSD_REFRESH,
+    shell:
+        "python {input.downloader:q} --structure-only "
+        "--output-dir {params.directory:q} {params.refresh}"
+
+
+rule retrieve_unsd_sdmx_country:
+    input:
+        downloader="scripts/download_unsd_sdmx.py",
+    output:
+        UNSD_SDMX_DIR + "/{unsd_area}.csv",
+    wildcard_constraints:
+        unsd_area=r"[0-9]{3}",
+    params:
+        directory=UNSD_SDMX_DIR,
+        refresh=UNSD_REFRESH,
+    shell:
+        "python {input.downloader:q} --country-code {wildcards.unsd_area} "
+        "--output-dir {params.directory:q} {params.refresh}"
+
+
 rule build_base_energy_totals:
     params:
+        unsd_source=UNSD_SOURCE,
+        unsd_max_year_gap=UNSD_MAX_YEAR_GAP,
         space_heat_share=config["sector"]["space_heat_share"],
         update_data=config["demand_data"]["update_data"],
         base_year=config["demand_data"]["base_year"],
         countries=config["countries"],
         shift_coal_to_elec=config["sector"]["coal"]["shift_to_elec"],
     input:
-        unsd_paths="data/demand/unsd/paths/Energy_Statistics_Database.xlsx",
+        unsd_sdmx_structure=UNSD_STRUCTURE,
+        unsd_sdmx_data=UNSD_COUNTRY_FILES,
+        unsd_helpers="scripts/unsd.py",
+        unsd_paths=(
+            []
+            if UNSD_SDMX
+            else "data/demand/unsd/paths/Energy_Statistics_Database.xlsx"
+        ),
     output:
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
-        unsd_export_path=directory("data/demand/unsd/data/"),
+        unsd_export_path=[] if UNSD_SDMX else directory("data/demand/unsd/data/"),
     script:
         "scripts/build_base_energy_totals.py"
 
@@ -2205,14 +2266,19 @@ rule build_industrial_distribution_key:  #default data
 
 rule build_base_industry_totals:  #default data
     params:
+        unsd_source=UNSD_SOURCE,
+        unsd_max_year_gap=UNSD_MAX_YEAR_GAP,
         base_year=config["demand_data"]["base_year"],
         countries=config["countries"],
         other_industries=config["demand_data"]["other_industries"],
         demand_scenario=config["demand_data"]["scenario"],
     input:
+        unsd_sdmx_structure=UNSD_STRUCTURE,
+        unsd_sdmx_data=UNSD_COUNTRY_FILES,
+        unsd_helpers="scripts/unsd.py",
         #os.path.dirname(snakemake.input["transactions_path"]) + "/demand/unsd/data/"
         #industrial_production_per_country="data/industrial_production_per_country.csv",
-        unsd_export_path="data/demand/unsd/data/",
+        unsd_export_path=[] if UNSD_SDMX else "data/demand/unsd/data/",
         energy_totals_base="resources/" + SECDIR + "energy_totals_base.csv",
         transactions_path="data/unsd_transactions.csv",
     output:

@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 from _helpers import BASE_DIR, aggregate_fuels, get_conv_factors, read_csv_nafix
 from googledrivedownloader import download_file_from_google_drive as download_gdrive
+from unsd import prepare_demand_rows, select_sector
 
 _logger = logging.getLogger(__name__)
 
@@ -29,34 +30,37 @@ def calc_sector(sector):
         # print(country, sector)
         df_co = df_yr[df_yr.country == country]
 
-        if sector == "navigation":
-            df_sector = df_co.loc[
-                (df_co["Commodity - Transaction"].str.lower().str.contains(sector))
-                | (
-                    df_co["Commodity - Transaction"]
-                    .str.lower()
-                    .str.contains("marine bunkers")
-                )
-            ]
-
-        elif sector == "non energy use":
-            df_sector = df_co.loc[
-                (df_co["Transaction"].str.lower().str.contains(sector))
-                | (
-                    df_co["Transaction"]
-                    .str.replace("-", " ")
-                    .str.replace("uses", "use")
-                    .str.lower()
-                    .str.contains(sector)
-                )
-            ]
-        elif sector == "other energy":
-            df_sector = df_co.loc[df_co["Transaction"].isin(other_energy)]
+        if "transaction_code" in df_co.columns:
+            df_sector = select_sector(df_co, sector)
         else:
-            df_sector = df_co.loc[
-                df_co["Commodity - Transaction"].str.lower().str.contains(sector)
-            ]
-            # assert df_yr[df_yr["Commodity - Transaction"].str.contains(sector)]["Unit"].unique() == 'Metric tons,  thousand', "Not all quantities have the expected unit: {}".format(expected_unit)
+            if sector == "navigation":
+                df_sector = df_co.loc[
+                    (df_co["Commodity - Transaction"].str.lower().str.contains(sector))
+                    | (
+                        df_co["Commodity - Transaction"]
+                        .str.lower()
+                        .str.contains("marine bunkers")
+                    )
+                ]
+
+            elif sector == "non energy use":
+                df_sector = df_co.loc[
+                    (df_co["Transaction"].str.lower().str.contains(sector))
+                    | (
+                        df_co["Transaction"]
+                        .str.replace("-", " ")
+                        .str.replace("uses", "use")
+                        .str.lower()
+                        .str.contains(sector)
+                    )
+                ]
+            elif sector == "other energy":
+                df_sector = df_co.loc[df_co["Transaction"].isin(other_energy)]
+            else:
+                df_sector = df_co.loc[
+                    df_co["Commodity - Transaction"].str.lower().str.contains(sector)
+                ]
+                # assert df_yr[df_yr["Commodity - Transaction"].str.contains(sector)]["Unit"].unique() == 'Metric tons,  thousand', "Not all quantities have the expected unit: {}".format(expected_unit)
 
         if df_sector.empty:
             if sector == "consumption by households":
@@ -101,43 +105,46 @@ def calc_sector(sector):
             _logger.warning("No data for " + country + " in the sector " + sector + ".")
 
         else:
-            index_mass = df_sector["Unit"] == "Metric tons,  thousand"
-            mass_factors = df_sector.loc[index_mass, "Commodity"].map(fuels_conv_toTWh)
-            if mass_factors.isna().any():
-                missing = df_sector.loc[index_mass, "Commodity"][
-                    mass_factors.isna()
-                ].unique()
-                raise KeyError(f"Missing fuel conversion factors: {missing}")
+            if "Quantity_TWh" not in df_sector.columns:
+                index_mass = df_sector["Unit"] == "Metric tons,  thousand"
+                mass_factors = df_sector.loc[index_mass, "Commodity"].map(
+                    fuels_conv_toTWh
+                )
+                if mass_factors.isna().any():
+                    missing = df_sector.loc[index_mass, "Commodity"][
+                        mass_factors.isna()
+                    ].unique()
+                    raise KeyError(f"Missing fuel conversion factors: {missing}")
 
-            df_sector.loc[index_mass, "Quantity_TWh"] = (
-                df_sector.loc[index_mass, "Quantity"] * mass_factors
-            )
+                df_sector.loc[index_mass, "Quantity_TWh"] = (
+                    df_sector.loc[index_mass, "Quantity"] * mass_factors
+                )
 
-            index_energy = df_sector[
-                df_sector["Unit"] == "Kilowatt-hours, million"
-            ].index
-            df_sector.loc[index_energy, "Quantity_TWh"] = df_sector.loc[
-                index_energy
-            ].apply(lambda x: x["Quantity"] / 1e3, axis=1)
+                index_energy = df_sector[
+                    df_sector["Unit"] == "Kilowatt-hours, million"
+                ].index
+                df_sector.loc[index_energy, "Quantity_TWh"] = df_sector.loc[
+                    index_energy
+                ].apply(lambda x: x["Quantity"] / 1e3, axis=1)
 
-            index_energy_TJ = df_sector[df_sector["Unit"] == "Terajoules"].index
-            df_sector.loc[index_energy_TJ, "Quantity_TWh"] = df_sector.loc[
-                index_energy_TJ
-            ].apply(lambda x: x["Quantity"] / 3600, axis=1)
+                index_energy_TJ = df_sector[df_sector["Unit"] == "Terajoules"].index
+                df_sector.loc[index_energy_TJ, "Quantity_TWh"] = df_sector.loc[
+                    index_energy_TJ
+                ].apply(lambda x: x["Quantity"] / 3600, axis=1)
 
-            index_volume = df_sector["Unit"] == "Cubic metres, thousand"
-            volume_factors = df_sector.loc[index_volume, "Commodity"].map(
-                fuels_conv_toTWh
-            )
-            if volume_factors.isna().any():
-                missing = df_sector.loc[index_volume, "Commodity"][
-                    volume_factors.isna()
-                ].unique()
-                raise KeyError(f"Missing fuel conversion factors: {missing}")
+                index_volume = df_sector["Unit"] == "Cubic metres, thousand"
+                volume_factors = df_sector.loc[index_volume, "Commodity"].map(
+                    fuels_conv_toTWh
+                )
+                if volume_factors.isna().any():
+                    missing = df_sector.loc[index_volume, "Commodity"][
+                        volume_factors.isna()
+                    ].unique()
+                    raise KeyError(f"Missing fuel conversion factors: {missing}")
 
-            df_sector.loc[index_volume, "Quantity_TWh"] = (
-                df_sector.loc[index_volume, "Quantity"] * volume_factors
-            )
+                df_sector.loc[index_volume, "Quantity_TWh"] = (
+                    df_sector.loc[index_volume, "Quantity"] * volume_factors
+                )
 
             sectors_dfs[sector] = df_sector.copy()
 
@@ -371,97 +378,115 @@ if __name__ == "__main__":
             planning_horizons=2030,
         )
 
-    energy_stat_database = pd.read_excel(
-        snakemake.input.unsd_paths, index_col=0, header=0
-    )  # pd.read_excel("/nfs/home/haz43975/pypsa-earth-sec/scripts/Energy_Statistics_Database.xlsx"
+    sdmx_structure = getattr(snakemake.input, "unsd_sdmx_structure", None)
 
-    # Load the links and make a dictionary
-    df = energy_stat_database.copy()
-    df = df.dropna(axis=0, subset=["Link"])
-    df = df.to_dict("dict")
-    d = df["Link"]
+    if sdmx_structure:
+        countries = snakemake.params.countries
+        year = snakemake.params.base_year
+        fuels_conv_toTWh = get_conv_factors("industry")
 
-    if snakemake.params.update_data:
-        # Delete and existing files to avoid duplication and double counting
+        df_yr = prepare_demand_rows(
+            Path(sdmx_structure).parent,
+            countries,
+            year,
+            fuels_conv_toTWh,
+            set().union(*aggregate_fuels("industry")),
+            max_year_gap=getattr(snakemake.params, "unsd_max_year_gap", 0),
+        )
+    else:
+        energy_stat_database = pd.read_excel(
+            snakemake.input.unsd_paths, index_col=0, header=0
+        )  # pd.read_excel("/nfs/home/haz43975/pypsa-earth-sec/scripts/Energy_Statistics_Database.xlsx"
 
-        files = glob.glob(os.path.join(BASE_DIR, "data/demand/unsd/data/*.txt"))
-        for f in files:
-            os.remove(f)
+        # Load the links and make a dictionary
+        df = energy_stat_database.copy()
+        df = df.dropna(axis=0, subset=["Link"])
+        df = df.to_dict("dict")
+        d = df["Link"]
 
-        # Feed the dictionary of links to the for loop, download and unzip all files
-        try:
-            for key, value in d.items():
-                zipurl = value
+        if snakemake.params.update_data:
+            # Delete and existing files to avoid duplication and double counting
 
-                with urlopen(zipurl) as zipresp:
-                    with ZipFile(BytesIO(zipresp.read())) as zfile:
-                        zfile.extractall(
-                            os.path.join(BASE_DIR, "data/demand/unsd/data")
-                        )
+            files = glob.glob(os.path.join(BASE_DIR, "data/demand/unsd/data/*.txt"))
+            for f in files:
+                os.remove(f)
 
-                path = os.path.join(BASE_DIR, "data/demand/unsd/data")
-        except:
-            _logger.warning(
-                f"Could not open the file from {zipurl}. "
-                "Using the data stored in google drive."
-            )
-            download_gdrive(
-                file_id="1VUV0X-tTQECi2pHdE5EWXjPI2yeCdk6F",
-                dest_path=os.path.join(BASE_DIR, "data/demand/unsd/unsd.zip"),
-                unzip=True,
-                overwrite=True,
-            )
+            # Feed the dictionary of links to the for loop, download and unzip all files
+            try:
+                for key, value in d.items():
+                    zipurl = value
 
-            # clean up __MACOSX folder if it exists
-            macosx_root_path = os.path.join(BASE_DIR, "data/demand/unsd/__MACOSX")
-            if os.path.exists(macosx_root_path):
-                shutil.rmtree(macosx_root_path)
+                    with urlopen(zipurl) as zipresp:
+                        with ZipFile(BytesIO(zipresp.read())) as zfile:
+                            zfile.extractall(
+                                os.path.join(BASE_DIR, "data/demand/unsd/data")
+                            )
 
-    # Get the files from the path provided in the OP
-    all_files = list(
-        Path(os.path.join(BASE_DIR, "data/demand/unsd/data")).glob("*.txt")
-    )
+                    path = os.path.join(BASE_DIR, "data/demand/unsd/data")
+            except:
+                _logger.warning(
+                    f"Could not open the file from {zipurl}. "
+                    "Using the data stored in google drive."
+                )
+                download_gdrive(
+                    file_id="1VUV0X-tTQECi2pHdE5EWXjPI2yeCdk6F",
+                    dest_path=os.path.join(BASE_DIR, "data/demand/unsd/unsd.zip"),
+                    unzip=True,
+                    overwrite=True,
+                )
 
-    # Create a dataframe from all downloaded files
-    df = pd.concat(
-        (read_csv_nafix(f, encoding="utf8", sep=";") for f in all_files),
-        ignore_index=True,
-    )
+                # clean up __MACOSX folder if it exists
+                macosx_root_path = os.path.join(BASE_DIR, "data/demand/unsd/__MACOSX")
+                if os.path.exists(macosx_root_path):
+                    shutil.rmtree(macosx_root_path)
 
-    # Split 'Commodity', 'Transaction' column to two
-    df[["Commodity", "Transaction", "extra"]] = df["Commodity - Transaction"].str.split(
-        " - ", expand=True
-    )
+        # Get the files from the path provided in the OP
+        all_files = list(
+            Path(os.path.join(BASE_DIR, "data/demand/unsd/data")).glob("*.txt")
+        )
 
-    # Remove Foootnote and Estimate from 'Commodity - Transaction' column
-    df = df.loc[df["Commodity - Transaction"] != "Footnote"]
-    df = df.loc[df["Commodity - Transaction"] != "Estimate"]
+        # Create a dataframe from all downloaded files
+        df = pd.concat(
+            (read_csv_nafix(f, encoding="utf8", sep=";") for f in all_files),
+            ignore_index=True,
+        )
 
-    # Create a column with iso2 country code
-    cc = coco.CountryConverter()
-    Country = pd.Series(df["Country or Area"])
+        # Split 'Commodity', 'Transaction' column to two
+        df[["Commodity", "Transaction", "extra"]] = df[
+            "Commodity - Transaction"
+        ].str.split(" - ", expand=True)
 
-    df["country"] = cc.pandas_convert(series=Country, to="ISO2", not_found="not found")
+        # Remove Foootnote and Estimate from 'Commodity - Transaction' column
+        df = df.loc[df["Commodity - Transaction"] != "Footnote"]
+        df = df.loc[df["Commodity - Transaction"] != "Estimate"]
 
-    # remove countries or areas that have no iso2 such as former countries names
-    df = df.loc[df["country"] != "not found"]
+        # Create a column with iso2 country code
+        cc = coco.CountryConverter()
+        Country = pd.Series(df["Country or Area"])
 
-    # Convert country column that contains lists for some country names that are identified with more than one country.
-    df["country"] = df["country"].astype(str)
+        df["country"] = cc.pandas_convert(
+            series=Country, to="ISO2", not_found="not found"
+        )
 
-    # Remove all iso2 conversions for some country names that are identified with more than one country.
-    df = df[~df.country.str.contains(",", na=False)].reset_index(drop=True)
+        # remove countries or areas that have no iso2 such as former countries names
+        df = df.loc[df["country"] != "not found"]
 
-    # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
-    fuels_conv_toTWh = get_conv_factors("industry")
+        # Convert country column that contains lists for some country names that are identified with more than one country.
+        df["country"] = df["country"].astype(str)
 
-    # Fetch country list and demand base year from the config file
-    year = snakemake.params.base_year
-    countries = snakemake.params.countries
+        # Remove all iso2 conversions for some country names that are identified with more than one country.
+        df = df[~df.country.str.contains(",", na=False)].reset_index(drop=True)
 
-    # Filter for the year and country
-    df_yr = df[df.Year == year]
-    df_yr = df_yr[df_yr.country.isin(countries)]
+        # Create a dictionary with all the conversion factors from ktons or m3 to TWh based on https://unstats.un.org/unsd/energy/balance/2014/05.pdf
+        fuels_conv_toTWh = get_conv_factors("industry")
+
+        # Fetch country list and demand base year from the config file
+        year = snakemake.params.base_year
+        countries = snakemake.params.countries
+
+        # Filter for the year and country
+        df_yr = df[df.Year == year]
+        df_yr = df_yr[df_yr.country.isin(countries)]
 
     # Create an empty dataframe for energy_totals_base
     energy_totals_cols = read_csv_nafix(
