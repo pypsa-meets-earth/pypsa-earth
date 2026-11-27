@@ -35,12 +35,12 @@ Relevant Settings
 Inputs
 ------
 
-- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: confer :ref:`prepare`
+- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: confer :ref:`prepare`
 
 Outputs
 -------
 
-- ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Solved PyPSA network including optimisation results
+- ``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: Solved PyPSA network including optimisation results
 
     .. image:: /img/results.png
         :width: 40 %
@@ -1494,7 +1494,7 @@ if __name__ == "__main__":
             planning_horizons="2030",
             discountrate="0.071",
             sopts="144H",
-            configfile="config.tutorial.yaml",
+            configfiles="config.tutorial.yaml",
         )
 
     configure_logging(snakemake)
