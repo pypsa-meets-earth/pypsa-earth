@@ -30,6 +30,7 @@ Relevant Settings
             carriers:
             hydro_max_hours:
             hydro_max_hours_default:
+            hydro_capacities:
             hydro_capital_cost:
 
     lines:
@@ -43,11 +44,10 @@ Inputs
 ------
 
 - ``resources/costs.csv``: The database of cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.
-- ``data/bundle/hydro_capacities.csv``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!
+- ``data/hydro_capacities.csv``, or the table given by ``hydro_capacities``: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country. Used to estimate ``max_hours`` of hydro reservoirs without a reported duration.
 
     .. image:: /img/hydrocapacities.png
 
-- ``data/geth2015_hydro_capacities.csv``: alternative to capacities above; not currently used!
 - ``resources/demand_profiles.csv``: a csv file containing the demand profile associated with buses
 - ``resources/shapes/gadm_shapes.geojson``: confer :ref:`shapes`
 - ``resources/powerplants.csv``: confer :ref:`powerplants`
@@ -90,6 +90,10 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
     update_p_nom_max,
+)
+from assign_costs import (
+    calculate_renewable_capital_cost,
+    update_transmission_costs,
 )
 
 idx = pd.IndexSlice
@@ -286,54 +290,6 @@ def attach_load(n, demand_profiles):
     demand_df = read_csv_nafix(demand_profiles, index_col=0, parse_dates=True)
 
     n.add("Load", demand_df.columns, bus=demand_df.columns, p_set=demand_df)
-
-
-def attach_dc_costs(lines_or_links, costs, length_factor=1.0, simple_hvdc_costs=False):
-    if lines_or_links.empty:
-        return
-
-    if lines_or_links.loc[lines_or_links.carrier == "DC"].empty:
-        return
-
-    dc_b = lines_or_links.carrier == "DC"
-    if simple_hvdc_costs:
-        costs = (
-            lines_or_links.loc[dc_b, "length"]
-            * length_factor
-            * costs.at["HVDC overhead", "capital_cost"]
-        )
-    else:
-        costs = (
-            lines_or_links.loc[dc_b, "length"]
-            * length_factor
-            * (
-                (1.0 - lines_or_links.loc[dc_b, "underwater_fraction"])
-                * costs.at["HVDC overhead", "capital_cost"]
-                + lines_or_links.loc[dc_b, "underwater_fraction"]
-                * costs.at["HVDC submarine", "capital_cost"]
-            )
-            + costs.at["HVDC inverter pair", "capital_cost"]
-        )
-    lines_or_links.loc[dc_b, "capital_cost"] = costs
-
-
-def update_transmission_costs(n, costs, length_factor=1.0, simple_hvdc_costs=False):
-    n.lines["capital_cost"] = (
-        n.lines["length"] * length_factor * costs.at["HVAC overhead", "capital_cost"]
-    )
-
-    attach_dc_costs(
-        lines_or_links=n.links,
-        costs=costs,
-        length_factor=length_factor,
-        simple_hvdc_costs=simple_hvdc_costs,
-    )
-    attach_dc_costs(
-        lines_or_links=n.lines,
-        costs=costs,
-        length_factor=length_factor,
-        simple_hvdc_costs=simple_hvdc_costs,
-    )
 
 
 def get_grouping_year(build_year: int, grouping_years: list) -> int:
@@ -593,34 +549,13 @@ def attach_wind_and_solar(
 
             supcarrier = carrier.split("-", 2)[0]
 
-            if supcarrier == "offwind":
-                underwater_fraction = ds["underwater_fraction"].to_pandas()
-                connection_cost = (
-                    line_length_factor
-                    * ds["average_distance"].to_pandas()
-                    * (
-                        underwater_fraction
-                        * costs.at[carrier + "-connection-submarine", "capital_cost"]
-                        + (1.0 - underwater_fraction)
-                        * costs.at[carrier + "-connection-underground", "capital_cost"]
-                    )
-                )
-                capital_cost = (
-                    costs.at["offwind", "capital_cost"]
-                    + costs.at[carrier + "-station", "capital_cost"]
-                    + connection_cost
-                )
-
-                logger.info(
-                    "Added connection cost of {:0.0f}-{:0.0f} {}/MW/a to {}".format(
-                        connection_cost.min(),
-                        connection_cost.max(),
-                        snakemake.config["costs"]["output_currency"],
-                        carrier,
-                    )
-                )
-            else:
-                capital_cost = costs.at[carrier, "capital_cost"]
+            capital_cost, capital_cost_tech = calculate_renewable_capital_cost(
+                carrier,
+                ds,
+                costs,
+                line_length_factor,
+                snakemake.config["costs"]["output_currency"],
+            )
 
             # Existing capacity from powerplants.csv
             ppl_carrier = df.query("carrier == @carrier")
@@ -732,6 +667,22 @@ def attach_wind_and_solar(
                 efficiency=costs.at[supcarrier, "efficiency"],
                 lifetime=renewable_lifetime,
             )
+
+            # Store submarine and underground connection lengths [km] so per-horizon
+            # re-costing can recompute the connection cost without the profile.
+            # The cost is linear in these lengths, so aggregating them like
+            # capital_cost keeps simplification and clustering cost-consistent.
+            # For non-offwind carriers these stay NaN and are unused.
+            if supcarrier == "offwind":
+                distance = line_length_factor * ds["average_distance"].to_pandas()
+                underwater_fraction = ds["underwater_fraction"].to_pandas()
+                gens = ds.indexes["bus"] + suffix
+                n.generators.loc[gens, "connection_submarine_length"] = (
+                    distance * underwater_fraction
+                ).values
+                n.generators.loc[gens, "connection_underground_length"] = (
+                    distance * (1.0 - underwater_fraction)
+                ).values
 
 
 def attach_conventional_generators(
@@ -904,6 +855,7 @@ def attach_hydro(
     n: pypsa.Network,
     costs: pd.DataFrame,
     ppl: pd.DataFrame,
+    hydro_capacities: str,
     hydro_min_inflow_pu: float = 1.0,
 ) -> None:
     """
@@ -917,6 +869,10 @@ def attach_hydro(
         DataFrame containing technology costs.
     ppl : pd.DataFrame
         Power plant DataFrame.
+    hydro_capacities : str
+        Path to the table of hydro capacities by country, in the format of ``data/hydro_capacities.csv``.
+    hydro_min_inflow_pu : float, optional
+        Energy-to-capacity ratio above which hydro plants of unknown technology are reservoirs.
 
     Returns
     -------
@@ -1098,7 +1054,7 @@ def attach_hydro(
         hydro_max_hours = c.get("hydro_max_hours")
         hydro_stats = (
             read_csv_nafix(
-                snakemake.input.hydro_capacities,
+                hydro_capacities,
                 comment="#",
                 na_values=["-"],
                 index_col=0,
@@ -1339,7 +1295,11 @@ if __name__ == "__main__":
         snakemake.params.length_factor,
     )
     attach_hydro(
-        n, costs, ppl, snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"]
+        n,
+        costs,
+        ppl,
+        snakemake.input.hydro_capacities,
+        snakemake.params.renewable["hydro"]["hydro_min_inflow_pu"],
     )
 
     attach_existing_batteries(
