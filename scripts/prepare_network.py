@@ -48,7 +48,7 @@ Inputs
 Outputs
 -------
 
-- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
+- ``networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_{planning_horizons}.nc``: Complete PyPSA network that will be handed to the ``solve_network`` rule.
 
 Description
 -----------
@@ -70,7 +70,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from add_electricity import update_transmission_costs
+from assign_costs import update_transmission_costs
 
 idx = pd.IndexSlice
 
@@ -99,7 +99,7 @@ def emission_extractor(
     Returns
     -------
     pd.Series
-        CO2 emission values (in kt CO2) of studied countries for the given year.
+        CO2 emission values (in t CO2) of studied countries for the given year.
     """
     emission_year = int(emission_year)
     df = pd.read_csv(emission_csv).set_index("country_code_a2")
@@ -144,7 +144,7 @@ def emission_extractor(
             "Please check the emission data file, the requested base year, or the "
             "configured countries."
         )
-    return emission_by_country
+    return emission_by_country * 1e3
 
 
 def add_co2limit(n, annual_emissions, Nyears=1.0):
@@ -350,6 +350,7 @@ if __name__ == "__main__":
             clusters="6",
             ll="copt",
             opts="Co2L-4H",
+            planning_horizons=2030,
             # configfile="test/config.sector.yaml",
         )
 
