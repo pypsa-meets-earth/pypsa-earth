@@ -260,7 +260,7 @@ from _helpers import (
     sanitize_carriers,
     sanitize_locations,
 )
-from prepare_network import add_co2limit
+from prepare_network import _weighted_resample, add_co2limit
 
 logger = logging.getLogger(__name__)
 
@@ -2945,23 +2945,30 @@ def average_every_nhours(n: pypsa.Network, offset: str) -> pypsa.Network:
     pypsa.Network
         A new PyPSA network resampled to the specified temporal resolution.
     """
-    # logger.info(f'Resampling the network to {offset}')
+    offset = offset.casefold()
+
     m = n.copy(snapshots=[])
 
-    snapshot_weightings = n.snapshot_weightings.resample(offset.casefold()).sum()
+    snapshot_weightings = n.snapshot_weightings.resample(offset).sum()
     m.set_snapshots(snapshot_weightings.index)
     m.snapshot_weightings = snapshot_weightings
 
     for c in n.iterate_components():
         pnl = getattr(m, c.list_name + "_t")
+        weights = (
+            n.snapshot_weightings.stores
+            if c.name in {"Store", "StorageUnit"}
+            else n.snapshot_weightings.generators
+        )
+
         for k, df in c.pnl.items():
             if not df.empty:
                 if c.list_name == "stores" and k == "e_max_pu":
-                    pnl[k] = df.resample(offset.casefold()).min()
+                    pnl[k] = df.resample(offset).min()
                 elif c.list_name == "stores" and k == "e_min_pu":
-                    pnl[k] = df.resample(offset.casefold()).max()
+                    pnl[k] = df.resample(offset).max()
                 else:
-                    pnl[k] = df.resample(offset.casefold()).mean()
+                    pnl[k] = _weighted_resample(df, weights, offset)
 
     return m
 
