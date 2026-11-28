@@ -1,18 +1,51 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-This script provides a command-line interface (CLI) for checking the status of files in a databundle and retrieving missing files.
-It uses the `rich` library to display markdown and tables in the console, making it easier for users to understand which files are missing and how to retrieve them.
-The script checks the configuration of the databundles, identifies missing files, and offers options for retrieving them either automatically or manually.
-It also allows users to update the checklist after retrieving files to ensure that all necessary data is available for their snakemake workflow.
+Command-line interface (CLI) for inspecting and retrieving databundles.
+
+This non-workflow helper utility scans configured databundles, checks whether
+the expected local files exist on disk, presents an interactive checklist using
+the ``rich`` library, and provides options to retrieve missing bundles either
+automatically or manually via cloud storage links (Zenodo, Google Drive, direct).
+
+Typical usage
+-------------
+Run the script directly from the repository root:
+
+```bash
+python scripts/non_workflow/databundle_cli.py
+```
+
+Relevant Settings
+-----------------
+The script reads configuration settings from ``config.yaml`` / ``config.default.yaml``
+and ``configs/bundle_config.yaml``:
+
+```yaml
+enable:
+  progress_bar: true
+
+databundles:
+  # Bundle definitions with URLs and output paths
+```
+
+Inputs
+------
+- ``configs/bundle_config.yaml``: Databundle definitions, source URLs, and expected output paths.
+- ``logs/databundle_cli.yaml`` (optional): Custom parameters logged by previous workflow runs.
+
+Outputs
+-------
+- Downloaded and extracted dataset files into local project directories (e.g. ``data/``, ``cutouts/``).
 """
 
 import os
 import sys
 import textwrap
+from typing import Any
 
+import pandas as pd
 import yaml
 
 # Add parent directory to sys.path
@@ -20,7 +53,10 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, parent_dir)
 
 from _helpers import mock_snakemake
-from retrieve_databundle_light import *
+from retrieve_databundle_light import (
+    load_databundle_config,
+    retrieve_databundle,
+)
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.table import Table
@@ -34,24 +70,24 @@ def console_markdown(markdown: str, lvl: int = 1) -> None:
     ----------
     markdown : str
         The markdown text to be printed.
-    lvl : int
-        The level of indentation (number of times to dedent the markdown text). Default is 1.
+    lvl : int, default 1
+        The level of indentation (number of times to dedent the markdown text).
 
     Returns
     -------
     None
-        The function prints the markdown text to the console and does not return anything.
     """
-
     console = Console()
-    for i in range(lvl):
+    for _ in range(lvl):
         markdown = textwrap.dedent(markdown)
     md = Markdown(markdown)
 
-    return console.print(md)
+    console.print(md)
 
 
-def console_table(dataframe: pd.DataFrame, table_kw: dict = {}) -> None:
+def console_table(
+    dataframe: pd.DataFrame, table_kw: dict[str, Any] | None = None
+) -> None:
     """
     Print a DataFrame as a rich table in the console.
 
@@ -59,14 +95,16 @@ def console_table(dataframe: pd.DataFrame, table_kw: dict = {}) -> None:
     ----------
     dataframe : pd.DataFrame
         The DataFrame to be printed as a table.
-    table_kw : dict
+    table_kw : dict[str, Any], optional
         Keyword arguments for customizing the table appearance.
 
     Returns
     -------
     None
-         The function prints the table to the console and does not return anything.
     """
+    if table_kw is None:
+        table_kw = {}
+
     df = dataframe.reset_index()
 
     # Initialize the console
@@ -77,7 +115,7 @@ def console_table(dataframe: pd.DataFrame, table_kw: dict = {}) -> None:
 
     # Add columns from the DataFrame
     for column in df.columns:
-        table.add_column(column, overflow="fold")
+        table.add_column(str(column), overflow="fold")
 
     # Add rows from the DataFrame
     for row in df.itertuples(index=False):
@@ -87,27 +125,27 @@ def console_table(dataframe: pd.DataFrame, table_kw: dict = {}) -> None:
         else:
             table.add_row(*map(str, row))
 
-    # Print the table to the console
-    return console.print(table)
+    console.print(table)
 
 
-def databundle_check(bundles_to_download: list, config_databundles: dict) -> list:
+def databundle_check(
+    bundles_to_download: list[str], config_databundles: dict[str, Any]
+) -> list[str]:
     """
     Check the status of the files in the databundle and print a checklist to the console.
 
     Parameters
     ----------
-    bundles_to_download : list
+    bundles_to_download : list[str]
         A list of databundle names to check.
-    config_databundles : dict
+    config_databundles : dict[str, Any]
         A dictionary containing the configuration for each databundle.
 
     Returns
     -------
-    list
+    list[str]
         A list of missing databundle names.
     """
-
     df_file = pd.DataFrame()
 
     for bundlename in bundles_to_download:
@@ -125,7 +163,7 @@ def databundle_check(bundles_to_download: list, config_databundles: dict) -> lis
 
         df_file = pd.concat([df_file, df])
 
-    df_file["retrieve"] = [os.path.isfile(f"{i}") for i in df_file.index]
+    df_file["retrieve"] = [os.path.isfile(str(i)) for i in df_file.index]
 
     console_table(
         df_file, table_kw={"title": "Databundle Checklist"}
@@ -211,11 +249,11 @@ if __name__ == "__main__":
     rootpath = "."
 
     # Load the rule from YAML if it exists, otherwise use default
-    snakemake_rule = (
-        yaml.safe_load(open(log_path))
-        if os.path.exists(log_path)
-        else {"rulename": "retrieve_databundle_light"}
-    )
+    if os.path.exists(log_path):
+        with open(log_path, encoding="utf-8") as f:
+            snakemake_rule = yaml.safe_load(f)
+    else:
+        snakemake_rule = {"rulename": "retrieve_databundle_light"}
 
     snakemake = mock_snakemake(**snakemake_rule)
 
@@ -251,8 +289,8 @@ if __name__ == "__main__":
             console_markdown("**rerun** is selected")
             bundles = bundles_to_download
         elif listed_bundles:
-            console_markdown(f"**{listed_bundles[0]}** is selected")
-            bundles = (listed_bundles[0],)
+            console_markdown(f"**{', '.join(listed_bundles)}** selected")
+            bundles = tuple(listed_bundles)
         else:
             console_markdown("incorrect input")
             continue
