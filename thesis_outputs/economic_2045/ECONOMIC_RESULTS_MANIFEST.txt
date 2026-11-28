@@ -1,0 +1,10 @@
+THESIS ECONOMIC PYPSA-EARTH RESULTS
+Code reference: ba-pypsa-earth @ a89178b9
+Source: optimized network NetCDF files in results/thesis_economic_2045/networks/
+Generation: python scripts/build_thesis_economic_results.py
+Scenarios: E0, E1, E2, E3, E4R35, E4R38, E4R40, E4R100, E5C75, E5C125, E6CAP2000
+Files: table_01_economic_scenario_kpis.csv, table_02_economic_sensitivity_effects.csv, table_economic_scenario_results.tex
+Objective: annualized net system objective including modeled BTC revenues; not gross electricity supply cost.
+H2 annual volume: final energy of bookkeeping Store, converted using configured H2 LHV 33.33 kWh/kg.
+BTC power: negative-sign Generator dispatch; positive consumption in results.
+E3 interaction E3-E1-E2+E0: 1.269748 MEUR/a
