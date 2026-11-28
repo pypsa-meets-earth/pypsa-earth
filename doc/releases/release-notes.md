@@ -10,6 +10,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **New Features and Major Changes**
 
+* Integrate `planning_horizon` wildcard into electricity-only networks. The cost year now follows `scenario.planning_horizons` and `costs.year` is removed (a deprecation warning is raised if it is still set) [PR #1859](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1859)
+
 * Enable support of PyPSA 1+ and improve environment [PR #1676](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1676)
 
 * Enable support of Snakemake 8+ [PR #2032](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2032)
@@ -18,9 +20,23 @@ This part of documentation collects descriptive release notes to capture the mai
 
 * Update DemandCast to version 2.0.0, covering 2000–2025 with improved accuracy; `demcast` load values change by about +4% on average per country [PR #2121](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2121)
 
+* Streamline data management #1711 by externalising on-fly data downloads and creating a data inventory [PR #1711](https://github.com/pypsa-meets-earth/pypsa-earth/pull/1711)
+
 **Minor Changes and bug-fixing**
 
+* Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `retrieve_transport_data_input` is no longer available [PR #2118](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2118)
+
+* Fix logging calls in `monte_carlo` and `prepare_transport_data_input` that passed values without a `%s` placeholder and printed a logging error instead of the message [PR #2135](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2135)
+
+* Fix the ktCO2-to-tCO2 conversion for automatically derived historical CO2 limits. [PR #2136](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2136)
+
+* Fix regressions from Snakemake 9 support: `make_statistics` failure, unreadable error messages, ignored `configfile` in `mock_snakemake`, and leftover `demand`/`h2export` wildcard constraints [PR #2131](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2131)
+
+* Filter custom powerplants by the modelled countries in `add_custom_powerplants` [PR #2141](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2141)
+
 * Ignore query strings like `?download=1` when building the file name of `direct` and `post` databundle downloads [PR #2122](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2122)
+
+* Keep the CRS of country, offshore and extended country shapes in `build_shapes`, which was lost during polygon simplification and caused CRS warnings [PR #2137](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2137)
 
 * Update the DemandCast demand value in the CLI quiz to DemandCast v2.0.0 [PR #2128](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2128)
 

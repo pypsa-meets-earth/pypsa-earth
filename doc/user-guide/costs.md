@@ -11,7 +11,7 @@ The database of cost assumptions is retrieved from the repository
 saved to `resources/costs.csv`. Cost assumptions of previous PyPSA-Eur
 versions can be restored by using setting retrieve_costs in the config to false.
 
-The `config.yaml` provides options to choose a reference year (`costs: year:`) and use a specific version of the repository `costs: version:`.
+The cost year is taken from `scenario: planning_horizons:` (one cost file per planning horizon), and a specific version of the repository can be chosen with `costs: technology_data_version:`.
 
 It includes cost assumptions for all included technologies for specific
 years from various sources, namely for
