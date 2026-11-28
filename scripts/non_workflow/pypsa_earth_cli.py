@@ -112,6 +112,109 @@ def ask(text: str, default: str = "", datatype=str) -> str:
         return typer.prompt(styled_text, type=datatype)
 
 
+def coerce_value(value: str, expected):
+    """
+    Convert a user-entered string to the type of the existing config value.
+
+    Parameters
+    ----------
+    value: str
+        Value entered by the user
+    expected:
+        Existing config value whose type should be matched
+
+    Returns
+    -------
+    The converted value
+
+    Raises
+    ------
+    ValueError
+        If the value cannot be converted to the expected type
+    """
+    # With no existing value there is no type to validate against, so accept
+    # the input as typed.
+    if expected is None:
+        return value
+
+    # bool must be checked before int because bool is a subclass of int.
+    if isinstance(expected, bool):
+        normalized = value.strip().lower()
+        if normalized in ("true", "yes"):
+            return True
+        if normalized in ("false", "no"):
+            return False
+        raise ValueError(f"invalid boolean {value!r}; expected true/false/yes/no")
+
+    if isinstance(expected, int):
+        try:
+            return int(value)
+        except ValueError as error:
+            raise ValueError(f"invalid integer {value!r}") from error
+
+    if isinstance(expected, float):
+        try:
+            return float(value)
+        except ValueError as error:
+            raise ValueError(f"invalid float {value!r}") from error
+
+    if isinstance(expected, str):
+        return value
+
+    if isinstance(expected, list):
+        if not value.strip():
+            return []
+        items = value.split(",")
+        # Infer the element type from the first existing element. An empty
+        # existing list has no type information, so its elements stay strings.
+        element_type = expected[0] if expected else ""
+        return [coerce_value(item.strip(), element_type) for item in items]
+
+    return value
+
+
+def prompt_config_value(key: str, expected):
+    """
+    Prompt for a config value until it can be coerced to the expected type.
+
+    Parameters
+    ----------
+    key: str
+        Config key shown to the user and used in error messages
+    expected:
+        Existing config value whose type should be matched
+
+    Returns
+    -------
+    The validated and converted value
+    """
+    from rich.markup import escape
+
+    # config.default.yaml:88-90: worldpop_method/gdp_method accept strings or false
+    polymorphic_false_keys = {
+        "build_shape_options.worldpop_method",
+        "build_shape_options.gdp_method",
+    }
+
+    while True:
+        value = ask(f"Enter the value of {key} to update in the config file")
+        try:
+            # config.default.yaml:37: scenario.simpl: [""]
+            if key == "scenario.simpl" and not value.strip():
+                return [""]
+            if key in polymorphic_false_keys:
+                if value.strip().lower() == "false":
+                    return False
+                return value
+            return coerce_value(value, expected)
+        except ValueError as error:
+            console.print(
+                f"[bold red] ❌ Invalid value for '{key}': "
+                f"expected {type(expected).__name__}. "
+                f"{escape(str(error))} [/bold red]"
+            )
+
+
 def exit_message() -> None:
     console.print(style="dim")
     console.print("[bold magenta] 👋 Exiting the application. [/bold magenta]")
@@ -341,25 +444,12 @@ def config_setup():
                     return_to_config_setup = True
                     continue
 
-                updated_value = ask(
-                    f"Enter the value of {subchoice} to update in the config file"
+                updated_config[choice][subchoice] = prompt_config_value(
+                    f"{choice}.{subchoice}", updated_config[choice][subchoice]
                 )
-                if isinstance(updated_config[choice][subchoice], list):
-                    updated_value = updated_value.split(",")
-                if isinstance(updated_config[choice][subchoice], bool):
-                    updated_value = True if updated_value == "True" else False
-                updated_config[choice][subchoice] = updated_value
         else:
             # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
-            updated_value = ask(
-                f"Enter the value of {choice} to update in the config file"
-            )
-            if isinstance(updated_config[choice], list):
-                # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
-                updated_value = updated_value.split(",")
-            if isinstance(updated_config[choice], bool):
-                updated_value = True if updated_value == "True" else False
-            updated_config[choice] = updated_value
+            updated_config[choice] = prompt_config_value(choice, updated_config[choice])
 
     # Save updated config file
     config_save_path = "config.cli_updated.yaml"
