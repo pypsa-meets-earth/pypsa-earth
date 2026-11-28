@@ -140,6 +140,45 @@ def load_config_file(config_path: str) -> dict:
             print(f"Error parsing YAML file: {error}")
 
 
+def load_config_descriptions(config_path: str = "config.default.yaml") -> dict:
+    """
+    Load parameter descriptions from inline comments in the config file.
+
+    Returns
+    -------
+    dict
+        Mapping of flattened config parameter paths to descriptions.
+    """
+    descriptions = {}
+    stack = []
+
+    with open(config_path, "r", encoding="utf-8") as file:
+        for line in file:
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+
+            indent = len(line) - len(line.lstrip())
+            content = line.strip()
+
+            match = re.match(r"^([^:#][^:]*):(?:.*?)(?:\s+#\s*(.*))?$", content)
+            if not match:
+                continue
+
+            key = match.group(1).strip().strip('"').strip("'")
+            description = match.group(2)
+
+            while stack and stack[-1][0] >= indent:
+                stack.pop()
+
+            stack.append((indent, key))
+            full_path = ".".join(item[1] for item in stack)
+
+            if description:
+                descriptions[full_path] = description.strip()
+
+    return descriptions
+
+
 def save_config_file(config_path: str, config_data: dict[dict]) -> None:
     """
     Save a nested dictionary as a config file
@@ -285,6 +324,7 @@ def config_setup():
     # Load config file
     config_path = "config.default.yaml"
     config = load_config_file(config_path)
+    config_descriptions = load_config_descriptions(config_path)
 
     # Filter config file for the required params based on user group
     config_options = user_groups_config[user_group]
@@ -322,7 +362,13 @@ def config_setup():
                 ):
                     # The 'name' controls what the user sees in the box.
                     # The 'value' is what gets returned to Python upon selection.
-                    display_label = f"{index}. {key} : {value}"
+                    parameter_path = f"{choice}.{key}"
+                    description = config_descriptions.get(
+                        parameter_path, "No description available."
+                    )
+                    display_label = (
+                        f"{index}. {key} : {value}\n" f"   [Description] {description}"
+                    )
                     subchoice_options.append(Choice(value=key, name=display_label))
 
                 subchoice_options.append(
@@ -341,8 +387,12 @@ def config_setup():
                     return_to_config_setup = True
                     continue
 
+                parameter_path = f"{choice}.{subchoice}"
+                description = config_descriptions.get(
+                    parameter_path, "No description available."
+                )
                 updated_value = ask(
-                    f"Enter the value of {subchoice} to update in the config file"
+                    f"{subchoice} - {description}\n" "Enter the new value"
                 )
                 if isinstance(updated_config[choice][subchoice], list):
                     updated_value = updated_value.split(",")
@@ -351,9 +401,8 @@ def config_setup():
                 updated_config[choice][subchoice] = updated_value
         else:
             # If no nested params exist for a particular config option, directly ask for the value to be updated. E.g., countries
-            updated_value = ask(
-                f"Enter the value of {choice} to update in the config file"
-            )
+            description = config_descriptions.get(choice, "No description available.")
+            updated_value = ask(f"{choice} - {description}\n" "Enter the new value")
             if isinstance(updated_config[choice], list):
                 # Splitting by separator to allow for multiple values to be entered for a config option. E.g., countries
                 updated_value = updated_value.split(",")
