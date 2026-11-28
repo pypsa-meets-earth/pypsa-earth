@@ -5,6 +5,7 @@
 name: pypsa-earth
 channels:
 - conda-forge
+- nodefaults
 - bioconda
 - gurobi
 dependencies:
