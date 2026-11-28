@@ -24,6 +24,8 @@ This part of documentation collects descriptive release notes to capture the mai
 
 **Minor Changes and bug-fixing**
 
+* Add module-level docstrings, NumPy-style function docstrings, type hints, and fix multi-bundle selection and unclosed file descriptor in `scripts/non_workflow/databundle_cli.py`, addressing the final item of [Issue #1837](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1837) [PR #2164](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2164)
+
 * Retrieve the number of registered vehicles from the WHO GHO OData API, as the legacy Athena API used in `retrieve_transport_data_input` is no longer available [PR #2118](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2118)
 
 * Fix logging calls in `monte_carlo` and `prepare_transport_data_input` that passed values without a `%s` placeholder and printed a logging error instead of the message [PR #2135](https://github.com/pypsa-meets-earth/pypsa-earth/pull/2135)
